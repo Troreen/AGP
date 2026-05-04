@@ -1,0 +1,27 @@
+# Visual Studio / MSBuild
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build outputs used by the solution
+Bin/
+Lib/
+Intermediate/
+x64/
+x86/
+Debug/
+Release/
+
+# Common generated artifacts
+*.idb
+*.ilk
+*.ipch
+*.pdb
+*.obj
+*.res
+*.exp
+*.lib
+*.dll
+*.exe
