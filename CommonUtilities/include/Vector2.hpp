@@ -317,4 +317,8 @@ namespace CommonUtilities
 	{
 		return Vector4<T>(x, y, aZ, aW);
 	}
+
+	using Vector2u = Vector2<unsigned>;
+	using Vector2f = Vector2<float>;
+	using Vector2i = Vector2<int>;
 }

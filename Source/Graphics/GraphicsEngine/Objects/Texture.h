@@ -1,5 +1,6 @@
 #pragma once
 #include <wrl.h>
+#include "GraphicsEngine/RHI/RHIStructs.h"
 
 struct ID3D11RenderTargetView;
 
@@ -14,5 +15,5 @@ public:
 private:
 
     Microsoft::WRL::ComPtr<ID3D11RenderTargetView> myRTV;
-
+	Viewport myViewport;
 };

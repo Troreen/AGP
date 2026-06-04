@@ -5,6 +5,7 @@
 #include <wrl.h>
 
 #include "RHI/RenderHardwareInterface.h"
+#include "Objects/Buffer.h"
 #include "Objects/Texture.h"
 
 
@@ -25,4 +26,7 @@ private:
 	RenderHardwareInterface myRHI;
 	Texture myBackBuffer;
 
+
+	//Todo: Temporary code
+	Buffer myTempBuffer;
 };

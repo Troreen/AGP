@@ -63,3 +63,39 @@ Logging has started at 2026-06-04 11:46:58.
 [11:46:58] [   LOG   ] [RHI] Selected adapter: Capture Adapter
 [11:46:59] [   LOG   ] [RHI] RHI Started!
 [11:46:59] [   LOG   ] [ModelViewer] Ready!
+****************************************************************************************************
+Logging has started at 2026-06-04 16:42:45.
+****************************************************************************************************
+[16:42:45] [   LOG   ] [ModelViewer] ModelViewer starting...
+[16:42:45] [   LOG   ] [ModelViewer] Initializing Graphics Engine...
+[16:42:45] [   LOG   ] [RHI] Initializing RHI...
+[16:42:45] [   LOG   ] [RHI] Selected adapter: NVIDIA GeForce RTX 2080
+[16:42:45] [   LOG   ] [RHI] RHI Started!
+[16:42:45] [   LOG   ] [ModelViewer] Ready!
+****************************************************************************************************
+Logging has started at 2026-06-04 16:43:16.
+****************************************************************************************************
+[16:43:16] [   LOG   ] [ModelViewer] ModelViewer starting...
+[16:43:16] [   LOG   ] [ModelViewer] Initializing Graphics Engine...
+[16:43:17] [   LOG   ] [RHI] Initializing RHI...
+[16:43:17] [   LOG   ] [RHI] Selected adapter: Capture Adapter
+[16:43:17] [   LOG   ] [RHI] RHI Started!
+[16:43:17] [   LOG   ] [ModelViewer] Ready!
+****************************************************************************************************
+Logging has started at 2026-06-04 16:45:29.
+****************************************************************************************************
+[16:45:29] [   LOG   ] [ModelViewer] ModelViewer starting...
+[16:45:29] [   LOG   ] [ModelViewer] Initializing Graphics Engine...
+[16:45:29] [   LOG   ] [RHI] Initializing RHI...
+[16:45:29] [   LOG   ] [RHI] Selected adapter: Capture Adapter
+[16:45:29] [   LOG   ] [RHI] RHI Started!
+[16:45:29] [   LOG   ] [ModelViewer] Ready!
+****************************************************************************************************
+Logging has started at 2026-06-04 20:46:24.
+****************************************************************************************************
+[20:46:24] [   LOG   ] [ModelViewer] ModelViewer starting...
+[20:46:24] [   LOG   ] [ModelViewer] Initializing Graphics Engine...
+[20:46:25] [   LOG   ] [RHI] Initializing RHI...
+[20:46:25] [   LOG   ] [RHI] Selected adapter: Capture Adapter
+[20:46:25] [   LOG   ] [RHI] RHI Started!
+[20:46:25] [   LOG   ] [ModelViewer] Ready!

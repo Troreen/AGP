@@ -3,6 +3,14 @@
 
 #include "StringHelpers.h"
 #include "GraphicsEngine/Objects/Texture.h"
+#include "GraphicsEngine/Objects/Buffer.h"
+#include "GraphicsEngine/Objects/Vertex.h"
+
+
+//TODO: Temporary includes
+#include "GraphicsEngine/TemporaryShaders/VertexShader.h"
+#include "GraphicsEngine/TemporaryShaders/PixelShader.h"
+
 
 using namespace Microsoft::WRL;
 
@@ -16,6 +24,7 @@ RenderHardwareInterface::~RenderHardwareInterface() = default;
 
 bool RenderHardwareInterface::Initialize(HWND aWindowHandle, bool aEnableDebug, Texture& outBackBuffer)
 {
+	myWindowHandle = aWindowHandle;
 	HRESULT result = E_FAIL;
 
 	ComPtr<IDXGIFactory> dxFactory;
@@ -118,6 +127,52 @@ bool RenderHardwareInterface::Initialize(HWND aWindowHandle, bool aEnableDebug, 
 
 	SetObjectName(outBackBuffer.myRTV, "BackBufferRTV");
 
+	CommonUtilities::Vector2u clientSize = GetClientSize();
+	Viewport viewport = { 0, 0, static_cast<float>(clientSize.x), static_cast<float>(clientSize.y), 0, 1 };
+	outBackBuffer.myViewport = viewport;
+
+	//TODO: Temporary code
+	myContext->IASetPrimitiveTopology(static_cast<D3D11_PRIMITIVE_TOPOLOGY>(Topology::TriangleList)); 
+
+	std::vector<D3D11_INPUT_ELEMENT_DESC> elements;
+	elements.reserve(Vertex::Description.size());
+
+	for (const auto& desc : Vertex::Description)
+	{
+		D3D11_INPUT_ELEMENT_DESC element = {};
+		element.SemanticName = desc.Semantic.c_str();
+		element.SemanticIndex = desc.SemanticIndex;
+		element.Format = static_cast<DXGI_FORMAT>(desc.Format);
+		
+		element.InputSlot = 0;
+		element.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+		element.AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+		element.InstanceDataStepRate = 0;
+
+		elements.emplace_back(element);
+	}
+
+	myDevice->CreateInputLayout(
+		elements.data(), 
+		static_cast<unsigned>(elements.size()),
+		TEMP_VertexShader_ByteCode,
+		sizeof(TEMP_VertexShader_ByteCode),
+		&myTempIL 
+	);
+	myContext->IASetInputLayout(myTempIL.Get());
+
+	myDevice->CreateVertexShader(TEMP_VertexShader_ByteCode, sizeof(TEMP_VertexShader_ByteCode), nullptr, &myTempVS);
+	myContext->VSSetShader(myTempVS.Get(), nullptr, 0);
+
+	myDevice->CreatePixelShader(TEMP_PixelShader_ByteCode, sizeof(TEMP_PixelShader_ByteCode), nullptr, &myTempPS);
+	myContext->PSSetShader(myTempPS.Get(), nullptr, 0);
+
+	SetObjectName(myTempIL, "TemporaryInputLayout");
+	SetObjectName(myTempVS, "TemporaryVertexShader");
+	SetObjectName(myTempPS, "TemporaryPixelShader");
+	
+	//End temporary code
+
 	LOG(RhiLog, Log, "RHI Started!");
 	return true;
 }
@@ -129,8 +184,88 @@ void RenderHardwareInterface::Present() const
 
 void RenderHardwareInterface::ClearRenderTarget(const Texture& aTarget) const
 {
-	float clearColor[4] = { 0, 1, 0, 0 };	 
+	float clearColor[4] = { 0, 0, 0, 0 };	 
 	myContext->ClearRenderTargetView(aTarget.myRTV.Get(), clearColor);
+}
+
+void RenderHardwareInterface::SetRenderTarget(const Texture* aTarget) const
+{
+	ID3D11RenderTargetView* rtv = nullptr;
+	D3D11_VIEWPORT viewport = { 0, 0, 0, 0, 0, 1 };
+
+	if (aTarget)
+	{
+		rtv = aTarget->myRTV.Get();
+		memcpy_s(&viewport, sizeof(D3D11_VIEWPORT), &aTarget->myViewport, sizeof(Viewport));
+	}
+
+	myContext->OMSetRenderTargets(1, &rtv, nullptr);
+	myContext->RSSetViewports(1, &viewport);
+}
+
+CommonUtilities::Vector2u RenderHardwareInterface::GetClientSize() const
+{
+	RECT clientRect = {};
+	GetClientRect(myWindowHandle, &clientRect);
+	const unsigned width = clientRect.right - clientRect.left;
+	const unsigned height = clientRect.bottom - clientRect.top;
+
+	return { width, height };
+}
+
+bool RenderHardwareInterface::CreateVertexBuffer(std::string_view aName, const std::vector<Vertex> &aVertexList, Buffer &outBuffer) const
+{
+	if(aVertexList.empty())
+	{
+		LOG(RhiLog, Error, "Failed to create vertex buffer for {}! Vertex list is empty.", aName);
+		return false;
+	}
+
+	D3D11_BUFFER_DESC desc = {};
+	desc.Usage = D3D11_USAGE_IMMUTABLE;
+	desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	desc.CPUAccessFlags = 0;
+	desc.ByteWidth = static_cast<unsigned>(sizeof(Vertex) * aVertexList.size());
+
+	D3D11_SUBRESOURCE_DATA data = {};
+	data.pSysMem = aVertexList.data();
+
+	const HRESULT result = myDevice->CreateBuffer(&desc, &data, &outBuffer.myBuffer);
+	if(aVertexList.empty())
+	{
+		LOG(RhiLog, Error, "Failed to create vertex buffer for {}! Failed to create Buffer.", aName);
+		return false;
+	}
+
+	std::string bufferName = std::format("{}_VX", aName);
+	SetObjectName(outBuffer.myBuffer, bufferName);
+
+	outBuffer.myName = aName;
+	outBuffer.mySize = desc.ByteWidth;
+	outBuffer.myStride = sizeof(Vertex);
+	outBuffer.myType = BufferType::VertexBuffer;
+
+	return true;
+}
+
+void RenderHardwareInterface::SetVertexBuffer(const Buffer *aBuffer) const
+{
+	constexpr unsigned offset = 0;
+	if (aBuffer)
+	{
+		myContext->IASetVertexBuffers(0, 1, aBuffer->myBuffer.GetAddressOf(), &aBuffer->myStride, &offset);
+	}
+	else
+	{
+		const unsigned stride = 0;
+		ID3D11Buffer* buffer = nullptr;
+		myContext->IASetVertexBuffers(0, 1, &buffer, &stride, &offset);
+	}
+}
+
+void RenderHardwareInterface::Draw(unsigned aNumVertices) const
+{
+	myContext->Draw(aNumVertices, 0);
 }
 
 void RenderHardwareInterface::SetObjectName(const Microsoft::WRL::ComPtr<ID3D11DeviceChild>& aObject, std::string_view aName) const

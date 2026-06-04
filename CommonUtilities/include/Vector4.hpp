@@ -363,4 +363,8 @@ namespace CommonUtilities
 		aOut << "(" << aVector.x << ", " << aVector.y << ", " << aVector.z << ", " << aVector.w << ")";
 		return aOut;
 	}
+
+	using Vector4u = Vector4<unsigned>;
+	using Vector4f = Vector4<float>;
+	using Vector4i = Vector4<int>;
 }

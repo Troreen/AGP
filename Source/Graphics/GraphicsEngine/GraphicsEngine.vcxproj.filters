@@ -27,6 +27,15 @@
     <ClInclude Include="Objects\Texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RHI\RHIStructs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\Vertex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\Buffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GraphicsEngine.cpp">
@@ -41,5 +50,18 @@
     <ClCompile Include="Objects\Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Objects\Buffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\Vertex.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="RHI\Shaders\VertexShader.hlsl" />
+    <FxCompile Include="RHI\Shaders\PixelShader.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="RHI\Shaders\Common.hlsli" />
   </ItemGroup>
 </Project>
