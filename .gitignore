@@ -8,6 +8,7 @@
 # Build outputs used by the solution
 Bin/
 Lib/
+!CommonUtilities/lib/
 Intermediate/
 x64/
 x86/
@@ -23,5 +24,6 @@ Release/
 *.res
 *.exp
 *.lib
+!CommonUtilities/lib/*.lib
 *.dll
 *.exe

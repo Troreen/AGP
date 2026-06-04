@@ -1,6 +1,12 @@
 #pragma once
 
-typedef struct HWND__ *HWND;
+#include <string>
+#include <unordered_map>
+#include <wrl.h>
+
+#include "RHI/RenderHardwareInterface.h"
+#include "Objects/Texture.h"
+
 
 class GraphicsEngine
 {
@@ -15,5 +21,8 @@ private:
 
 	GraphicsEngine();
 	~GraphicsEngine();
+
+	RenderHardwareInterface myRHI;
+	Texture myBackBuffer;
 
 };

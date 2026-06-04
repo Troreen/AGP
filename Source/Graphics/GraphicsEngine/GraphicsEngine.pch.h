@@ -10,6 +10,7 @@
 // add headers that you want to pre-compile here
 #include "GraphicsEngine.h"
 #include "Logger/Logger.h"
+#include "d3d11_1.h"
 
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
