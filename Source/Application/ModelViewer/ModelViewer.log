@@ -99,3 +99,12 @@ Logging has started at 2026-06-04 20:46:24.
 [20:46:25] [   LOG   ] [RHI] Selected adapter: Capture Adapter
 [20:46:25] [   LOG   ] [RHI] RHI Started!
 [20:46:25] [   LOG   ] [ModelViewer] Ready!
+****************************************************************************************************
+Logging has started at 2026-06-05 22:38:44.
+****************************************************************************************************
+[22:38:44] [   LOG   ] [ModelViewer] ModelViewer starting...
+[22:38:44] [   LOG   ] [ModelViewer] Initializing Graphics Engine...
+[22:38:44] [   LOG   ] [RHI] Initializing RHI...
+[22:38:44] [   LOG   ] [RHI] Selected adapter: Capture Adapter
+[22:38:44] [   LOG   ] [RHI] RHI Started!
+[22:38:44] [   LOG   ] [ModelViewer] Ready!

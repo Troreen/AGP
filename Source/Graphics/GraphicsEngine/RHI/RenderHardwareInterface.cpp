@@ -248,6 +248,101 @@ bool RenderHardwareInterface::CreateVertexBuffer(std::string_view aName, const s
 	return true;
 }
 
+bool RenderHardwareInterface::CreateIndexBuffer(std::string_view aName, const std::vector<unsigned> &aIndexList, Buffer &outBuffer) const
+{
+    if(aIndexList.empty())
+	{
+		LOG(RhiLog, Error, "Failed to create index buffer for {}! Index list is empty.", aName);
+		return false;
+	}
+
+	D3D11_BUFFER_DESC desc = {};
+	desc.Usage = D3D11_USAGE_IMMUTABLE;
+	desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	desc.CPUAccessFlags = 0;
+	desc.ByteWidth = static_cast<unsigned>(sizeof(unsigned) * aIndexList.size());
+
+	D3D11_SUBRESOURCE_DATA data = {};
+	data.pSysMem = aIndexList.data();
+
+	const HRESULT result = myDevice->CreateBuffer(&desc, &data, &outBuffer.myBuffer);
+	if(aIndexList.empty())
+	{
+		LOG(RhiLog, Error, "Failed to create index buffer for {}! Failed to create Buffer.", aName);
+		return false;
+	}
+
+	std::string bufferName = std::format("{}_IX", aName);
+	SetObjectName(outBuffer.myBuffer, bufferName);
+
+	outBuffer.myName = aName;
+	outBuffer.mySize = desc.ByteWidth;
+	outBuffer.myStride = sizeof(unsigned);
+	outBuffer.myType = BufferType::IndexBuffer;
+
+	return true;
+}
+
+bool RenderHardwareInterface::CreateConstantBuffer(std::string_view aName, size_t aSize, Buffer &outBuffer) const
+{
+	if (aSize > 65536)
+	{
+		LOG(RhiLog, Error, "Failed to create constant buffer {}! Size is greater than 64kB!", aName);
+		return false;
+	}
+
+	D3D11_BUFFER_DESC desc = {};
+	desc.Usage = D3D11_USAGE_DYNAMIC;
+	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	desc.ByteWidth = static_cast<unsigned>(aSize);
+
+	const HRESULT result = myDevice->CreateBuffer(&desc, nullptr, &outBuffer.myBuffer);
+	if (FAILED(result))
+	{
+		LOG(RhiLog, Error, "Failed to create constant buffer {}!", aName);
+		return false;
+	}
+
+	SetObjectName(outBuffer.myBuffer, aName);
+
+	outBuffer.myName = aName;
+	outBuffer.mySize = aSize;
+	outBuffer.myStride = outBuffer.mySize;
+	outBuffer.myType = BufferType::ConstantBuffer;
+
+	return true;
+}
+
+bool RenderHardwareInterface::UpdateConstantBuffer(const Buffer &aConstantBuffer, const void *aBufferData, size_t aBufferDataSize) const
+{
+    if (!aConstantBuffer.IsValid() || aConstantBuffer.myType != BufferType::ConstantBuffer)
+	{
+		LOG(RhiLog, Error, "Failed to update constant buffer! Buffer is either null or invalid type!");
+		return false;
+	}
+
+	if (aBufferDataSize > aConstantBuffer.mySize)
+	{
+		LOG(RhiLog, Error, "Failed to update constant buffer {}! Data provided is larger than the buffer capacity!", aConstantBuffer.myName);
+		return false;
+	}
+
+	D3D11_MAPPED_SUBRESOURCE resource = {};
+	
+	const HRESULT result = myContext->Map(aConstantBuffer.myBuffer.Get(), 0,  D3D11_MAP_WRITE_DISCARD, 0, &resource);
+	if (FAILED(result))
+	{
+		LOG(RhiLog, Error, "Failed to update constant buffer {}! Failed to map buffer!", aConstantBuffer.myName);
+		return false;
+	}
+
+	memcpy_s(resource.pData, aConstantBuffer.mySize, aBufferData, aBufferDataSize);
+	myContext->Unmap(aConstantBuffer.myBuffer.Get(), 0);
+
+	return true;
+}
+
 void RenderHardwareInterface::SetVertexBuffer(const Buffer *aBuffer) const
 {
 	constexpr unsigned offset = 0;
@@ -263,9 +358,46 @@ void RenderHardwareInterface::SetVertexBuffer(const Buffer *aBuffer) const
 	}
 }
 
+void RenderHardwareInterface::SetIndexBuffer(const Buffer *aBuffer) const
+{
+	if (aBuffer)
+	{
+		myContext->IASetIndexBuffer(aBuffer->myBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+	}
+	else
+	{
+		ID3D11Buffer* buffer = nullptr;
+		myContext->IASetIndexBuffer(buffer, DXGI_FORMAT_UNKNOWN, 0);
+	}
+}
+
+void RenderHardwareInterface::SetConstantBuffer(const Buffer *aBuffer, unsigned aSlot, PipeLineStages aStages) const
+{
+	ID3D11Buffer* buffer = nullptr;
+	if (aBuffer)
+	{
+		buffer = aBuffer->myBuffer.Get();
+	}
+
+	if (aStages & PipeLineStage_VertexShader)
+	{
+		myContext->VSSetConstantBuffers(aSlot, 1, &buffer);
+	}
+	if (aStages & PipeLineStage_PixelShader)
+	{
+		myContext->PSSetConstantBuffers(aSlot, 1, &buffer);
+	}
+	
+}
+
 void RenderHardwareInterface::Draw(unsigned aNumVertices) const
 {
 	myContext->Draw(aNumVertices, 0);
+}
+
+void RenderHardwareInterface::DrawIndexed(unsigned aIndexCount, unsigned aIndexOffset) const
+{
+	myContext->DrawIndexed(aIndexCount, aIndexOffset, 0);
 }
 
 void RenderHardwareInterface::SetObjectName(const Microsoft::WRL::ComPtr<ID3D11DeviceChild>& aObject, std::string_view aName) const

@@ -458,4 +458,5 @@ namespace CommonUtilities
 		return aStream;
 	}
 
+	using Matrix3f = Matrix3x3<float>;
 }

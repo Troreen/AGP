@@ -30,9 +30,17 @@ public:
 	CommonUtilities::Vector2u GetClientSize() const;
 
 	bool CreateVertexBuffer(std::string_view aName, const std::vector<Vertex>&  aVertexList, Buffer& outBuffer) const;
+	bool CreateIndexBuffer(std::string_view aName, const std::vector<unsigned>&  aIndexList, Buffer& outBuffer) const;
+	bool CreateConstantBuffer(std::string_view aName, size_t aSize, Buffer& outBuffer) const;
+
+	bool UpdateConstantBuffer(const Buffer& aConstantBuffer, const void* aBufferData, size_t aBufferDataSize) const;
+
 	void SetVertexBuffer(const Buffer* aBuffer) const;
+	void SetIndexBuffer(const Buffer* aBuffer) const;
+	void SetConstantBuffer(const Buffer* aBuffer, unsigned aSlot, PipeLineStages aStages) const; 
 
 	void Draw(unsigned aNumVertices) const;
+	void DrawIndexed(unsigned aIndexCount, unsigned aIndexOffset) const;
 
 private:
 

@@ -21,6 +21,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CommonUtilities", "CommonUt
 		CommonUtilities\include\Line.hpp = CommonUtilities\include\Line.hpp
 		CommonUtilities\include\LineVolume.hpp = CommonUtilities\include\LineVolume.hpp
 		CommonUtilities\include\LooseQuadTree2D.hpp = CommonUtilities\include\LooseQuadTree2D.hpp
+		CommonUtilities\include\Maths.hpp = CommonUtilities\include\Maths.hpp
 		CommonUtilities\include\Matrix.hpp = CommonUtilities\include\Matrix.hpp
 		CommonUtilities\include\Matrix3x3.hpp = CommonUtilities\include\Matrix3x3.hpp
 		CommonUtilities\include\Matrix4x4.hpp = CommonUtilities\include\Matrix4x4.hpp

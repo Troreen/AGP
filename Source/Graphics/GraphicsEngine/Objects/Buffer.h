@@ -14,6 +14,8 @@ public:
     Buffer();
     ~Buffer();
 
+    bool IsValid() const { return myBuffer && myType != BufferType::Unknown; }
+
 private:
 
     std::string myName;

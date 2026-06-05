@@ -196,6 +196,10 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ConstantBuffers\FrameBuffer.h" />
+    <ClInclude Include="ConstantBuffers\ObjectBuffer.h" />
+    <ClInclude Include="Objects\Mesh.h" />
+    <ClInclude Include="Objects\Camera.h" />
     <ClInclude Include="Objects\Buffer.h" />
     <ClInclude Include="GraphicsEngine.h" />
     <ClInclude Include="GraphicsEngine.pch.h" />
@@ -205,6 +209,10 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
     <ClInclude Include="RHI\RHIStructs.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ConstantBuffers\FrameBuffer.cpp" />
+    <ClCompile Include="ConstantBuffers\ObjectBuffer.cpp" />
+    <ClCompile Include="Objects\Mesh.cpp" />
+    <ClCompile Include="Objects\Camera.cpp" />
     <ClCompile Include="Objects\Buffer.cpp" />
     <ClCompile Include="GraphicsEngine.cpp" />
     <ClCompile Include="GraphicsEngine.pch.cpp">

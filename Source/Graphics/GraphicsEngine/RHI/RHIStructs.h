@@ -15,7 +15,9 @@ struct Viewport
 enum class BufferType : uint8_t
 {
 	Unknown,
-	VertexBuffer
+	VertexBuffer,
+	IndexBuffer,
+	ConstantBuffer
 };
 
 enum class Topology : unsigned
@@ -30,3 +32,17 @@ struct VertexElementDesc
 	unsigned SemanticIndex = 0;
 	unsigned Format = 0;
 };
+
+enum PipeLineStage_
+{
+	PipeLineStage_None = 0,
+	PipeLineStage_InputAssembler = 1,
+	PipeLineStage_VertexShader = 2,
+	PipeLineStage_GeometryShader = 4,
+	PipeLineStage_ComputeShader = 8,
+	PipeLineStage_Rasterizer = 16,
+	PipeLineStage_PixelShader = 32,
+	PipeLineStage_OutputMerger = 64,
+};
+
+typedef int PipeLineStages;

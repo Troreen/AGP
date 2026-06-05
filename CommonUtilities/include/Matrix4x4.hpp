@@ -499,4 +499,6 @@ namespace CommonUtilities
 		}
 		return aStream;
 	}
+
+	using Matrix4f = Matrix4x4<float>;
 }

@@ -1,5 +1,7 @@
 #pragma once
 #include <memory>
+#include "GraphicsEngine/GraphicsEngine.h"
+#include "GraphicsEngine/Objects/Mesh.h"
 
 #pragma region WindowsIncludes
 #define	WIN32_LEAN_AND_MEAN
@@ -46,7 +48,6 @@
 #include <Windows.h>
 #pragma endregion
 
-#include "GraphicsEngine/GraphicsEngine.h"
 
 class ModelViewer
 {
@@ -61,4 +62,6 @@ private:
 	bool myIsRunning = false;
 
 	HWND myMainWindowHandle = nullptr;
+
+	Mesh myMesh;
 };

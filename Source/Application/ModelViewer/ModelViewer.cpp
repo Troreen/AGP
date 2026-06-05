@@ -49,6 +49,76 @@ bool ModelViewer::Initialize(SIZE aWindowSize, WNDPROC aWindowProcess, LPCWSTR a
 	        return false;
 	}
 
+    {
+        // Temporary Mesh init
+
+        std::vector<Vertex> meshVertices(24);
+        // front face
+        meshVertices[0].Position = { -0.5f, -0.5f, -0.5f, 1 };
+        meshVertices[1].Position = { 0.5f, -0.5f, -0.5f, 1 };
+        meshVertices[2].Position = { 0.5f, 0.5f, -0.5f, 1 };
+        meshVertices[3].Position = { -0.5f, 0.5f, -0.5f, 1 };
+        // back face
+        meshVertices[4].Position = { -0.5f, -0.5f, 0.5f, 1 };
+        meshVertices[5].Position = { 0.5f, -0.5f, 0.5f, 1 };
+        meshVertices[6].Position = { 0.5f, 0.5f, 0.5f, 1 };
+        meshVertices[7].Position = { -0.5f, 0.5f, 0.5f, 1 };
+        // left face
+        meshVertices[8].Position = { -0.5f, -0.5f, 0.5f, 1 };
+        meshVertices[9].Position = { -0.5f, -0.5f, -0.5f, 1 };
+        meshVertices[10].Position = { -0.5f, 0.5f, -0.5f, 1 };
+        meshVertices[11].Position = { -0.5f, 0.5f, 0.5f, 1 };
+        // right face
+        meshVertices[12].Position = { 0.5f, -0.5f, -0.5f, 1 };
+        meshVertices[13].Position = { 0.5f, -0.5f, 0.5f, 1 };
+        meshVertices[14].Position = { 0.5f, 0.5f, 0.5f, 1 };
+        meshVertices[15].Position = { 0.5f, 0.5f, -0.5f, 1 };
+        // top face
+        meshVertices[16].Position = { -0.5f, 0.5f, -0.5f, 1 };
+        meshVertices[17].Position = { 0.5f, 0.5f, -0.5f, 1 };
+        meshVertices[18].Position = { 0.5f, 0.5f, 0.5f, 1 };
+        meshVertices[19].Position = { -0.5f, 0.5f, 0.5f, 1 };
+        // bottom face
+        meshVertices[20].Position = { -0.5f, -0.5f, 0.5f, 1 };
+        meshVertices[21].Position = { 0.5f, -0.5f, 0.5f, 1 };
+        meshVertices[22].Position = { 0.5f, -0.5f, -0.5f, 1 };
+        meshVertices[23].Position = { -0.5f, -0.5f, -0.5f, 1 };
+
+        // indices of a cube
+        std::vector<unsigned> 
+        meshIndices = {
+            // front face
+            0, 2, 1,
+            0, 3, 2,
+            
+            // right face
+            1, 2, 6,
+            1, 6, 5,
+            
+            // back face
+            4, 5, 6,
+            4, 6, 7,
+            
+            // left face
+            0, 4, 7,
+            0, 7, 3,
+            
+            // top face
+            0, 1, 5,
+            0, 5, 4,
+            
+            // bottom face
+            3, 7, 6,
+            3, 6, 2
+        };
+
+        Mesh::Element cubeElement;
+        cubeElement.NumVertices = static_cast<unsigned>(meshVertices.size());
+        cubeElement.NumIndices = static_cast<unsigned>(meshIndices.size());
+
+        myMesh.Initialize("Cube", { cubeElement }, std::move(meshVertices), std::move(meshIndices));
+    }
+
     MVLOG(Log, "Ready!");
 
     // Show our program window and give it focus.
@@ -81,8 +151,7 @@ int ModelViewer::Run()
         }
 
         // TODO: Frame Update and Rendering goes here
-        GraphicsEngine::Get().Render();
-    
+        GraphicsEngine::Get().Render(myMesh);
     }
 
     return 0;
