@@ -22,7 +22,7 @@ RenderHardwareInterface::RenderHardwareInterface() = default;
 
 RenderHardwareInterface::~RenderHardwareInterface() = default;
 
-bool RenderHardwareInterface::Initialize(HWND aWindowHandle, bool aEnableDebug, Texture& outBackBuffer)
+bool RenderHardwareInterface::Initialize(HWND aWindowHandle, bool aEnableDebug, Texture& outBackBuffer, Texture& outDepthStencil)
 {
 	myWindowHandle = aWindowHandle;
 	HRESULT result = E_FAIL;
@@ -55,7 +55,7 @@ bool RenderHardwareInterface::Initialize(HWND aWindowHandle, bool aEnableDebug, 
 			selectedAdapter = adapter;
 			selectedAdapterDesc = desc;
 		}
-	}
+	} 
 
 	const wchar_t* wideAdapterName = selectedAdapterDesc.Description;
 	const std::string adapterName = str::wide_to_utf8(wideAdapterName);
@@ -131,6 +131,43 @@ bool RenderHardwareInterface::Initialize(HWND aWindowHandle, bool aEnableDebug, 
 	Viewport viewport = { 0, 0, static_cast<float>(clientSize.x), static_cast<float>(clientSize.y), 0, 1 };
 	outBackBuffer.myViewport = viewport;
 
+	D3D11_TEXTURE2D_DESC depthDesc = {};
+	depthDesc.Width = clientSize.x;
+	depthDesc.Height = clientSize.y;
+	depthDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+	depthDesc.Usage = D3D11_USAGE_DEFAULT;
+	depthDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	depthDesc.CPUAccessFlags = 0;
+	depthDesc.MiscFlags = 0;
+	depthDesc.ArraySize = 1;
+	depthDesc.MipLevels = 1;
+	depthDesc.SampleDesc.Count = 1;
+	depthDesc.SampleDesc.Quality = 0;
+
+	ComPtr<ID3D11Texture2D> depthTexture;
+	result = myDevice->CreateTexture2D(&depthDesc, nullptr, &depthTexture);
+	if (FAILED(result))
+	{
+		LOG(RhiLog, Error, "Failed to create Depth Stencil!");
+		return false;
+	}
+
+	SetObjectName(depthTexture, "DepthStencil_T2D");
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
+	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	result = myDevice->CreateDepthStencilView(depthTexture.Get(), &dsvDesc, &outDepthStencil.myDSV);
+	if (FAILED(result))
+	{
+		LOG(RhiLog, Error, "Failed to create Depth Stencil View!");
+		return false;
+	}
+
+	SetObjectName(outDepthStencil.myDSV, "DepthStencil_DSV");
+
+	outDepthStencil.myViewport = viewport;
+
 	//TODO: Temporary code
 	myContext->IASetPrimitiveTopology(static_cast<D3D11_PRIMITIVE_TOPOLOGY>(Topology::TriangleList)); 
 
@@ -188,9 +225,15 @@ void RenderHardwareInterface::ClearRenderTarget(const Texture& aTarget) const
 	myContext->ClearRenderTargetView(aTarget.myRTV.Get(), clearColor);
 }
 
-void RenderHardwareInterface::SetRenderTarget(const Texture* aTarget) const
+void RenderHardwareInterface::ClearDepthStencil(const Texture &aTarget) const
+{
+	myContext->ClearDepthStencilView(aTarget.myDSV.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+}
+
+void RenderHardwareInterface::SetRenderTarget(const Texture* aTarget, const Texture* aDepthStencil) const
 {
 	ID3D11RenderTargetView* rtv = nullptr;
+	ID3D11DepthStencilView* dsv = nullptr;
 	D3D11_VIEWPORT viewport = { 0, 0, 0, 0, 0, 1 };
 
 	if (aTarget)
@@ -199,7 +242,12 @@ void RenderHardwareInterface::SetRenderTarget(const Texture* aTarget) const
 		memcpy_s(&viewport, sizeof(D3D11_VIEWPORT), &aTarget->myViewport, sizeof(Viewport));
 	}
 
-	myContext->OMSetRenderTargets(1, &rtv, nullptr);
+	if (aDepthStencil)
+	{
+		dsv = aDepthStencil->myDSV.Get();
+	}
+
+	myContext->OMSetRenderTargets(1, &rtv, dsv);
 	myContext->RSSetViewports(1, &viewport);
 }
 
@@ -308,7 +356,7 @@ bool RenderHardwareInterface::CreateConstantBuffer(std::string_view aName, size_
 
 	outBuffer.myName = aName;
 	outBuffer.mySize = aSize;
-	outBuffer.myStride = outBuffer.mySize;
+	outBuffer.myStride = static_cast<unsigned>(outBuffer.mySize);
 	outBuffer.myType = BufferType::ConstantBuffer;
 
 	return true;

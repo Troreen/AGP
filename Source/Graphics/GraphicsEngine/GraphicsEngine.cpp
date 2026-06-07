@@ -1,7 +1,8 @@
 #include "GraphicsEngine.pch.h"
 #include "GraphicsEngine.h"
 
-#include "GraphicsEngine/Objects/Vertex.h"
+#include "ConstantBuffers/FrameBuffer.h"
+#include "ConstantBuffers/ObjectBuffer.h"
 
 /*
  * GraphicsEngine handles rendering of a scene.
@@ -17,31 +18,54 @@ GraphicsEngine& GraphicsEngine::Get()
 
 bool GraphicsEngine::Initialize(HWND aWindowHandle)
 {
-	if (!myRHI.Initialize(aWindowHandle, true, myBackBuffer))
+	if (!myRHI.Initialize(aWindowHandle, true, myBackBuffer, myDepthBuffer))
 	{
 		return false; // RHI logs this for us 
 	}
 	
+	CreateConstantBuffer<FrameBuffer>(ConstantBuffer::FrameBuffer, "FrameBuffer");
+	CreateConstantBuffer<ObjectBuffer>(ConstantBuffer::ObjectBuffer, "ObjectBuffer");
+
+
 	return true;
 }
 
-void GraphicsEngine::Render(const Mesh& aMesh)
+void GraphicsEngine::Render(const CU::Camera3D& aCamera, const Mesh& aMesh, const std::vector<CU::Transform>& aMeshTransforms)
 {
 	myRHI.ClearRenderTarget(myBackBuffer);
-	myRHI.SetRenderTarget(&myBackBuffer);
+	myRHI.ClearDepthStencil(myDepthBuffer);
+	myRHI.SetRenderTarget(&myBackBuffer, &myDepthBuffer);
 
+	FrameBuffer fb;
+	fb.View = aCamera.GetViewMatrix();
+	fb.Projection = aCamera.GetProjectionMatrix();
+
+	UpdateAndSetConstantBuffer(ConstantBuffer::FrameBuffer, fb, 0, PipeLineStage_VertexShader); 
+	
 	if (PrepareMeshForRendering(aMesh))
 	{
 		myRHI.SetVertexBuffer(&aMesh.myVertexBuffer);		
 		myRHI.SetIndexBuffer(&aMesh.myIndexBuffer);
 
-		for	(const Mesh::Element& element : aMesh.myElements)
+		for (const CU::Transform& transform : aMeshTransforms)
 		{
-			myRHI.DrawIndexed(element.NumIndices, element.IndexOffset);
+			ObjectBuffer ob;
+			ob.World = transform.GetWorldMatrix();
+			UpdateAndSetConstantBuffer(ConstantBuffer::ObjectBuffer, ob, 1, PipeLineStage_VertexShader);
+	
+			for	(const Mesh::Element& element : aMesh.myElements)
+			{
+				myRHI.DrawIndexed(element.NumIndices, element.IndexOffset);
+			}
 		}
 	}
 
 	myRHI.Present();	
+}
+
+CU::Vector2u GraphicsEngine::GetClientSize() const
+{
+    return myRHI.GetClientSize();
 }
 
 bool GraphicsEngine::CreateConstantBufferInternal(ConstantBuffer aBufferId, std::string_view aName, size_t aBufferSize)

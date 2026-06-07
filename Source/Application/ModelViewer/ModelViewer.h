@@ -1,5 +1,8 @@
 #pragma once
+#include <chrono>
 #include <memory>
+#include <vector>
+
 #include "GraphicsEngine/GraphicsEngine.h"
 #include "GraphicsEngine/Objects/Mesh.h"
 
@@ -48,6 +51,7 @@
 #include <Windows.h>
 #pragma endregion
 
+#include "FreeFlyCameraController.h"
 
 class ModelViewer
 {
@@ -64,4 +68,10 @@ private:
 	HWND myMainWindowHandle = nullptr;
 
 	Mesh myMesh;
+	std::vector<CU::Transform> myMeshTransforms;
+
+	CU::Camera3D myCamera;
+	CommonUtilities::InputHandler myInputHandler;
+	FreeFlyCameraController myCameraController;
+	std::chrono::high_resolution_clock::time_point myPreviousFrameTime{};
 };

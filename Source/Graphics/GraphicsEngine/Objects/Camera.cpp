@@ -13,11 +13,11 @@ Camera::Camera(float aHorizontalFoV, float aNearPlane, float aFarPlane, Vector2f
 	myFarPlane = aFarPlane;
 	myHorizontalFoV = aHorizontalFoV;	
 
-	const float hFoVRad = Maths::DegToRad<float>() * aHorizontalFoV;
+	const float hFoVRad = Maths::DegreesToRadians(aHorizontalFoV);
 
 	const float vFoVRad = 2 * std::atan(std::tan(hFoVRad * 0.5f) * (static_cast<float>(aResolution.y) / static_cast<float>(aResolution.x)));
 	
-	myVerticalFoV = Maths::RadToDeg<float>() * vFoVRad;
+	myVerticalFoV = Maths::RadiansToDegrees(vFoVRad);
 
 	const float myXScale = 1 / std::tan(hFoVRad * 0.5f);
 	const float myYScale = 1 / std::tan(vFoVRad * 0.5f);

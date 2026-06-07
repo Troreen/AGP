@@ -4,6 +4,7 @@
 #include <string_view>
 #include <vector>
 
+#include "RHIStructs.h"
 #include "Vector.hpp"
 
 
@@ -21,11 +22,12 @@ public:
 	RenderHardwareInterface();
 	~RenderHardwareInterface();
 
-	bool Initialize(HWND aWindowHandle, bool aEnableDebug, Texture& outBackBuffer);
+	bool Initialize(HWND aWindowHandle, bool aEnableDebug, Texture& outBackBuffer, Texture& outDepthStencil);
 
 	void Present() const; 
 	void ClearRenderTarget(const Texture& aTarget) const;
-	void SetRenderTarget(const Texture* aTarget) const;
+	void ClearDepthStencil(const Texture& aTarget) const;
+	void SetRenderTarget(const Texture* aTarget, const Texture* aDepthStencil) const;
 
 	CommonUtilities::Vector2u GetClientSize() const;
 

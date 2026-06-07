@@ -1,9 +1,9 @@
 #pragma once
-#include "CommonUtilities/include/Matrix.hpp"
+#include "Matrix.hpp"
 
 struct FrameBuffer
 {
-    Matrix4f View;
-    Matrix4f Projection;
+    CU::Matrix4f View;
+    CU::Matrix4f Projection;
 };
 

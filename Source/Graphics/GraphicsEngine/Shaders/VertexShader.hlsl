@@ -8,8 +8,12 @@ struct Vertex
 
 VStoPS main(Vertex aVertex)
 {
+    const float4 worldPos = mul(OB_World, aVertex.Position);
+    const float4 viewPos = mul(FB_View, worldPos);
+    const float4 clipPos = mul(FB_Projection, viewPos);
+
     VStoPS result;
-    result.Position = aVertex.Position;
+    result.Position = clipPos;
     result.Color = aVertex.Color;
     return result;
 }

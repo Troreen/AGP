@@ -3,6 +3,7 @@
 #include "GraphicsEngine/RHI/RHIStructs.h"
 
 struct ID3D11RenderTargetView;
+struct ID3D11DepthStencilView;
 
 class Texture
 {
@@ -15,5 +16,6 @@ public:
 private:
 
     Microsoft::WRL::ComPtr<ID3D11RenderTargetView> myRTV;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> myDSV;
 	Viewport myViewport;
 };

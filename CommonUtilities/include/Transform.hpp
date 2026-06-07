@@ -1,65 +1,62 @@
 #pragma once
 
+#include "Maths.hpp"
 #include "Matrix4x4.hpp"
 #include "Quaternion.hpp"
 #include "Vector3.hpp"
 
 namespace CommonUtilities
 {
-	template <typename T>
 	class Transform
 	{
 	public:
 		Transform();
-		Transform(const Vector3<T>& aTranslation, const Quaternion<T>& aRotation, const Vector3<T>& aScale);
+		Transform(const Vector3<float>& aTranslation, const Quaternion<float>& aRotation, const Vector3<float>& aScale);
 
-		void SetPosition(const Vector3<T>& aTranslation);
-		void SetRotation(const Quaternion<T>& aRotation);
-		void SetScale(const Vector3<T>& aScale);
-		void SetParent(Transform<T>* aParent);
+		void SetPosition(const Vector3<float>& aTranslation);
+		void SetRotation(const Quaternion<float>& aRotation);
+		void SetRotation(float aYawDegrees, float aPitchDegrees, float aRollDegrees);
+		void SetRotation(const Vector3<float>& aYawPitchRollDegrees);
+		void SetScale(const Vector3<float>& aScale);
+		void SetParent(Transform* aParent);
 
-		const Vector3<T>& GetPosition() const;
-		const Quaternion<T>& GetRotation() const;
-		const Vector3<T>& GetScale() const;
-		Transform<T>* GetParent() const;
+		const Vector3<float>& GetPosition() const;
+		const Quaternion<float>& GetRotation() const;
+		const Vector3<float>& GetScale() const;
+		Transform* GetParent() const;
 
-		// Vector components are (yaw, pitch, roll) in radians.
-		void SetYawPitchRollRadians(const T aYawRadians, const T aPitchRadians, const T aRollRadians);
-		void SetYawPitchRollRadians(const Vector3<T>& aYawPitchRollRadians);
+		void SetYawPitchRollRadians(float aYawRadians, float aPitchRadians, float aRollRadians);
+		void SetYawPitchRollRadians(const Vector3<float>& aYawPitchRollRadians);
 
-		const Matrix4x4<T>& GetLocalMatrix();
-		Matrix4x4<T> GetWorldMatrix();
+		const Matrix4f& GetLocalMatrix() const;
+		Matrix4f GetWorldMatrix() const;
 
-		Vector3<T> GetRight() const;
-		Vector3<T> GetUp() const;
-		Vector3<T> GetForward() const;
+		Vector3<float> GetRight() const;
+		Vector3<float> GetUp() const;
+		Vector3<float> GetForward() const;
 
 	private:
-		void UpdateLocalMatrix();
+		void UpdateLocalMatrix() const;
 
-		Vector3<T> myTranslation;
-		Quaternion<T> myRotation;
-		Vector3<T> myScale;
-		Matrix4x4<T> myLocalMatrix;
-		bool myDirty;
-		Transform<T>* myParent;
+		Vector3<float> myTranslation;
+		Quaternion<float> myRotation;
+		Vector3<float> myScale;
+		mutable Matrix4f myLocalMatrix;
+		mutable bool myDirty;
+		Transform* myParent;
 	};
 
-	// --- Implementation ---
-
-	template <typename T>
-	inline Transform<T>::Transform()
-		: myTranslation(Vector3<T>::Zero)
+	inline Transform::Transform()
+		: myTranslation(Vector3<float>::Zero)
 		, myRotation()
-		, myScale(Vector3<T>::One)
+		, myScale(Vector3<float>::One)
 		, myLocalMatrix()
 		, myDirty(true)
 		, myParent(nullptr)
 	{
 	}
 
-	template <typename T>
-	inline Transform<T>::Transform(const Vector3<T>& aTranslation, const Quaternion<T>& aRotation, const Vector3<T>& aScale)
+	inline Transform::Transform(const Vector3<float>& aTranslation, const Quaternion<float>& aRotation, const Vector3<float>& aScale)
 		: myTranslation(aTranslation)
 		, myRotation(aRotation)
 		, myScale(aScale)
@@ -69,72 +66,74 @@ namespace CommonUtilities
 	{
 	}
 
-	template <typename T>
-	inline void Transform<T>::SetPosition(const Vector3<T>& aTranslation)
+	inline void Transform::SetPosition(const Vector3<float>& aTranslation)
 	{
 		myTranslation = aTranslation;
 		myDirty = true;
 	}
 
-	template <typename T>
-	inline void Transform<T>::SetRotation(const Quaternion<T>& aRotation)
+	inline void Transform::SetRotation(const Quaternion<float>& aRotation)
 	{
 		myRotation = aRotation;
 		myDirty = true;
 	}
 
-	template <typename T>
-	inline void Transform<T>::SetScale(const Vector3<T>& aScale)
+	inline void Transform::SetRotation(float aYawDegrees, float aPitchDegrees, float aRollDegrees)
+	{
+		SetYawPitchRollRadians(
+			Maths::DegreesToRadians(aYawDegrees),
+			Maths::DegreesToRadians(aPitchDegrees),
+			Maths::DegreesToRadians(aRollDegrees));
+	}
+
+	inline void Transform::SetRotation(const Vector3<float>& aYawPitchRollDegrees)
+	{
+		SetRotation(aYawPitchRollDegrees.x, aYawPitchRollDegrees.y, aYawPitchRollDegrees.z);
+	}
+
+	inline void Transform::SetScale(const Vector3<float>& aScale)
 	{
 		myScale = aScale;
 		myDirty = true;
 	}
 
-	template <typename T>
-	inline void Transform<T>::SetParent(Transform<T>* aParent)
+	inline void Transform::SetParent(Transform* aParent)
 	{
 		myParent = aParent;
 	}
 
-	template <typename T>
-	inline const Vector3<T>& Transform<T>::GetPosition() const
+	inline const Vector3<float>& Transform::GetPosition() const
 	{
 		return myTranslation;
 	}
 
-	template <typename T>
-	inline const Quaternion<T>& Transform<T>::GetRotation() const
+	inline const Quaternion<float>& Transform::GetRotation() const
 	{
 		return myRotation;
 	}
 
-	template <typename T>
-	inline const Vector3<T>& Transform<T>::GetScale() const
+	inline const Vector3<float>& Transform::GetScale() const
 	{
 		return myScale;
 	}
 
-	template <typename T>
-	inline Transform<T>* Transform<T>::GetParent() const
+	inline Transform* Transform::GetParent() const
 	{
 		return myParent;
 	}
 
-	template <typename T>
-	inline void Transform<T>::SetYawPitchRollRadians(const T aYawRadians, const T aPitchRadians, const T aRollRadians)
+	inline void Transform::SetYawPitchRollRadians(float aYawRadians, float aPitchRadians, float aRollRadians)
 	{
-		myRotation = Quaternion<T>::CreateFromYawPitchRoll(aYawRadians, aPitchRadians, aRollRadians);
+		myRotation = Quaternion<float>::CreateFromYawPitchRoll(aYawRadians, aPitchRadians, aRollRadians);
 		myDirty = true;
 	}
 
-	template <typename T>
-	inline void Transform<T>::SetYawPitchRollRadians(const Vector3<T>& aYawPitchRollRadians)
+	inline void Transform::SetYawPitchRollRadians(const Vector3<float>& aYawPitchRollRadians)
 	{
 		SetYawPitchRollRadians(aYawPitchRollRadians.x, aYawPitchRollRadians.y, aYawPitchRollRadians.z);
 	}
 
-	template <typename T>
-	inline const Matrix4x4<T>& Transform<T>::GetLocalMatrix()
+	inline const Matrix4f& Transform::GetLocalMatrix() const
 	{
 		if (myDirty)
 		{
@@ -143,10 +142,9 @@ namespace CommonUtilities
 		return myLocalMatrix;
 	}
 
-	template <typename T>
-	inline Matrix4x4<T> Transform<T>::GetWorldMatrix()
+	inline Matrix4f Transform::GetWorldMatrix() const
 	{
-		Matrix4x4<T> local = GetLocalMatrix();
+		Matrix4f local = GetLocalMatrix();
 		if (myParent)
 		{
 			return local * myParent->GetWorldMatrix();
@@ -154,35 +152,31 @@ namespace CommonUtilities
 		return local;
 	}
 
-	template <typename T>
-	inline Vector3<T> Transform<T>::GetRight() const
+	inline Vector3<float> Transform::GetRight() const
 	{
 		return myRotation.GetRight();
 	}
 
-	template <typename T>
-	inline Vector3<T> Transform<T>::GetUp() const
+	inline Vector3<float> Transform::GetUp() const
 	{
 		return myRotation.GetUp();
 	}
 
-	template <typename T>
-	inline Vector3<T> Transform<T>::GetForward() const
+	inline Vector3<float> Transform::GetForward() const
 	{
 		return myRotation.GetForward();
 	}
 
-	template <typename T>
-	inline void Transform<T>::UpdateLocalMatrix()
+	inline void Transform::UpdateLocalMatrix() const
 	{
-		Matrix4x4<T> scaleMatrix;
+		Matrix4f scaleMatrix;
 		scaleMatrix(1, 1) = myScale.x;
 		scaleMatrix(2, 2) = myScale.y;
 		scaleMatrix(3, 3) = myScale.z;
 
-		Matrix4x4<T> rotationMatrix = myRotation.ToMatrix4x4();
+		Matrix4f rotationMatrix = myRotation.ToMatrix4x4();
 
-		Matrix4x4<T> translationMatrix;
+		Matrix4f translationMatrix;
 		translationMatrix(4, 1) = myTranslation.x;
 		translationMatrix(4, 2) = myTranslation.y;
 		translationMatrix(4, 3) = myTranslation.z;

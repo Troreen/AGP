@@ -82,10 +82,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="RHI\Shaders\VertexShader.hlsl" />
-    <FxCompile Include="RHI\Shaders\PixelShader.hlsl" />
+    <FxCompile Include="Shaders\VertexShader.hlsl" />
+    <FxCompile Include="Shaders\PixelShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="RHI\Shaders\Common.hlsli" />
+    <None Include="Shaders\Common.hlsli" />
   </ItemGroup>
 </Project>

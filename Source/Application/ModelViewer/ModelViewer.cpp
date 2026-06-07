@@ -47,7 +47,30 @@ bool ModelViewer::Initialize(SIZE aWindowSize, WNDPROC aWindowProcess, LPCWSTR a
 
 	    if(!GraphicsEngine::Get().Initialize(myMainWindowHandle))
 	        return false;
-	}
+    }
+
+    {
+        myCamera = CU::Camera3D(90.0f, 1.0f, 50000.0f, GraphicsEngine::Get().GetClientSize());
+        myCamera.GetTransform().SetPosition({ 0.0f, 0.0f, -200.0f });
+        myCamera.LookAt({ 0.0f, 0.0f, 400.0f });
+
+        myInputHandler.SetWindowHandle(myMainWindowHandle);
+        myInputHandler.SetAutoMouseCapture(false);
+        myCameraController.Init(myInputHandler, myCamera);
+
+        myMeshTransforms.clear();
+
+        CU::Transform cubeA;
+        cubeA.SetPosition({ 0.0f, 0.0f, 0.0f });
+        cubeA.SetScale({ 100.0f, 100.0f, 100.0f });
+        myMeshTransforms.emplace_back(cubeA);
+
+        CU::Transform cubeB;
+        cubeB.SetPosition({ 200.0f, 0.0f, 400.0f });
+        cubeB.SetRotation(0.0f, 45.0f, 0.0f);
+        cubeB.SetScale({ 100.0f, 100.0f, 100.0f });
+        myMeshTransforms.emplace_back(cubeB);
+    }
 
     {
         // Temporary Mesh init
@@ -83,6 +106,16 @@ bool ModelViewer::Initialize(SIZE aWindowSize, WNDPROC aWindowProcess, LPCWSTR a
         meshVertices[21].Position = { 0.5f, -0.5f, 0.5f, 1 };
         meshVertices[22].Position = { 0.5f, -0.5f, -0.5f, 1 };
         meshVertices[23].Position = { -0.5f, -0.5f, -0.5f, 1 };
+
+        for (Vertex& vertex : meshVertices)
+        {
+            vertex.Color = {
+                vertex.Position.x + 0.5f,
+                vertex.Position.y + 0.5f,
+                vertex.Position.z + 0.5f,
+                1.0f
+            };
+        }
 
         // indices of a cube
         std::vector<unsigned> 
@@ -124,6 +157,7 @@ bool ModelViewer::Initialize(SIZE aWindowSize, WNDPROC aWindowProcess, LPCWSTR a
     // Show our program window and give it focus.
     ShowWindow(myMainWindowHandle, SW_SHOW);
     SetForegroundWindow(myMainWindowHandle);
+    myPreviousFrameTime = std::chrono::high_resolution_clock::now();
 
     return true;
 }
@@ -139,6 +173,7 @@ int ModelViewer::Run()
     {
         while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
         {
+            myInputHandler.UpdateEvents(msg.message, msg.wParam, msg.lParam);
             TranslateMessage(&msg);
             DispatchMessage(&msg);
 
@@ -150,8 +185,14 @@ int ModelViewer::Run()
             // TODO: CU Input Manager is updated here.
         }
 
-        // TODO: Frame Update and Rendering goes here
-        GraphicsEngine::Get().Render(myMesh);
+        const auto currentFrameTime = std::chrono::high_resolution_clock::now();
+        const float deltaTime = std::chrono::duration<float>(currentFrameTime - myPreviousFrameTime).count();
+        myPreviousFrameTime = currentFrameTime;
+
+        myInputHandler.UpdateInput();
+        myCameraController.Update(deltaTime);
+
+        GraphicsEngine::Get().Render(myCamera, myMesh, myMeshTransforms);
     }
 
     return 0;

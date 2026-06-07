@@ -1,8 +1,8 @@
 #pragma once
-#include "CommonUtilities/include/Matrix.hpp"
+#include "Matrix.hpp"
 
 struct ObjectBuffer
 {
-	Matrix4f World;
+	CU::Matrix4f World;
 };
 
