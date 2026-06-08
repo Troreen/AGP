@@ -215,7 +215,7 @@ bool RenderHardwareInterface::CreateVertexBuffer(std::string_view aName, const s
 	data.pSysMem = aVertexList.data();
 
 	const HRESULT result = myDevice->CreateBuffer(&desc, &data, &outBuffer.myBuffer);
-	if(aVertexList.empty())
+	if (FAILED(result))
 	{
 		LOG(RhiLog, Error, "Failed to create vertex buffer for {}! Failed to create Buffer.", aName);
 		return false;
@@ -250,7 +250,7 @@ bool RenderHardwareInterface::CreateIndexBuffer(std::string_view aName, const st
 	data.pSysMem = aIndexList.data();
 
 	const HRESULT result = myDevice->CreateBuffer(&desc, &data, &outBuffer.myBuffer);
-	if(aIndexList.empty())
+	if (FAILED(result))
 	{
 		LOG(RhiLog, Error, "Failed to create index buffer for {}! Failed to create Buffer.", aName);
 		return false;

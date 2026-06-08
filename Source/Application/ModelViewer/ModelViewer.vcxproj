@@ -149,6 +149,7 @@
     <ClInclude Include="Application.h" />
     <ClInclude Include="ApplicationState.h" />
     <ClInclude Include="ModelViewer.h" />
+    <ClInclude Include="PrimitiveMeshBuilder.h" />
     <ClInclude Include="..\..\Utilities\FreeFlyCameraController.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
@@ -158,6 +159,7 @@
     <ClCompile Include="..\..\Utilities\FreeFlyCameraController.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="ModelViewer.cpp" />
+    <ClCompile Include="PrimitiveMeshBuilder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ModelViewer.rc" />

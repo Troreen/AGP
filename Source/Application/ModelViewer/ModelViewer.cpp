@@ -1,12 +1,16 @@
 #include "ModelViewer.h"
 
 #include <algorithm>
-#include <vector>
+#include <array>
+#include <memory>
+#include <string>
+#include <utility>
 
 #include "Application.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/CameraComponent.h"
 #include "GameFramework/MeshComponent.h"
+#include "PrimitiveMeshBuilder.h"
 
 ModelViewer::ModelViewer() = default;
 
@@ -61,86 +65,7 @@ bool ModelViewer::Initialize(SIZE aWindowSize, WNDPROC aWindowProcess, LPCWSTR a
         myInputHandler.SetAutoMouseCapture(false);
     }
 
-    {
-        // Temporary Mesh init
-
-        std::vector<Vertex> meshVertices(24);
-        // front face
-        meshVertices[0].Position = { -0.5f, -0.5f, -0.5f, 1 };
-        meshVertices[1].Position = { 0.5f, -0.5f, -0.5f, 1 };
-        meshVertices[2].Position = { 0.5f, 0.5f, -0.5f, 1 };
-        meshVertices[3].Position = { -0.5f, 0.5f, -0.5f, 1 };
-        // back face
-        meshVertices[4].Position = { -0.5f, -0.5f, 0.5f, 1 };
-        meshVertices[5].Position = { 0.5f, -0.5f, 0.5f, 1 };
-        meshVertices[6].Position = { 0.5f, 0.5f, 0.5f, 1 };
-        meshVertices[7].Position = { -0.5f, 0.5f, 0.5f, 1 };
-        // left face
-        meshVertices[8].Position = { -0.5f, -0.5f, 0.5f, 1 };
-        meshVertices[9].Position = { -0.5f, -0.5f, -0.5f, 1 };
-        meshVertices[10].Position = { -0.5f, 0.5f, -0.5f, 1 };
-        meshVertices[11].Position = { -0.5f, 0.5f, 0.5f, 1 };
-        // right face
-        meshVertices[12].Position = { 0.5f, -0.5f, -0.5f, 1 };
-        meshVertices[13].Position = { 0.5f, -0.5f, 0.5f, 1 };
-        meshVertices[14].Position = { 0.5f, 0.5f, 0.5f, 1 };
-        meshVertices[15].Position = { 0.5f, 0.5f, -0.5f, 1 };
-        // top face
-        meshVertices[16].Position = { -0.5f, 0.5f, -0.5f, 1 };
-        meshVertices[17].Position = { 0.5f, 0.5f, -0.5f, 1 };
-        meshVertices[18].Position = { 0.5f, 0.5f, 0.5f, 1 };
-        meshVertices[19].Position = { -0.5f, 0.5f, 0.5f, 1 };
-        // bottom face
-        meshVertices[20].Position = { -0.5f, -0.5f, 0.5f, 1 };
-        meshVertices[21].Position = { 0.5f, -0.5f, 0.5f, 1 };
-        meshVertices[22].Position = { 0.5f, -0.5f, -0.5f, 1 };
-        meshVertices[23].Position = { -0.5f, -0.5f, -0.5f, 1 };
-
-        for (Vertex& vertex : meshVertices)
-        {
-            vertex.Color = {
-                vertex.Position.x + 0.5f,
-                vertex.Position.y + 0.5f,
-                vertex.Position.z + 0.5f,
-                1.0f
-            };
-        }
-
-        // indices of a cube
-        std::vector<unsigned> 
-        meshIndices = {
-            // front face
-            0, 2, 1,
-            0, 3, 2,
-            
-            // right face
-            1, 2, 6,
-            1, 6, 5,
-            
-            // back face
-            4, 5, 6,
-            4, 6, 7,
-            
-            // left face
-            0, 4, 7,
-            0, 7, 3,
-            
-            // top face
-            0, 1, 5,
-            0, 5, 4,
-            
-            // bottom face
-            3, 7, 6,
-            3, 6, 2
-        };
-
-        Mesh::Element cubeElement;
-        cubeElement.NumVertices = static_cast<unsigned>(meshVertices.size());
-        cubeElement.NumIndices = static_cast<unsigned>(meshIndices.size());
-
-        myMesh = std::make_shared<Mesh>();
-        myMesh->Initialize("Cube", { cubeElement }, std::move(meshVertices), std::move(meshIndices));
-    }
+    RegisterPrimitiveMeshes();
 
     LoadScene();
 
@@ -204,6 +129,8 @@ int ModelViewer::Run()
 
 void ModelViewer::LoadScene()
 {
+    mySpinningActors.clear();
+
     {
         myCameraActor = myWorld.CreateActor("Camera Actor");
         if (myCameraActor != nullptr)
@@ -215,33 +142,97 @@ void ModelViewer::LoadScene()
                 50000.0f,
                 GraphicsEngine::Get().GetClientSize());
 
-            myCameraActor->SetTranslation({ 0.0f, 0.0f, -200.0f });
-            myCameraActor->LookAt({ 0.0f, 0.0f, 400.0f });
+            myCameraActor->SetTranslation({ 0.0f, 100.0f, -850.0f });
+            myCameraActor->LookAt({ 0.0f, 0.0f, 250.0f });
         }
     }
 
+    constexpr std::array primitiveNames = {
+        "Plane",
+        "Cube",
+        "Pyramid",
+        "Sphere",
+        "Torus",
+    };
+
+    constexpr float spacing = 165.0f;
+    const float startX = -spacing * (static_cast<float>(primitiveNames.size()) - 1.0f) * 0.5f;
+
+    for (size_t index = 0; index < primitiveNames.size(); ++index)
     {
-        Actor* actor = myWorld.CreateActor("Cube Actor 1");
-        if (actor != nullptr)
+        const std::string primitiveName = primitiveNames[index];
+        std::shared_ptr<Mesh> mesh = GetRegisteredMesh(primitiveName);
+        if (mesh == nullptr)
         {
-            actor->AddComponent<MeshComponent>("Cube Mesh Component", myMesh);
-            actor->SetTranslation({ 0.0f, 0.0f, 0.0f });
-            actor->SetScale({ 100.0f, 100.0f, 100.0f });
+            continue;
         }
-    }
-    {
-        Actor* actor = myWorld.CreateActor("Cube Actor 2");
+
+        Actor* actor = myWorld.CreateActor(primitiveName + " Actor");
         if (actor != nullptr)
         {
-            actor->AddComponent<MeshComponent>("Cube Mesh Component", myMesh);
-            actor->SetTranslation({ 200.0f, 0.0f, 400.0f });
-            actor->SetRotation(0.0f, 45.0f, 0.0f);
+            actor->AddComponent<MeshComponent>(primitiveName + " Mesh Component", mesh);
+            actor->SetTranslation({ startX + spacing * static_cast<float>(index), 0.0f, 250.0f });
+            actor->SetRotation(0.0f, 20.0f * static_cast<float>(index), 0.0f);
             actor->SetScale({ 100.0f, 100.0f, 100.0f });
+
+            SpinningActor spinner;
+            spinner.Instance = actor;
+            spinner.RotationDegrees = { 0.0f, 20.0f * static_cast<float>(index), 0.0f };
+            spinner.RotationSpeedDegrees = {
+                10.0f + 2.0f * static_cast<float>(index),
+                18.0f + 4.0f * static_cast<float>(index),
+                6.0f + static_cast<float>(index)
+            };
+            mySpinningActors.push_back(spinner);
         }
     }
 }
 
+void ModelViewer::RegisterPrimitiveMeshes()
+{
+    RegisterMesh("Plane", PrimitiveMeshBuilder::CreatePlane());
+    RegisterMesh("Cube", PrimitiveMeshBuilder::CreateCube());
+    RegisterMesh("Pyramid", PrimitiveMeshBuilder::CreatePyramid());
+    RegisterMesh("Sphere", PrimitiveMeshBuilder::CreateSphere());
+    RegisterMesh("Torus", PrimitiveMeshBuilder::CreateTorus());
+}
+
+void ModelViewer::RegisterMesh(std::string aName, std::shared_ptr<Mesh> aMesh)
+{
+    if (aName.empty() || aMesh == nullptr)
+    {
+        return;
+    }
+
+    myMeshRegistry[std::move(aName)] = std::move(aMesh);
+}
+
+std::shared_ptr<Mesh> ModelViewer::GetRegisteredMesh(const std::string& aName) const
+{
+    const auto foundMesh = myMeshRegistry.find(aName);
+    if (foundMesh == myMeshRegistry.end())
+    {
+        return nullptr;
+    }
+
+    return foundMesh->second;
+}
+
 void ModelViewer::UpdateScene(float aDeltaTime)
 {
+    for (SpinningActor& spinningActor : mySpinningActors)
+    {
+        if (spinningActor.Instance == nullptr)
+        {
+            continue;
+        }
+
+        spinningActor.RotationDegrees += spinningActor.RotationSpeedDegrees * aDeltaTime;
+        spinningActor.Instance->SetRotation(
+            spinningActor.RotationDegrees.x,
+            spinningActor.RotationDegrees.y,
+            spinningActor.RotationDegrees.z);
+    }
+
     myWorld.Update(aDeltaTime);
 }

@@ -1,5 +1,8 @@
 #pragma once
 #include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 #pragma region WindowsIncludes
 #define	WIN32_LEAN_AND_MEAN
@@ -49,9 +52,10 @@
 
 #include "GameFramework/World.h"
 #include "GraphicsEngine/GraphicsEngine.h"
-#include "GraphicsEngine/Objects/Mesh.h"
 #include "GraphicsEngine/RHI/GraphicsCommandList.h"
 #include "FreeFlyCameraController.h"
+
+class Mesh;
 
 class ModelViewer
 {
@@ -63,13 +67,24 @@ class ModelViewer
 	void LoadScene();
 
 private:
+	struct SpinningActor
+	{
+		Actor* Instance = nullptr;
+		CommonUtilities::Vector3<float> RotationDegrees;
+		CommonUtilities::Vector3<float> RotationSpeedDegrees;
+	};
+
+	void RegisterPrimitiveMeshes();
+	void RegisterMesh(std::string aName, std::shared_ptr<Mesh> aMesh);
+	std::shared_ptr<Mesh> GetRegisteredMesh(const std::string& aName) const;
 	void UpdateScene(float aDeltaTime);
 
 	bool myIsRunning = false;
 
 	HWND myMainWindowHandle = nullptr;
 
-	std::shared_ptr<Mesh> myMesh;
+	std::unordered_map<std::string, std::shared_ptr<Mesh>> myMeshRegistry;
+	std::vector<SpinningActor> mySpinningActors;
 	World myWorld;
 	Actor* myCameraActor = nullptr;
 

@@ -407,4 +407,5 @@ namespace CommonUtilities
 
 	// (dimension-changing helper implementations are located earlier in this file)
 
+	using Vector3f = Vector3<float>; 
 }
