@@ -1,10 +1,6 @@
 #pragma once
 #include <memory>
 
-#include "GameFramework/World.h"
-#include "GraphicsEngine/GraphicsEngine.h"
-#include "GraphicsEngine/Objects/Mesh.h"
-
 #pragma region WindowsIncludes
 #define	WIN32_LEAN_AND_MEAN
 
@@ -50,13 +46,18 @@
 #include <Windows.h>
 #pragma endregion
 
+
+#include "GameFramework/World.h"
+#include "GraphicsEngine/GraphicsEngine.h"
+#include "GraphicsEngine/Objects/Mesh.h"
+#include "GraphicsEngine/RHI/GraphicsCommandList.h"
 #include "FreeFlyCameraController.h"
 
 class ModelViewer
 {
-public:
+	public:
 	ModelViewer();
-
+	
 	bool Initialize(SIZE aWindowSize, WNDPROC aWindowProcess, LPCWSTR aWindowTitle);
 	int Run();
 	void LoadScene();
@@ -74,4 +75,6 @@ private:
 
 	CommonUtilities::InputHandler myInputHandler;
 	FreeFlyCameraController myCameraController;
+
+	GraphicsCommandList myCommandList;
 };

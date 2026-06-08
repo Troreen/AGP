@@ -128,7 +128,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>GraphicsEngine.pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(SolutionDir)Source\Graphics;$(SolutionDir)Source\Utilities;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -166,7 +166,7 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>GraphicsEngine.pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(SolutionDir)Source\Graphics;$(SolutionDir)Source\Utilities;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -198,7 +198,7 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
   <ItemGroup>
     <ClInclude Include="ConstantBuffers\FrameBuffer.h" />
     <ClInclude Include="ConstantBuffers\ObjectBuffer.h" />
-    <ClInclude Include="Ensure.h" />
+    <ClInclude Include="..\..\Utilities\Ensure.h" />
     <ClInclude Include="Objects\Mesh.h" />
     <ClInclude Include="Objects\Camera.h" />
     <ClInclude Include="Objects\Buffer.h" />
@@ -207,6 +207,7 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
     <ClInclude Include="Objects\Texture.h" />
     <ClInclude Include="Objects\Vertex.h" />
     <ClInclude Include="PipelineStateObject.h" />
+    <ClInclude Include="RHI\GraphicsCommandList.h" />
     <ClInclude Include="RHI\RenderHardwareInterface.h" />
     <ClInclude Include="RHI\RHIStructs.h" />
   </ItemGroup>
@@ -226,6 +227,7 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
     <ClCompile Include="Objects\Texture.cpp" />
     <ClCompile Include="Objects\Vertex.cpp" />
     <ClCompile Include="PipelineStateObject.cpp" />
+    <ClCompile Include="RHI\GraphicsCommandList.cpp" />
     <ClCompile Include="RHI\RenderHardwareInterface.cpp" />
   </ItemGroup>
   <ItemGroup>

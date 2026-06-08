@@ -8,6 +8,7 @@ struct ID3D11DepthStencilView;
 class Texture
 {
     friend class RenderHardwareInterface;
+    friend class GraphicsCommandList;
 
 public:
     Texture();

@@ -23,6 +23,7 @@ struct PipelineStateDescription
 class PipelineStateObject
 {
     friend class RenderHardwareInterface;
+    friend class GraphicsCommandList;
     
 public:
     PipelineStateObject();

@@ -1,15 +1,22 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.7.34024.191
+# Visual Studio Version 18
+VisualStudioVersion = 18.4.11612.150 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utilities", "Utilities", "{B88584E6-8C02-45F9-A781-DE156A465D72}"
+	ProjectSection(SolutionItems) = preProject
+		Source\Utilities\Ensure.h = Source\Utilities\Ensure.h
+		Source\Utilities\StringHelpers.h = Source\Utilities\StringHelpers.h
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CommonUtilities", "CommonUtilities", "{EF90B348-59F6-42BE-85CE-4E0F517FE8EB}"
 	ProjectSection(SolutionItems) = preProject
 		CommonUtilities\include\AABB3D.hpp = CommonUtilities\include\AABB3D.hpp
 		CommonUtilities\include\AStar.hpp = CommonUtilities\include\AStar.hpp
 		CommonUtilities\include\Camera3D.hpp = CommonUtilities\include\Camera3D.hpp
+		CommonUtilities\lib\CommonUtilities-d.lib = CommonUtilities\lib\CommonUtilities-d.lib
+		CommonUtilities\lib\CommonUtilities.lib = CommonUtilities\lib\CommonUtilities.lib
+		Source\CommonUtilities.props = Source\CommonUtilities.props
 		CommonUtilities\include\Dijkstra.hpp = CommonUtilities\include\Dijkstra.hpp
 		CommonUtilities\include\EnumKeys.h = CommonUtilities\include\EnumKeys.h
 		CommonUtilities\include\framework.h = CommonUtilities\include\framework.h
@@ -39,9 +46,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CommonUtilities", "CommonUt
 		CommonUtilities\include\Vector2.hpp = CommonUtilities\include\Vector2.hpp
 		CommonUtilities\include\Vector3.hpp = CommonUtilities\include\Vector3.hpp
 		CommonUtilities\include\Vector4.hpp = CommonUtilities\include\Vector4.hpp
-		CommonUtilities\lib\CommonUtilities-d.lib = CommonUtilities\lib\CommonUtilities-d.lib
-		CommonUtilities\lib\CommonUtilities.lib = CommonUtilities\lib\CommonUtilities.lib
-		Source\CommonUtilities.props = Source\CommonUtilities.props
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ModelViewer", "Source\Application\ModelViewer\ModelViewer.vcxproj", "{8B55EFBB-A7C8-47B8-A963-46AC7BA7FA8E}"

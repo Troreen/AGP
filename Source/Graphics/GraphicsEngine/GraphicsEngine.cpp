@@ -6,7 +6,7 @@
 #include "GameFramework/CameraComponent.h"
 #include "GameFramework/MeshComponent.h"
 #include "GameFramework/World.h"
-
+#include "RHI/GraphicsCommandList.h"
 /*
  * GraphicsEngine handles rendering of a scene.
  * Handles culling using whatever cameras it's told to use.
@@ -51,19 +51,18 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle)
 	return true;
 }
 
-void GraphicsEngine::Render(const Actor& aCameraActor, const World& aWorld)
+void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const Actor& aCameraActor, const World& aWorld)
 {
-	myRHI.ClearRenderTarget(myBackBuffer);
-	myRHI.ClearDepthStencil(myDepthBuffer);
-	myRHI.SetRenderTarget(&myBackBuffer, &myDepthBuffer);
-	myRHI.SetPipelineState(&myTempPSO); // TODO: Temporary PSO
+	inoutCommandList.ClearRenderTarget(myBackBuffer);
+	inoutCommandList.ClearDepthStencil(myDepthBuffer);
+	inoutCommandList.SetRenderTarget(&myBackBuffer, &myDepthBuffer);
+	inoutCommandList.SetPipelineState(&myTempPSO); // TODO: Temporary PSO
 
 
 	CameraComponent* cameraComponent = aCameraActor.GetComponent<CameraComponent>();
 	if (cameraComponent == nullptr)
 	{
 		GELOG(Warning, "Could not render world because camera actor '{}' has no CameraComponent.", aCameraActor.GetName());
-		myRHI.Present();
 		return;
 	}
 
@@ -74,7 +73,7 @@ void GraphicsEngine::Render(const Actor& aCameraActor, const World& aWorld)
 	fb.View = camera.GetViewMatrix();
 	fb.Projection = camera.GetProjectionMatrix();
 
-	UpdateAndSetConstantBuffer(ConstantBuffer::FrameBuffer, fb, 0, PipeLineStage_VertexShader);
+	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::FrameBuffer, fb, 0, PipeLineStage_VertexShader);
 
 	for (const std::unique_ptr<Actor>& actor : aWorld.GetActors())
 	{
@@ -93,16 +92,29 @@ void GraphicsEngine::Render(const Actor& aCameraActor, const World& aWorld)
 				continue;
 			}
 
-			RenderMesh(*meshComponent->GetMesh(), actor->GetTransform().GetWorldMatrix());
+			RenderMesh(inoutCommandList, *meshComponent->GetMesh(), actor->GetTransform().GetWorldMatrix());
 		}
 	}
+}
 
+void GraphicsEngine::Present() const
+{
 	myRHI.Present();
 }
 
 CU::Vector2u GraphicsEngine::GetClientSize() const
 {
     return myRHI.GetClientSize();
+}
+
+bool GraphicsEngine::CreateCommandList(std::string_view aName, GraphicsCommandList &outCommandList) const
+{
+    return myRHI.CreateCommandList(aName, outCommandList);
+}
+
+void GraphicsEngine::ExecuteCommandList(const GraphicsCommandList &aCommandList) const
+{
+	myRHI.ExecuteCommandList(aCommandList);
 }
 
 bool GraphicsEngine::CreateConstantBufferInternal(ConstantBuffer aBufferId, std::string_view aName, size_t aBufferSize)
@@ -117,7 +129,7 @@ bool GraphicsEngine::CreateConstantBufferInternal(ConstantBuffer aBufferId, std:
 	return true;
 }
 
-bool GraphicsEngine::UpdateAndSetConstantBufferInternal(ConstantBuffer aBufferId, const void *aData, size_t aDataSize, unsigned aSlot, PipeLineStages aStages)
+bool GraphicsEngine::UpdateAndSetConstantBufferInternal(GraphicsCommandList& inoutCommandList, ConstantBuffer aBufferId, const void *aData, size_t aDataSize, unsigned aSlot, PipeLineStages aStages)
 {
     if (!myConstantBuffers.contains(aBufferId))
 	{
@@ -126,35 +138,35 @@ bool GraphicsEngine::UpdateAndSetConstantBufferInternal(ConstantBuffer aBufferId
 	}
 
 	const Buffer& buffer = myConstantBuffers.at(aBufferId);
-	if (!myRHI.UpdateConstantBuffer(buffer, aData, aDataSize))
+	if (!inoutCommandList.UpdateConstantBuffer(buffer, aData, aDataSize))
 	{
 		return false;
 	}
 
-	myRHI.SetConstantBuffer(&buffer, aSlot, aStages);
+	inoutCommandList.SetConstantBuffer(&buffer, aSlot, aStages);
 	return true;
 }
 
 GraphicsEngine::GraphicsEngine() = default;
 GraphicsEngine::~GraphicsEngine() = default;
 
-void GraphicsEngine::RenderMesh(const Mesh& aMesh, const CU::Matrix4f& aWorld)
+void GraphicsEngine::RenderMesh(GraphicsCommandList& inoutCommandList, const Mesh& aMesh, const CU::Matrix4f& aWorld)
 {
 	if (!PrepareMeshForRendering(aMesh))
 	{
 		return;
 	}
 
-	myRHI.SetVertexBuffer(&aMesh.myVertexBuffer);
-	myRHI.SetIndexBuffer(&aMesh.myIndexBuffer);
+	inoutCommandList.SetVertexBuffer(&aMesh.myVertexBuffer);
+	inoutCommandList.SetIndexBuffer(&aMesh.myIndexBuffer);
 
 	ObjectBuffer ob;
 	ob.World = aWorld;
-	UpdateAndSetConstantBuffer(ConstantBuffer::ObjectBuffer, ob, 1, PipeLineStage_VertexShader);
+	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::ObjectBuffer, ob, 1, PipeLineStage_VertexShader);
 
 	for (const Mesh::Element& element : aMesh.myElements)
 	{
-		myRHI.DrawIndexed(element.NumIndices, element.IndexOffset);
+		inoutCommandList.DrawIndexed(element.NumIndices, element.IndexOffset);
 	}
 }
 

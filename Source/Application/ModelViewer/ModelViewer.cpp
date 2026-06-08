@@ -45,8 +45,15 @@ bool ModelViewer::Initialize(SIZE aWindowSize, WNDPROC aWindowProcess, LPCWSTR a
 	{   // Graphics Init
         MVLOG(Log, "Initializing Graphics Engine...");
 
-	    if(!GraphicsEngine::Get().Initialize(myMainWindowHandle))
+        GraphicsEngine& GE = GraphicsEngine::Get();
+
+	    if(!GE.Initialize(myMainWindowHandle))
 	        return false;
+
+        if (!GE.CreateCommandList("Model Viewer", myCommandList))
+        {
+            return false;
+        }
     }
 
     {
@@ -180,10 +187,16 @@ int ModelViewer::Run()
         myCameraController.Update(deltaTime);
         UpdateScene(deltaTime);
 
+        myCommandList.ResetCommandList();
+        GraphicsEngine& GE = GraphicsEngine::Get();
         if (myCameraActor != nullptr)
         {
-            GraphicsEngine::Get().Render(*myCameraActor, myWorld);
+            GE.Render(myCommandList, *myCameraActor, myWorld);
+            myCommandList.FinishCommandList();
+            GE.ExecuteCommandList(myCommandList);
+            GE.Present();
         }
+        
     }
 
     return 0;

@@ -51,7 +51,10 @@
     <ClInclude Include="PipelineStateObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Ensure.h">
+    <ClInclude Include="..\..\Utilities\Ensure.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RHI\GraphicsCommandList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -87,6 +90,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PipelineStateObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RHI\GraphicsCommandList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

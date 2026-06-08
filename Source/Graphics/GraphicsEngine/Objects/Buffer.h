@@ -9,6 +9,7 @@ struct ID3D11Buffer;
 class Buffer
 {
     friend class RenderHardwareInterface;
+    friend class GraphicsCommandList;
     
 public:
     Buffer();

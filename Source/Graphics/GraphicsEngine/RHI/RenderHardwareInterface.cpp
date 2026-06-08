@@ -5,7 +5,9 @@
 #include "GraphicsEngine/Objects/Texture.h"
 #include "GraphicsEngine/Objects/Buffer.h"
 #include "GraphicsEngine/Objects/Vertex.h"
+#include "GraphicsCommandList.h"
 #include "PipelineStateObject.h"
+#include "Ensure.h"
 
 using namespace Microsoft::WRL;
 
@@ -183,43 +185,6 @@ bool RenderHardwareInterface::Initialize(HWND aWindowHandle, bool aEnableDebug, 
 
 	LOG(RhiLog, Log, "RHI Started!");
 	return true;
-}
-
-void RenderHardwareInterface::Present() const
-{
-	mySwapChain->Present(0, DXGI_PRESENT_ALLOW_TEARING);
-}
-
-void RenderHardwareInterface::ClearRenderTarget(const Texture& aTarget) const
-{
-	float clearColor[4] = { 0, 0, 0, 0 };	 
-	myContext->ClearRenderTargetView(aTarget.myRTV.Get(), clearColor);
-}
-
-void RenderHardwareInterface::ClearDepthStencil(const Texture &aTarget) const
-{
-	myContext->ClearDepthStencilView(aTarget.myDSV.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-}
-
-void RenderHardwareInterface::SetRenderTarget(const Texture* aTarget, const Texture* aDepthStencil) const
-{
-	ID3D11RenderTargetView* rtv = nullptr;
-	ID3D11DepthStencilView* dsv = nullptr;
-	D3D11_VIEWPORT viewport = { 0, 0, 0, 0, 0, 1 };
-
-	if (aTarget)
-	{
-		rtv = aTarget->myRTV.Get();
-		memcpy_s(&viewport, sizeof(D3D11_VIEWPORT), &aTarget->myViewport, sizeof(Viewport));
-	}
-
-	if (aDepthStencil)
-	{
-		dsv = aDepthStencil->myDSV.Get();
-	}
-
-	myContext->OMSetRenderTargets(1, &rtv, dsv);
-	myContext->RSSetViewports(1, &viewport);
 }
 
 CommonUtilities::Vector2u RenderHardwareInterface::GetClientSize() const
@@ -421,98 +386,34 @@ bool RenderHardwareInterface::CreatePipelineStateObject(const PipelineStateDescr
 	return !hasErrored;
 }
 
-bool RenderHardwareInterface::UpdateConstantBuffer(const Buffer &aConstantBuffer, const void *aBufferData, size_t aBufferDataSize) const
+bool RenderHardwareInterface::CreateCommandList(std::string_view aName, GraphicsCommandList &outCommandList) const
 {
-    if (!aConstantBuffer.IsValid() || aConstantBuffer.myType != BufferType::ConstantBuffer)
-	{
-		LOG(RhiLog, Error, "Failed to update constant buffer! Buffer is either null or invalid type!");
-		return false;
-	}
+    ensure(!outCommandList.myContext);
 
-	if (aBufferDataSize > aConstantBuffer.mySize)
-	{
-		LOG(RhiLog, Error, "Failed to update constant buffer {}! Data provided is larger than the buffer capacity!", aConstantBuffer.myName);
-		return false;
-	}
-
-	D3D11_MAPPED_SUBRESOURCE resource = {};
-	
-	const HRESULT result = myContext->Map(aConstantBuffer.myBuffer.Get(), 0,  D3D11_MAP_WRITE_DISCARD, 0, &resource);
+	const HRESULT result = myDevice->CreateDeferredContext(0, &outCommandList.myContext);
 	if (FAILED(result))
 	{
-		LOG(RhiLog, Error, "Failed to update constant buffer {}! Failed to map buffer!", aConstantBuffer.myName);
+		LOG(RhiLog, Error, "Failed to create command list!");
 		return false;
 	}
 
-	memcpy_s(resource.pData, aConstantBuffer.mySize, aBufferData, aBufferDataSize);
-	myContext->Unmap(aConstantBuffer.myBuffer.Get(), 0);
+	const std::string name = std::format("{}_CTXT", aName);
+	SetObjectName(outCommandList.myContext, name);
+	outCommandList.myName = aName;
+	outCommandList.myContext->QueryInterface(IID_PPV_ARGS(&outCommandList.myUDA));
 
 	return true;
 }
 
-void RenderHardwareInterface::SetVertexBuffer(const Buffer *aBuffer) const
+void RenderHardwareInterface::ExecuteCommandList(const GraphicsCommandList &aCommandList) const
 {
-	constexpr unsigned offset = 0;
-	if (aBuffer)
-	{
-		myContext->IASetVertexBuffers(0, 1, aBuffer->myBuffer.GetAddressOf(), &aBuffer->myStride, &offset);
-	}
-	else
-	{
-		const unsigned stride = 0;
-		ID3D11Buffer* buffer = nullptr;
-		myContext->IASetVertexBuffers(0, 1, &buffer, &stride, &offset);
-	}
+	ensure(aCommandList.IsReadyForExecution());
+	myContext->ExecuteCommandList(aCommandList.myCommandList.Get(), false);
 }
 
-void RenderHardwareInterface::SetIndexBuffer(const Buffer *aBuffer) const
+void RenderHardwareInterface::Present() const
 {
-	if (aBuffer)
-	{
-		myContext->IASetIndexBuffer(aBuffer->myBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-	}
-	else
-	{
-		ID3D11Buffer* buffer = nullptr;
-		myContext->IASetIndexBuffer(buffer, DXGI_FORMAT_UNKNOWN, 0);
-	}
-}
-
-void RenderHardwareInterface::SetConstantBuffer(const Buffer *aBuffer, unsigned aSlot, PipeLineStages aStages) const
-{
-	ID3D11Buffer* buffer = nullptr;
-	if (aBuffer)
-	{
-		buffer = aBuffer->myBuffer.Get();
-	}
-
-	if (aStages & PipeLineStage_VertexShader)
-	{
-		myContext->VSSetConstantBuffers(aSlot, 1, &buffer);
-	}
-	if (aStages & PipeLineStage_PixelShader)
-	{
-		myContext->PSSetConstantBuffers(aSlot, 1, &buffer);
-	}
-	
-}
-
-void RenderHardwareInterface::SetPipelineState(const PipelineStateObject *aPSO)
-{
-	myContext->IASetPrimitiveTopology(static_cast<D3D11_PRIMITIVE_TOPOLOGY>(aPSO->myTopology)); 
-	myContext->IASetInputLayout(aPSO->myInputLayout.Get());
-	myContext->VSSetShader(aPSO->myVertexShader.Get(), nullptr, 0);
-	myContext->PSSetShader(aPSO->myPixelShader.Get(), nullptr, 0);
-}
-
-void RenderHardwareInterface::Draw(unsigned aNumVertices) const
-{
-	myContext->Draw(aNumVertices, 0);
-}
-
-void RenderHardwareInterface::DrawIndexed(unsigned aIndexCount, unsigned aIndexOffset) const
-{
-	myContext->DrawIndexed(aIndexCount, aIndexOffset, 0);
+	mySwapChain->Present(0, DXGI_PRESENT_ALLOW_TEARING);
 }
 
 void RenderHardwareInterface::SetObjectName(const Microsoft::WRL::ComPtr<ID3D11DeviceChild>& aObject, std::string_view aName) const
