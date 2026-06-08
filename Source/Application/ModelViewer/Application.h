@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "Logger/Logger.h"
+#include "Timer.h"
 
 #if _DEBUG
 DECLARE_LOG_CATEGORY_WITH_NAME(LogModelViewer, ModelViewer, Verbose);
@@ -11,7 +12,7 @@ DECLARE_LOG_CATEGORY_WITH_NAME(LogModelViewer, ModelViewer, Warning);
 
 struct ApplicationData
 {
-	// Application State data goes here for easy access.
+	CommonUtilities::Timer Timer;
 };
 
 inline ApplicationData Application;

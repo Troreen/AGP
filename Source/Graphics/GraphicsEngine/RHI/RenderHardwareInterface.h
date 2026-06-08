@@ -8,6 +8,8 @@
 #include "Vector.hpp"
 
 
+class PipelineStateObject;
+struct PipelineStateDescription;
 class Buffer;
 struct Vertex;
 class Texture;
@@ -35,11 +37,14 @@ public:
 	bool CreateIndexBuffer(std::string_view aName, const std::vector<unsigned>&  aIndexList, Buffer& outBuffer) const;
 	bool CreateConstantBuffer(std::string_view aName, size_t aSize, Buffer& outBuffer) const;
 
+	bool CreatePipelineStateObject (const PipelineStateDescription& aDescription, PipelineStateObject& outPSO) const;
+
 	bool UpdateConstantBuffer(const Buffer& aConstantBuffer, const void* aBufferData, size_t aBufferDataSize) const;
 
 	void SetVertexBuffer(const Buffer* aBuffer) const;
 	void SetIndexBuffer(const Buffer* aBuffer) const;
 	void SetConstantBuffer(const Buffer* aBuffer, unsigned aSlot, PipeLineStages aStages) const; 
+	void SetPipelineState (const PipelineStateObject* aPSO);
 
 	void Draw(unsigned aNumVertices) const;
 	void DrawIndexed(unsigned aIndexCount, unsigned aIndexOffset) const;
@@ -53,11 +58,5 @@ private:
 	Microsoft::WRL::ComPtr<IDXGISwapChain> mySwapChain;
 	
 	HWND myWindowHandle;
-
-	//TEMP
-	Microsoft::WRL::ComPtr<struct ID3D11InputLayout> myTempIL;
-	Microsoft::WRL::ComPtr<struct ID3D11VertexShader> myTempVS;
-	Microsoft::WRL::ComPtr<struct ID3D11PixelShader> myTempPS;
-
 };
 

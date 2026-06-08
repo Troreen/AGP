@@ -69,4 +69,6 @@ namespace CommonUtilities
 		void TryBeginMouseCapture();
 		void TryEndMouseCaptureIfNoButtons();
 	};
+
+	namespace CU = CommonUtilities;
 } // namespace CommonUtilities

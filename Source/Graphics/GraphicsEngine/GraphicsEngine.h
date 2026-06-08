@@ -15,6 +15,10 @@
 #include "Camera3D.hpp"
 #include "Matrix.hpp"
 
+#include "PipelineStateObject.h"
+
+class Actor;
+class World;
 
 enum class ConstantBuffer : uint8_t
 {
@@ -30,7 +34,7 @@ public:
 	static GraphicsEngine& Get();
 
 	bool Initialize(HWND aWindowHandle);
-	void Render(const CU::Camera3D& aCamera, const Mesh& aMesh, const std::vector<CU::Transform>& aMeshTransforms);
+	void Render(const Actor& aCameraActor, const World& aWorld);
 
 	template <class T>
 	bool CreateConstantBuffer(ConstantBuffer aBufferId, std::string_view aName) 
@@ -55,10 +59,14 @@ private:
 	~GraphicsEngine();
 
 	bool PrepareMeshForRendering(const Mesh& aMesh) const;
+	void RenderMesh(const Mesh& aMesh, const CU::Matrix4f& aWorld);
 
 	RenderHardwareInterface myRHI;
 	Texture myBackBuffer;
 	Texture myDepthBuffer;
 
 	std::unordered_map<ConstantBuffer, Buffer> myConstantBuffers;
+
+	// TODO: Temporary PSO=
+	PipelineStateObject myTempPSO;
 };

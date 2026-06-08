@@ -1,14 +1,14 @@
 #pragma once
 
-#include "Camera3D.hpp"
 #include "InputHandler.h"
+#include "Transform.hpp"
 
 class FreeFlyCameraController
 {
 public:
 	FreeFlyCameraController();
 
-	void Init(CommonUtilities::InputHandler& anInputHandler, CommonUtilities::Camera3D& aCamera);
+	void Init(CommonUtilities::InputHandler& anInputHandler, CommonUtilities::Transform& aTransform);
 	void Update(float aTimeDelta);
 	void ResetMouseLookAnchor();
 
@@ -19,7 +19,7 @@ public:
 
 private:
 	CommonUtilities::InputHandler* myInputHandler;
-	CommonUtilities::Camera3D* myCamera;
+	CommonUtilities::Transform* myTransform;
 
 	float myMoveSpeed;
 	float myLookSensitivity;

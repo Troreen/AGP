@@ -1,12 +1,12 @@
 #include "ModelViewer.h"
 
 #include <algorithm>
-#include <filesystem>
-#include <future>
-#include <iostream>
 #include <vector>
 
 #include "Application.h"
+#include "GameFramework/Actor.h"
+#include "GameFramework/CameraComponent.h"
+#include "GameFramework/MeshComponent.h"
 
 ModelViewer::ModelViewer() = default;
 
@@ -50,26 +50,8 @@ bool ModelViewer::Initialize(SIZE aWindowSize, WNDPROC aWindowProcess, LPCWSTR a
     }
 
     {
-        myCamera = CU::Camera3D(90.0f, 1.0f, 50000.0f, GraphicsEngine::Get().GetClientSize());
-        myCamera.GetTransform().SetPosition({ 0.0f, 0.0f, -200.0f });
-        myCamera.LookAt({ 0.0f, 0.0f, 400.0f });
-
         myInputHandler.SetWindowHandle(myMainWindowHandle);
         myInputHandler.SetAutoMouseCapture(false);
-        myCameraController.Init(myInputHandler, myCamera);
-
-        myMeshTransforms.clear();
-
-        CU::Transform cubeA;
-        cubeA.SetPosition({ 0.0f, 0.0f, 0.0f });
-        cubeA.SetScale({ 100.0f, 100.0f, 100.0f });
-        myMeshTransforms.emplace_back(cubeA);
-
-        CU::Transform cubeB;
-        cubeB.SetPosition({ 200.0f, 0.0f, 400.0f });
-        cubeB.SetRotation(0.0f, 45.0f, 0.0f);
-        cubeB.SetScale({ 100.0f, 100.0f, 100.0f });
-        myMeshTransforms.emplace_back(cubeB);
     }
 
     {
@@ -149,7 +131,15 @@ bool ModelViewer::Initialize(SIZE aWindowSize, WNDPROC aWindowProcess, LPCWSTR a
         cubeElement.NumVertices = static_cast<unsigned>(meshVertices.size());
         cubeElement.NumIndices = static_cast<unsigned>(meshIndices.size());
 
-        myMesh.Initialize("Cube", { cubeElement }, std::move(meshVertices), std::move(meshIndices));
+        myMesh = std::make_shared<Mesh>();
+        myMesh->Initialize("Cube", { cubeElement }, std::move(meshVertices), std::move(meshIndices));
+    }
+
+    LoadScene();
+
+    if (myCameraActor != nullptr)
+    {
+        myCameraController.Init(myInputHandler, myCameraActor->GetTransform());
     }
 
     MVLOG(Log, "Ready!");
@@ -157,7 +147,7 @@ bool ModelViewer::Initialize(SIZE aWindowSize, WNDPROC aWindowProcess, LPCWSTR a
     // Show our program window and give it focus.
     ShowWindow(myMainWindowHandle, SW_SHOW);
     SetForegroundWindow(myMainWindowHandle);
-    myPreviousFrameTime = std::chrono::high_resolution_clock::now();
+    Application.Timer.Update();
 
     return true;
 }
@@ -181,19 +171,64 @@ int ModelViewer::Run()
             {
                 myIsRunning = false;
             }
-
-            // TODO: CU Input Manager is updated here.
         }
 
-        const auto currentFrameTime = std::chrono::high_resolution_clock::now();
-        const float deltaTime = std::chrono::duration<float>(currentFrameTime - myPreviousFrameTime).count();
-        myPreviousFrameTime = currentFrameTime;
+        Application.Timer.Update();
+        const float deltaTime = Application.Timer.GetDeltaTime();
 
         myInputHandler.UpdateInput();
         myCameraController.Update(deltaTime);
+        UpdateScene(deltaTime);
 
-        GraphicsEngine::Get().Render(myCamera, myMesh, myMeshTransforms);
+        if (myCameraActor != nullptr)
+        {
+            GraphicsEngine::Get().Render(*myCameraActor, myWorld);
+        }
     }
 
     return 0;
+}
+
+void ModelViewer::LoadScene()
+{
+    {
+        myCameraActor = myWorld.CreateActor("Camera Actor");
+        if (myCameraActor != nullptr)
+        {
+            myCameraActor->AddComponent<CameraComponent>(
+                "Camera",
+                90.0f,
+                1.0f,
+                50000.0f,
+                GraphicsEngine::Get().GetClientSize());
+
+            myCameraActor->SetTranslation({ 0.0f, 0.0f, -200.0f });
+            myCameraActor->LookAt({ 0.0f, 0.0f, 400.0f });
+        }
+    }
+
+    {
+        Actor* actor = myWorld.CreateActor("Cube Actor 1");
+        if (actor != nullptr)
+        {
+            actor->AddComponent<MeshComponent>("Cube Mesh Component", myMesh);
+            actor->SetTranslation({ 0.0f, 0.0f, 0.0f });
+            actor->SetScale({ 100.0f, 100.0f, 100.0f });
+        }
+    }
+    {
+        Actor* actor = myWorld.CreateActor("Cube Actor 2");
+        if (actor != nullptr)
+        {
+            actor->AddComponent<MeshComponent>("Cube Mesh Component", myMesh);
+            actor->SetTranslation({ 200.0f, 0.0f, 400.0f });
+            actor->SetRotation(0.0f, 45.0f, 0.0f);
+            actor->SetScale({ 100.0f, 100.0f, 100.0f });
+        }
+    }
+}
+
+void ModelViewer::UpdateScene(float aDeltaTime)
+{
+    myWorld.Update(aDeltaTime);
 }

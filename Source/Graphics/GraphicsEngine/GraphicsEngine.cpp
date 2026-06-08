@@ -3,12 +3,19 @@
 
 #include "ConstantBuffers/FrameBuffer.h"
 #include "ConstantBuffers/ObjectBuffer.h"
+#include "GameFramework/CameraComponent.h"
+#include "GameFramework/MeshComponent.h"
+#include "GameFramework/World.h"
 
 /*
  * GraphicsEngine handles rendering of a scene.
  * Handles culling using whatever cameras it's told to use.
  * Renders onto a user-provided render target and depth.
  */
+
+// TODO: Temporary Shader Includes
+#include "GraphicsEngine/TemporaryShaders/VertexShader.h"
+#include "GraphicsEngine/TemporaryShaders/PixelShader.h"
 
 GraphicsEngine& GraphicsEngine::Get()
 {
@@ -26,41 +33,71 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle)
 	CreateConstantBuffer<FrameBuffer>(ConstantBuffer::FrameBuffer, "FrameBuffer");
 	CreateConstantBuffer<ObjectBuffer>(ConstantBuffer::ObjectBuffer, "ObjectBuffer");
 
+	// TODO: Temporary PSO
+	PipelineStateDescription tempPSODesc;
+	tempPSODesc.Name = "TempPSO";
+	tempPSODesc.VertexShader.ByteCode = TEMP_VertexShader_ByteCode;
+	tempPSODesc.VertexShader.ByteCodeSize = sizeof(TEMP_VertexShader_ByteCode);
+	tempPSODesc.PixelShader.ByteCode = TEMP_PixelShader_ByteCode;
+	tempPSODesc.PixelShader.ByteCodeSize = sizeof(TEMP_PixelShader_ByteCode);
+	tempPSODesc.InputLayoutElements = Vertex::Description;
+	tempPSODesc.Topology = Topology::TriangleList;
+	if (!myRHI.CreatePipelineStateObject(tempPSODesc, myTempPSO))
+	{
+		return false; // RHI logs this for us
+	}
+	// End Temporary PSO
 
 	return true;
 }
 
-void GraphicsEngine::Render(const CU::Camera3D& aCamera, const Mesh& aMesh, const std::vector<CU::Transform>& aMeshTransforms)
+void GraphicsEngine::Render(const Actor& aCameraActor, const World& aWorld)
 {
 	myRHI.ClearRenderTarget(myBackBuffer);
 	myRHI.ClearDepthStencil(myDepthBuffer);
 	myRHI.SetRenderTarget(&myBackBuffer, &myDepthBuffer);
+	myRHI.SetPipelineState(&myTempPSO); // TODO: Temporary PSO
+
+
+	CameraComponent* cameraComponent = aCameraActor.GetComponent<CameraComponent>();
+	if (cameraComponent == nullptr)
+	{
+		GELOG(Warning, "Could not render world because camera actor '{}' has no CameraComponent.", aCameraActor.GetName());
+		myRHI.Present();
+		return;
+	}
+
+	cameraComponent->SyncCameraToOwner();
+	const CU::Camera3D& camera = cameraComponent->GetCamera();
 
 	FrameBuffer fb;
-	fb.View = aCamera.GetViewMatrix();
-	fb.Projection = aCamera.GetProjectionMatrix();
+	fb.View = camera.GetViewMatrix();
+	fb.Projection = camera.GetProjectionMatrix();
 
-	UpdateAndSetConstantBuffer(ConstantBuffer::FrameBuffer, fb, 0, PipeLineStage_VertexShader); 
-	
-	if (PrepareMeshForRendering(aMesh))
+	UpdateAndSetConstantBuffer(ConstantBuffer::FrameBuffer, fb, 0, PipeLineStage_VertexShader);
+
+	for (const std::unique_ptr<Actor>& actor : aWorld.GetActors())
 	{
-		myRHI.SetVertexBuffer(&aMesh.myVertexBuffer);		
-		myRHI.SetIndexBuffer(&aMesh.myIndexBuffer);
-
-		for (const CU::Transform& transform : aMeshTransforms)
+		if (!actor || !actor->IsActive())
 		{
-			ObjectBuffer ob;
-			ob.World = transform.GetWorldMatrix();
-			UpdateAndSetConstantBuffer(ConstantBuffer::ObjectBuffer, ob, 1, PipeLineStage_VertexShader);
-	
-			for	(const Mesh::Element& element : aMesh.myElements)
+			continue;
+		}
+
+		std::vector<MeshComponent*> meshComponents;
+		actor->GetComponentsOfType(meshComponents);
+
+		for (const MeshComponent* meshComponent : meshComponents)
+		{
+			if (meshComponent == nullptr || !meshComponent->IsEnabled() || !meshComponent->HasMesh())
 			{
-				myRHI.DrawIndexed(element.NumIndices, element.IndexOffset);
+				continue;
 			}
+
+			RenderMesh(*meshComponent->GetMesh(), actor->GetTransform().GetWorldMatrix());
 		}
 	}
 
-	myRHI.Present();	
+	myRHI.Present();
 }
 
 CU::Vector2u GraphicsEngine::GetClientSize() const
@@ -100,6 +137,26 @@ bool GraphicsEngine::UpdateAndSetConstantBufferInternal(ConstantBuffer aBufferId
 
 GraphicsEngine::GraphicsEngine() = default;
 GraphicsEngine::~GraphicsEngine() = default;
+
+void GraphicsEngine::RenderMesh(const Mesh& aMesh, const CU::Matrix4f& aWorld)
+{
+	if (!PrepareMeshForRendering(aMesh))
+	{
+		return;
+	}
+
+	myRHI.SetVertexBuffer(&aMesh.myVertexBuffer);
+	myRHI.SetIndexBuffer(&aMesh.myIndexBuffer);
+
+	ObjectBuffer ob;
+	ob.World = aWorld;
+	UpdateAndSetConstantBuffer(ConstantBuffer::ObjectBuffer, ob, 1, PipeLineStage_VertexShader);
+
+	for (const Mesh::Element& element : aMesh.myElements)
+	{
+		myRHI.DrawIndexed(element.NumIndices, element.IndexOffset);
+	}
+}
 
 bool GraphicsEngine::PrepareMeshForRendering(const Mesh &aMesh) const
 {

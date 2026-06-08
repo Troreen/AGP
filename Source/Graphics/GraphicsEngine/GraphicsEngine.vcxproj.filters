@@ -48,6 +48,12 @@
     <ClInclude Include="ConstantBuffers\ObjectBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PipelineStateObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Ensure.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GraphicsEngine.cpp">
@@ -78,6 +84,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ConstantBuffers\ObjectBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PipelineStateObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

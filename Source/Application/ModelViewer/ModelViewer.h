@@ -1,8 +1,7 @@
 #pragma once
-#include <chrono>
 #include <memory>
-#include <vector>
 
+#include "GameFramework/World.h"
 #include "GraphicsEngine/GraphicsEngine.h"
 #include "GraphicsEngine/Objects/Mesh.h"
 
@@ -60,18 +59,19 @@ public:
 
 	bool Initialize(SIZE aWindowSize, WNDPROC aWindowProcess, LPCWSTR aWindowTitle);
 	int Run();
+	void LoadScene();
 
 private:
+	void UpdateScene(float aDeltaTime);
 
 	bool myIsRunning = false;
 
 	HWND myMainWindowHandle = nullptr;
 
-	Mesh myMesh;
-	std::vector<CU::Transform> myMeshTransforms;
+	std::shared_ptr<Mesh> myMesh;
+	World myWorld;
+	Actor* myCameraActor = nullptr;
 
-	CU::Camera3D myCamera;
 	CommonUtilities::InputHandler myInputHandler;
 	FreeFlyCameraController myCameraController;
-	std::chrono::high_resolution_clock::time_point myPreviousFrameTime{};
 };

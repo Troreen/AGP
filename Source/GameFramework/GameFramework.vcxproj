@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{949cdb08-2579-4f0e-8ba4-5ae09a39c4df}</ProjectGuid>
-    <RootNamespace>GraphicsEngine</RootNamespace>
+    <ProjectGuid>{d6f43e75-5c34-4dc2-98de-34c68f82833d}</ProjectGuid>
+    <RootNamespace>GameFramework</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -74,16 +74,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)Lib\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir)Source\;$(SolutionDir)Source\Graphics\;$(SolutionDir)Source\Utilities\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Source\;$(SolutionDir)Source\Utilities\;$(ProjectDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)Lib\$(Configuration)\;$(LibraryPath)</LibraryPath>
-    <CustomBuildAfterTargets>Build</CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)Lib\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir)Source\;$(SolutionDir)Source\Graphics\;$(SolutionDir)Source\Utilities\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Source\;$(SolutionDir)Source\Utilities\;$(ProjectDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)Lib\$(Configuration)\;$(LibraryPath)</LibraryPath>
-    <CustomBuildAfterTargets>Build</CustomBuildAfterTargets>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -91,8 +89,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -108,8 +105,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -125,35 +121,11 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>GraphicsEngine.pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
+      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(SolutionDir)Source\Utilities;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <Link>
-      <SubSystem>
-      </SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
-    <FxCompile>
-      <ShaderModel>5.0</ShaderModel>
-      <ObjectFileOutput />
-      <TreatWarningAsError>true</TreatWarningAsError>
-      <VariableName>TEMP_%(Filename)_ByteCode</VariableName>
-      <HeaderFileOutput>$(ProjectDir)TemporaryShaders\%(Filename).h</HeaderFileOutput>
-    </FxCompile>
-    <Lib />
-    <PostBuildEvent />
-    <PostBuildEvent />
-    <Lib />
-    <Lib />
-    <CustomBuildStep>
-      <Command>IF EXIST "$(ProjectDir)Shaders"  (
-xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Shaders"
-)</Command>
-      <Message>Copying Shaders to $(SolutionDir)Bin\$(Configuration)\Shaders...</Message>
-      <Outputs>*.hlsl*</Outputs>
-    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -163,87 +135,27 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>GraphicsEngine.pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
+      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(SolutionDir)Source\Utilities;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <Link>
-      <SubSystem>
-      </SubSystem>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
-    <FxCompile>
-      <ShaderModel>5.0</ShaderModel>
-      <ObjectFileOutput />
-      <TreatWarningAsError>true</TreatWarningAsError>
-      <VariableName>TEMP_%(Filename)_ByteCode</VariableName>
-      <HeaderFileOutput>$(ProjectDir)TemporaryShaders\%(Filename).h</HeaderFileOutput>
-    </FxCompile>
-    <Lib />
-    <PostBuildEvent />
-    <PostBuildEvent />
-    <Lib />
-    <Lib />
-    <CustomBuildStep>
-      <Command>IF EXIST "$(ProjectDir)Shaders"  (
-xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Shaders"
-)</Command>
-      <Message>Copying Shaders to $(SolutionDir)Bin\$(Configuration)\Shaders...</Message>
-      <Outputs>*.hlsl*</Outputs>
-    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="ConstantBuffers\FrameBuffer.h" />
-    <ClInclude Include="ConstantBuffers\ObjectBuffer.h" />
-    <ClInclude Include="Ensure.h" />
-    <ClInclude Include="Objects\Mesh.h" />
-    <ClInclude Include="Objects\Camera.h" />
-    <ClInclude Include="Objects\Buffer.h" />
-    <ClInclude Include="GraphicsEngine.h" />
-    <ClInclude Include="GraphicsEngine.pch.h" />
-    <ClInclude Include="Objects\Texture.h" />
-    <ClInclude Include="Objects\Vertex.h" />
-    <ClInclude Include="PipelineStateObject.h" />
-    <ClInclude Include="RHI\RenderHardwareInterface.h" />
-    <ClInclude Include="RHI\RHIStructs.h" />
+    <ClInclude Include="Actor.h" />
+    <ClInclude Include="CameraComponent.h" />
+    <ClInclude Include="Component.h" />
+    <ClInclude Include="GameFrameworkLog.h" />
+    <ClInclude Include="MeshComponent.h" />
+    <ClInclude Include="World.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ConstantBuffers\FrameBuffer.cpp" />
-    <ClCompile Include="ConstantBuffers\ObjectBuffer.cpp" />
-    <ClCompile Include="Objects\Mesh.cpp" />
-    <ClCompile Include="Objects\Camera.cpp" />
-    <ClCompile Include="Objects\Buffer.cpp" />
-    <ClCompile Include="GraphicsEngine.cpp" />
-    <ClCompile Include="GraphicsEngine.pch.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="Objects\Texture.cpp" />
-    <ClCompile Include="Objects\Vertex.cpp" />
-    <ClCompile Include="PipelineStateObject.cpp" />
-    <ClCompile Include="RHI\RenderHardwareInterface.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="Shaders\PixelShader.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Shaders\VertexShader.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-    </FxCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Shaders\Common.hlsli" />
+    <ClCompile Include="Actor.cpp" />
+    <ClCompile Include="CameraComponent.cpp" />
+    <ClCompile Include="Component.cpp" />
+    <ClCompile Include="GameFrameworkLog.cpp" />
+    <ClCompile Include="MeshComponent.cpp" />
+    <ClCompile Include="World.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -12,7 +12,7 @@ namespace
 
 FreeFlyCameraController::FreeFlyCameraController()
 	: myInputHandler(nullptr)
-	, myCamera(nullptr)
+	, myTransform(nullptr)
 	, myMoveSpeed(LOC_DEFAULT_MOVE_SPEED)
 	, myLookSensitivity(LOC_DEFAULT_LOOK_SENSITIVITY)
 	, myYawRadians(0.f)
@@ -22,13 +22,13 @@ FreeFlyCameraController::FreeFlyCameraController()
 {
 }
 
-void FreeFlyCameraController::Init(CommonUtilities::InputHandler& anInputHandler, CommonUtilities::Camera3D& aCamera)
+void FreeFlyCameraController::Init(CommonUtilities::InputHandler& anInputHandler, CommonUtilities::Transform& aTransform)
 {
 	myInputHandler = &anInputHandler;
-	myCamera = &aCamera;
+	myTransform = &aTransform;
 	myHasMouseLookAnchor = false;
 
-	const CommonUtilities::Vector3<float> startForward = myCamera->GetForward().GetNormalized();
+	const CommonUtilities::Vector3<float> startForward = myTransform->GetForward().GetNormalized();
 	myYawRadians = std::atan2(startForward.x, startForward.z);
 	myPitchRadians = -std::asin(std::clamp(startForward.y, -1.f, 1.f));
 
@@ -36,12 +36,12 @@ void FreeFlyCameraController::Init(CommonUtilities::InputHandler& anInputHandler
 	CommonUtilities::Quaternion<float> pitchRotation = CommonUtilities::Quaternion<float>::CreateFromAxisAngle(CommonUtilities::Vector3<float>::UnitX, myPitchRadians);
 	CommonUtilities::Quaternion<float> cameraRotation = yawRotation * pitchRotation;
 	cameraRotation.Normalize();
-	myCamera->GetTransform().SetRotation(cameraRotation);
+	myTransform->SetRotation(cameraRotation);
 }
 
 void FreeFlyCameraController::Update(float aTimeDelta)
 {
-	if (myInputHandler == nullptr || myCamera == nullptr)
+	if (myInputHandler == nullptr || myTransform == nullptr)
 	{
 		return;
 	}
@@ -84,7 +84,7 @@ void FreeFlyCameraController::Update(float aTimeDelta)
 				CommonUtilities::Quaternion<float> pitchRotation = CommonUtilities::Quaternion<float>::CreateFromAxisAngle(CommonUtilities::Vector3<float>::UnitX, myPitchRadians);
 				CommonUtilities::Quaternion<float> cameraRotation = yawRotation * pitchRotation;
 				cameraRotation.Normalize();
-				myCamera->GetTransform().SetRotation(cameraRotation);
+				myTransform->SetRotation(cameraRotation);
 			}
 
 			POINT centerPointScreen = centerPoint;
@@ -98,7 +98,7 @@ void FreeFlyCameraController::Update(float aTimeDelta)
 		myHasMouseLookAnchor = false;
 	}
 
-	CommonUtilities::Vector3<float> cameraForward = myCamera->GetForward();
+	CommonUtilities::Vector3<float> cameraForward = myTransform->GetForward();
 	if (cameraForward.LengthSqr() > 0.f)
 	{
 		cameraForward.Normalize();
@@ -108,7 +108,7 @@ void FreeFlyCameraController::Update(float aTimeDelta)
 		cameraForward = CommonUtilities::Vector3<float>::UnitZ;
 	}
 
-	CommonUtilities::Vector3<float> cameraRight = myCamera->GetRight();
+	CommonUtilities::Vector3<float> cameraRight = myTransform->GetRight();
 	if (cameraRight.LengthSqr() > 0.f)
 	{
 		cameraRight.Normalize();
@@ -154,8 +154,7 @@ void FreeFlyCameraController::Update(float aTimeDelta)
 	if (moveDirection.LengthSqr() > 0.f)
 	{
 		moveDirection.Normalize();
-		auto& cameraTransform = myCamera->GetTransform();
-		cameraTransform.SetPosition(cameraTransform.GetPosition() + moveDirection * (myMoveSpeed * aTimeDelta));
+		myTransform->SetPosition(myTransform->GetPosition() + moveDirection * (myMoveSpeed * aTimeDelta));
 	}
 }
 

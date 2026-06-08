@@ -5,12 +5,7 @@
 #include "GraphicsEngine/Objects/Texture.h"
 #include "GraphicsEngine/Objects/Buffer.h"
 #include "GraphicsEngine/Objects/Vertex.h"
-
-
-//TODO: Temporary includes
-#include "GraphicsEngine/TemporaryShaders/VertexShader.h"
-#include "GraphicsEngine/TemporaryShaders/PixelShader.h"
-
+#include "PipelineStateObject.h"
 
 using namespace Microsoft::WRL;
 
@@ -74,6 +69,24 @@ bool RenderHardwareInterface::Initialize(HWND aWindowHandle, bool aEnableDebug, 
 		NULL,
 		&myContext
 	);
+
+	if (FAILED(result) && aEnableDebug)
+	{
+		LOG(RhiLog, Warning, "Failed to create D3D11 debug device. Retrying without the debug layer.");
+		result = D3D11CreateDevice(
+			selectedAdapter.Get(),
+			D3D_DRIVER_TYPE_UNKNOWN,
+			NULL,
+			0,
+			NULL,
+			0,
+			D3D11_SDK_VERSION,
+			&myDevice,
+			NULL,
+			&myContext
+		);
+	}
+
 	if (FAILED(result))
 	{
 		LOG(RhiLog, Error, "Failed to create D3D11 Device!");
@@ -167,48 +180,6 @@ bool RenderHardwareInterface::Initialize(HWND aWindowHandle, bool aEnableDebug, 
 	SetObjectName(outDepthStencil.myDSV, "DepthStencil_DSV");
 
 	outDepthStencil.myViewport = viewport;
-
-	//TODO: Temporary code
-	myContext->IASetPrimitiveTopology(static_cast<D3D11_PRIMITIVE_TOPOLOGY>(Topology::TriangleList)); 
-
-	std::vector<D3D11_INPUT_ELEMENT_DESC> elements;
-	elements.reserve(Vertex::Description.size());
-
-	for (const auto& desc : Vertex::Description)
-	{
-		D3D11_INPUT_ELEMENT_DESC element = {};
-		element.SemanticName = desc.Semantic.c_str();
-		element.SemanticIndex = desc.SemanticIndex;
-		element.Format = static_cast<DXGI_FORMAT>(desc.Format);
-		
-		element.InputSlot = 0;
-		element.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-		element.AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-		element.InstanceDataStepRate = 0;
-
-		elements.emplace_back(element);
-	}
-
-	myDevice->CreateInputLayout(
-		elements.data(), 
-		static_cast<unsigned>(elements.size()),
-		TEMP_VertexShader_ByteCode,
-		sizeof(TEMP_VertexShader_ByteCode),
-		&myTempIL 
-	);
-	myContext->IASetInputLayout(myTempIL.Get());
-
-	myDevice->CreateVertexShader(TEMP_VertexShader_ByteCode, sizeof(TEMP_VertexShader_ByteCode), nullptr, &myTempVS);
-	myContext->VSSetShader(myTempVS.Get(), nullptr, 0);
-
-	myDevice->CreatePixelShader(TEMP_PixelShader_ByteCode, sizeof(TEMP_PixelShader_ByteCode), nullptr, &myTempPS);
-	myContext->PSSetShader(myTempPS.Get(), nullptr, 0);
-
-	SetObjectName(myTempIL, "TemporaryInputLayout");
-	SetObjectName(myTempVS, "TemporaryVertexShader");
-	SetObjectName(myTempPS, "TemporaryPixelShader");
-	
-	//End temporary code
 
 	LOG(RhiLog, Log, "RHI Started!");
 	return true;
@@ -362,6 +333,94 @@ bool RenderHardwareInterface::CreateConstantBuffer(std::string_view aName, size_
 	return true;
 }
 
+bool RenderHardwareInterface::CreatePipelineStateObject(const PipelineStateDescription& aDescription, PipelineStateObject &outPSO) const
+{
+    ensure(!aDescription.Name.empty());
+
+	bool hasErrored = false;
+
+	if (aDescription.VertexShader.ByteCode)
+	{
+		ComPtr<ID3D11VertexShader> shader;
+		const HRESULT result = myDevice->CreateVertexShader(aDescription.VertexShader.ByteCode, aDescription.VertexShader.ByteCodeSize, nullptr, &shader);
+		if (FAILED(result))
+		{
+			LOG(RhiLog, Error, "Failed to create vertex shader for the pipeline state object {}!", aDescription.Name);
+			hasErrored = true;
+		}
+		else 
+		{
+			const std::string shaderName = std::format("{}_VS", aDescription.Name);
+			SetObjectName(shader, shaderName);
+			outPSO.myVertexShader = shader;
+		}
+	}
+
+	if (aDescription.PixelShader.ByteCode)
+	{
+		ComPtr<ID3D11PixelShader> shader;
+		const HRESULT result = myDevice->CreatePixelShader(aDescription.PixelShader.ByteCode, aDescription.PixelShader.ByteCodeSize, nullptr, &shader);
+		if (FAILED(result))
+		{
+			LOG(RhiLog, Error, "Failed to create pixel shader for the pipeline state object {}!", aDescription.Name);
+			hasErrored = true;
+		}
+		else 
+		{
+			const std::string shaderName = std::format("{}_PS", aDescription.Name);
+			SetObjectName(shader, shaderName);
+			outPSO.myPixelShader = shader;
+		}
+	}
+
+	if (!aDescription.InputLayoutElements.empty())
+	{
+		std::vector<D3D11_INPUT_ELEMENT_DESC> elements;
+		elements.reserve(aDescription.InputLayoutElements.size());
+
+		for (const auto& desc : aDescription.InputLayoutElements)
+		{
+			D3D11_INPUT_ELEMENT_DESC element = {};
+			element.SemanticName = desc.Semantic.c_str();
+			element.SemanticIndex = desc.SemanticIndex;
+			element.Format = static_cast<DXGI_FORMAT>(desc.Format);
+			
+			element.InputSlot = 0;
+			element.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+			element.AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+			element.InstanceDataStepRate = 0;
+
+			elements.emplace_back(element);
+		}
+
+		ComPtr<ID3D11InputLayout> inputLayout;
+
+		const HRESULT result = myDevice->CreateInputLayout(
+			elements.data(), 
+			static_cast<unsigned>(elements.size()),
+			aDescription.VertexShader.ByteCode,
+			aDescription.VertexShader.ByteCodeSize,
+			&inputLayout 
+		);
+		if (FAILED(result))
+		{
+			LOG(RhiLog, Error, "Failed to create input layout for the pipeline state object {}!", aDescription.Name);
+			hasErrored = true;
+		}
+		else
+		{
+			const std::string inputLayoutName = std::format("{}_IL", aDescription.Name);
+			SetObjectName(inputLayout, inputLayoutName);
+			outPSO.myInputLayout = inputLayout;
+		}
+	}
+
+	outPSO.myName = aDescription.Name;
+	outPSO.myTopology = aDescription.Topology;
+
+	return !hasErrored;
+}
+
 bool RenderHardwareInterface::UpdateConstantBuffer(const Buffer &aConstantBuffer, const void *aBufferData, size_t aBufferDataSize) const
 {
     if (!aConstantBuffer.IsValid() || aConstantBuffer.myType != BufferType::ConstantBuffer)
@@ -436,6 +495,14 @@ void RenderHardwareInterface::SetConstantBuffer(const Buffer *aBuffer, unsigned 
 		myContext->PSSetConstantBuffers(aSlot, 1, &buffer);
 	}
 	
+}
+
+void RenderHardwareInterface::SetPipelineState(const PipelineStateObject *aPSO)
+{
+	myContext->IASetPrimitiveTopology(static_cast<D3D11_PRIMITIVE_TOPOLOGY>(aPSO->myTopology)); 
+	myContext->IASetInputLayout(aPSO->myInputLayout.Get());
+	myContext->VSSetShader(aPSO->myVertexShader.Get(), nullptr, 0);
+	myContext->PSSetShader(aPSO->myPixelShader.Get(), nullptr, 0);
 }
 
 void RenderHardwareInterface::Draw(unsigned aNumVertices) const

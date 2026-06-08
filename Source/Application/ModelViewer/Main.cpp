@@ -81,7 +81,12 @@ int GuardedMain()
     constexpr LPCWSTR windowTitle = L"AGP Modelviewer"; // L"" denotes "I want this to be a wide-string".
 
     ModelViewer MV;
-    MV.Initialize(windowSize, WinProc, windowTitle);
+    if (!MV.Initialize(windowSize, WinProc, windowTitle))
+    {
+        MVLOG(Error, "ModelViewer failed to initialize.");
+        return -1;
+    }
+
     return MV.Run();
 }
 
