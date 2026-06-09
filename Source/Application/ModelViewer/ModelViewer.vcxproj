@@ -115,16 +115,16 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;FBXSDK_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(SolutionDir)Source\Graphics;$(SolutionDir)Source\Utilities;$(ProjectDir);$(SolutionDir)ThirdParty\TGAFBX\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(SolutionDir)Source\Graphics;$(SolutionDir)Source\Utilities;$(ProjectDir);$(SolutionDir)ThirdParty\TGAFBXImporter\source;$(SolutionDir)ThirdParty\TGAFBXImporter\FBXSDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>GameFramework.lib;Logger.lib;GraphicsEngine.lib;d3d11.lib;dxguid.lib;dxgi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)ThirdParty\TGAFBX\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>GameFramework.lib;Logger.lib;GraphicsEngine.lib;libfbxsdk.lib;libxml2-md.lib;zlib-md.lib;d3d11.lib;dxguid.lib;dxgi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)ThirdParty\TGAFBXImporter\FBXSDK\lib\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -133,23 +133,25 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;FBXSDK_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(SolutionDir)Source\Graphics;$(SolutionDir)Source\Utilities;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(SolutionDir)Source\Graphics;$(SolutionDir)Source\Utilities;$(ProjectDir);$(SolutionDir)ThirdParty\TGAFBXImporter\source;$(SolutionDir)ThirdParty\TGAFBXImporter\FBXSDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>GameFramework.lib;Logger.lib;GraphicsEngine.lib;d3d11.lib;dxguid.lib;dxgi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>GameFramework.lib;Logger.lib;GraphicsEngine.lib;libfbxsdk.lib;libxml2-md.lib;zlib-md.lib;d3d11.lib;dxguid.lib;dxgi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)ThirdParty\TGAFBXImporter\FBXSDK\lib\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
     <ClInclude Include="ApplicationState.h" />
     <ClInclude Include="ModelViewer.h" />
+    <ClInclude Include="MeshLibrary.h" />
     <ClInclude Include="PrimitiveMeshBuilder.h" />
     <ClInclude Include="..\..\Utilities\FreeFlyCameraController.h" />
     <ClInclude Include="Resource.h" />
@@ -159,8 +161,12 @@
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="..\..\Utilities\FreeFlyCameraController.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="MeshLibrary.cpp" />
     <ClCompile Include="ModelViewer.cpp" />
     <ClCompile Include="PrimitiveMeshBuilder.cpp" />
+    <ClCompile Include="..\..\..\ThirdParty\TGAFBXImporter\source\Importer.cpp" />
+    <ClCompile Include="..\..\..\ThirdParty\TGAFBXImporter\source\Internals.cpp" />
+    <ClCompile Include="..\..\..\ThirdParty\TGAFBXImporter\source\TgaFbxStructs.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ModelViewer.rc" />

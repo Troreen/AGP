@@ -36,6 +36,9 @@
     <ClInclude Include="PrimitiveMeshBuilder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MeshLibrary.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ModelViewer.cpp">
@@ -51,6 +54,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PrimitiveMeshBuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshLibrary.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\TGAFBXImporter\source\Importer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\TGAFBXImporter\source\Internals.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\TGAFBXImporter\source\TgaFbxStructs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

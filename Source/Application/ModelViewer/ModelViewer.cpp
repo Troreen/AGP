@@ -10,7 +10,6 @@
 #include "GameFramework/Actor.h"
 #include "GameFramework/CameraComponent.h"
 #include "GameFramework/MeshComponent.h"
-#include "PrimitiveMeshBuilder.h"
 
 ModelViewer::ModelViewer() = default;
 
@@ -65,7 +64,7 @@ bool ModelViewer::Initialize(SIZE aWindowSize, WNDPROC aWindowProcess, LPCWSTR a
         myInputHandler.SetAutoMouseCapture(false);
     }
 
-    RegisterPrimitiveMeshes();
+    myMeshLibrary.Initialize();
 
     LoadScene();
 
@@ -147,6 +146,27 @@ void ModelViewer::LoadScene()
         }
     }
 
+    if (std::shared_ptr<Mesh> axesMesh = GetRegisteredMesh("WorldAxes"))
+    {
+        Actor* axesActor = myWorld.CreateActor("World Axes Actor");
+        if (axesActor != nullptr)
+        {
+            axesActor->AddComponent<MeshComponent>("World Axes Mesh Component", axesMesh);
+        }
+    }
+
+    if (std::shared_ptr<Mesh> chestMesh = GetRegisteredMesh("SM_Chest"))
+    {
+        Actor* chestActor = myWorld.CreateActor("SM_Chest Actor");
+        if (chestActor != nullptr)
+        {
+            chestActor->AddComponent<MeshComponent>("SM_Chest Mesh Component", chestMesh);
+            chestActor->SetTranslation({ 500.0f, -120.0f, 250.0f });
+            chestActor->SetRotation(0.0f, 180.0f, 180.0f);
+            chestActor->SetScale({ 1.0f, 1.0f, 1.0f });
+        }
+    }
+
     constexpr std::array primitiveNames = {
         "Plane",
         "Cube",
@@ -175,47 +195,13 @@ void ModelViewer::LoadScene()
             actor->SetRotation(0.0f, 20.0f * static_cast<float>(index), 0.0f);
             actor->SetScale({ 100.0f, 100.0f, 100.0f });
 
-            SpinningActor spinner;
-            spinner.Instance = actor;
-            spinner.RotationDegrees = { 0.0f, 20.0f * static_cast<float>(index), 0.0f };
-            spinner.RotationSpeedDegrees = {
-                10.0f + 2.0f * static_cast<float>(index),
-                18.0f + 4.0f * static_cast<float>(index),
-                6.0f + static_cast<float>(index)
-            };
-            mySpinningActors.push_back(spinner);
         }
     }
 }
 
-void ModelViewer::RegisterPrimitiveMeshes()
-{
-    RegisterMesh("Plane", PrimitiveMeshBuilder::CreatePlane());
-    RegisterMesh("Cube", PrimitiveMeshBuilder::CreateCube());
-    RegisterMesh("Pyramid", PrimitiveMeshBuilder::CreatePyramid());
-    RegisterMesh("Sphere", PrimitiveMeshBuilder::CreateSphere());
-    RegisterMesh("Torus", PrimitiveMeshBuilder::CreateTorus());
-}
-
-void ModelViewer::RegisterMesh(std::string aName, std::shared_ptr<Mesh> aMesh)
-{
-    if (aName.empty() || aMesh == nullptr)
-    {
-        return;
-    }
-
-    myMeshRegistry[std::move(aName)] = std::move(aMesh);
-}
-
 std::shared_ptr<Mesh> ModelViewer::GetRegisteredMesh(const std::string& aName) const
 {
-    const auto foundMesh = myMeshRegistry.find(aName);
-    if (foundMesh == myMeshRegistry.end())
-    {
-        return nullptr;
-    }
-
-    return foundMesh->second;
+    return myMeshLibrary.GetMesh(aName);
 }
 
 void ModelViewer::UpdateScene(float aDeltaTime)

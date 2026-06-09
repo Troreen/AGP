@@ -51,6 +51,34 @@ namespace
 		return mesh;
 	}
 
+	void AddBox(std::vector<Vertex>& outVertices, std::vector<unsigned>& outIndices,
+		const Point3& aMin, const Point3& aMax, const Color& aColor)
+	{
+		const unsigned firstVertex = static_cast<unsigned>(outVertices.size());
+		outVertices.push_back(MakeVertex(Point3(aMin.x, aMin.y, aMin.z), aColor));
+		outVertices.push_back(MakeVertex(Point3(aMax.x, aMin.y, aMin.z), aColor));
+		outVertices.push_back(MakeVertex(Point3(aMax.x, aMax.y, aMin.z), aColor));
+		outVertices.push_back(MakeVertex(Point3(aMin.x, aMax.y, aMin.z), aColor));
+		outVertices.push_back(MakeVertex(Point3(aMin.x, aMin.y, aMax.z), aColor));
+		outVertices.push_back(MakeVertex(Point3(aMax.x, aMin.y, aMax.z), aColor));
+		outVertices.push_back(MakeVertex(Point3(aMax.x, aMax.y, aMax.z), aColor));
+		outVertices.push_back(MakeVertex(Point3(aMin.x, aMax.y, aMax.z), aColor));
+
+		const std::array<unsigned, 36> boxIndices = {
+			0, 2, 1, 0, 3, 2,
+			5, 6, 4, 6, 7, 4,
+			4, 7, 0, 7, 3, 0,
+			1, 2, 5, 2, 6, 5,
+			3, 7, 2, 7, 6, 2,
+			4, 0, 5, 0, 1, 5
+		};
+
+		for (const unsigned index : boxIndices)
+		{
+			outIndices.push_back(firstVertex + index);
+		}
+	}
+
 	void AddTriangle(std::vector<Vertex>& outVertices, std::vector<unsigned>& outIndices,
 		const Point3& aPoint0, const Point3& aPoint1, const Point3& aPoint2)
 	{
@@ -79,6 +107,23 @@ namespace
 		outIndices.push_back(firstVertex);
 		outIndices.push_back(firstVertex + 3);
 		outIndices.push_back(firstVertex + 2);
+	}
+
+	void AddReversedQuad(std::vector<Vertex>& outVertices, std::vector<unsigned>& outIndices,
+		const Point3& aPoint0, const Point3& aPoint1, const Point3& aPoint2, const Point3& aPoint3)
+	{
+		const unsigned firstVertex = static_cast<unsigned>(outVertices.size());
+		outVertices.push_back(MakeVertex(aPoint0, GetVertexColor(firstVertex)));
+		outVertices.push_back(MakeVertex(aPoint1, GetVertexColor(firstVertex + 1)));
+		outVertices.push_back(MakeVertex(aPoint2, GetVertexColor(firstVertex + 2)));
+		outVertices.push_back(MakeVertex(aPoint3, GetVertexColor(firstVertex + 3)));
+
+		outIndices.push_back(firstVertex);
+		outIndices.push_back(firstVertex + 1);
+		outIndices.push_back(firstVertex + 2);
+		outIndices.push_back(firstVertex);
+		outIndices.push_back(firstVertex + 2);
+		outIndices.push_back(firstVertex + 3);
 	}
 
 	Point3 GetSpherePoint(float aLatitudeRadians, float aLongitudeRadians, float aRadius)
@@ -179,7 +224,7 @@ std::shared_ptr<Mesh> PrimitiveMeshBuilder::CreateSphere()
 		{
 			const float longitude0 = CommonUtilities::Maths::TwoPi<float>() * static_cast<float>(longitude) / static_cast<float>(longitudeSegments);
 			const float longitude1 = CommonUtilities::Maths::TwoPi<float>() * static_cast<float>(longitude + 1) / static_cast<float>(longitudeSegments);
-			AddQuad(vertices, indices,
+			AddReversedQuad(vertices, indices,
 				GetSpherePoint(latitude0, longitude0, radius),
 				GetSpherePoint(latitude0, longitude1, radius),
 				GetSpherePoint(latitude1, longitude1, radius),
@@ -211,7 +256,7 @@ std::shared_ptr<Mesh> PrimitiveMeshBuilder::CreateTorus()
 		{
 			const float minor0 = CommonUtilities::Maths::TwoPi<float>() * static_cast<float>(minor) / static_cast<float>(minorSegments);
 			const float minor1 = CommonUtilities::Maths::TwoPi<float>() * static_cast<float>(minor + 1) / static_cast<float>(minorSegments);
-			AddQuad(vertices, indices,
+			AddReversedQuad(vertices, indices,
 				GetTorusPoint(major0, minor0, majorRadius, minorRadius),
 				GetTorusPoint(major1, minor0, majorRadius, minorRadius),
 				GetTorusPoint(major1, minor1, majorRadius, minorRadius),
@@ -220,4 +265,32 @@ std::shared_ptr<Mesh> PrimitiveMeshBuilder::CreateTorus()
 	}
 
 	return CreateMesh("Torus", std::move(vertices), std::move(indices));
+}
+
+std::shared_ptr<Mesh> PrimitiveMeshBuilder::CreateAxes()
+{
+	constexpr float length = 500.0f;
+	constexpr float halfThickness = 0.6f;
+
+	std::vector<Vertex> vertices;
+	std::vector<unsigned> indices;
+	vertices.reserve(24);
+	indices.reserve(108);
+
+	AddBox(vertices, indices,
+		Point3(0.0f, -halfThickness, -halfThickness),
+		Point3(length, halfThickness, halfThickness),
+		Color{ 1.0f, 0.0f, 0.0f, 1.0f });
+
+	AddBox(vertices, indices,
+		Point3(-halfThickness, 0.0f, -halfThickness),
+		Point3(halfThickness, length, halfThickness),
+		Color{ 0.0f, 1.0f, 0.0f, 1.0f });
+
+	AddBox(vertices, indices,
+		Point3(-halfThickness, -halfThickness, 0.0f),
+		Point3(halfThickness, halfThickness, length),
+		Color{ 0.0f, 0.2f, 1.0f, 1.0f });
+
+	return CreateMesh("WorldAxes", std::move(vertices), std::move(indices));
 }

@@ -1,7 +1,6 @@
 #pragma once
 #include <memory>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 #pragma region WindowsIncludes
@@ -54,6 +53,7 @@
 #include "GraphicsEngine/GraphicsEngine.h"
 #include "GraphicsEngine/RHI/GraphicsCommandList.h"
 #include "FreeFlyCameraController.h"
+#include "MeshLibrary.h"
 
 class Mesh;
 
@@ -74,8 +74,6 @@ private:
 		CommonUtilities::Vector3<float> RotationSpeedDegrees;
 	};
 
-	void RegisterPrimitiveMeshes();
-	void RegisterMesh(std::string aName, std::shared_ptr<Mesh> aMesh);
 	std::shared_ptr<Mesh> GetRegisteredMesh(const std::string& aName) const;
 	void UpdateScene(float aDeltaTime);
 
@@ -83,7 +81,7 @@ private:
 
 	HWND myMainWindowHandle = nullptr;
 
-	std::unordered_map<std::string, std::shared_ptr<Mesh>> myMeshRegistry;
+	MeshLibrary myMeshLibrary;
 	std::vector<SpinningActor> mySpinningActors;
 	World myWorld;
 	Actor* myCameraActor = nullptr;
