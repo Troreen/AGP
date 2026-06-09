@@ -56,6 +56,7 @@
 #include "MeshLibrary.h"
 
 class Mesh;
+class MeshComponent;
 
 class ModelViewer
 {
@@ -75,6 +76,7 @@ private:
 	};
 
 	std::shared_ptr<Mesh> GetRegisteredMesh(const std::string& aName) const;
+	void HandleAnimationInput();
 	void UpdateScene(float aDeltaTime);
 
 	bool myIsRunning = false;
@@ -85,6 +87,7 @@ private:
 	std::vector<SpinningActor> mySpinningActors;
 	World myWorld;
 	Actor* myCameraActor = nullptr;
+	MeshComponent* myAnimatedMeshComponent = nullptr;
 
 	CommonUtilities::InputHandler myInputHandler;
 	FreeFlyCameraController myCameraController;

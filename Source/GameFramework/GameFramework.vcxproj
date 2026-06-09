@@ -74,13 +74,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)Lib\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir)Source\;$(SolutionDir)Source\Utilities\;$(ProjectDir);$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Source\;$(SolutionDir)Source\Graphics\;$(SolutionDir)Source\Utilities\;$(ProjectDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)Lib\$(Configuration)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)Lib\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir)Source\;$(SolutionDir)Source\Utilities\;$(ProjectDir);$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Source\;$(SolutionDir)Source\Graphics\;$(SolutionDir)Source\Utilities\;$(ProjectDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)Lib\$(Configuration)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -124,7 +124,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
-      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(SolutionDir)Source\Utilities;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(SolutionDir)Source\Graphics;$(SolutionDir)Source\Utilities;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -138,7 +138,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
-      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(SolutionDir)Source\Utilities;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(SolutionDir)Source\Graphics;$(SolutionDir)Source\Utilities;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>

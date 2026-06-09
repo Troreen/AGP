@@ -18,6 +18,7 @@ public:
 
 	std::shared_ptr<Mesh> GetMesh(std::string_view aName) const;
 	bool LoadFBXMesh(const std::filesystem::path& aPath);
+	bool LoadFBXAnimation(std::string_view aMeshName, std::string aAnimationName, const std::filesystem::path& aPath);
 
 private:
 	void RegisterPrimitiveMeshes();

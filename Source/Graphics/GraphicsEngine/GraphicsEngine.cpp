@@ -1,6 +1,7 @@
 #include "GraphicsEngine.pch.h"
 #include "GraphicsEngine.h"
 
+#include "ConstantBuffers/AnimationBuffer.h"
 #include "ConstantBuffers/FrameBuffer.h"
 #include "ConstantBuffers/ObjectBuffer.h"
 #include "GameFramework/CameraComponent.h"
@@ -32,6 +33,7 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle)
 	
 	CreateConstantBuffer<FrameBuffer>(ConstantBuffer::FrameBuffer, "FrameBuffer");
 	CreateConstantBuffer<ObjectBuffer>(ConstantBuffer::ObjectBuffer, "ObjectBuffer");
+	CreateConstantBuffer<AnimationBuffer>(ConstantBuffer::AnimationBuffer, "AnimationBuffer");
 
 	// TODO: Temporary PSO
 	PipelineStateDescription tempPSODesc;
@@ -92,7 +94,7 @@ void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const Actor& 
 				continue;
 			}
 
-			RenderMesh(inoutCommandList, *meshComponent->GetMesh(), actor->GetTransform().GetWorldMatrix());
+			RenderMesh(inoutCommandList, *meshComponent, actor->GetTransform().GetWorldMatrix());
 		}
 	}
 }
@@ -150,8 +152,15 @@ bool GraphicsEngine::UpdateAndSetConstantBufferInternal(GraphicsCommandList& ino
 GraphicsEngine::GraphicsEngine() = default;
 GraphicsEngine::~GraphicsEngine() = default;
 
-void GraphicsEngine::RenderMesh(GraphicsCommandList& inoutCommandList, const Mesh& aMesh, const CU::Matrix4f& aWorld)
+void GraphicsEngine::RenderMesh(GraphicsCommandList& inoutCommandList, const MeshComponent& aMeshComponent, const CU::Matrix4f& aWorld)
 {
+	const std::shared_ptr<Mesh> mesh = aMeshComponent.GetMesh();
+	if (mesh == nullptr)
+	{
+		return;
+	}
+
+	const Mesh& aMesh = *mesh;
 	if (!PrepareMeshForRendering(aMesh))
 	{
 		return;
@@ -162,7 +171,15 @@ void GraphicsEngine::RenderMesh(GraphicsCommandList& inoutCommandList, const Mes
 
 	ObjectBuffer ob;
 	ob.World = aWorld;
+	ob.HasSkinning = aMeshComponent.HasSkinning() ? 1u : 0u;
 	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::ObjectBuffer, ob, 1, PipeLineStage_VertexShader);
+
+	if (aMeshComponent.HasSkinning())
+	{
+		AnimationBuffer animationBuffer;
+		animationBuffer.JointTransforms = aMeshComponent.GetJointTransforms();
+		UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::AnimationBuffer, animationBuffer, 2, PipeLineStage_VertexShader);
+	}
 
 	for (const Mesh::Element& element : aMesh.myElements)
 	{

@@ -197,6 +197,7 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ConstantBuffers\FrameBuffer.h" />
+    <ClInclude Include="ConstantBuffers\AnimationBuffer.h" />
     <ClInclude Include="ConstantBuffers\ObjectBuffer.h" />
     <ClInclude Include="..\..\Utilities\Ensure.h" />
     <ClInclude Include="Objects\Mesh.h" />

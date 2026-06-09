@@ -109,6 +109,7 @@ int ModelViewer::Run()
 
         myInputHandler.UpdateInput();
         myCameraController.Update(deltaTime);
+        HandleAnimationInput();
         UpdateScene(deltaTime);
 
         myCommandList.ResetCommandList();
@@ -129,6 +130,7 @@ int ModelViewer::Run()
 void ModelViewer::LoadScene()
 {
     mySpinningActors.clear();
+    myAnimatedMeshComponent = nullptr;
 
     {
         myCameraActor = myWorld.CreateActor("Camera Actor");
@@ -162,8 +164,29 @@ void ModelViewer::LoadScene()
         {
             chestActor->AddComponent<MeshComponent>("SM_Chest Mesh Component", chestMesh);
             chestActor->SetTranslation({ 500.0f, -120.0f, 250.0f });
-            chestActor->SetRotation(0.0f, 180.0f, 180.0f);
+            chestActor->SetRotation(0.0f, 0.0f, 0.0f);
             chestActor->SetScale({ 1.0f, 1.0f, 1.0f });
+        }
+    }
+
+    if (std::shared_ptr<Mesh> characterMesh = GetRegisteredMesh("SK_C_TGA_Bro"))
+    {
+        Actor* characterActor = myWorld.CreateActor("TGA Bro Actor");
+        if (characterActor != nullptr)
+        {
+            myAnimatedMeshComponent = characterActor->AddComponent<MeshComponent>("TGA Bro Mesh Component", characterMesh);
+            characterActor->SetTranslation({ -450.0f, -120.0f, 250.0f });
+            characterActor->SetRotation(180.0f, 0.0f, 0.0f);
+            characterActor->SetScale({ 1.0f, 1.0f, 1.0f });
+
+            if (myAnimatedMeshComponent != nullptr)
+            {
+                // TODO Engine future:
+                // Replace hardcoded joint mask with data-driven animation mask assets.
+                // Masks should be authored externally and resolved to joint indices when loading the skeleton.
+                myAnimatedMeshComponent->ConfigurePartialLayerFromJointName("RightShoulder");
+                myAnimatedMeshComponent->PlayAnimation("Breathing", true);
+            }
         }
     }
 
@@ -202,6 +225,37 @@ void ModelViewer::LoadScene()
 std::shared_ptr<Mesh> ModelViewer::GetRegisteredMesh(const std::string& aName) const
 {
     return myMeshLibrary.GetMesh(aName);
+}
+
+void ModelViewer::HandleAnimationInput()
+{
+    if (myAnimatedMeshComponent == nullptr)
+    {
+        return;
+    }
+
+    if (myInputHandler.IsKeyPressed(Keys::NUMPAD0))
+    {
+		myAnimatedMeshComponent->PlayAnimation("Breathing", true);
+    }
+
+    if (myInputHandler.IsKeyPressed(Keys::NUMPAD1))
+    {
+        myAnimatedMeshComponent->PlayAnimation("Walk", true);
+    }
+
+    if (myInputHandler.IsKeyPressed(Keys::NUMPAD2))
+    {
+        myAnimatedMeshComponent->PlayAnimation("Run", true);
+    }
+
+    if (myInputHandler.IsKeyPressed(Keys::NUMPAD3))
+    {
+        if (!myAnimatedMeshComponent->PlayPartialAnimation("Wave", false))
+        {
+            myAnimatedMeshComponent->PlayAnimation("Wave", false);
+        }
+    }
 }
 
 void ModelViewer::UpdateScene(float aDeltaTime)

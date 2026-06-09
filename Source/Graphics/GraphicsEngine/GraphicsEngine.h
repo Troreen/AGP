@@ -18,12 +18,14 @@
 #include "PipelineStateObject.h"
 
 class Actor;
+class MeshComponent;
 class World;
 
 enum class ConstantBuffer : uint8_t
 {
 	FrameBuffer,
 	ObjectBuffer,
+	AnimationBuffer,
 	MAX
 };
 
@@ -63,7 +65,7 @@ private:
 	~GraphicsEngine();
 
 	bool PrepareMeshForRendering(const Mesh& aMesh) const;
-	void RenderMesh(GraphicsCommandList& inoutCommandList, const Mesh& aMesh, const CU::Matrix4f& aWorld);
+	void RenderMesh(GraphicsCommandList& inoutCommandList, const MeshComponent& aMeshComponent, const CU::Matrix4f& aWorld);
 
 	RenderHardwareInterface myRHI;
 	Texture myBackBuffer;

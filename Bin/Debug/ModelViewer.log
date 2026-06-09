@@ -320,3 +320,243 @@ Logging has started at 2026-06-09 19:11:02.
 [19:11:02] [   LOG   ] [RHI] RHI Started!
 [19:11:02] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SM_Chest' with 2 elements.
 [19:11:02] [   LOG   ] [ModelViewer] Ready!
+****************************************************************************************************
+Logging has started at 2026-06-09 22:48:18.
+****************************************************************************************************
+[22:48:18] [   LOG   ] [ModelViewer] ModelViewer starting...
+[22:48:18] [   LOG   ] [ModelViewer] Initializing Graphics Engine...
+[22:48:18] [   LOG   ] [RHI] Initializing RHI...
+[22:48:18] [   LOG   ] [RHI] Selected adapter: NVIDIA GeForce RTX 3070
+[22:48:18] [   LOG   ] [RHI] RHI Started!
+[22:48:18] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SM_Chest' with 2 elements.
+[22:48:19] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SK_C_TGA_Bro' with 1 elements.
+[22:48:19] [   LOG   ] [ModelViewer] Loaded animation 'Walk' for mesh 'SK_C_TGA_Bro'.
+[22:48:19] [   LOG   ] [ModelViewer] Loaded animation 'Run' for mesh 'SK_C_TGA_Bro'.
+[22:48:19] [   LOG   ] [ModelViewer] Loaded animation 'Wave' for mesh 'SK_C_TGA_Bro'.
+[22:48:19] [   LOG   ] [ModelViewer] Loaded animation 'Breathing' for mesh 'SK_C_TGA_Bro'.
+[22:48:19] [   LOG   ] [ModelViewer] Ready!
+****************************************************************************************************
+Logging has started at 2026-06-09 22:51:27.
+****************************************************************************************************
+[22:51:27] [   LOG   ] [ModelViewer] ModelViewer starting...
+[22:51:27] [   LOG   ] [ModelViewer] Initializing Graphics Engine...
+[22:51:27] [   LOG   ] [RHI] Initializing RHI...
+[22:51:27] [   LOG   ] [RHI] Selected adapter: NVIDIA GeForce RTX 3070
+[22:51:27] [   LOG   ] [RHI] RHI Started!
+[22:51:28] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SM_Chest' with 2 elements.
+[22:51:28] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SK_C_TGA_Bro' with 1 elements.
+[22:51:28] [   LOG   ] [ModelViewer] Loaded animation 'Walk' for mesh 'SK_C_TGA_Bro'.
+[22:51:28] [   LOG   ] [ModelViewer] Loaded animation 'Run' for mesh 'SK_C_TGA_Bro'.
+[22:51:28] [   LOG   ] [ModelViewer] Loaded animation 'Wave' for mesh 'SK_C_TGA_Bro'.
+[22:51:28] [   LOG   ] [ModelViewer] Loaded animation 'Breathing' for mesh 'SK_C_TGA_Bro'.
+[22:51:28] [   LOG   ] [ModelViewer] Ready!
+****************************************************************************************************
+Logging has started at 2026-06-09 23:03:09.
+****************************************************************************************************
+[23:03:09] [   LOG   ] [ModelViewer] ModelViewer starting...
+[23:03:09] [   LOG   ] [ModelViewer] Initializing Graphics Engine...
+[23:03:09] [   LOG   ] [RHI] Initializing RHI...
+[23:03:09] [   LOG   ] [RHI] Selected adapter: NVIDIA GeForce RTX 3070
+[23:03:09] [   LOG   ] [RHI] RHI Started!
+[23:03:09] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SM_Chest' with 2 elements.
+[23:03:09] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SK_C_TGA_Bro' with 1 elements.
+[23:03:09] [   LOG   ] [ModelViewer] Loaded animation 'Walk' for mesh 'SK_C_TGA_Bro'.
+[23:03:09] [   LOG   ] [ModelViewer] Loaded animation 'Run' for mesh 'SK_C_TGA_Bro'.
+[23:03:10] [   LOG   ] [ModelViewer] Loaded animation 'Wave' for mesh 'SK_C_TGA_Bro'.
+[23:03:10] [   LOG   ] [ModelViewer] Loaded animation 'Breathing' for mesh 'SK_C_TGA_Bro'.
+[23:03:10] [   LOG   ] [ModelViewer] Ready!
+****************************************************************************************************
+Logging has started at 2026-06-09 23:05:32.
+****************************************************************************************************
+[23:05:32] [   LOG   ] [ModelViewer] ModelViewer starting...
+[23:05:32] [   LOG   ] [ModelViewer] Initializing Graphics Engine...
+[23:05:32] [   LOG   ] [RHI] Initializing RHI...
+[23:05:32] [   LOG   ] [RHI] Selected adapter: NVIDIA GeForce RTX 3070
+[23:05:32] [   LOG   ] [RHI] RHI Started!
+[23:05:32] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SM_Chest' with 2 elements.
+[23:05:32] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SK_C_TGA_Bro' with 1 elements.
+[23:05:32] [   LOG   ] [ModelViewer] Loaded animation 'Walk' for mesh 'SK_C_TGA_Bro'.
+[23:05:32] [   LOG   ] [ModelViewer] Loaded animation 'Run' for mesh 'SK_C_TGA_Bro'.
+[23:05:32] [   LOG   ] [ModelViewer] Loaded animation 'Wave' for mesh 'SK_C_TGA_Bro'.
+[23:05:33] [   LOG   ] [ModelViewer] Loaded animation 'Breathing' for mesh 'SK_C_TGA_Bro'.
+[23:05:33] [   LOG   ] [ModelViewer] Ready!
+****************************************************************************************************
+Logging has started at 2026-06-09 23:07:47.
+****************************************************************************************************
+[23:07:47] [   LOG   ] [ModelViewer] ModelViewer starting...
+[23:07:47] [   LOG   ] [ModelViewer] Initializing Graphics Engine...
+[23:07:47] [   LOG   ] [RHI] Initializing RHI...
+[23:07:47] [   LOG   ] [RHI] Selected adapter: NVIDIA GeForce RTX 3070
+[23:07:48] [   LOG   ] [RHI] RHI Started!
+[23:07:48] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SM_Chest' with 2 elements.
+[23:07:48] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SK_C_TGA_Bro' with 1 elements.
+[23:07:48] [   LOG   ] [ModelViewer] Loaded animation 'Walk' for mesh 'SK_C_TGA_Bro'.
+[23:07:48] [   LOG   ] [ModelViewer] Loaded animation 'Run' for mesh 'SK_C_TGA_Bro'.
+[23:07:48] [   LOG   ] [ModelViewer] Loaded animation 'Wave' for mesh 'SK_C_TGA_Bro'.
+[23:07:49] [   LOG   ] [ModelViewer] Loaded animation 'Breathing' for mesh 'SK_C_TGA_Bro'.
+[23:07:49] [   LOG   ] [ModelViewer] Ready!
+****************************************************************************************************
+Logging has started at 2026-06-09 23:21:16.
+****************************************************************************************************
+[23:21:16] [   LOG   ] [ModelViewer] ModelViewer starting...
+[23:21:16] [   LOG   ] [ModelViewer] Initializing Graphics Engine...
+[23:21:16] [   LOG   ] [RHI] Initializing RHI...
+[23:21:16] [   LOG   ] [RHI] Selected adapter: NVIDIA GeForce RTX 3070
+[23:21:16] [   LOG   ] [RHI] RHI Started!
+[23:21:16] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SM_Chest' with 2 elements.
+[23:21:17] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SK_C_TGA_Bro' with 1 elements.
+[23:21:17] [   LOG   ] [ModelViewer] Loaded animation 'Walk' for mesh 'SK_C_TGA_Bro'.
+[23:21:17] [   LOG   ] [ModelViewer] Loaded animation 'Run' for mesh 'SK_C_TGA_Bro'.
+[23:21:17] [   LOG   ] [ModelViewer] Loaded animation 'Wave' for mesh 'SK_C_TGA_Bro'.
+[23:21:17] [   LOG   ] [ModelViewer] Loaded animation 'Breathing' for mesh 'SK_C_TGA_Bro'.
+[23:21:17] [   LOG   ] [ModelViewer] Ready!
+****************************************************************************************************
+Logging has started at 2026-06-09 23:25:50.
+****************************************************************************************************
+[23:25:50] [   LOG   ] [ModelViewer] ModelViewer starting...
+[23:25:50] [   LOG   ] [ModelViewer] Initializing Graphics Engine...
+[23:25:50] [   LOG   ] [RHI] Initializing RHI...
+[23:25:50] [   LOG   ] [RHI] Selected adapter: NVIDIA GeForce RTX 3070
+[23:25:51] [   LOG   ] [RHI] RHI Started!
+[23:25:51] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SM_Chest' with 2 elements.
+[23:25:51] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SK_C_TGA_Bro' with 1 elements.
+[23:25:51] [   LOG   ] [ModelViewer] Loaded animation 'Walk' for mesh 'SK_C_TGA_Bro'.
+[23:25:51] [   LOG   ] [ModelViewer] Loaded animation 'Run' for mesh 'SK_C_TGA_Bro'.
+[23:25:51] [   LOG   ] [ModelViewer] Loaded animation 'Wave' for mesh 'SK_C_TGA_Bro'.
+[23:25:51] [   LOG   ] [ModelViewer] Loaded animation 'Breathing' for mesh 'SK_C_TGA_Bro'.
+[23:25:51] [   LOG   ] [ModelViewer] Ready!
+****************************************************************************************************
+Logging has started at 2026-06-09 23:26:21.
+****************************************************************************************************
+[23:26:21] [   LOG   ] [ModelViewer] ModelViewer starting...
+[23:26:21] [   LOG   ] [ModelViewer] Initializing Graphics Engine...
+[23:26:21] [   LOG   ] [RHI] Initializing RHI...
+[23:26:21] [   LOG   ] [RHI] Selected adapter: NVIDIA GeForce RTX 3070
+[23:26:21] [   LOG   ] [RHI] RHI Started!
+[23:26:21] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SM_Chest' with 2 elements.
+[23:26:21] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SK_C_TGA_Bro' with 1 elements.
+[23:26:21] [   LOG   ] [ModelViewer] Loaded animation 'Walk' for mesh 'SK_C_TGA_Bro'.
+[23:26:22] [   LOG   ] [ModelViewer] Loaded animation 'Run' for mesh 'SK_C_TGA_Bro'.
+[23:26:22] [   LOG   ] [ModelViewer] Loaded animation 'Wave' for mesh 'SK_C_TGA_Bro'.
+[23:26:22] [   LOG   ] [ModelViewer] Loaded animation 'Breathing' for mesh 'SK_C_TGA_Bro'.
+[23:26:22] [   LOG   ] [ModelViewer] Ready!
+****************************************************************************************************
+Logging has started at 2026-06-09 23:26:34.
+****************************************************************************************************
+[23:26:34] [   LOG   ] [ModelViewer] ModelViewer starting...
+[23:26:34] [   LOG   ] [ModelViewer] Initializing Graphics Engine...
+[23:26:34] [   LOG   ] [RHI] Initializing RHI...
+[23:26:34] [   LOG   ] [RHI] Selected adapter: NVIDIA GeForce RTX 3070
+[23:26:34] [   LOG   ] [RHI] RHI Started!
+[23:26:34] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SM_Chest' with 2 elements.
+[23:26:34] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SK_C_TGA_Bro' with 1 elements.
+[23:26:34] [   LOG   ] [ModelViewer] Loaded animation 'Walk' for mesh 'SK_C_TGA_Bro'.
+[23:26:35] [   LOG   ] [ModelViewer] Loaded animation 'Run' for mesh 'SK_C_TGA_Bro'.
+[23:26:35] [   LOG   ] [ModelViewer] Loaded animation 'Wave' for mesh 'SK_C_TGA_Bro'.
+[23:26:35] [   LOG   ] [ModelViewer] Loaded animation 'Breathing' for mesh 'SK_C_TGA_Bro'.
+[23:26:35] [   LOG   ] [ModelViewer] Ready!
+****************************************************************************************************
+Logging has started at 2026-06-09 23:27:09.
+****************************************************************************************************
+[23:27:09] [   LOG   ] [ModelViewer] ModelViewer starting...
+[23:27:09] [   LOG   ] [ModelViewer] Initializing Graphics Engine...
+[23:27:09] [   LOG   ] [RHI] Initializing RHI...
+[23:27:09] [   LOG   ] [RHI] Selected adapter: NVIDIA GeForce RTX 3070
+[23:27:09] [   LOG   ] [RHI] RHI Started!
+[23:27:09] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SM_Chest' with 2 elements.
+[23:27:10] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SK_C_TGA_Bro' with 1 elements.
+[23:27:10] [   LOG   ] [ModelViewer] Loaded animation 'Walk' for mesh 'SK_C_TGA_Bro'.
+[23:27:10] [   LOG   ] [ModelViewer] Loaded animation 'Run' for mesh 'SK_C_TGA_Bro'.
+[23:27:10] [   LOG   ] [ModelViewer] Loaded animation 'Wave' for mesh 'SK_C_TGA_Bro'.
+[23:27:10] [   LOG   ] [ModelViewer] Loaded animation 'Breathing' for mesh 'SK_C_TGA_Bro'.
+[23:27:10] [   LOG   ] [ModelViewer] Ready!
+****************************************************************************************************
+Logging has started at 2026-06-09 23:27:58.
+****************************************************************************************************
+[23:27:58] [   LOG   ] [ModelViewer] ModelViewer starting...
+[23:27:58] [   LOG   ] [ModelViewer] Initializing Graphics Engine...
+[23:27:58] [   LOG   ] [RHI] Initializing RHI...
+[23:27:58] [   LOG   ] [RHI] Selected adapter: NVIDIA GeForce RTX 3070
+[23:27:58] [   LOG   ] [RHI] RHI Started!
+[23:27:58] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SM_Chest' with 2 elements.
+[23:27:59] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SK_C_TGA_Bro' with 1 elements.
+[23:27:59] [   LOG   ] [ModelViewer] Loaded animation 'Walk' for mesh 'SK_C_TGA_Bro'.
+[23:27:59] [   LOG   ] [ModelViewer] Loaded animation 'Run' for mesh 'SK_C_TGA_Bro'.
+[23:27:59] [   LOG   ] [ModelViewer] Loaded animation 'Wave' for mesh 'SK_C_TGA_Bro'.
+[23:27:59] [   LOG   ] [ModelViewer] Loaded animation 'Breathing' for mesh 'SK_C_TGA_Bro'.
+[23:27:59] [   LOG   ] [ModelViewer] Ready!
+****************************************************************************************************
+Logging has started at 2026-06-09 23:28:29.
+****************************************************************************************************
+[23:28:29] [   LOG   ] [ModelViewer] ModelViewer starting...
+[23:28:29] [   LOG   ] [ModelViewer] Initializing Graphics Engine...
+[23:28:29] [   LOG   ] [RHI] Initializing RHI...
+[23:28:29] [   LOG   ] [RHI] Selected adapter: NVIDIA GeForce RTX 3070
+[23:28:30] [   LOG   ] [RHI] RHI Started!
+[23:28:30] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SM_Chest' with 2 elements.
+[23:28:30] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SK_C_TGA_Bro' with 1 elements.
+[23:28:30] [   LOG   ] [ModelViewer] Loaded animation 'Walk' for mesh 'SK_C_TGA_Bro'.
+[23:28:30] [   LOG   ] [ModelViewer] Loaded animation 'Run' for mesh 'SK_C_TGA_Bro'.
+[23:28:30] [   LOG   ] [ModelViewer] Loaded animation 'Wave' for mesh 'SK_C_TGA_Bro'.
+[23:28:30] [   LOG   ] [ModelViewer] Loaded animation 'Breathing' for mesh 'SK_C_TGA_Bro'.
+[23:28:30] [   LOG   ] [ModelViewer] Ready!
+****************************************************************************************************
+Logging has started at 2026-06-09 23:39:15.
+****************************************************************************************************
+[23:39:15] [   LOG   ] [ModelViewer] ModelViewer starting...
+[23:39:15] [   LOG   ] [ModelViewer] Initializing Graphics Engine...
+[23:39:15] [   LOG   ] [RHI] Initializing RHI...
+[23:39:15] [   LOG   ] [RHI] Selected adapter: NVIDIA GeForce RTX 3070
+[23:39:15] [   LOG   ] [RHI] RHI Started!
+[23:39:15] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SM_Chest' with 2 elements.
+[23:39:15] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SK_C_TGA_Bro' with 1 elements.
+[23:39:15] [   LOG   ] [ModelViewer] Loaded animation 'Walk' for mesh 'SK_C_TGA_Bro'.
+[23:39:16] [   LOG   ] [ModelViewer] Loaded animation 'Run' for mesh 'SK_C_TGA_Bro'.
+[23:39:16] [   LOG   ] [ModelViewer] Loaded animation 'Wave' for mesh 'SK_C_TGA_Bro'.
+[23:39:16] [   LOG   ] [ModelViewer] Loaded animation 'Breathing' for mesh 'SK_C_TGA_Bro'.
+[23:39:16] [   LOG   ] [ModelViewer] Ready!
+****************************************************************************************************
+Logging has started at 2026-06-09 23:44:06.
+****************************************************************************************************
+[23:44:06] [   LOG   ] [ModelViewer] ModelViewer starting...
+[23:44:06] [   LOG   ] [ModelViewer] Initializing Graphics Engine...
+[23:44:06] [   LOG   ] [RHI] Initializing RHI...
+[23:44:06] [   LOG   ] [RHI] Selected adapter: NVIDIA GeForce RTX 3070
+[23:44:06] [   LOG   ] [RHI] RHI Started!
+[23:44:06] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SM_Chest' with 2 elements.
+[23:44:07] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SK_C_TGA_Bro' with 1 elements.
+[23:44:07] [   LOG   ] [ModelViewer] Loaded animation 'Walk' for mesh 'SK_C_TGA_Bro'.
+[23:44:07] [   LOG   ] [ModelViewer] Loaded animation 'Run' for mesh 'SK_C_TGA_Bro'.
+[23:44:07] [   LOG   ] [ModelViewer] Loaded animation 'Wave' for mesh 'SK_C_TGA_Bro'.
+[23:44:07] [   LOG   ] [ModelViewer] Loaded animation 'Breathing' for mesh 'SK_C_TGA_Bro'.
+[23:44:07] [   LOG   ] [ModelViewer] Ready!
+****************************************************************************************************
+Logging has started at 2026-06-09 23:45:14.
+****************************************************************************************************
+[23:45:14] [   LOG   ] [ModelViewer] ModelViewer starting...
+[23:45:14] [   LOG   ] [ModelViewer] Initializing Graphics Engine...
+[23:45:14] [   LOG   ] [RHI] Initializing RHI...
+[23:45:14] [   LOG   ] [RHI] Selected adapter: NVIDIA GeForce RTX 3070
+[23:45:14] [   LOG   ] [RHI] RHI Started!
+[23:45:14] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SM_Chest' with 2 elements.
+[23:45:15] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SK_C_TGA_Bro' with 1 elements.
+[23:45:15] [   LOG   ] [ModelViewer] Loaded animation 'Walk' for mesh 'SK_C_TGA_Bro'.
+[23:45:15] [   LOG   ] [ModelViewer] Loaded animation 'Run' for mesh 'SK_C_TGA_Bro'.
+[23:45:15] [   LOG   ] [ModelViewer] Loaded animation 'Wave' for mesh 'SK_C_TGA_Bro'.
+[23:45:15] [   LOG   ] [ModelViewer] Loaded animation 'Breathing' for mesh 'SK_C_TGA_Bro'.
+[23:45:15] [   LOG   ] [ModelViewer] Ready!
+****************************************************************************************************
+Logging has started at 2026-06-10 00:10:29.
+****************************************************************************************************
+[00:10:29] [   LOG   ] [ModelViewer] ModelViewer starting...
+[00:10:29] [   LOG   ] [ModelViewer] Initializing Graphics Engine...
+[00:10:29] [   LOG   ] [RHI] Initializing RHI...
+[00:10:29] [   LOG   ] [RHI] Selected adapter: NVIDIA GeForce RTX 3070
+[00:10:29] [   LOG   ] [RHI] RHI Started!
+[00:10:29] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SM_Chest' with 2 elements.
+[00:10:30] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SK_C_TGA_Bro' with 1 elements.
+[00:10:30] [   LOG   ] [ModelViewer] Loaded animation 'Walk' for mesh 'SK_C_TGA_Bro'.
+[00:10:30] [   LOG   ] [ModelViewer] Loaded animation 'Run' for mesh 'SK_C_TGA_Bro'.
+[00:10:30] [   LOG   ] [ModelViewer] Loaded animation 'Wave' for mesh 'SK_C_TGA_Bro'.
+[00:10:30] [   LOG   ] [ModelViewer] Loaded animation 'Breathing' for mesh 'SK_C_TGA_Bro'.
+[00:10:30] [   LOG   ] [ModelViewer] Ready!
