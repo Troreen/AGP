@@ -6,9 +6,6 @@
 *.sln.docstates
 
 # Build outputs used by the solution
-Bin/
-Lib/
-!CommonUtilities/lib/
 Intermediate/
 x64/
 x86/
@@ -23,5 +20,4 @@ Release/
 *.obj
 *.res
 *.exp
-!CommonUtilities/lib/*
 *.exe
