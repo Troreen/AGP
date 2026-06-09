@@ -23,7 +23,5 @@ Release/
 *.obj
 *.res
 *.exp
-*.lib
 !CommonUtilities/lib/*.lib
-*.dll
 *.exe

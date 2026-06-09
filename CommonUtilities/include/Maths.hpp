@@ -21,8 +21,7 @@ namespace CommonUtilities
 		// forward and +Y as up, matching Camera3D and Transform. Transform matrices are composed
 		// in SRT order: Scale * Rotation * Translation.
 
-		// --- Constants -------------------------------------------------------
-
+		#pragma region Constants
 		template <typename T>
 		constexpr T Pi()
 		{
@@ -65,9 +64,9 @@ namespace CommonUtilities
 				return static_cast<T>(0);
 			}
 		}
+#pragma endregion 
 
-		// --- Scalar helpers --------------------------------------------------
-
+		#pragma region ScalarHelpers
 		template <typename T>
 		constexpr T Square(const T aValue)
 		{
@@ -222,9 +221,9 @@ namespace CommonUtilities
 			const T value = Repeat(aValue, aLength * static_cast<T>(2));
 			return aLength - Abs(value - aLength);
 		}
+		#pragma endregion
 
-		// --- Numeric robustness and alignment -------------------------------
-
+		#pragma region NumericRobustness	
 		template <typename T>
 		inline bool ApproximatelyEqual(const T aA, const T aB, const T anEpsilon = Epsilon<T>())
 		{
@@ -307,9 +306,9 @@ namespace CommonUtilities
 			}
 			return static_cast<T>(aValue - (aValue % anAlignment));
 		}
+		#pragma endregion
 
-		// --- Range mapping ---------------------------------------------------
-
+		#pragma region RangeMapping
 		template <typename T>
 		inline T InverseLerp(const T aStart, const T anEnd, const T aValue)
 		{
@@ -344,9 +343,9 @@ namespace CommonUtilities
 		{
 			return InverseLerp(aMin, aMax, aValue);
 		}
+#pragma endregion
 
-		// --- Angles ----------------------------------------------------------
-
+		#pragma region Angles
 		template <typename T>
 		constexpr T DegreesToRadians(const T aDegrees)
 		{
@@ -418,9 +417,9 @@ namespace CommonUtilities
 		{
 			return aCurrent + MoveTowards(static_cast<T>(0), DeltaAngleDegrees(aCurrent, aTarget), aMaxDelta);
 		}
+#pragma endregion
 
-		// --- Interpolation and motion --------------------------------------
-
+		#pragma region Interpolation and motion
 		template <typename T>
 		inline T Lerp(const T aStart, const T anEnd, const T aT)
 		{
@@ -474,9 +473,9 @@ namespace CommonUtilities
 			aVelocity = (aVelocity - omega * temp) * exp;
 			return aTarget + (change + temp) * exp;
 		}
-
-		// --- Vector helpers --------------------------------------------------
-
+		#pragma endregion
+		
+		#pragma region Vector helpers
 		template <typename T>
 		inline Vector2<T> Lerp(const Vector2<T>& aStart, const Vector2<T>& anEnd, const T aT)
 		{
@@ -683,9 +682,9 @@ namespace CommonUtilities
 		{
 			return AngleBetween(aA, aB, Epsilon<T>());
 		}
-
-		// --- 2D helpers ------------------------------------------------------
-
+		#pragma endregion
+		
+		#pragma region 2D helpers
 		template <typename T>
 		constexpr Vector2<T> PerpendicularClockwise(const Vector2<T>& aVector)
 		{
@@ -742,9 +741,9 @@ namespace CommonUtilities
 			const T t = Clamp01((aPoint - aStart).Dot(segment) / lengthSqr);
 			return aStart + segment * t;
 		}
-
-		// --- 3D helpers ------------------------------------------------------
-
+		#pragma endregion
+		
+		#pragma region 3D helpers
 		template <typename T>
 		inline T SignedAngleAroundAxis(const Vector3<T>& aFrom, const Vector3<T>& aTo, const Vector3<T>& anAxis)
 		{
@@ -818,8 +817,9 @@ namespace CommonUtilities
 			return aStart + segment * t;
 		}
 
-		// --- Quaternion helpers ---------------------------------------------
+#pragma endregion
 
+		#pragma region Quaternion helpers
 		template <typename T>
 		inline Quaternion<T> QuaternionFromRotationMatrix(const Matrix3x3<T>& aMatrix)
 		{
@@ -988,9 +988,9 @@ namespace CommonUtilities
 				pitch,
 				static_cast<T>(std::atan2(m(1, 2), m(2, 2))));
 		}
+#pragma endregion
 
-		// --- Matrix and transform helpers ----------------------------------
-
+		#pragma region Matrix and transform helpers
 		template <typename T>
 		inline Matrix4x4<T> CreateTranslation(const Vector3<T>& aTranslation)
 		{
@@ -1140,9 +1140,9 @@ namespace CommonUtilities
 			outRotation = QuaternionFromRotationMatrix(rotation);
 			return true;
 		}
+#pragma endregion
 
-		// --- Coordinate conversion -----------------------------------------
-
+		#pragma region Coordinate conversion
 		template <typename T>
 		inline Vector2<T> CartesianToPolar(const Vector2<T>& aPosition)
 		{
@@ -1191,9 +1191,9 @@ namespace CommonUtilities
 				(anNDCPosition.x + static_cast<T>(1)) * static_cast<T>(0.5) * aScreenSize.x,
 				(static_cast<T>(1) - anNDCPosition.y) * static_cast<T>(0.5) * aScreenSize.y);
 		}
+#pragma endregion
 
-		// --- Easing ----------------------------------------------------------
-
+		#pragma region Easing
 		template <typename T>
 		inline T EaseInSine(const T aT)
 		{
@@ -1289,5 +1289,6 @@ namespace CommonUtilities
 				? (Square(static_cast<T>(2) * t) * ((c2 + static_cast<T>(1)) * static_cast<T>(2) * t - c2)) * static_cast<T>(0.5)
 				: (Square(static_cast<T>(2) * t - static_cast<T>(2)) * ((c2 + static_cast<T>(1)) * (t * static_cast<T>(2) - static_cast<T>(2)) + c2) + static_cast<T>(2)) * static_cast<T>(0.5);
 		}
+#pragma endregion
 	}
 }
