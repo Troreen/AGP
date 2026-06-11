@@ -22,6 +22,17 @@ void Mesh::Initialize(std::string_view aName, std::vector<Element>&& aElementLis
     myElements = std::move(aElementList);
     myVertices = std::move(aVertexList);
     myIndices = std::move(aIndexList);
+
+    unsigned highestMaterialIndex = 0;
+    for (const Element& element : myElements)
+    {
+        if (element.MaterialIndex > highestMaterialIndex)
+        {
+            highestMaterialIndex = element.MaterialIndex;
+        }
+    }
+
+	myNumMaterialSlots = myElements.empty() ? 0 : static_cast<size_t>(highestMaterialIndex) + 1;
 }
 
 void Mesh::SetSkeleton(Skeleton&& aSkeleton)

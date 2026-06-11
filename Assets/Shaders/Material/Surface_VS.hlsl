@@ -1,4 +1,5 @@
 #include "Common.hlsli"
+#include "Material.hlsli"
 
 struct Vertex
 {
@@ -23,11 +24,17 @@ VStoPS main(Vertex aVertex)
     }
 
     const float4 worldPos = mul(localPosition, OB_World);
-    const float4 viewPos = mul(worldPos, FB_View);
+
+    MaterialVertexParameters parameters;
+    parameters.WorldPosition = worldPos;
+    parameters.VertexColor = aVertex.Color;
+    Material_Vertex(parameters);
+
+    const float4 viewPos = mul(parameters.WorldPosition, FB_View);
     const float4 clipPos = mul(viewPos, FB_Projection);
 
     VStoPS result;
     result.Position = clipPos;
-    result.Color = aVertex.Color;
+    result.Color = parameters.VertexColor;
     return result;
 }

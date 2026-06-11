@@ -3,7 +3,7 @@
 
 #include "GraphicsEngine/Objects/Buffer.h"
 #include "GraphicsEngine/Objects/Texture.h"
-#include "GraphicsEngine/PipelineStateObject.h"
+#include "GraphicsEngine/RHI/PipelineStateObject.h"
 #include "Ensure.h"
 #include "StringHelpers.h"
 

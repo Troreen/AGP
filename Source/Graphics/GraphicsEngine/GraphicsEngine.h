@@ -15,17 +15,22 @@
 #include "Camera3D.hpp"
 #include "Matrix.hpp"
 
-#include "PipelineStateObject.h"
+#include "RHI/PipelineStateObject.h"
+#include "Materials/MaterialInterface.h"
+#include "Materials/Material.h"
 
 class Actor;
-class MeshComponent;
+class MeshComponentBase;
 class World;
+
+struct MaterialDescription;
 
 enum class ConstantBuffer : uint8_t
 {
 	FrameBuffer,
 	ObjectBuffer,
 	AnimationBuffer,
+	MaterialBuffer,
 	MAX
 };
 
@@ -35,7 +40,7 @@ public:
 
 	static GraphicsEngine& Get();
 
-	bool Initialize(HWND aWindowHandle);
+	bool Initialize(HWND aWindowHandle, const std::filesystem::path& aShaderRoot);
 	void Render(GraphicsCommandList& inoutCommandList, const Actor& aCameraActor, const World& aWorld);
 	void Present() const;
 
@@ -44,6 +49,9 @@ public:
 	{
 		return CreateConstantBufferInternal(aBufferId, aName, sizeof(T));
 	}
+
+	bool CreateConstantBuffer(ConstantBuffer aBufferId, std::string_view aName, size_t aBufferSize);
+
 
 	template <class T>
 	bool UpdateAndSetConstantBuffer(GraphicsCommandList& inoutCommandList, ConstantBuffer aBufferId, const T& aData, unsigned aSlot, PipeLineStages aStages)
@@ -56,6 +64,7 @@ public:
 	bool CreateCommandList(std::string_view aName, GraphicsCommandList& outCommandList) const;
 	void ExecuteCommandList(const GraphicsCommandList& aCommandList) const;
 
+	bool CreateMaterial(const MaterialDescription& aDescription, Material& outMaterial) const;
 private:
 
 	bool CreateConstantBufferInternal(ConstantBuffer aBufferId, std::string_view aName, size_t aBufferSize);
@@ -65,7 +74,7 @@ private:
 	~GraphicsEngine();
 
 	bool PrepareMeshForRendering(const Mesh& aMesh) const;
-	void RenderMesh(GraphicsCommandList& inoutCommandList, const MeshComponent& aMeshComponent, const CU::Matrix4f& aWorld);
+	void RenderMesh(GraphicsCommandList& inoutCommandList, const MeshComponentBase& aMeshComponent, const CU::Matrix4f& aWorld);
 
 	RenderHardwareInterface myRHI;
 	Texture myBackBuffer;
@@ -75,4 +84,10 @@ private:
 
 	// TODO: Temporary PSO=
 	PipelineStateObject myTempPSO;
+
+	std::filesystem::path myShaderRoot;
+	std::unordered_map<MaterialDomain, std::filesystem::path> myMaterialDomainShaders;
+	std::unordered_map<ShadingModel, std::filesystem::path> myMaterialShadingModelShaders;
+
+	Material myDefaultMaterial;
 };

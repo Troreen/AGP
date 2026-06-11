@@ -56,7 +56,7 @@
 #include "MeshLibrary.h"
 
 class Mesh;
-class MeshComponent;
+class SkeletalMeshComponent;
 
 class ModelViewer
 {
@@ -87,10 +87,12 @@ private:
 	std::vector<SpinningActor> mySpinningActors;
 	World myWorld;
 	Actor* myCameraActor = nullptr;
-	MeshComponent* myAnimatedMeshComponent = nullptr;
+	SkeletalMeshComponent* myAnimatedMeshComponent = nullptr;
 
 	CommonUtilities::InputHandler myInputHandler;
 	FreeFlyCameraController myCameraController;
 
 	GraphicsCommandList myCommandList;
+
+	std::filesystem::path myContentRoot;
 };

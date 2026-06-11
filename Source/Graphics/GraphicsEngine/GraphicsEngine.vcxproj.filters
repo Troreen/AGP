@@ -48,13 +48,31 @@
     <ClInclude Include="ConstantBuffers\ObjectBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PipelineStateObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Utilities\Ensure.h">
+    <ClInclude Include="RHI\PipelineStateObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RHI\GraphicsCommandList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ConstantBuffers\AnimationBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Materials\MaterialHelpers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Materials\MaterialInterface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Materials\MaterialShaderIncludeHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Materials\Material.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\Shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RHI\RHIShaderReflectionInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -89,18 +107,35 @@
     <ClCompile Include="ConstantBuffers\ObjectBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PipelineStateObject.cpp">
+    <ClCompile Include="RHI\PipelineStateObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RHI\GraphicsCommandList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Materials\MaterialInterface.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Materials\MaterialShaderIncludeHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Materials\Material.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\Shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RHI\RHIShaderReflectionInfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shaders\VertexShader.hlsl" />
-    <FxCompile Include="Shaders\PixelShader.hlsl" />
+    <FxCompile Include="Shaders\Material\Surface_VS.hlsl" />
+    <FxCompile Include="Shaders\Material\Unlit_PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\Common.hlsli" />
+    <None Include="Shaders\Material\Common.hlsli" />
+    <None Include="Shaders\Material\MaterialParameters.hlsli" />
+    <None Include="Shaders\Material\Material.hlsli" />
   </ItemGroup>
 </Project>

@@ -85,4 +85,7 @@
   <ItemGroup>
     <Text Include="ModelViewer.log" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Materials\TestMaterial.hlsli" />
+  </ItemGroup>
 </Project>

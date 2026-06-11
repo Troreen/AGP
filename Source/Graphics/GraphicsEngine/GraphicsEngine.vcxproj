@@ -36,7 +36,7 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v145</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -49,7 +49,7 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v145</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -139,8 +139,8 @@
       <ShaderModel>5.0</ShaderModel>
       <ObjectFileOutput />
       <TreatWarningAsError>true</TreatWarningAsError>
-      <VariableName>TEMP_%(Filename)_ByteCode</VariableName>
-      <HeaderFileOutput>$(ProjectDir)TemporaryShaders\%(Filename).h</HeaderFileOutput>
+      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
+      <HeaderFileOutput>$(IntDir)PrecompiledShaders\%(Filename).h</HeaderFileOutput>
     </FxCompile>
     <Lib />
     <PostBuildEvent />
@@ -148,10 +148,13 @@
     <Lib />
     <Lib />
     <CustomBuildStep>
-      <Command>IF EXIST "$(ProjectDir)Shaders"  (
-xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Shaders"
-)</Command>
-      <Message>Copying Shaders to $(SolutionDir)Bin\$(Configuration)\Shaders...</Message>
+      <Command>set "CONTENTROOT=$(SolutionDir)Assets"
+set "SHADERSRC=$(ProjectDir)Shaders"
+set "SHADERDEST=%CONTENTROOT%\Shaders"
+if not exist "%CONTENTROOT%" mkdir "%CONTENTROOT%"
+if not exist "%SHADERDEST%" mkdir "%SHADERDEST%"
+xcopy /E /I /R /Y "%SHADERSRC%" "%SHADERDEST%"</Command>
+      <Message>Copying Shaders to Assets Dir</Message>
       <Outputs>*.hlsl*</Outputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
@@ -199,7 +202,10 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
     <ClInclude Include="ConstantBuffers\FrameBuffer.h" />
     <ClInclude Include="ConstantBuffers\AnimationBuffer.h" />
     <ClInclude Include="ConstantBuffers\ObjectBuffer.h" />
-    <ClInclude Include="..\..\Utilities\Ensure.h" />
+    <ClInclude Include="Materials\Material.h" />
+    <ClInclude Include="Materials\MaterialHelpers.h" />
+    <ClInclude Include="Materials\MaterialInterface.h" />
+    <ClInclude Include="Materials\MaterialShaderIncludeHandler.h" />
     <ClInclude Include="Objects\Mesh.h" />
     <ClInclude Include="Objects\Camera.h" />
     <ClInclude Include="Objects\Buffer.h" />
@@ -207,14 +213,19 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
     <ClInclude Include="GraphicsEngine.pch.h" />
     <ClInclude Include="Objects\Texture.h" />
     <ClInclude Include="Objects\Vertex.h" />
-    <ClInclude Include="PipelineStateObject.h" />
+    <ClInclude Include="RHI\PipelineStateObject.h" />
     <ClInclude Include="RHI\GraphicsCommandList.h" />
     <ClInclude Include="RHI\RenderHardwareInterface.h" />
+    <ClInclude Include="RHI\RHIShaderReflectionInfo.h" />
     <ClInclude Include="RHI\RHIStructs.h" />
+    <ClInclude Include="Objects\Shader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ConstantBuffers\FrameBuffer.cpp" />
     <ClCompile Include="ConstantBuffers\ObjectBuffer.cpp" />
+    <ClCompile Include="Materials\Material.cpp" />
+    <ClCompile Include="Materials\MaterialInterface.cpp" />
+    <ClCompile Include="Materials\MaterialShaderIncludeHandler.cpp" />
     <ClCompile Include="Objects\Mesh.cpp" />
     <ClCompile Include="Objects\Camera.cpp" />
     <ClCompile Include="Objects\Buffer.cpp" />
@@ -227,18 +238,20 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
     </ClCompile>
     <ClCompile Include="Objects\Texture.cpp" />
     <ClCompile Include="Objects\Vertex.cpp" />
-    <ClCompile Include="PipelineStateObject.cpp" />
+    <ClCompile Include="RHI\PipelineStateObject.cpp" />
     <ClCompile Include="RHI\GraphicsCommandList.cpp" />
     <ClCompile Include="RHI\RenderHardwareInterface.cpp" />
+    <ClCompile Include="Objects\Shader.cpp" />
+    <ClCompile Include="RHI\RHIShaderReflectionInfo.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shaders\PixelShader.hlsl">
+    <FxCompile Include="Shaders\Material\Unlit_PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
-    <FxCompile Include="Shaders\VertexShader.hlsl">
+    <FxCompile Include="Shaders\Material\Surface_VS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
@@ -246,7 +259,9 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\Common.hlsli" />
+    <None Include="Shaders\Material\Common.hlsli" />
+    <None Include="Shaders\Material\Material.hlsli" />
+    <None Include="Shaders\Material\MaterialParameters.hlsli" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

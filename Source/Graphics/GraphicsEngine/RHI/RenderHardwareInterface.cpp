@@ -1,9 +1,12 @@
 #include "GraphicsEngine.pch.h"
 #include "RenderHardwareInterface.h"
 
+#include <d3dcompiler.h>
+
 #include "StringHelpers.h"
 #include "GraphicsEngine/Objects/Texture.h"
 #include "GraphicsEngine/Objects/Buffer.h"
+#include "GraphicsEngine/Objects/Shader.h"
 #include "GraphicsEngine/Objects/Vertex.h"
 #include "GraphicsCommandList.h"
 #include "PipelineStateObject.h"
@@ -415,6 +418,83 @@ void RenderHardwareInterface::Present() const
 {
 	mySwapChain->Present(0, DXGI_PRESENT_ALLOW_TEARING);
 }
+
+bool RenderHardwareInterface::CompileShader(ShaderType aShaderType, const std::filesystem::path &aPath, 
+	ID3DInclude *aIncludeHandler, bool aCompileDebug, Shader &outShader) const
+{
+    std::ifstream codeFile(aPath, std::ios::binary);
+	std::ostringstream codeFileStream;
+	codeFileStream << codeFile.rdbuf();
+	codeFile.close();
+	const std::string shaderSource = codeFileStream.str();
+
+	if	(shaderSource.empty())
+	{
+		LOG(RhiLog, Error, "Failed to compile shader {}! Shader source is empty.", aPath.string());
+		return false;
+	}
+
+	std::string shaderTarget(6, ' '); 
+	switch (aShaderType)
+	{
+	case ShaderType::VertexShader:
+		shaderTarget = "vs_5_0";
+		break;
+	case ShaderType::PixelShader:
+		shaderTarget = "ps_5_0";
+		break;
+	case ShaderType::GeometryShader:
+		shaderTarget = "gs_5_0";
+		break;
+	case ShaderType::ComputeShader:
+		shaderTarget = "cs_5_0";
+		break;
+	default:
+		LOG(RhiLog, Error, "Failed to compile shader {}! Invalid shader type specified.", aPath.string());
+		return false;
+	}
+
+	std::vector<D3D_SHADER_MACRO> shaderMacros;
+	unsigned shaderFlags = D3DCOMPILE_WARNINGS_ARE_ERRORS;
+	if (aCompileDebug)
+	{
+		shaderMacros.emplace_back(D3D_SHADER_MACRO{ .Name = "_DEBUG", .Definition = "1" });
+		shaderFlags |= D3DCOMPILE_DEBUG;
+	}
+
+	shaderMacros.emplace_back(D3D_SHADER_MACRO{ .Name = nullptr, .Definition = nullptr });
+
+	ComPtr<ID3DBlob> compiledShader;
+	ComPtr<ID3DBlob> errorMessages;
+
+	const HRESULT result = D3DCompile(
+		shaderSource.data(),
+		shaderSource.size(),
+		aPath.string().c_str(),
+		shaderMacros.data(),
+		aIncludeHandler,
+		"main",
+		shaderTarget.c_str(),
+		shaderFlags,
+		0,
+		&compiledShader,
+		&errorMessages
+	);
+
+	if (FAILED(result))
+	{
+		const std::string message = static_cast<const char*>(errorMessages->GetBufferPointer());
+		LOG(RhiLog, Error, "Shader compilation failed!");
+		LOG(RhiLog, Error, "Error {}", message);
+		return false;
+	}
+
+	outShader.myBlob = compiledShader;
+	outShader.myType = aShaderType;
+
+	return true;
+}
+
 
 void RenderHardwareInterface::SetObjectName(const Microsoft::WRL::ComPtr<ID3D11DeviceChild>& aObject, std::string_view aName) const
 {

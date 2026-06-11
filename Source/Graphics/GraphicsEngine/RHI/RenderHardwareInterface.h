@@ -1,4 +1,5 @@
 #pragma once
+#include <filesystem>
 #include <wrl.h>
 #include <Windows.h>
 #include <string_view>
@@ -17,6 +18,9 @@ struct ID3D11Device;
 struct ID3D11DeviceContext;
 struct IDXGISwapChain;
 struct ID3D11DeviceChild;
+
+struct ID3DInclude;
+class Shader;
 
 class RenderHardwareInterface
 {
@@ -40,6 +44,8 @@ public:
 	
 	void Present() const; 
 	
+	bool CompileShader(ShaderType aShaderType, const std::filesystem::path& aPath, ID3DInclude* aIncludeHandler, bool aCompileDebug, Shader& outShader) const;
+
 private:
 
 	void SetObjectName(const Microsoft::WRL::ComPtr<ID3D11DeviceChild>& aObject, std::string_view aName) const;

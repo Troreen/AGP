@@ -9,7 +9,8 @@
 #include "Application.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/CameraComponent.h"
-#include "GameFramework/MeshComponent.h"
+#include "GameFramework/SkeletalMeshComponent.h"
+#include "GameFramework/StaticMeshComponent.h"
 
 ModelViewer::ModelViewer() = default;
 
@@ -45,12 +46,16 @@ bool ModelViewer::Initialize(SIZE aWindowSize, WNDPROC aWindowProcess, LPCWSTR a
         nullptr
     );
 
+    std::filesystem::path contentPath = std::filesystem::current_path() / ".." / ".." / "Assets";
+	contentPath = std::filesystem::canonical(contentPath);
+	myContentRoot = contentPath;
+
 	{   // Graphics Init
         MVLOG(Log, "Initializing Graphics Engine...");
 
         GraphicsEngine& GE = GraphicsEngine::Get();
 
-	    if(!GE.Initialize(myMainWindowHandle))
+	    if(!GE.Initialize(myMainWindowHandle, contentPath / "Shaders"))
 	        return false;
 
         if (!GE.CreateCommandList("Model Viewer", myCommandList))
@@ -153,20 +158,40 @@ void ModelViewer::LoadScene()
         Actor* axesActor = myWorld.CreateActor("World Axes Actor");
         if (axesActor != nullptr)
         {
-            axesActor->AddComponent<MeshComponent>("World Axes Mesh Component", axesMesh);
+            axesActor->AddComponent<StaticMeshComponent>("World Axes Mesh Component", axesMesh);
         }
     }
 
     if (std::shared_ptr<Mesh> chestMesh = GetRegisteredMesh("SM_Chest"))
     {
         Actor* chestActor = myWorld.CreateActor("SM_Chest Actor");
+		StaticMeshComponent* chestMeshComponent = nullptr;
         if (chestActor != nullptr)
         {
-            chestActor->AddComponent<MeshComponent>("SM_Chest Mesh Component", chestMesh);
+            chestMeshComponent = chestActor->AddComponent<StaticMeshComponent>("SM_Chest Mesh Component", chestMesh);
             chestActor->SetTranslation({ 500.0f, -120.0f, 250.0f });
             chestActor->SetRotation(0.0f, 0.0f, 0.0f);
             chestActor->SetScale({ 1.0f, 1.0f, 1.0f });
         }
+
+		if (chestMeshComponent != nullptr)
+		{
+			MaterialDescription desc;
+			desc.Domain = MaterialDomain::Surface;
+			desc.ShadingModel = ShadingModel::Unlit;
+			desc.BlendMode = BlendMode::Opaque;
+			desc.Name = "Chest_TestMaterial";
+			desc.MaterialShaderCode = myContentRoot.parent_path() / "Source" / "Application" / "ModelViewer" / "Materials" / "TestMaterial.hlsli";
+
+			std::shared_ptr<Material> material = std::make_shared<Material>();
+			if (GraphicsEngine::Get().CreateMaterial(desc, *material))
+			{
+				for (size_t materialIndex = 0; materialIndex < chestMesh->GetNumMaterialSlots(); ++materialIndex)
+				{
+					chestMeshComponent->SetMaterial(static_cast<unsigned>(materialIndex), material);
+				}
+			}
+		}
     }
 
     if (std::shared_ptr<Mesh> characterMesh = GetRegisteredMesh("SK_C_TGA_Bro"))
@@ -174,7 +199,7 @@ void ModelViewer::LoadScene()
         Actor* characterActor = myWorld.CreateActor("TGA Bro Actor");
         if (characterActor != nullptr)
         {
-            myAnimatedMeshComponent = characterActor->AddComponent<MeshComponent>("TGA Bro Mesh Component", characterMesh);
+            myAnimatedMeshComponent = characterActor->AddComponent<SkeletalMeshComponent>("TGA Bro Mesh Component", characterMesh);
             characterActor->SetTranslation({ -450.0f, -120.0f, 250.0f });
             characterActor->SetRotation(180.0f, 0.0f, 0.0f);
             characterActor->SetScale({ 1.0f, 1.0f, 1.0f });
@@ -213,7 +238,7 @@ void ModelViewer::LoadScene()
         Actor* actor = myWorld.CreateActor(primitiveName + " Actor");
         if (actor != nullptr)
         {
-            actor->AddComponent<MeshComponent>(primitiveName + " Mesh Component", mesh);
+            actor->AddComponent<StaticMeshComponent>(primitiveName + " Mesh Component", mesh);
             actor->SetTranslation({ startX + spacing * static_cast<float>(index), 0.0f, 250.0f });
             actor->SetRotation(0.0f, 20.0f * static_cast<float>(index), 0.0f);
             actor->SetScale({ 100.0f, 100.0f, 100.0f });

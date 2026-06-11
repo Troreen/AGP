@@ -75,6 +75,9 @@ public:
 
     void AddAnimation(std::shared_ptr<Animation> anAnimation);
     std::shared_ptr<Animation> GetAnimation(std::string_view aName) const;
+    
+	std::string_view GetName() const { return myName; }
+	size_t GetNumMaterialSlots() const { return myNumMaterialSlots; }
 
 private:
 
@@ -84,6 +87,8 @@ private:
     std::vector<Element> myElements;
     Skeleton mySkeleton;
     std::unordered_map<std::string, std::shared_ptr<Animation>> myAnimations;
+
+	size_t myNumMaterialSlots = 0; 
 
     mutable Buffer myVertexBuffer;
     mutable Buffer myIndexBuffer;

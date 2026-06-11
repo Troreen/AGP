@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Component.h"
-#include "Matrix.hpp"
+#include "MeshComponentBase.h"
 
 #include <array>
 #include <memory>
@@ -9,28 +8,24 @@
 #include <string_view>
 
 struct Animation;
-class Mesh;
 
-class MeshComponent final : public Component
+class SkeletalMeshComponent final : public MeshComponentBase
 {
 public:
-	MeshComponent() = default;
-	explicit MeshComponent(std::shared_ptr<Mesh> aMesh);
+	SkeletalMeshComponent();
+	explicit SkeletalMeshComponent(std::shared_ptr<Mesh> aMesh);
 
 	void Update(float aDeltaTime) override;
 
-	void SetMesh(std::shared_ptr<Mesh> aMesh);
-	std::shared_ptr<Mesh> GetMesh() const;
-	bool HasMesh() const;
-	bool HasSkinning() const;
-
-	void SetVisible(bool aVisible);
-	bool IsVisible() const;
+	bool HasSkinning() const override;
+	const std::array<CU::Matrix4f, 128>* GetJointTransforms() const override;
 
 	bool PlayAnimation(std::string_view anAnimationName, bool aShouldLoop);
 	bool PlayPartialAnimation(std::string_view anAnimationName, bool aShouldLoop);
 	bool ConfigurePartialLayerFromJointName(std::string_view aRootJointName);
-	const std::array<CU::Matrix4f, 128>& GetJointTransforms() const;
+
+protected:
+	void OnMeshChanged() override;
 
 private:
 	struct PlaybackState
@@ -50,7 +45,6 @@ private:
 	const CU::Matrix4f& GetLocalTransformForJoint(size_t aJointIndex) const;
 	void MarkJointAndChildren(size_t aJointIndex);
 
-	std::shared_ptr<Mesh> myMesh;
 	PlaybackState myBaseLayer;
 	PlaybackState myPartialLayer;
 	std::array<CU::Matrix4f, 128> myJointTransforms;

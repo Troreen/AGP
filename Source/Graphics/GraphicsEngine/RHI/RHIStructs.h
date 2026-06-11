@@ -46,3 +46,12 @@ enum PipeLineStage_
 };
 
 typedef int PipeLineStages;
+
+enum class ShaderType : unsigned
+{
+	Unknown,
+	VertexShader,
+	PixelShader,
+	GeometryShader,
+	ComputeShader
+};
