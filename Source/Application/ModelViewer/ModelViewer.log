@@ -126,3 +126,30 @@ Logging has started at 2026-06-09 14:05:53.
 [14:05:53] [   LOG   ] [RHI] Initializing RHI...
 [14:05:53] [   LOG   ] [RHI] Selected adapter: NVIDIA GeForce RTX 2080
 [14:05:53] [   LOG   ] [RHI] RHI Started!
+****************************************************************************************************
+Logging has started at 2026-06-12 11:21:49.
+****************************************************************************************************
+[11:21:49] [   LOG   ] [ModelViewer] ModelViewer starting...
+[] [  ERROR  ] [ModelViewer] Exception caught!
+canonical: The system cannot find the file specified.: "C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Application\ModelViewer\..\..\Assets"
+****************************************************************************************************
+Logging has started at 2026-06-12 11:22:56.
+****************************************************************************************************
+[11:22:56] [   LOG   ] [ModelViewer] ModelViewer starting...
+[] [  ERROR  ] [ModelViewer] Exception caught!
+canonical: The system cannot find the file specified.: "C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Application\ModelViewer\..\..\Assets"
+****************************************************************************************************
+Logging has started at 2026-06-12 11:24:17.
+****************************************************************************************************
+[11:24:17] [   LOG   ] [ModelViewer] ModelViewer starting...
+[11:24:17] [   LOG   ] [ModelViewer] Initializing Graphics Engine...
+[11:24:17] [   LOG   ] [RHI] Initializing RHI...
+[11:24:17] [   LOG   ] [RHI] Selected adapter: NVIDIA GeForce RTX 2080
+[11:24:17] [   LOG   ] [RHI] RHI Started!
+[11:24:18] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SM_Chest' with 2 elements.
+[11:24:18] [   LOG   ] [ModelViewer] Loaded FBX mesh 'SK_C_TGA_Bro' with 1 elements.
+[11:24:18] [   LOG   ] [ModelViewer] Loaded animation 'Walk' for mesh 'SK_C_TGA_Bro'.
+[11:24:19] [   LOG   ] [ModelViewer] Loaded animation 'Run' for mesh 'SK_C_TGA_Bro'.
+[11:24:19] [   LOG   ] [ModelViewer] Loaded animation 'Wave' for mesh 'SK_C_TGA_Bro'.
+[11:24:19] [   LOG   ] [ModelViewer] Loaded animation 'Breathing' for mesh 'SK_C_TGA_Bro'.
+[11:24:23] [   LOG   ] [ModelViewer] Ready!

@@ -125,7 +125,7 @@ bool ModelViewer::Initialize(SIZE aWindowSize, WNDPROC aWindowProcess, LPCWSTR a
         nullptr
     );
 
-    std::filesystem::path contentPath = std::filesystem::current_path() / ".." / ".." / "Assets";
+    std::filesystem::path contentPath = std::filesystem::current_path() / ".." / ".." / ".." / "Assets";
 	contentPath = std::filesystem::canonical(contentPath);
 	myContentRoot = contentPath;
 
