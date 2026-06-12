@@ -1,9 +1,11 @@
 ﻿#pragma once
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <string_view>
 #include <vector>
 
+class Texture;
 class PipelineStateObject;
 
 /**
@@ -23,6 +25,7 @@ enum class ShadingModel : uint8_t
 {
 	None,
 	Unlit,
+	Lit,
 };
 
 /**
@@ -78,6 +81,8 @@ public:
 	// However, to keep things simple we assume that >= 16 are system slots
 	// which cannot be used by materials.
 	static constexpr unsigned MAX_MATERIAL_TEXTURE_COUNT = 16;
+	static constexpr unsigned ALBEDO_TEXTURE_SLOT = 0;
+	static constexpr unsigned NORMAL_TEXTURE_SLOT = 1;
 
 	MaterialInterface() = default;
 	virtual ~MaterialInterface() = default;
@@ -139,4 +144,12 @@ public:
 	//  * @param aName The Name of the Parameter to retrieve info about or nullptr if Name is invalid.
 	//  */
 	virtual const MaterialParameterInfo* GetParameterByName(const std::string& aName) const = 0;
+
+	virtual unsigned GetTextureSlotByName(const std::string& aName) const = 0;
+
+	virtual bool SetTexture(const std::string& aName, const std::shared_ptr<Texture>& aTexture) = 0;
+	virtual bool SetTexture(unsigned aSlot, const std::shared_ptr<Texture>& aTexture) = 0;
+	virtual std::shared_ptr<Texture> GetTexture(const std::string& aName) const = 0;
+	virtual std::shared_ptr<Texture> GetTexture(unsigned aSlot) const = 0;
+
 };

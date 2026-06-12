@@ -181,6 +181,40 @@ void GraphicsCommandList::SetPipelineState(const PipelineStateObject *aPSO)
 	SetMarker(message);
 }
 
+void GraphicsCommandList::SetShaderResources(const Texture* const* aResourcesList, size_t aNumResources, unsigned aStartSlot, PipeLineStages aStages) const
+{
+	std::vector<ID3D11ShaderResourceView*> srvs(aNumResources);
+	for (size_t t = 0; t < aNumResources; ++t)
+	{
+		if (const Texture* currentTexture = aResourcesList[t])
+		{
+			srvs[t] = currentTexture->mySRV.Get();
+		}
+	}
+
+	if (aStages & PipeLineStage_VertexShader)
+		myContext->VSSetShaderResources(aStartSlot, static_cast<unsigned>(srvs.size()), srvs.data());
+	if (aStages & PipeLineStage_PixelShader)
+		myContext->PSSetShaderResources(aStartSlot, static_cast<unsigned>(srvs.size()), srvs.data());
+}
+
+void GraphicsCommandList::SetShaderSamplers(const Sampler* const* aSamplerList, size_t aNumSamplers, unsigned aStartSlot, PipeLineStages aStages) const
+{
+	std::vector<ID3D11SamplerState*> samplers(aNumSamplers);
+	for (size_t s = 0; s < aNumSamplers; ++s)
+	{
+		if (const Sampler* currentSampler = aSamplerList[s])
+		{
+			samplers[s] = currentSampler->mySampler.Get();
+		}
+	}
+
+	if (aStages & PipeLineStage_VertexShader)
+		myContext->VSSetSamplers(aStartSlot, static_cast<unsigned>(samplers.size()), samplers.data());
+	if (aStages & PipeLineStage_PixelShader)
+		myContext->PSSetSamplers(aStartSlot, static_cast<unsigned>(samplers.size()), samplers.data());
+}
+
 void GraphicsCommandList::Draw(unsigned aNumVertices) const
 {
 	ensure(!IsReadyForExecution());

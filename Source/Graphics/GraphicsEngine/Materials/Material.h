@@ -17,8 +17,12 @@ struct MaterialDescription
     ShadingModel ShadingModel = ShadingModel::None;
     BlendMode BlendMode = BlendMode::None;
     std::filesystem::path MaterialShaderCode;
-
+    std::filesystem::path AlbedoTexture;
+    std::filesystem::path NormalTexture;
 };
+
+bool LoadMaterialDescription(const std::filesystem::path& aPath, MaterialDescription& outDescription);
+
 class Material : public MaterialInterface
 {
     friend class GraphicsEngine;
@@ -41,12 +45,24 @@ public:
 	const MaterialParameterInfo* GetParameterByIndex(unsigned aIndex) const override;
 	const MaterialParameterInfo* GetParameterByName(const std::string& aName) const override;
 
+
+	unsigned GetTextureSlotByName(const std::string& aName) const override;
+
+	bool SetTexture(const std::string& aName, const std::shared_ptr<Texture>& aTexture) override;
+	bool SetTexture(unsigned aSlot, const std::shared_ptr<Texture>& aTexture) override;
+
+    std::shared_ptr<Texture> GetTexture(const std::string& aName) const override;
+	std::shared_ptr<Texture> GetTexture(unsigned aSlot) const override; 
+
 private:
 
 	alignas(16) uint8_t myData[MATERIAL_BUFFER_SIZE] = {};
     std::vector<MaterialParameterInfo> myParameters;
 	std::unordered_map<std::string, unsigned> myParameterNameToIndex;
     
+    std::shared_ptr<Texture> myTextures[MAX_MATERIAL_TEXTURE_COUNT] = {};
+	std::unordered_map<std::string, unsigned> myTextureSlotNameToIndex;
+
     MaterialDescription myDescription;
     PipelineStateObject myPSO;
     std::string myName;
@@ -87,11 +103,21 @@ public:
         return SetRawParameterValue(*param, &aValue, sizeof(T));
     }
 
+    unsigned GetTextureSlotByName(const std::string& aName) const override;
+
+    bool SetTexture(const std::string& aName, const std::shared_ptr<Texture>& aTexture) override;
+    bool SetTexture(unsigned aSlot, const std::shared_ptr<Texture>& aTexture) override;
+
+    std::shared_ptr<Texture> GetTexture(const std::string& aName) const override;
+    std::shared_ptr<Texture> GetTexture(unsigned aSlot) const override;
+
+
 private:
 
     bool SetRawParameterValue(const MaterialParameterInfo& aParamInfo, const void* aPtr, size_t aPtrSize);
 
     alignas(16) mutable uint8_t myData[MATERIAL_BUFFER_SIZE] = {};
+	std::optional<std::shared_ptr<Texture>> myTextures[MAX_MATERIAL_TEXTURE_COUNT] = {};
 
     std::string myName;
 

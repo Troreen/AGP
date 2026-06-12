@@ -201,16 +201,19 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
   <ItemGroup>
     <ClInclude Include="ConstantBuffers\FrameBuffer.h" />
     <ClInclude Include="ConstantBuffers\AnimationBuffer.h" />
+    <ClInclude Include="ConstantBuffers\LightBuffer.h" />
     <ClInclude Include="ConstantBuffers\ObjectBuffer.h" />
     <ClInclude Include="Materials\Material.h" />
     <ClInclude Include="Materials\MaterialHelpers.h" />
     <ClInclude Include="Materials\MaterialInterface.h" />
     <ClInclude Include="Materials\MaterialShaderIncludeHandler.h" />
+    <ClInclude Include="InterOp\DDSTextureLoader11.h" />
     <ClInclude Include="Objects\Mesh.h" />
     <ClInclude Include="Objects\Camera.h" />
     <ClInclude Include="Objects\Buffer.h" />
     <ClInclude Include="GraphicsEngine.h" />
     <ClInclude Include="GraphicsEngine.pch.h" />
+    <ClInclude Include="Objects\Sampler.h" />
     <ClInclude Include="Objects\Texture.h" />
     <ClInclude Include="Objects\Vertex.h" />
     <ClInclude Include="RHI\PipelineStateObject.h" />
@@ -226,6 +229,12 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
     <ClCompile Include="Materials\Material.cpp" />
     <ClCompile Include="Materials\MaterialInterface.cpp" />
     <ClCompile Include="Materials\MaterialShaderIncludeHandler.cpp" />
+    <ClCompile Include="InterOp\DDSTextureLoader11.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="Objects\Mesh.cpp" />
     <ClCompile Include="Objects\Camera.cpp" />
     <ClCompile Include="Objects\Buffer.cpp" />
@@ -237,6 +246,7 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Objects\Texture.cpp" />
+    <ClCompile Include="Objects\Sampler.cpp" />
     <ClCompile Include="Objects\Vertex.cpp" />
     <ClCompile Include="RHI\PipelineStateObject.cpp" />
     <ClCompile Include="RHI\GraphicsCommandList.cpp" />
@@ -245,6 +255,12 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
     <ClCompile Include="RHI\RHIShaderReflectionInfo.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="Shaders\Material\Lit_PS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
     <FxCompile Include="Shaders\Material\Unlit_PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
@@ -260,8 +276,11 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Material\Common.hlsli" />
+    <None Include="Shaders\Material\Lighting.hlsli" />
     <None Include="Shaders\Material\Material.hlsli" />
     <None Include="Shaders\Material\MaterialParameters.hlsli" />
+    <None Include="Shaders\Material\MaterialTextures.hlsli" />
+    <None Include="Shaders\Material\Samplers.hlsli" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

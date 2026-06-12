@@ -1,0 +1,9 @@
+{
+  "name": "CharacterMaterial",
+  "domain": "Surface",
+  "shadingModel": "Lit",
+  "blendMode": "Opaque",
+  "materialShaderCode": "CharacterMaterial.hlsli",
+  "albedoTexture": "../../../../Assets/Textures/T_TGA_Bro_C.dds",
+  "normalTexture": ""
+}

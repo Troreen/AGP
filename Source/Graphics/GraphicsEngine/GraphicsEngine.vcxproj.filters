@@ -57,6 +57,9 @@
     <ClInclude Include="ConstantBuffers\AnimationBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ConstantBuffers\LightBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Materials\MaterialHelpers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -73,6 +76,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RHI\RHIShaderReflectionInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\Sampler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InterOp\DDSTextureLoader11.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -128,14 +137,24 @@
     <ClCompile Include="RHI\RHIShaderReflectionInfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Objects\Sampler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InterOp\DDSTextureLoader11.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\Material\Surface_VS.hlsl" />
     <FxCompile Include="Shaders\Material\Unlit_PS.hlsl" />
+    <FxCompile Include="Shaders\Material\Lit_PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Material\Common.hlsli" />
     <None Include="Shaders\Material\MaterialParameters.hlsli" />
     <None Include="Shaders\Material\Material.hlsli" />
+    <None Include="Shaders\Material\Lighting.hlsli" />
+    <None Include="Shaders\Material\MaterialTextures.hlsli" />
+    <None Include="Shaders\Material\Samplers.hlsli" />
   </ItemGroup>
 </Project>

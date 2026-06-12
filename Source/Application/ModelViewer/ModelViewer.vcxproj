@@ -190,7 +190,24 @@ xcopy /E /I /R /Y "%SHADERSRC%" "%SHADERDEST%"</Command>
     <Text Include="ModelViewer.log" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Materials\AxesMaterial.hlsli" />
+    <None Include="Materials\AxesMaterial.mat" />
+    <None Include="Materials\CharacterMaterial.hlsli" />
+    <None Include="Materials\CharacterMaterial.mat" />
+    <None Include="Materials\ChestMaterial.hlsli" />
+    <None Include="Materials\ChestMaterial.mat" />
+    <None Include="Materials\CubeMaterial.hlsli" />
+    <None Include="Materials\CubeMaterial.mat" />
+    <None Include="Materials\FloorMaterial.hlsli" />
+    <None Include="Materials\FloorMaterial.mat" />
+    <None Include="Materials\PyramidMaterial.hlsli" />
+    <None Include="Materials\PyramidMaterial.mat" />
+    <None Include="Materials\SphereMaterial.hlsli" />
+    <None Include="Materials\SphereMaterial.mat" />
     <None Include="Materials\TestMaterial.hlsli" />
+    <None Include="Materials\TexturingExampleMaterial.hlsli" />
+    <None Include="Materials\TorusMaterial.hlsli" />
+    <None Include="Materials\TorusMaterial.mat" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

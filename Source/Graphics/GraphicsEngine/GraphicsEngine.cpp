@@ -3,8 +3,10 @@
 
 #include "ConstantBuffers/AnimationBuffer.h"
 #include "ConstantBuffers/FrameBuffer.h"
+#include "ConstantBuffers/LightBuffer.h"
 #include "ConstantBuffers/ObjectBuffer.h"
 #include "GameFramework/CameraComponent.h"
+#include "GameFramework/LightComponent.h"
 #include "GameFramework/MeshComponentBase.h"
 #include "GameFramework/World.h"
 #include "RHI/GraphicsCommandList.h"
@@ -14,6 +16,41 @@
 #include "Materials/MaterialShaderIncludeHandler.h"
 #include "Materials/MaterialHelpers.h"
 #include "Objects/Shader.h"
+
+#include <algorithm>
+#include <array>
+#include <cctype>
+
+namespace
+{
+	float GetRenderIntensity(const LightComponent& aLightComponent)
+	{
+		if (aLightComponent.GetLightType() == LightType::Directional)
+		{
+			return aLightComponent.GetIntensity();
+		}
+
+		return aLightComponent.GetIntensity() * 10000.0f;
+	}
+
+	void AddLightToBuffer(const LightComponent& aLightComponent, LightBuffer& inoutLightBuffer)
+	{
+		if (inoutLightBuffer.NumActiveLights >= LightBuffer::MaxLights)
+		{
+			return;
+		}
+
+		LightBuffer::Light& light = inoutLightBuffer.Lights[inoutLightBuffer.NumActiveLights++];
+		light.Color = aLightComponent.GetColor();
+		light.Intensity = GetRenderIntensity(aLightComponent);
+		light.Position = aLightComponent.GetWorldPosition();
+		light.Type = static_cast<unsigned>(aLightComponent.GetLightType());
+		light.Direction = aLightComponent.GetWorldDirection();
+		light.InnerCone = aLightComponent.GetInnerCone();
+		light.OuterCone = aLightComponent.GetOuterCone();
+		light.Radius = aLightComponent.GetRadius();
+	}
+}
 
 GraphicsEngine& GraphicsEngine::Get()
 {
@@ -35,9 +72,15 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path&
 	{
 		return false; // RHI logs this for us 
 	}
+
+	if (!CreateDefaultTextures())
+	{
+		return false;
+	}
 	
 	myMaterialDomainShaders.emplace(MaterialDomain::Surface, aShaderRoot / "Material" / "Surface_VS.hlsl");
 	myMaterialShadingModelShaders.emplace(ShadingModel::Unlit, aShaderRoot / "Material" / "Unlit_PS.hlsl");
+	myMaterialShadingModelShaders.emplace(ShadingModel::Lit, aShaderRoot / "Material" / "Lit_PS.hlsl");
 
 	MaterialDescription defaultMaterialDesc;
 	defaultMaterialDesc.Name = "Default";
@@ -56,6 +99,17 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path&
 	CreateConstantBuffer<ObjectBuffer>(ConstantBuffer::ObjectBuffer, "ObjectBuffer");
 	CreateConstantBuffer<AnimationBuffer>(ConstantBuffer::AnimationBuffer, "AnimationBuffer");
 	CreateConstantBuffer(ConstantBuffer::MaterialBuffer, "MaterialBuffer", Material::MATERIAL_BUFFER_SIZE);
+	CreateConstantBuffer<LightBuffer>(ConstantBuffer::LightBuffer, "LightBuffer");
+
+	{ // Trilinear Wrap
+		SamplerDescription samplerDesc;
+		samplerDesc.Name = "TrilinearWrap";
+		samplerDesc.AddressMode = SamplerAddressMode::Wrap;
+		samplerDesc.FilterMode = SamplerFilterMode::Trilinear;
+		Sampler sampler;
+		ensure(myRHI.CreateSampler(samplerDesc, sampler));
+		mySamplers.emplace_back(std::move(sampler));
+	}
 
 	return true;
 }
@@ -65,6 +119,14 @@ void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const Actor& 
 	inoutCommandList.ClearRenderTarget(myBackBuffer);
 	inoutCommandList.ClearDepthStencil(myDepthBuffer);
 	inoutCommandList.SetRenderTarget(&myBackBuffer, &myDepthBuffer);
+
+	std::vector<Sampler*> samplerList(mySamplers.size());
+	for (size_t s = 0; s < mySamplers.size(); ++s)
+	{
+		samplerList[s] = &mySamplers[s];
+	}
+
+	inoutCommandList.SetShaderSamplers(samplerList.data(), samplerList.size(), 0, PipeLineStage_VertexShader | PipeLineStage_PixelShader);
 
 	CameraComponent* cameraComponent = aCameraActor.GetComponent<CameraComponent>();
 	if (cameraComponent == nullptr)
@@ -81,6 +143,28 @@ void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const Actor& 
 	fb.Projection = camera.GetProjectionMatrix();
 
 	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::FrameBuffer, fb, 0, PipeLineStage_VertexShader);
+
+	LightBuffer lightBuffer;
+	for (const std::unique_ptr<Actor>& actor : aWorld.GetActors())
+	{
+		if (!actor || !actor->IsActive())
+		{
+			continue;
+		}
+
+		std::vector<LightComponent*> lightComponents;
+		actor->GetComponentsOfType(lightComponents);
+		for (const LightComponent* lightComponent : lightComponents)
+		{
+			if (lightComponent == nullptr || !lightComponent->IsEnabled())
+			{
+				continue;
+			}
+
+			AddLightToBuffer(*lightComponent, lightBuffer);
+		}
+	}
+	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::LightBuffer, lightBuffer, 4, PipeLineStage_PixelShader);
 
 	for (const std::unique_ptr<Actor>& actor : aWorld.GetActors())
 	{
@@ -169,6 +253,15 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 			return false;
 	}
 
+	memset(outMaterial.myData, 0, Material::MATERIAL_BUFFER_SIZE);
+	outMaterial.myParameters.clear();
+	outMaterial.myParameterNameToIndex.clear();
+	outMaterial.myTextureSlotNameToIndex.clear();
+	for (std::shared_ptr<Texture>& texture : outMaterial.myTextures)
+	{
+		texture.reset();
+	}
+
 	RHIShaderReflectionInfo vsInfo, psInfo;
 	RHIShaderReflector::Reflect(materialVS.GetDataPtr(), materialVS.GetDataSize(), vsInfo);
 	RHIShaderReflector::Reflect(materialPS.GetDataPtr(), materialPS.GetDataSize(), psInfo);
@@ -184,13 +277,10 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 		materialBufferSource = &psInfo;
 	}
 	
-	memset(outMaterial.myData, 0, Material::MATERIAL_BUFFER_SIZE);
-
 	if (materialBufferSource)
 	{
 		const RHIShaderReflectionInfo::ConstantBufferInfo& info = materialBufferSource->ConstantBuffers[materialBufferSource->ConstantBufferNameToIndex.at(materialBufferName)];
 		
-		//for (const auto& member : info.Members)
 		for (size_t i = 0; i < info.Members.size(); ++i)
 		{
 			const auto& member = info.Members[i];
@@ -224,11 +314,77 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 		return false;
 	}
 
+	CreateMaterialTextureSlots(vsInfo, outMaterial);
+	CreateMaterialTextureSlots(psInfo, outMaterial);
+
+	auto loadTextureOrFallback = [this](const std::filesystem::path& aTexturePath, const std::shared_ptr<Texture>& aFallback, std::string_view aTextureLabel)
+	{
+		if (!aTexturePath.empty())
+		{
+			std::shared_ptr<Texture> texture = std::make_shared<Texture>();
+			if (LoadTexture(aTexturePath, *texture))
+			{
+				return texture;
+			}
+
+			GELOG(Warning, "Falling back to default {} texture because {} could not be loaded.", aTextureLabel, aTexturePath.string());
+		}
+
+		return aFallback;
+	};
+
+	outMaterial.SetTexture(Material::ALBEDO_TEXTURE_SLOT, loadTextureOrFallback(aDescription.AlbedoTexture, myDefaultAlbedoTexture, "albedo"));
+	outMaterial.SetTexture(Material::NORMAL_TEXTURE_SLOT, loadTextureOrFallback(aDescription.NormalTexture, myDefaultNormalTexture, "normal"));
+
 	outMaterial.myPSO = matPSO;
 	outMaterial.myName = aDescription.Name;
 	outMaterial.myDescription = aDescription;
 
 	return true;
+}
+
+bool GraphicsEngine::CreateDefaultTextures()
+{
+	myDefaultAlbedoTexture = std::make_shared<Texture>();
+	if (!myRHI.CreateColorTexture("Default_Albedo_White", std::array<uint8_t, 4>{ 255, 255, 255, 255 }, *myDefaultAlbedoTexture))
+	{
+		GELOG(Error, "Failed to create default albedo texture.");
+		return false;
+	}
+
+	myDefaultNormalTexture = std::make_shared<Texture>();
+	if (!myRHI.CreateColorTexture("Default_Normal_Flat", std::array<uint8_t, 4>{ 128, 128, 255, 255 }, *myDefaultNormalTexture))
+	{
+		GELOG(Error, "Failed to create default normal texture.");
+		return false;
+	}
+
+	return true;
+}
+
+bool GraphicsEngine::LoadTexture(const std::filesystem::path& aPath, Texture& outTexture) const
+{
+	if (!std::filesystem::exists(aPath))
+	{
+		GELOG(Warning, "Texture path {} does not exist!", aPath.string());
+		return false;
+	}
+
+	std::ifstream file(aPath, std::ios::binary | std::ios::ate);
+	if (!file)
+	{
+		GELOG(Error, "Failed to load texture {}! Could not open file!", aPath.string());
+		return false;
+	}
+
+	const std::streamsize size = file.tellg();
+	file.seekg(0, std::ios::beg);
+
+	std::vector<uint8_t> fileData(size);
+	file.read(reinterpret_cast<char*>(fileData.data()), size);
+	file.close();
+
+	return myRHI.CreateTexture(aPath.stem().string(), fileData.data(), fileData.size(), outTexture);
 }
 
 bool GraphicsEngine::CreateConstantBufferInternal(ConstantBuffer aBufferId, std::string_view aName, size_t aBufferSize)
@@ -261,6 +417,30 @@ bool GraphicsEngine::UpdateAndSetConstantBufferInternal(GraphicsCommandList& ino
 	return true;
 }
 
+void GraphicsEngine::CreateMaterialTextureSlots(const RHIShaderReflectionInfo& aShaderInfo, Material& inoutMaterial) const
+{
+	for (const auto& shaderTextureSlot : aShaderInfo.Bindings)
+	{
+		if (shaderTextureSlot.Type != 2 || shaderTextureSlot.BindPoint >= Material::MAX_MATERIAL_TEXTURE_COUNT)
+			continue;
+
+		std::string lowerName = shaderTextureSlot.Name;
+		std::ranges::transform(lowerName, lowerName.begin(), [](unsigned char aChar)
+		{
+			return static_cast<char>(std::tolower(aChar));
+		});
+
+		if (inoutMaterial.myTextureSlotNameToIndex.contains(lowerName) && inoutMaterial.myTextureSlotNameToIndex.at(lowerName) != shaderTextureSlot.BindPoint)
+		{
+			GELOG(Warning, "Found texture {} in multiple places when setting up material. Only the first instance will be used!", shaderTextureSlot.Name);
+			continue;
+		}
+
+		inoutMaterial.myTextureSlotNameToIndex.emplace(lowerName, shaderTextureSlot.BindPoint);
+	}
+
+}
+
 GraphicsEngine::GraphicsEngine() = default;
 GraphicsEngine::~GraphicsEngine() = default;
 
@@ -283,6 +463,7 @@ void GraphicsEngine::RenderMesh(GraphicsCommandList& inoutCommandList, const Mes
 
 	ObjectBuffer ob;
 	ob.World = aWorld;
+	ob.WorldInvT = aWorld.GetInverseTranspose3x3();
 	ob.HasSkinning = aMeshComponent.HasSkinning() ? 1u : 0u;
 	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::ObjectBuffer, ob, 1, PipeLineStage_VertexShader);
 
@@ -322,6 +503,16 @@ void GraphicsEngine::RenderMesh(GraphicsCommandList& inoutCommandList, const Mes
 			UpdateAndSetConstantBufferInternal(inoutCommandList, ConstantBuffer::MaterialBuffer, currentMaterial->GetParameterDataBlock(), 
 				Material::MATERIAL_BUFFER_SIZE, 3, PipeLineStage_VertexShader | PipeLineStage_PixelShader);
 		}
+		std::vector<const Texture*> textures(Material::MAX_MATERIAL_TEXTURE_COUNT);
+		for (size_t t = 0; t < Material::MAX_MATERIAL_TEXTURE_COUNT; ++t)
+		{
+			if (const std::shared_ptr<Texture>& texture = currentMaterial->GetTexture(static_cast<unsigned>(t)))
+			{
+				textures[t] = texture.get();
+			}
+		}
+		inoutCommandList.SetShaderResources(textures.data(), textures.size(), 0, PipeLineStage_VertexShader | PipeLineStage_PixelShader);
+
 		inoutCommandList.DrawIndexed(element.NumIndices, element.IndexOffset);
 	}
 }

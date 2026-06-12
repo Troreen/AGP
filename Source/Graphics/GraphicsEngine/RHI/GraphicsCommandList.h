@@ -40,6 +40,10 @@ public:
 	void SetConstantBuffer(const Buffer* aBuffer, unsigned aSlot, PipeLineStages aStages) const; 
 	void SetPipelineState (const PipelineStateObject* aPSO);
 
+    void SetShaderResources(const Texture* const* aResourcesList, size_t aNumResources, unsigned aStartSlot, PipeLineStages aStages) const;
+    void SetShaderSamplers(const Sampler* const* aSamplerList, size_t aNumSamplers, unsigned aStartSlot, PipeLineStages aStages) const;
+
+
 	void Draw(unsigned aNumVertices) const;
 	void DrawIndexed(unsigned aIndexCount, unsigned aIndexOffset) const;
 

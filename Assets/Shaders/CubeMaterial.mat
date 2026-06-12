@@ -1,0 +1,9 @@
+{
+  "name": "CubeMaterial",
+  "domain": "Surface",
+  "shadingModel": "Lit",
+  "blendMode": "Opaque",
+  "materialShaderCode": "CubeMaterial.hlsli",
+  "albedoTexture": "../../../../Assets/Textures/T_Default_C.dds",
+  "normalTexture": ""
+}

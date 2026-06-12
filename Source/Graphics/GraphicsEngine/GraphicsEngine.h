@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -11,6 +12,7 @@
 #include "Objects/Texture.h"
 #include "Objects/Vertex.h"
 #include "Objects/Mesh.h"
+#include "Objects/Sampler.h"
 
 #include "Camera3D.hpp"
 #include "Matrix.hpp"
@@ -23,6 +25,7 @@ class Actor;
 class MeshComponentBase;
 class World;
 
+struct RHIShaderReflectionInfo;
 struct MaterialDescription;
 
 enum class ConstantBuffer : uint8_t
@@ -31,6 +34,7 @@ enum class ConstantBuffer : uint8_t
 	ObjectBuffer,
 	AnimationBuffer,
 	MaterialBuffer,
+	LightBuffer,
 	MAX
 };
 
@@ -65,16 +69,21 @@ public:
 	void ExecuteCommandList(const GraphicsCommandList& aCommandList) const;
 
 	bool CreateMaterial(const MaterialDescription& aDescription, Material& outMaterial) const;
+
+	bool LoadTexture(const std::filesystem::path& aPath, Texture& outTexture) const;
 private:
 
 	bool CreateConstantBufferInternal(ConstantBuffer aBufferId, std::string_view aName, size_t aBufferSize);
 	bool UpdateAndSetConstantBufferInternal(GraphicsCommandList& inoutCommandList, ConstantBuffer aBufferId, const void* aData, size_t aDataSize, unsigned aSlot, PipeLineStages aStages);
+
+	void CreateMaterialTextureSlots(const RHIShaderReflectionInfo& aShaderInfo, Material& inoutMaterial) const;
 
 	GraphicsEngine();
 	~GraphicsEngine();
 
 	bool PrepareMeshForRendering(const Mesh& aMesh) const;
 	void RenderMesh(GraphicsCommandList& inoutCommandList, const MeshComponentBase& aMeshComponent, const CU::Matrix4f& aWorld);
+	bool CreateDefaultTextures();
 
 	RenderHardwareInterface myRHI;
 	Texture myBackBuffer;
@@ -88,6 +97,10 @@ private:
 	std::filesystem::path myShaderRoot;
 	std::unordered_map<MaterialDomain, std::filesystem::path> myMaterialDomainShaders;
 	std::unordered_map<ShadingModel, std::filesystem::path> myMaterialShadingModelShaders;
+
+	std::vector<Sampler> mySamplers;
+	std::shared_ptr<Texture> myDefaultAlbedoTexture;
+	std::shared_ptr<Texture> myDefaultNormalTexture;
 
 	Material myDefaultMaterial;
 };

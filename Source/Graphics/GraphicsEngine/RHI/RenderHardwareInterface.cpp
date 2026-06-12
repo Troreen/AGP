@@ -11,6 +11,7 @@
 #include "GraphicsCommandList.h"
 #include "PipelineStateObject.h"
 #include "Ensure.h"
+#include "GraphicsEngine/InterOp/DDSTextureLoader11.h"
 
 using namespace Microsoft::WRL;
 
@@ -98,6 +99,23 @@ bool RenderHardwareInterface::Initialize(HWND aWindowHandle, bool aEnableDebug, 
 		return false;
 	}
 
+	ComPtr<ID3D11Debug> deviceDebug;
+	myDevice.As(&deviceDebug);
+	if (deviceDebug)
+	{
+		ComPtr<ID3D11InfoQueue> infoQueue;
+		deviceDebug->QueryInterface(IID_PPV_ARGS(&infoQueue));
+
+		D3D11_MESSAGE_ID mask[] =
+		{
+			D3D11_MESSAGE_ID_SETPRIVATEDATA_CHANGINGPARAMS
+		};
+
+		D3D11_INFO_QUEUE_FILTER filter = {};
+		filter.DenyList.NumIDs = _countof(mask);
+		filter.DenyList.pIDList = mask;
+		infoQueue->AddStorageFilterEntries(&filter);
+	}
 
 	const std::string dxAdapterName = "Adapter";
 	myDevice->SetPrivateData(WKPDID_D3DDebugObjectName, static_cast<unsigned>(dxAdapterName.size() * sizeof(char)), dxAdapterName.data());
@@ -405,6 +423,114 @@ bool RenderHardwareInterface::CreateCommandList(std::string_view aName, Graphics
 	outCommandList.myName = aName;
 	outCommandList.myContext->QueryInterface(IID_PPV_ARGS(&outCommandList.myUDA));
 
+	return true;
+}
+
+bool RenderHardwareInterface::CreateTexture(std::string_view aName, const uint8_t* aByteCode, size_t aByteCodeSize, Texture& outTexture) const
+{
+	ensure(!aName.empty());
+
+	ComPtr<ID3D11Resource> resource;
+	ComPtr<ID3D11ShaderResourceView> srv;
+	const HRESULT result = DirectX::CreateDDSTextureFromMemory(
+		myDevice.Get(),
+		aByteCode,
+		aByteCodeSize,
+		&resource,
+		&srv
+	); 
+	if (FAILED(result))
+	{
+		LOG(RhiLog, Error, "Failed to load texture {}!", aName);
+		return false;
+	}
+
+	SetObjectName(resource, aName);
+	const std::string srvName = std::format("{}_SRV", aName);
+	SetObjectName(srv, srvName);
+
+	outTexture.myResource = resource;
+	outTexture.mySRV = srv;
+	outTexture.myName = aName;
+
+	return true;
+
+}
+
+bool RenderHardwareInterface::CreateColorTexture(std::string_view aName, const std::array<uint8_t, 4>& aColor, Texture& outTexture) const
+{
+	ensure(!aName.empty());
+
+	D3D11_TEXTURE2D_DESC textureDesc = {};
+	textureDesc.Width = 1;
+	textureDesc.Height = 1;
+	textureDesc.MipLevels = 1;
+	textureDesc.ArraySize = 1;
+	textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	textureDesc.SampleDesc.Count = 1;
+	textureDesc.Usage = D3D11_USAGE_IMMUTABLE;
+	textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+
+	D3D11_SUBRESOURCE_DATA textureData = {};
+	textureData.pSysMem = aColor.data();
+	textureData.SysMemPitch = 4;
+
+	ComPtr<ID3D11Texture2D> texture;
+	HRESULT result = myDevice->CreateTexture2D(&textureDesc, &textureData, &texture);
+	if (FAILED(result))
+	{
+		LOG(RhiLog, Error, "Failed to create color texture {}!", aName);
+		return false;
+	}
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Format = textureDesc.Format;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MipLevels = 1;
+
+	ComPtr<ID3D11ShaderResourceView> srv;
+	result = myDevice->CreateShaderResourceView(texture.Get(), &srvDesc, &srv);
+	if (FAILED(result))
+	{
+		LOG(RhiLog, Error, "Failed to create shader resource view for color texture {}!", aName);
+		return false;
+	}
+
+	SetObjectName(texture, aName);
+	const std::string srvName = std::format("{}_SRV", aName);
+	SetObjectName(srv, srvName);
+
+	outTexture.myResource = texture;
+	outTexture.mySRV = srv;
+	outTexture.myName = aName;
+
+	return true;
+}
+
+bool RenderHardwareInterface::CreateSampler(const SamplerDescription& aDescription, Sampler& outSampler) const
+{
+	ensure(!aDescription.Name.empty());
+
+	D3D11_SAMPLER_DESC samplerDesc = CD3D11_SAMPLER_DESC(D3D11_DEFAULT);
+	samplerDesc.Filter = static_cast<D3D11_FILTER>(aDescription.FilterMode);
+	samplerDesc.AddressU = static_cast<D3D11_TEXTURE_ADDRESS_MODE>(aDescription.AddressMode);
+	samplerDesc.AddressV = static_cast<D3D11_TEXTURE_ADDRESS_MODE>(aDescription.AddressMode);
+	samplerDesc.AddressW = static_cast<D3D11_TEXTURE_ADDRESS_MODE>(aDescription.AddressMode);
+	samplerDesc.ComparisonFunc = static_cast<D3D11_COMPARISON_FUNC>(aDescription.ComparisonFunction);
+	samplerDesc.BorderColor[0] = aDescription.BorderColor.x;
+	samplerDesc.BorderColor[1] = aDescription.BorderColor.y;
+	samplerDesc.BorderColor[2] = aDescription.BorderColor.z;
+	samplerDesc.BorderColor[3] = aDescription.BorderColor.w;
+
+	const HRESULT result = myDevice->CreateSamplerState(&samplerDesc, &outSampler.mySampler);
+	if(FAILED(result))
+	{
+		LOG(RhiLog, Error, "Failed to create sampler state {}!", aDescription.Name);
+		return false;
+	}
+
+	SetObjectName(outSampler.mySampler, aDescription.Name);
+	outSampler.myDescription = aDescription;
 	return true;
 }
 

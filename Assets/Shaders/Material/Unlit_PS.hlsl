@@ -1,12 +1,23 @@
 #include "Common.hlsli"
+#include "Samplers.hlsli"
+#include "MaterialTextures.hlsli"
+#include "Lighting.hlsli"
 #include "Material.hlsli"
 #include "MaterialParameters.hlsli"
 
 float4 main(VStoPS aPixel) : SV_TARGET
 {
+	float4 albedo = AlbedoTexture.Sample(TrilinearWrap, aPixel.UV0) * aPixel.Color;
+
 	MaterialPixelParameters parameters;
-	parameters.PixelColor = aPixel.Color;
+	parameters.PixelColor = albedo;
+	parameters.WorldPosition = aPixel.WorldPosition;
+	parameters.UV0 = aPixel.UV0;
+	parameters.UV1 = aPixel.UV1;
+	parameters.Normal = aPixel.Normal;
+	parameters.Tangent = aPixel.Tangent;
+	parameters.Binormal = aPixel.Binormal;
 	Material_Pixel(parameters);
 
-	return parameters.PixelColor;
+	return float4(LinearToGamma(parameters.PixelColor.rgb), parameters.PixelColor.a);
 }

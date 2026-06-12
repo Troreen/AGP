@@ -1,0 +1,9 @@
+{
+  "name": "ChestMaterial",
+  "domain": "Surface",
+  "shadingModel": "Lit",
+  "blendMode": "Opaque",
+  "materialShaderCode": "ChestMaterial.hlsli",
+  "albedoTexture": "../../../../Assets/Textures/T_Chest_C.dds",
+  "normalTexture": ""
+}

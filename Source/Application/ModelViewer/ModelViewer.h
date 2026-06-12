@@ -56,7 +56,10 @@
 #include "MeshLibrary.h"
 
 class Mesh;
+class DirectionalLightComponent;
+class PointLightComponent;
 class SkeletalMeshComponent;
+class SpotLightComponent;
 
 class ModelViewer
 {
@@ -77,6 +80,7 @@ private:
 
 	std::shared_ptr<Mesh> GetRegisteredMesh(const std::string& aName) const;
 	void HandleAnimationInput();
+	void HandleLightInput();
 	void UpdateScene(float aDeltaTime);
 
 	bool myIsRunning = false;
@@ -88,6 +92,9 @@ private:
 	World myWorld;
 	Actor* myCameraActor = nullptr;
 	SkeletalMeshComponent* myAnimatedMeshComponent = nullptr;
+	DirectionalLightComponent* myDirectionalLightComponent = nullptr;
+	std::vector<PointLightComponent*> myPointLightComponents;
+	SpotLightComponent* mySpotLightComponent = nullptr;
 
 	CommonUtilities::InputHandler myInputHandler;
 	FreeFlyCameraController myCameraController;

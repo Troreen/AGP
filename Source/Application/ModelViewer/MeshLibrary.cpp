@@ -6,23 +6,12 @@
 #include "PrimitiveMeshBuilder.h"
 #include "Importer.h"
 
-#include <array>
-#include <random>
 #include <utility>
 #include <vector>
 
 namespace
 {
-	CommonUtilities::Vector4f CreateRandomColor(std::mt19937& aRandomGenerator)
-	{
-		std::uniform_real_distribution<float> colorDistribution(0.2f, 1.0f);
-		return {
-			colorDistribution(aRandomGenerator),
-			colorDistribution(aRandomGenerator),
-			colorDistribution(aRandomGenerator),
-			1.0f
-		};
-	}
+	const CommonUtilities::Vector4f DefaultVertexColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 	bool HasImportedColor(const TGA::FBX::Vertex& aVertex)
 	{
@@ -37,6 +26,21 @@ namespace
 			aSourceMatrix(3, 1), aSourceMatrix(3, 2), aSourceMatrix(3, 3), aSourceMatrix(3, 4),
 			aSourceMatrix(4, 1), aSourceMatrix(4, 2), aSourceMatrix(4, 3), aSourceMatrix(4, 4)
 		};
+	}
+
+	CommonUtilities::Vector3f ConvertDirection(const float* aSourceVector, const CommonUtilities::Vector3f& aFallback)
+	{
+		CommonUtilities::Vector3f direction(
+			aSourceVector[0],
+			aSourceVector[1],
+			aSourceVector[2]);
+
+		if (direction.LengthSqr() <= 0.000001f)
+		{
+			return aFallback;
+		}
+
+		return direction.GetNormalized();
 	}
 
 	Vertex ConvertVertex(const TGA::FBX::Vertex& aSourceVertex, const CommonUtilities::Vector4f& aFallbackColor)
@@ -76,6 +80,19 @@ namespace
 			aSourceVertex.BoneWeights[2],
 			aSourceVertex.BoneWeights[3]
 		};
+
+		vertex.UV0 = {
+			aSourceVertex.UVs[0][0],
+			aSourceVertex.UVs[0][1]
+		};
+
+		vertex.UV1 = {
+			aSourceVertex.UVs[1][0],
+			aSourceVertex.UVs[1][1]
+		};
+
+		vertex.Normal = ConvertDirection(aSourceVertex.Normal, CommonUtilities::Vector3f::UnitZ);
+		vertex.Tangent = ConvertDirection(aSourceVertex.Tangent, CommonUtilities::Vector3f::UnitX);
 
 		const float totalWeight =
 			vertex.SkinWeights.x +
@@ -148,8 +165,7 @@ namespace
 		const TGA::FBX::Mesh::Element& aSourceElement,
 		std::vector<Mesh::Element>& outElements,
 		std::vector<Vertex>& outVertices,
-		std::vector<unsigned>& outIndices,
-		std::mt19937& aRandomGenerator)
+		std::vector<unsigned>& outIndices)
 	{
 		if (aSourceElement.Vertices.empty() || aSourceElement.Indices.empty())
 		{
@@ -168,7 +184,7 @@ namespace
 
 		for (const TGA::FBX::Vertex& sourceVertex : aSourceElement.Vertices)
 		{
-			outVertices.push_back(ConvertVertex(sourceVertex, CreateRandomColor(aRandomGenerator)));
+			outVertices.push_back(ConvertVertex(sourceVertex, DefaultVertexColor));
 		}
 
 		for (const unsigned sourceIndex : aSourceElement.Indices)
@@ -237,11 +253,10 @@ bool MeshLibrary::LoadFBXMesh(const std::filesystem::path& aPath)
 	std::vector<Mesh::Element> elements;
 	std::vector<Vertex> vertices;
 	std::vector<unsigned> indices;
-	std::mt19937 randomGenerator(0x2A1FBCu);
 
 	for (const TGA::FBX::Mesh::Element& importedElement : importedMesh.Elements)
 	{
-		AppendElement(importedElement, elements, vertices, indices, randomGenerator);
+		AppendElement(importedElement, elements, vertices, indices);
 	}
 
 	if (elements.empty())
@@ -300,7 +315,7 @@ bool MeshLibrary::LoadFBXAnimation(std::string_view aMeshName, std::string aAnim
 
 void MeshLibrary::RegisterPrimitiveMeshes()
 {
-	RegisterMesh("Plane", PrimitiveMeshBuilder::CreatePlane());
+	RegisterMesh("Floor", PrimitiveMeshBuilder::CreateFloor());
 	RegisterMesh("Cube", PrimitiveMeshBuilder::CreateCube());
 	RegisterMesh("Pyramid", PrimitiveMeshBuilder::CreatePyramid());
 	RegisterMesh("Sphere", PrimitiveMeshBuilder::CreateSphere());

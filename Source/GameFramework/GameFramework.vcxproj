@@ -146,6 +146,7 @@
     <ClInclude Include="CameraComponent.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="GameFrameworkLog.h" />
+    <ClInclude Include="LightComponent.h" />
     <ClInclude Include="MeshComponentBase.h" />
     <ClInclude Include="SkeletalMeshComponent.h" />
     <ClInclude Include="StaticMeshComponent.h" />
@@ -156,6 +157,7 @@
     <ClCompile Include="CameraComponent.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="GameFrameworkLog.cpp" />
+    <ClCompile Include="LightComponent.cpp" />
     <ClCompile Include="MeshComponentBase.cpp" />
     <ClCompile Include="SkeletalMeshComponent.cpp" />
     <ClCompile Include="StaticMeshComponent.cpp" />

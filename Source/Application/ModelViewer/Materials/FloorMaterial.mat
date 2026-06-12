@@ -1,0 +1,9 @@
+{
+  "name": "FloorMaterial",
+  "domain": "Surface",
+  "shadingModel": "Lit",
+  "blendMode": "Opaque",
+  "materialShaderCode": "FloorMaterial.hlsli",
+  "albedoTexture": "../../../../Assets/Textures/T_Marble_Tiles_C.dds",
+  "normalTexture": ""
+}

@@ -1,0 +1,3 @@
+Standard Albedotexturer
+
+Default.dds och Default.h är samma textur men i olika format. Den första är en vanlig DDS fil medan den ändra är samma fil som en ByteArray, precis som shaders kompilerade till en headerfil. Du kan använda Default.h om du vill ha inbyggda defaulttexturer i din grafikmotor (Vilken som är enklast beror på din struktur!). I Workshoppen laddar vi texturer via en byte array oavsett så det bör vara enkelt att plugga in om ni vill.

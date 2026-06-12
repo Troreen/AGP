@@ -7,7 +7,7 @@ class Mesh;
 class PrimitiveMeshBuilder
 {
 public:
-	static std::shared_ptr<Mesh> CreatePlane();
+	static std::shared_ptr<Mesh> CreateFloor();
 	static std::shared_ptr<Mesh> CreateCube();
 	static std::shared_ptr<Mesh> CreatePyramid();
 	static std::shared_ptr<Mesh> CreateSphere();

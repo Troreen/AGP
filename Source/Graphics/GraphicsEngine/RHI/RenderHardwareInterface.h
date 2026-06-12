@@ -1,5 +1,6 @@
 #pragma once
 #include <filesystem>
+#include <array>
 #include <wrl.h>
 #include <Windows.h>
 #include <string_view>
@@ -8,6 +9,8 @@
 #include "RHIStructs.h"
 #include "Vector.hpp"
 
+class Sampler;
+struct SamplerDescription;
 class GraphicsCommandList;
 class PipelineStateObject;
 struct PipelineStateDescription;
@@ -39,7 +42,10 @@ public:
 	
 	bool CreatePipelineStateObject (const PipelineStateDescription& aDescription, PipelineStateObject& outPSO) const;
 	bool CreateCommandList(std::string_view aName, GraphicsCommandList& outCommandList) const;
-	
+	bool CreateTexture(std::string_view aName, const uint8_t* aByteCode, size_t aByteCodeSize, Texture& outTexture) const;
+	bool CreateColorTexture(std::string_view aName, const std::array<uint8_t, 4>& aColor, Texture& outTexture) const;
+	bool CreateSampler(const SamplerDescription& aDescription, Sampler& outSampler) const; 
+
 	void ExecuteCommandList(const GraphicsCommandList& aCommandList) const;
 	
 	void Present() const; 

@@ -56,6 +56,9 @@ namespace CommonUtilities
 		// Assumes the matrix is made up of nothing but rotations and translations.
 		Matrix4x4<T> GetFastInverse() const;
 
+		// Returns the inverse-transpose of the upper-left 3x3 with translation cleared.
+		Matrix4x4<T> GetInverseTranspose3x3() const;
+
 		// Static functions for creating rotation matrices.
 		static Matrix4x4 CreateRotationAroundX(const T aAngleInRadians);
 		static Matrix4x4 CreateRotationAroundY(const T aAngleInRadians);
@@ -299,6 +302,67 @@ namespace CommonUtilities
 		return inverseMatrix;
 	}
 
+	template <typename T>
+	inline Matrix4x4<T> Matrix4x4<T>::GetInverseTranspose3x3() const
+	{
+		const T m00 = myMatrix[0][0];
+		const T m01 = myMatrix[0][1];
+		const T m02 = myMatrix[0][2];
+		const T m10 = myMatrix[1][0];
+		const T m11 = myMatrix[1][1];
+		const T m12 = myMatrix[1][2];
+		const T m20 = myMatrix[2][0];
+		const T m21 = myMatrix[2][1];
+		const T m22 = myMatrix[2][2];
+
+		const T determinant =
+			m00 * (m11 * m22 - m12 * m21) -
+			m01 * (m10 * m22 - m12 * m20) +
+			m02 * (m10 * m21 - m11 * m20);
+
+		Matrix4x4<T> result;
+		if (std::abs(determinant) <= static_cast<T>(0.000001))
+		{
+			return result;
+		}
+
+		const T invDet = static_cast<T>(1) / determinant;
+		const T inverse[3][3] =
+		{
+			{
+				(m11 * m22 - m12 * m21) * invDet,
+				(m02 * m21 - m01 * m22) * invDet,
+				(m01 * m12 - m02 * m11) * invDet
+			},
+			{
+				(m12 * m20 - m10 * m22) * invDet,
+				(m00 * m22 - m02 * m20) * invDet,
+				(m02 * m10 - m00 * m12) * invDet
+			},
+			{
+				(m10 * m21 - m11 * m20) * invDet,
+				(m01 * m20 - m00 * m21) * invDet,
+				(m00 * m11 - m01 * m10) * invDet
+			}
+		};
+
+		for (int row = 0; row < 3; ++row)
+		{
+			for (int column = 0; column < 3; ++column)
+			{
+				result(row + 1, column + 1) = inverse[column][row];
+			}
+		}
+
+		result(1, 4) = static_cast<T>(0);
+		result(2, 4) = static_cast<T>(0);
+		result(3, 4) = static_cast<T>(0);
+		result(4, 1) = static_cast<T>(0);
+		result(4, 2) = static_cast<T>(0);
+		result(4, 3) = static_cast<T>(0);
+		result(4, 4) = static_cast<T>(1);
+		return result;
+	}
 
 	template <typename T>
 	inline Matrix4x4<T> Matrix4x4<T>::CreateRotationAroundX(const T aAngleInRadians)

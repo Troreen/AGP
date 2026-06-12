@@ -9,10 +9,89 @@
 #include "Application.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/CameraComponent.h"
+#include "GameFramework/LightComponent.h"
 #include "GameFramework/SkeletalMeshComponent.h"
 #include "GameFramework/StaticMeshComponent.h"
+#include "GraphicsEngine/Materials/Material.h"
 
 ModelViewer::ModelViewer() = default;
+
+namespace
+{
+	using Vector3f = CommonUtilities::Vector3f;
+
+	struct PrimitivePlacement
+	{
+		const char* Name = "";
+		Vector3f Position;
+		Vector3f RotationDegrees;
+		Vector3f Scale;
+	};
+
+	std::filesystem::path GetMaterialRoot(const std::filesystem::path& aContentRoot)
+	{
+		return aContentRoot.parent_path() / "Source" / "Application" / "ModelViewer" / "Materials";
+	}
+
+	std::shared_ptr<Material> CreateMaterialFromFile(const std::filesystem::path& aMaterialFile)
+	{
+		MaterialDescription description;
+		if (!LoadMaterialDescription(aMaterialFile, description))
+		{
+			MVLOG(Warning, "Could not load material description '{}'.", aMaterialFile.string());
+			return nullptr;
+		}
+
+		std::shared_ptr<Material> material = std::make_shared<Material>();
+		if (!GraphicsEngine::Get().CreateMaterial(description, *material))
+		{
+			MVLOG(Warning, "Could not create material '{}'.", description.Name);
+			return nullptr;
+		}
+
+		return material;
+	}
+
+	void AssignMaterialToAllSlots(MeshComponentBase* aMeshComponent, const std::shared_ptr<MaterialInterface>& aMaterial)
+	{
+		if (aMeshComponent == nullptr || aMaterial == nullptr || !aMeshComponent->HasMesh())
+		{
+			return;
+		}
+
+		const std::shared_ptr<Mesh> mesh = aMeshComponent->GetMesh();
+		for (size_t materialIndex = 0; materialIndex < mesh->GetNumMaterialSlots(); ++materialIndex)
+		{
+			aMeshComponent->SetMaterial(static_cast<unsigned>(materialIndex), aMaterial);
+		}
+	}
+
+	PointLightComponent* CreatePointLight(
+		World& aWorld,
+		const char* aName,
+		const Vector3f& aPosition,
+		const Vector3f& aColor,
+		float anIntensity,
+		float aRadius)
+	{
+		Actor* pointLightActor = aWorld.CreateActor(std::string(aName) + " Actor");
+		if (pointLightActor == nullptr)
+		{
+			return nullptr;
+		}
+
+		pointLightActor->SetTranslation(aPosition);
+		PointLightComponent* pointLightComponent = pointLightActor->AddComponent<PointLightComponent>(std::string(aName) + " Light");
+		if (pointLightComponent != nullptr)
+		{
+			pointLightComponent->SetColor(aColor);
+			pointLightComponent->SetIntensity(anIntensity);
+			pointLightComponent->SetRadius(aRadius);
+		}
+
+		return pointLightComponent;
+	}
+}
 
 bool ModelViewer::Initialize(SIZE aWindowSize, WNDPROC aWindowProcess, LPCWSTR aWindowTitle)
 {
@@ -115,6 +194,7 @@ int ModelViewer::Run()
         myInputHandler.UpdateInput();
         myCameraController.Update(deltaTime);
         HandleAnimationInput();
+        HandleLightInput();
         UpdateScene(deltaTime);
 
         myCommandList.ResetCommandList();
@@ -136,6 +216,14 @@ void ModelViewer::LoadScene()
 {
     mySpinningActors.clear();
     myAnimatedMeshComponent = nullptr;
+    myDirectionalLightComponent = nullptr;
+    myPointLightComponents.clear();
+    mySpotLightComponent = nullptr;
+    const std::filesystem::path materialRoot = GetMaterialRoot(myContentRoot);
+    const Vector3f sceneFocus = { 25.0f, -70.0f, 260.0f };
+    const Vector3f floorPosition = { 0.0f, -135.0f, 260.0f };
+    const Vector3f characterPosition = { 0.0f, -120.0f, 250.0f };
+    const Vector3f chestPosition = { 135.0f, -120.0f, 285.0f };
 
     {
         myCameraActor = myWorld.CreateActor("Camera Actor");
@@ -148,8 +236,42 @@ void ModelViewer::LoadScene()
                 50000.0f,
                 GraphicsEngine::Get().GetClientSize());
 
-            myCameraActor->SetTranslation({ 0.0f, 100.0f, -850.0f });
-            myCameraActor->LookAt({ 0.0f, 0.0f, 250.0f });
+            myCameraActor->SetTranslation({ 0.0f, 260.0f, -950.0f });
+            myCameraActor->LookAt(sceneFocus);
+        }
+    }
+
+    {
+        Actor* directionalLightActor = myWorld.CreateActor("Directional Light Actor");
+        if (directionalLightActor != nullptr)
+        {
+            directionalLightActor->SetTranslation({ -450.0f, 650.0f, -350.0f });
+            directionalLightActor->LookAt(sceneFocus);
+            myDirectionalLightComponent = directionalLightActor->AddComponent<DirectionalLightComponent>("Directional Light");
+            if (myDirectionalLightComponent != nullptr)
+            {
+                myDirectionalLightComponent->SetColor({ 1.0f, 0.96f, 0.9f });
+                myDirectionalLightComponent->SetIntensity(11.0f);
+            }
+        }
+
+        myPointLightComponents.push_back(CreatePointLight(myWorld, "Warm Character Point", { 0.0f, 35.0f, 0.0f }, { 1.0f, 0.42f, 0.22f }, 300.0f, 650.0f));
+        //myPointLightComponents.push_back(CreatePointLight(myWorld, "Cool Character Point", { 60.0f, 75.0f, 330.0f }, { 0.25f, 0.55f, 1.0f }, 500.0f, 620.0f));
+        //myPointLightComponents.push_back(CreatePointLight(myWorld, "Chest Accent Point", { 170.0f, 25.0f, 235.0f }, { 0.35f, 1.0f, 0.55f }, 560.0f, 560.0f));
+
+        Actor* spotLightActor = myWorld.CreateActor("Spot Light Actor");
+        if (spotLightActor != nullptr)
+        {
+            spotLightActor->SetTranslation({ 350.0f, 380.0f, -250.0f });
+            spotLightActor->LookAt(sceneFocus);
+            mySpotLightComponent = spotLightActor->AddComponent<SpotLightComponent>("Spot Light");
+            if (mySpotLightComponent != nullptr)
+            {
+                mySpotLightComponent->SetColor({ 0.55f, 0.7f, 1.0f });
+                mySpotLightComponent->SetIntensity(2400.0f);
+                mySpotLightComponent->SetRadius(1200.0f);
+                mySpotLightComponent->SetConeAnglesDegrees(18.0f, 34.0f);
+            }
         }
     }
 
@@ -158,7 +280,21 @@ void ModelViewer::LoadScene()
         Actor* axesActor = myWorld.CreateActor("World Axes Actor");
         if (axesActor != nullptr)
         {
-            axesActor->AddComponent<StaticMeshComponent>("World Axes Mesh Component", axesMesh);
+            StaticMeshComponent* axesMeshComponent = axesActor->AddComponent<StaticMeshComponent>("World Axes Mesh Component", axesMesh);
+            AssignMaterialToAllSlots(axesMeshComponent, CreateMaterialFromFile(materialRoot / "AxesMaterial.mat"));
+        }
+    }
+
+    if (std::shared_ptr<Mesh> floorMesh = GetRegisteredMesh("Floor"))
+    {
+        Actor* floorActor = myWorld.CreateActor("Floor Actor");
+        if (floorActor != nullptr)
+        {
+            StaticMeshComponent* floorMeshComponent = floorActor->AddComponent<StaticMeshComponent>("Floor Mesh Component", floorMesh);
+            floorActor->SetTranslation(floorPosition);
+            floorActor->SetRotation(0.0f, -90.0f, 0.0f);
+            floorActor->SetScale({ 1100.0f, 1100.0f, 1100.0f });
+            AssignMaterialToAllSlots(floorMeshComponent, CreateMaterialFromFile(materialRoot / "FloorMaterial.mat"));
         }
     }
 
@@ -169,29 +305,12 @@ void ModelViewer::LoadScene()
         if (chestActor != nullptr)
         {
             chestMeshComponent = chestActor->AddComponent<StaticMeshComponent>("SM_Chest Mesh Component", chestMesh);
-            chestActor->SetTranslation({ 500.0f, -120.0f, 250.0f });
-            chestActor->SetRotation(0.0f, 0.0f, 0.0f);
+            chestActor->SetTranslation(chestPosition);
+            chestActor->SetRotation(-18.0f, 0.0f, 0.0f);
             chestActor->SetScale({ 1.0f, 1.0f, 1.0f });
         }
 
-		if (chestMeshComponent != nullptr)
-		{
-			MaterialDescription desc;
-			desc.Domain = MaterialDomain::Surface;
-			desc.ShadingModel = ShadingModel::Unlit;
-			desc.BlendMode = BlendMode::Opaque;
-			desc.Name = "Chest_TestMaterial";
-			desc.MaterialShaderCode = myContentRoot.parent_path() / "Source" / "Application" / "ModelViewer" / "Materials" / "TestMaterial.hlsli";
-
-			std::shared_ptr<Material> material = std::make_shared<Material>();
-			if (GraphicsEngine::Get().CreateMaterial(desc, *material))
-			{
-				for (size_t materialIndex = 0; materialIndex < chestMesh->GetNumMaterialSlots(); ++materialIndex)
-				{
-					chestMeshComponent->SetMaterial(static_cast<unsigned>(materialIndex), material);
-				}
-			}
-		}
+		AssignMaterialToAllSlots(chestMeshComponent, CreateMaterialFromFile(materialRoot / "ChestMaterial.mat"));
     }
 
     if (std::shared_ptr<Mesh> characterMesh = GetRegisteredMesh("SK_C_TGA_Bro"))
@@ -200,12 +319,14 @@ void ModelViewer::LoadScene()
         if (characterActor != nullptr)
         {
             myAnimatedMeshComponent = characterActor->AddComponent<SkeletalMeshComponent>("TGA Bro Mesh Component", characterMesh);
-            characterActor->SetTranslation({ -450.0f, -120.0f, 250.0f });
+            characterActor->SetTranslation(characterPosition);
             characterActor->SetRotation(180.0f, 0.0f, 0.0f);
             characterActor->SetScale({ 1.0f, 1.0f, 1.0f });
 
             if (myAnimatedMeshComponent != nullptr)
             {
+                AssignMaterialToAllSlots(myAnimatedMeshComponent, CreateMaterialFromFile(materialRoot / "CharacterMaterial.mat"));
+
                 // TODO Engine future:
                 // Replace hardcoded joint mask with data-driven animation mask assets.
                 // Masks should be authored externally and resolved to joint indices when loading the skeleton.
@@ -215,20 +336,16 @@ void ModelViewer::LoadScene()
         }
     }
 
-    constexpr std::array primitiveNames = {
-        "Plane",
-        "Cube",
-        "Pyramid",
-        "Sphere",
-        "Torus",
+    const std::array primitivePlacements = {
+        PrimitivePlacement{ "Cube", { -310.0f, -15.0f, 120.0f }, { 12.0f, 28.0f, -8.0f }, { 95.0f, 95.0f, 95.0f } },
+        PrimitivePlacement{ "Pyramid", { 315.0f, 30.0f, 145.0f }, { -8.0f, -34.0f, 12.0f }, { 105.0f, 105.0f, 105.0f } },
+        PrimitivePlacement{ "Sphere", { -245.0f, 115.0f, 470.0f }, { 0.0f, 0.0f, 0.0f }, { 115.0f, 115.0f, 115.0f } },
+        PrimitivePlacement{ "Torus", { 300.0f, 90.0f, 505.0f }, { 24.0f, 42.0f, 0.0f }, { 115.0f, 115.0f, 115.0f } },
     };
 
-    constexpr float spacing = 165.0f;
-    const float startX = -spacing * (static_cast<float>(primitiveNames.size()) - 1.0f) * 0.5f;
-
-    for (size_t index = 0; index < primitiveNames.size(); ++index)
+    for (const PrimitivePlacement& placement : primitivePlacements)
     {
-        const std::string primitiveName = primitiveNames[index];
+        const std::string primitiveName = placement.Name;
         std::shared_ptr<Mesh> mesh = GetRegisteredMesh(primitiveName);
         if (mesh == nullptr)
         {
@@ -238,11 +355,11 @@ void ModelViewer::LoadScene()
         Actor* actor = myWorld.CreateActor(primitiveName + " Actor");
         if (actor != nullptr)
         {
-            actor->AddComponent<StaticMeshComponent>(primitiveName + " Mesh Component", mesh);
-            actor->SetTranslation({ startX + spacing * static_cast<float>(index), 0.0f, 250.0f });
-            actor->SetRotation(0.0f, 20.0f * static_cast<float>(index), 0.0f);
-            actor->SetScale({ 100.0f, 100.0f, 100.0f });
-
+            StaticMeshComponent* meshComponent = actor->AddComponent<StaticMeshComponent>(primitiveName + " Mesh Component", mesh);
+            actor->SetTranslation(placement.Position);
+            actor->SetRotation(placement.RotationDegrees.x, placement.RotationDegrees.y, placement.RotationDegrees.z);
+            actor->SetScale(placement.Scale);
+            AssignMaterialToAllSlots(meshComponent, CreateMaterialFromFile(materialRoot / (primitiveName + "Material.mat")));
         }
     }
 }
@@ -280,6 +397,47 @@ void ModelViewer::HandleAnimationInput()
         {
             myAnimatedMeshComponent->PlayAnimation("Wave", false);
         }
+    }
+}
+
+void ModelViewer::HandleLightInput()
+{
+    if ((myInputHandler.IsKeyPressed(Keys::NUMPAD7) || myInputHandler.IsKeyPressed(static_cast<int>('7')))
+        && myDirectionalLightComponent != nullptr)
+    {
+        myDirectionalLightComponent->SetEnabled(!myDirectionalLightComponent->IsEnabled());
+    }
+
+    if (myInputHandler.IsKeyPressed(Keys::NUMPAD8) || myInputHandler.IsKeyPressed(static_cast<int>('8')))
+    {
+        bool shouldEnable = true;
+        bool foundPointLight = false;
+        for (const PointLightComponent* pointLightComponent : myPointLightComponents)
+        {
+            if (pointLightComponent != nullptr)
+            {
+                shouldEnable = !pointLightComponent->IsEnabled();
+                foundPointLight = true;
+                break;
+            }
+        }
+
+        if (foundPointLight)
+        {
+            for (PointLightComponent* pointLightComponent : myPointLightComponents)
+            {
+                if (pointLightComponent != nullptr)
+                {
+                    pointLightComponent->SetEnabled(shouldEnable);
+                }
+            }
+        }
+    }
+
+    if ((myInputHandler.IsKeyPressed(Keys::NUMPAD9) || myInputHandler.IsKeyPressed(static_cast<int>('9')))
+        && mySpotLightComponent != nullptr)
+    {
+        mySpotLightComponent->SetEnabled(!mySpotLightComponent->IsEnabled());
     }
 }
 
