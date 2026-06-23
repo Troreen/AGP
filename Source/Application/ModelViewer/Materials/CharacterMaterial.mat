@@ -5,5 +5,6 @@
   "blendMode": "Opaque",
   "materialShaderCode": "CharacterMaterial.hlsli",
   "albedoTexture": "../../../../Assets/Textures/T_TGA_Bro_C.dds",
-  "normalTexture": "../../../../Assets/Textures/T_TGA_Bro_N.dds"
+  "normalTexture": "../../../../Assets/Textures/T_TGA_Bro_N.dds",
+  "materialTexture": "../../../../Assets/Textures/T_TGA_Bro_M.dds"
 }

@@ -19,6 +19,7 @@ struct MaterialDescription
     std::filesystem::path MaterialShaderCode;
     std::filesystem::path AlbedoTexture;
     std::filesystem::path NormalTexture;
+    std::filesystem::path MaterialTexture;
 };
 
 bool LoadMaterialDescription(const std::filesystem::path& aPath, MaterialDescription& outDescription);

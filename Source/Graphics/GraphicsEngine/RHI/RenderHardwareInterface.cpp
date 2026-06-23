@@ -554,6 +554,73 @@ bool RenderHardwareInterface::CreateCommandList(std::string_view aName, Graphics
 	return true;
 }
 
+bool RenderHardwareInterface::CreateRenderTargetTexture(std::string_view aName, unsigned aWidth, unsigned aHeight, unsigned aFormat, Texture& outTexture) const
+{
+	ensure(!aName.empty());
+	ensure(aWidth > 0);
+	ensure(aHeight > 0);
+
+	const DXGI_FORMAT format = static_cast<DXGI_FORMAT>(aFormat);
+
+	D3D11_TEXTURE2D_DESC textureDesc = {};
+	textureDesc.Width = aWidth;
+	textureDesc.Height = aHeight;
+	textureDesc.MipLevels = 1;
+	textureDesc.ArraySize = 1;
+	textureDesc.Format = format;
+	textureDesc.SampleDesc.Count = 1;
+	textureDesc.Usage = D3D11_USAGE_DEFAULT;
+	textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+
+	ComPtr<ID3D11Texture2D> texture;
+	HRESULT result = myDevice->CreateTexture2D(&textureDesc, nullptr, &texture);
+	if (FAILED(result))
+	{
+		LOG(RhiLog, Error, "Failed to create render target texture {}!", aName);
+		return false;
+	}
+
+	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
+	rtvDesc.Format = format;
+	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+
+	ComPtr<ID3D11RenderTargetView> rtv;
+	result = myDevice->CreateRenderTargetView(texture.Get(), &rtvDesc, &rtv);
+	if (FAILED(result))
+	{
+		LOG(RhiLog, Error, "Failed to create render target view for texture {}!", aName);
+		return false;
+	}
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Format = format;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MipLevels = 1;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+
+	ComPtr<ID3D11ShaderResourceView> srv;
+	result = myDevice->CreateShaderResourceView(texture.Get(), &srvDesc, &srv);
+	if (FAILED(result))
+	{
+		LOG(RhiLog, Error, "Failed to create shader resource view for render target texture {}!", aName);
+		return false;
+	}
+
+	SetObjectName(texture, aName);
+	const std::string rtvName = std::format("{}_RTV", aName);
+	SetObjectName(rtv, rtvName);
+	const std::string srvName = std::format("{}_SRV", aName);
+	SetObjectName(srv, srvName);
+
+	outTexture.myResource = texture;
+	outTexture.myRTV = rtv;
+	outTexture.mySRV = srv;
+	outTexture.myViewport = { 0, 0, static_cast<float>(aWidth), static_cast<float>(aHeight), 0, 1 };
+	outTexture.myName = aName;
+
+	return true;
+}
+
 bool RenderHardwareInterface::CreateTexture(std::string_view aName, const uint8_t* aByteCode, size_t aByteCodeSize, Texture& outTexture) const
 {
 	ensure(!aName.empty());

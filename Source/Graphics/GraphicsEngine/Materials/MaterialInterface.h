@@ -83,6 +83,7 @@ public:
 	static constexpr unsigned MAX_MATERIAL_TEXTURE_COUNT = 16;
 	static constexpr unsigned ALBEDO_TEXTURE_SLOT = 0;
 	static constexpr unsigned NORMAL_TEXTURE_SLOT = 1;
+	static constexpr unsigned MATERIAL_TEXTURE_SLOT = 2;
 
 	MaterialInterface() = default;
 	virtual ~MaterialInterface() = default;

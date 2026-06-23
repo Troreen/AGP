@@ -23,7 +23,8 @@ enum class BufferType : uint8_t
 enum class Topology : unsigned
 {
 	Undefined = 0,
-	TriangleList = 4
+	TriangleList = 4,
+	TriangleStrip = 5
 };
 
 enum class RasterizerFillMode : unsigned

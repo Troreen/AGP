@@ -86,6 +86,8 @@
     <None Include="Materials\CharacterMaterial.mat" />
     <None Include="Materials\ChestMaterial.hlsli" />
     <None Include="Materials\ChestMaterial.mat" />
+    <None Include="Materials\ColorCheckerMaterial.hlsli" />
+    <None Include="Materials\ColorCheckerMaterial.mat" />
     <None Include="Materials\CubeMaterial.hlsli" />
     <None Include="Materials\CubeMaterial.mat" />
     <None Include="Materials\FloorMaterial.hlsli" />
