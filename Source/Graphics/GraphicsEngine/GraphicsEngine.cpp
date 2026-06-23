@@ -1152,27 +1152,28 @@ void GraphicsEngine::RenderMesh(GraphicsCommandList& inoutCommandList, const Mes
 		{
 			currentMaterial = elementMaterial;
 			inoutCommandList.SetPipelineState(&currentMaterial->GetPSO());
-		}
 
-		if (currentMaterial->HasParameters())
-		{
-			if (currentMaterial->IsMaterialDataDirty())
+			if (currentMaterial->HasParameters())
 			{
-				currentMaterial->RefreshMaterialData();
+				if (currentMaterial->IsMaterialDataDirty())
+				{
+					currentMaterial->RefreshMaterialData();
+				}
+
+				UpdateAndSetConstantBufferInternal(inoutCommandList, ConstantBuffer::MaterialBuffer, currentMaterial->GetParameterDataBlock(),
+					Material::MATERIAL_BUFFER_SIZE, 3, PipeLineStage_VertexShader | PipeLineStage_PixelShader);
 			}
 
-			UpdateAndSetConstantBufferInternal(inoutCommandList, ConstantBuffer::MaterialBuffer, currentMaterial->GetParameterDataBlock(), 
-				Material::MATERIAL_BUFFER_SIZE, 3, PipeLineStage_VertexShader | PipeLineStage_PixelShader);
-		}
-		std::vector<const Texture*> textures(Material::MAX_MATERIAL_TEXTURE_COUNT);
-		for (size_t t = 0; t < Material::MAX_MATERIAL_TEXTURE_COUNT; ++t)
-		{
-			if (const std::shared_ptr<Texture>& texture = currentMaterial->GetTexture(static_cast<unsigned>(t)))
+			std::array<const Texture*, Material::MAX_MATERIAL_TEXTURE_COUNT> textures = {};
+			for (size_t t = 0; t < Material::MAX_MATERIAL_TEXTURE_COUNT; ++t)
 			{
-				textures[t] = texture.get();
+				if (const std::shared_ptr<Texture>& texture = currentMaterial->GetTexture(static_cast<unsigned>(t)))
+				{
+					textures[t] = texture.get();
+				}
 			}
+			inoutCommandList.SetShaderResources(textures.data(), textures.size(), 0, PipeLineStage_VertexShader | PipeLineStage_PixelShader);
 		}
-		inoutCommandList.SetShaderResources(textures.data(), textures.size(), 0, PipeLineStage_VertexShader | PipeLineStage_PixelShader);
 
 		inoutCommandList.DrawIndexed(element.NumIndices, element.IndexOffset);
 	}

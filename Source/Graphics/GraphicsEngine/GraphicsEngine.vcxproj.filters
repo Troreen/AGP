@@ -158,6 +158,8 @@
     <None Include="Shaders\Material\Material.hlsli" />
     <None Include="Shaders\Material\Lighting.hlsli" />
     <None Include="Shaders\Material\MaterialTextures.hlsli" />
+    <None Include="Shaders\Material\PBR.hlsli" />
     <None Include="Shaders\Material\Samplers.hlsli" />
+    <None Include="Shaders\Material\ShadowSampling.hlsli" />
   </ItemGroup>
 </Project>

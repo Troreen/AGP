@@ -1,6 +1,8 @@
 #pragma once
+#include <filesystem>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #pragma region WindowsIncludes
@@ -57,9 +59,11 @@
 
 class Mesh;
 class DirectionalLightComponent;
+class MaterialInterface;
 class PointLightComponent;
 class SkeletalMeshComponent;
 class SpotLightComponent;
+class StaticMeshComponent;
 
 class ModelViewer
 {
@@ -79,6 +83,15 @@ private:
 	};
 
 	std::shared_ptr<Mesh> GetRegisteredMesh(const std::string& aName) const;
+	std::shared_ptr<MaterialInterface> GetMaterial(const std::filesystem::path& aMaterialFile);
+	StaticMeshComponent* CreateStaticMeshActor(
+		const std::string& anActorName,
+		const std::string& aComponentName,
+		const std::string& aMeshName,
+		const std::filesystem::path& aMaterialFile,
+		const CommonUtilities::Vector3<float>& aPosition,
+		const CommonUtilities::Vector3<float>& aRotationDegrees,
+		const CommonUtilities::Vector3<float>& aScale);
 	void HandleAnimationInput();
 	void HandleLightInput();
 	void UpdateScene(float aDeltaTime);
@@ -102,4 +115,5 @@ private:
 	GraphicsCommandList myCommandList;
 
 	std::filesystem::path myContentRoot;
+	std::unordered_map<std::string, std::shared_ptr<MaterialInterface>> myMaterialCache;
 };
