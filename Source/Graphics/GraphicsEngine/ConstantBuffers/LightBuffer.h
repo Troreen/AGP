@@ -20,7 +20,12 @@ struct LightBuffer
 
 		float OuterCone = 0.0f;
 		float Radius = 1.0f;
-		CU::Vector2f __padding = CU::Vector2f::Zero;
+		unsigned ShadowMapIndex = 0;
+		unsigned NumCascades = 0;
+
+		std::array<CU::Matrix4f, 4> LightViewProjTexture = {};
+		CU::Vector4f CascadeSplits = CU::Vector4f::Zero;
+		CU::Vector4f ShadowSettings = CU::Vector4f::Zero;
 	};
 
 	static constexpr unsigned MaxLights = 8;

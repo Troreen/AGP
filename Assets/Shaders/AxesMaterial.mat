@@ -1,9 +1,0 @@
-{
-  "name": "AxesMaterial",
-  "domain": "Surface",
-  "shadingModel": "Unlit",
-  "blendMode": "Opaque",
-  "materialShaderCode": "AxesMaterial.hlsli",
-  "albedoTexture": "../../../../Assets/Textures/T_Default_C.dds",
-  "normalTexture": ""
-}

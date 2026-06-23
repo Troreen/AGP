@@ -319,6 +319,7 @@ void MeshLibrary::RegisterPrimitiveMeshes()
 	RegisterMesh("Cube", PrimitiveMeshBuilder::CreateCube());
 	RegisterMesh("Pyramid", PrimitiveMeshBuilder::CreatePyramid());
 	RegisterMesh("Sphere", PrimitiveMeshBuilder::CreateSphere());
+	RegisterMesh("SmoothSphere", PrimitiveMeshBuilder::CreateSmoothSphere());
 	RegisterMesh("Torus", PrimitiveMeshBuilder::CreateTorus());
 	RegisterMesh("WorldAxes", PrimitiveMeshBuilder::CreateAxes());
 }

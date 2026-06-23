@@ -15,9 +15,11 @@ struct PipelineStateDescription
 
     ShaderData VertexShader;
     ShaderData PixelShader;
+    ShaderData GeometryShader;
 
     std::vector<VertexElementDesc> InputLayoutElements;
     Topology Topology = Topology::TriangleList;
+    RasterizerStateDescription RasterizerState;
 };
 
 class PipelineStateObject
@@ -34,6 +36,8 @@ private:
 	Microsoft::WRL::ComPtr<struct ID3D11InputLayout> myInputLayout;
 	Microsoft::WRL::ComPtr<struct ID3D11VertexShader> myVertexShader;
 	Microsoft::WRL::ComPtr<struct ID3D11PixelShader> myPixelShader;
+	Microsoft::WRL::ComPtr<struct ID3D11GeometryShader> myGeometryShader;
+	Microsoft::WRL::ComPtr<struct ID3D11RasterizerState> myRasterizerState;
 
     std::string myName;
     Topology myTopology;

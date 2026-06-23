@@ -120,6 +120,41 @@ namespace
 			std::cos(aLongitudeRadians) * ringRadius);
 	}
 
+	std::shared_ptr<Mesh> CreateSphereMesh(std::string_view aName, int aLatitudeSegments, int aLongitudeSegments, float aRadius)
+	{
+		std::vector<Vertex> vertices;
+		std::vector<unsigned> indices;
+		vertices.reserve(aLatitudeSegments * aLongitudeSegments * 4);
+		indices.reserve(aLatitudeSegments * aLongitudeSegments * 6);
+
+		for (int latitude = 0; latitude < aLatitudeSegments; ++latitude)
+		{
+			const float latitude0 = -CommonUtilities::Maths::HalfPi<float>() + CommonUtilities::Maths::Pi<float>() * static_cast<float>(latitude) / static_cast<float>(aLatitudeSegments);
+			const float latitude1 = -CommonUtilities::Maths::HalfPi<float>() + CommonUtilities::Maths::Pi<float>() * static_cast<float>(latitude + 1) / static_cast<float>(aLatitudeSegments);
+			const float v0 = 1.0f - static_cast<float>(latitude) / static_cast<float>(aLatitudeSegments);
+			const float v1 = 1.0f - static_cast<float>(latitude + 1) / static_cast<float>(aLatitudeSegments);
+
+			for (int longitude = 0; longitude < aLongitudeSegments; ++longitude)
+			{
+				const float longitude0 = CommonUtilities::Maths::TwoPi<float>() * static_cast<float>(longitude) / static_cast<float>(aLongitudeSegments);
+				const float longitude1 = CommonUtilities::Maths::TwoPi<float>() * static_cast<float>(longitude + 1) / static_cast<float>(aLongitudeSegments);
+				const float u0 = static_cast<float>(longitude) / static_cast<float>(aLongitudeSegments);
+				const float u1 = static_cast<float>(longitude + 1) / static_cast<float>(aLongitudeSegments);
+				AddReversedQuad(vertices, indices,
+					GetSpherePoint(latitude0, longitude0, aRadius),
+					GetSpherePoint(latitude0, longitude1, aRadius),
+					GetSpherePoint(latitude1, longitude1, aRadius),
+					GetSpherePoint(latitude1, longitude0, aRadius),
+					UV{ u0, v0 },
+					UV{ u1, v0 },
+					UV{ u1, v1 },
+					UV{ u0, v1 });
+			}
+		}
+
+		return CreateMesh(aName, std::move(vertices), std::move(indices));
+	}
+
 	Point3 GetTorusPoint(float aMajorRadians, float aMinorRadians, float aMajorRadius, float aMinorRadius)
 	{
 		const float tubeX = aMajorRadius + std::cos(aMinorRadians) * aMinorRadius;
@@ -303,37 +338,16 @@ std::shared_ptr<Mesh> PrimitiveMeshBuilder::CreateSphere()
 	constexpr int longitudeSegments = 16;
 	constexpr float radius = 0.55f;
 
-	std::vector<Vertex> vertices;
-	std::vector<unsigned> indices;
-	vertices.reserve(latitudeSegments * longitudeSegments * 4);
-	indices.reserve(latitudeSegments * longitudeSegments * 6);
+	return CreateSphereMesh("Sphere", latitudeSegments, longitudeSegments, radius);
+}
 
-	for (int latitude = 0; latitude < latitudeSegments; ++latitude)
-	{
-		const float latitude0 = -CommonUtilities::Maths::HalfPi<float>() + CommonUtilities::Maths::Pi<float>() * static_cast<float>(latitude) / static_cast<float>(latitudeSegments);
-		const float latitude1 = -CommonUtilities::Maths::HalfPi<float>() + CommonUtilities::Maths::Pi<float>() * static_cast<float>(latitude + 1) / static_cast<float>(latitudeSegments);
-		const float v0 = 1.0f - static_cast<float>(latitude) / static_cast<float>(latitudeSegments);
-		const float v1 = 1.0f - static_cast<float>(latitude + 1) / static_cast<float>(latitudeSegments);
+std::shared_ptr<Mesh> PrimitiveMeshBuilder::CreateSmoothSphere()
+{
+	constexpr int latitudeSegments = 24;
+	constexpr int longitudeSegments = 48;
+	constexpr float radius = 0.55f;
 
-		for (int longitude = 0; longitude < longitudeSegments; ++longitude)
-		{
-			const float longitude0 = CommonUtilities::Maths::TwoPi<float>() * static_cast<float>(longitude) / static_cast<float>(longitudeSegments);
-			const float longitude1 = CommonUtilities::Maths::TwoPi<float>() * static_cast<float>(longitude + 1) / static_cast<float>(longitudeSegments);
-			const float u0 = static_cast<float>(longitude) / static_cast<float>(longitudeSegments);
-			const float u1 = static_cast<float>(longitude + 1) / static_cast<float>(longitudeSegments);
-			AddReversedQuad(vertices, indices,
-				GetSpherePoint(latitude0, longitude0, radius),
-				GetSpherePoint(latitude0, longitude1, radius),
-				GetSpherePoint(latitude1, longitude1, radius),
-				GetSpherePoint(latitude1, longitude0, radius),
-				UV{ u0, v0 },
-				UV{ u1, v0 },
-				UV{ u1, v1 },
-				UV{ u0, v1 });
-		}
-	}
-
-	return CreateMesh("Sphere", std::move(vertices), std::move(indices));
+	return CreateSphereMesh("SmoothSphere", latitudeSegments, longitudeSegments, radius);
 }
 
 std::shared_ptr<Mesh> PrimitiveMeshBuilder::CreateTorus()

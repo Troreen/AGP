@@ -7,8 +7,8 @@ struct Vertex
     float4 Color : COLOR;
     uint4 BoneIDs : BONEIDS;
     float4 SkinWeights : SKINWEIGHTS;
-    float2 UV0 : TEXCOORD0;
-    float2 UV1 : TEXCOORD1;
+    float2 UV0 : UV0;
+    float2 UV1 : UV1;
     float3 Normal : NORMAL;
     float3 Tangent : TANGENT;
 };

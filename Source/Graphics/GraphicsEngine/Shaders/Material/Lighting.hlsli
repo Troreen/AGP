@@ -3,6 +3,7 @@ static const uint LIGHT_TYPE_DIRECTIONAL = 0;
 static const uint LIGHT_TYPE_POINT = 1;
 static const uint LIGHT_TYPE_SPOT = 2;
 static const uint MAX_LIGHTS = 8;
+static const uint SHADOW_SETTINGS_DEPTH_BIAS = 0;
 
 struct Light
 {
@@ -17,7 +18,12 @@ struct Light
 
     float OuterCone;
     float Radius;
-    float2 __padding;
+    uint ShadowMapIndex;
+    uint NumCascades;
+
+    row_major float4x4 LightViewProjTexture[4];
+    float4 CascadeSplits;
+    float4 ShadowSettings;
 };
 
 cbuffer LightBuffer : register(b4)
@@ -25,6 +31,11 @@ cbuffer LightBuffer : register(b4)
     Light LB_Lights[MAX_LIGHTS];
     uint LB_NumActiveLights;
     float3 __LB_padding;
+}
+
+float GetShadowDepthBias(Light aLight)
+{
+    return aLight.ShadowSettings[SHADOW_SETTINGS_DEPTH_BIAS];
 }
 
 float3 LinearToGamma(float3 aColor)
@@ -87,6 +98,161 @@ float3 CalculateSpotLight(Light aLight, float3 anAlbedo, float3 aNormal, float3 
     return NdotL * (anAlbedo / PI) * aLight.Color * illuminance;
 }
 
+bool IsValidShadowCoord(float3 aShadowCoord)
+{
+    return aShadowCoord.x >= 0.0f && aShadowCoord.x <= 1.0f
+        && aShadowCoord.y >= 0.0f && aShadowCoord.y <= 1.0f
+        && aShadowCoord.z >= 0.0f && aShadowCoord.z <= 1.0f;
+}
+
+float SampleDirectionalShadowMap(uint aCascadeIndex, float2 aShadowUV, float aShadowDepth)
+{
+    float shadow = 1.0f;
+    switch (aCascadeIndex)
+    {
+        case 0:
+            shadow = DirectionalShadowMaps[0].SampleCmpLevelZero(ShadowCmpSampler, aShadowUV, aShadowDepth);
+            break;
+        case 1:
+            shadow = DirectionalShadowMaps[1].SampleCmpLevelZero(ShadowCmpSampler, aShadowUV, aShadowDepth);
+            break;
+        case 2:
+            shadow = DirectionalShadowMaps[2].SampleCmpLevelZero(ShadowCmpSampler, aShadowUV, aShadowDepth);
+            break;
+        case 3:
+            shadow = DirectionalShadowMaps[3].SampleCmpLevelZero(ShadowCmpSampler, aShadowUV, aShadowDepth);
+            break;
+    }
+    return shadow;
+}
+
+float SampleSpotShadowMap(uint aShadowIndex, float2 aShadowUV, float aShadowDepth)
+{
+    float shadow = 1.0f;
+    switch (aShadowIndex)
+    {
+        case 0:
+            shadow = SpotLightShadowMaps[0].SampleCmpLevelZero(ShadowCmpSampler, aShadowUV, aShadowDepth);
+            break;
+        case 1:
+            shadow = SpotLightShadowMaps[1].SampleCmpLevelZero(ShadowCmpSampler, aShadowUV, aShadowDepth);
+            break;
+        case 2:
+            shadow = SpotLightShadowMaps[2].SampleCmpLevelZero(ShadowCmpSampler, aShadowUV, aShadowDepth);
+            break;
+        case 3:
+            shadow = SpotLightShadowMaps[3].SampleCmpLevelZero(ShadowCmpSampler, aShadowUV, aShadowDepth);
+            break;
+    }
+    return shadow;
+}
+
+float SamplePointShadowMap(uint aShadowIndex, float3 aDirection, float aShadowDepth)
+{
+    float shadow = 1.0f;
+    switch (aShadowIndex)
+    {
+        case 0:
+            shadow = PointLightShadowMaps[0].SampleCmpLevelZero(ShadowCmpSampler, aDirection, aShadowDepth);
+            break;
+        case 1:
+            shadow = PointLightShadowMaps[1].SampleCmpLevelZero(ShadowCmpSampler, aDirection, aShadowDepth);
+            break;
+        case 2:
+            shadow = PointLightShadowMaps[2].SampleCmpLevelZero(ShadowCmpSampler, aDirection, aShadowDepth);
+            break;
+        case 3:
+            shadow = PointLightShadowMaps[3].SampleCmpLevelZero(ShadowCmpSampler, aDirection, aShadowDepth);
+            break;
+    }
+    return shadow;
+}
+
+float CalculateProjectedShadow(Light aLight, uint aMatrixIndex, float3 aWorldPosition, bool aUseDirectionalMaps)
+{
+    float shadow = 1.0f;
+    const float4 shadowPosition = mul(float4(aWorldPosition, 1.0f), aLight.LightViewProjTexture[aMatrixIndex]);
+    const float3 shadowCoord = shadowPosition.xyz / shadowPosition.w;
+    if (IsValidShadowCoord(shadowCoord))
+    {
+        const float shadowDepth = saturate(shadowCoord.z - GetShadowDepthBias(aLight));
+        if (aUseDirectionalMaps)
+        {
+            shadow = SampleDirectionalShadowMap(aMatrixIndex, shadowCoord.xy, shadowDepth);
+        }
+        else
+        {
+            shadow = SampleSpotShadowMap(aLight.ShadowMapIndex, shadowCoord.xy, shadowDepth);
+        }
+    }
+
+    return shadow;
+}
+
+uint GetDirectionalCascadeIndex(Light aLight, float aViewDepth);
+
+float CalculateDirectionalShadow(Light aLight, float3 aWorldPosition)
+{
+    float shadow = 1.0f;
+    const float viewDepth = mul(float4(aWorldPosition, 1.0f), FB_View).z;
+    const uint cascadeIndex = GetDirectionalCascadeIndex(aLight, viewDepth);
+
+    if (aLight.NumCascades > 0)
+    {
+        shadow = CalculateProjectedShadow(aLight, cascadeIndex, aWorldPosition, true);
+    }
+
+    return shadow;
+}
+
+float CalculateSpotShadow(Light aLight, float3 aWorldPosition)
+{
+    float shadow = 1.0f;
+    if (aLight.NumCascades > 0)
+    {
+        shadow = CalculateProjectedShadow(aLight, 0, aWorldPosition, false);
+    }
+
+    return shadow;
+}
+
+float CalculatePointShadow(Light aLight, float3 aWorldPosition)
+{
+    float shadow = 1.0f;
+    const float3 toPixel = aWorldPosition - aLight.Position;
+    const float distanceToPixel = length(toPixel);
+    if (aLight.NumCascades > 0 && distanceToPixel > 0.001f && distanceToPixel <= aLight.Radius)
+    {
+        const float3 absToPixel = abs(toPixel);
+        const float z = max(absToPixel.x, max(absToPixel.y, absToPixel.z));
+        const float nearPlane = 1.0f;
+        const float farPlane = aLight.Radius;
+        const float range = farPlane / (farPlane - nearPlane);
+        const float depth = saturate(((range * z) - (range * nearPlane)) / z - GetShadowDepthBias(aLight));
+        shadow = SamplePointShadowMap(aLight.ShadowMapIndex, normalize(toPixel), depth);
+    }
+
+    return shadow;
+}
+
+uint GetDirectionalCascadeIndex(Light aLight, float aViewDepth)
+{
+    uint cascadeIndex = 0;
+    if (aViewDepth > aLight.CascadeSplits.z)
+    {
+        cascadeIndex = 3;
+    }
+    else if (aViewDepth > aLight.CascadeSplits.y)
+    {
+        cascadeIndex = 2;
+    }
+    else if (aViewDepth > aLight.CascadeSplits.x)
+    {
+        cascadeIndex = 1;
+    }
+    return cascadeIndex;
+}
+
 float3 CalculateLighting(float3 anAlbedo, float3 aNormal, float3 aWorldPosition)
 {
     float3 radiance = 0.0f;
@@ -97,15 +263,15 @@ float3 CalculateLighting(float3 anAlbedo, float3 aNormal, float3 aWorldPosition)
         const Light light = LB_Lights[lightIndex];
         if (light.Type == LIGHT_TYPE_DIRECTIONAL)
         {
-            radiance += CalculateDirectionalLight(light, anAlbedo, aNormal);
+            radiance += CalculateDirectionalLight(light, anAlbedo, aNormal) * CalculateDirectionalShadow(light, aWorldPosition);
         }
         else if (light.Type == LIGHT_TYPE_POINT)
         {
-            radiance += CalculatePointLight(light, anAlbedo, aNormal, aWorldPosition);
+            radiance += CalculatePointLight(light, anAlbedo, aNormal, aWorldPosition) * CalculatePointShadow(light, aWorldPosition);
         }
         else if (light.Type == LIGHT_TYPE_SPOT)
         {
-            radiance += CalculateSpotLight(light, anAlbedo, aNormal, aWorldPosition);
+            radiance += CalculateSpotLight(light, anAlbedo, aNormal, aWorldPosition) * CalculateSpotShadow(light, aWorldPosition);
         }
     }
 

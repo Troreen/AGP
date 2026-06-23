@@ -8,12 +8,14 @@
 # Build outputs used by the solution
 Intermediate/
 /Lib/
+/Bin/
 x64/
 x86/
 /Debug/
 /Release/
 
 # Common generated artifacts
+*.log
 *.idb
 *.ilk
 *.ipch
@@ -22,3 +24,8 @@ x86/
 *.res
 *.exp
 *.exe
+*.dll
+
+# Generated/copied shader artifacts
+/Assets/Shaders/
+/Source/Graphics/GraphicsEngine/TemporaryShaders/

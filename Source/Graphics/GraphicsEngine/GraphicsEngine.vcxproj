@@ -275,6 +275,7 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shaders\Internal\PointShadow_GS.hlsl" />
     <None Include="Shaders\Material\Common.hlsli" />
     <None Include="Shaders\Material\Lighting.hlsli" />
     <None Include="Shaders\Material\Material.hlsli" />

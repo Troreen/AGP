@@ -319,6 +319,91 @@ bool RenderHardwareInterface::CreateConstantBuffer(std::string_view aName, size_
 	return true;
 }
 
+bool RenderHardwareInterface::CreateDepthStencil(std::string_view aName, unsigned aWidth, unsigned aHeight, Texture& outDepthStencil, bool aCubeMap) const
+{
+	ensure(!aName.empty());
+
+	D3D11_TEXTURE2D_DESC depthDesc = {};
+	depthDesc.Width = aWidth;
+	depthDesc.Height = aHeight;
+	depthDesc.Format = DXGI_FORMAT_R32_TYPELESS; // DXGI_FORMAT_R32G8X24_TYPLESS
+	depthDesc.Usage = D3D11_USAGE_DEFAULT;
+	depthDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+	depthDesc.CPUAccessFlags = 0;
+	depthDesc.MiscFlags = aCubeMap ? D3D11_RESOURCE_MISC_TEXTURECUBE : 0;
+	depthDesc.MipLevels = 1;
+	depthDesc.ArraySize = aCubeMap ? 6 : 1;
+	depthDesc.SampleDesc.Count = 1;
+	depthDesc.SampleDesc.Quality = 0;
+
+	HRESULT result = S_OK;
+
+	ComPtr<ID3D11Texture2D> depthTexture;
+	result = myDevice->CreateTexture2D(&depthDesc, nullptr, &depthTexture);
+	if (FAILED(result))
+	{
+		LOG(RhiLog, Error, "Failed to create depth stencil {}!", aName);
+		return false;
+	}
+
+	const std::string textureName = std::format("{}_T2D", aName);
+	SetObjectName(depthTexture, textureName);
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT; // DXGI_FORMAT_D32_FLOAT_S8X24_UINT
+	if (aCubeMap)
+	{
+		dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
+		dsvDesc.Texture2DArray.MipSlice = 0;
+		dsvDesc.Texture2DArray.FirstArraySlice = 0;
+		dsvDesc.Texture2DArray.ArraySize = 6;
+	}
+	else
+	{
+		dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	}
+
+	result = myDevice->CreateDepthStencilView(depthTexture.Get(), &dsvDesc, &outDepthStencil.myDSV);
+	if (FAILED(result))
+	{
+		LOG(RhiLog, Error, "Failed to create depth stencil view for {}!", aName);
+		return false;
+	}
+
+	const std::string dsvName = std::format("{}_DSV", aName);
+	SetObjectName(outDepthStencil.myDSV, dsvName);
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Format = DXGI_FORMAT_R32_FLOAT; // DXGI_FORMAT_R32_FLOAT_X824_TYPELESS
+	if (aCubeMap)
+	{
+		srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
+		srvDesc.TextureCube.MipLevels = depthDesc.MipLevels;
+		srvDesc.TextureCube.MostDetailedMip = 0;
+	}
+	else
+	{
+		srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+		srvDesc.Texture2D.MipLevels = depthDesc.MipLevels;
+		srvDesc.Texture2D.MostDetailedMip = 0;
+	}
+
+	result = myDevice->CreateShaderResourceView(depthTexture.Get(), &srvDesc, &outDepthStencil.mySRV);
+	if (FAILED(result))
+	{
+		LOG(RhiLog, Error, "Failed to create shader resource view for depth stencil {}!", aName);
+		return false;
+	}
+
+	const std::string srvName = std::format("{}_SRV", aName);
+	SetObjectName(outDepthStencil.mySRV, srvName);
+
+	outDepthStencil.myViewport = { 0, 0, static_cast<float>(aWidth), static_cast<float>(aHeight), 0, 1 };
+	outDepthStencil.myName = aName;
+
+	return true;
+}
+
 bool RenderHardwareInterface::CreatePipelineStateObject(const PipelineStateDescription& aDescription, PipelineStateObject &outPSO) const
 {
     ensure(!aDescription.Name.empty());
@@ -356,6 +441,23 @@ bool RenderHardwareInterface::CreatePipelineStateObject(const PipelineStateDescr
 			const std::string shaderName = std::format("{}_PS", aDescription.Name);
 			SetObjectName(shader, shaderName);
 			outPSO.myPixelShader = shader;
+		}
+	}
+
+	if (aDescription.GeometryShader.ByteCode)
+	{
+		ComPtr<ID3D11GeometryShader> shader;
+		const HRESULT result = myDevice->CreateGeometryShader(aDescription.GeometryShader.ByteCode, aDescription.GeometryShader.ByteCodeSize, nullptr, &shader);
+		if (FAILED(result))
+		{
+			LOG(RhiLog, Error, "Failed to create geometry shader for the pipeline state object {}!", aDescription.Name);
+			hasErrored = true;
+		}
+		else
+		{
+			const std::string shaderName = std::format("{}_GS", aDescription.Name);
+			SetObjectName(shader, shaderName);
+			outPSO.myGeometryShader = shader;
 		}
 	}
 
@@ -403,6 +505,32 @@ bool RenderHardwareInterface::CreatePipelineStateObject(const PipelineStateDescr
 
 	outPSO.myName = aDescription.Name;
 	outPSO.myTopology = aDescription.Topology;
+
+	D3D11_RASTERIZER_DESC rasterizerDesc = {};
+	rasterizerDesc.FillMode = static_cast<D3D11_FILL_MODE>(aDescription.RasterizerState.FillMode);
+	rasterizerDesc.CullMode = static_cast<D3D11_CULL_MODE>(aDescription.RasterizerState.CullMode);
+	rasterizerDesc.FrontCounterClockwise = false;
+	rasterizerDesc.DepthBias = aDescription.RasterizerState.DepthBias;
+	rasterizerDesc.DepthBiasClamp = aDescription.RasterizerState.DepthBiasClamp;
+	rasterizerDesc.SlopeScaledDepthBias = aDescription.RasterizerState.SlopeScaledDepthBias;
+	rasterizerDesc.DepthClipEnable = aDescription.RasterizerState.DepthClipEnable;
+	rasterizerDesc.ScissorEnable = false;
+	rasterizerDesc.MultisampleEnable = false;
+	rasterizerDesc.AntialiasedLineEnable = false;
+
+	ComPtr<ID3D11RasterizerState> rasterizerState;
+	const HRESULT rasterizerResult = myDevice->CreateRasterizerState(&rasterizerDesc, &rasterizerState);
+	if (FAILED(rasterizerResult))
+	{
+		LOG(RhiLog, Error, "Failed to create rasterizer state for the pipeline state object {}!", aDescription.Name);
+		hasErrored = true;
+	}
+	else
+	{
+		const std::string rasterizerName = std::format("{}_RS", aDescription.Name);
+		SetObjectName(rasterizerState, rasterizerName);
+		outPSO.myRasterizerState = rasterizerState;
+	}
 
 	return !hasErrored;
 }

@@ -4,9 +4,9 @@
 #include <wrl.h>
 
 #include "RHIStructs.h"
+#include "PipelineStateObject.h"
 
 class Buffer;
-class PipelineStateObject;
 class RenderHardwareInterface;
 class Texture;
 
@@ -39,6 +39,9 @@ public:
 	void SetIndexBuffer(const Buffer* aBuffer) const;
 	void SetConstantBuffer(const Buffer* aBuffer, unsigned aSlot, PipeLineStages aStages) const; 
 	void SetPipelineState (const PipelineStateObject* aPSO);
+	void SetOverridePipelineState(const PipelineStateObject& aOverridePSO, PipeLineStages aOverrideStages);
+	bool IsOverrideActive(PipeLineStages aOverride) const;
+	void ClearOverridePipelineState();
 
     void SetShaderResources(const Texture* const* aResourcesList, size_t aNumResources, unsigned aStartSlot, PipeLineStages aStages) const;
     void SetShaderSamplers(const Sampler* const* aSamplerList, size_t aNumSamplers, unsigned aStartSlot, PipeLineStages aStages) const;
@@ -57,6 +60,8 @@ private:
     Microsoft::WRL::ComPtr<struct ID3D11DeviceContext> myContext;
     Microsoft::WRL::ComPtr<struct ID3D11CommandList> myCommandList;
     Microsoft::WRL::ComPtr<struct ID3DUserDefinedAnnotation> myUDA;
+    PipelineStateObject myOverridePipelineState;
+    PipeLineStages myCurrentOverrides = PipeLineStage_None;
 
 };
 

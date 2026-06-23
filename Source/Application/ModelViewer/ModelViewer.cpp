@@ -23,6 +23,7 @@ namespace
 	struct PrimitivePlacement
 	{
 		const char* Name = "";
+		const char* MaterialName = "";
 		Vector3f Position;
 		Vector3f RotationDegrees;
 		Vector3f Scale;
@@ -64,6 +65,78 @@ namespace
 		{
 			aMeshComponent->SetMaterial(static_cast<unsigned>(materialIndex), aMaterial);
 		}
+	}
+
+	bool IsShiftDown(const CommonUtilities::InputHandler& anInputHandler)
+	{
+		return anInputHandler.IsKeyDown(Keys::SHIFT)
+			|| anInputHandler.IsKeyDown(Keys::LSHIFT)
+			|| anInputHandler.IsKeyDown(Keys::RSHIFT);
+	}
+
+	bool IsKeyPressed(const CommonUtilities::InputHandler& anInputHandler, Keys aNumpadKey, char aDigitKey)
+	{
+		return anInputHandler.IsKeyPressed(aNumpadKey)
+			|| anInputHandler.IsKeyPressed(static_cast<int>(aDigitKey));
+	}
+
+	void AimActorAlongCameraForward(Actor& anActor, const CommonUtilities::Transform& aCameraTransform)
+	{
+		Vector3f forward = aCameraTransform.GetForward();
+		if (forward.LengthSqr() <= 0.0f)
+		{
+			forward = Vector3f::UnitZ;
+		}
+		else
+		{
+			forward.Normalize();
+		}
+
+		const Vector3f position = anActor.GetTransform().GetPosition();
+		anActor.LookAt(position + forward);
+	}
+
+	void PrintLightTuningValues(
+		const DirectionalLightComponent* aDirectionalLightComponent,
+		const std::vector<PointLightComponent*>& somePointLightComponents,
+		const SpotLightComponent* aSpotLightComponent)
+	{
+		unsigned activeLightCount = 0;
+		if (aDirectionalLightComponent != nullptr)
+		{
+			activeLightCount += aDirectionalLightComponent->IsEnabled() ? 1 : 0;
+			const Vector3f direction = aDirectionalLightComponent->GetWorldDirection();
+			MVLOG(Log, "Directional light direction: {{ {:.2f}, {:.2f}, {:.2f} }}, intensity: {:.2f}",
+				direction.x, direction.y, direction.z, aDirectionalLightComponent->GetIntensity());
+		}
+
+		for (size_t pointIndex = 0; pointIndex < somePointLightComponents.size(); ++pointIndex)
+		{
+			const PointLightComponent* pointLightComponent = somePointLightComponents[pointIndex];
+			if (pointLightComponent == nullptr)
+			{
+				continue;
+			}
+
+			activeLightCount += pointLightComponent->IsEnabled() ? 1 : 0;
+			const Vector3f position = pointLightComponent->GetWorldPosition();
+			MVLOG(Log, "Point light {} position: {{ {:.2f}, {:.2f}, {:.2f} }}, intensity: {:.2f}, radius: {:.2f}",
+				pointIndex, position.x, position.y, position.z, pointLightComponent->GetIntensity(), pointLightComponent->GetRadius());
+		}
+
+		if (aSpotLightComponent != nullptr)
+		{
+			activeLightCount += aSpotLightComponent->IsEnabled() ? 1 : 0;
+			const Vector3f position = aSpotLightComponent->GetWorldPosition();
+			const Vector3f direction = aSpotLightComponent->GetWorldDirection();
+			MVLOG(Log, "Spot light position: {{ {:.2f}, {:.2f}, {:.2f} }}, direction: {{ {:.2f}, {:.2f}, {:.2f} }}, intensity: {:.2f}, radius: {:.2f}",
+				position.x, position.y, position.z,
+				direction.x, direction.y, direction.z,
+				aSpotLightComponent->GetIntensity(), aSpotLightComponent->GetRadius());
+		}
+
+		MVLOG(Log, "Active demo lights: {}", activeLightCount);
+		GraphicsEngine::Get().LogShadowTuning();
 	}
 
 	PointLightComponent* CreatePointLight(
@@ -220,10 +293,10 @@ void ModelViewer::LoadScene()
     myPointLightComponents.clear();
     mySpotLightComponent = nullptr;
     const std::filesystem::path materialRoot = GetMaterialRoot(myContentRoot);
-    const Vector3f sceneFocus = { 25.0f, -70.0f, 260.0f };
-    const Vector3f floorPosition = { 0.0f, -135.0f, 260.0f };
-    const Vector3f characterPosition = { 0.0f, -120.0f, 250.0f };
-    const Vector3f chestPosition = { 135.0f, -120.0f, 285.0f };
+    const Vector3f sceneFocus = { 25.0f, 0.0f, 260.0f };
+    const Vector3f floorPosition = { 0.0f, 0.0f, 260.0f };
+    const Vector3f characterPosition = { 0.0f, 0.0f, 250.0f };
+    const Vector3f chestPosition = { 135.0f, 0.0f, 285.0f };
 
     {
         myCameraActor = myWorld.CreateActor("Camera Actor");
@@ -255,20 +328,20 @@ void ModelViewer::LoadScene()
             }
         }
 
-        myPointLightComponents.push_back(CreatePointLight(myWorld, "Warm Character Point", { 0.0f, 35.0f, 0.0f }, { 1.0f, 0.42f, 0.22f }, 300.0f, 650.0f));
+        myPointLightComponents.push_back(CreatePointLight(myWorld, "Warm Character Point", { -90.0f, 180.0f, 150.0f }, { 1.0f, 0.42f, 0.22f }, 420.0f, 760.0f));
         //myPointLightComponents.push_back(CreatePointLight(myWorld, "Cool Character Point", { 60.0f, 75.0f, 330.0f }, { 0.25f, 0.55f, 1.0f }, 500.0f, 620.0f));
         //myPointLightComponents.push_back(CreatePointLight(myWorld, "Chest Accent Point", { 170.0f, 25.0f, 235.0f }, { 0.35f, 1.0f, 0.55f }, 560.0f, 560.0f));
 
         Actor* spotLightActor = myWorld.CreateActor("Spot Light Actor");
         if (spotLightActor != nullptr)
         {
-            spotLightActor->SetTranslation({ 350.0f, 380.0f, -250.0f });
+            spotLightActor->SetTranslation({ 430.0f, 430.0f, -210.0f });
             spotLightActor->LookAt(sceneFocus);
             mySpotLightComponent = spotLightActor->AddComponent<SpotLightComponent>("Spot Light");
             if (mySpotLightComponent != nullptr)
             {
                 mySpotLightComponent->SetColor({ 0.55f, 0.7f, 1.0f });
-                mySpotLightComponent->SetIntensity(2400.0f);
+                mySpotLightComponent->SetIntensity(2800.0f);
                 mySpotLightComponent->SetRadius(1200.0f);
                 mySpotLightComponent->SetConeAnglesDegrees(18.0f, 34.0f);
             }
@@ -337,10 +410,11 @@ void ModelViewer::LoadScene()
     }
 
     const std::array primitivePlacements = {
-        PrimitivePlacement{ "Cube", { -310.0f, -15.0f, 120.0f }, { 12.0f, 28.0f, -8.0f }, { 95.0f, 95.0f, 95.0f } },
-        PrimitivePlacement{ "Pyramid", { 315.0f, 30.0f, 145.0f }, { -8.0f, -34.0f, 12.0f }, { 105.0f, 105.0f, 105.0f } },
-        PrimitivePlacement{ "Sphere", { -245.0f, 115.0f, 470.0f }, { 0.0f, 0.0f, 0.0f }, { 115.0f, 115.0f, 115.0f } },
-        PrimitivePlacement{ "Torus", { 300.0f, 90.0f, 505.0f }, { 24.0f, 42.0f, 0.0f }, { 115.0f, 115.0f, 115.0f } },
+        PrimitivePlacement{ "Cube", "", { -310.0f, 100.0f, 120.0f }, { 12.0f, 28.0f, -8.0f }, { 95.0f, 95.0f, 95.0f } },
+        PrimitivePlacement{ "Pyramid", "", { 315.0f, 100.0f, 145.0f }, { -8.0f, -34.0f, 12.0f }, { 105.0f, 105.0f, 105.0f } },
+        PrimitivePlacement{ "Sphere", "", { -270.0f, 100.0f, 470.0f }, { 0.0f, 0.0f, 0.0f }, { 105.0f, 105.0f, 105.0f } },
+        PrimitivePlacement{ "SmoothSphere", "Sphere", { 0.0f, 100.0f, 540.0f }, { 0.0f, 0.0f, 0.0f }, { 115.0f, 115.0f, 115.0f } },
+        PrimitivePlacement{ "Torus", "", { 300.0f, 100.0f, 505.0f }, { 24.0f, 42.0f, 0.0f }, { 115.0f, 115.0f, 115.0f } },
     };
 
     for (const PrimitivePlacement& placement : primitivePlacements)
@@ -359,7 +433,8 @@ void ModelViewer::LoadScene()
             actor->SetTranslation(placement.Position);
             actor->SetRotation(placement.RotationDegrees.x, placement.RotationDegrees.y, placement.RotationDegrees.z);
             actor->SetScale(placement.Scale);
-            AssignMaterialToAllSlots(meshComponent, CreateMaterialFromFile(materialRoot / (primitiveName + "Material.mat")));
+            const std::string materialName = placement.MaterialName[0] != '\0' ? placement.MaterialName : placement.Name;
+            AssignMaterialToAllSlots(meshComponent, CreateMaterialFromFile(materialRoot / (materialName + "Material.mat")));
         }
     }
 }
@@ -402,13 +477,108 @@ void ModelViewer::HandleAnimationInput()
 
 void ModelViewer::HandleLightInput()
 {
-    if ((myInputHandler.IsKeyPressed(Keys::NUMPAD7) || myInputHandler.IsKeyPressed(static_cast<int>('7')))
+    const bool shiftDown = IsShiftDown(myInputHandler);
+    GraphicsEngine& graphicsEngine = GraphicsEngine::Get();
+
+    if (myInputHandler.IsKeyPressed(Keys::F5))
+    {
+        graphicsEngine.ResetShadowTuning();
+    }
+
+    if (myInputHandler.IsKeyPressed(Keys::F6))
+    {
+        graphicsEngine.AdjustShadowBias(LightType::Directional, -0.00005f);
+    }
+
+    if (myInputHandler.IsKeyPressed(Keys::F7))
+    {
+        graphicsEngine.AdjustShadowBias(LightType::Directional, 0.00005f);
+    }
+
+    if (myInputHandler.IsKeyPressed(Keys::F8))
+    {
+        graphicsEngine.AdjustShadowBias(LightType::Spot, -0.00002f);
+    }
+
+    if (myInputHandler.IsKeyPressed(Keys::F9))
+    {
+        graphicsEngine.AdjustShadowBias(LightType::Spot, 0.00002f);
+    }
+
+    if (myInputHandler.IsKeyPressed(Keys::F10))
+    {
+        graphicsEngine.AdjustShadowBias(LightType::Point, -0.00005f);
+    }
+
+    if (myInputHandler.IsKeyPressed(Keys::F11))
+    {
+        graphicsEngine.AdjustShadowBias(LightType::Point, 0.00005f);
+    }
+
+    if (myInputHandler.IsKeyPressed(Keys::P))
+    {
+        PrintLightTuningValues(myDirectionalLightComponent, myPointLightComponents, mySpotLightComponent);
+    }
+
+    if (shiftDown && myCameraActor != nullptr)
+    {
+        const CommonUtilities::Transform& cameraTransform = myCameraActor->GetTransform();
+        const Vector3f cameraPosition = cameraTransform.GetPosition();
+
+        if (IsKeyPressed(myInputHandler, Keys::NUMPAD7, '7') && myDirectionalLightComponent != nullptr)
+        {
+            if (Actor* lightActor = myDirectionalLightComponent->GetOwner())
+            {
+                AimActorAlongCameraForward(*lightActor, cameraTransform);
+                const Vector3f direction = myDirectionalLightComponent->GetWorldDirection();
+                MVLOG(Log, "Aimed directional light from camera direction: {{ {:.2f}, {:.2f}, {:.2f} }}",
+                    direction.x, direction.y, direction.z);
+            }
+            return;
+        }
+
+        if (IsKeyPressed(myInputHandler, Keys::NUMPAD8, '8'))
+        {
+            for (PointLightComponent* pointLightComponent : myPointLightComponents)
+            {
+                if (pointLightComponent == nullptr)
+                {
+                    continue;
+                }
+
+                if (Actor* lightActor = pointLightComponent->GetOwner())
+                {
+                    lightActor->SetPosition(cameraPosition);
+                    MVLOG(Log, "Moved point light to camera position: {{ {:.2f}, {:.2f}, {:.2f} }}",
+                        cameraPosition.x, cameraPosition.y, cameraPosition.z);
+                    break;
+                }
+            }
+            return;
+        }
+
+        if (IsKeyPressed(myInputHandler, Keys::NUMPAD9, '9') && mySpotLightComponent != nullptr)
+        {
+            if (Actor* lightActor = mySpotLightComponent->GetOwner())
+            {
+                lightActor->SetPosition(cameraPosition);
+                AimActorAlongCameraForward(*lightActor, cameraTransform);
+                const Vector3f direction = mySpotLightComponent->GetWorldDirection();
+                MVLOG(Log, "Moved spot light to camera and aimed forward. Position: {{ {:.2f}, {:.2f}, {:.2f} }}, direction: {{ {:.2f}, {:.2f}, {:.2f} }}",
+                    cameraPosition.x, cameraPosition.y, cameraPosition.z,
+                    direction.x, direction.y, direction.z);
+            }
+            return;
+        }
+    }
+
+    if (IsKeyPressed(myInputHandler, Keys::NUMPAD7, '7')
         && myDirectionalLightComponent != nullptr)
     {
         myDirectionalLightComponent->SetEnabled(!myDirectionalLightComponent->IsEnabled());
     }
 
-    if (myInputHandler.IsKeyPressed(Keys::NUMPAD8) || myInputHandler.IsKeyPressed(static_cast<int>('8')))
+    if (IsKeyPressed(myInputHandler, Keys::NUMPAD8, '8'))
     {
         bool shouldEnable = true;
         bool foundPointLight = false;
@@ -434,7 +604,7 @@ void ModelViewer::HandleLightInput()
         }
     }
 
-    if ((myInputHandler.IsKeyPressed(Keys::NUMPAD9) || myInputHandler.IsKeyPressed(static_cast<int>('9')))
+    if (IsKeyPressed(myInputHandler, Keys::NUMPAD9, '9')
         && mySpotLightComponent != nullptr)
     {
         mySpotLightComponent->SetEnabled(!mySpotLightComponent->IsEnabled());

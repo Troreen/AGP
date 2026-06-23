@@ -5,5 +5,5 @@
   "blendMode": "Opaque",
   "materialShaderCode": "ChestMaterial.hlsli",
   "albedoTexture": "../../../../Assets/Textures/T_Chest_C.dds",
-  "normalTexture": ""
+  "normalTexture": "../../../../Assets/Textures/T_Chest_N.dds"
 }

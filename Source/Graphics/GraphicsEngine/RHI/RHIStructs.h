@@ -26,6 +26,29 @@ enum class Topology : unsigned
 	TriangleList = 4
 };
 
+enum class RasterizerFillMode : unsigned
+{
+	Wireframe = 2,
+	Solid = 3
+};
+
+enum class RasterizerCullMode : unsigned
+{
+	None = 1,
+	Front = 2,
+	Back = 3
+};
+
+struct RasterizerStateDescription
+{
+	RasterizerFillMode FillMode = RasterizerFillMode::Solid;
+	RasterizerCullMode CullMode = RasterizerCullMode::Back;
+	int DepthBias = 0;
+	float DepthBiasClamp = 0.0f;
+	float SlopeScaledDepthBias = 0.0f;
+	bool DepthClipEnable = true;
+};
+
 struct VertexElementDesc
 {
 	std::string Semantic;

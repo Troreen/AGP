@@ -83,6 +83,10 @@ void GraphicsCommandList::SetRenderTarget(const Texture* aTarget, const Texture*
 	if (aDepthStencil)
 	{
 		dsv = aDepthStencil->myDSV.Get();
+		if(!aTarget)
+		{
+			memcpy_s(&viewport, sizeof(D3D11_VIEWPORT), &aDepthStencil->myViewport, sizeof(Viewport));
+		}
 	}
 
 	myContext->OMSetRenderTargets(1, &rtv, dsv);
@@ -162,6 +166,10 @@ void GraphicsCommandList::SetConstantBuffer(const Buffer *aBuffer, unsigned aSlo
 	{
 		myContext->VSSetConstantBuffers(aSlot, 1, &buffer);
 	}
+	if (aStages & PipeLineStage_GeometryShader)
+	{
+		myContext->GSSetConstantBuffers(aSlot, 1, &buffer);
+	}
 	if (aStages & PipeLineStage_PixelShader)
 	{
 		myContext->PSSetConstantBuffers(aSlot, 1, &buffer);
@@ -172,13 +180,46 @@ void GraphicsCommandList::SetConstantBuffer(const Buffer *aBuffer, unsigned aSlo
 void GraphicsCommandList::SetPipelineState(const PipelineStateObject *aPSO)
 {
 	ensure(!IsReadyForExecution());
+	const PipelineStateObject& pipelineState = *aPSO;
 	myContext->IASetPrimitiveTopology(static_cast<D3D11_PRIMITIVE_TOPOLOGY>(aPSO->myTopology)); 
 	myContext->IASetInputLayout(aPSO->myInputLayout.Get());
-	myContext->VSSetShader(aPSO->myVertexShader.Get(), nullptr, 0);
-	myContext->PSSetShader(aPSO->myPixelShader.Get(), nullptr, 0);
+
+	myContext->VSSetShader(
+		IsOverrideActive(PipeLineStage_VertexShader) ? myOverridePipelineState.myVertexShader.Get() : pipelineState.myVertexShader.Get(),
+		nullptr,
+		0);
+	myContext->GSSetShader(
+		IsOverrideActive(PipeLineStage_GeometryShader) ? myOverridePipelineState.myGeometryShader.Get() : pipelineState.myGeometryShader.Get(),
+		nullptr,
+		0);
+	myContext->PSSetShader(
+		IsOverrideActive(PipeLineStage_PixelShader) ? myOverridePipelineState.myPixelShader.Get() : pipelineState.myPixelShader.Get(),
+		nullptr,
+		0);
+	myContext->RSSetState(
+		IsOverrideActive(PipeLineStage_Rasterizer) ? myOverridePipelineState.myRasterizerState.Get() : pipelineState.myRasterizerState.Get());
 
 	const std::string message = std::format("Change Pipeline State - {}", aPSO->myName);
 	SetMarker(message);
+}
+
+void GraphicsCommandList::SetOverridePipelineState(const PipelineStateObject& aOverridePSO, PipeLineStages aOverrideStages)
+{
+	ensure(!IsReadyForExecution());
+	myOverridePipelineState = aOverridePSO;
+	myCurrentOverrides = aOverrideStages;
+}
+
+bool GraphicsCommandList::IsOverrideActive(PipeLineStages aOverride) const
+{
+	return (myCurrentOverrides & aOverride) != 0;
+}
+
+void GraphicsCommandList::ClearOverridePipelineState()
+{
+	ensure(!IsReadyForExecution());
+	myOverridePipelineState = {};
+	myCurrentOverrides = PipeLineStage_None;
 }
 
 void GraphicsCommandList::SetShaderResources(const Texture* const* aResourcesList, size_t aNumResources, unsigned aStartSlot, PipeLineStages aStages) const
@@ -194,6 +235,8 @@ void GraphicsCommandList::SetShaderResources(const Texture* const* aResourcesLis
 
 	if (aStages & PipeLineStage_VertexShader)
 		myContext->VSSetShaderResources(aStartSlot, static_cast<unsigned>(srvs.size()), srvs.data());
+	if (aStages & PipeLineStage_GeometryShader)
+		myContext->GSSetShaderResources(aStartSlot, static_cast<unsigned>(srvs.size()), srvs.data());
 	if (aStages & PipeLineStage_PixelShader)
 		myContext->PSSetShaderResources(aStartSlot, static_cast<unsigned>(srvs.size()), srvs.data());
 }
@@ -211,6 +254,8 @@ void GraphicsCommandList::SetShaderSamplers(const Sampler* const* aSamplerList, 
 
 	if (aStages & PipeLineStage_VertexShader)
 		myContext->VSSetSamplers(aStartSlot, static_cast<unsigned>(samplers.size()), samplers.data());
+	if (aStages & PipeLineStage_GeometryShader)
+		myContext->GSSetSamplers(aStartSlot, static_cast<unsigned>(samplers.size()), samplers.data());
 	if (aStages & PipeLineStage_PixelShader)
 		myContext->PSSetSamplers(aStartSlot, static_cast<unsigned>(samplers.size()), samplers.data());
 }

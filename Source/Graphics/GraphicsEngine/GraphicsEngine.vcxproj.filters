@@ -150,6 +150,7 @@
     <FxCompile Include="Shaders\Material\Lit_PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shaders\Internal\PointShadow_GS.hlsl" />
     <None Include="Shaders\Material\Common.hlsli" />
     <None Include="Shaders\Material\MaterialParameters.hlsli" />
     <None Include="Shaders\Material\Material.hlsli" />

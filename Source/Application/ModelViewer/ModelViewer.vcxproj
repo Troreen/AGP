@@ -160,7 +160,6 @@ xcopy /E /I /R /Y "%SHADERSRC%" "%SHADERDEST%"</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
-    <ClInclude Include="ApplicationState.h" />
     <ClInclude Include="ModelViewer.h" />
     <ClInclude Include="MeshLibrary.h" />
     <ClInclude Include="PrimitiveMeshBuilder.h" />
@@ -185,9 +184,6 @@ xcopy /E /I /R /Y "%SHADERSRC%" "%SHADERDEST%"</Command>
   <ItemGroup>
     <Image Include="ModelViewer.ico" />
     <Image Include="small.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="ModelViewer.log" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Materials\AxesMaterial.hlsli" />

@@ -1,9 +1,0 @@
-{
-  "name": "SphereMaterial",
-  "domain": "Surface",
-  "shadingModel": "Lit",
-  "blendMode": "Opaque",
-  "materialShaderCode": "SphereMaterial.hlsli",
-  "albedoTexture": "../../../../Assets/Textures/T_Default_C.dds",
-  "normalTexture": ""
-}

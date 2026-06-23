@@ -30,9 +30,6 @@
     <ClInclude Include="..\..\Utilities\FreeFlyCameraController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ApplicationState.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="PrimitiveMeshBuilder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -81,9 +78,6 @@
     <Image Include="ModelViewer.ico">
       <Filter>Resource Files</Filter>
     </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="ModelViewer.log" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Materials\AxesMaterial.hlsli" />

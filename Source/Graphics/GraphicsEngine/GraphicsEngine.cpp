@@ -20,9 +20,36 @@
 #include <algorithm>
 #include <array>
 #include <cctype>
+#include <cmath>
+#include <limits>
+#include <vector>
 
 namespace
 {
+	namespace ShadowConfig
+	{
+		constexpr unsigned MapResolution = 2048;
+		constexpr unsigned DirectionalCascadeCount = 4;
+		constexpr unsigned MaxSpotMaps = 4;
+		constexpr unsigned MaxPointMaps = 4;
+		constexpr unsigned HighTextureSlotStart = 100;
+		constexpr float BiasMin = 0.0f;
+		constexpr float BiasMax = 0.005f;
+		constexpr float DirectionalShaderBias = 0.00025f;
+		constexpr float SpotShaderBias = 0.00008f;
+		constexpr float PointShaderBias = 0.0002f;
+		constexpr int DirectionalRasterDepthBias = 80;
+		constexpr float DirectionalRasterSlopeBias = 0.35f;
+		constexpr int LocalRasterDepthBias = 1;
+		constexpr float LocalRasterSlopeBias = 0.02f;
+		constexpr std::array<float, DirectionalCascadeCount> CascadeSplits = { 150.0f, 600.0f, 1600.0f, 5000.0f };
+	}
+
+	struct PointShadowBufferData
+	{
+		std::array<CU::Matrix4f, 6> ViewProjection = {};
+	};
+
 	float GetRenderIntensity(const LightComponent& aLightComponent)
 	{
 		if (aLightComponent.GetLightType() == LightType::Directional)
@@ -33,11 +60,166 @@ namespace
 		return aLightComponent.GetIntensity() * 10000.0f;
 	}
 
-	void AddLightToBuffer(const LightComponent& aLightComponent, LightBuffer& inoutLightBuffer)
+	CU::Matrix4f CreateNDCToTextureMatrix()
+	{
+		return {
+			0.5f, 0.0f, 0.0f, 0.0f,
+			0.0f, -0.5f, 0.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, 0.0f,
+			0.5f, 0.5f, 0.0f, 1.0f
+		};
+	}
+
+	CU::Vector3f GetLightUpVector(const CU::Vector3f& aDirection)
+	{
+		const float yAlignment = std::abs(aDirection.Dot(CU::Vector3f::UnitY));
+		return yAlignment > 0.95f ? CU::Vector3f::UnitZ : CU::Vector3f::UnitY;
+	}
+
+	std::array<CU::Vector3f, 8> GetFrustumCorners(const CU::Camera3D& aCamera, float aNearPlane, float aFarPlane)
+	{
+		const CU::Vector3f position = aCamera.GetTransform().GetPosition();
+		const CU::Vector3f forward = aCamera.GetForward().GetNormalized();
+		const CU::Vector3f right = aCamera.GetRight().GetNormalized();
+		const CU::Vector3f up = aCamera.GetUp().GetNormalized();
+		const float tanHalfFov = std::tan(aCamera.GetFieldOfViewRadians() * 0.5f);
+
+		const float nearHeight = 2.0f * tanHalfFov * aNearPlane;
+		const float nearWidth = nearHeight * aCamera.GetAspectRatio();
+		const float farHeight = 2.0f * tanHalfFov * aFarPlane;
+		const float farWidth = farHeight * aCamera.GetAspectRatio();
+
+		const CU::Vector3f nearCenter = position + forward * aNearPlane;
+		const CU::Vector3f farCenter = position + forward * aFarPlane;
+
+		return {
+			nearCenter - right * (nearWidth * 0.5f) + up * (nearHeight * 0.5f),
+			nearCenter + right * (nearWidth * 0.5f) + up * (nearHeight * 0.5f),
+			nearCenter + right * (nearWidth * 0.5f) - up * (nearHeight * 0.5f),
+			nearCenter - right * (nearWidth * 0.5f) - up * (nearHeight * 0.5f),
+			farCenter - right * (farWidth * 0.5f) + up * (farHeight * 0.5f),
+			farCenter + right * (farWidth * 0.5f) + up * (farHeight * 0.5f),
+			farCenter + right * (farWidth * 0.5f) - up * (farHeight * 0.5f),
+			farCenter - right * (farWidth * 0.5f) - up * (farHeight * 0.5f)
+		};
+	}
+
+	CU::Matrix4f CreateCascadeViewProjection(const CU::Camera3D& aCamera, const LightComponent& aLightComponent, float aNearPlane, float aFarPlane)
+	{
+		const std::array<CU::Vector3f, 8> corners = GetFrustumCorners(aCamera, aNearPlane, aFarPlane);
+
+		CU::Vector3f center = CU::Vector3f::Zero;
+		for (const CU::Vector3f& corner : corners)
+		{
+			center += corner;
+		}
+		center *= 1.0f / static_cast<float>(corners.size());
+
+		float radius = 0.0f;
+		for (const CU::Vector3f& corner : corners)
+		{
+			radius = (std::max)(radius, (corner - center).Length());
+		}
+		radius = std::ceil(radius / 10.0f) * 10.0f;
+
+		const CU::Vector3f lightDirection = aLightComponent.GetWorldDirection().GetNormalized();
+		const CU::Vector3f eye = center - lightDirection * (radius + 250.0f);
+		const CU::Matrix4f view = CU::Maths::CreateLookAtLH(eye, center, GetLightUpVector(lightDirection));
+
+		float minX = (std::numeric_limits<float>::max)();
+		float minY = (std::numeric_limits<float>::max)();
+		float minZ = (std::numeric_limits<float>::max)();
+		float maxX = (std::numeric_limits<float>::lowest)();
+		float maxY = (std::numeric_limits<float>::lowest)();
+		float maxZ = (std::numeric_limits<float>::lowest)();
+
+		for (const CU::Vector3f& corner : corners)
+		{
+			const CU::Vector3f lightSpaceCorner = CU::Maths::TransformPoint(corner, view);
+			minX = (std::min)(minX, lightSpaceCorner.x);
+			minY = (std::min)(minY, lightSpaceCorner.y);
+			minZ = (std::min)(minZ, lightSpaceCorner.z);
+			maxX = (std::max)(maxX, lightSpaceCorner.x);
+			maxY = (std::max)(maxY, lightSpaceCorner.y);
+			maxZ = (std::max)(maxZ, lightSpaceCorner.z);
+		}
+
+		constexpr float padding = 150.0f;
+		const CU::Matrix4f projection = CU::Maths::CreateOrthographicLH(
+			minX - padding,
+			maxX + padding,
+			minY - padding,
+			maxY + padding,
+			(std::max)(0.1f, minZ - padding),
+			maxZ + padding);
+
+		return view * projection;
+	}
+
+	CU::Matrix4f CreateLightViewProjectionTexture(const CU::Matrix4f& aViewProjection)
+	{
+		return aViewProjection * CreateNDCToTextureMatrix();
+	}
+
+	CU::Matrix4f CreateSpotViewProjection(const LightComponent& aLightComponent)
+	{
+		const CU::Vector3f position = aLightComponent.GetWorldPosition();
+		const CU::Vector3f direction = aLightComponent.GetWorldDirection().GetNormalized();
+		const CU::Matrix4f view = CU::Maths::CreateLookAtLH(position, position + direction, GetLightUpVector(direction));
+		const CU::Matrix4f projection = CU::Maths::CreatePerspectiveFovLH(
+			aLightComponent.GetOuterCone() * 2.0f,
+			1.0f,
+			1.0f,
+			aLightComponent.GetRadius());
+		return view * projection;
+	}
+
+	PointShadowBufferData CreatePointShadowBuffer(const LightComponent& aLightComponent)
+	{
+		const CU::Vector3f position = aLightComponent.GetWorldPosition();
+		const CU::Matrix4f projection = CU::Maths::CreatePerspectiveFovLH(
+			CU::Maths::HalfPi<float>(),
+			1.0f,
+			1.0f,
+			aLightComponent.GetRadius());
+
+		const std::array<CU::Vector3f, 6> directions = {
+			CU::Vector3f::UnitX,
+			-CU::Vector3f::UnitX,
+			CU::Vector3f::UnitY,
+			-CU::Vector3f::UnitY,
+			CU::Vector3f::UnitZ,
+			-CU::Vector3f::UnitZ
+		};
+
+		const std::array<CU::Vector3f, 6> upVectors = {
+			CU::Vector3f::UnitY,
+			CU::Vector3f::UnitY,
+			-CU::Vector3f::UnitZ,
+			CU::Vector3f::UnitZ,
+			CU::Vector3f::UnitY,
+			CU::Vector3f::UnitY
+		};
+
+		PointShadowBufferData buffer;
+		for (size_t face = 0; face < buffer.ViewProjection.size(); ++face)
+		{
+			buffer.ViewProjection[face] = CU::Maths::CreateLookAtLH(position, position + directions[face], upVectors[face]) * projection;
+		}
+
+		return buffer;
+	}
+
+	CU::Vector4f MakeShadowSettings(float aDepthBias)
+	{
+		return { aDepthBias, 0.0f, 0.0f, 0.0f };
+	}
+
+	LightBuffer::Light* AddLightToBuffer(const LightComponent& aLightComponent, LightBuffer& inoutLightBuffer, float aShadowDepthBias)
 	{
 		if (inoutLightBuffer.NumActiveLights >= LightBuffer::MaxLights)
 		{
-			return;
+			return nullptr;
 		}
 
 		LightBuffer::Light& light = inoutLightBuffer.Lights[inoutLightBuffer.NumActiveLights++];
@@ -49,7 +231,13 @@ namespace
 		light.InnerCone = aLightComponent.GetInnerCone();
 		light.OuterCone = aLightComponent.GetOuterCone();
 		light.Radius = aLightComponent.GetRadius();
+		light.ShadowMapIndex = 0;
+		light.NumCascades = 0;
+		light.CascadeSplits = CU::Vector4f::Zero;
+		light.ShadowSettings = MakeShadowSettings(aShadowDepthBias);
+		return &light;
 	}
+
 }
 
 GraphicsEngine& GraphicsEngine::Get()
@@ -100,6 +288,7 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path&
 	CreateConstantBuffer<AnimationBuffer>(ConstantBuffer::AnimationBuffer, "AnimationBuffer");
 	CreateConstantBuffer(ConstantBuffer::MaterialBuffer, "MaterialBuffer", Material::MATERIAL_BUFFER_SIZE);
 	CreateConstantBuffer<LightBuffer>(ConstantBuffer::LightBuffer, "LightBuffer");
+	CreateConstantBuffer(ConstantBuffer::PointShadowBuffer, "PointShadowBuffer", sizeof(PointShadowBufferData));
 
 	{ // Trilinear Wrap
 		SamplerDescription samplerDesc;
@@ -111,11 +300,80 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path&
 		mySamplers.emplace_back(std::move(sampler));
 	}
 
+	{ // Shadow comparison sampler
+		SamplerDescription samplerDesc;
+		samplerDesc.Name = "ShadowCmpSampler";
+		samplerDesc.AddressMode = SamplerAddressMode::Border;
+		samplerDesc.FilterMode = SamplerFilterMode::ComparisonLinearPoint;
+		samplerDesc.ComparisonFunction = SamplerComparisonFunc::LessEqual;
+		samplerDesc.BorderColor = CU::Vector4f::One;
+		Sampler sampler;
+		ensure(myRHI.CreateSampler(samplerDesc, sampler));
+		mySamplers.emplace_back(std::move(sampler));
+	}
+
+	if (!CreateShadowResources())
+	{
+		GELOG(Error, "Failed to create shadow resources.");
+		return false;
+	}
+
+	if (!CreateShadowPipelineStates())
+	{
+		GELOG(Error, "Failed to create shadow pipeline states.");
+		return false;
+	}
+
 	return true;
 }
 
 void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const Actor& aCameraActor, const World& aWorld)
 {
+	CameraComponent* cameraComponent = aCameraActor.GetComponent<CameraComponent>();
+	if (cameraComponent == nullptr)
+	{
+		GELOG(Warning, "Could not render world because camera actor '{}' has no CameraComponent.", aCameraActor.GetName());
+		return;
+	}
+
+	cameraComponent->SyncCameraToOwner();
+	const CU::Camera3D& camera = cameraComponent->GetCamera();
+
+	const SceneRenderData sceneData = CollectRenderItemsAndLights(aWorld);
+	UnbindShadowResources(inoutCommandList);
+
+	LightBuffer lightBuffer;
+	bool hasRenderedDirectionalShadow = false;
+	unsigned spotShadowCount = 0;
+	unsigned pointShadowCount = 0;
+
+	for (const LightComponent* lightComponent : sceneData.LightComponents)
+	{
+		LightBuffer::Light* light = AddLightToBuffer(*lightComponent, lightBuffer, GetShadowDepthBias(lightComponent->GetLightType()));
+		if (light == nullptr)
+		{
+			break;
+		}
+
+		if (lightComponent->GetLightType() == LightType::Directional && !hasRenderedDirectionalShadow)
+		{
+			RenderDirectionalShadows(inoutCommandList, camera, *lightComponent, *light, sceneData.RenderItems);
+			hasRenderedDirectionalShadow = true;
+		}
+		else if (lightComponent->GetLightType() == LightType::Spot && spotShadowCount < MaxSpotShadowMaps)
+		{
+			RenderSpotShadows(inoutCommandList, *lightComponent, *light, spotShadowCount, sceneData.RenderItems);
+			++spotShadowCount;
+		}
+		else if (lightComponent->GetLightType() == LightType::Point && pointShadowCount < MaxPointShadowMaps)
+		{
+			RenderPointShadows(inoutCommandList, *lightComponent, *light, pointShadowCount, sceneData.RenderItems);
+			++pointShadowCount;
+		}
+	}
+
+	inoutCommandList.ClearOverridePipelineState();
+
 	inoutCommandList.ClearRenderTarget(myBackBuffer);
 	inoutCommandList.ClearDepthStencil(myDepthBuffer);
 	inoutCommandList.SetRenderTarget(&myBackBuffer, &myDepthBuffer);
@@ -127,70 +385,284 @@ void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const Actor& 
 	}
 
 	inoutCommandList.SetShaderSamplers(samplerList.data(), samplerList.size(), 0, PipeLineStage_VertexShader | PipeLineStage_PixelShader);
-
-	CameraComponent* cameraComponent = aCameraActor.GetComponent<CameraComponent>();
-	if (cameraComponent == nullptr)
-	{
-		GELOG(Warning, "Could not render world because camera actor '{}' has no CameraComponent.", aCameraActor.GetName());
-		return;
-	}
-
-	cameraComponent->SyncCameraToOwner();
-	const CU::Camera3D& camera = cameraComponent->GetCamera();
+	BindShadowResources(inoutCommandList);
 
 	FrameBuffer fb;
 	fb.View = camera.GetViewMatrix();
 	fb.Projection = camera.GetProjectionMatrix();
 
-	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::FrameBuffer, fb, 0, PipeLineStage_VertexShader);
-
-	LightBuffer lightBuffer;
-	for (const std::unique_ptr<Actor>& actor : aWorld.GetActors())
-	{
-		if (!actor || !actor->IsActive())
-		{
-			continue;
-		}
-
-		std::vector<LightComponent*> lightComponents;
-		actor->GetComponentsOfType(lightComponents);
-		for (const LightComponent* lightComponent : lightComponents)
-		{
-			if (lightComponent == nullptr || !lightComponent->IsEnabled())
-			{
-				continue;
-			}
-
-			AddLightToBuffer(*lightComponent, lightBuffer);
-		}
-	}
+	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::FrameBuffer, fb, 0, PipeLineStage_VertexShader | PipeLineStage_PixelShader);
 	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::LightBuffer, lightBuffer, 4, PipeLineStage_PixelShader);
 
-	for (const std::unique_ptr<Actor>& actor : aWorld.GetActors())
+	for (const RenderItem& item : sceneData.RenderItems)
 	{
-		if (!actor || !actor->IsActive())
-		{
-			continue;
-		}
-
-		std::vector<MeshComponentBase*> meshComponents;
-		actor->GetComponentsOfType(meshComponents);
-
-		for (const MeshComponentBase* meshComponent : meshComponents)
-		{
-			if (meshComponent == nullptr || !meshComponent->IsEnabled() || !meshComponent->HasMesh())
-			{
-				continue;
-			}
-
-			RenderMesh(inoutCommandList, *meshComponent, actor->GetTransform().GetWorldMatrix());
-		}
+		RenderMesh(inoutCommandList, *item.MeshComponent, item.World);
 	}
 }
 
 void GraphicsEngine::Present() const
 {
 	myRHI.Present();
+}
+
+GraphicsEngine::SceneRenderData GraphicsEngine::CollectRenderItemsAndLights(const World& aWorld) const
+{
+	SceneRenderData data;
+	for (const std::unique_ptr<Actor>& actor : aWorld.GetActors())
+	{
+		if (!actor || !actor->IsActive())
+		{
+			continue;
+		}
+
+		std::vector<LightComponent*> actorLights;
+		actor->GetComponentsOfType(actorLights);
+		for (const LightComponent* lightComponent : actorLights)
+		{
+			if (lightComponent != nullptr && lightComponent->IsEnabled())
+			{
+				data.LightComponents.emplace_back(lightComponent);
+			}
+		}
+
+		std::vector<MeshComponentBase*> meshComponents;
+		actor->GetComponentsOfType(meshComponents);
+		for (const MeshComponentBase* meshComponent : meshComponents)
+		{
+			if (meshComponent != nullptr && meshComponent->IsEnabled() && meshComponent->HasMesh())
+			{
+				data.RenderItems.push_back({ meshComponent, actor->GetTransform().GetWorldMatrix() });
+			}
+		}
+	}
+
+	return data;
+}
+
+void GraphicsEngine::UnbindShadowResources(GraphicsCommandList& inoutCommandList) const
+{
+	std::array<const Texture*, ShadowConfig::DirectionalCascadeCount + ShadowConfig::MaxSpotMaps + ShadowConfig::MaxPointMaps> nullShadowResources = {};
+	inoutCommandList.SetShaderResources(
+		nullShadowResources.data(),
+		nullShadowResources.size(),
+		ShadowConfig::HighTextureSlotStart,
+		PipeLineStage_PixelShader | PipeLineStage_GeometryShader);
+}
+
+void GraphicsEngine::BindShadowResources(GraphicsCommandList& inoutCommandList) const
+{
+	std::array<const Texture*, ShadowConfig::DirectionalCascadeCount + ShadowConfig::MaxSpotMaps + ShadowConfig::MaxPointMaps> shadowResources = {};
+	for (size_t cascadeIndex = 0; cascadeIndex < myDirectionalShadowMaps.size(); ++cascadeIndex)
+	{
+		shadowResources[cascadeIndex] = &myDirectionalShadowMaps[cascadeIndex];
+	}
+	for (size_t spotIndex = 0; spotIndex < mySpotShadowMaps.size(); ++spotIndex)
+	{
+		shadowResources[ShadowConfig::DirectionalCascadeCount + spotIndex] = &mySpotShadowMaps[spotIndex];
+	}
+	for (size_t pointIndex = 0; pointIndex < myPointShadowMaps.size(); ++pointIndex)
+	{
+		shadowResources[ShadowConfig::DirectionalCascadeCount + ShadowConfig::MaxSpotMaps + pointIndex] = &myPointShadowMaps[pointIndex];
+	}
+
+	inoutCommandList.SetShaderResources(
+		shadowResources.data(),
+		shadowResources.size(),
+		ShadowConfig::HighTextureSlotStart,
+		PipeLineStage_PixelShader);
+}
+
+void GraphicsEngine::RenderShadowMap(
+	GraphicsCommandList& inoutCommandList,
+	std::string_view aEventName,
+	Texture& aShadowMap,
+	const FrameBuffer& aFrameBuffer,
+	const PipelineStateObject& aOverridePSO,
+	PipeLineStages aOverrideStages,
+	const void* aPointShadowBuffer,
+	const std::vector<RenderItem>& aRenderItems)
+{
+	inoutCommandList.BeginEvent(aEventName);
+	inoutCommandList.ClearDepthStencil(aShadowMap);
+	inoutCommandList.SetRenderTarget(nullptr, &aShadowMap);
+	inoutCommandList.SetOverridePipelineState(aOverridePSO, aOverrideStages);
+	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::FrameBuffer, aFrameBuffer, 0, PipeLineStage_VertexShader);
+
+	if (aPointShadowBuffer != nullptr)
+	{
+		UpdateAndSetConstantBufferInternal(
+			inoutCommandList,
+			ConstantBuffer::PointShadowBuffer,
+			aPointShadowBuffer,
+			sizeof(PointShadowBufferData),
+			5,
+			PipeLineStage_GeometryShader);
+	}
+
+	for (const RenderItem& item : aRenderItems)
+	{
+		RenderMesh(inoutCommandList, *item.MeshComponent, item.World);
+	}
+
+	inoutCommandList.ClearOverridePipelineState();
+	inoutCommandList.EndEvent();
+}
+
+void GraphicsEngine::RenderDirectionalShadows(
+	GraphicsCommandList& inoutCommandList,
+	const CU::Camera3D& aCamera,
+	const LightComponent& aLightComponent,
+	LightBuffer::Light& inoutLight,
+	const std::vector<RenderItem>& aRenderItems)
+{
+	float cascadeNear = aCamera.GetNearPlane();
+	for (unsigned cascadeIndex = 0; cascadeIndex < ShadowConfig::DirectionalCascadeCount; ++cascadeIndex)
+	{
+		const float cascadeFar = ShadowConfig::CascadeSplits[cascadeIndex];
+		const CU::Matrix4f lightViewProjection = CreateCascadeViewProjection(aCamera, aLightComponent, cascadeNear, cascadeFar);
+
+		FrameBuffer shadowFrameBuffer;
+		shadowFrameBuffer.View = CU::Matrix4f();
+		shadowFrameBuffer.Projection = lightViewProjection;
+		RenderShadowMap(
+			inoutCommandList,
+			std::format("Directional Shadow Cascade {}", cascadeIndex),
+			myDirectionalShadowMaps[cascadeIndex],
+			shadowFrameBuffer,
+			myShadowOverridePSO,
+			PipeLineStage_PixelShader | PipeLineStage_Rasterizer,
+			nullptr,
+			aRenderItems);
+
+		inoutLight.LightViewProjTexture[cascadeIndex] = CreateLightViewProjectionTexture(lightViewProjection);
+		cascadeNear = cascadeFar;
+	}
+
+	inoutLight.NumCascades = ShadowConfig::DirectionalCascadeCount;
+	inoutLight.CascadeSplits = {
+		ShadowConfig::CascadeSplits[0],
+		ShadowConfig::CascadeSplits[1],
+		ShadowConfig::CascadeSplits[2],
+		ShadowConfig::CascadeSplits[3]
+	};
+	inoutLight.ShadowSettings = MakeShadowSettings(GetShadowDepthBias(LightType::Directional));
+}
+
+void GraphicsEngine::RenderSpotShadows(
+	GraphicsCommandList& inoutCommandList,
+	const LightComponent& aLightComponent,
+	LightBuffer::Light& inoutLight,
+	unsigned aShadowIndex,
+	const std::vector<RenderItem>& aRenderItems)
+{
+	const CU::Matrix4f lightViewProjection = CreateSpotViewProjection(aLightComponent);
+	FrameBuffer shadowFrameBuffer;
+	shadowFrameBuffer.View = CU::Matrix4f();
+	shadowFrameBuffer.Projection = lightViewProjection;
+	RenderShadowMap(
+		inoutCommandList,
+		std::format("Spot Shadow {}", aShadowIndex),
+		mySpotShadowMaps[aShadowIndex],
+		shadowFrameBuffer,
+		myLocalShadowOverridePSO,
+		PipeLineStage_PixelShader | PipeLineStage_Rasterizer,
+		nullptr,
+		aRenderItems);
+
+	inoutLight.ShadowMapIndex = aShadowIndex;
+	inoutLight.NumCascades = 1;
+	inoutLight.LightViewProjTexture[0] = CreateLightViewProjectionTexture(lightViewProjection);
+	inoutLight.ShadowSettings = MakeShadowSettings(GetShadowDepthBias(LightType::Spot));
+}
+
+void GraphicsEngine::RenderPointShadows(
+	GraphicsCommandList& inoutCommandList,
+	const LightComponent& aLightComponent,
+	LightBuffer::Light& inoutLight,
+	unsigned aShadowIndex,
+	const std::vector<RenderItem>& aRenderItems)
+{
+	const PointShadowBufferData pointShadowBuffer = CreatePointShadowBuffer(aLightComponent);
+	FrameBuffer shadowFrameBuffer;
+	shadowFrameBuffer.View = CU::Matrix4f();
+	shadowFrameBuffer.Projection = CU::Matrix4f();
+	RenderShadowMap(
+		inoutCommandList,
+		std::format("Point Shadow {}", aShadowIndex),
+		myPointShadowMaps[aShadowIndex],
+		shadowFrameBuffer,
+		myPointShadowOverridePSO,
+		PipeLineStage_PixelShader | PipeLineStage_Rasterizer | PipeLineStage_GeometryShader,
+		&pointShadowBuffer,
+		aRenderItems);
+
+	inoutLight.ShadowMapIndex = aShadowIndex;
+	inoutLight.NumCascades = 1;
+	inoutLight.ShadowSettings = MakeShadowSettings(GetShadowDepthBias(LightType::Point));
+}
+
+float GraphicsEngine::GetShadowDepthBias(LightType aType) const
+{
+	float bias = ShadowConfig::DirectionalShaderBias + myDirectionalShadowBiasOffset;
+	if (aType == LightType::Spot)
+	{
+		bias = ShadowConfig::SpotShaderBias + mySpotShadowBiasOffset;
+	}
+	else if (aType == LightType::Point)
+	{
+		bias = ShadowConfig::PointShaderBias + myPointShadowBiasOffset;
+	}
+
+	return std::clamp(bias, ShadowConfig::BiasMin, ShadowConfig::BiasMax);
+}
+
+void GraphicsEngine::AdjustShadowBias(LightType aType, float aDelta)
+{
+	float* offset = &myDirectionalShadowBiasOffset;
+	if (aType == LightType::Spot)
+	{
+		offset = &mySpotShadowBiasOffset;
+	}
+	else if (aType == LightType::Point)
+	{
+		offset = &myPointShadowBiasOffset;
+	}
+
+	*offset += aDelta;
+	const float currentBias = GetShadowDepthBias(aType);
+	if (currentBias <= ShadowConfig::BiasMin || currentBias >= ShadowConfig::BiasMax)
+	{
+		const float defaultBias =
+			aType == LightType::Spot ? ShadowConfig::SpotShaderBias :
+			aType == LightType::Point ? ShadowConfig::PointShaderBias :
+			ShadowConfig::DirectionalShaderBias;
+		*offset = std::clamp(defaultBias + *offset, ShadowConfig::BiasMin, ShadowConfig::BiasMax) - defaultBias;
+	}
+
+	GELOG(Log, "Shadow {} bias: {:.6f}", aType == LightType::Directional ? "directional" : aType == LightType::Spot ? "spot" : "point", GetShadowDepthBias(aType));
+}
+
+void GraphicsEngine::ResetShadowTuning()
+{
+	myDirectionalShadowBiasOffset = 0.0f;
+	mySpotShadowBiasOffset = 0.0f;
+	myPointShadowBiasOffset = 0.0f;
+	GELOG(Log, "Shadow tuning reset.");
+}
+
+void GraphicsEngine::LogShadowTuning() const
+{
+	GELOG(Log, "Shadow tuning: cascades={}, splits={{ {:.1f}, {:.1f}, {:.1f}, {:.1f} }}, directionalBias={:.6f}, spotBias={:.6f}, pointBias={:.6f}, spotMaps={}, pointMaps={}",
+		ShadowConfig::DirectionalCascadeCount,
+		ShadowConfig::CascadeSplits[0],
+		ShadowConfig::CascadeSplits[1],
+		ShadowConfig::CascadeSplits[2],
+		ShadowConfig::CascadeSplits[3],
+		GetShadowDepthBias(LightType::Directional),
+		GetShadowDepthBias(LightType::Spot),
+		GetShadowDepthBias(LightType::Point),
+		ShadowConfig::MaxSpotMaps,
+		ShadowConfig::MaxPointMaps);
 }
 
 bool GraphicsEngine::CreateConstantBuffer(ConstantBuffer aBufferId, std::string_view aName, size_t aBufferSize)
@@ -211,6 +683,78 @@ bool GraphicsEngine::CreateCommandList(std::string_view aName, GraphicsCommandLi
 void GraphicsEngine::ExecuteCommandList(const GraphicsCommandList &aCommandList) const
 {
 	myRHI.ExecuteCommandList(aCommandList);
+}
+
+bool GraphicsEngine::CreateShadowResources()
+{
+	for (size_t cascadeIndex = 0; cascadeIndex < myDirectionalShadowMaps.size(); ++cascadeIndex)
+	{
+		if (!CreateShadowMap(std::format("DirectionalShadowCascade{}", cascadeIndex), ShadowConfig::MapResolution, ShadowConfig::MapResolution, myDirectionalShadowMaps[cascadeIndex]))
+		{
+			return false;
+		}
+	}
+
+	for (size_t spotIndex = 0; spotIndex < mySpotShadowMaps.size(); ++spotIndex)
+	{
+		if (!CreateShadowMap(std::format("SpotShadow{}", spotIndex), ShadowConfig::MapResolution, ShadowConfig::MapResolution, mySpotShadowMaps[spotIndex]))
+		{
+			return false;
+		}
+	}
+
+	for (size_t pointIndex = 0; pointIndex < myPointShadowMaps.size(); ++pointIndex)
+	{
+		if (!CreateShadowMap(std::format("PointShadow{}", pointIndex), ShadowConfig::MapResolution, ShadowConfig::MapResolution, myPointShadowMaps[pointIndex], true))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool GraphicsEngine::CreateShadowPipelineStates()
+{
+	RasterizerStateDescription shadowRasterizer;
+	shadowRasterizer.CullMode = RasterizerCullMode::Front;
+	shadowRasterizer.DepthBias = ShadowConfig::DirectionalRasterDepthBias;
+	shadowRasterizer.SlopeScaledDepthBias = ShadowConfig::DirectionalRasterSlopeBias;
+
+	PipelineStateDescription shadowPSODesc;
+	shadowPSODesc.Name = "ShadowOverridePSO";
+	shadowPSODesc.Topology = Topology::TriangleList;
+	shadowPSODesc.RasterizerState = shadowRasterizer;
+	if (!myRHI.CreatePipelineStateObject(shadowPSODesc, myShadowOverridePSO))
+	{
+		return false;
+	}
+
+	RasterizerStateDescription localShadowRasterizer;
+	localShadowRasterizer.CullMode = RasterizerCullMode::None;
+	localShadowRasterizer.DepthBias = ShadowConfig::LocalRasterDepthBias;
+	localShadowRasterizer.SlopeScaledDepthBias = ShadowConfig::LocalRasterSlopeBias;
+
+	PipelineStateDescription localShadowPSODesc;
+	localShadowPSODesc.Name = "LocalShadowOverridePSO";
+	localShadowPSODesc.Topology = Topology::TriangleList;
+	localShadowPSODesc.RasterizerState = localShadowRasterizer;
+	if (!myRHI.CreatePipelineStateObject(localShadowPSODesc, myLocalShadowOverridePSO))
+	{
+		return false;
+	}
+
+	Shader pointShadowGS;
+	if (!myRHI.CompileShader(ShaderType::GeometryShader, myShaderRoot / "Internal" / "PointShadow_GS.hlsl", nullptr, true, pointShadowGS))
+	{
+		return false;
+	}
+
+	PipelineStateDescription pointShadowPSODesc = localShadowPSODesc;
+	pointShadowPSODesc.Name = "PointShadowOverridePSO";
+	pointShadowPSODesc.GeometryShader.ByteCode = pointShadowGS.GetDataPtr();
+	pointShadowPSODesc.GeometryShader.ByteCodeSize = pointShadowGS.GetDataSize();
+	return myRHI.CreatePipelineStateObject(pointShadowPSODesc, myPointShadowOverridePSO);
 }
 
 bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Material& outMaterial) const
@@ -385,6 +929,11 @@ bool GraphicsEngine::LoadTexture(const std::filesystem::path& aPath, Texture& ou
 	file.close();
 
 	return myRHI.CreateTexture(aPath.stem().string(), fileData.data(), fileData.size(), outTexture);
+}
+
+bool GraphicsEngine::CreateShadowMap(std::string_view aName, unsigned aWidth, unsigned aHeight, Texture& outShadowMap, bool aCubeMap) const
+{
+	return myRHI.CreateDepthStencil(aName, aWidth, aHeight, outShadowMap, aCubeMap);
 }
 
 bool GraphicsEngine::CreateConstantBufferInternal(ConstantBuffer aBufferId, std::string_view aName, size_t aBufferSize)
