@@ -1,4 +1,10 @@
+#include "PoissonDisks.hlsli"
+
 static const uint SHADOW_SETTINGS_DEPTH_BIAS = 0;
+static const uint SHADOW_POISSON_SAMPLE_COUNT = 16;
+static const float SHADOW_MAP_TEXEL_SIZE = 1.0f / 2048.0f;
+static const float SHADOW_POISSON_FILTER_RADIUS = 2.0f * SHADOW_MAP_TEXEL_SIZE;
+static const float SHADOW_POISSON_SAMPLE_WEIGHT = 1.0f / 16.0f;
 
 float GetShadowDepthBias(Light aLight)
 {
@@ -18,17 +24,53 @@ float SampleDirectionalShadowMap(uint aCascadeIndex, float2 aShadowUV, float aSh
     switch (aCascadeIndex)
     {
         case 0:
-            shadow = DirectionalShadowMaps[0].SampleCmpLevelZero(ShadowCmpSampler, aShadowUV, aShadowDepth);
+        {
+            shadow = 0.0f;
+            [unroll]
+            for (uint sampleIndex = 0; sampleIndex < SHADOW_POISSON_SAMPLE_COUNT; ++sampleIndex)
+            {
+                const float2 sampleUV = aShadowUV + poissonDisk16[sampleIndex] * SHADOW_POISSON_FILTER_RADIUS;
+                shadow += DirectionalShadowMaps[0].SampleCmpLevelZero(ShadowCmpSampler, sampleUV, aShadowDepth);
+            }
+            shadow *= SHADOW_POISSON_SAMPLE_WEIGHT;
             break;
+        }
         case 1:
-            shadow = DirectionalShadowMaps[1].SampleCmpLevelZero(ShadowCmpSampler, aShadowUV, aShadowDepth);
+        {
+            shadow = 0.0f;
+            [unroll]
+            for (uint sampleIndex = 0; sampleIndex < SHADOW_POISSON_SAMPLE_COUNT; ++sampleIndex)
+            {
+                const float2 sampleUV = aShadowUV + poissonDisk16[sampleIndex] * SHADOW_POISSON_FILTER_RADIUS;
+                shadow += DirectionalShadowMaps[1].SampleCmpLevelZero(ShadowCmpSampler, sampleUV, aShadowDepth);
+            }
+            shadow *= SHADOW_POISSON_SAMPLE_WEIGHT;
             break;
+        }
         case 2:
-            shadow = DirectionalShadowMaps[2].SampleCmpLevelZero(ShadowCmpSampler, aShadowUV, aShadowDepth);
+        {
+            shadow = 0.0f;
+            [unroll]
+            for (uint sampleIndex = 0; sampleIndex < SHADOW_POISSON_SAMPLE_COUNT; ++sampleIndex)
+            {
+                const float2 sampleUV = aShadowUV + poissonDisk16[sampleIndex] * SHADOW_POISSON_FILTER_RADIUS;
+                shadow += DirectionalShadowMaps[2].SampleCmpLevelZero(ShadowCmpSampler, sampleUV, aShadowDepth);
+            }
+            shadow *= SHADOW_POISSON_SAMPLE_WEIGHT;
             break;
+        }
         case 3:
-            shadow = DirectionalShadowMaps[3].SampleCmpLevelZero(ShadowCmpSampler, aShadowUV, aShadowDepth);
+        {
+            shadow = 0.0f;
+            [unroll]
+            for (uint sampleIndex = 0; sampleIndex < SHADOW_POISSON_SAMPLE_COUNT; ++sampleIndex)
+            {
+                const float2 sampleUV = aShadowUV + poissonDisk16[sampleIndex] * SHADOW_POISSON_FILTER_RADIUS;
+                shadow += DirectionalShadowMaps[3].SampleCmpLevelZero(ShadowCmpSampler, sampleUV, aShadowDepth);
+            }
+            shadow *= SHADOW_POISSON_SAMPLE_WEIGHT;
             break;
+        }
     }
     return shadow;
 }
@@ -39,17 +81,53 @@ float SampleSpotShadowMap(uint aShadowIndex, float2 aShadowUV, float aShadowDept
     switch (aShadowIndex)
     {
         case 0:
-            shadow = SpotLightShadowMaps[0].SampleCmpLevelZero(ShadowCmpSampler, aShadowUV, aShadowDepth);
+        {
+            shadow = 0.0f;
+            [unroll]
+            for (uint sampleIndex = 0; sampleIndex < SHADOW_POISSON_SAMPLE_COUNT; ++sampleIndex)
+            {
+                const float2 sampleUV = aShadowUV + poissonDisk16[sampleIndex] * SHADOW_POISSON_FILTER_RADIUS;
+                shadow += SpotLightShadowMaps[0].SampleCmpLevelZero(ShadowCmpSampler, sampleUV, aShadowDepth);
+            }
+            shadow *= SHADOW_POISSON_SAMPLE_WEIGHT;
             break;
+        }
         case 1:
-            shadow = SpotLightShadowMaps[1].SampleCmpLevelZero(ShadowCmpSampler, aShadowUV, aShadowDepth);
+        {
+            shadow = 0.0f;
+            [unroll]
+            for (uint sampleIndex = 0; sampleIndex < SHADOW_POISSON_SAMPLE_COUNT; ++sampleIndex)
+            {
+                const float2 sampleUV = aShadowUV + poissonDisk16[sampleIndex] * SHADOW_POISSON_FILTER_RADIUS;
+                shadow += SpotLightShadowMaps[1].SampleCmpLevelZero(ShadowCmpSampler, sampleUV, aShadowDepth);
+            }
+            shadow *= SHADOW_POISSON_SAMPLE_WEIGHT;
             break;
+        }
         case 2:
-            shadow = SpotLightShadowMaps[2].SampleCmpLevelZero(ShadowCmpSampler, aShadowUV, aShadowDepth);
+        {
+            shadow = 0.0f;
+            [unroll]
+            for (uint sampleIndex = 0; sampleIndex < SHADOW_POISSON_SAMPLE_COUNT; ++sampleIndex)
+            {
+                const float2 sampleUV = aShadowUV + poissonDisk16[sampleIndex] * SHADOW_POISSON_FILTER_RADIUS;
+                shadow += SpotLightShadowMaps[2].SampleCmpLevelZero(ShadowCmpSampler, sampleUV, aShadowDepth);
+            }
+            shadow *= SHADOW_POISSON_SAMPLE_WEIGHT;
             break;
+        }
         case 3:
-            shadow = SpotLightShadowMaps[3].SampleCmpLevelZero(ShadowCmpSampler, aShadowUV, aShadowDepth);
+        {
+            shadow = 0.0f;
+            [unroll]
+            for (uint sampleIndex = 0; sampleIndex < SHADOW_POISSON_SAMPLE_COUNT; ++sampleIndex)
+            {
+                const float2 sampleUV = aShadowUV + poissonDisk16[sampleIndex] * SHADOW_POISSON_FILTER_RADIUS;
+                shadow += SpotLightShadowMaps[3].SampleCmpLevelZero(ShadowCmpSampler, sampleUV, aShadowDepth);
+            }
+            shadow *= SHADOW_POISSON_SAMPLE_WEIGHT;
             break;
+        }
     }
     return shadow;
 }

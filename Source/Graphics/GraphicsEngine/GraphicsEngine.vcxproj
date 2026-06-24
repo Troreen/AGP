@@ -284,6 +284,7 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
     <None Include="Shaders\Material\MaterialParameters.hlsli" />
     <None Include="Shaders\Material\MaterialTextures.hlsli" />
     <None Include="Shaders\Material\PBR.hlsli" />
+    <None Include="Shaders\Material\PoissonDisks.hlsli" />
     <None Include="Shaders\Material\Samplers.hlsli" />
     <None Include="Shaders\Material\ShadowSampling.hlsli" />
   </ItemGroup>
