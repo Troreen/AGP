@@ -1,9 +1,13 @@
+#include "PoissonDisks.hlsli"
+
 static const float PI = 3.14159265f;
 static const uint LIGHT_TYPE_DIRECTIONAL = 0;
 static const uint LIGHT_TYPE_POINT = 1;
 static const uint LIGHT_TYPE_SPOT = 2;
 static const uint MAX_LIGHTS = 8;
 static const uint SHADOW_SETTINGS_DEPTH_BIAS = 0;
+static const int SHADOW_PCF_SAMPLE_COUNT = 32;
+static const float SHADOW_PCF_FILTER_RADIUS = 2.0f;
 
 struct Light
 {
@@ -105,43 +109,64 @@ bool IsValidShadowCoord(float3 aShadowCoord)
         && aShadowCoord.z >= 0.0f && aShadowCoord.z <= 1.0f;
 }
 
-float SampleDirectionalShadowMap(uint aCascadeIndex, float2 aShadowUV, float aShadowDepth)
+float SampleShadowMapPCF(Texture2D aShadowMap, float2 aShadowUV, float aShadowDepth, float aShadowBias, float aFilterRadius)
+{
+    uint width = 0;
+    uint height = 0;
+    uint mipCount = 0;
+    aShadowMap.GetDimensions(0, width, height, mipCount);
+
+    const float2 texelSize = 1.0f / float2(width, height);
+    const float comparisonDepth = saturate(aShadowDepth - aShadowBias);
+    float shadow = 0.0f;
+
+    [unroll]
+    for (int sampleIndex = 0; sampleIndex < SHADOW_PCF_SAMPLE_COUNT; ++sampleIndex)
+    {
+        const float2 offset = poissonDisk32[sampleIndex] * texelSize * aFilterRadius;
+        shadow += aShadowMap.SampleCmpLevelZero(ShadowCmpSampler, aShadowUV + offset, comparisonDepth);
+    }
+
+    return saturate(shadow / SHADOW_PCF_SAMPLE_COUNT);
+}
+
+float SampleDirectionalShadowMap(uint aCascadeIndex, float2 aShadowUV, float aShadowDepth, float aShadowBias)
 {
     float shadow = 1.0f;
     switch (aCascadeIndex)
     {
         case 0:
-            shadow = DirectionalShadowMaps[0].SampleCmpLevelZero(ShadowCmpSampler, aShadowUV, aShadowDepth);
+            shadow = SampleShadowMapPCF(DirectionalShadowMaps[0], aShadowUV, aShadowDepth, aShadowBias, SHADOW_PCF_FILTER_RADIUS);
             break;
         case 1:
-            shadow = DirectionalShadowMaps[1].SampleCmpLevelZero(ShadowCmpSampler, aShadowUV, aShadowDepth);
+            shadow = SampleShadowMapPCF(DirectionalShadowMaps[1], aShadowUV, aShadowDepth, aShadowBias, SHADOW_PCF_FILTER_RADIUS);
             break;
         case 2:
-            shadow = DirectionalShadowMaps[2].SampleCmpLevelZero(ShadowCmpSampler, aShadowUV, aShadowDepth);
+            shadow = SampleShadowMapPCF(DirectionalShadowMaps[2], aShadowUV, aShadowDepth, aShadowBias, SHADOW_PCF_FILTER_RADIUS);
             break;
         case 3:
-            shadow = DirectionalShadowMaps[3].SampleCmpLevelZero(ShadowCmpSampler, aShadowUV, aShadowDepth);
+            shadow = SampleShadowMapPCF(DirectionalShadowMaps[3], aShadowUV, aShadowDepth, aShadowBias, SHADOW_PCF_FILTER_RADIUS);
             break;
     }
     return shadow;
 }
 
-float SampleSpotShadowMap(uint aShadowIndex, float2 aShadowUV, float aShadowDepth)
+float SampleSpotShadowMap(uint aShadowIndex, float2 aShadowUV, float aShadowDepth, float aShadowBias)
 {
     float shadow = 1.0f;
     switch (aShadowIndex)
     {
         case 0:
-            shadow = SpotLightShadowMaps[0].SampleCmpLevelZero(ShadowCmpSampler, aShadowUV, aShadowDepth);
+            shadow = SampleShadowMapPCF(SpotLightShadowMaps[0], aShadowUV, aShadowDepth, aShadowBias, SHADOW_PCF_FILTER_RADIUS);
             break;
         case 1:
-            shadow = SpotLightShadowMaps[1].SampleCmpLevelZero(ShadowCmpSampler, aShadowUV, aShadowDepth);
+            shadow = SampleShadowMapPCF(SpotLightShadowMaps[1], aShadowUV, aShadowDepth, aShadowBias, SHADOW_PCF_FILTER_RADIUS);
             break;
         case 2:
-            shadow = SpotLightShadowMaps[2].SampleCmpLevelZero(ShadowCmpSampler, aShadowUV, aShadowDepth);
+            shadow = SampleShadowMapPCF(SpotLightShadowMaps[2], aShadowUV, aShadowDepth, aShadowBias, SHADOW_PCF_FILTER_RADIUS);
             break;
         case 3:
-            shadow = SpotLightShadowMaps[3].SampleCmpLevelZero(ShadowCmpSampler, aShadowUV, aShadowDepth);
+            shadow = SampleShadowMapPCF(SpotLightShadowMaps[3], aShadowUV, aShadowDepth, aShadowBias, SHADOW_PCF_FILTER_RADIUS);
             break;
     }
     return shadow;
@@ -175,14 +200,15 @@ float CalculateProjectedShadow(Light aLight, uint aMatrixIndex, float3 aWorldPos
     const float3 shadowCoord = shadowPosition.xyz / shadowPosition.w;
     if (IsValidShadowCoord(shadowCoord))
     {
-        const float shadowDepth = saturate(shadowCoord.z - GetShadowDepthBias(aLight));
+        const float shadowDepth = saturate(shadowCoord.z);
+        const float shadowBias = GetShadowDepthBias(aLight);
         if (aUseDirectionalMaps)
         {
-            shadow = SampleDirectionalShadowMap(aMatrixIndex, shadowCoord.xy, shadowDepth);
+            shadow = SampleDirectionalShadowMap(aMatrixIndex, shadowCoord.xy, shadowDepth, shadowBias);
         }
         else
         {
-            shadow = SampleSpotShadowMap(aLight.ShadowMapIndex, shadowCoord.xy, shadowDepth);
+            shadow = SampleSpotShadowMap(aLight.ShadowMapIndex, shadowCoord.xy, shadowDepth, shadowBias);
         }
     }
 

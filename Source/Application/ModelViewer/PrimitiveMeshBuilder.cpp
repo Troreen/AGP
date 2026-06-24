@@ -278,7 +278,7 @@ std::shared_ptr<Mesh> PrimitiveMeshBuilder::CreateFloor()
 	std::vector<Vertex> vertices;
 	std::vector<unsigned> indices;
 
-	AddQuad(vertices, indices,
+	AddReversedQuad(vertices, indices,
 		Point3(-0.5f, -0.5f, 0.0f),
 		Point3(0.5f, -0.5f, 0.0f),
 		Point3(0.5f, 0.5f, 0.0f),
