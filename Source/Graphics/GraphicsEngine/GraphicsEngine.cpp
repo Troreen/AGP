@@ -45,6 +45,13 @@ namespace
 		constexpr std::array<float, DirectionalCascadeCount> CascadeSplits = { 150.0f, 600.0f, 1600.0f, 5000.0f };
 	}
 
+	namespace PBLConfig
+	{
+		constexpr unsigned EnvironmentCubeSlot = 98;
+		constexpr unsigned BRDFLUTSlot = 99;
+		constexpr unsigned BRDFLUTResolution = 512;
+	}
+
 	struct PointShadowBufferData
 	{
 		std::array<CU::Matrix4f, 6> ViewProjection = {};
@@ -312,6 +319,16 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path&
 		mySamplers.emplace_back(std::move(sampler));
 	}
 
+	{ // Linear Clamp
+		SamplerDescription samplerDesc;
+		samplerDesc.Name = "LUTSampler";
+		samplerDesc.AddressMode = SamplerAddressMode::Clamp;
+		samplerDesc.FilterMode = SamplerFilterMode::Linear;
+		Sampler sampler;
+		ensure(myRHI.CreateSampler(samplerDesc, sampler));
+		mySamplers.emplace_back(std::move(sampler));
+	}
+
 	if (!CreateShadowResources())
 	{
 		GELOG(Error, "Failed to create shadow resources.");
@@ -321,6 +338,12 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path&
 	if (!CreateShadowPipelineStates())
 	{
 		GELOG(Error, "Failed to create shadow pipeline states.");
+		return false;
+	}
+
+	if (!CreatePBLResources())
+	{
+		GELOG(Error, "Failed to create PBL resources.");
 		return false;
 	}
 
@@ -385,11 +408,14 @@ void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const Actor& 
 	}
 
 	inoutCommandList.SetShaderSamplers(samplerList.data(), samplerList.size(), 0, PipeLineStage_VertexShader | PipeLineStage_PixelShader);
+	BindPBLResources(inoutCommandList);
 	BindShadowResources(inoutCommandList);
 
 	FrameBuffer fb;
 	fb.View = camera.GetViewMatrix();
 	fb.Projection = camera.GetProjectionMatrix();
+	const CU::Vector3f cameraPosition = camera.GetTransform().GetPosition();
+	fb.CameraPosition = { cameraPosition.x, cameraPosition.y, cameraPosition.z, 1.0f };
 
 	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::FrameBuffer, fb, 0, PipeLineStage_VertexShader | PipeLineStage_PixelShader);
 	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::LightBuffer, lightBuffer, 4, PipeLineStage_PixelShader);
@@ -447,6 +473,16 @@ void GraphicsEngine::UnbindShadowResources(GraphicsCommandList& inoutCommandList
 		nullShadowResources.size(),
 		ShadowConfig::HighTextureSlotStart,
 		PipeLineStage_PixelShader | PipeLineStage_GeometryShader);
+}
+
+void GraphicsEngine::BindPBLResources(GraphicsCommandList& inoutCommandList) const
+{
+	const std::array<const Texture*, 2> pblResources = { &myEnvironmentCubeTexture, &myBRDFLUTTexture };
+	inoutCommandList.SetShaderResources(
+		pblResources.data(),
+		pblResources.size(),
+		PBLConfig::EnvironmentCubeSlot,
+		PipeLineStage_PixelShader);
 }
 
 void GraphicsEngine::BindShadowResources(GraphicsCommandList& inoutCommandList) const
@@ -685,6 +721,74 @@ void GraphicsEngine::ExecuteCommandList(const GraphicsCommandList &aCommandList)
 	myRHI.ExecuteCommandList(aCommandList);
 }
 
+bool GraphicsEngine::CreatePBLResources()
+{
+	const std::filesystem::path environmentPath = myShaderRoot.parent_path() / "Textures" / "T_Shipyard.dds";
+	if (!LoadTexture(environmentPath, myEnvironmentCubeTexture))
+	{
+		GELOG(Error, "Failed to load environment cube map '{}'.", environmentPath.string());
+		return false;
+	}
+
+	return CreateBRDFLUT();
+}
+
+bool GraphicsEngine::CreateBRDFLUT()
+{
+	if (!myRHI.CreateRenderTargetTexture(
+		"BRDF_LUT",
+		PBLConfig::BRDFLUTResolution,
+		PBLConfig::BRDFLUTResolution,
+		static_cast<unsigned>(DXGI_FORMAT_R16G16_FLOAT),
+		myBRDFLUTTexture))
+	{
+		return false;
+	}
+
+	Shader fullTextureVS;
+	if (!myRHI.CompileShader(ShaderType::VertexShader, myShaderRoot / "Internal" / "FullTexture_VS.hlsl", nullptr, true, fullTextureVS))
+	{
+		return false;
+	}
+
+	Shader brdfLUTPS;
+	if (!myRHI.CompileShader(ShaderType::PixelShader, myShaderRoot / "Internal" / "BRDF_LUT_PS.hlsl", nullptr, true, brdfLUTPS))
+	{
+		return false;
+	}
+
+	PipelineStateDescription psoDesc;
+	psoDesc.Name = "BRDF_LUT_PSO";
+	psoDesc.VertexShader.ByteCode = fullTextureVS.GetDataPtr();
+	psoDesc.VertexShader.ByteCodeSize = fullTextureVS.GetDataSize();
+	psoDesc.PixelShader.ByteCode = brdfLUTPS.GetDataPtr();
+	psoDesc.PixelShader.ByteCodeSize = brdfLUTPS.GetDataSize();
+	psoDesc.Topology = Topology::TriangleStrip;
+
+	PipelineStateObject brdfLUTPSO;
+	if (!myRHI.CreatePipelineStateObject(psoDesc, brdfLUTPSO))
+	{
+		return false;
+	}
+
+	GraphicsCommandList commandList;
+	if (!CreateCommandList("BRDF LUT", commandList))
+	{
+		return false;
+	}
+
+	commandList.BeginEvent("Generate BRDF LUT");
+	commandList.ClearRenderTarget(myBRDFLUTTexture);
+	commandList.SetRenderTarget(&myBRDFLUTTexture, nullptr);
+	commandList.SetPipelineState(&brdfLUTPSO);
+	commandList.Draw(4);
+	commandList.EndEvent();
+	commandList.FinishCommandList();
+	ExecuteCommandList(commandList);
+
+	return true;
+}
+
 bool GraphicsEngine::CreateShadowResources()
 {
 	for (size_t cascadeIndex = 0; cascadeIndex < myDirectionalShadowMaps.size(); ++cascadeIndex)
@@ -879,6 +983,7 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 
 	outMaterial.SetTexture(Material::ALBEDO_TEXTURE_SLOT, loadTextureOrFallback(aDescription.AlbedoTexture, myDefaultAlbedoTexture, "albedo"));
 	outMaterial.SetTexture(Material::NORMAL_TEXTURE_SLOT, loadTextureOrFallback(aDescription.NormalTexture, myDefaultNormalTexture, "normal"));
+	outMaterial.SetTexture(Material::MATERIAL_TEXTURE_SLOT, loadTextureOrFallback(aDescription.MaterialTexture, myDefaultMaterialTexture, "material"));
 
 	outMaterial.myPSO = matPSO;
 	outMaterial.myName = aDescription.Name;
@@ -900,6 +1005,13 @@ bool GraphicsEngine::CreateDefaultTextures()
 	if (!myRHI.CreateColorTexture("Default_Normal_Flat", std::array<uint8_t, 4>{ 128, 128, 255, 255 }, *myDefaultNormalTexture))
 	{
 		GELOG(Error, "Failed to create default normal texture.");
+		return false;
+	}
+
+	myDefaultMaterialTexture = std::make_shared<Texture>();
+	if (!myRHI.CreateColorTexture("Default_Material_ORM", std::array<uint8_t, 4>{ 255, 128, 0, 255 }, *myDefaultMaterialTexture))
+	{
+		GELOG(Error, "Failed to create default material texture.");
 		return false;
 	}
 
@@ -1040,27 +1152,28 @@ void GraphicsEngine::RenderMesh(GraphicsCommandList& inoutCommandList, const Mes
 		{
 			currentMaterial = elementMaterial;
 			inoutCommandList.SetPipelineState(&currentMaterial->GetPSO());
-		}
 
-		if (currentMaterial->HasParameters())
-		{
-			if (currentMaterial->IsMaterialDataDirty())
+			if (currentMaterial->HasParameters())
 			{
-				currentMaterial->RefreshMaterialData();
+				if (currentMaterial->IsMaterialDataDirty())
+				{
+					currentMaterial->RefreshMaterialData();
+				}
+
+				UpdateAndSetConstantBufferInternal(inoutCommandList, ConstantBuffer::MaterialBuffer, currentMaterial->GetParameterDataBlock(),
+					Material::MATERIAL_BUFFER_SIZE, 3, PipeLineStage_VertexShader | PipeLineStage_PixelShader);
 			}
 
-			UpdateAndSetConstantBufferInternal(inoutCommandList, ConstantBuffer::MaterialBuffer, currentMaterial->GetParameterDataBlock(), 
-				Material::MATERIAL_BUFFER_SIZE, 3, PipeLineStage_VertexShader | PipeLineStage_PixelShader);
-		}
-		std::vector<const Texture*> textures(Material::MAX_MATERIAL_TEXTURE_COUNT);
-		for (size_t t = 0; t < Material::MAX_MATERIAL_TEXTURE_COUNT; ++t)
-		{
-			if (const std::shared_ptr<Texture>& texture = currentMaterial->GetTexture(static_cast<unsigned>(t)))
+			std::array<const Texture*, Material::MAX_MATERIAL_TEXTURE_COUNT> textures = {};
+			for (size_t t = 0; t < Material::MAX_MATERIAL_TEXTURE_COUNT; ++t)
 			{
-				textures[t] = texture.get();
+				if (const std::shared_ptr<Texture>& texture = currentMaterial->GetTexture(static_cast<unsigned>(t)))
+				{
+					textures[t] = texture.get();
+				}
 			}
+			inoutCommandList.SetShaderResources(textures.data(), textures.size(), 0, PipeLineStage_VertexShader | PipeLineStage_PixelShader);
 		}
-		inoutCommandList.SetShaderResources(textures.data(), textures.size(), 0, PipeLineStage_VertexShader | PipeLineStage_PixelShader);
 
 		inoutCommandList.DrawIndexed(element.NumIndices, element.IndexOffset);
 	}

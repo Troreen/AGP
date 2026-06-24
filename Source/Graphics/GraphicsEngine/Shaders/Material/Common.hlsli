@@ -14,6 +14,8 @@ cbuffer FrameBuffer : register(b0)
 {
     row_major float4x4 FB_View;
     row_major float4x4 FB_Projection;
+    float3 FB_CameraPosition;
+    float __FB_Padding;
 }
 
 cbuffer ObjectBuffer : register(b1)

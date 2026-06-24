@@ -1,7 +1,6 @@
 #include "ModelViewer.h"
 
 #include <algorithm>
-#include <array>
 #include <memory>
 #include <string>
 #include <utility>
@@ -20,37 +19,9 @@ namespace
 {
 	using Vector3f = CommonUtilities::Vector3f;
 
-	struct PrimitivePlacement
-	{
-		const char* Name = "";
-		const char* MaterialName = "";
-		Vector3f Position;
-		Vector3f RotationDegrees;
-		Vector3f Scale;
-	};
-
 	std::filesystem::path GetMaterialRoot(const std::filesystem::path& aContentRoot)
 	{
 		return aContentRoot.parent_path() / "Source" / "Application" / "ModelViewer" / "Materials";
-	}
-
-	std::shared_ptr<Material> CreateMaterialFromFile(const std::filesystem::path& aMaterialFile)
-	{
-		MaterialDescription description;
-		if (!LoadMaterialDescription(aMaterialFile, description))
-		{
-			MVLOG(Warning, "Could not load material description '{}'.", aMaterialFile.string());
-			return nullptr;
-		}
-
-		std::shared_ptr<Material> material = std::make_shared<Material>();
-		if (!GraphicsEngine::Get().CreateMaterial(description, *material))
-		{
-			MVLOG(Warning, "Could not create material '{}'.", description.Name);
-			return nullptr;
-		}
-
-		return material;
 	}
 
 	void AssignMaterialToAllSlots(MeshComponentBase* aMeshComponent, const std::shared_ptr<MaterialInterface>& aMaterial)
@@ -297,6 +268,8 @@ void ModelViewer::LoadScene()
     const Vector3f floorPosition = { 0.0f, 0.0f, 260.0f };
     const Vector3f characterPosition = { 0.0f, 0.0f, 250.0f };
     const Vector3f chestPosition = { 135.0f, 0.0f, 285.0f };
+    const Vector3f colorCheckerPosition = { -145.0f, 40.0f, 365.0f };
+    const Vector3f smoothSpherePosition = { 320.0f, 100.0f, 430.0f };
 
     {
         myCameraActor = myWorld.CreateActor("Camera Actor");
@@ -348,43 +321,23 @@ void ModelViewer::LoadScene()
         }
     }
 
-    if (std::shared_ptr<Mesh> axesMesh = GetRegisteredMesh("WorldAxes"))
-    {
-        Actor* axesActor = myWorld.CreateActor("World Axes Actor");
-        if (axesActor != nullptr)
-        {
-            StaticMeshComponent* axesMeshComponent = axesActor->AddComponent<StaticMeshComponent>("World Axes Mesh Component", axesMesh);
-            AssignMaterialToAllSlots(axesMeshComponent, CreateMaterialFromFile(materialRoot / "AxesMaterial.mat"));
-        }
-    }
+    CreateStaticMeshActor("Floor Actor", "Floor Mesh Component", "Floor",
+        materialRoot / "FloorMaterial.mat",
+        floorPosition,
+        { 0.0f, -90.0f, 0.0f },
+        { 1100.0f, 1100.0f, 1100.0f });
 
-    if (std::shared_ptr<Mesh> floorMesh = GetRegisteredMesh("Floor"))
-    {
-        Actor* floorActor = myWorld.CreateActor("Floor Actor");
-        if (floorActor != nullptr)
-        {
-            StaticMeshComponent* floorMeshComponent = floorActor->AddComponent<StaticMeshComponent>("Floor Mesh Component", floorMesh);
-            floorActor->SetTranslation(floorPosition);
-            floorActor->SetRotation(0.0f, -90.0f, 0.0f);
-            floorActor->SetScale({ 1100.0f, 1100.0f, 1100.0f });
-            AssignMaterialToAllSlots(floorMeshComponent, CreateMaterialFromFile(materialRoot / "FloorMaterial.mat"));
-        }
-    }
+    CreateStaticMeshActor("SM_Chest Actor", "SM_Chest Mesh Component", "SM_Chest",
+        materialRoot / "ChestMaterial.mat",
+        chestPosition,
+        { -18.0f, 0.0f, 0.0f },
+        { 1.0f, 1.0f, 1.0f });
 
-    if (std::shared_ptr<Mesh> chestMesh = GetRegisteredMesh("SM_Chest"))
-    {
-        Actor* chestActor = myWorld.CreateActor("SM_Chest Actor");
-		StaticMeshComponent* chestMeshComponent = nullptr;
-        if (chestActor != nullptr)
-        {
-            chestMeshComponent = chestActor->AddComponent<StaticMeshComponent>("SM_Chest Mesh Component", chestMesh);
-            chestActor->SetTranslation(chestPosition);
-            chestActor->SetRotation(-18.0f, 0.0f, 0.0f);
-            chestActor->SetScale({ 1.0f, 1.0f, 1.0f });
-        }
-
-		AssignMaterialToAllSlots(chestMeshComponent, CreateMaterialFromFile(materialRoot / "ChestMaterial.mat"));
-    }
+    CreateStaticMeshActor("SM_Color_Checker Actor", "SM_Color_Checker Mesh Component", "SM_Color_Checker",
+        materialRoot / "ColorCheckerMaterial.mat",
+        colorCheckerPosition,
+        { 0.0f, -90.0f, 0.0f },
+        { 1.0f, 1.0f, 1.0f });
 
     if (std::shared_ptr<Mesh> characterMesh = GetRegisteredMesh("SK_C_TGA_Bro"))
     {
@@ -398,7 +351,7 @@ void ModelViewer::LoadScene()
 
             if (myAnimatedMeshComponent != nullptr)
             {
-                AssignMaterialToAllSlots(myAnimatedMeshComponent, CreateMaterialFromFile(materialRoot / "CharacterMaterial.mat"));
+                AssignMaterialToAllSlots(myAnimatedMeshComponent, GetMaterial(materialRoot / "CharacterMaterial.mat"));
 
                 // TODO Engine future:
                 // Replace hardcoded joint mask with data-driven animation mask assets.
@@ -408,35 +361,63 @@ void ModelViewer::LoadScene()
             }
         }
     }
+}
 
-    const std::array primitivePlacements = {
-        PrimitivePlacement{ "Cube", "", { -310.0f, 100.0f, 120.0f }, { 12.0f, 28.0f, -8.0f }, { 95.0f, 95.0f, 95.0f } },
-        PrimitivePlacement{ "Pyramid", "", { 315.0f, 100.0f, 145.0f }, { -8.0f, -34.0f, 12.0f }, { 105.0f, 105.0f, 105.0f } },
-        PrimitivePlacement{ "Sphere", "", { -270.0f, 100.0f, 470.0f }, { 0.0f, 0.0f, 0.0f }, { 105.0f, 105.0f, 105.0f } },
-        PrimitivePlacement{ "SmoothSphere", "Sphere", { 0.0f, 100.0f, 540.0f }, { 0.0f, 0.0f, 0.0f }, { 115.0f, 115.0f, 115.0f } },
-        PrimitivePlacement{ "Torus", "", { 300.0f, 100.0f, 505.0f }, { 24.0f, 42.0f, 0.0f }, { 115.0f, 115.0f, 115.0f } },
-    };
-
-    for (const PrimitivePlacement& placement : primitivePlacements)
+std::shared_ptr<MaterialInterface> ModelViewer::GetMaterial(const std::filesystem::path& aMaterialFile)
+{
+    const std::string cacheKey = aMaterialFile.lexically_normal().string();
+    if (const auto materialIt = myMaterialCache.find(cacheKey); materialIt != myMaterialCache.end())
     {
-        const std::string primitiveName = placement.Name;
-        std::shared_ptr<Mesh> mesh = GetRegisteredMesh(primitiveName);
-        if (mesh == nullptr)
-        {
-            continue;
-        }
-
-        Actor* actor = myWorld.CreateActor(primitiveName + " Actor");
-        if (actor != nullptr)
-        {
-            StaticMeshComponent* meshComponent = actor->AddComponent<StaticMeshComponent>(primitiveName + " Mesh Component", mesh);
-            actor->SetTranslation(placement.Position);
-            actor->SetRotation(placement.RotationDegrees.x, placement.RotationDegrees.y, placement.RotationDegrees.z);
-            actor->SetScale(placement.Scale);
-            const std::string materialName = placement.MaterialName[0] != '\0' ? placement.MaterialName : placement.Name;
-            AssignMaterialToAllSlots(meshComponent, CreateMaterialFromFile(materialRoot / (materialName + "Material.mat")));
-        }
+        return materialIt->second;
     }
+
+    MaterialDescription description;
+    if (!LoadMaterialDescription(aMaterialFile, description))
+    {
+        MVLOG(Warning, "Could not load material description '{}'.", aMaterialFile.string());
+        return nullptr;
+    }
+
+    std::shared_ptr<Material> material = std::make_shared<Material>();
+    if (!GraphicsEngine::Get().CreateMaterial(description, *material))
+    {
+        MVLOG(Warning, "Could not create material '{}'.", description.Name);
+        return nullptr;
+    }
+
+    const auto materialResult = myMaterialCache.emplace(cacheKey, material);
+    return materialResult.first->second;
+}
+
+StaticMeshComponent* ModelViewer::CreateStaticMeshActor(
+    const std::string& anActorName,
+    const std::string& aComponentName,
+    const std::string& aMeshName,
+    const std::filesystem::path& aMaterialFile,
+    const CommonUtilities::Vector3<float>& aPosition,
+    const CommonUtilities::Vector3<float>& aRotationDegrees,
+    const CommonUtilities::Vector3<float>& aScale)
+{
+    const std::shared_ptr<Mesh> mesh = GetRegisteredMesh(aMeshName);
+    if (mesh == nullptr)
+    {
+        MVLOG(Warning, "Scene mesh '{}' is not registered.", aMeshName);
+        return nullptr;
+    }
+
+    Actor* actor = myWorld.CreateActor(anActorName);
+    if (actor == nullptr)
+    {
+        return nullptr;
+    }
+
+    StaticMeshComponent* meshComponent = actor->AddComponent<StaticMeshComponent>(aComponentName, mesh);
+    actor->SetTranslation(aPosition);
+    actor->SetRotation(aRotationDegrees.x, aRotationDegrees.y, aRotationDegrees.z);
+    actor->SetScale(aScale);
+
+    AssignMaterialToAllSlots(meshComponent, GetMaterial(aMaterialFile));
+    return meshComponent;
 }
 
 std::shared_ptr<Mesh> ModelViewer::GetRegisteredMesh(const std::string& aName) const

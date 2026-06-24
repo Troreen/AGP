@@ -210,6 +210,7 @@ void MeshLibrary::Initialize()
 {
 	RegisterPrimitiveMeshes();
 	LoadFBXMesh("Assets/Meshes/Props/SM_Chest.fbx");
+	LoadFBXMesh("Assets/Meshes/Props/SM_Color_Checker.fbx");
 	LoadFBXMesh("Assets/Meshes/Characters/TGA_Bro/SK_C_TGA_Bro.fbx");
 	LoadFBXAnimation("SK_C_TGA_Bro", "Walk", "Assets/Animations/Characters/TGA_Bro/Locomotion/A_C_TGA_Bro_Walk.fbx");
 	LoadFBXAnimation("SK_C_TGA_Bro", "Run", "Assets/Animations/Characters/TGA_Bro/Locomotion/A_C_TGA_Bro_Run.fbx");

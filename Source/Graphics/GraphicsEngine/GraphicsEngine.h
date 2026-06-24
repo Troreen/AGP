@@ -103,6 +103,9 @@ private:
 	bool UpdateAndSetConstantBufferInternal(GraphicsCommandList& inoutCommandList, ConstantBuffer aBufferId, const void* aData, size_t aDataSize, unsigned aSlot, PipeLineStages aStages);
 
 	void CreateMaterialTextureSlots(const RHIShaderReflectionInfo& aShaderInfo, Material& inoutMaterial) const;
+	bool CreatePBLResources();
+	bool CreateBRDFLUT();
+	void BindPBLResources(GraphicsCommandList& inoutCommandList) const;
 	bool CreateShadowResources();
 	bool CreateShadowPipelineStates();
 	SceneRenderData CollectRenderItemsAndLights(const World& aWorld) const;
@@ -140,8 +143,11 @@ private:
 	std::array<Texture, DirectionalCascadeCount> myDirectionalShadowMaps;
 	std::array<Texture, MaxSpotShadowMaps> mySpotShadowMaps;
 	std::array<Texture, MaxPointShadowMaps> myPointShadowMaps;
+	Texture myEnvironmentCubeTexture;
+	Texture myBRDFLUTTexture;
 	std::shared_ptr<Texture> myDefaultAlbedoTexture;
 	std::shared_ptr<Texture> myDefaultNormalTexture;
+	std::shared_ptr<Texture> myDefaultMaterialTexture;
 
 	Material myDefaultMaterial;
 	float myDirectionalShadowBiasOffset = 0.0f;

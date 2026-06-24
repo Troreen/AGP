@@ -43,6 +43,7 @@ public:
 	bool CreatePipelineStateObject (const PipelineStateDescription& aDescription, PipelineStateObject& outPSO) const;
 	bool CreateCommandList(std::string_view aName, GraphicsCommandList& outCommandList) const;
 	bool CreateDepthStencil(std::string_view aName, unsigned aWidth, unsigned aHeight, Texture& outDepthStencil, bool aCubeMap = false) const;
+	bool CreateRenderTargetTexture(std::string_view aName, unsigned aWidth, unsigned aHeight, unsigned aFormat, Texture& outTexture) const;
 	bool CreateTexture(std::string_view aName, const uint8_t* aByteCode, size_t aByteCodeSize, Texture& outTexture) const;
 	bool CreateColorTexture(std::string_view aName, const std::array<uint8_t, 4>& aColor, Texture& outTexture) const;
 	bool CreateSampler(const SamplerDescription& aDescription, Sampler& outSampler) const; 

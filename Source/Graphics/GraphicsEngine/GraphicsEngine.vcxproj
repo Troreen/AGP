@@ -275,14 +275,17 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shaders\Internal\BRDF_LUT_PS.hlsl" />
+    <None Include="Shaders\Internal\FullTexture_VS.hlsl" />
     <None Include="Shaders\Internal\PointShadow_GS.hlsl" />
     <None Include="Shaders\Material\Common.hlsli" />
     <None Include="Shaders\Material\Lighting.hlsli" />
     <None Include="Shaders\Material\Material.hlsli" />
     <None Include="Shaders\Material\MaterialParameters.hlsli" />
     <None Include="Shaders\Material\MaterialTextures.hlsli" />
-    <None Include="Shaders\Material\PoissonDisks.hlsli" />
+    <None Include="Shaders\Material\PBR.hlsli" />
     <None Include="Shaders\Material\Samplers.hlsli" />
+    <None Include="Shaders\Material\ShadowSampling.hlsli" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

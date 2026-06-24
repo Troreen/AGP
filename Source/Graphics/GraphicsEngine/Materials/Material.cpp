@@ -153,6 +153,7 @@ bool LoadMaterialDescription(const std::filesystem::path& aPath, MaterialDescrip
 	description.MaterialShaderCode = ResolveRelativePath(basePath, ExtractStringValue(text, "materialShaderCode").value_or({}));
 	description.AlbedoTexture = ResolveRelativePath(basePath, ExtractStringValue(text, "albedoTexture").value_or({}));
 	description.NormalTexture = ResolveRelativePath(basePath, ExtractStringValue(text, "normalTexture").value_or({}));
+	description.MaterialTexture = ResolveRelativePath(basePath, ExtractStringValue(text, "materialTexture").value_or({}));
 
 	outDescription = std::move(description);
 	return true;

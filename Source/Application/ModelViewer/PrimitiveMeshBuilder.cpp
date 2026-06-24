@@ -343,8 +343,8 @@ std::shared_ptr<Mesh> PrimitiveMeshBuilder::CreateSphere()
 
 std::shared_ptr<Mesh> PrimitiveMeshBuilder::CreateSmoothSphere()
 {
-	constexpr int latitudeSegments = 24;
-	constexpr int longitudeSegments = 48;
+	constexpr int latitudeSegments = 48;
+	constexpr int longitudeSegments = 96;
 	constexpr float radius = 0.55f;
 
 	return CreateSphereMesh("SmoothSphere", latitudeSegments, longitudeSegments, radius);
