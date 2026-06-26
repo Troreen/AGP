@@ -11,6 +11,35 @@ float GetShadowDepthBias(Light aLight)
     return aLight.ShadowSettings[SHADOW_SETTINGS_DEPTH_BIAS];
 }
 
+float GetDirectionalShadowDepthBias(Light aLight, uint aCascadeIndex)
+{
+    const float cascadeBias = aLight.CascadeDepthBiases[aCascadeIndex];
+    return cascadeBias > 0.0f ? cascadeBias : GetShadowDepthBias(aLight);
+}
+
+float3 GetDirectionalShadowRight(Light aLight)
+{
+    const float3 lightDirection = normalize(aLight.Direction);
+    const float3 upReference = abs(dot(lightDirection, float3(0.0f, 1.0f, 0.0f))) > 0.95f
+        ? float3(0.0f, 0.0f, 1.0f)
+        : float3(0.0f, 1.0f, 0.0f);
+    return normalize(cross(upReference, lightDirection));
+}
+
+float3 GetDirectionalShadowUp(Light aLight, float3 aShadowRight)
+{
+    return cross(normalize(aLight.Direction), aShadowRight);
+}
+
+float2 GetDirectionalWorldFilterUVOffset(Light aLight, uint aCascadeIndex, float2 aDiskOffset)
+{
+    const float3 shadowRight = GetDirectionalShadowRight(aLight);
+    const float3 shadowUp = GetDirectionalShadowUp(aLight, shadowRight);
+    const float filterRadiusWorld = aLight.CascadeFilterWorldRadii[aCascadeIndex];
+    const float3 worldOffset = (shadowRight * aDiskOffset.x + shadowUp * aDiskOffset.y) * filterRadiusWorld;
+    return mul(float4(worldOffset, 0.0f), aLight.LightViewProjTexture[aCascadeIndex]).xy;
+}
+
 bool IsValidShadowCoord(float3 aShadowCoord)
 {
     return aShadowCoord.x >= 0.0f && aShadowCoord.x <= 1.0f
@@ -18,7 +47,7 @@ bool IsValidShadowCoord(float3 aShadowCoord)
         && aShadowCoord.z >= 0.0f && aShadowCoord.z <= 1.0f;
 }
 
-float SampleDirectionalShadowMap(uint aCascadeIndex, float2 aShadowUV, float aShadowDepth)
+float SampleDirectionalShadowMap(Light aLight, uint aCascadeIndex, float2 aShadowUV, float aShadowDepth)
 {
     float shadow = 1.0f;
     switch (aCascadeIndex)
@@ -29,7 +58,7 @@ float SampleDirectionalShadowMap(uint aCascadeIndex, float2 aShadowUV, float aSh
             [unroll]
             for (uint sampleIndex = 0; sampleIndex < SHADOW_POISSON_SAMPLE_COUNT; ++sampleIndex)
             {
-                const float2 sampleUV = aShadowUV + poissonDisk16[sampleIndex] * SHADOW_POISSON_FILTER_RADIUS;
+                const float2 sampleUV = aShadowUV + GetDirectionalWorldFilterUVOffset(aLight, 0, poissonDisk16[sampleIndex]);
                 shadow += DirectionalShadowMaps[0].SampleCmpLevelZero(ShadowCmpSampler, sampleUV, aShadowDepth);
             }
             shadow *= SHADOW_POISSON_SAMPLE_WEIGHT;
@@ -41,7 +70,7 @@ float SampleDirectionalShadowMap(uint aCascadeIndex, float2 aShadowUV, float aSh
             [unroll]
             for (uint sampleIndex = 0; sampleIndex < SHADOW_POISSON_SAMPLE_COUNT; ++sampleIndex)
             {
-                const float2 sampleUV = aShadowUV + poissonDisk16[sampleIndex] * SHADOW_POISSON_FILTER_RADIUS;
+                const float2 sampleUV = aShadowUV + GetDirectionalWorldFilterUVOffset(aLight, 1, poissonDisk16[sampleIndex]);
                 shadow += DirectionalShadowMaps[1].SampleCmpLevelZero(ShadowCmpSampler, sampleUV, aShadowDepth);
             }
             shadow *= SHADOW_POISSON_SAMPLE_WEIGHT;
@@ -53,7 +82,7 @@ float SampleDirectionalShadowMap(uint aCascadeIndex, float2 aShadowUV, float aSh
             [unroll]
             for (uint sampleIndex = 0; sampleIndex < SHADOW_POISSON_SAMPLE_COUNT; ++sampleIndex)
             {
-                const float2 sampleUV = aShadowUV + poissonDisk16[sampleIndex] * SHADOW_POISSON_FILTER_RADIUS;
+                const float2 sampleUV = aShadowUV + GetDirectionalWorldFilterUVOffset(aLight, 2, poissonDisk16[sampleIndex]);
                 shadow += DirectionalShadowMaps[2].SampleCmpLevelZero(ShadowCmpSampler, sampleUV, aShadowDepth);
             }
             shadow *= SHADOW_POISSON_SAMPLE_WEIGHT;
@@ -65,7 +94,7 @@ float SampleDirectionalShadowMap(uint aCascadeIndex, float2 aShadowUV, float aSh
             [unroll]
             for (uint sampleIndex = 0; sampleIndex < SHADOW_POISSON_SAMPLE_COUNT; ++sampleIndex)
             {
-                const float2 sampleUV = aShadowUV + poissonDisk16[sampleIndex] * SHADOW_POISSON_FILTER_RADIUS;
+                const float2 sampleUV = aShadowUV + GetDirectionalWorldFilterUVOffset(aLight, 3, poissonDisk16[sampleIndex]);
                 shadow += DirectionalShadowMaps[3].SampleCmpLevelZero(ShadowCmpSampler, sampleUV, aShadowDepth);
             }
             shadow *= SHADOW_POISSON_SAMPLE_WEIGHT;
@@ -178,10 +207,13 @@ float CalculateProjectedShadow(Light aLight, uint aMatrixIndex, float3 aWorldPos
     const float3 shadowCoord = shadowPosition.xyz / shadowPosition.w;
     if (IsValidShadowCoord(shadowCoord))
     {
-        const float shadowDepth = saturate(shadowCoord.z - GetShadowDepthBias(aLight));
+        const float depthBias = aUseDirectionalMaps
+            ? GetDirectionalShadowDepthBias(aLight, aMatrixIndex)
+            : GetShadowDepthBias(aLight);
+        const float shadowDepth = saturate(shadowCoord.z - depthBias);
         if (aUseDirectionalMaps)
         {
-            shadow = SampleDirectionalShadowMap(aMatrixIndex, shadowCoord.xy, shadowDepth);
+            shadow = SampleDirectionalShadowMap(aLight, aMatrixIndex, shadowCoord.xy, shadowDepth);
         }
         else
         {

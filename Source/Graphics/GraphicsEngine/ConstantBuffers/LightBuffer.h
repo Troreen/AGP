@@ -26,6 +26,8 @@ struct LightBuffer
 		std::array<CU::Matrix4f, 4> LightViewProjTexture = {};
 		CU::Vector4f CascadeSplits = CU::Vector4f::Zero;
 		CU::Vector4f ShadowSettings = CU::Vector4f::Zero;
+		CU::Vector4f CascadeDepthBiases = CU::Vector4f::Zero;
+		CU::Vector4f CascadeFilterWorldRadii = CU::Vector4f::Zero;
 	};
 
 	static constexpr unsigned MaxLights = 8;

@@ -43,6 +43,12 @@ namespace
 		constexpr int LocalRasterDepthBias = 1;
 		constexpr float LocalRasterSlopeBias = 0.02f;
 		constexpr std::array<float, DirectionalCascadeCount> CascadeSplits = { 150.0f, 600.0f, 1600.0f, 5000.0f };
+		constexpr float DirectionalCascadeSplitPaddingMin = 30.0f;
+		constexpr float DirectionalCascadeSplitPaddingScale = 0.08f;
+		constexpr float DirectionalCascadeLightPaddingMin = 250.0f;
+		constexpr float DirectionalCascadeLightPaddingScale = 0.08f;
+		constexpr float DirectionalCascadeDepthPaddingScale = 0.15f;
+		constexpr float DirectionalFilterRadiusWorld = 2.0f;
 	}
 
 	namespace PBLConfig
@@ -55,6 +61,12 @@ namespace
 	struct PointShadowBufferData
 	{
 		std::array<CU::Matrix4f, 6> ViewProjection = {};
+	};
+
+	struct CascadeShadowData
+	{
+		CU::Matrix4f ViewProjection;
+		float DepthRange = 1.0f;
 	};
 
 	float GetRenderIntensity(const LightComponent& aLightComponent)
@@ -111,7 +123,7 @@ namespace
 		};
 	}
 
-	CU::Matrix4f CreateCascadeViewProjection(const CU::Camera3D& aCamera, const LightComponent& aLightComponent, float aNearPlane, float aFarPlane)
+	CascadeShadowData CreateCascadeShadowData(const CU::Camera3D& aCamera, const LightComponent& aLightComponent, float aNearPlane, float aFarPlane)
 	{
 		const std::array<CU::Vector3f, 8> corners = GetFrustumCorners(aCamera, aNearPlane, aFarPlane);
 
@@ -151,16 +163,41 @@ namespace
 			maxZ = (std::max)(maxZ, lightSpaceCorner.z);
 		}
 
-		constexpr float padding = 150.0f;
-		const CU::Matrix4f projection = CU::Maths::CreateOrthographicLH(
-			minX - padding,
-			maxX + padding,
-			minY - padding,
-			maxY + padding,
-			(std::max)(0.1f, minZ - padding),
-			maxZ + padding);
+		const float xyPadding = (std::max)(
+			ShadowConfig::DirectionalCascadeLightPaddingMin,
+			radius * ShadowConfig::DirectionalCascadeLightPaddingScale);
+		const float zPadding = (std::max)(
+			ShadowConfig::DirectionalCascadeLightPaddingMin,
+			radius * ShadowConfig::DirectionalCascadeDepthPaddingScale);
 
-		return view * projection;
+		minX -= xyPadding;
+		maxX += xyPadding;
+		minY -= xyPadding;
+		maxY += xyPadding;
+		minZ = (std::max)(0.1f, minZ - zPadding);
+		maxZ += zPadding;
+
+		const float width = maxX - minX;
+		const float height = maxY - minY;
+		const float texelSizeX = width / static_cast<float>(ShadowConfig::MapResolution);
+		const float texelSizeY = height / static_cast<float>(ShadowConfig::MapResolution);
+		minX = std::floor(minX / texelSizeX) * texelSizeX;
+		minY = std::floor(minY / texelSizeY) * texelSizeY;
+		maxX = minX + width;
+		maxY = minY + height;
+
+		const CU::Matrix4f projection = CU::Maths::CreateOrthographicLH(
+			minX,
+			maxX,
+			minY,
+			maxY,
+			minZ,
+			maxZ);
+
+		CascadeShadowData data;
+		data.ViewProjection = view * projection;
+		data.DepthRange = (std::max)(maxZ - minZ, 1.0f);
+		return data;
 	}
 
 	CU::Matrix4f CreateLightViewProjectionTexture(const CU::Matrix4f& aViewProjection)
@@ -242,6 +279,8 @@ namespace
 		light.NumCascades = 0;
 		light.CascadeSplits = CU::Vector4f::Zero;
 		light.ShadowSettings = MakeShadowSettings(aShadowDepthBias);
+		light.CascadeDepthBiases = CU::Vector4f::Zero;
+		light.CascadeFilterWorldRadii = CU::Vector4f::Zero;
 		return &light;
 	}
 
@@ -552,10 +591,18 @@ void GraphicsEngine::RenderDirectionalShadows(
 	const std::vector<RenderItem>& aRenderItems)
 {
 	float cascadeNear = aCamera.GetNearPlane();
+	std::array<CascadeShadowData, ShadowConfig::DirectionalCascadeCount> cascadeData = {};
 	for (unsigned cascadeIndex = 0; cascadeIndex < ShadowConfig::DirectionalCascadeCount; ++cascadeIndex)
 	{
 		const float cascadeFar = ShadowConfig::CascadeSplits[cascadeIndex];
-		const CU::Matrix4f lightViewProjection = CreateCascadeViewProjection(aCamera, aLightComponent, cascadeNear, cascadeFar);
+		const float cascadeLength = cascadeFar - cascadeNear;
+		const float cascadePadding = (std::max)(
+			ShadowConfig::DirectionalCascadeSplitPaddingMin,
+			cascadeLength * ShadowConfig::DirectionalCascadeSplitPaddingScale);
+		const float fitNear = (std::max)(aCamera.GetNearPlane(), cascadeNear - cascadePadding);
+		const float fitFar = cascadeFar + cascadePadding;
+		cascadeData[cascadeIndex] = CreateCascadeShadowData(aCamera, aLightComponent, fitNear, fitFar);
+		const CU::Matrix4f lightViewProjection = cascadeData[cascadeIndex].ViewProjection;
 
 		FrameBuffer shadowFrameBuffer;
 		shadowFrameBuffer.View = CU::Matrix4f();
@@ -574,6 +621,8 @@ void GraphicsEngine::RenderDirectionalShadows(
 		cascadeNear = cascadeFar;
 	}
 
+	const float baseDirectionalBias = GetShadowDepthBias(LightType::Directional);
+	const float referenceDepthRange = cascadeData[0].DepthRange;
 	inoutLight.NumCascades = ShadowConfig::DirectionalCascadeCount;
 	inoutLight.CascadeSplits = {
 		ShadowConfig::CascadeSplits[0],
@@ -582,6 +631,18 @@ void GraphicsEngine::RenderDirectionalShadows(
 		ShadowConfig::CascadeSplits[3]
 	};
 	inoutLight.ShadowSettings = MakeShadowSettings(GetShadowDepthBias(LightType::Directional));
+	inoutLight.CascadeDepthBiases = {
+		baseDirectionalBias * referenceDepthRange / cascadeData[0].DepthRange,
+		baseDirectionalBias * referenceDepthRange / cascadeData[1].DepthRange,
+		baseDirectionalBias * referenceDepthRange / cascadeData[2].DepthRange,
+		baseDirectionalBias * referenceDepthRange / cascadeData[3].DepthRange
+	};
+	inoutLight.CascadeFilterWorldRadii = {
+		ShadowConfig::DirectionalFilterRadiusWorld,
+		ShadowConfig::DirectionalFilterRadiusWorld,
+		ShadowConfig::DirectionalFilterRadiusWorld,
+		ShadowConfig::DirectionalFilterRadiusWorld
+	};
 }
 
 void GraphicsEngine::RenderSpotShadows(

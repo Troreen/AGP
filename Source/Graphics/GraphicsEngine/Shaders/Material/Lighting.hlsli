@@ -24,6 +24,8 @@ struct Light
     row_major float4x4 LightViewProjTexture[4];
     float4 CascadeSplits;
     float4 ShadowSettings;
+    float4 CascadeDepthBiases;
+    float4 CascadeFilterWorldRadii;
 };
 
 cbuffer LightBuffer : register(b4)
