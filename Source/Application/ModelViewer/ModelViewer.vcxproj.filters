@@ -30,6 +30,9 @@
     <ClInclude Include="..\..\Utilities\FreeFlyCameraController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Utilities\FrameScheduler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="PrimitiveMeshBuilder.h">
       <Filter>Header Files</Filter>
     </ClInclude>

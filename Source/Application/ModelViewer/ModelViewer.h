@@ -1,7 +1,13 @@
 #pragma once
+#include <array>
+#include <condition_variable>
+#include <cstddef>
+#include <cstdint>
 #include <filesystem>
 #include <memory>
+#include <mutex>
 #include <string>
+#include <thread>
 #include <unordered_map>
 #include <vector>
 
@@ -54,6 +60,7 @@
 #include "GameFramework/World.h"
 #include "GraphicsEngine/GraphicsEngine.h"
 #include "GraphicsEngine/RHI/GraphicsCommandList.h"
+#include "FrameScheduler.h"
 #include "FreeFlyCameraController.h"
 #include "MeshLibrary.h"
 
@@ -82,6 +89,15 @@ private:
 		CommonUtilities::Vector3<float> RotationSpeedDegrees;
 	};
 
+	struct ModelViewerInputFrame
+	{
+		std::array<bool, 256> KeysDown = {};
+		std::array<bool, 256> KeysPressed = {};
+		FreeFlyCameraController::InputState CameraInput;
+
+		void ClearPressed();
+	};
+
 	std::shared_ptr<Mesh> GetRegisteredMesh(const std::string& aName) const;
 	std::shared_ptr<MaterialInterface> GetMaterial(const std::filesystem::path& aMaterialFile);
 	StaticMeshComponent* CreateStaticMeshActor(
@@ -92,9 +108,20 @@ private:
 		const CommonUtilities::Vector3<float>& aPosition,
 		const CommonUtilities::Vector3<float>& aRotationDegrees,
 		const CommonUtilities::Vector3<float>& aScale);
-	void HandleAnimationInput();
-	void HandleLightInput();
+	void HandleAnimationInput(const ModelViewerInputFrame& anInputFrame);
+	void HandleLightInput(const ModelViewerInputFrame& anInputFrame);
 	void UpdateScene(float aDeltaTime);
+	void StartUpdateThread();
+	void StopUpdateThread();
+	void RunFixedUpdateStep(float aDeltaTime, ModelViewerInputFrame& inoutInputFrame);
+	void BuildAndPublishRenderSnapshot();
+	void LogRuntimeStats() const;
+	ModelViewerInputFrame CaptureInputFrame();
+	void SubmitInputFrame(const ModelViewerInputFrame& anInputFrame);
+	bool ConsumePendingInputFrame(ModelViewerInputFrame& inoutInputFrame);
+
+	static bool IsKeyDown(const ModelViewerInputFrame& anInputFrame, Keys aKey);
+	static bool IsKeyPressed(const ModelViewerInputFrame& anInputFrame, Keys aKey);
 
 	bool myIsRunning = false;
 
@@ -113,6 +140,15 @@ private:
 	FreeFlyCameraController myCameraController;
 
 	GraphicsCommandList myCommandList;
+	static constexpr size_t RenderSnapshotBufferCount = 3;
+	EngineScheduling::TripleBufferedSnapshotQueue<GraphicsEngine::RenderSceneSnapshot, RenderSnapshotBufferCount> myRenderSnapshots;
+
+	EngineScheduling::FixedStepUpdateWorker<ModelViewerInputFrame> myUpdateWorker;
+	std::mutex myInputMutex;
+	std::condition_variable myInputCondition;
+	ModelViewerInputFrame myPendingInputFrame;
+	bool myHasPendingInputFrame = false;
+	bool myHasMainThreadMouseLookAnchor = false;
 
 	std::filesystem::path myContentRoot;
 	std::unordered_map<std::string, std::shared_ptr<MaterialInterface>> myMaterialCache;

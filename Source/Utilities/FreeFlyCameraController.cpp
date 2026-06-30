@@ -25,6 +25,11 @@ FreeFlyCameraController::FreeFlyCameraController()
 void FreeFlyCameraController::Init(CommonUtilities::InputHandler& anInputHandler, CommonUtilities::Transform& aTransform)
 {
 	myInputHandler = &anInputHandler;
+	Init(aTransform);
+}
+
+void FreeFlyCameraController::Init(CommonUtilities::Transform& aTransform)
+{
 	myTransform = &aTransform;
 	myHasMouseLookAnchor = false;
 
@@ -98,6 +103,43 @@ void FreeFlyCameraController::Update(float aTimeDelta)
 		myHasMouseLookAnchor = false;
 	}
 
+	const bool wDown = myInputHandler->IsKeyDown(Keys::W) || (isFocused && isVirtualKeyDown(static_cast<int>(Keys::W)));
+	const bool sDown = myInputHandler->IsKeyDown(Keys::S) || (isFocused && isVirtualKeyDown(static_cast<int>(Keys::S)));
+	const bool dDown = myInputHandler->IsKeyDown(Keys::D) || (isFocused && isVirtualKeyDown(static_cast<int>(Keys::D)));
+	const bool aDown = myInputHandler->IsKeyDown(Keys::A) || (isFocused && isVirtualKeyDown(static_cast<int>(Keys::A)));
+	const bool spaceDown = myInputHandler->IsKeyDown(Keys::SPACE) || (isFocused && isVirtualKeyDown(static_cast<int>(Keys::SPACE)));
+	const bool controlDown = myInputHandler->IsKeyDown(Keys::CONTROL) || (isFocused && isVirtualKeyDown(static_cast<int>(Keys::CONTROL)));
+
+	InputState inputState;
+	inputState.MoveForward = wDown;
+	inputState.MoveBackward = sDown;
+	inputState.MoveRight = dDown;
+	inputState.MoveLeft = aDown;
+	inputState.MoveUp = spaceDown;
+	inputState.MoveDown = controlDown;
+	Update(aTimeDelta, inputState);
+}
+
+void FreeFlyCameraController::Update(float aTimeDelta, const InputState& anInputState)
+{
+	if (myTransform == nullptr)
+	{
+		return;
+	}
+
+	if (anInputState.MouseLookActive)
+	{
+		myYawRadians += anInputState.MouseDeltaX * myLookSensitivity;
+		myPitchRadians += anInputState.MouseDeltaY * myLookSensitivity;
+		myPitchRadians = std::clamp(myPitchRadians, -myMaxPitchRadians, myMaxPitchRadians);
+
+		CommonUtilities::Quaternion<float> yawRotation = CommonUtilities::Quaternion<float>::CreateFromAxisAngle(CommonUtilities::Vector3<float>::UnitY, myYawRadians);
+		CommonUtilities::Quaternion<float> pitchRotation = CommonUtilities::Quaternion<float>::CreateFromAxisAngle(CommonUtilities::Vector3<float>::UnitX, myPitchRadians);
+		CommonUtilities::Quaternion<float> cameraRotation = yawRotation * pitchRotation;
+		cameraRotation.Normalize();
+		myTransform->SetRotation(cameraRotation);
+	}
+
 	CommonUtilities::Vector3<float> cameraForward = myTransform->GetForward();
 	if (cameraForward.LengthSqr() > 0.f)
 	{
@@ -119,34 +161,27 @@ void FreeFlyCameraController::Update(float aTimeDelta)
 	}
 
 	CommonUtilities::Vector3<float> moveDirection = CommonUtilities::Vector3<float>::Zero;
-	const bool wDown = myInputHandler->IsKeyDown(Keys::W) || (isFocused && isVirtualKeyDown(static_cast<int>(Keys::W)));
-	const bool sDown = myInputHandler->IsKeyDown(Keys::S) || (isFocused && isVirtualKeyDown(static_cast<int>(Keys::S)));
-	const bool dDown = myInputHandler->IsKeyDown(Keys::D) || (isFocused && isVirtualKeyDown(static_cast<int>(Keys::D)));
-	const bool aDown = myInputHandler->IsKeyDown(Keys::A) || (isFocused && isVirtualKeyDown(static_cast<int>(Keys::A)));
-	const bool spaceDown = myInputHandler->IsKeyDown(Keys::SPACE) || (isFocused && isVirtualKeyDown(static_cast<int>(Keys::SPACE)));
-	const bool controlDown = myInputHandler->IsKeyDown(Keys::CONTROL) || (isFocused && isVirtualKeyDown(static_cast<int>(Keys::CONTROL)));
-
-	if (wDown)
+	if (anInputState.MoveForward)
 	{
 		moveDirection += cameraForward;
 	}
-	if (sDown)
+	if (anInputState.MoveBackward)
 	{
 		moveDirection -= cameraForward;
 	}
-	if (dDown)
+	if (anInputState.MoveRight)
 	{
 		moveDirection += cameraRight;
 	}
-	if (aDown)
+	if (anInputState.MoveLeft)
 	{
 		moveDirection -= cameraRight;
 	}
-	if (spaceDown)
+	if (anInputState.MoveUp)
 	{
 		moveDirection += CommonUtilities::Vector3<float>::UnitY;
 	}
-	if (controlDown)
+	if (anInputState.MoveDown)
 	{
 		moveDirection -= CommonUtilities::Vector3<float>::UnitY;
 	}

@@ -1,6 +1,9 @@
 #include "ModelViewer.h"
 
 #include <algorithm>
+#include <chrono>
+#include <cstddef>
+#include <limits>
 #include <memory>
 #include <string>
 #include <utility>
@@ -18,6 +21,12 @@ ModelViewer::ModelViewer() = default;
 namespace
 {
 	using Vector3f = CommonUtilities::Vector3f;
+	using namespace std::chrono_literals;
+
+	constexpr float FixedUpdateDeltaTime = 1.0f / 60.0f;
+	constexpr float MaxFrameDeltaTime = 0.25f;
+	constexpr int MaxFixedStepsPerFrame = 5;
+	constexpr int KeyCount = 256;
 
 	std::filesystem::path GetMaterialRoot(const std::filesystem::path& aContentRoot)
 	{
@@ -38,17 +47,14 @@ namespace
 		}
 	}
 
-	bool IsShiftDown(const CommonUtilities::InputHandler& anInputHandler)
+	bool IsVirtualKeyDown(int aVirtualKey)
 	{
-		return anInputHandler.IsKeyDown(Keys::SHIFT)
-			|| anInputHandler.IsKeyDown(Keys::LSHIFT)
-			|| anInputHandler.IsKeyDown(Keys::RSHIFT);
+		return (GetAsyncKeyState(aVirtualKey) & 0x8000) != 0;
 	}
 
-	bool IsKeyPressed(const CommonUtilities::InputHandler& anInputHandler, Keys aNumpadKey, char aDigitKey)
+	bool IsValidKeyIndex(int aKeyCode)
 	{
-		return anInputHandler.IsKeyPressed(aNumpadKey)
-			|| anInputHandler.IsKeyPressed(static_cast<int>(aDigitKey));
+		return aKeyCode >= 0 && aKeyCode < KeyCount;
 	}
 
 	void AimActorAlongCameraForward(Actor& anActor, const CommonUtilities::Transform& aCameraTransform)
@@ -198,7 +204,7 @@ bool ModelViewer::Initialize(SIZE aWindowSize, WNDPROC aWindowProcess, LPCWSTR a
 
     if (myCameraActor != nullptr)
     {
-        myCameraController.Init(myInputHandler, myCameraActor->GetTransform());
+        myCameraController.Init(myCameraActor->GetTransform());
     }
 
     MVLOG(Log, "Ready!");
@@ -217,6 +223,9 @@ int ModelViewer::Run()
     ZeroMemory(&msg, sizeof(MSG));
 
     myIsRunning = true;
+    // After this point, the update thread owns World/component mutation.
+    // The main thread only pumps Win32 input and renders immutable snapshots.
+    StartUpdateThread();
 
     while (myIsRunning)
     {
@@ -233,19 +242,15 @@ int ModelViewer::Run()
         }
 
         Application.Timer.Update();
-        const float deltaTime = Application.Timer.GetDeltaTime();
 
         myInputHandler.UpdateInput();
-        myCameraController.Update(deltaTime);
-        HandleAnimationInput();
-        HandleLightInput();
-        UpdateScene(deltaTime);
+        SubmitInputFrame(CaptureInputFrame());
 
-        myCommandList.ResetCommandList();
         GraphicsEngine& GE = GraphicsEngine::Get();
-        if (myCameraActor != nullptr)
+        myCommandList.ResetCommandList();
+        if (const GraphicsEngine::RenderSceneSnapshot* snapshot = myRenderSnapshots.AcquireLatest())
         {
-            GE.Render(myCommandList, *myCameraActor, myWorld);
+            GE.RenderSnapshot(myCommandList, *snapshot);
             myCommandList.FinishCommandList();
             GE.ExecuteCommandList(myCommandList);
             GE.Present();
@@ -253,7 +258,232 @@ int ModelViewer::Run()
         
     }
 
+    StopUpdateThread();
+    myRenderSnapshots.ReleaseRendering();
+
     return 0;
+}
+
+void ModelViewer::ModelViewerInputFrame::ClearPressed()
+{
+    KeysPressed.fill(false);
+    CameraInput.MouseDeltaX = 0.0f;
+    CameraInput.MouseDeltaY = 0.0f;
+}
+
+bool ModelViewer::IsKeyDown(const ModelViewerInputFrame& anInputFrame, Keys aKey)
+{
+    const int keyCode = static_cast<int>(aKey);
+    return IsValidKeyIndex(keyCode) && anInputFrame.KeysDown[static_cast<size_t>(keyCode)];
+}
+
+bool ModelViewer::IsKeyPressed(const ModelViewerInputFrame& anInputFrame, Keys aKey)
+{
+    const int keyCode = static_cast<int>(aKey);
+    return IsValidKeyIndex(keyCode) && anInputFrame.KeysPressed[static_cast<size_t>(keyCode)];
+}
+
+ModelViewer::ModelViewerInputFrame ModelViewer::CaptureInputFrame()
+{
+    ModelViewerInputFrame inputFrame;
+    const bool isFocused = myMainWindowHandle != nullptr && GetForegroundWindow() == myMainWindowHandle;
+
+    for (int keyCode = 0; keyCode < KeyCount; ++keyCode)
+    {
+        inputFrame.KeysDown[static_cast<size_t>(keyCode)] =
+            myInputHandler.IsKeyDown(keyCode) || (isFocused && IsVirtualKeyDown(keyCode));
+        inputFrame.KeysPressed[static_cast<size_t>(keyCode)] = myInputHandler.IsKeyPressed(keyCode);
+    }
+
+    const bool rightMouseDown = inputFrame.KeysDown[static_cast<size_t>(Keys::MOUSERBUTTON)];
+    if (isFocused && rightMouseDown)
+    {
+        RECT clientRect = {};
+        if (GetClientRect(myMainWindowHandle, &clientRect) != 0)
+        {
+            const POINT centerPoint = {
+                (clientRect.right - clientRect.left) / 2,
+                (clientRect.bottom - clientRect.top) / 2
+            };
+
+            inputFrame.CameraInput.MouseLookActive = true;
+            if (myHasMainThreadMouseLookAnchor)
+            {
+                POINT mousePosScreen = {};
+                GetCursorPos(&mousePosScreen);
+                POINT mousePosClient = mousePosScreen;
+                ScreenToClient(myMainWindowHandle, &mousePosClient);
+                inputFrame.CameraInput.MouseDeltaX = static_cast<float>(mousePosClient.x - centerPoint.x);
+                inputFrame.CameraInput.MouseDeltaY = static_cast<float>(mousePosClient.y - centerPoint.y);
+            }
+
+            POINT centerPointScreen = centerPoint;
+            ClientToScreen(myMainWindowHandle, &centerPointScreen);
+            SetCursorPos(centerPointScreen.x, centerPointScreen.y);
+            myHasMainThreadMouseLookAnchor = true;
+        }
+    }
+    else
+    {
+        myHasMainThreadMouseLookAnchor = false;
+    }
+
+    inputFrame.CameraInput.MoveForward = IsKeyDown(inputFrame, Keys::W);
+    inputFrame.CameraInput.MoveBackward = IsKeyDown(inputFrame, Keys::S);
+    inputFrame.CameraInput.MoveRight = IsKeyDown(inputFrame, Keys::D);
+    inputFrame.CameraInput.MoveLeft = IsKeyDown(inputFrame, Keys::A);
+    inputFrame.CameraInput.MoveUp = IsKeyDown(inputFrame, Keys::SPACE);
+    inputFrame.CameraInput.MoveDown = IsKeyDown(inputFrame, Keys::CONTROL);
+    return inputFrame;
+}
+
+void ModelViewer::SubmitInputFrame(const ModelViewerInputFrame& anInputFrame)
+{
+    {
+        std::scoped_lock lock(myInputMutex);
+        if (!myHasPendingInputFrame)
+        {
+            myPendingInputFrame = anInputFrame;
+            myHasPendingInputFrame = true;
+        }
+        else
+        {
+            const float accumulatedMouseDeltaX = myPendingInputFrame.CameraInput.MouseDeltaX + anInputFrame.CameraInput.MouseDeltaX;
+            const float accumulatedMouseDeltaY = myPendingInputFrame.CameraInput.MouseDeltaY + anInputFrame.CameraInput.MouseDeltaY;
+
+            for (size_t keyIndex = 0; keyIndex < myPendingInputFrame.KeysPressed.size(); ++keyIndex)
+            {
+                myPendingInputFrame.KeysPressed[keyIndex] = myPendingInputFrame.KeysPressed[keyIndex] || anInputFrame.KeysPressed[keyIndex];
+            }
+
+            myPendingInputFrame.KeysDown = anInputFrame.KeysDown;
+            myPendingInputFrame.CameraInput = anInputFrame.CameraInput;
+            myPendingInputFrame.CameraInput.MouseDeltaX = accumulatedMouseDeltaX;
+            myPendingInputFrame.CameraInput.MouseDeltaY = accumulatedMouseDeltaY;
+            myPendingInputFrame.CameraInput.MouseLookActive =
+                anInputFrame.CameraInput.MouseLookActive || accumulatedMouseDeltaX != 0.0f || accumulatedMouseDeltaY != 0.0f;
+        }
+    }
+
+    myInputCondition.notify_one();
+}
+
+bool ModelViewer::ConsumePendingInputFrame(ModelViewerInputFrame& inoutInputFrame)
+{
+    std::scoped_lock lock(myInputMutex);
+    if (!myHasPendingInputFrame)
+    {
+        return false;
+    }
+
+    inoutInputFrame = myPendingInputFrame;
+    myPendingInputFrame = {};
+    myHasPendingInputFrame = false;
+    return true;
+}
+
+void ModelViewer::StartUpdateThread()
+{
+    StopUpdateThread();
+
+    myRenderSnapshots.Reset();
+
+    {
+        std::scoped_lock lock(myInputMutex);
+        myPendingInputFrame = {};
+        myHasPendingInputFrame = false;
+    }
+
+    myHasMainThreadMouseLookAnchor = false;
+    myUpdateWorker.Start(
+        EngineScheduling::FixedStepUpdateWorker<ModelViewerInputFrame>::Config{
+            .FixedDeltaTime = FixedUpdateDeltaTime,
+            .MaxFrameDeltaTime = MaxFrameDeltaTime,
+            .MaxFixedStepsPerWake = MaxFixedStepsPerFrame
+        },
+        [this](ModelViewerInputFrame& inoutInputFrame)
+        {
+            return ConsumePendingInputFrame(inoutInputFrame);
+        },
+        [this](float aDeltaTime, ModelViewerInputFrame& inoutInputFrame)
+        {
+            RunFixedUpdateStep(aDeltaTime, inoutInputFrame);
+        },
+        [this]()
+        {
+            BuildAndPublishRenderSnapshot();
+        },
+        [this](std::stop_token aStopToken)
+        {
+            std::unique_lock lock(myInputMutex);
+            myInputCondition.wait_for(lock, 1ms, [this, &aStopToken]
+            {
+                return aStopToken.stop_requested() || myHasPendingInputFrame;
+            });
+        });
+}
+
+void ModelViewer::StopUpdateThread()
+{
+    myInputCondition.notify_all();
+    myUpdateWorker.Stop();
+}
+
+void ModelViewer::RunFixedUpdateStep(float aDeltaTime, ModelViewerInputFrame& inoutInputFrame)
+{
+    myCameraController.Update(aDeltaTime, inoutInputFrame.CameraInput);
+    HandleAnimationInput(inoutInputFrame);
+    HandleLightInput(inoutInputFrame);
+    UpdateScene(aDeltaTime);
+}
+
+void ModelViewer::BuildAndPublishRenderSnapshot()
+{
+    if (myCameraActor == nullptr)
+    {
+        return;
+    }
+
+    GraphicsEngine::RenderSceneSnapshot* snapshot = myRenderSnapshots.BeginBuild();
+    if (snapshot == nullptr)
+    {
+        return;
+    }
+
+    if (GraphicsEngine::Get().BuildRenderSnapshot(*myCameraActor, myWorld, *snapshot))
+    {
+        myRenderSnapshots.Publish(snapshot);
+    }
+    else
+    {
+        myRenderSnapshots.CancelBuild(snapshot);
+    }
+}
+
+void ModelViewer::LogRuntimeStats() const
+{
+    const GraphicsEngine::RenderStats renderStats = GraphicsEngine::Get().GetLastRenderStats();
+    const auto snapshotStats = myRenderSnapshots.GetStats();
+
+    MVLOG(Log, "Render stats: meshes visible {}/{}, shadow casters {}, lights relevant {}/{}, shadow passes D/S/P = {}/{}/{}",
+        renderStats.VisibleRenderItems,
+        renderStats.TotalRenderItems,
+        renderStats.ShadowCasters,
+        renderStats.RelevantLights,
+        renderStats.TotalLights,
+        renderStats.DirectionalShadowPasses,
+        renderStats.SpotShadowPasses,
+        renderStats.PointShadowPasses);
+    MVLOG(Log, "Shadow culling/threading: caster draws {}, culled per pass {}, command lists recorded/executed {}/{}",
+        renderStats.ShadowCasterDraws,
+        renderStats.CulledShadowCasters,
+        renderStats.ShadowCommandListsRecorded,
+        renderStats.ShadowCommandListsExecuted);
+    MVLOG(Log, "Snapshot worker: fixed ticks {}, published {}, reused previous {}, dropped ready {}",
+        myUpdateWorker.GetTickCount(),
+        snapshotStats.PublishedSnapshots,
+        snapshotStats.ReusedSnapshots,
+        snapshotStats.DroppedReadySnapshots);
 }
 
 void ModelViewer::LoadScene()
@@ -425,29 +655,29 @@ std::shared_ptr<Mesh> ModelViewer::GetRegisteredMesh(const std::string& aName) c
     return myMeshLibrary.GetMesh(aName);
 }
 
-void ModelViewer::HandleAnimationInput()
+void ModelViewer::HandleAnimationInput(const ModelViewerInputFrame& anInputFrame)
 {
     if (myAnimatedMeshComponent == nullptr)
     {
         return;
     }
 
-    if (myInputHandler.IsKeyPressed(Keys::NUMPAD0))
+    if (IsKeyPressed(anInputFrame, Keys::NUMPAD0))
     {
 		myAnimatedMeshComponent->PlayAnimation("Breathing", true);
     }
 
-    if (myInputHandler.IsKeyPressed(Keys::NUMPAD1))
+    if (IsKeyPressed(anInputFrame, Keys::NUMPAD1))
     {
         myAnimatedMeshComponent->PlayAnimation("Walk", true);
     }
 
-    if (myInputHandler.IsKeyPressed(Keys::NUMPAD2))
+    if (IsKeyPressed(anInputFrame, Keys::NUMPAD2))
     {
         myAnimatedMeshComponent->PlayAnimation("Run", true);
     }
 
-    if (myInputHandler.IsKeyPressed(Keys::NUMPAD3))
+    if (IsKeyPressed(anInputFrame, Keys::NUMPAD3))
     {
         if (!myAnimatedMeshComponent->PlayPartialAnimation("Wave", false))
         {
@@ -456,49 +686,53 @@ void ModelViewer::HandleAnimationInput()
     }
 }
 
-void ModelViewer::HandleLightInput()
+void ModelViewer::HandleLightInput(const ModelViewerInputFrame& anInputFrame)
 {
-    const bool shiftDown = IsShiftDown(myInputHandler);
+    const bool shiftDown =
+        IsKeyDown(anInputFrame, Keys::SHIFT)
+        || IsKeyDown(anInputFrame, Keys::LSHIFT)
+        || IsKeyDown(anInputFrame, Keys::RSHIFT);
     GraphicsEngine& graphicsEngine = GraphicsEngine::Get();
 
-    if (myInputHandler.IsKeyPressed(Keys::F5))
+    if (IsKeyPressed(anInputFrame, Keys::F5))
     {
         graphicsEngine.ResetShadowTuning();
     }
 
-    if (myInputHandler.IsKeyPressed(Keys::F6))
+    if (IsKeyPressed(anInputFrame, Keys::F6))
     {
         graphicsEngine.AdjustShadowBias(LightType::Directional, -0.00005f);
     }
 
-    if (myInputHandler.IsKeyPressed(Keys::F7))
+    if (IsKeyPressed(anInputFrame, Keys::F7))
     {
         graphicsEngine.AdjustShadowBias(LightType::Directional, 0.00005f);
     }
 
-    if (myInputHandler.IsKeyPressed(Keys::F8))
+    if (IsKeyPressed(anInputFrame, Keys::F8))
     {
         graphicsEngine.AdjustShadowBias(LightType::Spot, -0.00002f);
     }
 
-    if (myInputHandler.IsKeyPressed(Keys::F9))
+    if (IsKeyPressed(anInputFrame, Keys::F9))
     {
         graphicsEngine.AdjustShadowBias(LightType::Spot, 0.00002f);
     }
 
-    if (myInputHandler.IsKeyPressed(Keys::F10))
+    if (IsKeyPressed(anInputFrame, Keys::F10))
     {
         graphicsEngine.AdjustShadowBias(LightType::Point, -0.00005f);
     }
 
-    if (myInputHandler.IsKeyPressed(Keys::F11))
+    if (IsKeyPressed(anInputFrame, Keys::F11))
     {
         graphicsEngine.AdjustShadowBias(LightType::Point, 0.00005f);
     }
 
-    if (myInputHandler.IsKeyPressed(Keys::P))
+    if (IsKeyPressed(anInputFrame, Keys::P))
     {
         PrintLightTuningValues(myDirectionalLightComponent, myPointLightComponents, mySpotLightComponent);
+        LogRuntimeStats();
     }
 
     if (shiftDown && myCameraActor != nullptr)
@@ -506,7 +740,8 @@ void ModelViewer::HandleLightInput()
         const CommonUtilities::Transform& cameraTransform = myCameraActor->GetTransform();
         const Vector3f cameraPosition = cameraTransform.GetPosition();
 
-        if (IsKeyPressed(myInputHandler, Keys::NUMPAD7, '7') && myDirectionalLightComponent != nullptr)
+        if ((IsKeyPressed(anInputFrame, Keys::NUMPAD7) || anInputFrame.KeysPressed[static_cast<size_t>('7')])
+            && myDirectionalLightComponent != nullptr)
         {
             if (Actor* lightActor = myDirectionalLightComponent->GetOwner())
             {
@@ -518,7 +753,7 @@ void ModelViewer::HandleLightInput()
             return;
         }
 
-        if (IsKeyPressed(myInputHandler, Keys::NUMPAD8, '8'))
+        if (IsKeyPressed(anInputFrame, Keys::NUMPAD8) || anInputFrame.KeysPressed[static_cast<size_t>('8')])
         {
             for (PointLightComponent* pointLightComponent : myPointLightComponents)
             {
@@ -538,7 +773,8 @@ void ModelViewer::HandleLightInput()
             return;
         }
 
-        if (IsKeyPressed(myInputHandler, Keys::NUMPAD9, '9') && mySpotLightComponent != nullptr)
+        if ((IsKeyPressed(anInputFrame, Keys::NUMPAD9) || anInputFrame.KeysPressed[static_cast<size_t>('9')])
+            && mySpotLightComponent != nullptr)
         {
             if (Actor* lightActor = mySpotLightComponent->GetOwner())
             {
@@ -553,13 +789,13 @@ void ModelViewer::HandleLightInput()
         }
     }
 
-    if (IsKeyPressed(myInputHandler, Keys::NUMPAD7, '7')
+    if ((IsKeyPressed(anInputFrame, Keys::NUMPAD7) || anInputFrame.KeysPressed[static_cast<size_t>('7')])
         && myDirectionalLightComponent != nullptr)
     {
         myDirectionalLightComponent->SetEnabled(!myDirectionalLightComponent->IsEnabled());
     }
 
-    if (IsKeyPressed(myInputHandler, Keys::NUMPAD8, '8'))
+    if (IsKeyPressed(anInputFrame, Keys::NUMPAD8) || anInputFrame.KeysPressed[static_cast<size_t>('8')])
     {
         bool shouldEnable = true;
         bool foundPointLight = false;
@@ -585,7 +821,7 @@ void ModelViewer::HandleLightInput()
         }
     }
 
-    if (IsKeyPressed(myInputHandler, Keys::NUMPAD9, '9')
+    if ((IsKeyPressed(anInputFrame, Keys::NUMPAD9) || anInputFrame.KeysPressed[static_cast<size_t>('9')])
         && mySpotLightComponent != nullptr)
     {
         mySpotLightComponent->SetEnabled(!mySpotLightComponent->IsEnabled());

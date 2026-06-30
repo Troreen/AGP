@@ -2,6 +2,9 @@
 #include "Mesh.h"
 #include "Vertex.h"
 
+#include <algorithm>
+#include <limits>
+
 bool Skeleton::IsValid() const
 {
     return !Joints.empty() && Joints.size() <= 128;
@@ -33,6 +36,43 @@ void Mesh::Initialize(std::string_view aName, std::vector<Element>&& aElementLis
     }
 
 	myNumMaterialSlots = myElements.empty() ? 0 : static_cast<size_t>(highestMaterialIndex) + 1;
+
+    myHasLocalBounds = !myVertices.empty();
+    if (myHasLocalBounds)
+    {
+        CU::Vector3f minBounds(
+            (std::numeric_limits<float>::max)(),
+            (std::numeric_limits<float>::max)(),
+            (std::numeric_limits<float>::max)());
+        CU::Vector3f maxBounds(
+            (std::numeric_limits<float>::lowest)(),
+            (std::numeric_limits<float>::lowest)(),
+            (std::numeric_limits<float>::lowest)());
+
+        for (const Vertex& vertex : myVertices)
+        {
+            const CU::Vector3f position(vertex.Position.x, vertex.Position.y, vertex.Position.z);
+            minBounds.x = (std::min)(minBounds.x, position.x);
+            minBounds.y = (std::min)(minBounds.y, position.y);
+            minBounds.z = (std::min)(minBounds.z, position.z);
+            maxBounds.x = (std::max)(maxBounds.x, position.x);
+            maxBounds.y = (std::max)(maxBounds.y, position.y);
+            maxBounds.z = (std::max)(maxBounds.z, position.z);
+        }
+
+        myLocalBoundsCenter = (minBounds + maxBounds) * 0.5f;
+        myLocalBoundsRadius = 0.0f;
+        for (const Vertex& vertex : myVertices)
+        {
+            const CU::Vector3f position(vertex.Position.x, vertex.Position.y, vertex.Position.z);
+            myLocalBoundsRadius = (std::max)(myLocalBoundsRadius, (position - myLocalBoundsCenter).Length());
+        }
+    }
+    else
+    {
+        myLocalBoundsCenter = CU::Vector3f::Zero;
+        myLocalBoundsRadius = 0.0f;
+    }
 }
 
 void Mesh::SetSkeleton(Skeleton&& aSkeleton)

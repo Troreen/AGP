@@ -8,6 +8,7 @@
 
 class Buffer;
 class RenderHardwareInterface;
+class Sampler;
 class Texture;
 
 class GraphicsCommandList

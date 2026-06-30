@@ -21,6 +21,7 @@
 #include <array>
 #include <cctype>
 #include <cmath>
+#include <future>
 #include <limits>
 #include <vector>
 
@@ -65,18 +66,225 @@ namespace
 
 	struct CascadeShadowData
 	{
+		CU::Matrix4f View;
 		CU::Matrix4f ViewProjection;
+		float MinX = 0.0f;
+		float MaxX = 0.0f;
+		float MinY = 0.0f;
+		float MaxY = 0.0f;
+		float MinZ = 0.0f;
+		float MaxZ = 0.0f;
 		float DepthRange = 1.0f;
+		bool HasBounds = false;
 	};
 
-	float GetRenderIntensity(const LightComponent& aLightComponent)
+	std::array<CU::Vector3f, 8> GetFrustumCorners(const CU::Camera3D& aCamera, float aNearPlane, float aFarPlane);
+
+	struct BoundingSphere
 	{
-		if (aLightComponent.GetLightType() == LightType::Directional)
+		CU::Vector3f Center = CU::Vector3f::Zero;
+		float Radius = 0.0f;
+		bool IsValid = false;
+	};
+
+	struct FrustumPlane
+	{
+		CU::Vector3f Normal = CU::Vector3f::Zero;
+		float D = 0.0f;
+		bool IsValid = false;
+	};
+
+	struct CameraFrustum
+	{
+		std::array<FrustumPlane, 6> Planes = {};
+		bool IsValid = false;
+	};
+
+	using RenderItemPtrList = std::vector<const GraphicsEngine::RenderItemSnapshot*>;
+
+	struct ShadowRenderJob
+	{
+		std::string EventName;
+		Texture* ShadowMap = nullptr;
+		FrameBuffer FrameBufferData;
+		const PipelineStateObject* OverridePSO = nullptr;
+		PipeLineStages OverrideStages = PipeLineStage_None;
+		PointShadowBufferData PointShadowBuffer;
+		bool HasPointShadowBuffer = false;
+		RenderItemPtrList RenderItems;
+	};
+
+	FrustumPlane CreateFrustumPlane(const CU::Vector4f& aPlane)
+	{
+		FrustumPlane plane;
+		plane.Normal = { aPlane.x, aPlane.y, aPlane.z };
+		const float normalLength = plane.Normal.Length();
+		if (normalLength <= 0.000001f)
 		{
-			return aLightComponent.GetIntensity();
+			return {};
 		}
 
-		return aLightComponent.GetIntensity() * 10000.0f;
+		const float invNormalLength = 1.0f / normalLength;
+		plane.Normal *= invNormalLength;
+		plane.D = aPlane.w * invNormalLength;
+		plane.IsValid = true;
+		return plane;
+	}
+
+	float GetSignedDistance(const FrustumPlane& aPlane, const CU::Vector3f& aPosition)
+	{
+		return aPlane.Normal.Dot(aPosition) + aPlane.D;
+	}
+
+	CameraFrustum CreateFrustumFromViewProjection(const CU::Matrix4f& aViewProjection)
+	{
+		const CU::Vector4f x = aViewProjection.GetColumn(1);
+		const CU::Vector4f y = aViewProjection.GetColumn(2);
+		const CU::Vector4f z = aViewProjection.GetColumn(3);
+		const CU::Vector4f w = aViewProjection.GetColumn(4);
+
+		CameraFrustum frustum;
+		frustum.Planes[0] = CreateFrustumPlane(x + w);
+		frustum.Planes[1] = CreateFrustumPlane(-x + w);
+		frustum.Planes[2] = CreateFrustumPlane(y + w);
+		frustum.Planes[3] = CreateFrustumPlane(-y + w);
+		frustum.Planes[4] = CreateFrustumPlane(z);
+		frustum.Planes[5] = CreateFrustumPlane(-z + w);
+		frustum.IsValid = std::ranges::all_of(frustum.Planes, [](const FrustumPlane& aPlane)
+		{
+			return aPlane.IsValid;
+		});
+		return frustum;
+	}
+
+	CameraFrustum CreateCameraFrustum(const CU::Camera3D& aCamera)
+	{
+		return CreateFrustumFromViewProjection(aCamera.GetViewProjectionMatrix());
+	}
+
+	bool IntersectsFrustum(const CameraFrustum& aFrustum, const BoundingSphere& aSphere)
+	{
+		if (!aFrustum.IsValid)
+		{
+			return true;
+		}
+
+		if (!aSphere.IsValid)
+		{
+			return true;
+		}
+
+		for (const FrustumPlane& plane : aFrustum.Planes)
+		{
+			if (GetSignedDistance(plane, aSphere.Center) < -aSphere.Radius)
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	bool IntersectsLightSpaceBounds(const CascadeShadowData& aCascade, const GraphicsEngine::RenderItemSnapshot& aRenderItem)
+	{
+		if (!aCascade.HasBounds || !aRenderItem.HasBounds)
+		{
+			return true;
+		}
+
+		const CU::Vector3f center = CU::Maths::TransformPoint(aRenderItem.BoundsCenter, aCascade.View);
+		const float radius = aRenderItem.BoundsRadius;
+		return center.x + radius >= aCascade.MinX
+			&& center.x - radius <= aCascade.MaxX
+			&& center.y + radius >= aCascade.MinY
+			&& center.y - radius <= aCascade.MaxY
+			&& center.z + radius >= aCascade.MinZ
+			&& center.z - radius <= aCascade.MaxZ;
+	}
+
+	bool IntersectsPointLightRadius(const GraphicsEngine::LightSnapshot& aLight, const GraphicsEngine::RenderItemSnapshot& aRenderItem)
+	{
+		if (!aRenderItem.HasBounds || aLight.Radius <= 0.0f || !std::isfinite(aLight.Radius))
+		{
+			return true;
+		}
+
+		const float radius = aLight.Radius + aRenderItem.BoundsRadius;
+		return (aRenderItem.BoundsCenter - aLight.Position).LengthSqr() <= radius * radius;
+	}
+
+	RenderItemPtrList CullCastersForCascade(const std::vector<GraphicsEngine::RenderItemSnapshot>& aRenderItems, const CascadeShadowData& aCascade)
+	{
+		RenderItemPtrList visibleCasters;
+		visibleCasters.reserve(aRenderItems.size());
+		for (const GraphicsEngine::RenderItemSnapshot& item : aRenderItems)
+		{
+			if (IntersectsLightSpaceBounds(aCascade, item))
+			{
+				visibleCasters.emplace_back(&item);
+			}
+		}
+		return visibleCasters;
+	}
+
+	RenderItemPtrList CullCastersForFrustum(const std::vector<GraphicsEngine::RenderItemSnapshot>& aRenderItems, const CameraFrustum& aFrustum)
+	{
+		RenderItemPtrList visibleCasters;
+		visibleCasters.reserve(aRenderItems.size());
+		for (const GraphicsEngine::RenderItemSnapshot& item : aRenderItems)
+		{
+			if (!item.HasBounds || IntersectsFrustum(aFrustum, { item.BoundsCenter, item.BoundsRadius, item.HasBounds }))
+			{
+				visibleCasters.emplace_back(&item);
+			}
+		}
+		return visibleCasters;
+	}
+
+	RenderItemPtrList CullCastersForPointLight(const std::vector<GraphicsEngine::RenderItemSnapshot>& aRenderItems, const GraphicsEngine::LightSnapshot& aLight)
+	{
+		RenderItemPtrList visibleCasters;
+		visibleCasters.reserve(aRenderItems.size());
+		for (const GraphicsEngine::RenderItemSnapshot& item : aRenderItems)
+		{
+			if (IntersectsPointLightRadius(aLight, item))
+			{
+				visibleCasters.emplace_back(&item);
+			}
+		}
+		return visibleCasters;
+	}
+
+	float GetMaxAxisScale(const CU::Matrix4f& aTransform)
+	{
+		const CU::Vector3f axisX(aTransform(1, 1), aTransform(1, 2), aTransform(1, 3));
+		const CU::Vector3f axisY(aTransform(2, 1), aTransform(2, 2), aTransform(2, 3));
+		const CU::Vector3f axisZ(aTransform(3, 1), aTransform(3, 2), aTransform(3, 3));
+		return (std::max)({ axisX.Length(), axisY.Length(), axisZ.Length() });
+	}
+
+	BoundingSphere TransformBoundingSphere(const CU::Vector3f& aCenter, float aRadius, bool aIsValid, const CU::Matrix4f& aTransform)
+	{
+		if (!aIsValid)
+		{
+			return {};
+		}
+
+		BoundingSphere sphere;
+		sphere.Center = CU::Maths::TransformPoint(aCenter, aTransform);
+		sphere.Radius = aRadius * GetMaxAxisScale(aTransform);
+		sphere.IsValid = sphere.Radius >= 0.0f && std::isfinite(sphere.Radius);
+		return sphere;
+	}
+
+	float GetRenderIntensity(const GraphicsEngine::LightSnapshot& aLight)
+	{
+		if (aLight.Type == LightType::Directional)
+		{
+			return aLight.Intensity;
+		}
+
+		return aLight.Intensity * 10000.0f;
 	}
 
 	CU::Matrix4f CreateNDCToTextureMatrix()
@@ -123,7 +331,7 @@ namespace
 		};
 	}
 
-	CascadeShadowData CreateCascadeShadowData(const CU::Camera3D& aCamera, const LightComponent& aLightComponent, float aNearPlane, float aFarPlane)
+	CascadeShadowData CreateCascadeShadowData(const CU::Camera3D& aCamera, const GraphicsEngine::LightSnapshot& aLight, float aNearPlane, float aFarPlane)
 	{
 		const std::array<CU::Vector3f, 8> corners = GetFrustumCorners(aCamera, aNearPlane, aFarPlane);
 
@@ -141,7 +349,7 @@ namespace
 		}
 		radius = std::ceil(radius / 10.0f) * 10.0f;
 
-		const CU::Vector3f lightDirection = aLightComponent.GetWorldDirection().GetNormalized();
+		const CU::Vector3f lightDirection = aLight.Direction.GetNormalized();
 		const CU::Vector3f eye = center - lightDirection * (radius + 250.0f);
 		const CU::Matrix4f view = CU::Maths::CreateLookAtLH(eye, center, GetLightUpVector(lightDirection));
 
@@ -195,8 +403,22 @@ namespace
 			maxZ);
 
 		CascadeShadowData data;
+		data.View = view;
 		data.ViewProjection = view * projection;
+		data.MinX = minX;
+		data.MaxX = maxX;
+		data.MinY = minY;
+		data.MaxY = maxY;
+		data.MinZ = minZ;
+		data.MaxZ = maxZ;
 		data.DepthRange = (std::max)(maxZ - minZ, 1.0f);
+		data.HasBounds =
+			std::isfinite(minX) && std::isfinite(maxX)
+			&& std::isfinite(minY) && std::isfinite(maxY)
+			&& std::isfinite(minZ) && std::isfinite(maxZ)
+			&& minX < maxX
+			&& minY < maxY
+			&& minZ < maxZ;
 		return data;
 	}
 
@@ -205,27 +427,27 @@ namespace
 		return aViewProjection * CreateNDCToTextureMatrix();
 	}
 
-	CU::Matrix4f CreateSpotViewProjection(const LightComponent& aLightComponent)
+	CU::Matrix4f CreateSpotViewProjection(const GraphicsEngine::LightSnapshot& aLight)
 	{
-		const CU::Vector3f position = aLightComponent.GetWorldPosition();
-		const CU::Vector3f direction = aLightComponent.GetWorldDirection().GetNormalized();
+		const CU::Vector3f position = aLight.Position;
+		const CU::Vector3f direction = aLight.Direction.GetNormalized();
 		const CU::Matrix4f view = CU::Maths::CreateLookAtLH(position, position + direction, GetLightUpVector(direction));
 		const CU::Matrix4f projection = CU::Maths::CreatePerspectiveFovLH(
-			aLightComponent.GetOuterCone() * 2.0f,
+			aLight.OuterCone * 2.0f,
 			1.0f,
 			1.0f,
-			aLightComponent.GetRadius());
+			aLight.Radius);
 		return view * projection;
 	}
 
-	PointShadowBufferData CreatePointShadowBuffer(const LightComponent& aLightComponent)
+	PointShadowBufferData CreatePointShadowBuffer(const GraphicsEngine::LightSnapshot& aLight)
 	{
-		const CU::Vector3f position = aLightComponent.GetWorldPosition();
+		const CU::Vector3f position = aLight.Position;
 		const CU::Matrix4f projection = CU::Maths::CreatePerspectiveFovLH(
 			CU::Maths::HalfPi<float>(),
 			1.0f,
 			1.0f,
-			aLightComponent.GetRadius());
+			aLight.Radius);
 
 		const std::array<CU::Vector3f, 6> directions = {
 			CU::Vector3f::UnitX,
@@ -259,7 +481,7 @@ namespace
 		return { aDepthBias, 0.0f, 0.0f, 0.0f };
 	}
 
-	LightBuffer::Light* AddLightToBuffer(const LightComponent& aLightComponent, LightBuffer& inoutLightBuffer, float aShadowDepthBias)
+	LightBuffer::Light* AddLightToBuffer(const GraphicsEngine::LightSnapshot& aLight, LightBuffer& inoutLightBuffer, float aShadowDepthBias)
 	{
 		if (inoutLightBuffer.NumActiveLights >= LightBuffer::MaxLights)
 		{
@@ -267,14 +489,14 @@ namespace
 		}
 
 		LightBuffer::Light& light = inoutLightBuffer.Lights[inoutLightBuffer.NumActiveLights++];
-		light.Color = aLightComponent.GetColor();
-		light.Intensity = GetRenderIntensity(aLightComponent);
-		light.Position = aLightComponent.GetWorldPosition();
-		light.Type = static_cast<unsigned>(aLightComponent.GetLightType());
-		light.Direction = aLightComponent.GetWorldDirection();
-		light.InnerCone = aLightComponent.GetInnerCone();
-		light.OuterCone = aLightComponent.GetOuterCone();
-		light.Radius = aLightComponent.GetRadius();
+		light.Color = aLight.Color;
+		light.Intensity = GetRenderIntensity(aLight);
+		light.Position = aLight.Position;
+		light.Type = static_cast<unsigned>(aLight.Type);
+		light.Direction = aLight.Direction;
+		light.InnerCone = aLight.InnerCone;
+		light.OuterCone = aLight.OuterCone;
+		light.Radius = aLight.Radius;
 		light.ShadowMapIndex = 0;
 		light.NumCascades = 0;
 		light.CascadeSplits = CU::Vector4f::Zero;
@@ -284,6 +506,39 @@ namespace
 		return &light;
 	}
 
+	GraphicsEngine::LightSnapshot CreateLightSnapshot(const LightComponent& aLightComponent)
+	{
+		GraphicsEngine::LightSnapshot light;
+		light.Type = aLightComponent.GetLightType();
+		light.Color = aLightComponent.GetColor();
+		light.Intensity = aLightComponent.GetIntensity();
+		light.Position = aLightComponent.GetWorldPosition();
+		light.Direction = aLightComponent.GetWorldDirection();
+		light.InnerCone = aLightComponent.GetInnerCone();
+		light.OuterCone = aLightComponent.GetOuterCone();
+		light.Radius = aLightComponent.GetRadius();
+		return light;
+	}
+
+	bool IsRelevantLight(const CameraFrustum& aFrustum, const GraphicsEngine::LightSnapshot& aLight)
+	{
+		if (aLight.Type == LightType::Directional)
+		{
+			return true;
+		}
+
+		return IntersectsFrustum(aFrustum, { aLight.Position, aLight.Radius, true });
+	}
+
+}
+
+void GraphicsEngine::RenderSceneSnapshot::Clear()
+{
+	HasCamera = false;
+	ShadowCasters.clear();
+	VisibleRenderItems.clear();
+	RelevantLights.clear();
+	Stats = {};
 }
 
 GraphicsEngine& GraphicsEngine::Get()
@@ -336,6 +591,7 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path&
 	CreateConstantBuffer<LightBuffer>(ConstantBuffer::LightBuffer, "LightBuffer");
 	CreateConstantBuffer(ConstantBuffer::PointShadowBuffer, "PointShadowBuffer", sizeof(PointShadowBufferData));
 
+	mySamplers.reserve(3);
 	{ // Trilinear Wrap
 		SamplerDescription samplerDesc;
 		samplerDesc.Name = "TrilinearWrap";
@@ -368,6 +624,13 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path&
 		mySamplers.emplace_back(std::move(sampler));
 	}
 
+	mySamplerBindings.clear();
+	mySamplerBindings.reserve(mySamplers.size());
+	for (const Sampler& sampler : mySamplers)
+	{
+		mySamplerBindings.emplace_back(&sampler);
+	}
+
 	if (!CreateShadowResources())
 	{
 		GELOG(Error, "Failed to create shadow resources.");
@@ -391,46 +654,306 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path&
 
 void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const Actor& aCameraActor, const World& aWorld)
 {
-	CameraComponent* cameraComponent = aCameraActor.GetComponent<CameraComponent>();
-	if (cameraComponent == nullptr)
+	RenderSceneSnapshot snapshot;
+	if (!BuildRenderSnapshot(aCameraActor, aWorld, snapshot))
 	{
-		GELOG(Warning, "Could not render world because camera actor '{}' has no CameraComponent.", aCameraActor.GetName());
 		return;
 	}
 
-	cameraComponent->SyncCameraToOwner();
-	const CU::Camera3D& camera = cameraComponent->GetCamera();
+	RenderSnapshot(inoutCommandList, snapshot);
+}
 
-	const SceneRenderData sceneData = CollectRenderItemsAndLights(aWorld);
+bool GraphicsEngine::BuildRenderSnapshot(const Actor& aCameraActor, const World& aWorld, RenderSceneSnapshot& outSnapshot) const
+{
+	outSnapshot.Clear();
+
+	CameraComponent* cameraComponent = aCameraActor.GetComponent<CameraComponent>();
+	if (cameraComponent == nullptr)
+	{
+		GELOG(Warning, "Could not build render snapshot because camera actor '{}' has no CameraComponent.", aCameraActor.GetName());
+		return false;
+	}
+
+	cameraComponent->SyncCameraToOwner();
+	outSnapshot.Camera = cameraComponent->GetCamera();
+	outSnapshot.HasCamera = true;
+
+	const CameraFrustum cameraFrustum = CreateCameraFrustum(outSnapshot.Camera);
+	const std::vector<std::unique_ptr<Actor>>& actors = aWorld.GetActors();
+	outSnapshot.ShadowCasters.reserve(actors.size());
+	outSnapshot.VisibleRenderItems.reserve(actors.size());
+	outSnapshot.RelevantLights.reserve(actors.size());
+
+	std::vector<LightComponent*> actorLights;
+	std::vector<MeshComponentBase*> meshComponents;
+	for (const std::unique_ptr<Actor>& actor : actors)
+	{
+		if (!actor || !actor->IsActive())
+		{
+			continue;
+		}
+
+		actorLights.clear();
+		actor->GetComponentsOfType(actorLights);
+		for (const LightComponent* lightComponent : actorLights)
+		{
+			if (lightComponent == nullptr || !lightComponent->IsEnabled())
+			{
+				continue;
+			}
+
+			++outSnapshot.Stats.TotalLights;
+			const LightSnapshot light = CreateLightSnapshot(*lightComponent);
+			if (IsRelevantLight(cameraFrustum, light))
+			{
+				outSnapshot.RelevantLights.emplace_back(light);
+			}
+		}
+
+		meshComponents.clear();
+		actor->GetComponentsOfType(meshComponents);
+		for (const MeshComponentBase* meshComponent : meshComponents)
+		{
+			if (meshComponent == nullptr || !meshComponent->IsEnabled() || !meshComponent->HasMesh())
+			{
+				continue;
+			}
+
+			const std::shared_ptr<Mesh> mesh = meshComponent->GetMesh();
+			if (mesh == nullptr)
+			{
+				continue;
+			}
+
+			RenderItemSnapshot renderItem;
+			renderItem.Mesh = mesh;
+			renderItem.Materials = meshComponent->GetMaterialList();
+			renderItem.World = actor->GetTransform().GetWorldMatrix();
+			renderItem.HasSkinning = meshComponent->HasSkinning();
+			if (const std::array<CU::Matrix4f, 128>* jointTransforms = meshComponent->GetJointTransforms())
+			{
+				renderItem.JointTransforms = *jointTransforms;
+			}
+
+			const BoundingSphere worldBounds = TransformBoundingSphere(mesh->myLocalBoundsCenter, mesh->myLocalBoundsRadius, mesh->myHasLocalBounds, renderItem.World);
+			renderItem.HasBounds = worldBounds.IsValid;
+			renderItem.BoundsCenter = worldBounds.Center;
+			renderItem.BoundsRadius = worldBounds.Radius;
+
+			outSnapshot.ShadowCasters.emplace_back(renderItem);
+			++outSnapshot.Stats.TotalRenderItems;
+			if (!renderItem.HasBounds || IntersectsFrustum(cameraFrustum, worldBounds))
+			{
+				outSnapshot.VisibleRenderItems.emplace_back(std::move(renderItem));
+			}
+		}
+	}
+
+	outSnapshot.Stats.ShadowCasters = static_cast<uint32_t>(outSnapshot.ShadowCasters.size());
+	outSnapshot.Stats.VisibleRenderItems = static_cast<uint32_t>(outSnapshot.VisibleRenderItems.size());
+	outSnapshot.Stats.RelevantLights = static_cast<uint32_t>(outSnapshot.RelevantLights.size());
+	return true;
+}
+
+void GraphicsEngine::RenderSnapshot(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot)
+{
+	if (!aSnapshot.HasCamera)
+	{
+		return;
+	}
+
+	PrepareSnapshotRenderResources(aSnapshot);
 	UnbindShadowResources(inoutCommandList);
 
+	RenderStats frameStats = aSnapshot.Stats;
 	LightBuffer lightBuffer;
 	bool hasRenderedDirectionalShadow = false;
 	unsigned spotShadowCount = 0;
 	unsigned pointShadowCount = 0;
+	std::vector<ShadowRenderJob> shadowJobs;
+	shadowJobs.reserve(ShadowConfig::DirectionalCascadeCount + ShadowConfig::MaxSpotMaps + ShadowConfig::MaxPointMaps);
 
-	for (const LightComponent* lightComponent : sceneData.LightComponents)
+	auto trackCasterList = [&frameStats, totalCasters = aSnapshot.ShadowCasters.size()](const RenderItemPtrList& aRenderItems)
 	{
-		LightBuffer::Light* light = AddLightToBuffer(*lightComponent, lightBuffer, GetShadowDepthBias(lightComponent->GetLightType()));
+		frameStats.ShadowCasterDraws += static_cast<uint32_t>(aRenderItems.size());
+		if (totalCasters > aRenderItems.size())
+		{
+			frameStats.CulledShadowCasters += static_cast<uint32_t>(totalCasters - aRenderItems.size());
+		}
+	};
+
+	for (const LightSnapshot& lightSnapshot : aSnapshot.RelevantLights)
+	{
+		LightBuffer::Light* light = AddLightToBuffer(lightSnapshot, lightBuffer, GetShadowDepthBias(lightSnapshot.Type));
 		if (light == nullptr)
 		{
 			break;
 		}
 
-		if (lightComponent->GetLightType() == LightType::Directional && !hasRenderedDirectionalShadow)
+		if (lightSnapshot.Type == LightType::Directional && !hasRenderedDirectionalShadow)
 		{
-			RenderDirectionalShadows(inoutCommandList, camera, *lightComponent, *light, sceneData.RenderItems);
+			float cascadeNear = aSnapshot.Camera.GetNearPlane();
+			std::array<CascadeShadowData, ShadowConfig::DirectionalCascadeCount> cascadeData = {};
+			for (unsigned cascadeIndex = 0; cascadeIndex < ShadowConfig::DirectionalCascadeCount; ++cascadeIndex)
+			{
+				const float cascadeFar = ShadowConfig::CascadeSplits[cascadeIndex];
+				const float cascadeLength = cascadeFar - cascadeNear;
+				const float cascadePadding = (std::max)(
+					ShadowConfig::DirectionalCascadeSplitPaddingMin,
+					cascadeLength * ShadowConfig::DirectionalCascadeSplitPaddingScale);
+				const float fitNear = (std::max)(aSnapshot.Camera.GetNearPlane(), cascadeNear - cascadePadding);
+				const float fitFar = cascadeFar + cascadePadding;
+				cascadeData[cascadeIndex] = CreateCascadeShadowData(aSnapshot.Camera, lightSnapshot, fitNear, fitFar);
+
+				FrameBuffer shadowFrameBuffer;
+				shadowFrameBuffer.View = CU::Matrix4f();
+				shadowFrameBuffer.Projection = cascadeData[cascadeIndex].ViewProjection;
+
+				ShadowRenderJob job;
+				job.EventName = std::format("Directional Shadow Cascade {}", cascadeIndex);
+				job.ShadowMap = &myDirectionalShadowMaps[cascadeIndex];
+				job.FrameBufferData = shadowFrameBuffer;
+				job.OverridePSO = &myShadowOverridePSO;
+				job.OverrideStages = PipeLineStage_PixelShader | PipeLineStage_Rasterizer;
+				job.RenderItems = CullCastersForCascade(aSnapshot.ShadowCasters, cascadeData[cascadeIndex]);
+				trackCasterList(job.RenderItems);
+				shadowJobs.emplace_back(std::move(job));
+				++frameStats.DirectionalShadowPasses;
+
+				light->LightViewProjTexture[cascadeIndex] = CreateLightViewProjectionTexture(cascadeData[cascadeIndex].ViewProjection);
+				cascadeNear = cascadeFar;
+			}
+
+			const float baseDirectionalBias = GetShadowDepthBias(LightType::Directional);
+			const float referenceDepthRange = cascadeData[0].DepthRange;
+			light->NumCascades = ShadowConfig::DirectionalCascadeCount;
+			light->CascadeSplits = {
+				ShadowConfig::CascadeSplits[0],
+				ShadowConfig::CascadeSplits[1],
+				ShadowConfig::CascadeSplits[2],
+				ShadowConfig::CascadeSplits[3]
+			};
+			light->ShadowSettings = MakeShadowSettings(GetShadowDepthBias(LightType::Directional));
+			light->CascadeDepthBiases = {
+				baseDirectionalBias * referenceDepthRange / cascadeData[0].DepthRange,
+				baseDirectionalBias * referenceDepthRange / cascadeData[1].DepthRange,
+				baseDirectionalBias * referenceDepthRange / cascadeData[2].DepthRange,
+				baseDirectionalBias * referenceDepthRange / cascadeData[3].DepthRange
+			};
+			light->CascadeFilterWorldRadii = {
+				ShadowConfig::DirectionalFilterRadiusWorld,
+				ShadowConfig::DirectionalFilterRadiusWorld,
+				ShadowConfig::DirectionalFilterRadiusWorld,
+				ShadowConfig::DirectionalFilterRadiusWorld
+			};
 			hasRenderedDirectionalShadow = true;
 		}
-		else if (lightComponent->GetLightType() == LightType::Spot && spotShadowCount < MaxSpotShadowMaps)
+		else if (lightSnapshot.Type == LightType::Spot && spotShadowCount < MaxSpotShadowMaps)
 		{
-			RenderSpotShadows(inoutCommandList, *lightComponent, *light, spotShadowCount, sceneData.RenderItems);
+			const CU::Matrix4f lightViewProjection = CreateSpotViewProjection(lightSnapshot);
+			FrameBuffer shadowFrameBuffer;
+			shadowFrameBuffer.View = CU::Matrix4f();
+			shadowFrameBuffer.Projection = lightViewProjection;
+
+			ShadowRenderJob job;
+			job.EventName = std::format("Spot Shadow {}", spotShadowCount);
+			job.ShadowMap = &mySpotShadowMaps[spotShadowCount];
+			job.FrameBufferData = shadowFrameBuffer;
+			job.OverridePSO = &myLocalShadowOverridePSO;
+			job.OverrideStages = PipeLineStage_PixelShader | PipeLineStage_Rasterizer;
+			job.RenderItems = CullCastersForFrustum(aSnapshot.ShadowCasters, CreateFrustumFromViewProjection(lightViewProjection));
+			trackCasterList(job.RenderItems);
+			shadowJobs.emplace_back(std::move(job));
+			++frameStats.SpotShadowPasses;
+
+			light->ShadowMapIndex = spotShadowCount;
+			light->NumCascades = 1;
+			light->LightViewProjTexture[0] = CreateLightViewProjectionTexture(lightViewProjection);
+			light->ShadowSettings = MakeShadowSettings(GetShadowDepthBias(LightType::Spot));
 			++spotShadowCount;
 		}
-		else if (lightComponent->GetLightType() == LightType::Point && pointShadowCount < MaxPointShadowMaps)
+		else if (lightSnapshot.Type == LightType::Point && pointShadowCount < MaxPointShadowMaps)
 		{
-			RenderPointShadows(inoutCommandList, *lightComponent, *light, pointShadowCount, sceneData.RenderItems);
+			const PointShadowBufferData pointShadowBuffer = CreatePointShadowBuffer(lightSnapshot);
+			FrameBuffer shadowFrameBuffer;
+			shadowFrameBuffer.View = CU::Matrix4f();
+			shadowFrameBuffer.Projection = CU::Matrix4f();
+
+			ShadowRenderJob job;
+			job.EventName = std::format("Point Shadow {}", pointShadowCount);
+			job.ShadowMap = &myPointShadowMaps[pointShadowCount];
+			job.FrameBufferData = shadowFrameBuffer;
+			job.OverridePSO = &myPointShadowOverridePSO;
+			job.OverrideStages = PipeLineStage_PixelShader | PipeLineStage_Rasterizer | PipeLineStage_GeometryShader;
+			job.PointShadowBuffer = pointShadowBuffer;
+			job.HasPointShadowBuffer = true;
+			job.RenderItems = CullCastersForPointLight(aSnapshot.ShadowCasters, lightSnapshot);
+			trackCasterList(job.RenderItems);
+			shadowJobs.emplace_back(std::move(job));
+			++frameStats.PointShadowPasses;
+
+			light->ShadowMapIndex = pointShadowCount;
+			light->NumCascades = 1;
+			light->ShadowSettings = MakeShadowSettings(GetShadowDepthBias(LightType::Point));
 			++pointShadowCount;
+		}
+	}
+
+	auto recordShadowJob = [this](GraphicsCommandList& inoutShadowCommandList, const ShadowRenderJob& aJob, bool aFinishCommandList)
+	{
+		ensure(aJob.ShadowMap != nullptr);
+		ensure(aJob.OverridePSO != nullptr);
+		RenderShadowMap(
+			inoutShadowCommandList,
+			aJob.EventName,
+			*aJob.ShadowMap,
+			aJob.FrameBufferData,
+			*aJob.OverridePSO,
+			aJob.OverrideStages,
+			aJob.HasPointShadowBuffer ? &aJob.PointShadowBuffer : nullptr,
+			aJob.RenderItems);
+
+		if (aFinishCommandList)
+		{
+			inoutShadowCommandList.FinishCommandList();
+		}
+	};
+
+	if (!shadowJobs.empty())
+	{
+		if (EnsureShadowCommandListCount(shadowJobs.size()))
+		{
+			std::vector<std::future<void>> shadowFutures;
+			shadowFutures.reserve(shadowJobs.size());
+			for (size_t jobIndex = 0; jobIndex < shadowJobs.size(); ++jobIndex)
+			{
+				GraphicsCommandList& commandList = myShadowCommandLists[jobIndex];
+				commandList.ResetCommandList();
+				shadowFutures.emplace_back(std::async(std::launch::async, [recordShadowJob, &commandList, &job = shadowJobs[jobIndex]]
+				{
+					recordShadowJob(commandList, job, true);
+				}));
+			}
+
+			for (std::future<void>& future : shadowFutures)
+			{
+				future.get();
+			}
+
+			for (size_t jobIndex = 0; jobIndex < shadowJobs.size(); ++jobIndex)
+			{
+				ExecuteCommandList(myShadowCommandLists[jobIndex]);
+			}
+
+			frameStats.ShadowCommandListsRecorded = static_cast<uint32_t>(shadowJobs.size());
+			frameStats.ShadowCommandListsExecuted = static_cast<uint32_t>(shadowJobs.size());
+		}
+		else
+		{
+			for (const ShadowRenderJob& job : shadowJobs)
+			{
+				recordShadowJob(inoutCommandList, job, false);
+			}
 		}
 	}
 
@@ -440,68 +963,30 @@ void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const Actor& 
 	inoutCommandList.ClearDepthStencil(myDepthBuffer);
 	inoutCommandList.SetRenderTarget(&myBackBuffer, &myDepthBuffer);
 
-	std::vector<Sampler*> samplerList(mySamplers.size());
-	for (size_t s = 0; s < mySamplers.size(); ++s)
-	{
-		samplerList[s] = &mySamplers[s];
-	}
-
-	inoutCommandList.SetShaderSamplers(samplerList.data(), samplerList.size(), 0, PipeLineStage_VertexShader | PipeLineStage_PixelShader);
+	inoutCommandList.SetShaderSamplers(mySamplerBindings.data(), mySamplerBindings.size(), 0, PipeLineStage_VertexShader | PipeLineStage_PixelShader);
 	BindPBLResources(inoutCommandList);
 	BindShadowResources(inoutCommandList);
 
 	FrameBuffer fb;
-	fb.View = camera.GetViewMatrix();
-	fb.Projection = camera.GetProjectionMatrix();
-	const CU::Vector3f cameraPosition = camera.GetTransform().GetPosition();
+	fb.View = aSnapshot.Camera.GetViewMatrix();
+	fb.Projection = aSnapshot.Camera.GetProjectionMatrix();
+	const CU::Vector3f cameraPosition = aSnapshot.Camera.GetTransform().GetPosition();
 	fb.CameraPosition = { cameraPosition.x, cameraPosition.y, cameraPosition.z, 1.0f };
 
 	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::FrameBuffer, fb, 0, PipeLineStage_VertexShader | PipeLineStage_PixelShader);
 	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::LightBuffer, lightBuffer, 4, PipeLineStage_PixelShader);
 
-	for (const RenderItem& item : sceneData.RenderItems)
+	for (const RenderItemSnapshot& item : aSnapshot.VisibleRenderItems)
 	{
-		RenderMesh(inoutCommandList, *item.MeshComponent, item.World);
+		RenderMesh(inoutCommandList, item, false);
 	}
+
+	StoreLastRenderStats(frameStats);
 }
 
 void GraphicsEngine::Present() const
 {
 	myRHI.Present();
-}
-
-GraphicsEngine::SceneRenderData GraphicsEngine::CollectRenderItemsAndLights(const World& aWorld) const
-{
-	SceneRenderData data;
-	for (const std::unique_ptr<Actor>& actor : aWorld.GetActors())
-	{
-		if (!actor || !actor->IsActive())
-		{
-			continue;
-		}
-
-		std::vector<LightComponent*> actorLights;
-		actor->GetComponentsOfType(actorLights);
-		for (const LightComponent* lightComponent : actorLights)
-		{
-			if (lightComponent != nullptr && lightComponent->IsEnabled())
-			{
-				data.LightComponents.emplace_back(lightComponent);
-			}
-		}
-
-		std::vector<MeshComponentBase*> meshComponents;
-		actor->GetComponentsOfType(meshComponents);
-		for (const MeshComponentBase* meshComponent : meshComponents)
-		{
-			if (meshComponent != nullptr && meshComponent->IsEnabled() && meshComponent->HasMesh())
-			{
-				data.RenderItems.push_back({ meshComponent, actor->GetTransform().GetWorldMatrix() });
-			}
-		}
-	}
-
-	return data;
 }
 
 void GraphicsEngine::UnbindShadowResources(GraphicsCommandList& inoutCommandList) const
@@ -555,9 +1040,10 @@ void GraphicsEngine::RenderShadowMap(
 	const PipelineStateObject& aOverridePSO,
 	PipeLineStages aOverrideStages,
 	const void* aPointShadowBuffer,
-	const std::vector<RenderItem>& aRenderItems)
+	const std::vector<const RenderItemSnapshot*>& aRenderItems)
 {
 	inoutCommandList.BeginEvent(aEventName);
+	UnbindShadowResources(inoutCommandList);
 	inoutCommandList.ClearDepthStencil(aShadowMap);
 	inoutCommandList.SetRenderTarget(nullptr, &aShadowMap);
 	inoutCommandList.SetOverridePipelineState(aOverridePSO, aOverrideStages);
@@ -574,9 +1060,12 @@ void GraphicsEngine::RenderShadowMap(
 			PipeLineStage_GeometryShader);
 	}
 
-	for (const RenderItem& item : aRenderItems)
+	for (const RenderItemSnapshot* item : aRenderItems)
 	{
-		RenderMesh(inoutCommandList, *item.MeshComponent, item.World);
+		if (item != nullptr)
+		{
+			RenderMesh(inoutCommandList, *item, false);
+		}
 	}
 
 	inoutCommandList.ClearOverridePipelineState();
@@ -586,9 +1075,9 @@ void GraphicsEngine::RenderShadowMap(
 void GraphicsEngine::RenderDirectionalShadows(
 	GraphicsCommandList& inoutCommandList,
 	const CU::Camera3D& aCamera,
-	const LightComponent& aLightComponent,
+	const LightSnapshot& aLight,
 	LightBuffer::Light& inoutLight,
-	const std::vector<RenderItem>& aRenderItems)
+	const std::vector<RenderItemSnapshot>& aRenderItems)
 {
 	float cascadeNear = aCamera.GetNearPlane();
 	std::array<CascadeShadowData, ShadowConfig::DirectionalCascadeCount> cascadeData = {};
@@ -601,12 +1090,18 @@ void GraphicsEngine::RenderDirectionalShadows(
 			cascadeLength * ShadowConfig::DirectionalCascadeSplitPaddingScale);
 		const float fitNear = (std::max)(aCamera.GetNearPlane(), cascadeNear - cascadePadding);
 		const float fitFar = cascadeFar + cascadePadding;
-		cascadeData[cascadeIndex] = CreateCascadeShadowData(aCamera, aLightComponent, fitNear, fitFar);
+		cascadeData[cascadeIndex] = CreateCascadeShadowData(aCamera, aLight, fitNear, fitFar);
 		const CU::Matrix4f lightViewProjection = cascadeData[cascadeIndex].ViewProjection;
 
 		FrameBuffer shadowFrameBuffer;
 		shadowFrameBuffer.View = CU::Matrix4f();
 		shadowFrameBuffer.Projection = lightViewProjection;
+		RenderItemPtrList renderItems;
+		renderItems.reserve(aRenderItems.size());
+		for (const RenderItemSnapshot& item : aRenderItems)
+		{
+			renderItems.emplace_back(&item);
+		}
 		RenderShadowMap(
 			inoutCommandList,
 			std::format("Directional Shadow Cascade {}", cascadeIndex),
@@ -615,7 +1110,7 @@ void GraphicsEngine::RenderDirectionalShadows(
 			myShadowOverridePSO,
 			PipeLineStage_PixelShader | PipeLineStage_Rasterizer,
 			nullptr,
-			aRenderItems);
+			renderItems);
 
 		inoutLight.LightViewProjTexture[cascadeIndex] = CreateLightViewProjectionTexture(lightViewProjection);
 		cascadeNear = cascadeFar;
@@ -647,15 +1142,21 @@ void GraphicsEngine::RenderDirectionalShadows(
 
 void GraphicsEngine::RenderSpotShadows(
 	GraphicsCommandList& inoutCommandList,
-	const LightComponent& aLightComponent,
+	const LightSnapshot& aLight,
 	LightBuffer::Light& inoutLight,
 	unsigned aShadowIndex,
-	const std::vector<RenderItem>& aRenderItems)
+	const std::vector<RenderItemSnapshot>& aRenderItems)
 {
-	const CU::Matrix4f lightViewProjection = CreateSpotViewProjection(aLightComponent);
+	const CU::Matrix4f lightViewProjection = CreateSpotViewProjection(aLight);
 	FrameBuffer shadowFrameBuffer;
 	shadowFrameBuffer.View = CU::Matrix4f();
 	shadowFrameBuffer.Projection = lightViewProjection;
+	RenderItemPtrList renderItems;
+	renderItems.reserve(aRenderItems.size());
+	for (const RenderItemSnapshot& item : aRenderItems)
+	{
+		renderItems.emplace_back(&item);
+	}
 	RenderShadowMap(
 		inoutCommandList,
 		std::format("Spot Shadow {}", aShadowIndex),
@@ -664,7 +1165,7 @@ void GraphicsEngine::RenderSpotShadows(
 		myLocalShadowOverridePSO,
 		PipeLineStage_PixelShader | PipeLineStage_Rasterizer,
 		nullptr,
-		aRenderItems);
+		renderItems);
 
 	inoutLight.ShadowMapIndex = aShadowIndex;
 	inoutLight.NumCascades = 1;
@@ -674,15 +1175,21 @@ void GraphicsEngine::RenderSpotShadows(
 
 void GraphicsEngine::RenderPointShadows(
 	GraphicsCommandList& inoutCommandList,
-	const LightComponent& aLightComponent,
+	const LightSnapshot& aLight,
 	LightBuffer::Light& inoutLight,
 	unsigned aShadowIndex,
-	const std::vector<RenderItem>& aRenderItems)
+	const std::vector<RenderItemSnapshot>& aRenderItems)
 {
-	const PointShadowBufferData pointShadowBuffer = CreatePointShadowBuffer(aLightComponent);
+	const PointShadowBufferData pointShadowBuffer = CreatePointShadowBuffer(aLight);
 	FrameBuffer shadowFrameBuffer;
 	shadowFrameBuffer.View = CU::Matrix4f();
 	shadowFrameBuffer.Projection = CU::Matrix4f();
+	RenderItemPtrList renderItems;
+	renderItems.reserve(aRenderItems.size());
+	for (const RenderItemSnapshot& item : aRenderItems)
+	{
+		renderItems.emplace_back(&item);
+	}
 	RenderShadowMap(
 		inoutCommandList,
 		std::format("Point Shadow {}", aShadowIndex),
@@ -691,7 +1198,7 @@ void GraphicsEngine::RenderPointShadows(
 		myPointShadowOverridePSO,
 		PipeLineStage_PixelShader | PipeLineStage_Rasterizer | PipeLineStage_GeometryShader,
 		&pointShadowBuffer,
-		aRenderItems);
+		renderItems);
 
 	inoutLight.ShadowMapIndex = aShadowIndex;
 	inoutLight.NumCascades = 1;
@@ -699,6 +1206,12 @@ void GraphicsEngine::RenderPointShadows(
 }
 
 float GraphicsEngine::GetShadowDepthBias(LightType aType) const
+{
+	std::scoped_lock lock(myShadowTuningMutex);
+	return GetShadowDepthBiasUnlocked(aType);
+}
+
+float GraphicsEngine::GetShadowDepthBiasUnlocked(LightType aType) const
 {
 	float bias = ShadowConfig::DirectionalShaderBias + myDirectionalShadowBiasOffset;
 	if (aType == LightType::Spot)
@@ -715,6 +1228,7 @@ float GraphicsEngine::GetShadowDepthBias(LightType aType) const
 
 void GraphicsEngine::AdjustShadowBias(LightType aType, float aDelta)
 {
+	std::scoped_lock lock(myShadowTuningMutex);
 	float* offset = &myDirectionalShadowBiasOffset;
 	if (aType == LightType::Spot)
 	{
@@ -726,7 +1240,7 @@ void GraphicsEngine::AdjustShadowBias(LightType aType, float aDelta)
 	}
 
 	*offset += aDelta;
-	const float currentBias = GetShadowDepthBias(aType);
+	const float currentBias = GetShadowDepthBiasUnlocked(aType);
 	if (currentBias <= ShadowConfig::BiasMin || currentBias >= ShadowConfig::BiasMax)
 	{
 		const float defaultBias =
@@ -736,11 +1250,12 @@ void GraphicsEngine::AdjustShadowBias(LightType aType, float aDelta)
 		*offset = std::clamp(defaultBias + *offset, ShadowConfig::BiasMin, ShadowConfig::BiasMax) - defaultBias;
 	}
 
-	GELOG(Log, "Shadow {} bias: {:.6f}", aType == LightType::Directional ? "directional" : aType == LightType::Spot ? "spot" : "point", GetShadowDepthBias(aType));
+	GELOG(Log, "Shadow {} bias: {:.6f}", aType == LightType::Directional ? "directional" : aType == LightType::Spot ? "spot" : "point", GetShadowDepthBiasUnlocked(aType));
 }
 
 void GraphicsEngine::ResetShadowTuning()
 {
+	std::scoped_lock lock(myShadowTuningMutex);
 	myDirectionalShadowBiasOffset = 0.0f;
 	mySpotShadowBiasOffset = 0.0f;
 	myPointShadowBiasOffset = 0.0f;
@@ -749,15 +1264,16 @@ void GraphicsEngine::ResetShadowTuning()
 
 void GraphicsEngine::LogShadowTuning() const
 {
+	std::scoped_lock lock(myShadowTuningMutex);
 	GELOG(Log, "Shadow tuning: cascades={}, splits={{ {:.1f}, {:.1f}, {:.1f}, {:.1f} }}, directionalBias={:.6f}, spotBias={:.6f}, pointBias={:.6f}, spotMaps={}, pointMaps={}",
 		ShadowConfig::DirectionalCascadeCount,
 		ShadowConfig::CascadeSplits[0],
 		ShadowConfig::CascadeSplits[1],
 		ShadowConfig::CascadeSplits[2],
 		ShadowConfig::CascadeSplits[3],
-		GetShadowDepthBias(LightType::Directional),
-		GetShadowDepthBias(LightType::Spot),
-		GetShadowDepthBias(LightType::Point),
+		GetShadowDepthBiasUnlocked(LightType::Directional),
+		GetShadowDepthBiasUnlocked(LightType::Spot),
+		GetShadowDepthBiasUnlocked(LightType::Point),
 		ShadowConfig::MaxSpotMaps,
 		ShadowConfig::MaxPointMaps);
 }
@@ -1166,38 +1682,118 @@ void GraphicsEngine::CreateMaterialTextureSlots(const RHIShaderReflectionInfo& a
 GraphicsEngine::GraphicsEngine() = default;
 GraphicsEngine::~GraphicsEngine() = default;
 
-void GraphicsEngine::RenderMesh(GraphicsCommandList& inoutCommandList, const MeshComponentBase& aMeshComponent, const CU::Matrix4f& aWorld)
+void GraphicsEngine::PrepareSnapshotRenderResources(const RenderSceneSnapshot& aSnapshot) const
 {
-	const std::shared_ptr<Mesh>& mesh = aMeshComponent.GetMesh();
-	const std::vector<std::shared_ptr<MaterialInterface>>& materials = aMeshComponent.GetMaterialList();
+	for (const RenderItemSnapshot& item : aSnapshot.ShadowCasters)
+	{
+		PrepareRenderItemResources(item);
+	}
+
+	for (const RenderItemSnapshot& item : aSnapshot.VisibleRenderItems)
+	{
+		PrepareRenderItemResources(item);
+	}
+}
+
+bool GraphicsEngine::PrepareRenderItemResources(const RenderItemSnapshot& aRenderItem) const
+{
+	const std::shared_ptr<Mesh>& mesh = aRenderItem.Mesh;
+	if (mesh == nullptr)
+	{
+		return false;
+	}
+
+	if (!PrepareMeshForRendering(*mesh))
+	{
+		return false;
+	}
+
+	const std::vector<std::shared_ptr<MaterialInterface>>& materials = aRenderItem.Materials;
+	for (const Mesh::Element& element : mesh->myElements)
+	{
+		const MaterialInterface* elementMaterial = &myDefaultMaterial;
+		if (element.MaterialIndex < materials.size() && materials[element.MaterialIndex] != nullptr)
+		{
+			elementMaterial = materials[element.MaterialIndex].get();
+		}
+
+		if (elementMaterial->HasParameters() && elementMaterial->IsMaterialDataDirty())
+		{
+			elementMaterial->RefreshMaterialData();
+		}
+	}
+
+	return true;
+}
+
+bool GraphicsEngine::EnsureShadowCommandListCount(size_t aCount)
+{
+	while (myShadowCommandLists.size() < aCount)
+	{
+		GraphicsCommandList commandList;
+		if (!CreateCommandList(std::format("Shadow Worker {}", myShadowCommandLists.size()), commandList))
+		{
+			return false;
+		}
+
+		myShadowCommandLists.emplace_back(std::move(commandList));
+	}
+
+	return true;
+}
+
+void GraphicsEngine::StoreLastRenderStats(const RenderStats& aStats)
+{
+	std::scoped_lock lock(myRenderStatsMutex);
+	myLastRenderStats = aStats;
+}
+
+GraphicsEngine::RenderStats GraphicsEngine::GetLastRenderStats() const
+{
+	std::scoped_lock lock(myRenderStatsMutex);
+	return myLastRenderStats;
+}
+
+void GraphicsEngine::RenderMesh(GraphicsCommandList& inoutCommandList, const RenderItemSnapshot& aRenderItem, bool aAllowLazyPrepare)
+{
+	const std::shared_ptr<Mesh>& mesh = aRenderItem.Mesh;
+	const std::vector<std::shared_ptr<MaterialInterface>>& materials = aRenderItem.Materials;
 	if (mesh == nullptr)
 	{
 		return;
 	}
 
-	if (!PrepareMeshForRendering(*mesh))
+	if (aAllowLazyPrepare)
 	{
-		return;
+		if (!PrepareMeshForRendering(*mesh))
+		{
+			return;
+		}
+	}
+	else
+	{
+		ensure(mesh->myVertexBuffer.IsValid());
+		ensure(mesh->myIndexBuffer.IsValid());
+		if (!mesh->myVertexBuffer.IsValid() || !mesh->myIndexBuffer.IsValid())
+		{
+			return;
+		}
 	}
 
 	inoutCommandList.SetVertexBuffer(&mesh->myVertexBuffer);
 	inoutCommandList.SetIndexBuffer(&mesh->myIndexBuffer);
 
 	ObjectBuffer ob;
-	ob.World = aWorld;
-	ob.WorldInvT = aWorld.GetInverseTranspose3x3();
-	ob.HasSkinning = aMeshComponent.HasSkinning() ? 1u : 0u;
+	ob.World = aRenderItem.World;
+	ob.WorldInvT = aRenderItem.World.GetInverseTranspose3x3();
+	ob.HasSkinning = aRenderItem.HasSkinning ? 1u : 0u;
 	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::ObjectBuffer, ob, 1, PipeLineStage_VertexShader);
 
-	if (aMeshComponent.HasSkinning())
+	if (aRenderItem.HasSkinning)
 	{
 		AnimationBuffer animationBuffer;
-		const std::array<CU::Matrix4f, 128>* jointTransforms = aMeshComponent.GetJointTransforms();
-		if (jointTransforms != nullptr)
-		{
-			animationBuffer.JointTransforms = *jointTransforms;
-			UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::AnimationBuffer, animationBuffer, 2, PipeLineStage_VertexShader);
-		}
+		animationBuffer.JointTransforms = aRenderItem.JointTransforms;
+		UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::AnimationBuffer, animationBuffer, 2, PipeLineStage_VertexShader);
 	}
 
 	MaterialInterface* currentMaterial = nullptr;
@@ -1218,6 +1814,11 @@ void GraphicsEngine::RenderMesh(GraphicsCommandList& inoutCommandList, const Mes
 			{
 				if (currentMaterial->IsMaterialDataDirty())
 				{
+					ensure(aAllowLazyPrepare);
+					if (!aAllowLazyPrepare)
+					{
+						return;
+					}
 					currentMaterial->RefreshMaterialData();
 				}
 

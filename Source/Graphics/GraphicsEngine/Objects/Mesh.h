@@ -1,6 +1,7 @@
 #pragma once
 #include "Buffer.h"
 #include "Matrix.hpp"
+#include "Vector.hpp"
 
 #include <memory>
 #include <string>
@@ -89,6 +90,9 @@ private:
     std::unordered_map<std::string, std::shared_ptr<Animation>> myAnimations;
 
 	size_t myNumMaterialSlots = 0; 
+	CU::Vector3f myLocalBoundsCenter = CU::Vector3f::Zero;
+	float myLocalBoundsRadius = 0.0f;
+	bool myHasLocalBounds = false;
 
     mutable Buffer myVertexBuffer;
     mutable Buffer myIndexBuffer;
