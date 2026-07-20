@@ -4,12 +4,12 @@ setlocal EnableExtensions EnableDelayedExpansion
 set "SOLUTION=AGP.sln"
 set "PLATFORM=x64"
 set "APP_NAME=ModelViewer.exe"
-set "APP_CONFIG=Debug"
+set "APP_CONFIG=Release"
 
 set "OUTDIR=HandIn"
 set "SOLUTION_OUT=%OUTDIR%\AGP_Solution"
 set "APP_OUT=%OUTDIR%\AGP_App"
-set "APP_RUNTIME_DIR=%APP_OUT%\Source\Application\ModelViewer"
+set "APP_RUNTIME_DIR=%APP_OUT%\Bin\%APP_CONFIG%"
 
 pushd "%~dp0"
 
@@ -133,8 +133,8 @@ exit /B 0
 :WriteLauncher
 (
     echo @echo off
-    echo pushd "%%~dp0Source\Application\ModelViewer"
-    echo start "" "%APP_NAME%"
+    echo pushd "%%~dp0"
+    echo start "" "Bin\%APP_CONFIG%\%APP_NAME%"
     echo popd
 ) > "%APP_OUT%\RunModelViewer.bat"
 if not exist "%APP_OUT%\RunModelViewer.bat" (

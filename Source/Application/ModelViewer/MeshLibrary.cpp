@@ -206,16 +206,17 @@ MeshLibrary::~MeshLibrary()
 	TGA::FBX::Importer::UninitImporter();
 }
 
-void MeshLibrary::Initialize()
+void MeshLibrary::Initialize(const std::filesystem::path& aContentRoot)
 {
+	myContentRoot = aContentRoot;
 	RegisterPrimitiveMeshes();
-	LoadFBXMesh("Assets/Meshes/Props/SM_Chest.fbx");
-	LoadFBXMesh("Assets/Meshes/Props/SM_Color_Checker.fbx");
-	LoadFBXMesh("Assets/Meshes/Characters/TGA_Bro/SK_C_TGA_Bro.fbx");
-	LoadFBXAnimation("SK_C_TGA_Bro", "Walk", "Assets/Animations/Characters/TGA_Bro/Locomotion/A_C_TGA_Bro_Walk.fbx");
-	LoadFBXAnimation("SK_C_TGA_Bro", "Run", "Assets/Animations/Characters/TGA_Bro/Locomotion/A_C_TGA_Bro_Run.fbx");
-	LoadFBXAnimation("SK_C_TGA_Bro", "Wave", "Assets/Animations/Characters/TGA_Bro/Idle/A_C_TGA_Bro_Idle_Wave.fbx");
-	LoadFBXAnimation("SK_C_TGA_Bro", "Breathing", "Assets/Animations/Characters/TGA_Bro/Idle/A_C_TGA_Bro_Idle_Brething.fbx");
+	LoadFBXMesh("Meshes/Props/SM_Chest.fbx");
+	LoadFBXMesh("Meshes/Props/SM_Color_Checker.fbx");
+	LoadFBXMesh("Meshes/Characters/TGA_Bro/SK_C_TGA_Bro.fbx");
+	LoadFBXAnimation("SK_C_TGA_Bro", "Walk", "Animations/Characters/TGA_Bro/Locomotion/A_C_TGA_Bro_Walk.fbx");
+	LoadFBXAnimation("SK_C_TGA_Bro", "Run", "Animations/Characters/TGA_Bro/Locomotion/A_C_TGA_Bro_Run.fbx");
+	LoadFBXAnimation("SK_C_TGA_Bro", "Wave", "Animations/Characters/TGA_Bro/Idle/A_C_TGA_Bro_Idle_Wave.fbx");
+	LoadFBXAnimation("SK_C_TGA_Bro", "Breathing", "Animations/Characters/TGA_Bro/Idle/A_C_TGA_Bro_Idle_Brething.fbx");
 }
 
 std::shared_ptr<Mesh> MeshLibrary::GetMesh(std::string_view aName) const
@@ -337,21 +338,11 @@ void MeshLibrary::RegisterMesh(std::string aName, std::shared_ptr<Mesh> aMesh)
 
 std::filesystem::path MeshLibrary::ResolvePath(const std::filesystem::path& aPath) const
 {
-	if (std::filesystem::exists(aPath))
+	const std::filesystem::path candidate = aPath.is_absolute() ? aPath : myContentRoot / aPath;
+	std::error_code error;
+	if (std::filesystem::is_regular_file(candidate, error))
 	{
-		return aPath;
-	}
-
-	std::filesystem::path basePath = std::filesystem::current_path();
-	for (int depth = 0; depth < 5; ++depth)
-	{
-		const std::filesystem::path candidate = basePath / aPath;
-		if (std::filesystem::exists(candidate))
-		{
-			return candidate;
-		}
-
-		basePath /= "..";
+		return std::filesystem::canonical(candidate, error);
 	}
 
 	return {};

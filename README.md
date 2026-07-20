@@ -29,17 +29,20 @@ C++20 / DirectX 11 graphics programming project for the AGP assignments. The cur
 
 ## Build
 
-Open `AGP.sln` in Visual Studio and build the `Debug | x64` configuration.
+Open `AGP.sln` in Visual Studio and build the `Debug | x64` or `Release | x64` configuration.
 
-The ModelViewer expects to run with `Source/Application/ModelViewer` as the working directory because it resolves `Assets` relative to that path.
+The runtime layout keeps executables under `Bin/<Configuration>` and assets under the repository-level `Assets` directory. ModelViewer resolves this layout relative to its executable, so it does not require a special working directory.
 
 ## Running ModelViewer
 
-Run `Bin/Debug/ModelViewer.exe` after building, with this working directory:
+Run the executable for the configuration you built:
 
 ```text
-C:\Users\tarik\Documents\GitHub\AGP\Source\Application\ModelViewer
+Bin\Debug\ModelViewer.exe
+Bin\Release\ModelViewer.exe
 ```
+
+The packaged application preserves the same directory structure and includes `RunModelViewer.bat` at its root.
 
 The debug build opens a console window for logs. The `P` key is useful while tuning lights and shadows because it prints copy-paste friendly placement and bias values.
 

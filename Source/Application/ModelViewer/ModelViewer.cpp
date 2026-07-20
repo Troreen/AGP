@@ -28,6 +28,36 @@ namespace
 	constexpr int MaxFixedStepsPerFrame = 5;
 	constexpr int KeyCount = 256;
 
+	std::filesystem::path GetExecutableDirectory()
+	{
+		wchar_t executablePath[MAX_PATH] = {};
+		const DWORD pathLength = GetModuleFileNameW(nullptr, executablePath, MAX_PATH);
+		if (pathLength == 0 || pathLength == MAX_PATH)
+		{
+			return {};
+		}
+
+		return std::filesystem::path(executablePath).parent_path();
+	}
+
+	std::filesystem::path GetContentRoot()
+	{
+		const std::filesystem::path executableDirectory = GetExecutableDirectory();
+		if (executableDirectory.empty())
+		{
+			return {};
+		}
+
+		const std::filesystem::path contentRoot = executableDirectory / ".." / ".." / "Assets";
+		std::error_code error;
+		if (!std::filesystem::is_directory(contentRoot, error))
+		{
+			return {};
+		}
+
+		return std::filesystem::canonical(contentRoot, error);
+	}
+
 	std::filesystem::path GetMaterialRoot(const std::filesystem::path& aContentRoot)
 	{
 		return aContentRoot.parent_path() / "Source" / "Application" / "ModelViewer" / "Materials";
@@ -175,8 +205,12 @@ bool ModelViewer::Initialize(SIZE aWindowSize, WNDPROC aWindowProcess, LPCWSTR a
         nullptr
     );
 
-    std::filesystem::path contentPath = std::filesystem::current_path() / ".." / ".." / ".." / "Assets";
-	contentPath = std::filesystem::canonical(contentPath);
+	const std::filesystem::path contentPath = GetContentRoot();
+	if (contentPath.empty())
+	{
+		MVLOG(Error, "Could not locate the Assets directory from the executable or working directory.");
+		return false;
+	}
 	myContentRoot = contentPath;
 
 	{   // Graphics Init
@@ -198,7 +232,7 @@ bool ModelViewer::Initialize(SIZE aWindowSize, WNDPROC aWindowProcess, LPCWSTR a
         myInputHandler.SetAutoMouseCapture(false);
     }
 
-    myMeshLibrary.Initialize();
+	myMeshLibrary.Initialize(myContentRoot);
 
     LoadScene();
 
@@ -376,7 +410,26 @@ bool ModelViewer::ConsumePendingInputFrame(ModelViewerInputFrame& inoutInputFram
         return false;
     }
 
-    inoutInputFrame = myPendingInputFrame;
+    const float accumulatedMouseDeltaX =
+        inoutInputFrame.CameraInput.MouseDeltaX + myPendingInputFrame.CameraInput.MouseDeltaX;
+    const float accumulatedMouseDeltaY =
+        inoutInputFrame.CameraInput.MouseDeltaY + myPendingInputFrame.CameraInput.MouseDeltaY;
+
+    for (size_t keyIndex = 0; keyIndex < inoutInputFrame.KeysPressed.size(); ++keyIndex)
+    {
+        inoutInputFrame.KeysPressed[keyIndex] =
+            inoutInputFrame.KeysPressed[keyIndex] || myPendingInputFrame.KeysPressed[keyIndex];
+    }
+
+    inoutInputFrame.KeysDown = myPendingInputFrame.KeysDown;
+    inoutInputFrame.CameraInput = myPendingInputFrame.CameraInput;
+    inoutInputFrame.CameraInput.MouseDeltaX = accumulatedMouseDeltaX;
+    inoutInputFrame.CameraInput.MouseDeltaY = accumulatedMouseDeltaY;
+    inoutInputFrame.CameraInput.MouseLookActive =
+        myPendingInputFrame.CameraInput.MouseLookActive
+        || accumulatedMouseDeltaX != 0.0f
+        || accumulatedMouseDeltaY != 0.0f;
+
     myPendingInputFrame = {};
     myHasPendingInputFrame = false;
     return true;
