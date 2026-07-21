@@ -43,7 +43,7 @@ Three repetitions are the default because a single desktop run can be noisy. The
 
 ## Compare Existing Commits
 
-The benchmark harness should be one focused commit with no optimization mixed into it. Once that commit exists, older refs can be measured with the exact same harness without rewriting this branch:
+Keep benchmark harness changes separate from engine optimizations. Pass the latest harness setup commit to `compare.ps1`; it traces back to the commit that introduced `FrameBenchmark.cpp` and extracts the complete instrumentation range. Older refs can then be measured with the exact same harness without rewriting this branch:
 
 ```powershell
 .\Benchmarks\compare.ps1 `
@@ -55,6 +55,8 @@ The benchmark harness should be one focused commit with no optimization mixed in
 ```
 
 For every ref, `compare.ps1` creates a detached temporary worktree, extracts and applies only the benchmark source/project instrumentation from the benchmark commit when necessary, builds and runs it, writes the results back to this checkout, and removes the temporary worktree. Documentation and result files are deliberately excluded from that temporary patch. The measured commit stored in the result remains the requested ref, while the `harness` field records how instrumentation was supplied.
+
+`libfbxsdk.dll` is an essential runtime dependency and is tracked for both Debug and Release. Historical worktrees receive the Release DLL through the same temporary binary harness patch, so Windows can resolve it beside `ModelViewer.exe`.
 
 For the current history, the useful first comparison is:
 

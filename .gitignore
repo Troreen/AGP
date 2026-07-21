@@ -8,7 +8,11 @@
 # Build outputs used by the solution
 Intermediate/
 /Lib/
-/Bin/
+/Bin/*
+!/Bin/Debug/
+!/Bin/Release/
+/Bin/Debug/*
+/Bin/Release/*
 x64/
 x86/
 /Debug/
@@ -25,6 +29,8 @@ x86/
 *.exp
 *.exe
 *.dll
+!/Bin/Debug/libfbxsdk.dll
+!/Bin/Release/libfbxsdk.dll
 
 # Generated/copied shader artifacts
 /Assets/Shaders/

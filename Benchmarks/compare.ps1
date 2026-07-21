@@ -48,7 +48,13 @@ if (-not $HarnessCommit) {
 }
 $HarnessCommit = Invoke-Git -WorkingDirectory $repoRoot -Arguments @("rev-parse", $HarnessCommit) -ReturnText
 $harnessShort = $HarnessCommit.Substring(0, 8)
+$harnessStartHistory = & git -C $repoRoot log --reverse --format=%H $HarnessCommit -- "Source/Utilities/FrameBenchmark.cpp"
+if ($LASTEXITCODE -ne 0 -or -not $harnessStartHistory) {
+    throw "Commit $HarnessCommit does not contain the benchmark recorder history."
+}
+$harnessStartCommit = @($harnessStartHistory)[0]
 $instrumentationPaths = @(
+    "Bin/Release/libfbxsdk.dll",
     "Source/Utilities/FrameBenchmark.cpp",
     "Source/Utilities/FrameBenchmark.h",
     "Source/Graphics/GraphicsEngine/RHI/RenderHardwareInterface.cpp",
@@ -56,9 +62,9 @@ $instrumentationPaths = @(
     "Source/Graphics/GraphicsEngine/GraphicsEngine.vcxproj",
     "Source/Graphics/GraphicsEngine/GraphicsEngine.vcxproj.filters"
 )
-$harnessPatch = & git -C $repoRoot diff "$HarnessCommit^" $HarnessCommit -- @instrumentationPaths
+$harnessPatch = & git -C $repoRoot diff --binary "$harnessStartCommit^" $HarnessCommit -- @instrumentationPaths
 if ($LASTEXITCODE -ne 0 -or -not $harnessPatch) {
-    throw "Could not extract the benchmark instrumentation from commit $HarnessCommit. Keep the harness in one focused commit."
+    throw "Could not extract the benchmark instrumentation through commit $HarnessCommit."
 }
 
 $systemTempRoot = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath())
