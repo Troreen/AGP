@@ -61,6 +61,21 @@ function Find-MSBuild {
     throw "Could not find MSBuild. Install Visual Studio with the Desktop development with C++ workload."
 }
 
+function Remove-CreatedJunction {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return
+    }
+
+    $item = Get-Item -LiteralPath $Path -Force
+    if (($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) -eq 0) {
+        throw "Refusing to remove temporary path because it is not a junction: $($item.FullName)"
+    }
+
+    [System.IO.Directory]::Delete($item.FullName, $false)
+}
+
 if (-not $CommitOverride) {
     $CommitOverride = Invoke-GitText -Arguments @("rev-parse", "HEAD")
 }
@@ -105,6 +120,38 @@ $executable = Join-Path $RepoRoot "Bin\$Configuration\ModelViewer.exe"
 if (-not (Test-Path -LiteralPath $executable)) {
     throw "ModelViewer executable not found at $executable."
 }
+$builtShaderDirectory = Join-Path $RepoRoot "Bin\$Configuration\Shaders"
+if (-not (Test-Path -LiteralPath $builtShaderDirectory -PathType Container)) {
+    throw "Built shader directory not found at $builtShaderDirectory."
+}
+$runtimeShaderDirectory = Join-Path $RepoRoot "Assets\Shaders"
+$createdShaderJunction = $false
+if (-not (Test-Path -LiteralPath $runtimeShaderDirectory)) {
+    New-Item -ItemType Junction -Path $runtimeShaderDirectory -Target $builtShaderDirectory | Out-Null
+    $createdShaderJunction = $true
+    Write-Host "Created temporary runtime Shaders junction."
+}
+
+$modelViewerProjectDirectory = Join-Path $RepoRoot "Source\Application\ModelViewer"
+$modelViewerSource = Join-Path $modelViewerProjectDirectory "ModelViewer.cpp"
+if (-not (Test-Path -LiteralPath $modelViewerSource -PathType Leaf)) {
+    throw "ModelViewer source not found at $modelViewerSource."
+}
+
+$modelViewerSourceText = Get-Content -LiteralPath $modelViewerSource -Raw
+$usesLegacyAssetPaths = $modelViewerSourceText.Contains('std::filesystem::current_path()')
+$runtimeWorkingDirectory = $RepoRoot
+$createdLegacyAssetJunction = $false
+if ($usesLegacyAssetPaths) {
+    $runtimeWorkingDirectory = $modelViewerProjectDirectory
+    $assetRoot = Join-Path $RepoRoot "Assets"
+    $legacyAssetPath = Join-Path $modelViewerProjectDirectory "Assets"
+    if (-not (Test-Path -LiteralPath $legacyAssetPath)) {
+        New-Item -ItemType Junction -Path $legacyAssetPath -Target $assetRoot | Out-Null
+        $createdLegacyAssetJunction = $true
+        Write-Host "Created temporary legacy Assets junction."
+    }
+}
 
 New-Item -ItemType Directory -Force -Path $ResultsRoot | Out-Null
 
@@ -143,7 +190,7 @@ try {
     for ($run = 1; $run -le $Repetitions; $run++) {
         $env:AGP_BENCHMARK_RUN = $run.ToString()
         Write-Host "Running '$Label' repetition $run/$Repetitions ($WarmupFrames warmup + $SampleFrames measured frames)..."
-        $process = Start-Process -FilePath $executable -WorkingDirectory $RepoRoot -Wait -PassThru
+        $process = Start-Process -FilePath $executable -WorkingDirectory $runtimeWorkingDirectory -Wait -PassThru
         if ($process.ExitCode -ne 0) {
             throw "ModelViewer benchmark exited with code $($process.ExitCode)."
         }
@@ -152,6 +199,12 @@ try {
 finally {
     foreach ($name in $benchmarkVariables) {
         [Environment]::SetEnvironmentVariable($name, $savedEnvironment[$name], "Process")
+    }
+    if ($createdLegacyAssetJunction) {
+        Remove-CreatedJunction -Path $legacyAssetPath
+    }
+    if ($createdShaderJunction) {
+        Remove-CreatedJunction -Path $runtimeShaderDirectory
     }
 }
 

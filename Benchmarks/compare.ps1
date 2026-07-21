@@ -62,11 +62,6 @@ $instrumentationPaths = @(
     "Source/Graphics/GraphicsEngine/GraphicsEngine.vcxproj",
     "Source/Graphics/GraphicsEngine/GraphicsEngine.vcxproj.filters"
 )
-$harnessPatch = & git -C $repoRoot diff --binary "$harnessStartCommit^" $HarnessCommit -- @instrumentationPaths
-if ($LASTEXITCODE -ne 0 -or -not $harnessPatch) {
-    throw "Could not extract the benchmark instrumentation through commit $HarnessCommit."
-}
-
 $systemTempRoot = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath())
 $tempBase = Join-Path $systemTempRoot ("agp-benchmark-" + [Guid]::NewGuid().ToString("N"))
 $tempBase = [System.IO.Path]::GetFullPath($tempBase)
@@ -75,6 +70,12 @@ if (-not $tempBase.StartsWith($systemTempRoot, [StringComparison]::OrdinalIgnore
     throw "Refusing to use an unexpected temporary worktree path: $tempBase"
 }
 New-Item -ItemType Directory -Force -Path $tempBase | Out-Null
+$harnessPatchPath = Join-Path $tempBase "benchmark-harness.patch"
+& git -C $repoRoot diff --binary "--output=$harnessPatchPath" "$harnessStartCommit^" $HarnessCommit -- @instrumentationPaths
+if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $harnessPatchPath) -or
+    (Get-Item -LiteralPath $harnessPatchPath).Length -eq 0) {
+    throw "Could not extract the benchmark instrumentation through commit $HarnessCommit."
+}
 
 try {
     foreach ($ref in $Refs) {
@@ -93,7 +94,7 @@ try {
             }
             else {
                 Write-Host "Applying benchmark-only instrumentation from $harnessShort without changing the measured ref..."
-                $harnessPatch | & git -C $worktree apply --whitespace=nowarn -
+                & git -C $worktree apply --whitespace=nowarn $harnessPatchPath
                 if ($LASTEXITCODE -ne 0) {
                     throw "The benchmark instrumentation did not apply cleanly to $ref."
                 }

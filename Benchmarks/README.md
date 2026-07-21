@@ -33,7 +33,7 @@ Use a clean, committed checkout and close unrelated heavy programs:
 The script:
 
 1. Builds `ModelViewer` as `Release | x64`.
-2. Starts the normal fixed ModelViewer scene.
+2. Links the freshly built shaders into the expected ignored runtime location and provides a temporary `Assets` junction only for historical refs with legacy path assumptions.
 3. Discards the warmup frames.
 4. Saves the requested number of raw frame samples.
 5. Closes ModelViewer automatically.
