@@ -1,0 +1,47 @@
+{
+  "schema_version": 2,
+  "timestamp_utc": "20260721-052306-713Z",
+  "label": "engine-optimizations",
+  "commit": "5054845fbf803df554a0efeeb0bfe717758866aa",
+  "branch": "engine-optimizations",
+  "configuration": "Release",
+  "scenario": "default",
+  "comparison_id": "20260721-052015Z-8792f670",
+  "execution_index": 2,
+  "run_index": 1,
+  "requested_ref": "engine-optimizations",
+  "notes": "",
+  "harness": "in-tree:820cf58c",
+  "source_dirty": false,
+  "warmup_frames": 300,
+  "sample_frames": 1200,
+  "system": {
+    "computer": "DESKTOP-O2EOU65",
+    "processor": "Intel64 Family 6 Model 140 Stepping 1, GenuineIntel",
+    "adapter": "NVIDIA GeForce MX450",
+    "width": 1284,
+    "height": 701
+  },
+  "metrics": {
+    "average_fps": 377.457923,
+    "one_percent_low_fps": 113.422944,
+    "frame_ms": {
+      "mean": 2.649302,
+      "median": 2.424250,
+      "p95": 6.655755,
+      "p99": 8.290056,
+      "min": 0.472400,
+      "max": 9.547300,
+      "stddev": 1.661582
+    },
+    "present_ms": {
+      "mean": 1.812737,
+      "median": 1.598200,
+      "p95": 5.822215,
+      "p99": 7.469903,
+      "min": 0.023300,
+      "max": 8.615500,
+      "stddev": 1.718757
+    }
+  }
+}
