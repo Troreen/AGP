@@ -132,27 +132,6 @@ if (-not (Test-Path -LiteralPath $runtimeShaderDirectory)) {
     Write-Host "Created temporary runtime Shaders junction."
 }
 
-$modelViewerProjectDirectory = Join-Path $RepoRoot "Source\Application\ModelViewer"
-$modelViewerSource = Join-Path $modelViewerProjectDirectory "ModelViewer.cpp"
-if (-not (Test-Path -LiteralPath $modelViewerSource -PathType Leaf)) {
-    throw "ModelViewer source not found at $modelViewerSource."
-}
-
-$modelViewerSourceText = Get-Content -LiteralPath $modelViewerSource -Raw
-$usesLegacyAssetPaths = $modelViewerSourceText.Contains('std::filesystem::current_path()')
-$runtimeWorkingDirectory = $RepoRoot
-$createdLegacyAssetJunction = $false
-if ($usesLegacyAssetPaths) {
-    $runtimeWorkingDirectory = $modelViewerProjectDirectory
-    $assetRoot = Join-Path $RepoRoot "Assets"
-    $legacyAssetPath = Join-Path $modelViewerProjectDirectory "Assets"
-    if (-not (Test-Path -LiteralPath $legacyAssetPath)) {
-        New-Item -ItemType Junction -Path $legacyAssetPath -Target $assetRoot | Out-Null
-        $createdLegacyAssetJunction = $true
-        Write-Host "Created temporary legacy Assets junction."
-    }
-}
-
 New-Item -ItemType Directory -Force -Path $ResultsRoot | Out-Null
 
 $benchmarkVariables = @(
@@ -190,7 +169,7 @@ try {
     for ($run = 1; $run -le $Repetitions; $run++) {
         $env:AGP_BENCHMARK_RUN = $run.ToString()
         Write-Host "Running '$Label' repetition $run/$Repetitions ($WarmupFrames warmup + $SampleFrames measured frames)..."
-        $process = Start-Process -FilePath $executable -WorkingDirectory $runtimeWorkingDirectory -Wait -PassThru
+        $process = Start-Process -FilePath $executable -WorkingDirectory $RepoRoot -Wait -PassThru
         if ($process.ExitCode -ne 0) {
             throw "ModelViewer benchmark exited with code $($process.ExitCode)."
         }
@@ -199,9 +178,6 @@ try {
 finally {
     foreach ($name in $benchmarkVariables) {
         [Environment]::SetEnvironmentVariable($name, $savedEnvironment[$name], "Process")
-    }
-    if ($createdLegacyAssetJunction) {
-        Remove-CreatedJunction -Path $legacyAssetPath
     }
     if ($createdShaderJunction) {
         Remove-CreatedJunction -Path $runtimeShaderDirectory
