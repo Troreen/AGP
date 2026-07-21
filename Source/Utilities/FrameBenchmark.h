@@ -36,7 +36,11 @@ private:
 		std::string Commit;
 		std::string Branch;
 		std::string Configuration;
-		std::string RunIndex;
+		std::string Scenario;
+		std::string ComparisonId;
+		std::string RequestedRef;
+		size_t ExecutionIndex = 1;
+		size_t RunIndex = 1;
 		std::string Notes;
 		std::string Harness;
 		bool SourceDirty = false;

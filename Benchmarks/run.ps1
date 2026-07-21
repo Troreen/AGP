@@ -8,19 +8,31 @@ param(
     [ValidateRange(1, 10000000)]
     [int]$SampleFrames = 1200,
     [ValidateRange(1, 20)]
-    [int]$Repetitions = 3,
+    [int]$Repetitions = 10,
+    [ValidateSet("default", "busy")]
+    [string]$Scenario = "default",
+    [string]$ComparisonId,
+    [ValidateRange(1, 1000000)]
+    [int]$ExecutionIndex = 1,
+    [ValidateRange(1, 1000000)]
+    [int]$RunIndex = 1,
+    [string]$RequestedRef,
     [string]$Notes = "",
-    [string]$RepoRoot = (Split-Path -Parent $PSScriptRoot),
+    [string]$RepoRoot,
     [string]$ResultsRoot,
     [string]$CommitOverride,
     [string]$BranchOverride,
     [string]$Harness = "in-tree",
     [Nullable[bool]]$DirtyOverride,
+    [switch]$BuildOnly,
     [switch]$NoBuild,
     [switch]$NoReport
 )
 
 $ErrorActionPreference = "Stop"
+if (-not $RepoRoot) {
+    $RepoRoot = Split-Path -Parent $PSScriptRoot
+}
 $RepoRoot = (Resolve-Path -LiteralPath $RepoRoot).Path
 if (-not $ResultsRoot) {
     $ResultsRoot = Join-Path $RepoRoot "Benchmarks\results"
@@ -88,6 +100,12 @@ if (-not $BranchOverride) {
 if (-not $Label) {
     $Label = $BranchOverride
 }
+if (-not $RequestedRef) {
+    $RequestedRef = $Label
+}
+if (-not $ComparisonId) {
+    $ComparisonId = [Guid]::NewGuid().ToString("N")
+}
 
 if ($null -eq $DirtyOverride) {
     $Dirty = [bool](Invoke-GitText -Arguments @("status", "--porcelain", "--untracked-files=no"))
@@ -116,6 +134,11 @@ if (-not $NoBuild) {
     }
 }
 
+if ($BuildOnly) {
+    Write-Host "Build complete: $RepoRoot"
+    return
+}
+
 $executable = Join-Path $RepoRoot "Bin\$Configuration\ModelViewer.exe"
 if (-not (Test-Path -LiteralPath $executable)) {
     throw "ModelViewer executable not found at $executable."
@@ -142,6 +165,10 @@ $benchmarkVariables = @(
     "AGP_BENCHMARK_BRANCH",
     "AGP_BENCHMARK_CONFIGURATION",
     "AGP_BENCHMARK_RUN",
+    "AGP_BENCHMARK_SCENARIO",
+    "AGP_BENCHMARK_COMPARISON_ID",
+    "AGP_BENCHMARK_EXECUTION_INDEX",
+    "AGP_BENCHMARK_REQUESTED_REF",
     "AGP_BENCHMARK_NOTES",
     "AGP_BENCHMARK_HARNESS",
     "AGP_BENCHMARK_DIRTY",
@@ -160,15 +187,21 @@ try {
     $env:AGP_BENCHMARK_COMMIT = $CommitOverride
     $env:AGP_BENCHMARK_BRANCH = $BranchOverride
     $env:AGP_BENCHMARK_CONFIGURATION = $Configuration
+    $env:AGP_BENCHMARK_SCENARIO = $Scenario
+    $env:AGP_BENCHMARK_COMPARISON_ID = $ComparisonId
+    $env:AGP_BENCHMARK_REQUESTED_REF = $RequestedRef
     $env:AGP_BENCHMARK_NOTES = $Notes
     $env:AGP_BENCHMARK_HARNESS = $Harness
     $env:AGP_BENCHMARK_DIRTY = if ($Dirty) { "1" } else { "0" }
     $env:AGP_BENCHMARK_WARMUP_FRAMES = $WarmupFrames.ToString()
     $env:AGP_BENCHMARK_SAMPLE_FRAMES = $SampleFrames.ToString()
 
-    for ($run = 1; $run -le $Repetitions; $run++) {
-        $env:AGP_BENCHMARK_RUN = $run.ToString()
-        Write-Host "Running '$Label' repetition $run/$Repetitions ($WarmupFrames warmup + $SampleFrames measured frames)..."
+    for ($runOffset = 0; $runOffset -lt $Repetitions; $runOffset++) {
+        $currentRunIndex = $RunIndex + $runOffset
+        $currentExecutionIndex = $ExecutionIndex + $runOffset
+        $env:AGP_BENCHMARK_RUN = $currentRunIndex.ToString()
+        $env:AGP_BENCHMARK_EXECUTION_INDEX = $currentExecutionIndex.ToString()
+        Write-Host "Running '$Label' repetition $currentRunIndex (execution $currentExecutionIndex, scenario $Scenario; $WarmupFrames warmup + $SampleFrames measured frames)..."
         $process = Start-Process -FilePath $executable -WorkingDirectory $RepoRoot -Wait -PassThru
         if ($process.ExitCode -ne 0) {
             throw "ModelViewer benchmark exited with code $($process.ExitCode)."

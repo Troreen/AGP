@@ -216,7 +216,11 @@ std::unique_ptr<FrameBenchmarkSession> FrameBenchmarkSession::CreateFromEnvironm
 	config.Commit = ReadEnvironment("AGP_BENCHMARK_COMMIT").value_or("unknown");
 	config.Branch = ReadEnvironment("AGP_BENCHMARK_BRANCH").value_or("unknown");
 	config.Configuration = ReadEnvironment("AGP_BENCHMARK_CONFIGURATION").value_or("unknown");
-	config.RunIndex = ReadEnvironment("AGP_BENCHMARK_RUN").value_or("1");
+	config.Scenario = ReadEnvironment("AGP_BENCHMARK_SCENARIO").value_or("default");
+	config.ComparisonId = ReadEnvironment("AGP_BENCHMARK_COMPARISON_ID").value_or("standalone");
+	config.RequestedRef = ReadEnvironment("AGP_BENCHMARK_REQUESTED_REF").value_or(config.Branch);
+	config.ExecutionIndex = ReadPositiveSizeEnvironment("AGP_BENCHMARK_EXECUTION_INDEX", config.ExecutionIndex);
+	config.RunIndex = ReadPositiveSizeEnvironment("AGP_BENCHMARK_RUN", config.RunIndex);
 	config.Notes = ReadEnvironment("AGP_BENCHMARK_NOTES").value_or("");
 	config.Harness = ReadEnvironment("AGP_BENCHMARK_HARNESS").value_or("in-tree");
 	config.SourceDirty = ReadBooleanEnvironment("AGP_BENCHMARK_DIRTY");
@@ -298,7 +302,7 @@ bool FrameBenchmarkSession::WriteResults()
 	const std::string runName = CreateTimestamp()
 		+ '_' + SanitizePathPart(myConfig.Label)
 		+ '_' + SanitizePathPart(shortCommit)
-		+ "_run" + SanitizePathPart(myConfig.RunIndex);
+		+ "_run" + std::to_string(myConfig.RunIndex);
 	myResultDirectory = myConfig.OutputDirectory / runName;
 
 	std::error_code error;
@@ -331,13 +335,17 @@ bool FrameBenchmarkSession::WriteResults()
 	const std::string processor = ReadEnvironment("PROCESSOR_IDENTIFIER").value_or("unknown");
 	summaryFile << std::fixed << std::setprecision(6);
 	summaryFile << "{\n";
-	summaryFile << "  \"schema_version\": 1,\n";
+	summaryFile << "  \"schema_version\": 2,\n";
 	summaryFile << "  \"timestamp_utc\": \"" << EscapeJson(runName.substr(0, 19) + "Z") << "\",\n";
 	summaryFile << "  \"label\": \"" << EscapeJson(myConfig.Label) << "\",\n";
 	summaryFile << "  \"commit\": \"" << EscapeJson(myConfig.Commit) << "\",\n";
 	summaryFile << "  \"branch\": \"" << EscapeJson(myConfig.Branch) << "\",\n";
 	summaryFile << "  \"configuration\": \"" << EscapeJson(myConfig.Configuration) << "\",\n";
-	summaryFile << "  \"run_index\": \"" << EscapeJson(myConfig.RunIndex) << "\",\n";
+	summaryFile << "  \"scenario\": \"" << EscapeJson(myConfig.Scenario) << "\",\n";
+	summaryFile << "  \"comparison_id\": \"" << EscapeJson(myConfig.ComparisonId) << "\",\n";
+	summaryFile << "  \"execution_index\": " << myConfig.ExecutionIndex << ",\n";
+	summaryFile << "  \"run_index\": " << myConfig.RunIndex << ",\n";
+	summaryFile << "  \"requested_ref\": \"" << EscapeJson(myConfig.RequestedRef) << "\",\n";
 	summaryFile << "  \"notes\": \"" << EscapeJson(myConfig.Notes) << "\",\n";
 	summaryFile << "  \"harness\": \"" << EscapeJson(myConfig.Harness) << "\",\n";
 	summaryFile << "  \"source_dirty\": " << (myConfig.SourceDirty ? "true" : "false") << ",\n";
