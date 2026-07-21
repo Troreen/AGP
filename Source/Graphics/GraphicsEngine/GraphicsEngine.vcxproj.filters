@@ -42,6 +42,9 @@
     <ClInclude Include="Objects\Mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Utilities\FrameBenchmark.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="ConstantBuffers\FrameBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -141,6 +144,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="InterOp\DDSTextureLoader11.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Utilities\FrameBenchmark.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

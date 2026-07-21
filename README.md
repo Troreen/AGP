@@ -33,6 +33,16 @@ Open `AGP.sln` in Visual Studio and build the `Debug | x64` or `Release | x64` c
 
 The runtime layout keeps executables under `Bin/<Configuration>` and assets under the repository-level `Assets` directory. ModelViewer resolves this layout relative to its executable, so it does not require a special working directory.
 
+## Engine Benchmark
+
+The reusable benchmark harness builds and runs the fixed ModelViewer scene, saves raw CSV and JSON results per commit, and regenerates a self-contained HTML comparison report:
+
+```powershell
+.\Benchmarks\run.ps1 -Label "my-optimization" -Repetitions 3
+```
+
+See [Benchmarks/README.md](Benchmarks/README.md) for the main-versus-commit workflow, metric definitions, and fair-comparison rules.
+
 ## Running ModelViewer
 
 Run the executable for the configuration you built:

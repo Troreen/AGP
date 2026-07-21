@@ -1,6 +1,7 @@
 #pragma once
 #include <filesystem>
 #include <array>
+#include <memory>
 #include <wrl.h>
 #include <Windows.h>
 #include <string_view>
@@ -24,6 +25,7 @@ struct ID3D11DeviceChild;
 
 struct ID3DInclude;
 class Shader;
+class FrameBenchmarkSession;
 
 class RenderHardwareInterface
 {
@@ -61,6 +63,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Device> myDevice;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> myContext;
 	Microsoft::WRL::ComPtr<IDXGISwapChain> mySwapChain;
+	mutable std::unique_ptr<FrameBenchmarkSession> myFrameBenchmark;
 	
 	HWND myWindowHandle;
 };

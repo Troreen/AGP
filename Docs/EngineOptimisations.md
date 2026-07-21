@@ -24,13 +24,14 @@ Implemented:
 - Threaded deferred command-list recording for shadow maps with deterministic main-thread playback.
 - Reusable header-only snapshot queue and fixed-step update worker utilities.
 - Quiet debug instrumentation for render, shadow, snapshot, and fixed-update counters.
+- Reusable Release-mode frame benchmark with versioned raw results and an HTML comparison report.
 
 Remaining future work:
 
 - A persistent engine-wide job system or thread pool instead of per-frame async shadow jobs.
 - Per-face point-light cubemap caster culling.
 - Broader integration of the scheduler utilities into applications beyond ModelViewer.
-- Frame-time profiling and visual debug overlays.
+- GPU timestamp profiling and visual debug overlays.
 
 ## Implemented Optimisations
 
@@ -407,7 +408,34 @@ Reasoning:
 Caveats:
 
 - These are counters, not a profiler.
-- They do not report CPU/GPU timings yet.
+- The counters themselves do not report timings; the separate benchmark below measures whole-frame throughput.
+
+### 17. Repeatable Frame Benchmark
+
+The shared RHI `Present` path can now run an opt-in steady-state benchmark configured by `Benchmarks/run.ps1`.
+
+Implementation:
+
+- The benchmark is disabled during normal engine use and enabled only through explicit environment configuration from the runner.
+- It measures complete CPU-observed frame intervals between finished `Present` calls plus the time spent inside `Present`.
+- Startup and shader/resource settling are excluded through a configurable warmup period.
+- Each repetition writes raw frame samples to CSV and metadata/aggregate metrics to JSON.
+- The report generator groups repetitions by commit and renders average FPS, 1% low FPS, percentile frame times, relative changes, run spread, and frame-time traces into a self-contained HTML file.
+- `Benchmarks/compare.ps1` can extract the focused instrumentation diff into temporary worktrees for older commits, allowing main and existing optimization checkpoints to use identical instrumentation.
+
+Reasoning:
+
+- Measuring at the RHI boundary keeps the harness reusable across different application-loop implementations.
+- Raw samples make spikes and unstable runs auditable instead of hiding them behind one average.
+- Commit, dirty-state, build, hardware, adapter, and resolution metadata make accidental mismatches visible.
+- A dependency-free report is easy to archive with each optimization and easy to judge later.
+
+Caveats:
+
+- These are CPU-observed frame intervals, not Direct3D GPU timestamp queries.
+- Desktop benchmarks remain noisy; compare multiple Release runs and treat changes inside the repetition spread as neutral.
+- The current default ModelViewer scene is a stable representative workload, not a complete engine stress suite.
+- Keep the benchmark harness as a focused commit so it can be applied unchanged to older refs.
 
 ## Render Flow After Optimisation
 
@@ -455,6 +483,8 @@ Latest checked build:
 
 - Debug x64 `ModelViewer` target, 2026-06-30.
 - Built with the sanitized child `cmd` MSBuild invocation because this machine can expose duplicate `PATH`/`Path` environment keys.
+- Release x64 `ModelViewer` target, 2026-07-20, after adding the benchmark harness.
+- The complete benchmark runner was smoke-verified with an automated warmup/sample run, automatic shutdown, raw CSV/JSON output, and HTML report generation. The short verification result was removed because it is not optimization evidence.
 
 Runtime smoke verification:
 
@@ -590,7 +620,8 @@ Reasoning:
 
 Current status:
 
-- The engine has counters but no CPU/GPU timing data.
+- The benchmark records whole-frame and `Present` CPU timings.
+- The engine does not yet expose scoped stage timings or GPU timestamp queries.
 
 Recommended change:
 

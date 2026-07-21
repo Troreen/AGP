@@ -12,6 +12,7 @@
 #include "PipelineStateObject.h"
 #include "Ensure.h"
 #include "GraphicsEngine/InterOp/DDSTextureLoader11.h"
+#include "FrameBenchmark.h"
 
 using namespace Microsoft::WRL;
 
@@ -61,6 +62,18 @@ bool RenderHardwareInterface::Initialize(HWND aWindowHandle, bool aEnableDebug, 
 	const wchar_t* wideAdapterName = selectedAdapterDesc.Description;
 	const std::string adapterName = str::wide_to_utf8(wideAdapterName);
 	LOG(RhiLog, Log, "Selected adapter: {}", adapterName);
+	myFrameBenchmark = FrameBenchmarkSession::CreateFromEnvironment();
+	if (myFrameBenchmark)
+	{
+		RECT clientRect = {};
+		GetClientRect(aWindowHandle, &clientRect);
+		myFrameBenchmark->SetRuntimeInfo({
+			.Adapter = adapterName,
+			.Width = static_cast<unsigned>((std::max)(LONG{ 0 }, clientRect.right - clientRect.left)),
+			.Height = static_cast<unsigned>((std::max)(LONG{ 0 }, clientRect.bottom - clientRect.top))
+		});
+		LOG(RhiLog, Log, "Frame benchmark enabled.");
+	}
 
 
 	result = D3D11CreateDevice(
@@ -737,7 +750,30 @@ void RenderHardwareInterface::ExecuteCommandList(const GraphicsCommandList &aCom
 
 void RenderHardwareInterface::Present() const
 {
+	if (!myFrameBenchmark)
+	{
+		mySwapChain->Present(0, DXGI_PRESENT_ALLOW_TEARING);
+		return;
+	}
+
+	const FrameBenchmarkSession::Clock::time_point presentStart = FrameBenchmarkSession::Clock::now();
 	mySwapChain->Present(0, DXGI_PRESENT_ALLOW_TEARING);
+	const FrameBenchmarkSession::Clock::time_point presentEnd = FrameBenchmarkSession::Clock::now();
+
+	if (myFrameBenchmark->RecordPresent(presentStart, presentEnd))
+	{
+		if (myFrameBenchmark->WasWrittenSuccessfully())
+		{
+			LOG(RhiLog, Log, "Benchmark complete: {:.3f} ms average frame time. Results: {}",
+				myFrameBenchmark->GetAverageFrameMilliseconds(),
+				myFrameBenchmark->GetResultDirectory().string());
+		}
+		else
+		{
+			LOG(RhiLog, Error, "Benchmark completed, but its result files could not be written.");
+		}
+		PostMessageW(myWindowHandle, WM_CLOSE, 0, 0);
+	}
 }
 
 bool RenderHardwareInterface::CompileShader(ShaderType aShaderType, const std::filesystem::path &aPath, 

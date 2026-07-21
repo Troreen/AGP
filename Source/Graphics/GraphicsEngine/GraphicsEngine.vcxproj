@@ -221,6 +221,7 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
     <ClInclude Include="RHI\RenderHardwareInterface.h" />
     <ClInclude Include="RHI\RHIShaderReflectionInfo.h" />
     <ClInclude Include="RHI\RHIStructs.h" />
+	<ClInclude Include="..\..\Utilities\FrameBenchmark.h" />
     <ClInclude Include="Objects\Shader.h" />
   </ItemGroup>
   <ItemGroup>
@@ -253,6 +254,9 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
     <ClCompile Include="RHI\RenderHardwareInterface.cpp" />
     <ClCompile Include="Objects\Shader.cpp" />
     <ClCompile Include="RHI\RHIShaderReflectionInfo.cpp" />
+    <ClCompile Include="..\..\Utilities\FrameBenchmark.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\Material\Lit_PS.hlsl">
