@@ -546,6 +546,7 @@ void ModelViewer::LoadScene()
     myDirectionalLightComponent = nullptr;
     myPointLightComponents.clear();
     mySpotLightComponent = nullptr;
+	const bool isBusyScenario = BenchmarkScene::IsBusyScenario();
     const std::filesystem::path materialRoot = GetMaterialRoot(myContentRoot);
     const Vector3f sceneFocus = { 25.0f, 0.0f, 260.0f };
     const Vector3f floorPosition = { 0.0f, 0.0f, 260.0f };
@@ -602,13 +603,32 @@ void ModelViewer::LoadScene()
                 mySpotLightComponent->SetConeAnglesDegrees(18.0f, 34.0f);
             }
         }
+
+		if (isBusyScenario)
+		{
+			const std::array lightPlacements = BenchmarkScene::BuildBusyPointLightPlacements();
+			for (size_t lightIndex = 0; lightIndex < lightPlacements.size(); ++lightIndex)
+			{
+				const BenchmarkScene::PointLightPlacement& placement = lightPlacements[lightIndex];
+				const std::string lightName = "Benchmark Point " + std::to_string(lightIndex);
+				myPointLightComponents.push_back(CreatePointLight(
+					myWorld,
+					lightName.c_str(),
+					placement.Position,
+					placement.Color,
+					placement.Intensity,
+					placement.Radius));
+			}
+		}
     }
 
     CreateStaticMeshActor("Floor Actor", "Floor Mesh Component", "Floor",
         materialRoot / "FloorMaterial.mat",
         floorPosition,
         { 0.0f, -90.0f, 0.0f },
-        { 1100.0f, 1100.0f, 1100.0f });
+		isBusyScenario
+			? Vector3f{ BenchmarkScene::BusyFloorScale, BenchmarkScene::BusyFloorScale, BenchmarkScene::BusyFloorScale }
+			: Vector3f{ 1100.0f, 1100.0f, 1100.0f });
 
     CreateStaticMeshActor("SM_Chest Actor", "SM_Chest Mesh Component", "SM_Chest",
         materialRoot / "ChestMaterial.mat",
@@ -645,7 +665,7 @@ void ModelViewer::LoadScene()
         }
     }
 
-    if (BenchmarkScene::IsBusyScenario())
+    if (isBusyScenario)
     {
         const std::array placements = BenchmarkScene::BuildBusyPrimitivePlacements();
         for (size_t placementIndex = 0; placementIndex < placements.size(); ++placementIndex)
@@ -661,7 +681,8 @@ void ModelViewer::LoadScene()
                 placement.RotationDegrees,
                 placement.Scale);
         }
-        MVLOG(Log, "Loaded deterministic busy benchmark scene with {} primitive actors.", placements.size());
+		MVLOG(Log, "Loaded deterministic busy benchmark scene with {} primitive actors, {} point lights, and floor scale {}.",
+			placements.size(), BenchmarkScene::BusyPointLightCount, BenchmarkScene::BusyFloorScale);
     }
 }
 

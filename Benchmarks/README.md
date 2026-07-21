@@ -9,7 +9,7 @@ The harness measures CPU-observed frame intervals at the shared RHI `Present` bo
 Two deterministic scenarios answer different questions:
 
 - `default` keeps the existing lightweight ModelViewer scene and exposes fixed overhead or regressions.
-- `busy` keeps that scene and adds 256 cached primitive actors in a fixed 16 by 16 layout, including visible and offscreen shadow casters. It stresses culling, snapshot construction, prewarm, shadow work, and scheduling without random input or per-run assets.
+- `busy` keeps that scene and adds 4,096 cached primitive actors in a fixed 64 by 64 layout, 96 deterministic point lights, and a 40,000-unit ground plane. A dense central band and five added point lights remain visible, while broad outer bands and 91 lights stay outside the camera frustum to heavily exercise object, light, and shadow-caster culling without random input or per-run assets.
 
 Normal ModelViewer launches do not set the benchmark environment and therefore keep the existing default scene.
 

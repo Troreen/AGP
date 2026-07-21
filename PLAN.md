@@ -217,7 +217,9 @@ Do not merge render optimizations into `main` while adding the scenario.
 Keep the workload understandable and deterministic:
 
 - Start with the existing camera, floor, character, and three-light setup.
-- Add approximately **256 static primitive mesh actors** in a fixed 16 by 16 layout.
+- Add **4,096 static primitive mesh actors** in a fixed 64 by 64 layout.
+- Add **96 deterministic point lights**: five in the camera frustum to fill the engine's eight-light budget, and 91 outside it to stress relevant-light filtering.
+- Increase the busy scenario's ground plane scale to **40,000** while leaving the default scene unchanged.
 - Reuse registered primitive meshes and cached existing materials.
 - Use index-based deterministic transforms; do not use an unrecorded random seed.
 - Place a meaningful portion inside the camera frustum and a meaningful portion outside it.
