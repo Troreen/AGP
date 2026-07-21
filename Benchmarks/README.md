@@ -13,7 +13,7 @@ Every repetition creates a timestamped directory under `Benchmarks/results` cont
 - `summary.json`: commit, branch, build, hardware, resolution, run settings, average FPS, 1% low FPS, and frame/present percentiles.
 - `frames.csv`: every measured frame interval and `Present` duration for spike inspection or external analysis.
 
-`Benchmarks/results/report.html` is regenerated from all summaries. It contains simple comparison bars, a baseline-relative table, and raw frame-time traces. It is self-contained and can be opened directly in any normal browser.
+`Benchmarks/results/report.html` is regenerated from all summaries. It contains simple comparison bars, a baseline-relative table, and raw frame-time traces grouped into one column per version on a shared scale. It is self-contained and can be opened directly in any normal browser.
 
 Results are intentionally not ignored by Git. Commit the raw results and regenerated report after a real comparison so the evidence stays beside the optimization history. Do not commit short smoke-test runs.
 

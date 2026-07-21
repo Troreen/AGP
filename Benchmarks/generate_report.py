@@ -7,7 +7,6 @@ import argparse
 import csv
 import html
 import json
-import math
 import statistics
 from collections import defaultdict
 from dataclasses import dataclass
@@ -140,11 +139,11 @@ def bar_chart(groups: list[Group], title: str, subtitle: str, getter: Any, highe
     )
 
 
-def sparkline(values: tuple[float, ...], color_index: int) -> str:
+def sparkline(values: tuple[float, ...], color_index: int, cap: float) -> str:
     if not values:
         return '<span class="muted">raw samples unavailable</span>'
     sampled = values[:: max(1, len(values) // 180)]
-    cap = sorted(sampled)[max(0, math.floor(len(sampled) * 0.99) - 1)] or 1.0
+    cap = cap or 1.0
     points: list[str] = []
     for index, value in enumerate(sampled):
         x = 100.0 * index / max(1, len(sampled) - 1)
@@ -163,7 +162,9 @@ def comparison_table(groups: list[Group]) -> str:
     rows: list[str] = []
     for index, group in enumerate(groups):
         fps_delta = ((group.fps / baseline.fps) - 1.0) * 100.0 if baseline.fps else 0.0
+        low_delta = ((group.one_percent_low / baseline.one_percent_low) - 1.0) * 100.0 if baseline.one_percent_low else 0.0
         frame_delta = ((group.frame_mean / baseline.frame_mean) - 1.0) * 100.0 if baseline.frame_mean else 0.0
+        p95_delta = ((group.frame_p95 / baseline.frame_p95) - 1.0) * 100.0 if baseline.frame_p95 else 0.0
         dirty = any(bool(run.data.get("source_dirty")) for run in group.runs)
         dirty_badge = '<span class="warning">dirty source</span>' if dirty else ""
         rows.append(
@@ -171,9 +172,9 @@ def comparison_table(groups: list[Group]) -> str:
             f'<td><span class="dot c{index % 6}"></span><strong>{html.escape(group.label)}</strong><br>'
             f'<span class="muted">{html.escape(group.branch)} - {html.escape(group.commit[:8])}</span></td>'
             f'<td>{group.fps:.2f}<small>{fps_delta:+.1f}%</small></td>'
-            f'<td>{group.one_percent_low:.2f}</td>'
+            f'<td>{group.one_percent_low:.2f}<small>{low_delta:+.1f}%</small></td>'
             f'<td>{group.frame_mean:.3f}<small>{frame_delta:+.1f}%</small></td>'
-            f'<td>{group.frame_p95:.3f}</td><td>{group.frame_p99:.3f}</td>'
+            f'<td>{group.frame_p95:.3f}<small>{p95_delta:+.1f}%</small></td><td>{group.frame_p99:.3f}</td>'
             f'<td>{len(group.runs)}<small>spread {group.spread:.2f} fps</small></td>'
             f'<td>{html.escape(group.configuration)}<small>{html.escape(group.resolution)}</small>'
             f'{dirty_badge}</td>'
@@ -188,6 +189,56 @@ def comparison_table(groups: list[Group]) -> str:
     )
 
 
+def consistency_section(groups: list[Group]) -> str:
+    shared_cap = max(
+        (
+            metric(run, "metrics", "frame_ms", "p99")
+            for group in groups
+            for run in group.runs
+        ),
+        default=1.0,
+    )
+    columns: list[str] = []
+    for group_index, group in enumerate(groups):
+        cards: list[str] = []
+        sorted_runs = sorted(
+            group.runs,
+            key=lambda run: (
+                int(run.data.get("run_index", 0)),
+                str(run.data.get("timestamp_utc", "")),
+            ),
+        )
+        for run in sorted_runs:
+            data = run.data
+            metrics = data["metrics"]
+            run_index = html.escape(str(data.get("run_index", "?")))
+            cards.append(
+                '<article class="run-card">'
+                f'<div class="run-title"><strong>Run {run_index}</strong>'
+                f'<span>{html.escape(str(data.get("timestamp_utc", "unknown")))}</span></div>'
+                f'<div class="run-metric"><b>{float(metrics["average_fps"]):.2f}</b><span>avg fps</span></div>'
+                f'<div class="run-metric"><b>{float(metrics["one_percent_low_fps"]):.2f}</b><span>1% low</span></div>'
+                f'<div class="run-metric"><b>{float(metrics["frame_ms"]["p95"]):.3f}</b><span>P95 ms</span></div>'
+                f'{sparkline(run.frame_times, group_index, shared_cap)}</article>'
+            )
+
+        columns.append(
+            f'<section class="consistency-column c{group_index % 6}-border">'
+            '<div class="consistency-heading"><div>'
+            f'<strong><span class="dot c{group_index % 6}"></span>{html.escape(group.label)}</strong>'
+            f'<span>{html.escape(group.branch)} &middot; {html.escape(group.commit[:8])}</span></div>'
+            f'<div class="consistency-summary"><b>{group.fps:.2f} fps</b>'
+            f'<span>median &middot; {group.spread:.2f} spread</span></div></div>'
+            f'<div class="run-stack">{"".join(cards)}</div></section>'
+        )
+
+    return (
+        '<section class="panel"><div class="panel-heading"><div><h2>Run consistency</h2>'
+        f'<p>Each version owns one column. Every trace shares a 0-{shared_cap:.2f} ms scale; larger spikes are clipped.</p>'
+        f'</div></div><div class="consistency-grid">{"".join(columns)}</div></section>'
+    )
+
+
 def render_report(groups: list[Group], runs: list[Run]) -> str:
     systems = {
         (group.adapter, group.resolution, group.configuration) for group in groups
@@ -199,17 +250,6 @@ def render_report(groups: list[Group], runs: list[Run]) -> str:
         warnings.append("At least one run used a dirty source tree. Keep only intentional benchmark harness changes.")
 
     warning_html = "".join(f'<div class="notice">{html.escape(message)}</div>' for message in warnings)
-    run_cards: list[str] = []
-    for index, run in enumerate(runs):
-        data = run.data
-        metrics = data["metrics"]
-        run_cards.append(
-            '<article class="run-card">'
-            f'<div><strong>{html.escape(str(data.get("label", "unlabelled")))}</strong>'
-            f'<span>{html.escape(str(data.get("commit", "unknown"))[:8])} · run {html.escape(str(data.get("run_index", "?")))}</span></div>'
-            f'<b>{float(metrics["average_fps"]):.2f}<small> fps</small></b>'
-            f'{sparkline(run.frame_times, index)}</article>'
-        )
 
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -223,18 +263,18 @@ main{{max-width:1180px;margin:auto;padding:56px 28px 80px}}header{{display:flex;
 .panel-heading{{display:flex;justify-content:space-between;margin-bottom:22px}}.bar-row{{display:grid;grid-template-columns:145px 1fr 64px;gap:14px;align-items:center;margin:14px 0}}.bar-label{{display:flex;flex-direction:column;overflow:hidden}}.bar-label strong{{white-space:nowrap;text-overflow:ellipsis;overflow:hidden}}.bar-label span,.muted{{color:var(--muted);font-size:12px}}.bar-track{{height:12px;background:#ece9e1;border-radius:9px;overflow:hidden}}.bar{{height:100%;border-radius:9px}}.bar-value{{font-variant-numeric:tabular-nums;text-align:right;font-weight:650}}
 .c0{{background:#1f6f5f}}.c1{{background:#cf6a45}}.c2{{background:#4776a8}}.c3{{background:#9b7a32}}.c4{{background:#7a5b9d}}.c5{{background:#3f817c}}.c0-stroke{{stroke:#1f6f5f}}.c1-stroke{{stroke:#cf6a45}}.c2-stroke{{stroke:#4776a8}}.c3-stroke{{stroke:#9b7a32}}.c4-stroke{{stroke:#7a5b9d}}.c5-stroke{{stroke:#3f817c}}
 .notice{{padding:12px 16px;border:1px solid #dabd76;background:#fff7df;border-radius:10px;margin-bottom:12px}}.table-wrap{{overflow:auto}}table{{width:100%;border-collapse:collapse}}th{{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em;text-align:left}}th,td{{padding:13px 12px;border-bottom:1px solid var(--line);white-space:nowrap}}td{{font-variant-numeric:tabular-nums}}td small{{display:block;color:var(--muted)}}.dot{{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px}}.warning{{display:block;color:#a14c2e;font-size:11px;font-weight:700}}
-.run-grid{{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}}.run-card{{display:grid;grid-template-columns:150px 85px 1fr;gap:14px;align-items:center;padding:15px;border:1px solid var(--line);border-radius:12px}}.run-card div{{display:flex;flex-direction:column}}.run-card b{{font-size:19px;font-variant-numeric:tabular-nums}}.run-card small{{font-weight:400;color:var(--muted)}}.spark{{width:100%;height:42px}}.spark-line{{fill:none;stroke-width:1.3;vector-effect:non-scaling-stroke}}
+.consistency-grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:18px;align-items:start}}.consistency-column{{min-width:0;border:1px solid var(--line);border-top-width:4px;border-radius:12px;padding:16px}}.c0-border{{border-top-color:#1f6f5f}}.c1-border{{border-top-color:#cf6a45}}.c2-border{{border-top-color:#4776a8}}.c3-border{{border-top-color:#9b7a32}}.c4-border{{border-top-color:#7a5b9d}}.c5-border{{border-top-color:#3f817c}}.consistency-heading{{display:flex;justify-content:space-between;gap:16px;align-items:start;margin-bottom:14px}}.consistency-heading>div{{display:flex;flex-direction:column}}.consistency-heading span,.run-title span,.run-metric span,.consistency-summary span{{color:var(--muted);font-size:12px}}.consistency-summary{{text-align:right}}.consistency-summary b{{font-variant-numeric:tabular-nums}}.run-stack{{display:grid;gap:10px}}.run-card{{display:grid;grid-template-columns:minmax(100px,1.2fr) repeat(3,minmax(64px,.8fr));gap:10px;align-items:center;padding:13px;border:1px solid var(--line);border-radius:10px}}.run-title,.run-metric{{display:flex;flex-direction:column;min-width:0}}.run-title span{{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}.run-metric b{{font-size:16px;font-variant-numeric:tabular-nums}}.spark{{grid-column:1/-1;width:100%;height:42px}}.spark-line{{fill:none;stroke-width:1.3;vector-effect:non-scaling-stroke}}
 .method{{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}}.method div{{border-left:2px solid var(--line);padding-left:14px}}.method strong{{display:block;margin-bottom:4px}}footer{{color:var(--muted);font-size:12px;margin-top:24px}}
-@media(max-width:800px){{header{{display:block}}.stamp{{text-align:left;margin-top:16px}}.grid,.run-grid,.method{{grid-template-columns:1fr}}.bar-row{{grid-template-columns:110px 1fr 55px}}.run-card{{grid-template-columns:120px 72px 1fr}}h1{{font-size:36px}}}}
+@media(max-width:800px){{header{{display:block}}.stamp{{text-align:left;margin-top:16px}}.grid,.method{{grid-template-columns:1fr}}.bar-row{{grid-template-columns:110px 1fr 55px}}h1{{font-size:36px}}}}@media(max-width:520px){{main{{padding-left:16px;padding-right:16px}}.panel{{padding:18px}}.consistency-grid{{grid-template-columns:1fr}}.consistency-heading{{display:block}}.consistency-summary{{text-align:left;margin-top:8px}}.run-card{{grid-template-columns:repeat(3,1fr)}}.run-title{{grid-column:1/-1}}}}
 </style></head><body><main>
-<header><div><div class="eyebrow">AGP · repeatable performance evidence</div><h1>Engine benchmark</h1><p>Steady-state ModelViewer throughput, compared commit by commit.</p></div><div class="stamp">{len(runs)} runs<br>{len(groups)} compared versions</div></header>
+<header><div><div class="eyebrow">AGP &middot; repeatable performance evidence</div><h1>Engine benchmark</h1><p>Steady-state ModelViewer throughput, compared commit by commit.</p></div><div class="stamp">{len(runs)} runs<br>{len(groups)} compared versions</div></header>
 {warning_html}
 <div class="grid">
 {bar_chart(groups, "Average throughput", "Frames per second · higher is better", lambda group: group.fps, True)}
 {bar_chart(groups, "Slow-frame cost", "P95 frame time in milliseconds · lower is better", lambda group: group.frame_p95, False)}
 </div>
 {comparison_table(groups)}
-<section class="panel"><div class="panel-heading"><div><h2>Run consistency</h2><p>Raw frame-time traces make spikes and unstable runs visible.</p></div></div><div class="run-grid">{"".join(run_cards)}</div></section>
+{consistency_section(groups)}
 <section class="panel"><div class="panel-heading"><div><h2>How to read this</h2><p>The benchmark intentionally keeps the first version as the reference point.</p></div></div><div class="method"><div><strong>Average FPS</strong><p>Overall throughput across measured frames after warmup.</p></div><div><strong>1% low</strong><p>FPS derived from the slowest one percent of frames. Higher means fewer noticeable hitches.</p></div><div><strong>P95 frame time</strong><p>Ninety-five percent of frames completed at or below this cost. Lower is better.</p></div></div></section>
 <footer>CPU-observed frame intervals measured between completed Present calls. This captures application-side throughput and driver back-pressure; it is not a GPU timestamp profile.</footer>
 </main></body></html>"""
