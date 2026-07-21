@@ -54,7 +54,9 @@ if ($ComparisonId -notmatch '^[A-Za-z0-9._-]+$') {
 
 if (-not $HarnessCommit) {
     $HarnessCommit = Invoke-Git -WorkingDirectory $repoRoot -Arguments @(
-        "log", "-1", "--format=%H", "--", "Source/Utilities/FrameBenchmark.cpp"
+        "log", "-1", "--format=%H", "--",
+        "Source/Utilities/FrameBenchmark.cpp",
+        "Source/Application/ModelViewer/BenchmarkScene.h"
     ) -ReturnText
 }
 if (-not $HarnessCommit) {
@@ -74,8 +76,22 @@ $instrumentationPaths = @(
     "Source/Graphics/GraphicsEngine/RHI/RenderHardwareInterface.cpp",
     "Source/Graphics/GraphicsEngine/RHI/RenderHardwareInterface.h",
     "Source/Graphics/GraphicsEngine/GraphicsEngine.vcxproj",
-    "Source/Graphics/GraphicsEngine/GraphicsEngine.vcxproj.filters"
+    "Source/Graphics/GraphicsEngine/GraphicsEngine.vcxproj.filters",
+    "Source/Application/ModelViewer/BenchmarkScene.h",
+    "Source/Application/ModelViewer/Application.h",
+    "Source/Application/ModelViewer/ModelViewer.cpp"
 )
+
+$benchmarkScenePath = "Source/Application/ModelViewer/BenchmarkScene.h"
+$expectedBenchmarkSceneBlob = ""
+if ($Scenario -eq "busy") {
+    $expectedBenchmarkSceneBlob = Invoke-Git -WorkingDirectory $repoRoot -Arguments @(
+        "rev-parse", ($HarnessCommit + ":" + $benchmarkScenePath)
+    ) -ReturnText -AllowFailure
+    if (-not $expectedBenchmarkSceneBlob) {
+        throw "Harness commit $HarnessCommit does not contain the deterministic busy benchmark scene."
+    }
+}
 
 $systemTempRoot = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath())
 $tempBase = Join-Path $systemTempRoot ("agp-benchmark-" + [Guid]::NewGuid().ToString("N"))
@@ -128,6 +144,18 @@ try {
                 throw "The benchmark instrumentation did not apply cleanly to $requestedRef."
             }
             $entry.Harness = "temporary:$harnessShort"
+        }
+
+        if ($Scenario -eq "busy") {
+            $worktreeScenePath = Join-Path $worktree ($benchmarkScenePath -replace '/', '\')
+            $actualBenchmarkSceneBlob = Invoke-Git -WorkingDirectory $worktree -Arguments @(
+                "hash-object", $worktreeScenePath
+            ) -ReturnText
+            $modelViewerSource = Join-Path $worktree "Source\Application\ModelViewer\ModelViewer.cpp"
+            $hasBusySceneHook = Select-String -LiteralPath $modelViewerSource -SimpleMatch "BuildBusyPrimitivePlacements" -Quiet
+            if ($actualBenchmarkSceneBlob -ne $expectedBenchmarkSceneBlob -or -not $hasBusySceneHook) {
+                throw "The busy benchmark scene is not identical and active in $requestedRef."
+            }
         }
     }
 

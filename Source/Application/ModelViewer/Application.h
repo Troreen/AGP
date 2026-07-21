@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "Logger/Logger.h"
+#include "BenchmarkScene.h"
 #include "Timer.h"
 
 #if _DEBUG

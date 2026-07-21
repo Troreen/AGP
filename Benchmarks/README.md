@@ -6,6 +6,13 @@ This benchmark answers one deliberately simple question:
 
 The harness measures CPU-observed frame intervals at the shared RHI `Present` boundary. That location works for both the old main-branch application loop and the optimized snapshot/threaded loop, so an optimization does not need benchmark-specific integration.
 
+Two deterministic scenarios answer different questions:
+
+- `default` keeps the existing lightweight ModelViewer scene and exposes fixed overhead or regressions.
+- `busy` keeps that scene and adds 256 cached primitive actors in a fixed 16 by 16 layout, including visible and offscreen shadow casters. It stresses culling, snapshot construction, prewarm, shadow work, and scheduling without random input or per-run assets.
+
+Normal ModelViewer launches do not set the benchmark environment and therefore keep the existing default scene.
+
 ## What Each Run Saves
 
 Every repetition creates a timestamped directory under `Benchmarks/results` containing:
@@ -49,6 +56,7 @@ Keep benchmark harness changes separate from engine optimizations. Pass the late
 .\Benchmarks\compare.ps1 `
   -Refs main,2f91e36,8c0efbb `
   -HarnessCommit <benchmark-harness-commit> `
+  -Scenario default `
   -WarmupFrames 300 `
   -SampleFrames 1200 `
   -Repetitions 10
@@ -57,6 +65,20 @@ Keep benchmark harness changes separate from engine optimizations. Pass the late
 For every ref, `compare.ps1` creates a detached temporary worktree and applies only the benchmark source/project instrumentation from the benchmark commit when necessary. It prepares every requested ref first, builds each ref exactly once, and then runs one repetition at a time in a rotating order. For two refs the order is `A,B`, then `B,A`, which balances which version starts each round. All worktrees remain available for the whole comparison and are removed in `finally` cleanup.
 
 Every summary stores a shared `comparison_id`, `scenario`, absolute `execution_index`, per-version `run_index`, and `requested_ref`. The report never merges different comparison IDs, scenarios, commits, machines, adapters, configurations, or resolutions. Summaries created before these fields are labeled as legacy and stay separate.
+
+For the scalability scenario, change only the scenario parameter:
+
+```powershell
+.\Benchmarks\compare.ps1 `
+  -Refs main,engine-optimizations `
+  -HarnessCommit <latest-benchmark-harness-commit> `
+  -Scenario busy `
+  -WarmupFrames 300 `
+  -SampleFrames 1200 `
+  -Repetitions 10
+```
+
+Busy comparisons verify that every temporary worktree contains the exact scene-helper blob from the selected harness commit and an active ModelViewer hook. This prevents a benchmark from silently comparing different scene definitions.
 
 `libfbxsdk.dll` is an essential runtime dependency and is tracked for both Debug and Release. Historical worktrees receive the Release DLL through the same temporary binary harness patch, so Windows can resolve it beside `ModelViewer.exe`.
 
@@ -95,7 +117,7 @@ The headline numbers are CPU-observed frame intervals, not Direct3D GPU timestam
 ## Fair-Comparison Rules
 
 - Use `Release | x64`.
-- Keep the ModelViewer window, default scene, camera, and light state unchanged.
+- Keep the ModelViewer window, selected scenario, camera, and light state unchanged.
 - Use the same machine, power mode, GPU, resolution, warmup, and sample count.
 - Run versions in one comparison session so execution can be interleaved and balanced.
 - Avoid interacting with the benchmark window.

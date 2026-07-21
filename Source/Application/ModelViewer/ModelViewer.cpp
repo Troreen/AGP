@@ -644,6 +644,25 @@ void ModelViewer::LoadScene()
             }
         }
     }
+
+    if (BenchmarkScene::IsBusyScenario())
+    {
+        const std::array placements = BenchmarkScene::BuildBusyPrimitivePlacements();
+        for (size_t placementIndex = 0; placementIndex < placements.size(); ++placementIndex)
+        {
+            const BenchmarkScene::PrimitivePlacement& placement = placements[placementIndex];
+            const std::string actorName = "Benchmark Primitive " + std::to_string(placementIndex);
+            CreateStaticMeshActor(
+                actorName,
+                actorName + " Mesh Component",
+                placement.MeshName,
+                materialRoot / "FloorMaterial.mat",
+                placement.Position,
+                placement.RotationDegrees,
+                placement.Scale);
+        }
+        MVLOG(Log, "Loaded deterministic busy benchmark scene with {} primitive actors.", placements.size());
+    }
 }
 
 std::shared_ptr<MaterialInterface> ModelViewer::GetMaterial(const std::filesystem::path& aMaterialFile)
