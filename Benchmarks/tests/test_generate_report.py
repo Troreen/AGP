@@ -134,6 +134,8 @@ class AggregateTests(unittest.TestCase):
         self.assertIn("Legacy summaries (no comparison_id)", report)
         self.assertIn("ci-whisker", report)
         self.assertIn("95% CI", report)
+        self.assertIn("Interpretation rules", report)
+        self.assertIn("A better mean is not sufficient by itself.", report)
         self.assertNotIn("run-card", report)
         self.assertNotIn("Frame-time history", report)
 

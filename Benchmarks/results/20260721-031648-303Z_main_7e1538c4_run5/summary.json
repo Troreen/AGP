@@ -1,0 +1,47 @@
+{
+  "schema_version": 2,
+  "timestamp_utc": "20260721-031648-303Z",
+  "label": "main",
+  "commit": "7e1538c4e825da907ca94af42b13c4de67db5884",
+  "branch": "main",
+  "configuration": "Release",
+  "scenario": "default",
+  "comparison_id": "evidence-default-20260721-0c803e1",
+  "execution_index": 9,
+  "run_index": 5,
+  "requested_ref": "main",
+  "notes": "Full default scenario evidence run",
+  "harness": "temporary:0c803e14",
+  "source_dirty": false,
+  "warmup_frames": 300,
+  "sample_frames": 1200,
+  "system": {
+    "computer": "DESKTOP-O2EOU65",
+    "processor": "Intel64 Family 6 Model 140 Stepping 1, GenuineIntel",
+    "adapter": "NVIDIA GeForce MX450",
+    "width": 1284,
+    "height": 701
+  },
+  "metrics": {
+    "average_fps": 310.886797,
+    "one_percent_low_fps": 68.820756,
+    "frame_ms": {
+      "mean": 3.216605,
+      "median": 2.726050,
+      "p95": 6.848185,
+      "p99": 11.343052,
+      "min": 0.838300,
+      "max": 21.019900,
+      "stddev": 2.060330
+    },
+    "present_ms": {
+      "mean": 1.733154,
+      "median": 1.648500,
+      "p95": 4.604545,
+      "p99": 6.841959,
+      "min": 0.041300,
+      "max": 15.461900,
+      "stddev": 1.512064
+    }
+  }
+}
