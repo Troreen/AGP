@@ -67,6 +67,14 @@ namespace AGP::Tools
 			return result;
 		}
 
+		void AttachSource(ArtifactValidationResult& aResult, const std::filesystem::path& aSourcePath)
+		{
+			for (ArtifactDiagnostic& diagnostic : aResult.Diagnostics)
+			{
+				if (diagnostic.SourcePath.empty()) diagnostic.SourcePath = aSourcePath;
+			}
+		}
+
 		template <typename T>
 		void AppendLittleEndian(Bytes& someBytes, const T aValue)
 		{
@@ -390,7 +398,7 @@ namespace AGP::Tools
 
 	std::string_view GetStaticMeshToolVersion()
 	{
-		return "agp-static-mesh-tool/1.0.0";
+		return StaticMeshToolVersion;
 	}
 
 	ArtifactValidationResult ValidateStaticMeshArtifact(const std::filesystem::path& anArtifactPath)
@@ -399,9 +407,12 @@ namespace AGP::Tools
 		const std::optional<Bytes> bytes = ReadFile(anArtifactPath, result);
 		if (!bytes.has_value())
 		{
+			AttachSource(result, anArtifactPath);
 			return result;
 		}
-		return ValidateBytes(*bytes);
+		result = ValidateBytes(*bytes);
+		AttachSource(result, anArtifactPath);
+		return result;
 	}
 
 	ArtifactValidationResult WriteStaticMeshArtifact(
@@ -496,6 +507,7 @@ namespace AGP::Tools
 		const std::optional<Bytes> bytes = ReadFile(anArtifactPath, validation);
 		if (!bytes.has_value())
 		{
+			AttachSource(validation, anArtifactPath);
 			return { std::nullopt, std::move(validation.Diagnostics) };
 		}
 
@@ -503,6 +515,7 @@ namespace AGP::Tools
 		validation = ValidateBytes(*bytes, &header);
 		if (!validation.Succeeded())
 		{
+			AttachSource(validation, anArtifactPath);
 			return { std::nullopt, std::move(validation.Diagnostics) };
 		}
 

@@ -4,6 +4,7 @@
 #include "GraphicsEngine/Objects/Mesh.h"
 #include "GraphicsEngine/Objects/Vertex.h"
 #include "PrimitiveMeshBuilder.h"
+#include "Tools/AGPTools/StaticMeshFbxInternal.h"
 #include "Importer.h"
 
 #include <utility>
@@ -194,6 +195,40 @@ namespace
 
 		outElements.push_back(element);
 	}
+
+	void AppendStaticMeshData(
+		const AGP::Tools::StaticMeshData& aSourceMesh,
+		std::vector<Mesh::Element>& outElements,
+		std::vector<Vertex>& outVertices,
+		std::vector<unsigned>& outIndices)
+	{
+		outElements.reserve(aSourceMesh.Submeshes.size());
+		outVertices.reserve(aSourceMesh.Vertices.size());
+		outIndices.assign(aSourceMesh.Indices.begin(), aSourceMesh.Indices.end());
+
+		for (const AGP::Tools::StaticMeshSubmesh& sourceSubmesh : aSourceMesh.Submeshes)
+		{
+			Mesh::Element element;
+			element.VertexOffset = sourceSubmesh.VertexOffset;
+			element.IndexOffset = sourceSubmesh.IndexOffset;
+			element.NumVertices = sourceSubmesh.VertexCount;
+			element.NumIndices = sourceSubmesh.IndexCount;
+			element.MaterialIndex = sourceSubmesh.MaterialIndex;
+			outElements.push_back(element);
+		}
+
+		for (const AGP::Tools::StaticMeshVertex& sourceVertex : aSourceMesh.Vertices)
+		{
+			Vertex vertex;
+			vertex.Position = { sourceVertex.Position[0], sourceVertex.Position[1], sourceVertex.Position[2], sourceVertex.Position[3] };
+			vertex.Color = { sourceVertex.Color[0], sourceVertex.Color[1], sourceVertex.Color[2], sourceVertex.Color[3] };
+			vertex.UV0 = { sourceVertex.UV0[0], sourceVertex.UV0[1] };
+			vertex.UV1 = { sourceVertex.UV1[0], sourceVertex.UV1[1] };
+			vertex.Normal = { sourceVertex.Normal[0], sourceVertex.Normal[1], sourceVertex.Normal[2] };
+			vertex.Tangent = { sourceVertex.Tangent[0], sourceVertex.Tangent[1], sourceVertex.Tangent[2] };
+			outVertices.push_back(vertex);
+		}
+	}
 }
 
 MeshLibrary::MeshLibrary()
@@ -256,9 +291,26 @@ bool MeshLibrary::LoadFBXMesh(const std::filesystem::path& aPath)
 	std::vector<Vertex> vertices;
 	std::vector<unsigned> indices;
 
-	for (const TGA::FBX::Mesh::Element& importedElement : importedMesh.Elements)
+	if (importedMesh.Skeleton.Bones.empty())
 	{
-		AppendElement(importedElement, elements, vertices, indices);
+		AGP::Tools::StaticMeshConversionResult conversion =
+			AGP::Tools::Detail::ConvertImportedStaticMesh(importedMesh, resolvedPath);
+		if (!conversion.Succeeded())
+		{
+			for (const AGP::Tools::ArtifactDiagnostic& diagnostic : conversion.Diagnostics)
+			{
+				MVLOG(Warning, "Could not convert FBX mesh '{}': {} ({})", resolvedPath.string(), diagnostic.Message, diagnostic.Code);
+			}
+			return false;
+		}
+		AppendStaticMeshData(*conversion.Mesh, elements, vertices, indices);
+	}
+	else
+	{
+		for (const TGA::FBX::Mesh::Element& importedElement : importedMesh.Elements)
+		{
+			AppendElement(importedElement, elements, vertices, indices);
+		}
 	}
 
 	if (elements.empty())

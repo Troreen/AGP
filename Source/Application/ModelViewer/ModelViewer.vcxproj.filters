@@ -59,15 +59,6 @@
     <ClCompile Include="MeshLibrary.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\TGAFBXImporter\source\Importer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\TGAFBXImporter\source\Internals.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\TGAFBXImporter\source\TgaFbxStructs.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ModelViewer.rc">

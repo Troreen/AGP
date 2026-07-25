@@ -1,6 +1,9 @@
 #include "../AGPTools/StaticMeshArtifact.h"
 #include "../AGPTools/StaticMeshArtifactFormat.h"
+#include "../AGPTools/StaticMeshFbx.h"
+#include "../AGPTools/StaticMeshFbxInternal.h"
 
+#include <atomic>
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
@@ -89,9 +92,9 @@ namespace
 		}
 	}
 
-	bool HasCode(const ArtifactValidationResult& aResult, const std::string_view aCode)
+	bool HasCode(const std::vector<ArtifactDiagnostic>& someDiagnostics, const std::string_view aCode)
 	{
-		for (const ArtifactDiagnostic& diagnostic : aResult.Diagnostics)
+		for (const ArtifactDiagnostic& diagnostic : someDiagnostics)
 		{
 			if (diagnostic.Code == aCode)
 			{
@@ -99,6 +102,11 @@ namespace
 			}
 		}
 		return false;
+	}
+
+	bool HasCode(const ArtifactValidationResult& aResult, const std::string_view aCode)
+	{
+		return HasCode(aResult.Diagnostics, aCode);
 	}
 
 	void TestRoundTrip(TestContext& aContext, const std::filesystem::path& aPath)
@@ -156,20 +164,116 @@ namespace
 		aContext.Check(!result.Succeeded(), "writer rejects structurally invalid input");
 		aContext.Check(HasCode(result, "artifact.submesh.index_range"), "writer returns a structured invalid-range diagnostic");
 	}
+
+	void TestChestFbx(TestContext& aContext, const std::filesystem::path& aTemporaryDirectory)
+	{
+		const std::filesystem::path repoRoot = std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path();
+		const std::filesystem::path chestPath = repoRoot / "Assets/Meshes/Props/SM_Chest.fbx";
+		const std::filesystem::path artifactPath = aTemporaryDirectory / "SM_Chest.agpmesh";
+		std::atomic_bool cancellationRequested = false;
+
+		const StaticMeshConversionResult firstConversion = ConvertFbxToStaticMeshData(chestPath, cancellationRequested);
+		aContext.Check(firstConversion.Succeeded(), "real chest FBX converts through the public AGPTools API");
+		if (!firstConversion.Succeeded())
+		{
+			for (const ArtifactDiagnostic& diagnostic : firstConversion.Diagnostics)
+			{
+				std::cerr << diagnostic.Code << ": " << diagnostic.Message << '\n';
+			}
+			return;
+		}
+
+		aContext.Check(!firstConversion.Mesh->Vertices.empty(), "chest conversion produces vertices");
+		aContext.Check(!firstConversion.Mesh->Indices.empty() && firstConversion.Mesh->Indices.size() % 3 == 0, "chest conversion produces triangle indices");
+		aContext.Check(!firstConversion.Mesh->Submeshes.empty(), "chest conversion produces submeshes");
+		aContext.Check(firstConversion.Mesh->Vertices.size() == 3679, "chest fixture has the expected deterministic vertex count");
+		aContext.Check(firstConversion.Mesh->Indices.size() == 12201, "chest fixture has the expected deterministic index count");
+		aContext.Check(firstConversion.Mesh->Submeshes == std::vector<StaticMeshSubmesh>{
+			{ 0, 0, 2237, 7926, 0 },
+			{ 2237, 7926, 1442, 4275, 0 }
+		}, "chest fixture has the expected deterministic submesh ranges");
+		aContext.Check(firstConversion.Mesh->Submeshes.front().VertexOffset == 0, "chest first submesh starts at vertex zero");
+		aContext.Check(firstConversion.Mesh->Submeshes.front().IndexOffset == 0, "chest first submesh starts at index zero");
+
+		const StaticMeshConversionResult secondConversion = ConvertFbxToStaticMeshData(chestPath, cancellationRequested);
+		aContext.Check(secondConversion.Succeeded() && secondConversion.Mesh == firstConversion.Mesh, "chest FBX conversion is structurally deterministic");
+
+		const StaticMeshArtifactBuildResult build = BuildStaticMeshArtifactFromFbx(chestPath, artifactPath, cancellationRequested);
+		aContext.Check(build.Succeeded(), "public FBX-to-artifact operation succeeds for the chest");
+		aContext.Check(ValidateStaticMeshArtifact(artifactPath).Succeeded(), "chest artifact passes standalone structural validation");
+		const StaticMeshReadResult read = ReadStaticMeshArtifact(artifactPath);
+		aContext.Check(read.Succeeded() && read.Mesh == firstConversion.Mesh, "chest artifact reads back to the converted static mesh");
+	}
+
+	void TestFbxFailuresAndCancellation(TestContext& aContext, const std::filesystem::path& aTemporaryDirectory)
+	{
+		std::atomic_bool cancellationRequested = false;
+		const std::filesystem::path missingPath = aTemporaryDirectory / "missing.fbx";
+		const StaticMeshConversionResult missing = ConvertFbxToStaticMeshData(missingPath, cancellationRequested);
+		aContext.Check(!missing.Succeeded() && HasCode(missing.Diagnostics, "fbx.source.missing"), "missing FBX returns a stable source diagnostic");
+		aContext.Check(!missing.Diagnostics.empty() && missing.Diagnostics.front().SourcePath == missingPath, "FBX diagnostics retain source context");
+
+		const std::filesystem::path malformedPath = aTemporaryDirectory / "malformed.fbx";
+		const std::array malformedBytes = { std::byte{ 'n' }, std::byte{ 'o' }, std::byte{ 't' }, std::byte{ 'f' }, std::byte{ 'b' }, std::byte{ 'x' } };
+		WriteBytes(malformedPath, malformedBytes);
+		const StaticMeshConversionResult malformed = ConvertFbxToStaticMeshData(malformedPath, cancellationRequested);
+		aContext.Check(!malformed.Succeeded() && (HasCode(malformed.Diagnostics, "fbx.import.failed") || HasCode(malformed.Diagnostics, "fbx.import.exception")), "malformed FBX is rejected without exposing mesh data");
+
+		const std::filesystem::path fakePath = aTemporaryDirectory / "fake.fbx";
+		WriteBytes(fakePath, malformedBytes);
+		const auto emptyLoader = [](const std::filesystem::path&, TGA::FBX::Mesh&, std::string&) { return true; };
+		const StaticMeshConversionResult empty = Detail::ConvertFbxToStaticMeshDataWithLoader(fakePath, cancellationRequested, emptyLoader);
+		aContext.Check(!empty.Succeeded() && HasCode(empty.Diagnostics, "fbx.mesh.empty"), "empty imported mesh is rejected");
+
+		const auto skeletalLoader = [](const std::filesystem::path&, TGA::FBX::Mesh& outMesh, std::string&)
+		{
+			outMesh.Elements.emplace_back();
+			outMesh.Skeleton.Bones.emplace_back();
+			return true;
+		};
+		const StaticMeshConversionResult skeletal = Detail::ConvertFbxToStaticMeshDataWithLoader(fakePath, cancellationRequested, skeletalLoader);
+		aContext.Check(!skeletal.Succeeded() && HasCode(skeletal.Diagnostics, "fbx.mesh.skeletal_unsupported"), "skeletal mesh is explicitly unsupported");
+
+		cancellationRequested.store(true);
+		const std::filesystem::path canceledArtifact = aTemporaryDirectory / "canceled.agpmesh";
+		const StaticMeshArtifactBuildResult canceledBuild = BuildStaticMeshArtifactFromFbx(fakePath, canceledArtifact, cancellationRequested);
+		aContext.Check(canceledBuild.Canceled && HasCode(canceledBuild.Diagnostics, "tool.canceled") && !std::filesystem::exists(canceledArtifact), "public artifact operation honors cancellation before import without writing output");
+
+		bool loaderInvoked = false;
+		const auto shouldNotRun = [&loaderInvoked](const std::filesystem::path&, TGA::FBX::Mesh&, std::string&)
+		{
+			loaderInvoked = true;
+			return true;
+		};
+		const StaticMeshConversionResult canceledBefore = Detail::ConvertFbxToStaticMeshDataWithLoader(fakePath, cancellationRequested, shouldNotRun);
+		aContext.Check(canceledBefore.Canceled && HasCode(canceledBefore.Diagnostics, "tool.canceled") && !loaderInvoked, "cancellation before import skips the FBX call");
+
+		cancellationRequested.store(false);
+		const auto cancelAfterLoad = [&cancellationRequested](const std::filesystem::path&, TGA::FBX::Mesh& outMesh, std::string&)
+		{
+			outMesh.Elements.emplace_back();
+			cancellationRequested.store(true);
+			return true;
+		};
+		const StaticMeshConversionResult canceledAfter = Detail::ConvertFbxToStaticMeshDataWithLoader(fakePath, cancellationRequested, cancelAfterLoad);
+		aContext.Check(canceledAfter.Canceled && HasCode(canceledAfter.Diagnostics, "tool.canceled") && !canceledAfter.Mesh.has_value(), "cancellation after a non-interruptible import discards imported data");
+	}
 }
 
 int main()
 {
 	TestContext context;
 	TemporaryDirectory temporaryDirectory;
-	const std::filesystem::path validPath = temporaryDirectory.Path() / "roundtrip.agpsmesh";
-	const std::filesystem::path scratchPath = temporaryDirectory.Path() / "corrupt.agpsmesh";
+	const std::filesystem::path validPath = temporaryDirectory.Path() / "roundtrip.agpmesh";
+	const std::filesystem::path scratchPath = temporaryDirectory.Path() / "corrupt.agpmesh";
 
 	context.Check(!GetStaticMeshToolVersion().empty(), "tool version is stable and non-empty");
 	context.Check(StaticMeshArtifactSchemaVersion != 0, "artifact schema version is non-zero");
 	TestRoundTrip(context, validPath);
 	TestCorruptions(context, validPath, scratchPath);
-	TestInvalidInput(context, temporaryDirectory.Path() / "invalid.agpsmesh");
+	TestInvalidInput(context, temporaryDirectory.Path() / "invalid.agpmesh");
+	TestChestFbx(context, temporaryDirectory.Path());
+	TestFbxFailuresAndCancellation(context, temporaryDirectory.Path());
 
 	if (context.Failures != 0)
 	{

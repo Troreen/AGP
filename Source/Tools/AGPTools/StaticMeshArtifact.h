@@ -11,6 +11,7 @@
 namespace AGP::Tools
 {
 	inline constexpr std::uint32_t StaticMeshArtifactSchemaVersion = 1;
+	inline constexpr std::string_view StaticMeshToolVersion = "agp-static-mesh-tool/1.1.0";
 
 	struct StaticMeshVertex
 	{
@@ -57,6 +58,7 @@ namespace AGP::Tools
 		std::string Code;
 		std::string Message;
 		std::uint64_t ByteOffset = 0;
+		std::filesystem::path SourcePath;
 	};
 
 	struct ArtifactValidationResult

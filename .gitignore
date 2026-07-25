@@ -17,6 +17,7 @@ x64/
 x86/
 /Debug/
 /Release/
+/Artifacts/
 
 # Common generated artifacts
 *.log

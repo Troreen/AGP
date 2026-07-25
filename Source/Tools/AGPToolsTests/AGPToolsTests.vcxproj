@@ -18,8 +18,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup><OutDir>$(SolutionDir)Bin\$(Configuration)\</OutDir><IntDir>$(SolutionDir)Intermediate\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir></PropertyGroup>
   <ItemDefinitionGroup>
-    <ClCompile><WarningLevel>Level4</WarningLevel><SDLCheck>true</SDLCheck><ConformanceMode>true</ConformanceMode><LanguageStandard>stdcpp20</LanguageStandard><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
-    <Link><SubSystem>Console</SubSystem><GenerateDebugInformation>true</GenerateDebugInformation></Link>
+    <ClCompile><WarningLevel>Level4</WarningLevel><SDLCheck>true</SDLCheck><ConformanceMode>true</ConformanceMode><LanguageStandard>stdcpp20</LanguageStandard><PrecompiledHeader>NotUsing</PrecompiledHeader><AdditionalIncludeDirectories>$(SolutionDir)ThirdParty\TGAFBXImporter\source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories></ClCompile>
+    <Link><SubSystem>Console</SubSystem><GenerateDebugInformation>true</GenerateDebugInformation><AdditionalDependencies>libfbxsdk.lib;libxml2-md.lib;zlib-md.lib;%(AdditionalDependencies)</AdditionalDependencies><AdditionalLibraryDirectories Condition="'$(Configuration)'=='Debug'">$(SolutionDir)ThirdParty\TGAFBXImporter\FBXSDK\lib\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories><AdditionalLibraryDirectories Condition="'$(Configuration)'=='Release'">$(SolutionDir)ThirdParty\TGAFBXImporter\FBXSDK\lib\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories></Link>
   </ItemDefinitionGroup>
   <ItemGroup><ClCompile Include="AGPToolsTests.cpp" /></ItemGroup>
   <ItemGroup><ProjectReference Include="..\AGPTools\AGPTools.vcxproj"><Project>{A41DF230-94D5-4BF8-B8BF-BE31FB58B1C2}</Project></ProjectReference></ItemGroup>

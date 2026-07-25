@@ -34,15 +34,24 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <WarningLevel>Level4</WarningLevel><SDLCheck>true</SDLCheck><ConformanceMode>true</ConformanceMode><LanguageStandard>stdcpp20</LanguageStandard><PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PreprocessorDefinitions Condition="'$(Configuration)'=='Debug'">_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)'=='Release'">NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)ThirdParty\TGAFBXImporter\source;$(SolutionDir)ThirdParty\TGAFBXImporter\FBXSDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions Condition="'$(Configuration)'=='Debug'">_DEBUG;_LIB;FBXSDK_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)'=='Release'">NDEBUG;_LIB;FBXSDK_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="StaticMeshArtifact.h" />
     <ClInclude Include="StaticMeshArtifactFormat.h" />
+    <ClInclude Include="StaticMeshFbx.h" />
+    <ClInclude Include="StaticMeshFbxInternal.h" />
   </ItemGroup>
-  <ItemGroup><ClCompile Include="StaticMeshArtifact.cpp" /></ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="StaticMeshArtifact.cpp" />
+    <ClCompile Include="StaticMeshFbx.cpp" />
+    <ClCompile Include="..\..\..\ThirdParty\TGAFBXImporter\source\Importer.cpp" />
+    <ClCompile Include="..\..\..\ThirdParty\TGAFBXImporter\source\Internals.cpp" />
+    <ClCompile Include="..\..\..\ThirdParty\TGAFBXImporter\source\TgaFbxStructs.cpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
 </Project>
