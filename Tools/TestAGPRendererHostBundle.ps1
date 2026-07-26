@@ -21,5 +21,7 @@ $command = 'set "PATH=" & "{0}" "{1}" /m /p:Configuration={2} /p:Platform=x64 /p
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 $testExecutable = Join-Path $repoRoot "Bin\$Configuration\RendererHostBundleTests.exe"
-& $testExecutable (Join-Path $bundleRoot 'shaders')
+& $testExecutable (Join-Path $bundleRoot 'shaders') 'partial-init-retry'
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+& $testExecutable (Join-Path $bundleRoot 'shaders') 'normal'
 exit $LASTEXITCODE

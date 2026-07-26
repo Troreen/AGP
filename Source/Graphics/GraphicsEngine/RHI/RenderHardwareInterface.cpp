@@ -231,7 +231,7 @@ CommonUtilities::Vector2u RenderHardwareInterface::GetClientSize() const
 	return { width, height };
 }
 
-bool RenderHardwareInterface::ResizeBackBuffer(
+RenderHardwareInterface::ResizeBackBufferResult RenderHardwareInterface::ResizeBackBuffer(
 	unsigned aWidth,
 	unsigned aHeight,
 	Texture& outBackBuffer,
@@ -239,36 +239,13 @@ bool RenderHardwareInterface::ResizeBackBuffer(
 {
 	if (!myDevice || !myContext || !mySwapChain || aWidth == 0 || aHeight == 0)
 	{
-		return false;
+		return ResizeBackBufferResult::FailedTargetsPreserved;
 	}
 
-	myContext->OMSetRenderTargets(0, nullptr, nullptr);
-	outBackBuffer.myRTV.Reset();
-	outBackBuffer.myResource.Reset();
-	outBackBuffer.mySRV.Reset();
-	outDepthStencil.myDSV.Reset();
-	outDepthStencil.myResource.Reset();
-	outDepthStencil.mySRV.Reset();
-	myContext->Flush();
-
-	HRESULT result = mySwapChain->ResizeBuffers(0, aWidth, aHeight, DXGI_FORMAT_UNKNOWN, DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING);
-	if (FAILED(result))
-	{
-		LOG(RhiLog, Error, "Failed to resize swapchain buffers to {}x{}.", aWidth, aHeight);
-		return false;
-	}
-
-	ComPtr<ID3D11Texture2D> backBufferTexture;
-	result = mySwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &backBufferTexture);
-	if (FAILED(result)
-		|| FAILED(myDevice->CreateRenderTargetView(backBufferTexture.Get(), nullptr, &outBackBuffer.myRTV)))
-	{
-		LOG(RhiLog, Error, "Failed to recreate the resized backbuffer view.");
-		return false;
-	}
-	SetObjectName(backBufferTexture, "BackBuffer_T2D");
-	SetObjectName(outBackBuffer.myRTV, "BackBufferRTV");
-
+	// Depth resources do not depend on the swapchain. Build them before releasing
+	// the live backbuffer so an allocation failure leaves the current frame targets
+	// completely intact.
+	Texture candidateDepthStencil;
 	D3D11_TEXTURE2D_DESC depthDesc = {};
 	depthDesc.Width = aWidth;
 	depthDesc.Height = aHeight;
@@ -279,28 +256,71 @@ bool RenderHardwareInterface::ResizeBackBuffer(
 	depthDesc.MipLevels = 1;
 	depthDesc.SampleDesc.Count = 1;
 	ComPtr<ID3D11Texture2D> depthTexture;
-	result = myDevice->CreateTexture2D(&depthDesc, nullptr, &depthTexture);
+	HRESULT result = myDevice->CreateTexture2D(&depthDesc, nullptr, &depthTexture);
 	if (FAILED(result))
 	{
-		LOG(RhiLog, Error, "Failed to recreate the resized depth texture.");
-		return false;
+		LOG(RhiLog, Error, "Failed to create a candidate resized depth texture.");
+		return ResizeBackBufferResult::FailedTargetsPreserved;
 	}
 	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
 	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
 	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-	result = myDevice->CreateDepthStencilView(depthTexture.Get(), &dsvDesc, &outDepthStencil.myDSV);
+	result = myDevice->CreateDepthStencilView(depthTexture.Get(), &dsvDesc, &candidateDepthStencil.myDSV);
 	if (FAILED(result))
 	{
-		LOG(RhiLog, Error, "Failed to recreate the resized depth-stencil view.");
-		return false;
+		LOG(RhiLog, Error, "Failed to create a candidate resized depth-stencil view.");
+		return ResizeBackBufferResult::FailedTargetsPreserved;
 	}
 	SetObjectName(depthTexture, "DepthStencil_T2D");
-	SetObjectName(outDepthStencil.myDSV, "DepthStencil_DSV");
+	SetObjectName(candidateDepthStencil.myDSV, "DepthStencil_DSV");
+
+	myContext->OMSetRenderTargets(0, nullptr, nullptr);
+	outBackBuffer.myRTV.Reset();
+	outBackBuffer.myResource.Reset();
+	outBackBuffer.mySRV.Reset();
+	myContext->Flush();
+
+	result = mySwapChain->ResizeBuffers(0, aWidth, aHeight, DXGI_FORMAT_UNKNOWN, DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING);
+	if (FAILED(result))
+	{
+		LOG(RhiLog, Error, "Failed to resize swapchain buffers to {}x{}.", aWidth, aHeight);
+		ComPtr<ID3D11Texture2D> restoredBackBufferTexture;
+		if (SUCCEEDED(mySwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &restoredBackBufferTexture))
+			&& SUCCEEDED(myDevice->CreateRenderTargetView(restoredBackBufferTexture.Get(), nullptr, &outBackBuffer.myRTV)))
+		{
+			SetObjectName(restoredBackBufferTexture, "BackBuffer_T2D");
+			SetObjectName(outBackBuffer.myRTV, "BackBufferRTV");
+			return ResizeBackBufferResult::FailedTargetsPreserved;
+		}
+		return ResizeBackBufferResult::FailedTargetsUnavailable;
+	}
+
+	wchar_t injectedFailure[64] = {};
+	if (GetEnvironmentVariableW(L"AGP_RENDERER_HOST_TEST_RESIZE_FAILURE", injectedFailure, _countof(injectedFailure)) > 0
+		&& wcscmp(injectedFailure, L"after_swapchain_resize") == 0)
+	{
+		LOG(RhiLog, Warning, "Injected renderer-host resize failure after swapchain resize.");
+		return ResizeBackBufferResult::FailedTargetsUnavailable;
+	}
+
+	ComPtr<ID3D11Texture2D> backBufferTexture;
+	result = mySwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &backBufferTexture);
+	Texture candidateBackBuffer;
+	if (FAILED(result)
+		|| FAILED(myDevice->CreateRenderTargetView(backBufferTexture.Get(), nullptr, &candidateBackBuffer.myRTV)))
+	{
+		LOG(RhiLog, Error, "Failed to recreate the resized backbuffer view.");
+		return ResizeBackBufferResult::FailedTargetsUnavailable;
+	}
+	SetObjectName(backBufferTexture, "BackBuffer_T2D");
+	SetObjectName(candidateBackBuffer.myRTV, "BackBufferRTV");
 
 	const Viewport viewport = { 0, 0, static_cast<float>(aWidth), static_cast<float>(aHeight), 0, 1 };
-	outBackBuffer.myViewport = viewport;
-	outDepthStencil.myViewport = viewport;
-	return true;
+	candidateBackBuffer.myViewport = viewport;
+	candidateDepthStencil.myViewport = viewport;
+	outBackBuffer = candidateBackBuffer;
+	outDepthStencil = candidateDepthStencil;
+	return ResizeBackBufferResult::Completed;
 }
 
 bool RenderHardwareInterface::CreateVertexBuffer(std::string_view aName, const std::vector<Vertex> &aVertexList, Buffer &outBuffer) const

@@ -1311,7 +1311,7 @@ bool GraphicsEngine::BeginBackBufferFrame(const std::array<float, 4>& aClearColo
 	return myRHI.BeginBackBufferFrame(myBackBuffer, myDepthBuffer, aClearColor);
 }
 
-bool GraphicsEngine::ResizeBackBuffer(unsigned aWidth, unsigned aHeight)
+RenderHardwareInterface::ResizeBackBufferResult GraphicsEngine::ResizeBackBuffer(unsigned aWidth, unsigned aHeight)
 {
 	return myRHI.ResizeBackBuffer(aWidth, aHeight, myBackBuffer, myDepthBuffer);
 }

@@ -131,7 +131,7 @@ public:
 	bool CreateCommandList(std::string_view aName, GraphicsCommandList& outCommandList) const;
 	void ExecuteCommandList(const GraphicsCommandList& aCommandList) const;
 	bool BeginBackBufferFrame(const std::array<float, 4>& aClearColor) const;
-	bool ResizeBackBuffer(unsigned aWidth, unsigned aHeight);
+	RenderHardwareInterface::ResizeBackBufferResult ResizeBackBuffer(unsigned aWidth, unsigned aHeight);
 	ID3D11Device* GetNativeDevice() const;
 	ID3D11DeviceContext* GetNativeImmediateContext() const;
 	RenderStats GetLastRenderStats() const;

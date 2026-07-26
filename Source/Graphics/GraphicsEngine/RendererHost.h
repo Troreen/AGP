@@ -9,7 +9,7 @@ struct ID3D11DeviceContext;
 
 namespace AGP
 {
-	inline constexpr std::string_view RendererHostVersion = "agp-renderer-host/1.0.0";
+	inline constexpr std::string_view RendererHostVersion = "agp-renderer-host/1.1.0";
 
 	struct NativeD3D11View
 	{
@@ -24,6 +24,7 @@ namespace AGP
 		NotInitialized,
 		InitializationFailed,
 		ResizeFailed,
+		RendererUnavailable,
 		BeginFrameFailed,
 		PresentFailed
 	};
@@ -31,8 +32,8 @@ namespace AGP
 	struct RendererHostResult
 	{
 		RendererHostStatus Status = RendererHostStatus::Completed;
-		const char* Code = "renderer.completed";
-		const char* Message = "The renderer-host operation completed.";
+		char Code[64] = "renderer.completed";
+		char Message[768] = "The renderer-host operation completed.";
 
 		[[nodiscard]] bool Succeeded() const { return Status == RendererHostStatus::Completed; }
 	};

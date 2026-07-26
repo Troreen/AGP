@@ -5,7 +5,7 @@ the `HWND`, Win32 message loop, application lifetime, and UI. AGP owns its Direc
 11 device, immediate context, swapchain, depth buffer, backbuffer, and presentation.
 The contract does not expose AGP `World`, `Actor`, component, or RHI types.
 
-The current contract is `agp-renderer-host/1.0.0`. It supports:
+The current contract is `agp-renderer-host/1.1.0`. It supports:
 
 - initializing AGP for one host-owned native window with explicit shader and
   environment-texture paths;
@@ -17,10 +17,23 @@ The current contract is `agp-renderer-host/1.0.0`. It supports:
 - stable operation status, code, and message values that a consumer can translate
   into its own diagnostic model.
 
-The returned D3D11 pointers are borrowed. A consumer must not call `Release`, replace
+The returned D3D11 pointers are borrowed and are null unless initialization has
+completed successfully and the current frame targets are usable. A consumer must not call `Release`, replace
 the immediate context, resize the swapchain directly, or retain the pointers beyond
 AGP's process lifetime. Calls are main-thread operations. A minimized host should
 skip resize and frame submission while either client dimension is zero.
+
+Initialization is single-attempt once AGP starts creating D3D11 resources. A
+failure before that point (invalid arguments or missing/invalid input paths) may be
+corrected and retried. A failure after resource creation starts returns
+`renderer.restart_required`, hides native views, and requires a new process.
+
+Resize first creates candidate depth resources. Failures before swapchain mutation
+preserve the previous targets. If a failure occurs after swapchain mutation, AGP
+returns `renderer.resize_recovery_required` and rejects begin/present until another
+non-zero resize succeeds. A failed present similarly requires process restart.
+Result code and message text are stored in fixed-size value-owned buffers, so they
+remain valid without sharing allocation ownership across the static-library ABI.
 
 ## Stage the bundle
 
@@ -63,6 +76,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Tools\TestAGPRendererH
 ```
 
 The test compiles solely against the staged header and libraries, creates a hidden
-Win32 window, initializes a real D3D11 device and swapchain, checks the borrowed
-interop view, clears and presents a frame, resizes the swapchain, and submits a
-second frame.
+Win32 window, checks representative path diagnostics and partial-initialization
+retry rejection, initializes a real D3D11 device and swapchain, checks the borrowed
+interop view, presents before resize, injects and recovers a post-swapchain resize
+failure, then presents again after resize.
