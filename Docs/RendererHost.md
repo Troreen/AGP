@@ -5,7 +5,7 @@ the `HWND`, Win32 message loop, application lifetime, and UI. AGP owns its Direc
 11 device, immediate context, swapchain, depth buffer, backbuffer, and presentation.
 The contract does not expose AGP `World`, `Actor`, component, or RHI types.
 
-The current contract is `agp-renderer-host/1.1.0`. It supports:
+The current contract is `agp-renderer-host/1.2.0`. It supports:
 
 - initializing AGP for one host-owned native window with explicit shader and
   environment-texture paths;
@@ -13,6 +13,12 @@ The current contract is `agp-renderer-host/1.1.0`. It supports:
   ImGui without transferring ownership;
 - resizing AGP's swapchain-backed render targets for non-zero client sizes;
 - binding and clearing the AGP-owned backbuffer before host UI draw submission;
+- creating renderer-owned static-mesh and `surface_lit_opaque` material resources
+  from caller-owned value arrays and explicit DDS paths;
+- submitting an immutable value snapshot with perspective camera, mesh/material
+  handles, positive transforms, shadow flags, and one directional preview light;
+- reporting renderer scene counts without exposing AGP `World`, `Actor`, component,
+  `Mesh`, `Material`, command-list, or RHI types;
 - presenting through AGP; and
 - stable operation status, code, and message values that a consumer can translate
   into its own diagnostic model.
@@ -22,6 +28,23 @@ completed successfully and the current frame targets are usable. A consumer must
 the immediate context, resize the swapchain directly, or retain the pointers beyond
 AGP's process lifetime. Calls are main-thread operations. A minimized host should
 skip resize and frame submission while either client dimension is zero.
+
+Resource creation copies CPU mesh values and creates AGP-owned resources. Returned
+64-bit handles are opaque, process-local, and invalid after
+`ReleaseRendererResource`. A snapshot borrows its item range only for the duration
+of `RenderRendererSceneSnapshot`; AGP converts it immediately and retains no pointer
+to caller storage. Resource handles must remain live through submission. Material
+creation accepts only the versioned `surface_lit_opaque` preset and requires exact
+caller-provided albedo, tangent-space normal, and packed AO/roughness/metalness DDS
+paths. Each scene item applies its one material handle to every mesh submesh, which
+matches the V1 static-mesh renderer component. The host never searches project
+content or interprets editor asset IDs.
+
+Scene submission occurs after `BeginRendererHostFrame` and before UI submission and
+`PresentRendererHostFrame`. AGP records and executes its own renderer command list,
+then releases command-list references so a later host resize can proceed. Empty
+snapshots remain valid and render the explicit preview camera/light with no scene
+items.
 
 Initialization is single-attempt once AGP starts creating D3D11 resources. A
 failure before that point (invalid arguments or missing/invalid input paths) may be
@@ -56,6 +79,9 @@ lib/Logger.lib
 lib/CommonUtilities.lib
 shaders/...
 fixtures/T_Shipyard.dds
+fixtures/T_Chest_C.dds
+fixtures/T_Chest_N.dds
+fixtures/T_Chest_M.dds
 ```
 
 `GameFramework.lib` is an internal static-link dependency of AGP's current combined
@@ -77,8 +103,10 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Tools\TestAGPRendererH
 
 The test compiles solely against the staged header and libraries, creates a hidden
 Win32 window, checks representative path diagnostics, initializes a real D3D11
-device and swapchain, checks the borrowed interop view, and presents both before
-and after resize. It also scans the staged production manifest and
+device and swapchain, checks the borrowed interop view, creates a mesh and generic
+lit material solely through the public staged header, submits an immutable
+snapshot, verifies scene statistics, releases its resources, and presents both
+before and after resize. It also scans the staged production manifest and
 `GraphicsEngine.lib` to reject any test fault-control symbol or legacy environment
 activation name.
 

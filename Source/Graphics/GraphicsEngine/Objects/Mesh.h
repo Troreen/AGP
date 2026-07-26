@@ -79,6 +79,9 @@ public:
     
 	std::string_view GetName() const { return myName; }
 	size_t GetNumMaterialSlots() const { return myNumMaterialSlots; }
+	const CU::Vector3f& GetLocalBoundsCenter() const { return myLocalBoundsCenter; }
+	float GetLocalBoundsRadius() const { return myLocalBoundsRadius; }
+	bool HasLocalBounds() const { return myHasLocalBounds; }
 
 private:
 

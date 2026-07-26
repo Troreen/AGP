@@ -36,8 +36,10 @@ int wmain(int aArgumentCount, wchar_t** aArguments)
 	{
 		return fail("Renderer host accepted a null native window.");
 	}
+	AGP::RendererResourceHandle notInitializedHandle = AGP::InvalidRendererResourceHandle;
 	if (AGP::GetRendererHostNativeD3D11View().Device != nullptr
 		|| AGP::ResizeRendererHost(640, 360).Status != AGP::RendererHostStatus::NotInitialized
+		|| AGP::CreateRendererStaticMesh({}, notInitializedHandle).Status != AGP::RendererHostStatus::NotInitialized
 		|| AGP::BeginRendererHostFrame(std::array{ 0.0f, 0.0f, 0.0f, 1.0f }).Status != AGP::RendererHostStatus::NotInitialized
 		|| AGP::PresentRendererHostFrame().Status != AGP::RendererHostStatus::NotInitialized)
 	{
@@ -90,16 +92,93 @@ int wmain(int aArgumentCount, wchar_t** aArguments)
 		{
 			result = fail("The initialized renderer host returned an incomplete D3D11 view.");
 		}
-		else if (!AGP::BeginRendererHostFrame(std::array{ 0.05f, 0.07f, 0.10f, 1.0f }).Succeeded()
-			|| !AGP::PresentRendererHostFrame().Succeeded())
+		AGP::RendererResourceHandle meshHandle = AGP::InvalidRendererResourceHandle;
+		AGP::RendererResourceHandle materialHandle = AGP::InvalidRendererResourceHandle;
+		const std::array vertices = {
+			AGP::RendererStaticMeshVertex{ .Position = { -50.0f, -50.0f, 0.0f, 1.0f }, .UV0 = { 0.0f, 1.0f } },
+			AGP::RendererStaticMeshVertex{ .Position = { 0.0f, 50.0f, 0.0f, 1.0f }, .UV0 = { 0.5f, 0.0f } },
+			AGP::RendererStaticMeshVertex{ .Position = { 50.0f, -50.0f, 0.0f, 1.0f }, .UV0 = { 1.0f, 1.0f } }
+		};
+		constexpr std::array<std::uint32_t, 3> indices = { 0, 1, 2 };
+		constexpr std::array submeshes = {
+			AGP::RendererStaticMeshSubmesh{ .VertexCount = 3, .IndexCount = 3 }
+		};
+		const AGP::RendererStaticMeshDescription meshDescription = {
+			.Vertices = vertices.data(),
+			.VertexCount = vertices.size(),
+			.Indices = indices.data(),
+			.IndexCount = indices.size(),
+			.Submeshes = submeshes.data(),
+			.SubmeshCount = submeshes.size()
+		};
+		const std::filesystem::path fixtureRoot = environmentTexture.parent_path();
+		const std::filesystem::path albedoTexture = fixtureRoot / "T_Chest_C.dds";
+		const std::filesystem::path normalTexture = fixtureRoot / "T_Chest_N.dds";
+		const std::filesystem::path materialTexture = fixtureRoot / "T_Chest_M.dds";
+		const AGP::RendererLitMaterialDescription materialDescription = {
+			.AlbedoTexture = albedoTexture.c_str(),
+			.NormalTexture = normalTexture.c_str(),
+			.MaterialTexture = materialTexture.c_str()
+		};
+		if (AGP::CreateRendererStaticMesh({}, meshHandle).Succeeded()
+			|| meshHandle != AGP::InvalidRendererResourceHandle)
 		{
-			result = fail("The renderer host could not present a frame before resize.");
+			result = fail("Renderer host accepted an empty static-mesh description.");
 		}
-		else if (!AGP::ResizeRendererHost(800, 450).Succeeded()
-			|| !AGP::BeginRendererHostFrame(std::array{ 0.08f, 0.10f, 0.14f, 1.0f }).Succeeded()
-			|| !AGP::PresentRendererHostFrame().Succeeded())
+		else if (!AGP::CreateRendererStaticMesh(meshDescription, meshHandle).Succeeded()
+			|| !AGP::CreateRendererLitMaterial(materialDescription, materialHandle).Succeeded())
 		{
-			result = fail("The renderer host could not resize and present afterward.");
+			result = fail("Renderer host could not create staged scene resources.");
+		}
+		else if (AGP::RenderRendererSceneSnapshot({}).Status != AGP::RendererHostStatus::SceneSubmissionFailed)
+		{
+			result = fail("Renderer host accepted scene submission before frame begin.");
+		}
+		else
+		{
+			const AGP::RendererSceneItem item = {
+				.Mesh = meshHandle,
+				.Material = materialHandle
+			};
+			const AGP::RendererSceneSnapshot snapshot = {
+				.Camera = {
+					.PositionCentimeters = { 0.0f, 0.0f, -300.0f },
+					.VerticalFieldOfViewDegrees = 60.0f,
+					.AspectRatio = 640.0f / 360.0f,
+					.NearPlaneCentimeters = 1.0f,
+					.FarPlaneCentimeters = 10000.0f
+				},
+				.Items = &item,
+				.ItemCount = 1
+			};
+			if (!AGP::BeginRendererHostFrame(std::array{ 0.05f, 0.07f, 0.10f, 1.0f }).Succeeded()
+				|| !AGP::RenderRendererSceneSnapshot(snapshot).Succeeded()
+				|| !AGP::PresentRendererHostFrame().Succeeded())
+			{
+				result = fail("The renderer host could not submit and present a scene snapshot.");
+			}
+			const AGP::RendererSceneStats stats = AGP::GetRendererSceneStats();
+			if (result == 0 && (stats.TotalRenderItems != 1 || stats.VisibleRenderItems != 1
+				|| stats.ShadowCasters != 1 || stats.TotalLights != 1))
+			{
+				result = fail("Renderer scene statistics did not prove the submitted immutable snapshot.");
+			}
+		}
+
+		if (result == 0 && (!AGP::ReleaseRendererResource(meshHandle).Succeeded()
+			|| !AGP::ReleaseRendererResource(materialHandle).Succeeded()))
+		{
+			result = fail("Renderer host could not release staged scene resources.");
+		}
+		else if (result == 0 && !AGP::ResizeRendererHost(800, 450).Succeeded())
+		{
+			result = fail("The renderer host could not resize after scene submission.");
+		}
+		else if (result == 0 && (!AGP::BeginRendererHostFrame(std::array{ 0.08f, 0.10f, 0.14f, 1.0f }).Succeeded()
+			|| !AGP::RenderRendererSceneSnapshot({}).Succeeded()
+			|| !AGP::PresentRendererHostFrame().Succeeded()))
+		{
+			result = fail("The renderer host could not render an empty snapshot after resize.");
 		}
 	}
 
