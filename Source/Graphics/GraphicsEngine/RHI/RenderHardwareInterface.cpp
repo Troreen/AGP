@@ -1,4 +1,8 @@
 #include "GraphicsEngine.pch.h"
+
+#if defined(AGP_RENDERER_HOST_TEST_FAULTS)
+#include "GraphicsEngine/RendererHostFaultInjection.h"
+#endif
 #include "RenderHardwareInterface.h"
 
 #include <d3dcompiler.h>
@@ -295,13 +299,13 @@ RenderHardwareInterface::ResizeBackBufferResult RenderHardwareInterface::ResizeB
 		return ResizeBackBufferResult::FailedTargetsUnavailable;
 	}
 
-	wchar_t injectedFailure[64] = {};
-	if (GetEnvironmentVariableW(L"AGP_RENDERER_HOST_TEST_RESIZE_FAILURE", injectedFailure, _countof(injectedFailure)) > 0
-		&& wcscmp(injectedFailure, L"after_swapchain_resize") == 0)
+#if defined(AGP_RENDERER_HOST_TEST_FAULTS)
+	if (AGP::Testing::ConsumeRendererHostFault(AGP::Testing::RendererHostFault::AfterSwapchainResize))
 	{
 		LOG(RhiLog, Warning, "Injected renderer-host resize failure after swapchain resize.");
 		return ResizeBackBufferResult::FailedTargetsUnavailable;
 	}
+#endif
 
 	ComPtr<ID3D11Texture2D> backBufferTexture;
 	result = mySwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &backBufferTexture);

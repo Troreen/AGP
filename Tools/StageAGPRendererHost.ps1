@@ -36,7 +36,7 @@ function Find-MSBuild {
 
 function Invoke-AGPProjectBuild([string]$Project) {
     $solutionDir = $repoRoot.TrimEnd('\') + '\\'
-    $command = 'set "PATH=" & "{0}" "{1}" /m /p:Configuration={2} /p:Platform=x64 /p:SolutionDir="{3}" /v:minimal' -f $script:msbuild, $Project, $Configuration, $solutionDir
+    $command = 'set "PATH=" & "{0}" "{1}" /m /p:Configuration={2} /p:Platform=x64 /p:SolutionDir="{3}" /p:RendererHostFaultInjection=false /v:minimal' -f $script:msbuild, $Project, $Configuration, $solutionDir
     & $env:ComSpec /d /c $command
     if ($LASTEXITCODE -ne 0) {
         throw "$Project $Configuration x64 build failed with exit code $LASTEXITCODE."

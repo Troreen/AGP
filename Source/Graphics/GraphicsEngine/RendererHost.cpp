@@ -2,6 +2,10 @@
 
 #include "RendererHost.h"
 
+#if defined(AGP_RENDERER_HOST_TEST_FAULTS)
+#include "RendererHostFaultInjection.h"
+#endif
+
 #include <filesystem>
 #include <fstream>
 #include <string>
@@ -9,6 +13,31 @@
 
 namespace AGP
 {
+#if defined(AGP_RENDERER_HOST_TEST_FAULTS)
+	namespace Testing
+	{
+		namespace
+		{
+			RendererHostFault ourRendererHostFault = RendererHostFault::None;
+		}
+
+		void SetRendererHostFault(RendererHostFault aFault) noexcept
+		{
+			ourRendererHostFault = aFault;
+		}
+
+		bool ConsumeRendererHostFault(RendererHostFault aFault) noexcept
+		{
+			if (ourRendererHostFault != aFault)
+			{
+				return false;
+			}
+			ourRendererHostFault = RendererHostFault::None;
+			return true;
+		}
+	}
+#endif
+
 	namespace
 	{
 		enum class HostState
@@ -137,13 +166,13 @@ namespace AGP
 				shaderRoot,
 				environmentTexture))
 			{
-				wchar_t injectedFailure[64] = {};
-				if (GetEnvironmentVariableW(L"AGP_RENDERER_HOST_TEST_INITIALIZATION_FAILURE", injectedFailure, _countof(injectedFailure)) > 0
-					&& wcscmp(injectedFailure, L"after_graphics_initialize") == 0)
+#if defined(AGP_RENDERER_HOST_TEST_FAULTS)
+				if (Testing::ConsumeRendererHostFault(Testing::RendererHostFault::AfterGraphicsInitialize))
 				{
 					return Failed(RendererHostStatus::InitializationFailed, "renderer.initialization_injected_failure",
 						"Injected failure after AGP created its renderer resources; restart is required before retrying.");
 				}
+#endif
 				ourHostState = HostState::Ready;
 				return Completed();
 			}

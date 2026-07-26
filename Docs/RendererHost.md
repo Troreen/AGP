@@ -76,7 +76,23 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Tools\TestAGPRendererH
 ```
 
 The test compiles solely against the staged header and libraries, creates a hidden
-Win32 window, checks representative path diagnostics and partial-initialization
-retry rejection, initializes a real D3D11 device and swapchain, checks the borrowed
-interop view, presents before resize, injects and recovers a post-swapchain resize
-failure, then presents again after resize.
+Win32 window, checks representative path diagnostics, initializes a real D3D11
+device and swapchain, checks the borrowed interop view, and presents both before
+and after resize. It also scans the staged production manifest and
+`GraphicsEngine.lib` to reject any test fault-control symbol or legacy environment
+activation name.
+
+Deterministic partial-initialization and post-swapchain resize failures use a
+separate internal build whose fault seam is compiled out of the production library:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Tools\TestAGPRendererHostFaults.ps1 -Configuration Debug
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Tools\TestAGPRendererHostFaults.ps1 -Configuration Release
+```
+
+That script builds `GraphicsEngineFaultInjection.lib` in an isolated ignored test
+artifact directory with `AGP_RENDERER_HOST_TEST_FAULTS`, links only the internal
+fault-test executable against it, and runs each process-terminal lifecycle case in
+a fresh process. Neither the internal header nor this library is staged for
+consumers. Production staging explicitly forces `RendererHostFaultInjection=false`
+before compiling `GraphicsEngine.lib`.
