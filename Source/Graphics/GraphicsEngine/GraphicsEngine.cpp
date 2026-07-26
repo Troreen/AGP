@@ -17,6 +17,10 @@
 #include "Materials/MaterialHelpers.h"
 #include "Objects/Shader.h"
 
+#if defined(AGP_RENDERER_HOST_TEST_FAULTS)
+#include "RendererHostFaultInjection.h"
+#endif
+
 #include <algorithm>
 #include <array>
 #include <cctype>
@@ -763,14 +767,17 @@ bool GraphicsEngine::BuildRenderSnapshot(const Actor& aCameraActor, const World&
 	return true;
 }
 
-void GraphicsEngine::RenderSnapshot(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot)
+bool GraphicsEngine::RenderSnapshot(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot)
 {
 	if (!aSnapshot.HasCamera)
 	{
-		return;
+		return false;
 	}
 
-	PrepareSnapshotRenderResources(aSnapshot);
+	if (!PrepareSnapshotRenderResources(aSnapshot))
+	{
+		return false;
+	}
 	UnbindShadowResources(inoutCommandList);
 
 	RenderStats frameStats = aSnapshot.Stats;
@@ -990,6 +997,7 @@ void GraphicsEngine::RenderSnapshot(GraphicsCommandList& inoutCommandList, const
 	}
 
 	StoreLastRenderStats(frameStats);
+	return true;
 }
 
 bool GraphicsEngine::Present() const
@@ -1709,17 +1717,25 @@ void GraphicsEngine::CreateMaterialTextureSlots(const RHIShaderReflectionInfo& a
 GraphicsEngine::GraphicsEngine() = default;
 GraphicsEngine::~GraphicsEngine() = default;
 
-void GraphicsEngine::PrepareSnapshotRenderResources(const RenderSceneSnapshot& aSnapshot) const
+bool GraphicsEngine::PrepareSnapshotRenderResources(const RenderSceneSnapshot& aSnapshot) const
 {
 	for (const RenderItemSnapshot& item : aSnapshot.ShadowCasters)
 	{
-		PrepareRenderItemResources(item);
+		if (!PrepareRenderItemResources(item))
+		{
+			return false;
+		}
 	}
 
 	for (const RenderItemSnapshot& item : aSnapshot.VisibleRenderItems)
 	{
-		PrepareRenderItemResources(item);
+		if (!PrepareRenderItemResources(item))
+		{
+			return false;
+		}
 	}
+
+	return true;
 }
 
 bool GraphicsEngine::PrepareRenderItemResources(const RenderItemSnapshot& aRenderItem) const
@@ -1870,6 +1886,13 @@ void GraphicsEngine::RenderMesh(GraphicsCommandList& inoutCommandList, const Ren
 
 bool GraphicsEngine::PrepareMeshForRendering(const Mesh &aMesh) const
 {
+#if defined(AGP_RENDERER_HOST_TEST_FAULTS)
+	if (AGP::Testing::ConsumeRendererHostFault(AGP::Testing::RendererHostFault::BeforeMeshBufferPreparation))
+	{
+		return false;
+	}
+#endif
+
     if (!aMesh.myVertexBuffer.IsValid())
 	{
 		if (!myRHI.CreateVertexBuffer(aMesh.myName, aMesh.myVertices, aMesh.myVertexBuffer))

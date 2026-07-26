@@ -5,7 +5,7 @@ the `HWND`, Win32 message loop, application lifetime, and UI. AGP owns its Direc
 11 device, immediate context, swapchain, depth buffer, backbuffer, and presentation.
 The contract does not expose AGP `World`, `Actor`, component, or RHI types.
 
-The current contract is `agp-renderer-host/1.2.0`. It supports:
+The current contract is `agp-renderer-host/1.3.0`. It supports:
 
 - initializing AGP for one host-owned native window with explicit shader and
   environment-texture paths;
@@ -40,11 +40,23 @@ paths. Each scene item applies its one material handle to every mesh submesh, wh
 matches the V1 static-mesh renderer component. The host never searches project
 content or interprets editor asset IDs.
 
+Static-mesh inputs follow the same structural boundary as AGP's versioned artifact:
+every vertex float must be finite, global and per-submesh index counts must form
+triangle lists, ranges must be non-empty and in bounds, and every index in a
+submesh must reference that submesh's declared vertex range. Rotations use explicit
+`RendererEulerDegrees { Yaw, Pitch, Roll }` values to preserve AGP's transform
+convention at the staged ABI boundary. Material validation diagnostics name the
+exact texture slot and caller path. Scene resource diagnostics name the item index
+and both opaque handles; result storage remains fixed-size and value-owned.
+
 Scene submission occurs after `BeginRendererHostFrame` and before UI submission and
 `PresentRendererHostFrame`. AGP records and executes its own renderer command list,
 then releases command-list references so a later host resize can proceed. Empty
 snapshots remain valid and render the explicit preview camera/light with no scene
-items.
+items. AGP prepares every mesh GPU buffer before recording draws. If any preparation
+fails, scene submission returns `renderer.scene_resource_preparation_failed`, no
+scene command list is executed, and statistics are not published for the rejected
+snapshot.
 
 Initialization is single-attempt once AGP starts creating D3D11 resources. A
 failure before that point (invalid arguments or missing/invalid input paths) may be
@@ -110,8 +122,9 @@ before and after resize. It also scans the staged production manifest and
 `GraphicsEngine.lib` to reject any test fault-control symbol or legacy environment
 activation name.
 
-Deterministic partial-initialization and post-swapchain resize failures use a
-separate internal build whose fault seam is compiled out of the production library:
+Deterministic partial-initialization, post-swapchain resize, and scene mesh-buffer
+preparation failures use a separate internal build whose fault seam is compiled out
+of the production library:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Tools\TestAGPRendererHostFaults.ps1 -Configuration Debug

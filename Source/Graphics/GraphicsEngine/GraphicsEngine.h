@@ -108,7 +108,7 @@ public:
 	bool Initialize(HWND aWindowHandle, const std::filesystem::path& aShaderRoot, const std::filesystem::path& aEnvironmentTexture);
 	void Render(GraphicsCommandList& inoutCommandList, const Actor& aCameraActor, const World& aWorld);
 	bool BuildRenderSnapshot(const Actor& aCameraActor, const World& aWorld, RenderSceneSnapshot& outSnapshot) const;
-	void RenderSnapshot(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot);
+	bool RenderSnapshot(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot);
 	bool Present() const;
 
 	template <class T>
@@ -161,7 +161,7 @@ private:
 	bool CreateShadowPipelineStates();
 	void UnbindShadowResources(GraphicsCommandList& inoutCommandList) const;
 	void BindShadowResources(GraphicsCommandList& inoutCommandList) const;
-	void PrepareSnapshotRenderResources(const RenderSceneSnapshot& aSnapshot) const;
+	bool PrepareSnapshotRenderResources(const RenderSceneSnapshot& aSnapshot) const;
 	bool PrepareRenderItemResources(const RenderItemSnapshot& aRenderItem) const;
 	bool EnsureShadowCommandListCount(size_t aCount);
 	void StoreLastRenderStats(const RenderStats& aStats);

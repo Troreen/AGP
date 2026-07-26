@@ -10,7 +10,8 @@ namespace AGP::Testing
 	{
 		None,
 		AfterGraphicsInitialize,
-		AfterSwapchainResize
+		AfterSwapchainResize,
+		BeforeMeshBufferPreparation
 	};
 
 	void SetRendererHostFault(RendererHostFault aFault) noexcept;

@@ -66,6 +66,7 @@ namespace AGP
 		RendererResourceHandle ourNextResourceHandle = 1;
 		std::unordered_map<RendererResourceHandle, std::shared_ptr<Mesh>> ourMeshes;
 		std::unordered_map<RendererResourceHandle, std::shared_ptr<Material>> ourMaterials;
+		RendererSceneStats ourLastSubmittedSceneStats;
 
 		RendererHostResult Completed()
 		{
@@ -120,6 +121,11 @@ namespace AGP
 			return IsFinite(aValue.X) && IsFinite(aValue.Y) && IsFinite(aValue.Z);
 		}
 
+		bool IsFinite(const RendererEulerDegrees& aValue)
+		{
+			return IsFinite(aValue.Yaw) && IsFinite(aValue.Pitch) && IsFinite(aValue.Roll);
+		}
+
 		CU::Vector3f ToVector3(const RendererFloat3& aValue)
 		{
 			return { aValue.X, aValue.Y, aValue.Z };
@@ -134,13 +140,6 @@ namespace AGP
 				++ourNextResourceHandle;
 			}
 			return ourNextResourceHandle++;
-		}
-
-		bool IsValidTextureInput(const wchar_t* aPath)
-		{
-			return aPath != nullptr && *aPath != L'\0'
-				&& std::filesystem::is_regular_file(aPath)
-				&& IsDdsFile(aPath);
 		}
 
 		float MaxAxisScale(const CU::Matrix4f& aTransform)
@@ -238,6 +237,7 @@ namespace AGP
 				}
 				ourShaderRoot = shaderRoot;
 				ourSceneCommandListReady = true;
+				ourLastSubmittedSceneStats = {};
 				ourHostState = HostState::Ready;
 				return Completed();
 			}
@@ -329,6 +329,11 @@ namespace AGP
 			return Failed(RendererHostStatus::InvalidArgument, "renderer.mesh_data_too_large",
 				"Static-mesh vertex and index counts must fit 32-bit renderer ranges.");
 		}
+		if (aDescription.IndexCount % 3 != 0)
+		{
+			return Failed(RendererHostStatus::InvalidArgument, "renderer.mesh_index_count_not_triangles",
+				"Static-mesh indices must form a complete triangle list.");
+		}
 
 		try
 		{
@@ -337,12 +342,17 @@ namespace AGP
 			for (std::size_t index = 0; index < aDescription.VertexCount; ++index)
 			{
 				const RendererStaticMeshVertex& source = aDescription.Vertices[index];
-				if (!IsFinite({ source.Position.X, source.Position.Y, source.Position.Z })
-					|| !IsFinite({ source.Normal.X, source.Normal.Y, source.Normal.Z })
-					|| !IsFinite({ source.Tangent.X, source.Tangent.Y, source.Tangent.Z }))
+				if (!IsFinite(source.Position.X) || !IsFinite(source.Position.Y)
+					|| !IsFinite(source.Position.Z) || !IsFinite(source.Position.W)
+					|| !IsFinite(source.Color.X) || !IsFinite(source.Color.Y)
+					|| !IsFinite(source.Color.Z) || !IsFinite(source.Color.W)
+					|| !IsFinite(source.UV0.X) || !IsFinite(source.UV0.Y)
+					|| !IsFinite(source.UV1.X) || !IsFinite(source.UV1.Y)
+					|| !IsFinite(RendererFloat3{ source.Normal.X, source.Normal.Y, source.Normal.Z })
+					|| !IsFinite(RendererFloat3{ source.Tangent.X, source.Tangent.Y, source.Tangent.Z }))
 				{
 					return Failed(RendererHostStatus::InvalidArgument, "renderer.mesh_non_finite",
-						"Static-mesh positions, normals, and tangents must contain finite values.");
+						"Every static-mesh vertex component must contain a finite value.");
 				}
 				Vertex vertex;
 				vertex.Position = { source.Position.X, source.Position.Y, source.Position.Z, source.Position.W };
@@ -373,11 +383,20 @@ namespace AGP
 				const RendererStaticMeshSubmesh& source = aDescription.Submeshes[index];
 				const std::uint64_t vertexEnd = static_cast<std::uint64_t>(source.VertexOffset) + source.VertexCount;
 				const std::uint64_t indexEnd = static_cast<std::uint64_t>(source.IndexOffset) + source.IndexCount;
-				if (source.VertexCount == 0 || source.IndexCount == 0
+				if (source.VertexCount == 0 || source.IndexCount == 0 || source.IndexCount % 3 != 0
 					|| vertexEnd > aDescription.VertexCount || indexEnd > aDescription.IndexCount)
 				{
 					return Failed(RendererHostStatus::InvalidArgument, "renderer.mesh_submesh_out_of_range",
-						"Every static-mesh submesh must describe non-empty ranges inside the supplied arrays.");
+						"Every static-mesh submesh must describe non-empty in-bounds vertex ranges and in-bounds triangle-list index ranges.");
+				}
+				for (std::uint64_t localIndex = source.IndexOffset; localIndex < indexEnd; ++localIndex)
+				{
+					const std::uint32_t vertexIndex = aDescription.Indices[localIndex];
+					if (vertexIndex < source.VertexOffset || vertexIndex >= vertexEnd)
+					{
+						return Failed(RendererHostStatus::InvalidArgument, "renderer.mesh_submesh_index_vertex_range",
+							"A static-mesh submesh index references a vertex outside that submesh's declared vertex range.");
+					}
 				}
 				elements.push_back({
 					.VertexOffset = source.VertexOffset,
@@ -423,12 +442,21 @@ namespace AGP
 		}
 		try
 		{
-			if (!IsValidTextureInput(aDescription.AlbedoTexture)
-				|| !IsValidTextureInput(aDescription.NormalTexture)
-				|| !IsValidTextureInput(aDescription.MaterialTexture))
+			const std::array textureInputs = {
+				std::pair{ "albedo", aDescription.AlbedoTexture },
+				std::pair{ "normal", aDescription.NormalTexture },
+				std::pair{ "material", aDescription.MaterialTexture }
+			};
+			for (const auto& [slot, path] : textureInputs)
 			{
-				return Failed(RendererHostStatus::InvalidArgument, "renderer.material_texture_invalid",
-					"The lit material requires accessible DDS albedo, normal, and packed material textures.");
+				const bool hasPath = path != nullptr && *path != L'\0';
+				const bool isValid = hasPath && std::filesystem::is_regular_file(path) && IsDdsFile(path);
+				if (!isValid)
+				{
+					const std::string renderedPath = hasPath ? Utf8Path(path) : "<null-or-empty>";
+					return Failed(RendererHostStatus::InvalidArgument, "renderer.material_texture_invalid",
+						std::string("Material texture slot '") + slot + "' requires an accessible DDS path; received: " + renderedPath);
+				}
 			}
 
 			MaterialDescription description;
@@ -547,7 +575,10 @@ namespace AGP
 				camera.NearPlaneCentimeters,
 				camera.FarPlaneCentimeters);
 			internal.Camera.GetTransform().SetPosition(ToVector3(camera.PositionCentimeters));
-			internal.Camera.GetTransform().SetRotation(ToVector3(camera.RotationDegrees));
+			internal.Camera.GetTransform().SetRotation(
+				camera.RotationDegrees.Yaw,
+				camera.RotationDegrees.Pitch,
+				camera.RotationDegrees.Roll);
 			internal.ShadowCasters.reserve(aSnapshot.ItemCount);
 			internal.VisibleRenderItems.reserve(aSnapshot.ItemCount);
 
@@ -559,7 +590,13 @@ namespace AGP
 				if (mesh == ourMeshes.end() || material == ourMaterials.end())
 				{
 					return Failed(RendererHostStatus::InvalidResource, "renderer.scene_resource_not_found",
-						"Every scene item must reference live mesh and material resource handles.");
+						"Scene item " + std::to_string(index)
+						+ " references mesh handle " + std::to_string(source.Mesh)
+						+ " and material handle " + std::to_string(source.Material)
+						+ "; missing: "
+						+ (mesh == ourMeshes.end() ? "mesh" : "")
+						+ (mesh == ourMeshes.end() && material == ourMaterials.end() ? ", " : "")
+						+ (material == ourMaterials.end() ? "material" : "") + ".");
 				}
 				if (!IsFinite(source.Transform.PositionCentimeters)
 					|| !IsFinite(source.Transform.RotationDegrees) || !IsFinite(source.Transform.Scale)
@@ -571,7 +608,10 @@ namespace AGP
 
 				CU::Transform transform;
 				transform.SetPosition(ToVector3(source.Transform.PositionCentimeters));
-				transform.SetRotation(ToVector3(source.Transform.RotationDegrees));
+				transform.SetRotation(
+					source.Transform.RotationDegrees.Yaw,
+					source.Transform.RotationDegrees.Pitch,
+					source.Transform.RotationDegrees.Roll);
 				transform.SetScale(ToVector3(source.Transform.Scale));
 
 				GraphicsEngine::RenderItemSnapshot item;
@@ -613,7 +653,12 @@ namespace AGP
 			internal.Stats.RelevantLights = 1;
 
 			ourSceneCommandList.ResetCommandList();
-			GraphicsEngine::Get().RenderSnapshot(ourSceneCommandList, internal);
+			if (!GraphicsEngine::Get().RenderSnapshot(ourSceneCommandList, internal))
+			{
+				ourSceneCommandList.ResetCommandList();
+				return Failed(RendererHostStatus::SceneSubmissionFailed, "renderer.scene_resource_preparation_failed",
+					"AGP could not prepare every scene mesh for drawing; no scene command list was submitted and scene statistics were not updated.");
+			}
 			ourSceneCommandList.FinishCommandList();
 			if (!ourSceneCommandList.IsReadyForExecution())
 			{
@@ -622,6 +667,12 @@ namespace AGP
 			}
 			GraphicsEngine::Get().ExecuteCommandList(ourSceneCommandList);
 			ourSceneCommandList.ResetCommandList();
+			ourLastSubmittedSceneStats = {
+				.TotalRenderItems = internal.Stats.TotalRenderItems,
+				.VisibleRenderItems = internal.Stats.VisibleRenderItems,
+				.ShadowCasters = internal.Stats.ShadowCasters,
+				.TotalLights = internal.Stats.TotalLights
+			};
 			return Completed();
 		}
 		catch (const std::exception& exception)
@@ -644,13 +695,7 @@ namespace AGP
 		{
 			return {};
 		}
-		const GraphicsEngine::RenderStats stats = GraphicsEngine::Get().GetLastRenderStats();
-		return {
-			.TotalRenderItems = stats.TotalRenderItems,
-			.VisibleRenderItems = stats.VisibleRenderItems,
-			.ShadowCasters = stats.ShadowCasters,
-			.TotalLights = stats.TotalLights
-		};
+		return ourLastSubmittedSceneStats;
 	}
 
 	RendererHostResult PresentRendererHostFrame() noexcept

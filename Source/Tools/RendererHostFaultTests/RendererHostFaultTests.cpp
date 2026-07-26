@@ -92,6 +92,83 @@ int wmain(int aArgumentCount, wchar_t** aArguments)
 			}
 		}
 	}
+	else if (mode == L"scene-resource-preparation")
+	{
+		if (!AGP::InitializeRendererHost(window, shaderRoot.c_str(), environmentTexture.c_str()).Succeeded())
+		{
+			result = Fail("Could not initialize the scene fault-test renderer.");
+		}
+		else
+		{
+			const std::array vertices = {
+				AGP::RendererStaticMeshVertex{ .Position = { -50.0f, -50.0f, 0.0f, 1.0f } },
+				AGP::RendererStaticMeshVertex{ .Position = { 0.0f, 50.0f, 0.0f, 1.0f } },
+				AGP::RendererStaticMeshVertex{ .Position = { 50.0f, -50.0f, 0.0f, 1.0f } }
+			};
+			constexpr std::array<std::uint32_t, 3> indices = { 0, 1, 2 };
+			constexpr std::array submeshes = {
+				AGP::RendererStaticMeshSubmesh{ .VertexCount = 3, .IndexCount = 3 }
+			};
+			const AGP::RendererStaticMeshDescription meshDescription = {
+				.Vertices = vertices.data(),
+				.VertexCount = vertices.size(),
+				.Indices = indices.data(),
+				.IndexCount = indices.size(),
+				.Submeshes = submeshes.data(),
+				.SubmeshCount = submeshes.size()
+			};
+			const std::filesystem::path fixtureRoot = environmentTexture.parent_path();
+			const std::filesystem::path albedoTexture = fixtureRoot / "T_Chest_C.dds";
+			const std::filesystem::path normalTexture = fixtureRoot / "T_Chest_N.dds";
+			const std::filesystem::path materialTexture = fixtureRoot / "T_Chest_M.dds";
+			const AGP::RendererLitMaterialDescription materialDescription = {
+				.AlbedoTexture = albedoTexture.c_str(),
+				.NormalTexture = normalTexture.c_str(),
+				.MaterialTexture = materialTexture.c_str()
+			};
+			AGP::RendererResourceHandle meshHandle = AGP::InvalidRendererResourceHandle;
+			AGP::RendererResourceHandle materialHandle = AGP::InvalidRendererResourceHandle;
+			if (!AGP::CreateRendererStaticMesh(meshDescription, meshHandle).Succeeded()
+				|| !AGP::CreateRendererLitMaterial(materialDescription, materialHandle).Succeeded())
+			{
+				result = Fail("Could not create resources for the scene preparation fault test.");
+			}
+			else
+			{
+				const AGP::RendererSceneItem item = { .Mesh = meshHandle, .Material = materialHandle };
+				const AGP::RendererSceneSnapshot snapshot = {
+					.Camera = {
+						.PositionCentimeters = { 0.0f, 0.0f, -300.0f },
+						.RotationDegrees = { .Yaw = 7.0f, .Pitch = 13.0f, .Roll = 19.0f },
+						.AspectRatio = 640.0f / 360.0f
+					},
+					.Items = &item,
+					.ItemCount = 1
+				};
+				if (!AGP::BeginRendererHostFrame(std::array{ 0.05f, 0.07f, 0.10f, 1.0f }).Succeeded())
+				{
+					result = Fail("Could not begin the scene preparation fault-test frame.");
+				}
+				else
+				{
+					AGP::Testing::SetRendererHostFault(AGP::Testing::RendererHostFault::BeforeMeshBufferPreparation);
+					const AGP::RendererHostResult submission = AGP::RenderRendererSceneSnapshot(snapshot);
+					const AGP::RendererSceneStats stats = AGP::GetRendererSceneStats();
+					if (submission.Status != AGP::RendererHostStatus::SceneSubmissionFailed
+						|| std::string_view(submission.Code) != "renderer.scene_resource_preparation_failed"
+						|| stats.TotalRenderItems != 0 || stats.VisibleRenderItems != 0
+						|| stats.ShadowCasters != 0 || stats.TotalLights != 0)
+					{
+						result = Fail("Scene mesh preparation failure was reported as success or published scene statistics.");
+					}
+					else if (!AGP::PresentRendererHostFrame().Succeeded())
+					{
+						result = Fail("A rejected scene submission left the host frame unusable.");
+					}
+				}
+			}
+		}
+	}
 	else
 	{
 		result = Fail("Unknown fault-test mode.");

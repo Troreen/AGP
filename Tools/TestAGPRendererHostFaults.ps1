@@ -34,4 +34,6 @@ $shaderRoot = Join-Path $bundleRoot 'shaders'
 & $testExecutable $shaderRoot 'partial-init-retry'
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 & $testExecutable $shaderRoot 'resize-recovery'
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+& $testExecutable $shaderRoot 'scene-resource-preparation'
 exit $LASTEXITCODE

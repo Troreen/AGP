@@ -10,7 +10,7 @@ struct ID3D11DeviceContext;
 
 namespace AGP
 {
-	inline constexpr std::string_view RendererHostVersion = "agp-renderer-host/1.2.0";
+	inline constexpr std::string_view RendererHostVersion = "agp-renderer-host/1.3.0";
 	inline constexpr std::string_view SurfaceLitOpaquePreset = "surface_lit_opaque";
 
 	using RendererResourceHandle = std::uint64_t;
@@ -35,6 +35,13 @@ namespace AGP
 		float Y = 0.0f;
 		float Z = 0.0f;
 		float W = 0.0f;
+	};
+
+	struct RendererEulerDegrees
+	{
+		float Yaw = 0.0f;
+		float Pitch = 0.0f;
+		float Roll = 0.0f;
 	};
 
 	struct RendererStaticMeshVertex
@@ -76,7 +83,7 @@ namespace AGP
 	struct RendererTransform
 	{
 		RendererFloat3 PositionCentimeters;
-		RendererFloat3 RotationDegrees;
+		RendererEulerDegrees RotationDegrees;
 		RendererFloat3 Scale = { 1.0f, 1.0f, 1.0f };
 	};
 
@@ -91,7 +98,7 @@ namespace AGP
 	struct RendererPerspectiveCamera
 	{
 		RendererFloat3 PositionCentimeters = { 0.0f, 150.0f, -300.0f };
-		RendererFloat3 RotationDegrees = { 0.0f, 0.0f, 0.0f };
+		RendererEulerDegrees RotationDegrees;
 		float VerticalFieldOfViewDegrees = 60.0f;
 		float AspectRatio = 16.0f / 9.0f;
 		float NearPlaneCentimeters = 1.0f;

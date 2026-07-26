@@ -5,6 +5,7 @@
 #include <array>
 #include <filesystem>
 #include <iostream>
+#include <limits>
 #include <string_view>
 
 namespace
@@ -120,29 +121,105 @@ int wmain(int aArgumentCount, wchar_t** aArguments)
 			.NormalTexture = normalTexture.c_str(),
 			.MaterialTexture = materialTexture.c_str()
 		};
+		auto nonFiniteVertices = vertices;
+		nonFiniteVertices[0].Color.W = (std::numeric_limits<float>::quiet_NaN)();
+		const AGP::RendererStaticMeshDescription nonFiniteDescription = {
+			.Vertices = nonFiniteVertices.data(),
+			.VertexCount = nonFiniteVertices.size(),
+			.Indices = indices.data(),
+			.IndexCount = indices.size(),
+			.Submeshes = submeshes.data(),
+			.SubmeshCount = submeshes.size()
+		};
+		constexpr std::array<std::uint32_t, 2> incompleteTriangleIndices = { 0, 1 };
+		const AGP::RendererStaticMeshDescription incompleteTriangleDescription = {
+			.Vertices = vertices.data(),
+			.VertexCount = vertices.size(),
+			.Indices = incompleteTriangleIndices.data(),
+			.IndexCount = incompleteTriangleIndices.size(),
+			.Submeshes = submeshes.data(),
+			.SubmeshCount = submeshes.size()
+		};
+		constexpr std::array<std::uint32_t, 6> twoTriangleIndices = { 0, 1, 2, 0, 2, 1 };
+		constexpr std::array incompleteSubmeshes = {
+			AGP::RendererStaticMeshSubmesh{ .VertexCount = 3, .IndexCount = 4 }
+		};
+		const AGP::RendererStaticMeshDescription incompleteSubmeshDescription = {
+			.Vertices = vertices.data(),
+			.VertexCount = vertices.size(),
+			.Indices = twoTriangleIndices.data(),
+			.IndexCount = twoTriangleIndices.size(),
+			.Submeshes = incompleteSubmeshes.data(),
+			.SubmeshCount = incompleteSubmeshes.size()
+		};
+		constexpr std::array narrowSubmeshes = {
+			AGP::RendererStaticMeshSubmesh{ .VertexOffset = 1, .VertexCount = 2, .IndexCount = 3 }
+		};
+		const AGP::RendererStaticMeshDescription outOfDeclaredVertexRangeDescription = {
+			.Vertices = vertices.data(),
+			.VertexCount = vertices.size(),
+			.Indices = indices.data(),
+			.IndexCount = indices.size(),
+			.Submeshes = narrowSubmeshes.data(),
+			.SubmeshCount = narrowSubmeshes.size()
+		};
 		if (AGP::CreateRendererStaticMesh({}, meshHandle).Succeeded()
 			|| meshHandle != AGP::InvalidRendererResourceHandle)
 		{
 			result = fail("Renderer host accepted an empty static-mesh description.");
 		}
-		else if (!AGP::CreateRendererStaticMesh(meshDescription, meshHandle).Succeeded()
-			|| !AGP::CreateRendererLitMaterial(materialDescription, materialHandle).Succeeded())
+		else if (std::string_view(AGP::CreateRendererStaticMesh(nonFiniteDescription, meshHandle).Code) != "renderer.mesh_non_finite"
+			|| std::string_view(AGP::CreateRendererStaticMesh(incompleteTriangleDescription, meshHandle).Code) != "renderer.mesh_index_count_not_triangles"
+			|| std::string_view(AGP::CreateRendererStaticMesh(incompleteSubmeshDescription, meshHandle).Code) != "renderer.mesh_submesh_out_of_range"
+			|| std::string_view(AGP::CreateRendererStaticMesh(outOfDeclaredVertexRangeDescription, meshHandle).Code) != "renderer.mesh_submesh_index_vertex_range"
+			|| meshHandle != AGP::InvalidRendererResourceHandle)
 		{
-			result = fail("Renderer host could not create staged scene resources.");
+			result = fail("Renderer host did not match the static-mesh artifact validation boundary.");
 		}
-		else if (AGP::RenderRendererSceneSnapshot({}).Status != AGP::RendererHostStatus::SceneSubmissionFailed)
+		else if (!AGP::CreateRendererStaticMesh(meshDescription, meshHandle).Succeeded())
 		{
-			result = fail("Renderer host accepted scene submission before frame begin.");
+			result = fail("Renderer host could not create a staged static-mesh resource.");
 		}
 		else
 		{
+			const std::filesystem::path missingNormalTexture = fixtureRoot / "missing-normal.dds";
+			const AGP::RendererLitMaterialDescription invalidMaterialDescription = {
+				.AlbedoTexture = albedoTexture.c_str(),
+				.NormalTexture = missingNormalTexture.c_str(),
+				.MaterialTexture = materialTexture.c_str()
+			};
+			const AGP::RendererHostResult invalidMaterial =
+				AGP::CreateRendererLitMaterial(invalidMaterialDescription, materialHandle);
+			if (std::string_view(invalidMaterial.Code) != "renderer.material_texture_invalid"
+				|| std::string_view(invalidMaterial.Message).find("slot 'normal'") == std::string_view::npos
+				|| std::string_view(invalidMaterial.Message).find("missing-normal.dds") == std::string_view::npos
+				|| std::char_traits<char>::length(invalidMaterial.Message) >= sizeof(invalidMaterial.Message)
+				|| materialHandle != AGP::InvalidRendererResourceHandle)
+			{
+				result = fail("Material diagnostics did not retain the exact slot/path in a bounded result.");
+			}
+			else if (!AGP::CreateRendererLitMaterial(materialDescription, materialHandle).Succeeded())
+			{
+				result = fail("Renderer host could not create a staged material resource.");
+			}
+		}
+		if (result == 0 && AGP::RenderRendererSceneSnapshot({}).Status != AGP::RendererHostStatus::SceneSubmissionFailed)
+		{
+			result = fail("Renderer host accepted scene submission before frame begin.");
+		}
+		else if (result == 0)
+		{
 			const AGP::RendererSceneItem item = {
 				.Mesh = meshHandle,
-				.Material = materialHandle
+				.Material = materialHandle,
+				.Transform = {
+					.RotationDegrees = { .Yaw = 11.0f, .Pitch = 22.0f, .Roll = 33.0f }
+				}
 			};
 			const AGP::RendererSceneSnapshot snapshot = {
 				.Camera = {
 					.PositionCentimeters = { 0.0f, 0.0f, -300.0f },
+					.RotationDegrees = { .Yaw = 7.0f, .Pitch = 13.0f, .Roll = 19.0f },
 					.VerticalFieldOfViewDegrees = 60.0f,
 					.AspectRatio = 640.0f / 360.0f,
 					.NearPlaneCentimeters = 1.0f,
@@ -151,9 +228,28 @@ int wmain(int aArgumentCount, wchar_t** aArguments)
 				.Items = &item,
 				.ItemCount = 1
 			};
-			if (!AGP::BeginRendererHostFrame(std::array{ 0.05f, 0.07f, 0.10f, 1.0f }).Succeeded()
-				|| !AGP::RenderRendererSceneSnapshot(snapshot).Succeeded()
-				|| !AGP::PresentRendererHostFrame().Succeeded())
+			const std::array invalidItems = {
+				item,
+				AGP::RendererSceneItem{ .Mesh = 999, .Material = 888 }
+			};
+			AGP::RendererSceneSnapshot invalidSnapshot = snapshot;
+			invalidSnapshot.Items = invalidItems.data();
+			invalidSnapshot.ItemCount = invalidItems.size();
+			if (!AGP::BeginRendererHostFrame(std::array{ 0.05f, 0.07f, 0.10f, 1.0f }).Succeeded())
+			{
+				result = fail("The renderer host could not begin a staged scene frame.");
+			}
+			const AGP::RendererHostResult invalidScene = AGP::RenderRendererSceneSnapshot(invalidSnapshot);
+			if (result == 0 && (std::string_view(invalidScene.Code) != "renderer.scene_resource_not_found"
+				|| std::string_view(invalidScene.Message).find("Scene item 1") == std::string_view::npos
+				|| std::string_view(invalidScene.Message).find("mesh handle 999") == std::string_view::npos
+				|| std::string_view(invalidScene.Message).find("material handle 888") == std::string_view::npos
+				|| std::char_traits<char>::length(invalidScene.Message) >= sizeof(invalidScene.Message)))
+			{
+				result = fail("Scene diagnostics did not retain the item and offending handles in a bounded result.");
+			}
+			else if (result == 0 && (!AGP::RenderRendererSceneSnapshot(snapshot).Succeeded()
+				|| !AGP::PresentRendererHostFrame().Succeeded()))
 			{
 				result = fail("The renderer host could not submit and present a scene snapshot.");
 			}
