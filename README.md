@@ -25,11 +25,16 @@ C++20 / DirectX 11 graphics programming project for the AGP assignments. The cur
 - `Source/Utilities` - logging, camera controller, string helpers, common utilities glue.
 - `CommonUtilities/include` - math, input, timer, and utility types.
 - `Assets` - runtime meshes, animations, textures, and copied shader files.
+- `Docs/RendererHost.md` - staged native-window/D3D11 consumer contract and verification.
 - `assignment_4_2_shadow_mapping_translation_and_md.md` - assignment notes and translated lecture guidance.
 
 ## Build
 
 Open `AGP.sln` in Visual Studio and build the `Debug | x64` or `Release | x64` configuration.
+
+Editor and tool hosts consume the renderer through the staged bundle documented in
+[Docs/RendererHost.md](Docs/RendererHost.md), rather than including AGP checkout
+paths directly.
 
 The runtime layout keeps executables under `Bin/<Configuration>` and assets under the repository-level `Assets` directory. ModelViewer resolves this layout relative to its executable, so it does not require a special working directory.
 

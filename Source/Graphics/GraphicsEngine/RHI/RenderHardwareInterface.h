@@ -30,6 +30,13 @@ class FrameBenchmarkSession;
 class RenderHardwareInterface
 {
 public:	
+	enum class ResizeBackBufferResult
+	{
+		Completed,
+		FailedTargetsPreserved,
+		FailedTargetsUnavailable
+	};
+
 	RenderHardwareInterface();
 	~RenderHardwareInterface();
 
@@ -51,8 +58,12 @@ public:
 	bool CreateSampler(const SamplerDescription& aDescription, Sampler& outSampler) const; 
 
 	void ExecuteCommandList(const GraphicsCommandList& aCommandList) const;
+	bool BeginBackBufferFrame(const Texture& aBackBuffer, const Texture& aDepthStencil, const std::array<float, 4>& aClearColor) const;
+	ResizeBackBufferResult ResizeBackBuffer(unsigned aWidth, unsigned aHeight, Texture& outBackBuffer, Texture& outDepthStencil);
+	ID3D11Device* GetNativeDevice() const { return myDevice.Get(); }
+	ID3D11DeviceContext* GetNativeImmediateContext() const { return myContext.Get(); }
 	
-	void Present() const; 
+	bool Present() const;
 	
 	bool CompileShader(ShaderType aShaderType, const std::filesystem::path& aPath, ID3DInclude* aIncludeHandler, bool aCompileDebug, Shader& outShader) const;
 

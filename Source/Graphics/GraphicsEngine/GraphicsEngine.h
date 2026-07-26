@@ -105,10 +105,11 @@ public:
 	static GraphicsEngine& Get();
 
 	bool Initialize(HWND aWindowHandle, const std::filesystem::path& aShaderRoot);
+	bool Initialize(HWND aWindowHandle, const std::filesystem::path& aShaderRoot, const std::filesystem::path& aEnvironmentTexture);
 	void Render(GraphicsCommandList& inoutCommandList, const Actor& aCameraActor, const World& aWorld);
 	bool BuildRenderSnapshot(const Actor& aCameraActor, const World& aWorld, RenderSceneSnapshot& outSnapshot) const;
 	void RenderSnapshot(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot);
-	void Present() const;
+	bool Present() const;
 
 	template <class T>
 	bool CreateConstantBuffer(ConstantBuffer aBufferId, std::string_view aName) 
@@ -129,6 +130,10 @@ public:
 	
 	bool CreateCommandList(std::string_view aName, GraphicsCommandList& outCommandList) const;
 	void ExecuteCommandList(const GraphicsCommandList& aCommandList) const;
+	bool BeginBackBufferFrame(const std::array<float, 4>& aClearColor) const;
+	RenderHardwareInterface::ResizeBackBufferResult ResizeBackBuffer(unsigned aWidth, unsigned aHeight);
+	ID3D11Device* GetNativeDevice() const;
+	ID3D11DeviceContext* GetNativeImmediateContext() const;
 	RenderStats GetLastRenderStats() const;
 
 	bool CreateMaterial(const MaterialDescription& aDescription, Material& outMaterial) const;
@@ -149,7 +154,7 @@ private:
 	bool UpdateAndSetConstantBufferInternal(GraphicsCommandList& inoutCommandList, ConstantBuffer aBufferId, const void* aData, size_t aDataSize, unsigned aSlot, PipeLineStages aStages);
 
 	void CreateMaterialTextureSlots(const RHIShaderReflectionInfo& aShaderInfo, Material& inoutMaterial) const;
-	bool CreatePBLResources();
+	bool CreatePBLResources(const std::filesystem::path& aEnvironmentTexture);
 	bool CreateBRDFLUT();
 	void BindPBLResources(GraphicsCommandList& inoutCommandList) const;
 	bool CreateShadowResources();

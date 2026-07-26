@@ -1,4 +1,8 @@
 #include "GraphicsEngine.pch.h"
+
+#if defined(AGP_RENDERER_HOST_TEST_FAULTS)
+#include "GraphicsEngine/RendererHostFaultInjection.h"
+#endif
 #include "RenderHardwareInterface.h"
 
 #include <d3dcompiler.h>
@@ -229,6 +233,98 @@ CommonUtilities::Vector2u RenderHardwareInterface::GetClientSize() const
 	const unsigned height = clientRect.bottom - clientRect.top;
 
 	return { width, height };
+}
+
+RenderHardwareInterface::ResizeBackBufferResult RenderHardwareInterface::ResizeBackBuffer(
+	unsigned aWidth,
+	unsigned aHeight,
+	Texture& outBackBuffer,
+	Texture& outDepthStencil)
+{
+	if (!myDevice || !myContext || !mySwapChain || aWidth == 0 || aHeight == 0)
+	{
+		return ResizeBackBufferResult::FailedTargetsPreserved;
+	}
+
+	// Depth resources do not depend on the swapchain. Build them before releasing
+	// the live backbuffer so an allocation failure leaves the current frame targets
+	// completely intact.
+	Texture candidateDepthStencil;
+	D3D11_TEXTURE2D_DESC depthDesc = {};
+	depthDesc.Width = aWidth;
+	depthDesc.Height = aHeight;
+	depthDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+	depthDesc.Usage = D3D11_USAGE_DEFAULT;
+	depthDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	depthDesc.ArraySize = 1;
+	depthDesc.MipLevels = 1;
+	depthDesc.SampleDesc.Count = 1;
+	ComPtr<ID3D11Texture2D> depthTexture;
+	HRESULT result = myDevice->CreateTexture2D(&depthDesc, nullptr, &depthTexture);
+	if (FAILED(result))
+	{
+		LOG(RhiLog, Error, "Failed to create a candidate resized depth texture.");
+		return ResizeBackBufferResult::FailedTargetsPreserved;
+	}
+	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
+	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	result = myDevice->CreateDepthStencilView(depthTexture.Get(), &dsvDesc, &candidateDepthStencil.myDSV);
+	if (FAILED(result))
+	{
+		LOG(RhiLog, Error, "Failed to create a candidate resized depth-stencil view.");
+		return ResizeBackBufferResult::FailedTargetsPreserved;
+	}
+	SetObjectName(depthTexture, "DepthStencil_T2D");
+	SetObjectName(candidateDepthStencil.myDSV, "DepthStencil_DSV");
+
+	myContext->OMSetRenderTargets(0, nullptr, nullptr);
+	outBackBuffer.myRTV.Reset();
+	outBackBuffer.myResource.Reset();
+	outBackBuffer.mySRV.Reset();
+	myContext->Flush();
+
+	result = mySwapChain->ResizeBuffers(0, aWidth, aHeight, DXGI_FORMAT_UNKNOWN, DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING);
+	if (FAILED(result))
+	{
+		LOG(RhiLog, Error, "Failed to resize swapchain buffers to {}x{}.", aWidth, aHeight);
+		ComPtr<ID3D11Texture2D> restoredBackBufferTexture;
+		if (SUCCEEDED(mySwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &restoredBackBufferTexture))
+			&& SUCCEEDED(myDevice->CreateRenderTargetView(restoredBackBufferTexture.Get(), nullptr, &outBackBuffer.myRTV)))
+		{
+			SetObjectName(restoredBackBufferTexture, "BackBuffer_T2D");
+			SetObjectName(outBackBuffer.myRTV, "BackBufferRTV");
+			return ResizeBackBufferResult::FailedTargetsPreserved;
+		}
+		return ResizeBackBufferResult::FailedTargetsUnavailable;
+	}
+
+#if defined(AGP_RENDERER_HOST_TEST_FAULTS)
+	if (AGP::Testing::ConsumeRendererHostFault(AGP::Testing::RendererHostFault::AfterSwapchainResize))
+	{
+		LOG(RhiLog, Warning, "Injected renderer-host resize failure after swapchain resize.");
+		return ResizeBackBufferResult::FailedTargetsUnavailable;
+	}
+#endif
+
+	ComPtr<ID3D11Texture2D> backBufferTexture;
+	result = mySwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &backBufferTexture);
+	Texture candidateBackBuffer;
+	if (FAILED(result)
+		|| FAILED(myDevice->CreateRenderTargetView(backBufferTexture.Get(), nullptr, &candidateBackBuffer.myRTV)))
+	{
+		LOG(RhiLog, Error, "Failed to recreate the resized backbuffer view.");
+		return ResizeBackBufferResult::FailedTargetsUnavailable;
+	}
+	SetObjectName(backBufferTexture, "BackBuffer_T2D");
+	SetObjectName(candidateBackBuffer.myRTV, "BackBufferRTV");
+
+	const Viewport viewport = { 0, 0, static_cast<float>(aWidth), static_cast<float>(aHeight), 0, 1 };
+	candidateBackBuffer.myViewport = viewport;
+	candidateDepthStencil.myViewport = viewport;
+	outBackBuffer = candidateBackBuffer;
+	outDepthStencil = candidateDepthStencil;
+	return ResizeBackBufferResult::Completed;
 }
 
 bool RenderHardwareInterface::CreateVertexBuffer(std::string_view aName, const std::vector<Vertex> &aVertexList, Buffer &outBuffer) const
@@ -748,16 +844,41 @@ void RenderHardwareInterface::ExecuteCommandList(const GraphicsCommandList &aCom
 	myContext->ExecuteCommandList(aCommandList.myCommandList.Get(), false);
 }
 
-void RenderHardwareInterface::Present() const
+bool RenderHardwareInterface::BeginBackBufferFrame(
+	const Texture& aBackBuffer,
+	const Texture& aDepthStencil,
+	const std::array<float, 4>& aClearColor) const
+{
+	if (!myContext || !aBackBuffer.myRTV || !aDepthStencil.myDSV)
+	{
+		return false;
+	}
+
+	myContext->ClearRenderTargetView(aBackBuffer.myRTV.Get(), aClearColor.data());
+	myContext->ClearDepthStencilView(aDepthStencil.myDSV.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	ID3D11RenderTargetView* renderTarget = aBackBuffer.myRTV.Get();
+	myContext->OMSetRenderTargets(1, &renderTarget, aDepthStencil.myDSV.Get());
+	const D3D11_VIEWPORT viewport = {
+		aBackBuffer.myViewport.TopLeftX,
+		aBackBuffer.myViewport.TopLeftY,
+		aBackBuffer.myViewport.Width,
+		aBackBuffer.myViewport.Height,
+		aBackBuffer.myViewport.MinDepth,
+		aBackBuffer.myViewport.MaxDepth
+	};
+	myContext->RSSetViewports(1, &viewport);
+	return true;
+}
+
+bool RenderHardwareInterface::Present() const
 {
 	if (!myFrameBenchmark)
 	{
-		mySwapChain->Present(0, DXGI_PRESENT_ALLOW_TEARING);
-		return;
+		return SUCCEEDED(mySwapChain->Present(0, DXGI_PRESENT_ALLOW_TEARING));
 	}
 
 	const FrameBenchmarkSession::Clock::time_point presentStart = FrameBenchmarkSession::Clock::now();
-	mySwapChain->Present(0, DXGI_PRESENT_ALLOW_TEARING);
+	const HRESULT presentResult = mySwapChain->Present(0, DXGI_PRESENT_ALLOW_TEARING);
 	const FrameBenchmarkSession::Clock::time_point presentEnd = FrameBenchmarkSession::Clock::now();
 
 	if (myFrameBenchmark->RecordPresent(presentStart, presentEnd))
@@ -774,6 +895,7 @@ void RenderHardwareInterface::Present() const
 		}
 		PostMessageW(myWindowHandle, WM_CLOSE, 0, 0);
 	}
+	return SUCCEEDED(presentResult);
 }
 
 bool RenderHardwareInterface::CompileShader(ShaderType aShaderType, const std::filesystem::path &aPath, 

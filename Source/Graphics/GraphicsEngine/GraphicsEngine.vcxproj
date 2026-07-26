@@ -198,6 +198,11 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
       <Outputs>*.hlsl*</Outputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(RendererHostFaultInjection)'=='true'">
+    <ClCompile>
+      <PreprocessorDefinitions>AGP_RENDERER_HOST_TEST_FAULTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ConstantBuffers\FrameBuffer.h" />
     <ClInclude Include="ConstantBuffers\AnimationBuffer.h" />
@@ -212,6 +217,8 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
     <ClInclude Include="Objects\Camera.h" />
     <ClInclude Include="Objects\Buffer.h" />
     <ClInclude Include="GraphicsEngine.h" />
+	<ClInclude Include="RendererHost.h" />
+	<ClInclude Include="RendererHostFaultInjection.h" />
     <ClInclude Include="GraphicsEngine.pch.h" />
     <ClInclude Include="Objects\Sampler.h" />
     <ClInclude Include="Objects\Texture.h" />
@@ -240,6 +247,7 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
     <ClCompile Include="Objects\Camera.cpp" />
     <ClCompile Include="Objects\Buffer.cpp" />
     <ClCompile Include="GraphicsEngine.cpp" />
+	<ClCompile Include="RendererHost.cpp" />
     <ClCompile Include="GraphicsEngine.pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
