@@ -58,6 +58,9 @@ $files = @(
     @{ Source = (Join-Path $repoRoot "Lib\$Configuration\Logger.lib"); Relative = 'lib/Logger.lib'; Role = 'static_library' },
     @{ Source = (Join-Path $repoRoot "CommonUtilities\lib\$commonUtilitiesLibrary"); Relative = 'lib/CommonUtilities.lib'; Role = 'static_library' },
     @{ Source = (Join-Path $repoRoot 'Assets\Textures\T_Shipyard.dds'); Relative = 'fixtures/T_Shipyard.dds'; Role = 'test_fixture' }
+    @{ Source = (Join-Path $repoRoot 'Assets\Textures\T_Chest_C.dds'); Relative = 'fixtures/T_Chest_C.dds'; Role = 'test_fixture' }
+    @{ Source = (Join-Path $repoRoot 'Assets\Textures\T_Chest_N.dds'); Relative = 'fixtures/T_Chest_N.dds'; Role = 'test_fixture' }
+    @{ Source = (Join-Path $repoRoot 'Assets\Textures\T_Chest_M.dds'); Relative = 'fixtures/T_Chest_M.dds'; Role = 'test_fixture' }
 )
 $shaderRoot = Join-Path $repoRoot 'Source\Graphics\GraphicsEngine\Shaders'
 foreach ($shader in Get-ChildItem -LiteralPath $shaderRoot -Recurse -File | Sort-Object FullName) {

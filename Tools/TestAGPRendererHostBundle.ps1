@@ -27,6 +27,7 @@ $forbiddenFaultSurfaces = @(
     'ConsumeRendererHostFault',
     'AfterGraphicsInitialize',
     'AfterSwapchainResize',
+	'BeforeMeshBufferPreparation',
     'renderer.initialization_injected_failure',
     'Injected failure after AGP created its renderer resources',
     'Injected renderer-host resize failure after swapchain resize'

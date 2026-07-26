@@ -1,14 +1,24 @@
 #include "GraphicsEngine.pch.h"
 
 #include "RendererHost.h"
+#include "GameFramework/LightComponent.h"
+#include "Materials/Material.h"
+#include "Objects/Mesh.h"
+#include "Objects/Vertex.h"
 
 #if defined(AGP_RENDERER_HOST_TEST_FAULTS)
 #include "RendererHostFaultInjection.h"
 #endif
 
+#include <algorithm>
+#include <cmath>
 #include <filesystem>
 #include <fstream>
+#include <limits>
+#include <memory>
 #include <string>
+#include <unordered_map>
+#include <vector>
 #include <Windows.h>
 
 namespace AGP
@@ -49,6 +59,14 @@ namespace AGP
 		};
 
 		HostState ourHostState = HostState::Uninitialized;
+		std::filesystem::path ourShaderRoot;
+		GraphicsCommandList ourSceneCommandList;
+		bool ourSceneCommandListReady = false;
+		bool ourFrameBegun = false;
+		RendererResourceHandle ourNextResourceHandle = 1;
+		std::unordered_map<RendererResourceHandle, std::shared_ptr<Mesh>> ourMeshes;
+		std::unordered_map<RendererResourceHandle, std::shared_ptr<Material>> ourMaterials;
+		RendererSceneStats ourLastSubmittedSceneStats;
 
 		RendererHostResult Completed()
 		{
@@ -91,6 +109,45 @@ namespace AGP
 			}
 			return Failed(RendererHostStatus::NotInitialized, "renderer.not_initialized",
 				std::string("AGP cannot ") + aOperation + " before renderer initialization succeeds.");
+		}
+
+		bool IsFinite(float aValue)
+		{
+			return std::isfinite(aValue);
+		}
+
+		bool IsFinite(const RendererFloat3& aValue)
+		{
+			return IsFinite(aValue.X) && IsFinite(aValue.Y) && IsFinite(aValue.Z);
+		}
+
+		bool IsFinite(const RendererEulerDegrees& aValue)
+		{
+			return IsFinite(aValue.Yaw) && IsFinite(aValue.Pitch) && IsFinite(aValue.Roll);
+		}
+
+		CU::Vector3f ToVector3(const RendererFloat3& aValue)
+		{
+			return { aValue.X, aValue.Y, aValue.Z };
+		}
+
+		RendererResourceHandle AllocateResourceHandle()
+		{
+			while (ourNextResourceHandle == InvalidRendererResourceHandle
+				|| ourMeshes.contains(ourNextResourceHandle)
+				|| ourMaterials.contains(ourNextResourceHandle))
+			{
+				++ourNextResourceHandle;
+			}
+			return ourNextResourceHandle++;
+		}
+
+		float MaxAxisScale(const CU::Matrix4f& aTransform)
+		{
+			const CU::Vector3f axisX(aTransform(1, 1), aTransform(1, 2), aTransform(1, 3));
+			const CU::Vector3f axisY(aTransform(2, 1), aTransform(2, 2), aTransform(2, 3));
+			const CU::Vector3f axisZ(aTransform(3, 1), aTransform(3, 2), aTransform(3, 3));
+			return (std::max)({ axisX.Length(), axisY.Length(), axisZ.Length() });
 		}
 	}
 
@@ -173,6 +230,14 @@ namespace AGP
 						"Injected failure after AGP created its renderer resources; restart is required before retrying.");
 				}
 #endif
+				if (!GraphicsEngine::Get().CreateCommandList("Renderer Host Scene", ourSceneCommandList))
+				{
+					return Failed(RendererHostStatus::InitializationFailed, "renderer.scene_command_list_failed",
+						"AGP created the renderer but could not create its scene command list; restart the process.");
+				}
+				ourShaderRoot = shaderRoot;
+				ourSceneCommandListReady = true;
+				ourLastSubmittedSceneStats = {};
 				ourHostState = HostState::Ready;
 				return Completed();
 			}
@@ -207,6 +272,7 @@ namespace AGP
 
 	RendererHostResult ResizeRendererHost(unsigned aWidth, unsigned aHeight) noexcept
 	{
+		ourFrameBegun = false;
 		if (aWidth == 0 || aHeight == 0)
 		{
 			return Failed(RendererHostStatus::InvalidArgument, "renderer.invalid_size", "Renderer dimensions must both be greater than zero.");
@@ -241,8 +307,240 @@ namespace AGP
 		}
 	}
 
+	RendererHostResult CreateRendererStaticMesh(
+		const RendererStaticMeshDescription& aDescription,
+		RendererResourceHandle& outHandle) noexcept
+	{
+		outHandle = InvalidRendererResourceHandle;
+		if (ourHostState != HostState::Ready)
+		{
+			return NotReady("create a static-mesh resource");
+		}
+		if (aDescription.Vertices == nullptr || aDescription.VertexCount == 0
+			|| aDescription.Indices == nullptr || aDescription.IndexCount == 0
+			|| aDescription.Submeshes == nullptr || aDescription.SubmeshCount == 0)
+		{
+			return Failed(RendererHostStatus::InvalidArgument, "renderer.mesh_data_required",
+				"Static-mesh creation requires non-empty vertex, index, and submesh arrays.");
+		}
+		if (aDescription.VertexCount > (std::numeric_limits<unsigned>::max)()
+			|| aDescription.IndexCount > (std::numeric_limits<unsigned>::max)())
+		{
+			return Failed(RendererHostStatus::InvalidArgument, "renderer.mesh_data_too_large",
+				"Static-mesh vertex and index counts must fit 32-bit renderer ranges.");
+		}
+		if (aDescription.IndexCount % 3 != 0)
+		{
+			return Failed(RendererHostStatus::InvalidArgument, "renderer.mesh_index_count_not_triangles",
+				"Static-mesh indices must form a complete triangle list.");
+		}
+
+		try
+		{
+			std::vector<Vertex> vertices;
+			vertices.reserve(aDescription.VertexCount);
+			for (std::size_t index = 0; index < aDescription.VertexCount; ++index)
+			{
+				const RendererStaticMeshVertex& source = aDescription.Vertices[index];
+				if (!IsFinite(source.Position.X) || !IsFinite(source.Position.Y)
+					|| !IsFinite(source.Position.Z) || !IsFinite(source.Position.W)
+					|| !IsFinite(source.Color.X) || !IsFinite(source.Color.Y)
+					|| !IsFinite(source.Color.Z) || !IsFinite(source.Color.W)
+					|| !IsFinite(source.UV0.X) || !IsFinite(source.UV0.Y)
+					|| !IsFinite(source.UV1.X) || !IsFinite(source.UV1.Y)
+					|| !IsFinite(RendererFloat3{ source.Normal.X, source.Normal.Y, source.Normal.Z })
+					|| !IsFinite(RendererFloat3{ source.Tangent.X, source.Tangent.Y, source.Tangent.Z }))
+				{
+					return Failed(RendererHostStatus::InvalidArgument, "renderer.mesh_non_finite",
+						"Every static-mesh vertex component must contain a finite value.");
+				}
+				Vertex vertex;
+				vertex.Position = { source.Position.X, source.Position.Y, source.Position.Z, source.Position.W };
+				vertex.Color = { source.Color.X, source.Color.Y, source.Color.Z, source.Color.W };
+				vertex.UV0 = { source.UV0.X, source.UV0.Y };
+				vertex.UV1 = { source.UV1.X, source.UV1.Y };
+				vertex.Normal = { source.Normal.X, source.Normal.Y, source.Normal.Z };
+				vertex.Tangent = { source.Tangent.X, source.Tangent.Y, source.Tangent.Z };
+				vertices.emplace_back(vertex);
+			}
+
+			std::vector<unsigned> indices;
+			indices.reserve(aDescription.IndexCount);
+			for (std::size_t index = 0; index < aDescription.IndexCount; ++index)
+			{
+				if (aDescription.Indices[index] >= aDescription.VertexCount)
+				{
+					return Failed(RendererHostStatus::InvalidArgument, "renderer.mesh_index_out_of_range",
+						"Static-mesh indices must reference an available vertex.");
+				}
+				indices.emplace_back(aDescription.Indices[index]);
+			}
+
+			std::vector<Mesh::Element> elements;
+			elements.reserve(aDescription.SubmeshCount);
+			for (std::size_t index = 0; index < aDescription.SubmeshCount; ++index)
+			{
+				const RendererStaticMeshSubmesh& source = aDescription.Submeshes[index];
+				const std::uint64_t vertexEnd = static_cast<std::uint64_t>(source.VertexOffset) + source.VertexCount;
+				const std::uint64_t indexEnd = static_cast<std::uint64_t>(source.IndexOffset) + source.IndexCount;
+				if (source.VertexCount == 0 || source.IndexCount == 0 || source.IndexCount % 3 != 0
+					|| vertexEnd > aDescription.VertexCount || indexEnd > aDescription.IndexCount)
+				{
+					return Failed(RendererHostStatus::InvalidArgument, "renderer.mesh_submesh_out_of_range",
+						"Every static-mesh submesh must describe non-empty in-bounds vertex ranges and in-bounds triangle-list index ranges.");
+				}
+				for (std::uint64_t localIndex = source.IndexOffset; localIndex < indexEnd; ++localIndex)
+				{
+					const std::uint32_t vertexIndex = aDescription.Indices[localIndex];
+					if (vertexIndex < source.VertexOffset || vertexIndex >= vertexEnd)
+					{
+						return Failed(RendererHostStatus::InvalidArgument, "renderer.mesh_submesh_index_vertex_range",
+							"A static-mesh submesh index references a vertex outside that submesh's declared vertex range.");
+					}
+				}
+				elements.push_back({
+					.VertexOffset = source.VertexOffset,
+					.IndexOffset = source.IndexOffset,
+					.NumVertices = source.VertexCount,
+					.NumIndices = source.IndexCount,
+					.MaterialIndex = 0
+				});
+			}
+
+			const RendererResourceHandle handle = AllocateResourceHandle();
+			auto mesh = std::make_shared<Mesh>();
+			mesh->Initialize("renderer-host-mesh", std::move(elements), std::move(vertices), std::move(indices));
+			ourMeshes.emplace(handle, std::move(mesh));
+			outHandle = handle;
+			return Completed();
+		}
+		catch (const std::exception& exception)
+		{
+			return Failed(RendererHostStatus::ResourceCreationFailed, "renderer.mesh_creation_exception",
+				std::string("AGP threw while creating a static-mesh resource: ") + exception.what());
+		}
+		catch (...)
+		{
+			return Failed(RendererHostStatus::ResourceCreationFailed, "renderer.mesh_creation_exception",
+				"AGP threw an unknown exception while creating a static-mesh resource.");
+		}
+	}
+
+	RendererHostResult CreateRendererLitMaterial(
+		const RendererLitMaterialDescription& aDescription,
+		RendererResourceHandle& outHandle) noexcept
+	{
+		outHandle = InvalidRendererResourceHandle;
+		if (ourHostState != HostState::Ready)
+		{
+			return NotReady("create a material resource");
+		}
+		if (aDescription.Preset != SurfaceLitOpaquePreset)
+		{
+			return Failed(RendererHostStatus::InvalidArgument, "renderer.material_preset_unsupported",
+				"The renderer host supports only the surface_lit_opaque material preset in this contract.");
+		}
+		try
+		{
+			const std::array textureInputs = {
+				std::pair{ "albedo", aDescription.AlbedoTexture },
+				std::pair{ "normal", aDescription.NormalTexture },
+				std::pair{ "material", aDescription.MaterialTexture }
+			};
+			for (const auto& [slot, path] : textureInputs)
+			{
+				const bool hasPath = path != nullptr && *path != L'\0';
+				const bool isValid = hasPath && std::filesystem::is_regular_file(path) && IsDdsFile(path);
+				if (!isValid)
+				{
+					const std::string renderedPath = hasPath ? Utf8Path(path) : "<null-or-empty>";
+					return Failed(RendererHostStatus::InvalidArgument, "renderer.material_texture_invalid",
+						std::string("Material texture slot '") + slot + "' requires an accessible DDS path; received: " + renderedPath);
+				}
+			}
+
+			MaterialDescription description;
+			description.Name = "renderer-host-surface-lit-opaque";
+			description.Domain = MaterialDomain::Surface;
+			description.ShadingModel = ShadingModel::Lit;
+			description.BlendMode = BlendMode::Opaque;
+			description.MaterialShaderCode = ourShaderRoot / "Material" / "Material.hlsli";
+			description.AlbedoTexture = aDescription.AlbedoTexture;
+			description.NormalTexture = aDescription.NormalTexture;
+			description.MaterialTexture = aDescription.MaterialTexture;
+
+			auto material = std::make_shared<Material>();
+			const GraphicsEngine::MaterialCreationResult creationResult =
+				GraphicsEngine::Get().CreateMaterialWithExactTextures(description, *material);
+			if (creationResult != GraphicsEngine::MaterialCreationResult::Completed)
+			{
+				const char* failedSlot = nullptr;
+				const wchar_t* failedPath = nullptr;
+				switch (creationResult)
+				{
+				case GraphicsEngine::MaterialCreationResult::AlbedoTextureFailed:
+					failedSlot = "albedo";
+					failedPath = aDescription.AlbedoTexture;
+					break;
+				case GraphicsEngine::MaterialCreationResult::NormalTextureFailed:
+					failedSlot = "normal";
+					failedPath = aDescription.NormalTexture;
+					break;
+				case GraphicsEngine::MaterialCreationResult::MaterialTextureFailed:
+					failedSlot = "material";
+					failedPath = aDescription.MaterialTexture;
+					break;
+				default:
+					break;
+				}
+				if (failedSlot != nullptr && failedPath != nullptr)
+				{
+					return Failed(RendererHostStatus::ResourceCreationFailed, "renderer.material_texture_load_failed",
+						std::string("Material texture slot '") + failedSlot
+						+ "' could not be decoded from exact DDS path: " + Utf8Path(failedPath));
+				}
+				return Failed(RendererHostStatus::ResourceCreationFailed, "renderer.material_creation_failed",
+					"AGP could not compile the surface_lit_opaque preset.");
+			}
+			const RendererResourceHandle handle = AllocateResourceHandle();
+			ourMaterials.emplace(handle, std::move(material));
+			outHandle = handle;
+			return Completed();
+		}
+		catch (const std::exception& exception)
+		{
+			return Failed(RendererHostStatus::ResourceCreationFailed, "renderer.material_creation_exception",
+				std::string("AGP threw while creating a material resource: ") + exception.what());
+		}
+		catch (...)
+		{
+			return Failed(RendererHostStatus::ResourceCreationFailed, "renderer.material_creation_exception",
+				"AGP threw an unknown exception while creating a material resource.");
+		}
+	}
+
+	RendererHostResult ReleaseRendererResource(RendererResourceHandle aHandle) noexcept
+	{
+		if (ourHostState != HostState::Ready)
+		{
+			return NotReady("release a renderer resource");
+		}
+		if (aHandle == InvalidRendererResourceHandle)
+		{
+			return Failed(RendererHostStatus::InvalidArgument, "renderer.resource_handle_invalid",
+				"A non-zero renderer resource handle is required.");
+		}
+		if (ourMeshes.erase(aHandle) == 0 && ourMaterials.erase(aHandle) == 0)
+		{
+			return Failed(RendererHostStatus::InvalidResource, "renderer.resource_not_found",
+				"The renderer resource handle is not live.");
+		}
+		return Completed();
+	}
+
 	RendererHostResult BeginRendererHostFrame(const std::array<float, 4>& aClearColor) noexcept
 	{
+		ourFrameBegun = false;
 		if (ourHostState != HostState::Ready)
 		{
 			return NotReady("begin a frame");
@@ -251,6 +549,7 @@ namespace AGP
 		{
 			if (GraphicsEngine::Get().BeginBackBufferFrame(aClearColor))
 			{
+				ourFrameBegun = true;
 				return Completed();
 			}
 			return Failed(RendererHostStatus::NotInitialized, "renderer.not_initialized", "AGP cannot begin a frame before renderer initialization succeeds.");
@@ -261,6 +560,171 @@ namespace AGP
 		}
 	}
 
+	RendererHostResult RenderRendererSceneSnapshot(const RendererSceneSnapshot& aSnapshot) noexcept
+	{
+		if (ourHostState != HostState::Ready)
+		{
+			return NotReady("render a scene snapshot");
+		}
+		if (!ourFrameBegun || !ourSceneCommandListReady)
+		{
+			return Failed(RendererHostStatus::SceneSubmissionFailed, "renderer.frame_not_begun",
+				"BeginRendererHostFrame must succeed before scene snapshot submission.");
+		}
+		if ((aSnapshot.Items == nullptr) != (aSnapshot.ItemCount == 0))
+		{
+			return Failed(RendererHostStatus::InvalidArgument, "renderer.scene_items_invalid",
+				"Scene items must provide either a non-null array with a positive count or an empty null range.");
+		}
+		if (aSnapshot.ItemCount > (std::numeric_limits<std::uint32_t>::max)())
+		{
+			return Failed(RendererHostStatus::InvalidArgument, "renderer.scene_too_large",
+				"Scene snapshot item count must fit the renderer's 32-bit statistics contract.");
+		}
+		const RendererPerspectiveCamera& camera = aSnapshot.Camera;
+		if (!IsFinite(camera.PositionCentimeters) || !IsFinite(camera.RotationDegrees)
+			|| !IsFinite(camera.VerticalFieldOfViewDegrees) || camera.VerticalFieldOfViewDegrees <= 1.0f
+			|| camera.VerticalFieldOfViewDegrees >= 179.0f || !IsFinite(camera.AspectRatio) || camera.AspectRatio <= 0.0f
+			|| !IsFinite(camera.NearPlaneCentimeters) || !IsFinite(camera.FarPlaneCentimeters)
+			|| camera.NearPlaneCentimeters <= 0.0f || camera.FarPlaneCentimeters <= camera.NearPlaneCentimeters)
+		{
+			return Failed(RendererHostStatus::InvalidArgument, "renderer.scene_camera_invalid",
+				"The perspective camera requires finite position/rotation, FOV in (1,179), positive aspect/near plane, and far greater than near.");
+		}
+
+		try
+		{
+			GraphicsEngine::RenderSceneSnapshot internal;
+			internal.HasCamera = true;
+			internal.Camera.SetPerspective(
+				camera.VerticalFieldOfViewDegrees,
+				camera.AspectRatio,
+				camera.NearPlaneCentimeters,
+				camera.FarPlaneCentimeters);
+			internal.Camera.GetTransform().SetPosition(ToVector3(camera.PositionCentimeters));
+			internal.Camera.GetTransform().SetRotation(
+				camera.RotationDegrees.Yaw,
+				camera.RotationDegrees.Pitch,
+				camera.RotationDegrees.Roll);
+			internal.ShadowCasters.reserve(aSnapshot.ItemCount);
+			internal.VisibleRenderItems.reserve(aSnapshot.ItemCount);
+
+			for (std::size_t index = 0; index < aSnapshot.ItemCount; ++index)
+			{
+				const RendererSceneItem& source = aSnapshot.Items[index];
+				const auto mesh = ourMeshes.find(source.Mesh);
+				const auto material = ourMaterials.find(source.Material);
+				if (mesh == ourMeshes.end() || material == ourMaterials.end())
+				{
+					return Failed(RendererHostStatus::InvalidResource, "renderer.scene_resource_not_found",
+						"Scene item " + std::to_string(index)
+						+ " references mesh handle " + std::to_string(source.Mesh)
+						+ " and material handle " + std::to_string(source.Material)
+						+ "; missing: "
+						+ (mesh == ourMeshes.end() ? "mesh" : "")
+						+ (mesh == ourMeshes.end() && material == ourMaterials.end() ? ", " : "")
+						+ (material == ourMaterials.end() ? "material" : "") + ".");
+				}
+				if (!IsFinite(source.Transform.PositionCentimeters)
+					|| !IsFinite(source.Transform.RotationDegrees) || !IsFinite(source.Transform.Scale)
+					|| source.Transform.Scale.X <= 0.0f || source.Transform.Scale.Y <= 0.0f || source.Transform.Scale.Z <= 0.0f)
+				{
+					return Failed(RendererHostStatus::InvalidArgument, "renderer.scene_transform_invalid",
+						"Scene item transforms require finite values and strictly positive scale.");
+				}
+
+				CU::Transform transform;
+				transform.SetPosition(ToVector3(source.Transform.PositionCentimeters));
+				transform.SetRotation(
+					source.Transform.RotationDegrees.Yaw,
+					source.Transform.RotationDegrees.Pitch,
+					source.Transform.RotationDegrees.Roll);
+				transform.SetScale(ToVector3(source.Transform.Scale));
+
+				GraphicsEngine::RenderItemSnapshot item;
+				item.Mesh = mesh->second;
+				item.Materials.assign(mesh->second->GetNumMaterialSlots(), material->second);
+				item.World = transform.GetWorldMatrix();
+				item.HasBounds = mesh->second->HasLocalBounds();
+				if (item.HasBounds)
+				{
+					item.BoundsCenter = CU::Maths::TransformPoint(mesh->second->GetLocalBoundsCenter(), item.World);
+					item.BoundsRadius = mesh->second->GetLocalBoundsRadius() * MaxAxisScale(item.World);
+					item.HasBounds = IsFinite(item.BoundsRadius);
+				}
+				internal.VisibleRenderItems.emplace_back(item);
+				if (source.CastsShadows)
+				{
+					internal.ShadowCasters.emplace_back(std::move(item));
+				}
+			}
+
+			const RendererDirectionalLight& sourceLight = aSnapshot.DirectionalLight;
+			if (!IsFinite(sourceLight.Color) || !IsFinite(sourceLight.Direction)
+				|| !IsFinite(sourceLight.Intensity) || sourceLight.Intensity < 0.0f
+				|| ToVector3(sourceLight.Direction).LengthSqr() == 0.0f)
+			{
+				return Failed(RendererHostStatus::InvalidArgument, "renderer.scene_light_invalid",
+					"The directional light requires finite color, non-negative intensity, and a non-zero finite direction.");
+			}
+			GraphicsEngine::LightSnapshot light;
+			light.Type = LightType::Directional;
+			light.Color = ToVector3(sourceLight.Color);
+			light.Intensity = sourceLight.Intensity;
+			light.Direction = ToVector3(sourceLight.Direction).GetNormalized();
+			internal.RelevantLights.emplace_back(light);
+			internal.Stats.TotalRenderItems = static_cast<std::uint32_t>(internal.VisibleRenderItems.size());
+			internal.Stats.VisibleRenderItems = static_cast<std::uint32_t>(internal.VisibleRenderItems.size());
+			internal.Stats.ShadowCasters = static_cast<std::uint32_t>(internal.ShadowCasters.size());
+			internal.Stats.TotalLights = 1;
+			internal.Stats.RelevantLights = 1;
+
+			ourSceneCommandList.ResetCommandList();
+			if (!GraphicsEngine::Get().RenderSnapshot(ourSceneCommandList, internal))
+			{
+				ourSceneCommandList.ResetCommandList();
+				return Failed(RendererHostStatus::SceneSubmissionFailed, "renderer.scene_resource_preparation_failed",
+					"AGP could not prepare every scene mesh for drawing; no scene command list was submitted and scene statistics were not updated.");
+			}
+			ourSceneCommandList.FinishCommandList();
+			if (!ourSceneCommandList.IsReadyForExecution())
+			{
+				return Failed(RendererHostStatus::SceneSubmissionFailed, "renderer.scene_command_recording_failed",
+					"AGP could not finish the scene snapshot command list.");
+			}
+			GraphicsEngine::Get().ExecuteCommandList(ourSceneCommandList);
+			ourSceneCommandList.ResetCommandList();
+			ourLastSubmittedSceneStats = {
+				.TotalRenderItems = internal.Stats.TotalRenderItems,
+				.VisibleRenderItems = internal.Stats.VisibleRenderItems,
+				.ShadowCasters = internal.Stats.ShadowCasters,
+				.TotalLights = internal.Stats.TotalLights
+			};
+			return Completed();
+		}
+		catch (const std::exception& exception)
+		{
+			ourSceneCommandList.ResetCommandList();
+			return Failed(RendererHostStatus::SceneSubmissionFailed, "renderer.scene_submission_exception",
+				std::string("AGP threw while submitting a scene snapshot: ") + exception.what());
+		}
+		catch (...)
+		{
+			ourSceneCommandList.ResetCommandList();
+			return Failed(RendererHostStatus::SceneSubmissionFailed, "renderer.scene_submission_exception",
+				"AGP threw an unknown exception while submitting a scene snapshot.");
+		}
+	}
+
+	RendererSceneStats GetRendererSceneStats() noexcept
+	{
+		if (ourHostState != HostState::Ready)
+		{
+			return {};
+		}
+		return ourLastSubmittedSceneStats;
+	}
+
 	RendererHostResult PresentRendererHostFrame() noexcept
 	{
 		if (ourHostState != HostState::Ready)
@@ -269,6 +733,7 @@ namespace AGP
 		}
 		try
 		{
+			ourFrameBegun = false;
 			if (GraphicsEngine::Get().Present())
 			{
 				return Completed();
