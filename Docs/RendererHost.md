@@ -36,7 +36,12 @@ of `RenderRendererSceneSnapshot`; AGP converts it immediately and retains no poi
 to caller storage. Resource handles must remain live through submission. Material
 creation accepts only the versioned `surface_lit_opaque` preset and requires exact
 caller-provided albedo, tangent-space normal, and packed AO/roughness/metalness DDS
-paths. Each scene item applies its one material handle to every mesh submesh, which
+paths. Renderer-host material creation decodes all three exact textures without
+fallback and registers the material handle only after every texture succeeds;
+decode failures name the slot/path and leave the output handle invalid. AGP's
+existing internal material creation path retains its default-texture fallback for
+ModelViewer and legacy engine content. Each scene item applies its one material
+handle to every mesh submesh, which
 matches the V1 static-mesh renderer component. The host never searches project
 content or interprets editor asset IDs.
 
@@ -118,7 +123,9 @@ Win32 window, checks representative path diagnostics, initializes a real D3D11
 device and swapchain, checks the borrowed interop view, creates a mesh and generic
 lit material solely through the public staged header, submits an immutable
 snapshot, verifies scene statistics, releases its resources, and presents both
-before and after resize. It also scans the staged production manifest and
+before and after resize. A temporary truncated DDS proves the exact material path
+rejects corrupt texture data without returning a handle or leaving test artifacts.
+The test also scans the staged production manifest and
 `GraphicsEngine.lib` to reject any test fault-control symbol or legacy environment
 activation name.
 

@@ -1475,42 +1475,61 @@ bool GraphicsEngine::CreateShadowPipelineStates()
 
 bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Material& outMaterial) const
 {
+	return CreateMaterialInternal(aDescription, outMaterial, false) == MaterialCreationResult::Completed;
+}
+
+GraphicsEngine::MaterialCreationResult GraphicsEngine::CreateMaterialWithExactTextures(
+	const MaterialDescription& aDescription,
+	Material& outMaterial) const
+{
+	return CreateMaterialInternal(aDescription, outMaterial, true);
+}
+
+GraphicsEngine::MaterialCreationResult GraphicsEngine::CreateMaterialInternal(
+	const MaterialDescription& aDescription,
+	Material& outMaterial,
+	bool aRequireExactTextures) const
+{
 	Shader materialVS;
 	Shader materialPS;
 
 	if (aDescription.ShadingModel == ShadingModel::None)
 	{
 		GELOG(Error, "Material {} has invalid shading model!", aDescription.Name);
-		return false;
+		return MaterialCreationResult::DefinitionOrShaderFailed;
 	}
 	if (aDescription.Domain == MaterialDomain::None)
 	{
 		GELOG(Error, "Material {} has invalid material domain!", aDescription.Name);
-		return false;
+		return MaterialCreationResult::DefinitionOrShaderFailed;
 	}
-	if(aDescription.BlendMode == BlendMode::None)
+	if (aDescription.BlendMode == BlendMode::None)
 	{
 		GELOG(Error, "Material {} has invalid blend mode!", aDescription.Name);
-		return false;
+		return MaterialCreationResult::DefinitionOrShaderFailed;
 	}
 	if (aDescription.Name.empty())
 	{
 		GELOG(Error, "Material has no name!");
-		return false;
+		return MaterialCreationResult::DefinitionOrShaderFailed;
 	}
-	
+
 	{
 		const std::filesystem::path& path = myMaterialDomainShaders.at(aDescription.Domain);
 		MaterialShaderIncludeHandler handler(myShaderRoot / "Material", path, aDescription.MaterialShaderCode);
 		if (!myRHI.CompileShader(ShaderType::VertexShader, path, &handler, true, materialVS))
-			return false;
+		{
+			return MaterialCreationResult::DefinitionOrShaderFailed;
+		}
 	}
 
 	{
 		const std::filesystem::path& path = myMaterialShadingModelShaders.at(aDescription.ShadingModel);
 		MaterialShaderIncludeHandler handler(myShaderRoot / "Material", path, aDescription.MaterialShaderCode);
 		if (!myRHI.CompileShader(ShaderType::PixelShader, path, &handler, true, materialPS))
-			return false;
+		{
+			return MaterialCreationResult::DefinitionOrShaderFailed;
+		}
 	}
 
 	memset(outMaterial.myData, 0, Material::MATERIAL_BUFFER_SIZE);
@@ -1525,7 +1544,7 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 	RHIShaderReflectionInfo vsInfo, psInfo;
 	RHIShaderReflector::Reflect(materialVS.GetDataPtr(), materialVS.GetDataSize(), vsInfo);
 	RHIShaderReflector::Reflect(materialPS.GetDataPtr(), materialPS.GetDataSize(), psInfo);
-	
+
 	const RHIShaderReflectionInfo* materialBufferSource = nullptr;
 	static std::string materialBufferName = "MaterialBuffer";
 	if (vsInfo.ConstantBufferNameToIndex.contains(materialBufferName))
@@ -1536,11 +1555,11 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 	{
 		materialBufferSource = &psInfo;
 	}
-	
+
 	if (materialBufferSource)
 	{
 		const RHIShaderReflectionInfo::ConstantBufferInfo& info = materialBufferSource->ConstantBuffers[materialBufferSource->ConstantBufferNameToIndex.at(materialBufferName)];
-		
+
 		for (size_t i = 0; i < info.Members.size(); ++i)
 		{
 			const auto& member = info.Members[i];
@@ -1554,10 +1573,8 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 
 			outMaterial.myParameterNameToIndex.emplace(param.Name, static_cast<unsigned>(outMaterial.myParameters.size()));
 			outMaterial.myParameters.emplace_back(std::move(param));
-		
 		}
 	}
-
 
 	PipelineStateDescription matPSOdesc;
 	matPSOdesc.Name = std::format("{}_MAT_PSO", aDescription.Name);
@@ -1571,37 +1588,77 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 	PipelineStateObject matPSO;
 	if (!myRHI.CreatePipelineStateObject(matPSOdesc, matPSO))
 	{
-		return false;
+		return MaterialCreationResult::DefinitionOrShaderFailed;
 	}
 
 	CreateMaterialTextureSlots(vsInfo, outMaterial);
 	CreateMaterialTextureSlots(psInfo, outMaterial);
 
-	auto loadTextureOrFallback = [this](const std::filesystem::path& aTexturePath, const std::shared_ptr<Texture>& aFallback, std::string_view aTextureLabel)
+	auto loadTextureOrFallback = [this, aRequireExactTextures](
+		const std::filesystem::path& aTexturePath,
+		const std::shared_ptr<Texture>& aFallback,
+		std::string_view aTextureLabel,
+		MaterialCreationResult aFailure,
+		std::shared_ptr<Texture>& outTexture)
 	{
 		if (!aTexturePath.empty())
 		{
 			std::shared_ptr<Texture> texture = std::make_shared<Texture>();
 			if (LoadTexture(aTexturePath, *texture))
 			{
-				return texture;
+				outTexture = std::move(texture);
+				return MaterialCreationResult::Completed;
 			}
 
+			if (aRequireExactTextures)
+			{
+				return aFailure;
+			}
 			GELOG(Warning, "Falling back to default {} texture because {} could not be loaded.", aTextureLabel, aTexturePath.string());
 		}
+		else if (aRequireExactTextures)
+		{
+			return aFailure;
+		}
 
-		return aFallback;
+		outTexture = aFallback;
+		return MaterialCreationResult::Completed;
 	};
 
-	outMaterial.SetTexture(Material::ALBEDO_TEXTURE_SLOT, loadTextureOrFallback(aDescription.AlbedoTexture, myDefaultAlbedoTexture, "albedo"));
-	outMaterial.SetTexture(Material::NORMAL_TEXTURE_SLOT, loadTextureOrFallback(aDescription.NormalTexture, myDefaultNormalTexture, "normal"));
-	outMaterial.SetTexture(Material::MATERIAL_TEXTURE_SLOT, loadTextureOrFallback(aDescription.MaterialTexture, myDefaultMaterialTexture, "material"));
+	std::shared_ptr<Texture> albedoTexture;
+	std::shared_ptr<Texture> normalTexture;
+	std::shared_ptr<Texture> materialTexture;
+	MaterialCreationResult textureResult = loadTextureOrFallback(
+		aDescription.AlbedoTexture, myDefaultAlbedoTexture, "albedo",
+		MaterialCreationResult::AlbedoTextureFailed, albedoTexture);
+	if (textureResult != MaterialCreationResult::Completed)
+	{
+		return textureResult;
+	}
+	textureResult = loadTextureOrFallback(
+		aDescription.NormalTexture, myDefaultNormalTexture, "normal",
+		MaterialCreationResult::NormalTextureFailed, normalTexture);
+	if (textureResult != MaterialCreationResult::Completed)
+	{
+		return textureResult;
+	}
+	textureResult = loadTextureOrFallback(
+		aDescription.MaterialTexture, myDefaultMaterialTexture, "material",
+		MaterialCreationResult::MaterialTextureFailed, materialTexture);
+	if (textureResult != MaterialCreationResult::Completed)
+	{
+		return textureResult;
+	}
+
+	outMaterial.SetTexture(Material::ALBEDO_TEXTURE_SLOT, albedoTexture);
+	outMaterial.SetTexture(Material::NORMAL_TEXTURE_SLOT, normalTexture);
+	outMaterial.SetTexture(Material::MATERIAL_TEXTURE_SLOT, materialTexture);
 
 	outMaterial.myPSO = matPSO;
 	outMaterial.myName = aDescription.Name;
 	outMaterial.myDescription = aDescription;
 
-	return true;
+	return MaterialCreationResult::Completed;
 }
 
 bool GraphicsEngine::CreateDefaultTextures()

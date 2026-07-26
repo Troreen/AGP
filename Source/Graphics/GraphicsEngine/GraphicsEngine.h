@@ -49,6 +49,14 @@ enum class ConstantBuffer : uint8_t
 class GraphicsEngine
 {
 public:
+	enum class MaterialCreationResult
+	{
+		Completed,
+		DefinitionOrShaderFailed,
+		AlbedoTextureFailed,
+		NormalTextureFailed,
+		MaterialTextureFailed
+	};
 
 	struct RenderItemSnapshot
 	{
@@ -137,6 +145,7 @@ public:
 	RenderStats GetLastRenderStats() const;
 
 	bool CreateMaterial(const MaterialDescription& aDescription, Material& outMaterial) const;
+	MaterialCreationResult CreateMaterialWithExactTextures(const MaterialDescription& aDescription, Material& outMaterial) const;
 
 	bool LoadTexture(const std::filesystem::path& aPath, Texture& outTexture) const;
 
@@ -151,6 +160,10 @@ private:
 	static constexpr unsigned MaxPointShadowMaps = 4;
 
 	bool CreateConstantBufferInternal(ConstantBuffer aBufferId, std::string_view aName, size_t aBufferSize);
+	MaterialCreationResult CreateMaterialInternal(
+		const MaterialDescription& aDescription,
+		Material& outMaterial,
+		bool aRequireExactTextures) const;
 	bool UpdateAndSetConstantBufferInternal(GraphicsCommandList& inoutCommandList, ConstantBuffer aBufferId, const void* aData, size_t aDataSize, unsigned aSlot, PipeLineStages aStages);
 
 	void CreateMaterialTextureSlots(const RHIShaderReflectionInfo& aShaderInfo, Material& inoutMaterial) const;

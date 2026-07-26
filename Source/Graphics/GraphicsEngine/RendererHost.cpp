@@ -470,10 +470,37 @@ namespace AGP
 			description.MaterialTexture = aDescription.MaterialTexture;
 
 			auto material = std::make_shared<Material>();
-			if (!GraphicsEngine::Get().CreateMaterial(description, *material))
+			const GraphicsEngine::MaterialCreationResult creationResult =
+				GraphicsEngine::Get().CreateMaterialWithExactTextures(description, *material);
+			if (creationResult != GraphicsEngine::MaterialCreationResult::Completed)
 			{
+				const char* failedSlot = nullptr;
+				const wchar_t* failedPath = nullptr;
+				switch (creationResult)
+				{
+				case GraphicsEngine::MaterialCreationResult::AlbedoTextureFailed:
+					failedSlot = "albedo";
+					failedPath = aDescription.AlbedoTexture;
+					break;
+				case GraphicsEngine::MaterialCreationResult::NormalTextureFailed:
+					failedSlot = "normal";
+					failedPath = aDescription.NormalTexture;
+					break;
+				case GraphicsEngine::MaterialCreationResult::MaterialTextureFailed:
+					failedSlot = "material";
+					failedPath = aDescription.MaterialTexture;
+					break;
+				default:
+					break;
+				}
+				if (failedSlot != nullptr && failedPath != nullptr)
+				{
+					return Failed(RendererHostStatus::ResourceCreationFailed, "renderer.material_texture_load_failed",
+						std::string("Material texture slot '") + failedSlot
+						+ "' could not be decoded from exact DDS path: " + Utf8Path(failedPath));
+				}
 				return Failed(RendererHostStatus::ResourceCreationFailed, "renderer.material_creation_failed",
-					"AGP could not compile the surface_lit_opaque preset or load its DDS textures.");
+					"AGP could not compile the surface_lit_opaque preset.");
 			}
 			const RendererResourceHandle handle = AllocateResourceHandle();
 			ourMaterials.emplace(handle, std::move(material));

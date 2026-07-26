@@ -4,8 +4,10 @@
 
 #include <array>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <limits>
+#include <string>
 #include <string_view>
 
 namespace
@@ -198,7 +200,30 @@ int wmain(int aArgumentCount, wchar_t** aArguments)
 			{
 				result = fail("Material diagnostics did not retain the exact slot/path in a bounded result.");
 			}
-			else if (!AGP::CreateRendererLitMaterial(materialDescription, materialHandle).Succeeded())
+			const std::filesystem::path corruptDdsPath = std::filesystem::temp_directory_path()
+				/ ("agp-renderer-host-corrupt-" + std::to_string(GetCurrentProcessId()) + ".dds");
+			{
+				std::ofstream corruptDds(corruptDdsPath, std::ios::binary | std::ios::trunc);
+				corruptDds.write("DDS ", 4);
+			}
+			const AGP::RendererLitMaterialDescription corruptMaterialDescription = {
+				.AlbedoTexture = albedoTexture.c_str(),
+				.NormalTexture = corruptDdsPath.c_str(),
+				.MaterialTexture = materialTexture.c_str()
+			};
+			const AGP::RendererHostResult corruptMaterial =
+				AGP::CreateRendererLitMaterial(corruptMaterialDescription, materialHandle);
+			std::error_code cleanupError;
+			std::filesystem::remove(corruptDdsPath, cleanupError);
+			if (result == 0 && (std::string_view(corruptMaterial.Code) != "renderer.material_texture_load_failed"
+				|| std::string_view(corruptMaterial.Message).find("slot 'normal'") == std::string_view::npos
+				|| std::string_view(corruptMaterial.Message).find(corruptDdsPath.string()) == std::string_view::npos
+				|| std::char_traits<char>::length(corruptMaterial.Message) >= sizeof(corruptMaterial.Message)
+				|| materialHandle != AGP::InvalidRendererResourceHandle))
+			{
+				result = fail("Renderer host accepted a corrupt exact DDS or lost its slot/path diagnostic.");
+			}
+			else if (result == 0 && !AGP::CreateRendererLitMaterial(materialDescription, materialHandle).Succeeded())
 			{
 				result = fail("Renderer host could not create a staged material resource.");
 			}
