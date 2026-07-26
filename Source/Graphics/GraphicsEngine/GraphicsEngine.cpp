@@ -549,6 +549,14 @@ GraphicsEngine& GraphicsEngine::Get()
 
 bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path& aShaderRoot)
 {
+	return Initialize(aWindowHandle, aShaderRoot, aShaderRoot.parent_path() / "Textures" / "T_Shipyard.dds");
+}
+
+bool GraphicsEngine::Initialize(
+	HWND aWindowHandle,
+	const std::filesystem::path& aShaderRoot,
+	const std::filesystem::path& aEnvironmentTexture)
+{
 	if (!std::filesystem::exists(aShaderRoot))
 	{
 		GELOG(Error, "Shader root dir is not a valid path! Provided root was {}.", aShaderRoot.string());
@@ -643,7 +651,7 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path&
 		return false;
 	}
 
-	if (!CreatePBLResources())
+	if (!CreatePBLResources(aEnvironmentTexture))
 	{
 		GELOG(Error, "Failed to create PBL resources.");
 		return false;
@@ -984,9 +992,9 @@ void GraphicsEngine::RenderSnapshot(GraphicsCommandList& inoutCommandList, const
 	StoreLastRenderStats(frameStats);
 }
 
-void GraphicsEngine::Present() const
+bool GraphicsEngine::Present() const
 {
-	myRHI.Present();
+	return myRHI.Present();
 }
 
 void GraphicsEngine::UnbindShadowResources(GraphicsCommandList& inoutCommandList) const
@@ -1298,12 +1306,31 @@ void GraphicsEngine::ExecuteCommandList(const GraphicsCommandList &aCommandList)
 	myRHI.ExecuteCommandList(aCommandList);
 }
 
-bool GraphicsEngine::CreatePBLResources()
+bool GraphicsEngine::BeginBackBufferFrame(const std::array<float, 4>& aClearColor) const
 {
-	const std::filesystem::path environmentPath = myShaderRoot.parent_path() / "Textures" / "T_Shipyard.dds";
-	if (!LoadTexture(environmentPath, myEnvironmentCubeTexture))
+	return myRHI.BeginBackBufferFrame(myBackBuffer, myDepthBuffer, aClearColor);
+}
+
+bool GraphicsEngine::ResizeBackBuffer(unsigned aWidth, unsigned aHeight)
+{
+	return myRHI.ResizeBackBuffer(aWidth, aHeight, myBackBuffer, myDepthBuffer);
+}
+
+ID3D11Device* GraphicsEngine::GetNativeDevice() const
+{
+	return myRHI.GetNativeDevice();
+}
+
+ID3D11DeviceContext* GraphicsEngine::GetNativeImmediateContext() const
+{
+	return myRHI.GetNativeImmediateContext();
+}
+
+bool GraphicsEngine::CreatePBLResources(const std::filesystem::path& aEnvironmentTexture)
+{
+	if (!LoadTexture(aEnvironmentTexture, myEnvironmentCubeTexture))
 	{
-		GELOG(Error, "Failed to load environment cube map '{}'.", environmentPath.string());
+		GELOG(Error, "Failed to load environment cube map '{}'.", aEnvironmentTexture.string());
 		return false;
 	}
 
