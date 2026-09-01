@@ -127,8 +127,13 @@ namespace
 		{
 			return BlendMode::Opaque;
 		}
+		else if (lowerValue == "alpha")
+		{
+			return BlendMode::Alpha;
+		}
 
-		return BlendMode::None;
+
+		return BlendMode::Opaque;
 	}
 }
 
@@ -330,6 +335,11 @@ bool MaterialInstance::SetRawParameterValue(const MaterialParameterInfo& aParamI
 		|| aParamInfo.Size > aPtrSize
 		)
 		return false;
+
+	if (aParamInfo.Index >= myOverridenParameters.size())
+	{
+		return false;
+	}
 
 	memcpy_s(myData + aParamInfo.Offset, aParamInfo.Size, aPtr, aParamInfo.Size);
 

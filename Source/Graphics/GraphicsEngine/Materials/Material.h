@@ -15,7 +15,7 @@ struct MaterialDescription
     std::string Name;
     MaterialDomain Domain = MaterialDomain::None;
     ShadingModel ShadingModel = ShadingModel::None;
-    BlendMode BlendMode = BlendMode::None;
+    BlendMode BlendMode = BlendMode::Opaque;
     std::filesystem::path MaterialShaderCode;
     std::filesystem::path AlbedoTexture;
     std::filesystem::path NormalTexture;

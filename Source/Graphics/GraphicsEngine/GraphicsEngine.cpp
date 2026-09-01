@@ -79,6 +79,59 @@ namespace
 		return aLightComponent.GetIntensity() * 10000.0f;
 	}
 
+	BlendMode GetElementBlendMode(
+		const Mesh::Element& anElement,
+		const std::vector<std::shared_ptr<MaterialInterface>>& someMaterials,
+		const MaterialInterface& aFallbackMaterial)
+	{
+		if (anElement.MaterialIndex < someMaterials.size() && someMaterials[anElement.MaterialIndex] != nullptr)
+		{
+			return someMaterials[anElement.MaterialIndex]->GetBlendMode();
+		}
+
+		return aFallbackMaterial.GetBlendMode();
+	}
+
+	bool MeshComponentHasOpaqueElements(const MeshComponentBase& aMeshComponent, const MaterialInterface& aFallbackMaterial)
+	{
+		const std::shared_ptr<Mesh>& mesh = aMeshComponent.GetMesh();
+		if (mesh == nullptr)
+		{
+			return false;
+		}
+
+		const std::vector<std::shared_ptr<MaterialInterface>>& materials = aMeshComponent.GetMaterialList();
+		for (const Mesh::Element& element : mesh->GetElements())
+		{
+			if (GetElementBlendMode(element, materials, aFallbackMaterial) == BlendMode::Opaque)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	bool MeshComponentHasBlendedElements(const MeshComponentBase& aMeshComponent, const MaterialInterface& aFallbackMaterial)
+	{
+		const std::shared_ptr<Mesh>& mesh = aMeshComponent.GetMesh();
+		if (mesh == nullptr)
+		{
+			return false;
+		}
+
+		const std::vector<std::shared_ptr<MaterialInterface>>& materials = aMeshComponent.GetMaterialList();
+		for (const Mesh::Element& element : mesh->GetElements())
+		{
+			if (GetElementBlendMode(element, materials, aFallbackMaterial) != BlendMode::Opaque)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	CU::Matrix4f CreateNDCToTextureMatrix()
 	{
 		return {
@@ -401,7 +454,7 @@ void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const Actor& 
 	cameraComponent->SyncCameraToOwner();
 	const CU::Camera3D& camera = cameraComponent->GetCamera();
 
-	const SceneRenderData sceneData = CollectRenderItemsAndLights(aWorld);
+	SceneRenderData sceneData = CollectRenderItemsAndLights(aWorld);
 	UnbindShadowResources(inoutCommandList);
 
 	LightBuffer lightBuffer;
@@ -454,14 +507,40 @@ void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const Actor& 
 	fb.View = camera.GetViewMatrix();
 	fb.Projection = camera.GetProjectionMatrix();
 	const CU::Vector3f cameraPosition = camera.GetTransform().GetPosition();
+
+	auto distanceToCameraSq = [&cameraPosition](const RenderItem& aRenderItem)
+	{
+		const float dx = aRenderItem.World(4, 1) - cameraPosition.x;
+		const float dy = aRenderItem.World(4, 2) - cameraPosition.y;
+		const float dz = aRenderItem.World(4, 3) - cameraPosition.z;
+		return dx * dx + dy * dy + dz * dz;
+	};
+
+	std::sort(sceneData.OpaqueRenderItems.begin(), sceneData.OpaqueRenderItems.end(),
+		[&distanceToCameraSq](const RenderItem& aLeft, const RenderItem& aRight)
+		{
+			return distanceToCameraSq(aLeft) < distanceToCameraSq(aRight);
+		});
+
+	std::sort(sceneData.BlendedRenderItems.begin(), sceneData.BlendedRenderItems.end(),
+		[&distanceToCameraSq](const RenderItem& aLeft, const RenderItem& aRight)
+		{
+			return distanceToCameraSq(aLeft) > distanceToCameraSq(aRight);
+		});
+
 	fb.CameraPosition = { cameraPosition.x, cameraPosition.y, cameraPosition.z, 1.0f };
 
 	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::FrameBuffer, fb, 0, PipeLineStage_VertexShader | PipeLineStage_PixelShader);
 	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::LightBuffer, lightBuffer, 4, PipeLineStage_PixelShader);
 
-	for (const RenderItem& item : sceneData.RenderItems)
+	for (const RenderItem& item : sceneData.OpaqueRenderItems)
 	{
-		RenderMesh(inoutCommandList, *item.MeshComponent, item.World);
+		RenderMesh(inoutCommandList, *item.MeshComponent, item.World, RenderBlendFilter::OpaqueOnly);
+	}
+
+	for (const RenderItem& item : sceneData.BlendedRenderItems)
+	{
+		RenderMesh(inoutCommandList, *item.MeshComponent, item.World, RenderBlendFilter::BlendedOnly);
 	}
 }
 
@@ -496,7 +575,18 @@ GraphicsEngine::SceneRenderData GraphicsEngine::CollectRenderItemsAndLights(cons
 		{
 			if (meshComponent != nullptr && meshComponent->IsEnabled() && meshComponent->HasMesh())
 			{
-				data.RenderItems.push_back({ meshComponent, actor->GetTransform().GetWorldMatrix() });
+				const RenderItem item = { meshComponent, actor->GetTransform().GetWorldMatrix() };
+				data.RenderItems.push_back(item);
+
+				if (MeshComponentHasOpaqueElements(*meshComponent, myDefaultMaterial))
+				{
+					data.OpaqueRenderItems.push_back(item);
+				}
+
+				if (MeshComponentHasBlendedElements(*meshComponent, myDefaultMaterial))
+				{
+					data.BlendedRenderItems.push_back(item);
+				}
 			}
 		}
 	}
@@ -937,11 +1027,6 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 		GELOG(Error, "Material {} has invalid material domain!", aDescription.Name);
 		return false;
 	}
-	if(aDescription.BlendMode == BlendMode::None)
-	{
-		GELOG(Error, "Material {} has invalid blend mode!", aDescription.Name);
-		return false;
-	}
 	if (aDescription.Name.empty())
 	{
 		GELOG(Error, "Material has no name!");
@@ -994,14 +1079,16 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 		{
 			const auto& member = info.Members[i];
 			MaterialParameterInfo param;
+			const unsigned parameterIndex = static_cast<unsigned>(outMaterial.myParameters.size());
 			param.Name = member.Name;
 			param.Type = MaterialHelpers::HLSLTypeToMaterialParameterType(member.Type);
 			param.Size = member.Size;
 			param.Offset = member.Offset;
+			param.Index = parameterIndex;
 
 			memcpy_s(outMaterial.myData + param.Offset, param.Size, member.Default, param.Size);
 
-			outMaterial.myParameterNameToIndex.emplace(param.Name, static_cast<unsigned>(outMaterial.myParameters.size()));
+			outMaterial.myParameterNameToIndex.emplace(param.Name, parameterIndex);
 			outMaterial.myParameters.emplace_back(std::move(param));
 		
 		}
@@ -1016,6 +1103,7 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 	matPSOdesc.PixelShader.ByteCodeSize = materialPS.GetDataSize();
 	matPSOdesc.InputLayoutElements = Vertex::Description;
 	matPSOdesc.Topology = Topology::TriangleList;
+	matPSOdesc.BlendMode = aDescription.BlendMode;
 
 	PipelineStateObject matPSO;
 	if (!myRHI.CreatePipelineStateObject(matPSOdesc, matPSO))
@@ -1166,7 +1254,7 @@ void GraphicsEngine::CreateMaterialTextureSlots(const RHIShaderReflectionInfo& a
 GraphicsEngine::GraphicsEngine() = default;
 GraphicsEngine::~GraphicsEngine() = default;
 
-void GraphicsEngine::RenderMesh(GraphicsCommandList& inoutCommandList, const MeshComponentBase& aMeshComponent, const CU::Matrix4f& aWorld)
+void GraphicsEngine::RenderMesh(GraphicsCommandList& inoutCommandList, const MeshComponentBase& aMeshComponent, const CU::Matrix4f& aWorld, RenderBlendFilter aBlendFilter)
 {
 	const std::shared_ptr<Mesh>& mesh = aMeshComponent.GetMesh();
 	const std::vector<std::shared_ptr<MaterialInterface>>& materials = aMeshComponent.GetMaterialList();
@@ -1201,12 +1289,22 @@ void GraphicsEngine::RenderMesh(GraphicsCommandList& inoutCommandList, const Mes
 	}
 
 	MaterialInterface* currentMaterial = nullptr;
-	for (const Mesh::Element& element : mesh->myElements)
+	for (const Mesh::Element& element : mesh->GetElements())
 	{
 		MaterialInterface* elementMaterial = &myDefaultMaterial;
 		if (element.MaterialIndex < materials.size() && materials[element.MaterialIndex] != nullptr)
 		{
 			elementMaterial = materials[element.MaterialIndex].get();
+		}
+
+		const BlendMode elementBlendMode = elementMaterial->GetBlendMode();
+		if (aBlendFilter == RenderBlendFilter::OpaqueOnly && elementBlendMode != BlendMode::Opaque)
+		{
+			continue;
+		}
+		if (aBlendFilter == RenderBlendFilter::BlendedOnly && elementBlendMode == BlendMode::Opaque)
+		{
+			continue;
 		}
 
 		if (elementMaterial != currentMaterial)

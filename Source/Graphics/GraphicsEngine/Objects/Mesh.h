@@ -78,6 +78,7 @@ public:
     
 	std::string_view GetName() const { return myName; }
 	size_t GetNumMaterialSlots() const { return myNumMaterialSlots; }
+    const std::vector<Element>& GetElements() const { return myElements; }
 
 private:
 

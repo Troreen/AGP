@@ -18,6 +18,7 @@ ModelViewer::ModelViewer() = default;
 namespace
 {
 	using Vector3f = CommonUtilities::Vector3f;
+    using Vector4f = CommonUtilities::Vector4f;
 
 	std::filesystem::path GetMaterialRoot(const std::filesystem::path& aContentRoot)
 	{
@@ -268,6 +269,8 @@ void ModelViewer::LoadScene()
     const Vector3f floorPosition = { 0.0f, 0.0f, 260.0f };
     const Vector3f characterPosition = { 0.0f, 0.0f, 250.0f };
     const Vector3f chestPosition = { 135.0f, 0.0f, 285.0f };
+    const Vector3f chestAlphaPosition = { -200.0f, 0.0f, -100.0f };
+    const Vector3f chestAlphaPosition2 = { 0.0f, 0.0f, -100.0f };
     const Vector3f colorCheckerPosition = { -145.0f, 40.0f, 365.0f };
     const Vector3f smoothSpherePosition = { 320.0f, 100.0f, 430.0f };
 
@@ -330,9 +333,46 @@ void ModelViewer::LoadScene()
     CreateStaticMeshActor("SM_Chest Actor", "SM_Chest Mesh Component", "SM_Chest",
         materialRoot / "ChestMaterial.mat",
         chestPosition,
-        { -18.0f, 0.0f, 0.0f },
+        { 0.0f, 0.0f, 0.0f },
         { 1.0f, 1.0f, 1.0f });
 
+    StaticMeshComponent* alphaChestMeshComponent = CreateStaticMeshActor("SM_Chest Alpha Actor", "SM_Chest Alpha Mesh Component", "SM_Chest",
+        materialRoot / "ChestMaterial_Alpha.mat",
+        chestAlphaPosition,
+        { 0.0f, 0.0f, 0.0f },
+        { 1.0f, 1.0f, 1.0f });
+
+        
+        
+        if (alphaChestMeshComponent != nullptr)
+        {
+            if (const std::shared_ptr<MaterialInterface> alphaBaseMaterial = GetMaterial(materialRoot / "ChestMaterial_Alpha.mat"))
+            {
+                if (const std::shared_ptr<MaterialInstance> alphaChestMaterial = MaterialInstance::Create("ChestMaterial_Alpha_Instance", alphaBaseMaterial))
+                {
+                    alphaChestMaterial->SetValue("MB_Tint", Vector4f(1.0f, 1.0f, 1.0f, 0.35f));
+                    AssignMaterialToAllSlots(alphaChestMeshComponent, alphaChestMaterial);
+                }
+            }
+        }
+    StaticMeshComponent* alphaChestMeshComponent2 = CreateStaticMeshActor("SM_Chest Alpha Actor 2", "SM_Chest Alpha Mesh Component 2", "SM_Chest",
+        materialRoot / "ChestMaterial_Alpha.mat",
+        chestAlphaPosition2,
+        { 0.0f, 0.0f, 0.0f },
+        { 1.0f, 1.0f, 1.0f });
+    
+    if (alphaChestMeshComponent2 != nullptr)
+        {
+            if (const std::shared_ptr<MaterialInterface> alphaBaseMaterial = GetMaterial(materialRoot / "ChestMaterial_Alpha.mat"))
+            {
+                if (const std::shared_ptr<MaterialInstance> alphaChestMaterial = MaterialInstance::Create("ChestMaterial_Alpha_Instance", alphaBaseMaterial))
+                {
+                    alphaChestMaterial->SetValue("MB_Tint", Vector4f(1.0f, 1.0f, 1.0f, 0.75f));
+                    AssignMaterialToAllSlots(alphaChestMeshComponent2, alphaChestMaterial);
+                }
+            }
+        }
+        
     CreateStaticMeshActor("SM_Color_Checker Actor", "SM_Color_Checker Mesh Component", "SM_Color_Checker",
         materialRoot / "ColorCheckerMaterial.mat",
         colorCheckerPosition,

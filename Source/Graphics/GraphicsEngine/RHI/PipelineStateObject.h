@@ -20,6 +20,7 @@ struct PipelineStateDescription
     std::vector<VertexElementDesc> InputLayoutElements;
     Topology Topology = Topology::TriangleList;
     RasterizerStateDescription RasterizerState;
+    BlendMode BlendMode = BlendMode::Opaque;
 };
 
 class PipelineStateObject
@@ -38,8 +39,9 @@ private:
 	Microsoft::WRL::ComPtr<struct ID3D11PixelShader> myPixelShader;
 	Microsoft::WRL::ComPtr<struct ID3D11GeometryShader> myGeometryShader;
 	Microsoft::WRL::ComPtr<struct ID3D11RasterizerState> myRasterizerState;
+    Microsoft::WRL::ComPtr<struct ID3D11BlendState> myBlendState;
 
     std::string myName;
     Topology myTopology;
+    BlendMode myBlendMode;
 };
-

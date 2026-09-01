@@ -67,6 +67,7 @@ enum PipeLineStage_
 	PipeLineStage_Rasterizer = 16,
 	PipeLineStage_PixelShader = 32,
 	PipeLineStage_OutputMerger = 64,
+	PipeLineStage_Blend = 128
 };
 
 typedef int PipeLineStages;
@@ -79,3 +80,13 @@ enum class ShaderType : unsigned
 	GeometryShader,
 	ComputeShader
 };
+
+enum class BlendMode : uint8_t
+{
+	Opaque,
+	Alpha
+	// PremultipliedAlpha,
+	// Additive,
+	// ...
+};
+

@@ -5,6 +5,8 @@
 #include <string_view>
 #include <vector>
 
+#include "GraphicsEngine/RHI/RHIStructs.h"
+
 class Texture;
 class PipelineStateObject;
 
@@ -26,16 +28,6 @@ enum class ShadingModel : uint8_t
 	None,
 	Unlit,
 	Lit,
-};
-
-/**
- * How this Material is Blended. Controls how a finished pixel is composited.
- */
-enum class BlendMode : uint8_t
-{
-	None,
-	Opaque // No blending, solid object.
-	// More come here later
 };
 
 /**

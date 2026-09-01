@@ -198,6 +198,11 @@ void GraphicsCommandList::SetPipelineState(const PipelineStateObject *aPSO)
 		0);
 	myContext->RSSetState(
 		IsOverrideActive(PipeLineStage_Rasterizer) ? myOverridePipelineState.myRasterizerState.Get() : pipelineState.myRasterizerState.Get());
+	constexpr float blendFactor[4] = { 0, 0, 0, 0 };
+	myContext->OMSetBlendState(
+		IsOverrideActive(PipeLineStage_Blend) ? myOverridePipelineState.myBlendState.Get() : pipelineState.myBlendState.Get(),
+		blendFactor,
+		0xFFFFFFFF);
 
 	const std::string message = std::format("Change Pipeline State - {}", aPSO->myName);
 	SetMarker(message);

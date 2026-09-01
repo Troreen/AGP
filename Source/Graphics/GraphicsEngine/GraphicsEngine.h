@@ -92,7 +92,16 @@ private:
 	struct SceneRenderData
 	{
 		std::vector<RenderItem> RenderItems;
+		std::vector<RenderItem> OpaqueRenderItems;
+		std::vector<RenderItem> BlendedRenderItems;
 		std::vector<const class LightComponent*> LightComponents;
+	};
+
+	enum class RenderBlendFilter : uint8_t
+	{
+		All,
+		OpaqueOnly,
+		BlendedOnly
 	};
 
 	static constexpr unsigned DirectionalCascadeCount = 4;
@@ -121,7 +130,7 @@ private:
 	~GraphicsEngine();
 
 	bool PrepareMeshForRendering(const Mesh& aMesh) const;
-	void RenderMesh(GraphicsCommandList& inoutCommandList, const MeshComponentBase& aMeshComponent, const CU::Matrix4f& aWorld);
+	void RenderMesh(GraphicsCommandList& inoutCommandList, const MeshComponentBase& aMeshComponent, const CU::Matrix4f& aWorld, RenderBlendFilter aBlendFilter = RenderBlendFilter::All);
 	bool CreateDefaultTextures();
 
 	RenderHardwareInterface myRHI;
