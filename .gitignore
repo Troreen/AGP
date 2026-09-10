@@ -29,3 +29,5 @@ x86/
 # Generated/copied shader artifacts
 /Assets/Shaders/
 /Source/Graphics/GraphicsEngine/TemporaryShaders/
+
+p4ignore.txt
