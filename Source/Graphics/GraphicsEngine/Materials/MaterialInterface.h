@@ -95,6 +95,7 @@ public:
 	virtual BlendMode GetBlendMode() const = 0;
 
 	virtual const PipelineStateObject& GetPSO() const = 0;
+	virtual const PipelineStateObject& GetGBufferPSO() const = 0;
 
 	// /**
 	//  * If True there has been changes to the C++ side MaterialParametersBuffer

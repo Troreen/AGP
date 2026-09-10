@@ -13,6 +13,7 @@
 #include "ConstantBuffers/LightBuffer.h"
 #include "Objects/Buffer.h"
 #include "Objects/Texture.h"
+#include "Objects/GBuffer.h"
 #include "Objects/Vertex.h"
 #include "Objects/Mesh.h"
 #include "Objects/Sampler.h"
@@ -113,6 +114,8 @@ private:
 
 	void CreateMaterialTextureSlots(const RHIShaderReflectionInfo& aShaderInfo, Material& inoutMaterial) const;
 	bool CreatePBLResources();
+	bool CreateGBufferResources();
+	bool CreateDeferredPipelineStates();
 	bool CreateBRDFLUT();
 	void BindPBLResources(GraphicsCommandList& inoutCommandList) const;
 	bool CreateShadowResources();
@@ -130,12 +133,14 @@ private:
 	~GraphicsEngine();
 
 	bool PrepareMeshForRendering(const Mesh& aMesh) const;
-	void RenderMesh(GraphicsCommandList& inoutCommandList, const MeshComponentBase& aMeshComponent, const CU::Matrix4f& aWorld, RenderBlendFilter aBlendFilter = RenderBlendFilter::All);
+	void RenderMesh(GraphicsCommandList& inoutCommandList, const MeshComponentBase& aMeshComponent, const CU::Matrix4f& aWorld, RenderBlendFilter aBlendFilter = RenderBlendFilter::All, bool aUseGBufferPSO = false);
 	bool CreateDefaultTextures();
 
 	RenderHardwareInterface myRHI;
 	Texture myBackBuffer;
 	Texture myDepthBuffer;
+	GBuffer myGBuffer;
+	Texture myDeferredLightingTexture;
 
 	std::unordered_map<ConstantBuffer, Buffer> myConstantBuffers;
 
@@ -143,6 +148,10 @@ private:
 	PipelineStateObject myShadowOverridePSO;
 	PipelineStateObject myLocalShadowOverridePSO;
 	PipelineStateObject myPointShadowOverridePSO;
+	PipelineStateObject myDeferredDirectionalPSO;
+	PipelineStateObject myDeferredPointPSO;
+	PipelineStateObject myDeferredSpotPSO;
+	PipelineStateObject myDeferredCompositePSO;
 
 	std::filesystem::path myShaderRoot;
 	std::unordered_map<MaterialDomain, std::filesystem::path> myMaterialDomainShaders;

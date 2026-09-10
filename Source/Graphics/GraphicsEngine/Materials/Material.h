@@ -35,7 +35,8 @@ public:
     ShadingModel GetShadingModel() const override { return myDescription.ShadingModel; }
     BlendMode GetBlendMode() const override { return myDescription.BlendMode; }
 
-    const PipelineStateObject& GetPSO() const override { return myPSO; }
+	const PipelineStateObject& GetPSO() const override { return myPSO; }
+	const PipelineStateObject& GetGBufferPSO() const override { return myGBufferPSO; }
 
     const uint8_t* GetParameterDataBlock() const override { return myData; }
     bool HasParameters() const override { return !myParameters.empty(); }
@@ -66,6 +67,7 @@ private:
 
     MaterialDescription myDescription;
     PipelineStateObject myPSO;
+	PipelineStateObject myGBufferPSO;
     std::string myName;
 
 };
@@ -81,7 +83,8 @@ public:
     ShadingModel GetShadingModel() const override { return myParentMaterial->GetShadingModel(); }
     BlendMode GetBlendMode() const override { return myParentMaterial->GetBlendMode(); }
 
-    const PipelineStateObject& GetPSO() const override { return myParentMaterial->GetPSO(); }
+	const PipelineStateObject& GetPSO() const override { return myParentMaterial->GetPSO(); }
+	const PipelineStateObject& GetGBufferPSO() const override { return myParentMaterial->GetGBufferPSO(); }
 
     const uint8_t* GetParameterDataBlock() const override { return myData; }
     bool HasParameters() const override { return myParentMaterial->HasParameters(); }

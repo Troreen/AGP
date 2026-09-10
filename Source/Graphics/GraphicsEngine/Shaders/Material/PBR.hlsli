@@ -5,23 +5,6 @@ float3 LinearToGamma(float3 aColor)
     return pow(abs(aColor), 1.0f / 2.2f);
 }
 
-float3 SampleWorldNormal(float2 aUV, float3 aNormal, float3 aTangent, float3 aBinormal)
-{
-    float2 normalXY = NormalTexture.Sample(TrilinearWrap, aUV).rg;
-    normalXY = normalXY * 2.0f - 1.0f;
-
-    const float normalZ = sqrt(1.0f - saturate(dot(normalXY, normalXY)));
-    float3 tangentNormal = normalize(float3(normalXY, normalZ));
-
-    const float3x3 TBN = float3x3(
-        normalize(aTangent),
-        normalize(aBinormal),
-        normalize(aNormal)
-    );
-
-    return normalize(mul(tangentNormal, TBN));
-}
-
 float3 Diffuse_BRDF(float3 aDiffuseColor)
 {
     return aDiffuseColor / PI;

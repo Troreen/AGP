@@ -17,6 +17,8 @@
 #include "Materials/MaterialHelpers.h"
 #include "Objects/Shader.h"
 
+#include <d3dcompiler.h>
+
 #include <algorithm>
 #include <array>
 #include <cctype>
@@ -364,6 +366,11 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path&
 	{
 		return false;
 	}
+
+	if (!CreateGBufferResources() || !CreateDeferredPipelineStates())
+	{
+		return false;
+	}
 	
 	myMaterialDomainShaders.emplace(MaterialDomain::Surface, aShaderRoot / "Material" / "Surface_VS.hlsl");
 	myMaterialShadingModelShaders.emplace(ShadingModel::Unlit, aShaderRoot / "Material" / "Unlit_PS.hlsl");
@@ -531,13 +538,61 @@ void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const Actor& 
 	fb.CameraPosition = { cameraPosition.x, cameraPosition.y, cameraPosition.z, 1.0f };
 
 	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::FrameBuffer, fb, 0, PipeLineStage_VertexShader | PipeLineStage_PixelShader);
-	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::LightBuffer, lightBuffer, 4, PipeLineStage_PixelShader);
 
+	// Non-blended geometry produces the five ordered GBuffer targets.
+	inoutCommandList.BeginEvent("Deferred GBuffer");
+	const std::array<Texture, GBuffer::TargetCount>& gbufferTextures = myGBuffer.GetTextures();
+	for (const Texture& target : gbufferTextures)
+	{
+		inoutCommandList.ClearRenderTarget(target);
+	}
+	const std::array<const Texture*, GBuffer::TargetCount> gbufferTargets = {
+		&gbufferTextures[GBuffer::Albedo], &gbufferTextures[GBuffer::PixelNormal], &gbufferTextures[GBuffer::Material],
+		&gbufferTextures[GBuffer::VertexNormal], &gbufferTextures[GBuffer::WorldPosition] };
+	inoutCommandList.SetRenderTargets(gbufferTargets.data(), gbufferTargets.size(), &myDepthBuffer);
 	for (const RenderItem& item : sceneData.OpaqueRenderItems)
 	{
-		RenderMesh(inoutCommandList, *item.MeshComponent, item.World, RenderBlendFilter::OpaqueOnly);
+		RenderMesh(inoutCommandList, *item.MeshComponent, item.World, RenderBlendFilter::OpaqueOnly, true);
 	}
+	inoutCommandList.SetRenderTargets(nullptr, 0, nullptr);
+	inoutCommandList.EndEvent();
 
+	// Deferred lights are fullscreen additive passes. Accumulation stays linear until
+	// the final composite pass, matching the Forward shader's gamma conversion.
+	inoutCommandList.BeginEvent("Deferred Lighting");
+	inoutCommandList.ClearRenderTarget(myDeferredLightingTexture);
+	inoutCommandList.SetRenderTarget(&myDeferredLightingTexture, nullptr);
+	inoutCommandList.SetShaderResources(gbufferTargets.data(), gbufferTargets.size(), 0, PipeLineStage_PixelShader);
+	for (unsigned lightIndex = 0; lightIndex < lightBuffer.NumActiveLights; ++lightIndex)
+	{
+		LightBuffer singleLightBuffer;
+		singleLightBuffer.Lights[0] = lightBuffer.Lights[lightIndex];
+		singleLightBuffer.NumActiveLights = 1;
+		UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::LightBuffer, singleLightBuffer, 4, PipeLineStage_PixelShader);
+
+		switch (singleLightBuffer.Lights[0].Type)
+		{
+		case static_cast<unsigned>(LightType::Directional): inoutCommandList.SetPipelineState(&myDeferredDirectionalPSO); break;
+		case static_cast<unsigned>(LightType::Point): inoutCommandList.SetPipelineState(&myDeferredPointPSO); break;
+		case static_cast<unsigned>(LightType::Spot): inoutCommandList.SetPipelineState(&myDeferredSpotPSO); break;
+		default: continue;
+		}
+		inoutCommandList.Draw(4);
+	}
+	const std::array<const Texture*, GBuffer::TargetCount> nullGBufferResources = {};
+	inoutCommandList.SetShaderResources(nullGBufferResources.data(), nullGBufferResources.size(), 0, PipeLineStage_PixelShader);
+	inoutCommandList.SetRenderTarget(&myBackBuffer, nullptr);
+	const Texture* deferredLightingResource = &myDeferredLightingTexture;
+	inoutCommandList.SetShaderResources(&deferredLightingResource, 1, 0, PipeLineStage_PixelShader);
+	inoutCommandList.SetPipelineState(&myDeferredCompositePSO);
+	inoutCommandList.Draw(4);
+	const std::array<const Texture*, 1> nullDeferredLightingResource = {};
+	inoutCommandList.SetShaderResources(nullDeferredLightingResource.data(), nullDeferredLightingResource.size(), 0, PipeLineStage_PixelShader);
+	inoutCommandList.EndEvent();
+
+	// Blended elements remain Forward rendered and use the depth written in GBuffer.
+	inoutCommandList.SetRenderTarget(&myBackBuffer, &myDepthBuffer);
+	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::LightBuffer, lightBuffer, 4, PipeLineStage_PixelShader);
 	for (const RenderItem& item : sceneData.BlendedRenderItems)
 	{
 		RenderMesh(inoutCommandList, *item.MeshComponent, item.World, RenderBlendFilter::BlendedOnly);
@@ -872,6 +927,54 @@ void GraphicsEngine::ExecuteCommandList(const GraphicsCommandList &aCommandList)
 	myRHI.ExecuteCommandList(aCommandList);
 }
 
+bool GraphicsEngine::CreateGBufferResources()
+{
+	const CU::Vector2u clientSize = GetClientSize();
+	const std::array<std::string_view, GBuffer::TargetCount> names = {
+		"GBuffer_Albedo", "GBuffer_PixelNormal", "GBuffer_Material", "GBuffer_VertexNormal", "GBuffer_WorldPosition" };
+	for (size_t targetIndex = 0; targetIndex < names.size(); ++targetIndex)
+	{
+		if (!myRHI.CreateRenderTargetTexture(names[targetIndex], clientSize.x, clientSize.y,
+			static_cast<unsigned>(DXGI_FORMAT_R32G32B32A32_FLOAT), myGBuffer.GetTextures()[targetIndex]))
+		{
+			return false;
+		}
+	}
+
+	return myRHI.CreateRenderTargetTexture("Deferred_Lighting", clientSize.x, clientSize.y,
+		static_cast<unsigned>(DXGI_FORMAT_R32G32B32A32_FLOAT), myDeferredLightingTexture);
+}
+
+bool GraphicsEngine::CreateDeferredPipelineStates()
+{
+	Shader fullTextureVS;
+	if (!myRHI.CompileShader(ShaderType::VertexShader, myShaderRoot / "Internal" / "FullTexture_VS.hlsl", nullptr, true, fullTextureVS))
+		return false;
+
+	auto createPipeline = [this, &fullTextureVS](std::string_view aName, std::string_view aPixelShader, BlendMode aBlendMode, PipelineStateObject& outPSO)
+	{
+		const std::filesystem::path pixelShaderPath = myShaderRoot / "Internal" / aPixelShader;
+		MaterialShaderIncludeHandler includeHandler(myShaderRoot, pixelShaderPath, {});
+		Shader pixelShader;
+		if (!myRHI.CompileShader(ShaderType::PixelShader, pixelShaderPath, &includeHandler, true, pixelShader))
+			return false;
+		PipelineStateDescription description;
+		description.Name = aName;
+		description.VertexShader.ByteCode = fullTextureVS.GetDataPtr();
+		description.VertexShader.ByteCodeSize = fullTextureVS.GetDataSize();
+		description.PixelShader.ByteCode = pixelShader.GetDataPtr();
+		description.PixelShader.ByteCodeSize = pixelShader.GetDataSize();
+		description.Topology = Topology::TriangleStrip;
+		description.BlendMode = aBlendMode;
+		return myRHI.CreatePipelineStateObject(description, outPSO);
+	};
+
+	return createPipeline("DeferredDirectionalPSO", "DeferredDirectional_PS.hlsl", BlendMode::Additive, myDeferredDirectionalPSO)
+		&& createPipeline("DeferredPointPSO", "DeferredPoint_PS.hlsl", BlendMode::Additive, myDeferredPointPSO)
+		&& createPipeline("DeferredSpotPSO", "DeferredSpot_PS.hlsl", BlendMode::Additive, myDeferredSpotPSO)
+		&& createPipeline("DeferredCompositePSO", "DeferredComposite_PS.hlsl", BlendMode::Opaque, myDeferredCompositePSO);
+}
+
 bool GraphicsEngine::CreatePBLResources()
 {
 	const std::filesystem::path environmentPath = myShaderRoot.parent_path() / "Textures" / "T_Shipyard.dds";
@@ -1016,6 +1119,7 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 {
 	Shader materialVS;
 	Shader materialPS;
+	Shader gbufferPS;
 
 	if (aDescription.ShadingModel == ShadingModel::None)
 	{
@@ -1046,6 +1150,11 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 		if (!myRHI.CompileShader(ShaderType::PixelShader, path, &handler, true, materialPS))
 			return false;
 	}
+
+	const std::filesystem::path gbufferPath = myShaderRoot / "Material" / "GBuffer_PS.hlsl";
+	MaterialShaderIncludeHandler gbufferHandler(myShaderRoot / "Material", gbufferPath, aDescription.MaterialShaderCode);
+	if (!myRHI.CompileShader(ShaderType::PixelShader, gbufferPath, &gbufferHandler, true, gbufferPS))
+		return false;
 
 	memset(outMaterial.myData, 0, Material::MATERIAL_BUFFER_SIZE);
 	outMaterial.myParameters.clear();
@@ -1111,6 +1220,17 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 		return false;
 	}
 
+	PipelineStateDescription gbufferPSOdesc = matPSOdesc;
+	gbufferPSOdesc.Name = std::format("{}_GBUFFER_PSO", aDescription.Name);
+	gbufferPSOdesc.PixelShader.ByteCode = gbufferPS.GetDataPtr();
+	gbufferPSOdesc.PixelShader.ByteCodeSize = gbufferPS.GetDataSize();
+	gbufferPSOdesc.BlendMode = BlendMode::Opaque;
+	PipelineStateObject gbufferPSO;
+	if (!myRHI.CreatePipelineStateObject(gbufferPSOdesc, gbufferPSO))
+	{
+		return false;
+	}
+
 	CreateMaterialTextureSlots(vsInfo, outMaterial);
 	CreateMaterialTextureSlots(psInfo, outMaterial);
 
@@ -1135,6 +1255,7 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 	outMaterial.SetTexture(Material::MATERIAL_TEXTURE_SLOT, loadTextureOrFallback(aDescription.MaterialTexture, myDefaultMaterialTexture, "material"));
 
 	outMaterial.myPSO = matPSO;
+	outMaterial.myGBufferPSO = gbufferPSO;
 	outMaterial.myName = aDescription.Name;
 	outMaterial.myDescription = aDescription;
 
@@ -1254,7 +1375,7 @@ void GraphicsEngine::CreateMaterialTextureSlots(const RHIShaderReflectionInfo& a
 GraphicsEngine::GraphicsEngine() = default;
 GraphicsEngine::~GraphicsEngine() = default;
 
-void GraphicsEngine::RenderMesh(GraphicsCommandList& inoutCommandList, const MeshComponentBase& aMeshComponent, const CU::Matrix4f& aWorld, RenderBlendFilter aBlendFilter)
+void GraphicsEngine::RenderMesh(GraphicsCommandList& inoutCommandList, const MeshComponentBase& aMeshComponent, const CU::Matrix4f& aWorld, RenderBlendFilter aBlendFilter, bool aUseGBufferPSO)
 {
 	const std::shared_ptr<Mesh>& mesh = aMeshComponent.GetMesh();
 	const std::vector<std::shared_ptr<MaterialInterface>>& materials = aMeshComponent.GetMaterialList();
@@ -1310,7 +1431,7 @@ void GraphicsEngine::RenderMesh(GraphicsCommandList& inoutCommandList, const Mes
 		if (elementMaterial != currentMaterial)
 		{
 			currentMaterial = elementMaterial;
-			inoutCommandList.SetPipelineState(&currentMaterial->GetPSO());
+			inoutCommandList.SetPipelineState(aUseGBufferPSO ? &currentMaterial->GetGBufferPSO() : &currentMaterial->GetPSO());
 
 			if (currentMaterial->HasParameters())
 			{

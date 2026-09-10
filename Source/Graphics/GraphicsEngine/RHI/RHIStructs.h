@@ -84,9 +84,7 @@ enum class ShaderType : unsigned
 enum class BlendMode : uint8_t
 {
 	Opaque,
-	Alpha
-	// PremultipliedAlpha,
-	// Additive,
-	// ...
+	Alpha,
+	Additive
 };
 

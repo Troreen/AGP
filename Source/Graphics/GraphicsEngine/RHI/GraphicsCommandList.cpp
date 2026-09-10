@@ -69,27 +69,39 @@ void GraphicsCommandList::ClearDepthStencil(const Texture &aTarget) const
 
 void GraphicsCommandList::SetRenderTarget(const Texture* aTarget, const Texture* aDepthStencil) const
 {
+	SetRenderTargets(&aTarget, 1, aDepthStencil);
+}
+
+void GraphicsCommandList::SetRenderTargets(const Texture* const* aTargets, size_t aNumTargets, const Texture* aDepthStencil) const
+{
 	ensure(!IsReadyForExecution());
-	ID3D11RenderTargetView* rtv = nullptr;
+	std::vector<ID3D11RenderTargetView*> rtvs(aNumTargets);
 	ID3D11DepthStencilView* dsv = nullptr;
 	D3D11_VIEWPORT viewport = { 0, 0, 0, 0, 0, 1 };
 
-	if (aTarget)
+	if (aNumTargets > 0 && aTargets[0])
 	{
-		rtv = aTarget->myRTV.Get();
-		memcpy_s(&viewport, sizeof(D3D11_VIEWPORT), &aTarget->myViewport, sizeof(Viewport));
+		memcpy_s(&viewport, sizeof(D3D11_VIEWPORT), &aTargets[0]->myViewport, sizeof(Viewport));
+	}
+
+	for (size_t targetIndex = 0; targetIndex < aNumTargets; ++targetIndex)
+	{
+		if (aTargets[targetIndex])
+		{
+			rtvs[targetIndex] = aTargets[targetIndex]->myRTV.Get();
+		}
 	}
 
 	if (aDepthStencil)
 	{
 		dsv = aDepthStencil->myDSV.Get();
-		if(!aTarget)
+		if(aNumTargets == 0 || !aTargets[0])
 		{
 			memcpy_s(&viewport, sizeof(D3D11_VIEWPORT), &aDepthStencil->myViewport, sizeof(Viewport));
 		}
 	}
 
-	myContext->OMSetRenderTargets(1, &rtv, dsv);
+	myContext->OMSetRenderTargets(static_cast<unsigned>(aNumTargets), rtvs.data(), dsv);
 	myContext->RSSetViewports(1, &viewport);
 }
 

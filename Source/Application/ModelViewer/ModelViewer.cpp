@@ -300,13 +300,13 @@ void ModelViewer::LoadScene()
             if (myDirectionalLightComponent != nullptr)
             {
                 myDirectionalLightComponent->SetColor({ 1.0f, 0.96f, 0.9f });
-                myDirectionalLightComponent->SetIntensity(11.0f);
+                myDirectionalLightComponent->SetIntensity(1.0f);
             }
         }
 
-        myPointLightComponents.push_back(CreatePointLight(myWorld, "Warm Character Point", { -90.0f, 180.0f, 150.0f }, { 1.0f, 0.42f, 0.22f }, 420.0f, 760.0f));
-        //myPointLightComponents.push_back(CreatePointLight(myWorld, "Cool Character Point", { 60.0f, 75.0f, 330.0f }, { 0.25f, 0.55f, 1.0f }, 500.0f, 620.0f));
-        //myPointLightComponents.push_back(CreatePointLight(myWorld, "Chest Accent Point", { 170.0f, 25.0f, 235.0f }, { 0.35f, 1.0f, 0.55f }, 560.0f, 560.0f));
+        myPointLightComponents.push_back(CreatePointLight(myWorld, "Warm Character Point", { -90.0f, 180.0f, 150.0f }, { 1.0f, 0.42f, 0.22f }, 20.0f, 760.0f));
+        //myPointLightComponents.push_back(CreatePointLight(myWorld, "Cool Character Point", { 60.0f, 75.0f, 330.0f }, { 0.25f, 0.55f, 1.0f }, 50.0f, 620.0f));
+        //myPointLightComponents.push_back(CreatePointLight(myWorld, "Chest Accent Point", { 170.0f, 25.0f, 235.0f }, { 0.35f, 1.0f, 0.55f }, 60.0f, 560.0f));
 
         Actor* spotLightActor = myWorld.CreateActor("Spot Light Actor");
         if (spotLightActor != nullptr)
@@ -317,7 +317,7 @@ void ModelViewer::LoadScene()
             if (mySpotLightComponent != nullptr)
             {
                 mySpotLightComponent->SetColor({ 0.55f, 0.7f, 1.0f });
-                mySpotLightComponent->SetIntensity(2800.0f);
+                mySpotLightComponent->SetIntensity(30.0f);
                 mySpotLightComponent->SetRadius(1200.0f);
                 mySpotLightComponent->SetConeAnglesDegrees(18.0f, 34.0f);
             }
