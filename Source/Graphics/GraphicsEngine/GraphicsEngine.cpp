@@ -907,6 +907,7 @@ void GraphicsEngine::LogShadowTuning() const
 		ShadowConfig::MaxPointMaps);
 }
 
+
 bool GraphicsEngine::CreateConstantBuffer(ConstantBuffer aBufferId, std::string_view aName, size_t aBufferSize)
 {
 	return CreateConstantBufferInternal(aBufferId, aName, aBufferSize);

@@ -531,10 +531,10 @@ void ModelViewer::HandleLightInput()
         graphicsEngine.AdjustShadowBias(LightType::Point, -0.00005f);
     }
 
-    if (myInputHandler.IsKeyPressed(Keys::F11))
-    {
-        graphicsEngine.AdjustShadowBias(LightType::Point, 0.00005f);
-    }
+	if (myInputHandler.IsKeyPressed(Keys::F11))
+	{
+		graphicsEngine.AdjustShadowBias(LightType::Point, 0.00005f);
+	}
 
     if (myInputHandler.IsKeyPressed(Keys::P))
     {
