@@ -25,19 +25,17 @@ bool GetDeferredSurface(FullTextureVertex aPixel, out float3 outDiffuse, out flo
 	outNormal = float3(0.0f, 1.0f, 0.0f);
 	outPosition = 0.0f;
 	outViewDir = float3(0.0f, 0.0f, 1.0f);
-    const float4 albedo = GBufferAlbedo.Sample(TrilinearWrap, aPixel.UV);
+    const float4 albedo = GBufferAlbedo.Sample(TrilinearClamp, aPixel.UV);
     if (albedo.a == 0.0f)
         return false;
 
-    const float3 material = GBufferMaterial.Sample(TrilinearWrap, aPixel.UV).rgb;
+    const float3 material = GBufferMaterial.Sample(TrilinearClamp, aPixel.UV).rgb;
     const float metalness = saturate(material.b);
     outAO = saturate(material.r);
     outRoughness = clamp(material.g, 0.04f, 1.0f);
-	const float3 vertexNormal = normalize(GBufferVertexNormal.Sample(TrilinearWrap, aPixel.UV).xyz);
-    outNormal = normalize(GBufferNormal.Sample(TrilinearWrap, aPixel.UV).xyz);
-	if (dot(outNormal, outNormal) < 0.00001f)
-		outNormal = vertexNormal;
-    outPosition = GBufferWorldPosition.Sample(TrilinearWrap, aPixel.UV).xyz;
+    
+    outNormal = normalize(GBufferNormal.Sample(TrilinearClamp, aPixel.UV).xyz);
+    outPosition = GBufferWorldPosition.Sample(TrilinearClamp, aPixel.UV).xyz;
     const float3 albedoColor = saturate(albedo.rgb);
     outDiffuse = albedoColor * (1.0f - metalness);
     outSpecular = lerp((float3)0.04f, albedoColor, metalness);

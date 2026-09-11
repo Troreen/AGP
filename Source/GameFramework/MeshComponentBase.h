@@ -25,6 +25,7 @@ public:
 	void SetMaterial(unsigned aMaterialIndex, const std::shared_ptr<MaterialInterface>& aMaterial);
 	const std::vector<std::shared_ptr<MaterialInterface>>& GetMaterialList() const { return myMaterials; }
 
+	// TODO: the way this works is bad, visibility and enabled are two different things, but we have a single flag for both. We should separate them.
 	void SetVisible(bool aVisible);
 	bool IsVisible() const;
 

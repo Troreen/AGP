@@ -428,6 +428,16 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path&
 		mySamplers.emplace_back(std::move(sampler));
 	}
 
+	{ // Trilinear Clamp, used for fullscreen GBuffer reads.
+		SamplerDescription samplerDesc;
+		samplerDesc.Name = "TrilinearClamp";
+		samplerDesc.AddressMode = SamplerAddressMode::Clamp;
+		samplerDesc.FilterMode = SamplerFilterMode::Trilinear;
+		Sampler sampler;
+		ensure(myRHI.CreateSampler(samplerDesc, sampler));
+		mySamplers.emplace_back(std::move(sampler));
+	}
+
 	if (!CreateShadowResources())
 	{
 		GELOG(Error, "Failed to create shadow resources.");
@@ -906,6 +916,7 @@ void GraphicsEngine::LogShadowTuning() const
 		ShadowConfig::MaxSpotMaps,
 		ShadowConfig::MaxPointMaps);
 }
+
 
 
 bool GraphicsEngine::CreateConstantBuffer(ConstantBuffer aBufferId, std::string_view aName, size_t aBufferSize)

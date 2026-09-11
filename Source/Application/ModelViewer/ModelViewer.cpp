@@ -300,7 +300,7 @@ void ModelViewer::LoadScene()
             if (myDirectionalLightComponent != nullptr)
             {
                 myDirectionalLightComponent->SetColor({ 1.0f, 0.96f, 0.9f });
-                myDirectionalLightComponent->SetIntensity(1.0f);
+                myDirectionalLightComponent->SetIntensity(10.0f);
             }
         }
 
@@ -500,41 +500,6 @@ void ModelViewer::HandleLightInput()
 {
     const bool shiftDown = IsShiftDown(myInputHandler);
     GraphicsEngine& graphicsEngine = GraphicsEngine::Get();
-
-    if (myInputHandler.IsKeyPressed(Keys::F5))
-    {
-        graphicsEngine.ResetShadowTuning();
-    }
-
-    if (myInputHandler.IsKeyPressed(Keys::F6))
-    {
-        graphicsEngine.AdjustShadowBias(LightType::Directional, -0.00005f);
-    }
-
-    if (myInputHandler.IsKeyPressed(Keys::F7))
-    {
-        graphicsEngine.AdjustShadowBias(LightType::Directional, 0.00005f);
-    }
-
-    if (myInputHandler.IsKeyPressed(Keys::F8))
-    {
-        graphicsEngine.AdjustShadowBias(LightType::Spot, -0.00002f);
-    }
-
-    if (myInputHandler.IsKeyPressed(Keys::F9))
-    {
-        graphicsEngine.AdjustShadowBias(LightType::Spot, 0.00002f);
-    }
-
-    if (myInputHandler.IsKeyPressed(Keys::F10))
-    {
-        graphicsEngine.AdjustShadowBias(LightType::Point, -0.00005f);
-    }
-
-	if (myInputHandler.IsKeyPressed(Keys::F11))
-	{
-		graphicsEngine.AdjustShadowBias(LightType::Point, 0.00005f);
-	}
 
     if (myInputHandler.IsKeyPressed(Keys::P))
     {
