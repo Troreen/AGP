@@ -558,8 +558,8 @@ void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const Actor& 
 		inoutCommandList.ClearRenderTarget(target);
 	}
 	const std::array<const Texture*, GBuffer::TargetCount> gbufferTargets = {
-		&gbufferTextures[GBuffer::Albedo], &gbufferTextures[GBuffer::PixelNormal], &gbufferTextures[GBuffer::Material],
-		&gbufferTextures[GBuffer::VertexNormal], &gbufferTextures[GBuffer::WorldPosition], &gbufferTextures[GBuffer::TangentNormal] };
+		&gbufferTextures[GBuffer::Albedo], &gbufferTextures[GBuffer::PixelNormal], &gbufferTextures[GBuffer::Surface],
+		&gbufferTextures[GBuffer::Emission], &gbufferTextures[GBuffer::WorldPosition] };
 	inoutCommandList.SetRenderTargets(gbufferTargets.data(), gbufferTargets.size(), &myDepthBuffer);
 	for (const RenderItem& item : sceneData.OpaqueRenderItems)
 	{
@@ -1001,11 +1001,17 @@ bool GraphicsEngine::CreateGBufferResources()
 {
 	const CU::Vector2u clientSize = GetClientSize();
 	const std::array<std::string_view, GBuffer::TargetCount> names = {
-		"GBuffer_Albedo", "GBuffer_PixelNormal", "GBuffer_Material", "GBuffer_VertexNormal", "GBuffer_WorldPosition", "GBuffer_TangentNormal" };
+		"GBuffer_Albedo", "GBuffer_PixelNormal", "GBuffer_Surface", "GBuffer_Emission", "GBuffer_WorldPosition" };
+	const std::array<unsigned, GBuffer::TargetCount> formats = {
+		static_cast<unsigned>(DXGI_FORMAT_R8G8B8A8_UNORM),
+		static_cast<unsigned>(DXGI_FORMAT_R16G16B16A16_SNORM),
+		static_cast<unsigned>(DXGI_FORMAT_R8G8B8A8_UNORM),
+		static_cast<unsigned>(DXGI_FORMAT_R16G16B16A16_FLOAT),
+		static_cast<unsigned>(DXGI_FORMAT_R32G32B32A32_FLOAT) };
 	for (size_t targetIndex = 0; targetIndex < names.size(); ++targetIndex)
 	{
 		if (!myRHI.CreateRenderTargetTexture(names[targetIndex], clientSize.x, clientSize.y,
-			static_cast<unsigned>(DXGI_FORMAT_R32G32B32A32_FLOAT), myGBuffer.GetTextures()[targetIndex]))
+			formats[targetIndex], myGBuffer.GetTextures()[targetIndex]))
 		{
 			return false;
 		}
@@ -1505,7 +1511,11 @@ void GraphicsEngine::RenderMesh(GraphicsCommandList& inoutCommandList, const Mes
 		if (elementMaterial != currentMaterial)
 		{
 			currentMaterial = elementMaterial;
-			inoutCommandList.SetPipelineState(aUseGBufferPSO ? &currentMaterial->GetGBufferPSO() : &currentMaterial->GetPSO());
+			// Only opaque elements write the GBuffer. Non-opaque materials retain
+			// their normal Lit/Unlit forward shader; an Unlit Deferred path is not
+			// supported or required.
+			const bool useGBufferForElement = aUseGBufferPSO && elementBlendMode == BlendMode::Opaque;
+			inoutCommandList.SetPipelineState(useGBufferForElement ? &currentMaterial->GetGBufferPSO() : &currentMaterial->GetPSO());
 
 			if (currentMaterial->HasParameters())
 			{

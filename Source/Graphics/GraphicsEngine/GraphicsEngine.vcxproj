@@ -193,8 +193,9 @@ xcopy /E /I /R /Y "%SHADERSRC%" "%SHADERDEST%"</Command>
     <CustomBuildStep>
       <Command>IF EXIST "$(ProjectDir)Shaders"  (
 xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Shaders"
+xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Assets\Shaders"
 )</Command>
-      <Message>Copying Shaders to $(SolutionDir)Bin\$(Configuration)\Shaders...</Message>
+      <Message>Copying Shaders to runtime shader directories...</Message>
       <Outputs>*.hlsl*</Outputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>

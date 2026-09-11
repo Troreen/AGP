@@ -7,10 +7,10 @@
 class GBuffer
 {
 public:
-	static constexpr size_t TargetCount = 6;
-	// Keep both normal spaces: lighting consumes PixelNormal (world space), while
-	// the tangent-space value is retained for the render-pass debugger.
-	enum Target : size_t { Albedo, PixelNormal, Material, VertexNormal, WorldPosition, TangentNormal };
+	static constexpr size_t TargetCount = 5;
+	// The compact deferred layout intentionally stores only the calculated pixel
+	// normal. Interpolated vertex normals are not needed by deferred lighting.
+	enum Target : size_t { Albedo, PixelNormal, Surface, Emission, WorldPosition };
 
 	const std::array<Texture, TargetCount>& GetTextures() const { return myTextures; }
 	std::array<Texture, TargetCount>& GetTextures() { return myTextures; }

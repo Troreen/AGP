@@ -5,10 +5,10 @@
 
 Texture2D GBufferAlbedo : register(t0);
 Texture2D GBufferNormal : register(t1);
-Texture2D GBufferMaterial : register(t2);
-Texture2D GBufferVertexNormal : register(t3);
+Texture2D GBufferSurface : register(t2);
+Texture2D GBufferEmission : register(t3);
 Texture2D GBufferWorldPosition : register(t4);
-Texture2D ScreenSpaceAO : register(t6);
+Texture2D ScreenSpaceAO : register(t5);
 
 struct FullTextureVertex
 {
@@ -30,7 +30,7 @@ bool GetDeferredSurface(FullTextureVertex aPixel, out float3 outDiffuse, out flo
     if (albedo.a == 0.0f)
         return false;
 
-    const float3 material = GBufferMaterial.Sample(TrilinearClamp, aPixel.UV).rgb;
+    const float3 material = GBufferSurface.Sample(TrilinearClamp, aPixel.UV).rgb;
     const float metalness = saturate(material.b);
     outAO = saturate(material.r) * saturate(ScreenSpaceAO.Sample(TrilinearClamp, aPixel.UV).r);
     outRoughness = clamp(material.g, 0.04f, 1.0f);
