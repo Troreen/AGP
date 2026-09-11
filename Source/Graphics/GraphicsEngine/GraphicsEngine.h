@@ -30,6 +30,21 @@ class MeshComponentBase;
 class World;
 enum class LightType : uint32_t;
 
+// Kept available in every build; these are user-facing renderer diagnostics.
+enum class RenderPass : uint8_t
+{
+	Lit,
+	Albedo,
+	Roughness,
+	Metalness,
+	AmbientOcclusionTexture,
+	AmbientOcclusionScreenSpace,
+	NormalsTangentSpace,
+	NormalsWorldSpace,
+	Shadows,
+	Count
+};
+
 struct RHIShaderReflectionInfo;
 struct MaterialDescription;
 
@@ -41,6 +56,7 @@ enum class ConstantBuffer : uint8_t
 	MaterialBuffer,
 	LightBuffer,
 	PointShadowBuffer,
+	RenderPassDebugBuffer,
 	MAX
 };
 
@@ -53,6 +69,8 @@ public:
 	bool Initialize(HWND aWindowHandle, const std::filesystem::path& aShaderRoot);
 	void Render(GraphicsCommandList& inoutCommandList, const Actor& aCameraActor, const World& aWorld);
 	void Present() const;
+	void CycleRenderPass();
+	const char* GetRenderPassName() const;
 
 	template <class T>
 	bool CreateConstantBuffer(ConstantBuffer aBufferId, std::string_view aName) 
@@ -141,6 +159,7 @@ private:
 	Texture myDepthBuffer;
 	GBuffer myGBuffer;
 	Texture myDeferredLightingTexture;
+	Texture myScreenSpaceAOTexture;
 
 	std::unordered_map<ConstantBuffer, Buffer> myConstantBuffers;
 
@@ -152,6 +171,8 @@ private:
 	PipelineStateObject myDeferredPointPSO;
 	PipelineStateObject myDeferredSpotPSO;
 	PipelineStateObject myDeferredCompositePSO;
+	PipelineStateObject myScreenSpaceAOPSO;
+	PipelineStateObject myRenderPassDebugPSO;
 
 	std::filesystem::path myShaderRoot;
 	std::unordered_map<MaterialDomain, std::filesystem::path> myMaterialDomainShaders;
@@ -171,4 +192,5 @@ private:
 	float myDirectionalShadowBiasOffset = 0.0f;
 	float mySpotShadowBiasOffset = 0.0f;
 	float myPointShadowBiasOffset = 0.0f;
+	RenderPass myRenderPass = RenderPass::Lit;
 };

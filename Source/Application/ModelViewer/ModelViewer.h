@@ -94,11 +94,14 @@ private:
 		const CommonUtilities::Vector3<float>& aScale);
 	void HandleAnimationInput();
 	void HandleLightInput();
+	void HandleRenderPassInput();
+	void UpdateRenderPassTitle();
 	void UpdateScene(float aDeltaTime);
 
 	bool myIsRunning = false;
 
 	HWND myMainWindowHandle = nullptr;
+	std::wstring myWindowTitle;
 
 	MeshLibrary myMeshLibrary;
 	std::vector<SpinningActor> mySpinningActors;

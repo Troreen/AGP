@@ -395,6 +395,7 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path&
 	CreateConstantBuffer(ConstantBuffer::MaterialBuffer, "MaterialBuffer", Material::MATERIAL_BUFFER_SIZE);
 	CreateConstantBuffer<LightBuffer>(ConstantBuffer::LightBuffer, "LightBuffer");
 	CreateConstantBuffer(ConstantBuffer::PointShadowBuffer, "PointShadowBuffer", sizeof(PointShadowBufferData));
+	CreateConstantBuffer(ConstantBuffer::RenderPassDebugBuffer, "RenderPassDebugBuffer", 16);
 
 	{ // Trilinear Wrap
 		SamplerDescription samplerDesc;
@@ -558,7 +559,7 @@ void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const Actor& 
 	}
 	const std::array<const Texture*, GBuffer::TargetCount> gbufferTargets = {
 		&gbufferTextures[GBuffer::Albedo], &gbufferTextures[GBuffer::PixelNormal], &gbufferTextures[GBuffer::Material],
-		&gbufferTextures[GBuffer::VertexNormal], &gbufferTextures[GBuffer::WorldPosition] };
+		&gbufferTextures[GBuffer::VertexNormal], &gbufferTextures[GBuffer::WorldPosition], &gbufferTextures[GBuffer::TangentNormal] };
 	inoutCommandList.SetRenderTargets(gbufferTargets.data(), gbufferTargets.size(), &myDepthBuffer);
 	for (const RenderItem& item : sceneData.OpaqueRenderItems)
 	{
@@ -567,12 +568,26 @@ void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const Actor& 
 	inoutCommandList.SetRenderTargets(nullptr, 0, nullptr);
 	inoutCommandList.EndEvent();
 
+	// SSAO is generated from the deferred surface data so it can be inspected and
+	// used independently from the material's packed texture AO channel.
+	inoutCommandList.BeginEvent("Screen Space Ambient Occlusion");
+	inoutCommandList.ClearRenderTarget(myScreenSpaceAOTexture);
+	inoutCommandList.SetRenderTarget(&myScreenSpaceAOTexture, nullptr);
+	inoutCommandList.SetShaderResources(gbufferTargets.data(), gbufferTargets.size(), 0, PipeLineStage_PixelShader);
+	inoutCommandList.SetPipelineState(&myScreenSpaceAOPSO);
+	inoutCommandList.Draw(4);
+	const std::array<const Texture*, GBuffer::TargetCount> nullGBufferResources = {};
+	inoutCommandList.SetShaderResources(nullGBufferResources.data(), nullGBufferResources.size(), 0, PipeLineStage_PixelShader);
+	inoutCommandList.EndEvent();
+
 	// Deferred lights are fullscreen additive passes. Accumulation stays linear until
 	// the final composite pass, matching the Forward shader's gamma conversion.
 	inoutCommandList.BeginEvent("Deferred Lighting");
 	inoutCommandList.ClearRenderTarget(myDeferredLightingTexture);
 	inoutCommandList.SetRenderTarget(&myDeferredLightingTexture, nullptr);
 	inoutCommandList.SetShaderResources(gbufferTargets.data(), gbufferTargets.size(), 0, PipeLineStage_PixelShader);
+	const Texture* screenSpaceAOResource = &myScreenSpaceAOTexture;
+	inoutCommandList.SetShaderResources(&screenSpaceAOResource, 1, GBuffer::TargetCount, PipeLineStage_PixelShader);
 	for (unsigned lightIndex = 0; lightIndex < lightBuffer.NumActiveLights; ++lightIndex)
 	{
 		LightBuffer singleLightBuffer;
@@ -589,8 +604,9 @@ void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const Actor& 
 		}
 		inoutCommandList.Draw(4);
 	}
-	const std::array<const Texture*, GBuffer::TargetCount> nullGBufferResources = {};
 	inoutCommandList.SetShaderResources(nullGBufferResources.data(), nullGBufferResources.size(), 0, PipeLineStage_PixelShader);
+	const Texture* nullScreenSpaceAOResource = nullptr;
+	inoutCommandList.SetShaderResources(&nullScreenSpaceAOResource, 1, GBuffer::TargetCount, PipeLineStage_PixelShader);
 	inoutCommandList.SetRenderTarget(&myBackBuffer, nullptr);
 	const Texture* deferredLightingResource = &myDeferredLightingTexture;
 	inoutCommandList.SetShaderResources(&deferredLightingResource, 1, 0, PipeLineStage_PixelShader);
@@ -599,6 +615,23 @@ void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const Actor& 
 	const std::array<const Texture*, 1> nullDeferredLightingResource = {};
 	inoutCommandList.SetShaderResources(nullDeferredLightingResource.data(), nullDeferredLightingResource.size(), 0, PipeLineStage_PixelShader);
 	inoutCommandList.EndEvent();
+
+	if (myRenderPass != RenderPass::Lit)
+	{
+		inoutCommandList.BeginEvent("Render Pass Debug");
+		inoutCommandList.SetRenderTarget(&myBackBuffer, nullptr);
+		inoutCommandList.SetShaderResources(gbufferTargets.data(), gbufferTargets.size(), 0, PipeLineStage_PixelShader);
+		const Texture* screenSpaceAO = &myScreenSpaceAOTexture;
+		inoutCommandList.SetShaderResources(&screenSpaceAO, 1, GBuffer::TargetCount, PipeLineStage_PixelShader);
+		const std::array<uint32_t, 4> renderPass = { static_cast<uint32_t>(myRenderPass), 0, 0, 0 };
+		UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::RenderPassDebugBuffer, renderPass, 5, PipeLineStage_PixelShader);
+		UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::LightBuffer, lightBuffer, 4, PipeLineStage_PixelShader);
+		inoutCommandList.SetPipelineState(&myRenderPassDebugPSO);
+		inoutCommandList.Draw(4);
+		const std::array<const Texture*, GBuffer::TargetCount + 1> nullDebugResources = {};
+		inoutCommandList.SetShaderResources(nullDebugResources.data(), nullDebugResources.size(), 0, PipeLineStage_PixelShader);
+		inoutCommandList.EndEvent();
+	}
 
 	// Blended elements remain Forward rendered and use the depth written in GBuffer.
 	inoutCommandList.SetRenderTarget(&myBackBuffer, &myDepthBuffer);
@@ -612,6 +645,31 @@ void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const Actor& 
 void GraphicsEngine::Present() const
 {
 	myRHI.Present();
+}
+
+void GraphicsEngine::CycleRenderPass()
+{
+	const auto nextPass = static_cast<uint8_t>(myRenderPass) + 1;
+	myRenderPass = nextPass == static_cast<uint8_t>(RenderPass::Count)
+		? RenderPass::Lit
+		: static_cast<RenderPass>(nextPass);
+}
+
+const char* GraphicsEngine::GetRenderPassName() const
+{
+	switch (myRenderPass)
+	{
+	case RenderPass::Lit: return "Lit";
+	case RenderPass::Albedo: return "Albedo (sRGB)";
+	case RenderPass::Roughness: return "Roughness (Linear Greyscale)";
+	case RenderPass::Metalness: return "Metalness (Linear Greyscale)";
+	case RenderPass::AmbientOcclusionTexture: return "Ambient Occlusion (Texture, Linear Greyscale)";
+	case RenderPass::AmbientOcclusionScreenSpace: return "Ambient Occlusion (Screen Space, Linear Greyscale)";
+	case RenderPass::NormalsTangentSpace: return "Normals (Tangent Space, Linear)";
+	case RenderPass::NormalsWorldSpace: return "Normals (World Space, Linear)";
+	case RenderPass::Shadows: return "Shadows (Directional)";
+	default: return "Unknown";
+	}
 }
 
 GraphicsEngine::SceneRenderData GraphicsEngine::CollectRenderItemsAndLights(const World& aWorld) const
@@ -943,7 +1001,7 @@ bool GraphicsEngine::CreateGBufferResources()
 {
 	const CU::Vector2u clientSize = GetClientSize();
 	const std::array<std::string_view, GBuffer::TargetCount> names = {
-		"GBuffer_Albedo", "GBuffer_PixelNormal", "GBuffer_Material", "GBuffer_VertexNormal", "GBuffer_WorldPosition" };
+		"GBuffer_Albedo", "GBuffer_PixelNormal", "GBuffer_Material", "GBuffer_VertexNormal", "GBuffer_WorldPosition", "GBuffer_TangentNormal" };
 	for (size_t targetIndex = 0; targetIndex < names.size(); ++targetIndex)
 	{
 		if (!myRHI.CreateRenderTargetTexture(names[targetIndex], clientSize.x, clientSize.y,
@@ -954,7 +1012,9 @@ bool GraphicsEngine::CreateGBufferResources()
 	}
 
 	return myRHI.CreateRenderTargetTexture("Deferred_Lighting", clientSize.x, clientSize.y,
-		static_cast<unsigned>(DXGI_FORMAT_R32G32B32A32_FLOAT), myDeferredLightingTexture);
+		static_cast<unsigned>(DXGI_FORMAT_R32G32B32A32_FLOAT), myDeferredLightingTexture)
+		&& myRHI.CreateRenderTargetTexture("ScreenSpace_AO", clientSize.x, clientSize.y,
+			static_cast<unsigned>(DXGI_FORMAT_R32_FLOAT), myScreenSpaceAOTexture);
 }
 
 bool GraphicsEngine::CreateDeferredPipelineStates()
@@ -984,7 +1044,9 @@ bool GraphicsEngine::CreateDeferredPipelineStates()
 	return createPipeline("DeferredDirectionalPSO", "DeferredDirectional_PS.hlsl", BlendMode::Additive, myDeferredDirectionalPSO)
 		&& createPipeline("DeferredPointPSO", "DeferredPoint_PS.hlsl", BlendMode::Additive, myDeferredPointPSO)
 		&& createPipeline("DeferredSpotPSO", "DeferredSpot_PS.hlsl", BlendMode::Additive, myDeferredSpotPSO)
-		&& createPipeline("DeferredCompositePSO", "DeferredComposite_PS.hlsl", BlendMode::Opaque, myDeferredCompositePSO);
+		&& createPipeline("DeferredCompositePSO", "DeferredComposite_PS.hlsl", BlendMode::Opaque, myDeferredCompositePSO)
+		&& createPipeline("ScreenSpaceAOPSO", "ScreenSpaceAO_PS.hlsl", BlendMode::Opaque, myScreenSpaceAOPSO)
+		&& createPipeline("RenderPassDebugPSO", "RenderPassDebug_PS.hlsl", BlendMode::Opaque, myRenderPassDebugPSO);
 }
 
 bool GraphicsEngine::CreatePBLResources()

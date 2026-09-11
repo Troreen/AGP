@@ -1,6 +1,7 @@
 #include "ModelViewer.h"
 
 #include <algorithm>
+#include <cstring>
 #include <memory>
 #include <string>
 #include <utility>
@@ -169,6 +170,7 @@ bool ModelViewer::Initialize(SIZE aWindowSize, WNDPROC aWindowProcess, LPCWSTR a
         nullptr, nullptr, nullptr,
         nullptr
     );
+	myWindowTitle = aWindowTitle;
 
     std::filesystem::path contentPath = std::filesystem::current_path() / ".." / ".." / ".." / "Assets";
 	contentPath = std::filesystem::canonical(contentPath);
@@ -202,7 +204,8 @@ bool ModelViewer::Initialize(SIZE aWindowSize, WNDPROC aWindowProcess, LPCWSTR a
         myCameraController.Init(myInputHandler, myCameraActor->GetTransform());
     }
 
-    MVLOG(Log, "Ready!");
+	MVLOG(Log, "Ready!");
+	UpdateRenderPassTitle();
 
     // Show our program window and give it focus.
     ShowWindow(myMainWindowHandle, SW_SHOW);
@@ -240,6 +243,7 @@ int ModelViewer::Run()
         myCameraController.Update(deltaTime);
         HandleAnimationInput();
         HandleLightInput();
+		HandleRenderPassInput();
         UpdateScene(deltaTime);
 
         myCommandList.ResetCommandList();
@@ -462,7 +466,24 @@ StaticMeshComponent* ModelViewer::CreateStaticMeshActor(
 
 std::shared_ptr<Mesh> ModelViewer::GetRegisteredMesh(const std::string& aName) const
 {
-    return myMeshLibrary.GetMesh(aName);
+	return myMeshLibrary.GetMesh(aName);
+}
+
+void ModelViewer::HandleRenderPassInput()
+{
+	if (myInputHandler.IsKeyPressed(Keys::F6))
+	{
+		GraphicsEngine::Get().CycleRenderPass();
+		UpdateRenderPassTitle();
+	}
+}
+
+void ModelViewer::UpdateRenderPassTitle()
+{
+	const char* passName = GraphicsEngine::Get().GetRenderPassName();
+	const std::wstring widePassName(passName, passName + std::strlen(passName));
+	const std::wstring title = myWindowTitle + L"  |  Render Pass: " + widePassName + L"  (F6 cycles)";
+	SetWindowTextW(myMainWindowHandle, title.c_str());
 }
 
 void ModelViewer::HandleAnimationInput()

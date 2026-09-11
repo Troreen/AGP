@@ -11,6 +11,7 @@ struct GBufferOutput
     float4 Material : SV_TARGET2;
     float4 VertexNormal : SV_TARGET3;
     float4 WorldPosition : SV_TARGET4;
+    float4 TangentNormal : SV_TARGET5;
 };
 
 GBufferOutput main(VStoPS aPixel)
@@ -34,5 +35,10 @@ GBufferOutput main(VStoPS aPixel)
     output.Material = float4(MaterialTexture.Sample(TrilinearWrap, parameters.UV0).rgb, 0.0f);
     output.VertexNormal = float4(normalize(aPixel.Normal), 0.0f);
     output.WorldPosition = parameters.WorldPosition;
+    const float3 tangentNormal = float3(
+        dot(parameters.Normal, normalize(aPixel.Tangent)),
+        dot(parameters.Normal, normalize(aPixel.Binormal)),
+        dot(parameters.Normal, normalize(aPixel.Normal)));
+    output.TangentNormal = float4(normalize(tangentNormal), 0.0f);
     return output;
 }

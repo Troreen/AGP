@@ -8,6 +8,7 @@ Texture2D GBufferNormal : register(t1);
 Texture2D GBufferMaterial : register(t2);
 Texture2D GBufferVertexNormal : register(t3);
 Texture2D GBufferWorldPosition : register(t4);
+Texture2D ScreenSpaceAO : register(t6);
 
 struct FullTextureVertex
 {
@@ -31,7 +32,7 @@ bool GetDeferredSurface(FullTextureVertex aPixel, out float3 outDiffuse, out flo
 
     const float3 material = GBufferMaterial.Sample(TrilinearClamp, aPixel.UV).rgb;
     const float metalness = saturate(material.b);
-    outAO = saturate(material.r);
+    outAO = saturate(material.r) * saturate(ScreenSpaceAO.Sample(TrilinearClamp, aPixel.UV).r);
     outRoughness = clamp(material.g, 0.04f, 1.0f);
     
     outNormal = normalize(GBufferNormal.Sample(TrilinearClamp, aPixel.UV).xyz);
