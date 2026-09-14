@@ -9,6 +9,7 @@ Texture2D GBufferSurface : register(t2);
 Texture2D GBufferEmission : register(t3);
 Texture2D GBufferWorldPosition : register(t4);
 Texture2D ScreenSpaceAO : register(t5);
+Texture2D GBufferTangentNormal : register(t6);
 
 struct FullTextureVertex
 {

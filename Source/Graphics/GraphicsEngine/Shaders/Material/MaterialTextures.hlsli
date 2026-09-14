@@ -11,13 +11,22 @@ Texture2D AlbedoTexture : register(t0);
 Texture2D NormalTexture : register(t1);
 Texture2D MaterialTexture : register(t2);
 
-float3 SampleWorldNormal(float2 aUV, float3 aNormal, float3 aTangent, float3 aBinormal)
+float3 SampleTangentNormal(float2 aUV)
 {
     float2 normalXY = NormalTexture.Sample(TrilinearWrap, aUV).rg * 2.0f - 1.0f;
     const float normalZ = sqrt(1.0f - saturate(dot(normalXY, normalXY)));
-    const float3 tangentNormal = normalize(float3(normalXY, normalZ));
+    return normalize(float3(normalXY, normalZ));
+}
+
+float3 TangentToWorldNormal(float3 aTangentNormal, float3 aNormal, float3 aTangent, float3 aBinormal)
+{
     const float3x3 TBN = float3x3(normalize(aTangent), normalize(aBinormal), normalize(aNormal));
-    return normalize(mul(tangentNormal, TBN));
+    return normalize(mul(aTangentNormal, TBN));
+}
+
+float3 SampleWorldNormal(float2 aUV, float3 aNormal, float3 aTangent, float3 aBinormal)
+{
+    return TangentToWorldNormal(SampleTangentNormal(aUV), aNormal, aTangent, aBinormal);
 }
 
 #include "GlobalLightingTextures.hlsli"

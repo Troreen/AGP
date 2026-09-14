@@ -11,12 +11,14 @@ struct GBufferOutput
     float4 Surface : SV_TARGET2;
     float4 Emission : SV_TARGET3;
     float4 WorldPosition : SV_TARGET4;
+    float4 TangentNormal : SV_TARGET5;
 };
 
 GBufferOutput main(VStoPS aPixel)
 {
     float4 albedo = AlbedoTexture.Sample(TrilinearWrap, aPixel.UV0) * aPixel.Color;
-    const float3 pixelNormal = SampleWorldNormal(aPixel.UV0, aPixel.Normal, aPixel.Tangent, aPixel.Binormal);
+    const float3 tangentNormal = SampleTangentNormal(aPixel.UV0);
+    const float3 pixelNormal = TangentToWorldNormal(tangentNormal, aPixel.Normal, aPixel.Tangent, aPixel.Binormal);
 
     MaterialPixelParameters parameters;
     parameters.PixelColor = albedo;
@@ -36,5 +38,6 @@ GBufferOutput main(VStoPS aPixel)
     // do not expose emission yet, so initialize the future-facing buffer to 0.
     output.Emission = 0.0f;
     output.WorldPosition = parameters.WorldPosition;
+    output.TangentNormal = float4(tangentNormal, 0.0f);
     return output;
 }

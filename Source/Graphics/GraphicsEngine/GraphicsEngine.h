@@ -158,6 +158,8 @@ private:
 	Texture myBackBuffer;
 	Texture myDepthBuffer;
 	GBuffer myGBuffer;
+	// Kept outside the production GBuffer; populated only for the tangent-normal debug view.
+	Texture myTangentNormalDebugTexture;
 	Texture myDeferredLightingTexture;
 	Texture myScreenSpaceAOTexture;
 

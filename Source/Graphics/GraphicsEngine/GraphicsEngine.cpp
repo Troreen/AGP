@@ -550,7 +550,8 @@ void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const Actor& 
 
 	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::FrameBuffer, fb, 0, PipeLineStage_VertexShader | PipeLineStage_PixelShader);
 
-	// Non-blended geometry produces the five ordered GBuffer targets.
+	// Non-blended geometry produces the five ordered GBuffer targets. The sampled
+	// tangent normal is captured separately only for its dedicated debug view.
 	inoutCommandList.BeginEvent("Deferred GBuffer");
 	const std::array<Texture, GBuffer::TargetCount>& gbufferTextures = myGBuffer.GetTextures();
 	for (const Texture& target : gbufferTextures)
@@ -560,7 +561,16 @@ void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const Actor& 
 	const std::array<const Texture*, GBuffer::TargetCount> gbufferTargets = {
 		&gbufferTextures[GBuffer::Albedo], &gbufferTextures[GBuffer::PixelNormal], &gbufferTextures[GBuffer::Surface],
 		&gbufferTextures[GBuffer::Emission], &gbufferTextures[GBuffer::WorldPosition] };
-	inoutCommandList.SetRenderTargets(gbufferTargets.data(), gbufferTargets.size(), &myDepthBuffer);
+	const bool captureTangentNormals = myRenderPass == RenderPass::NormalsTangentSpace;
+	std::array<const Texture*, GBuffer::TargetCount + 1> gbufferRenderTargets = {};
+	std::copy(gbufferTargets.begin(), gbufferTargets.end(), gbufferRenderTargets.begin());
+	if (captureTangentNormals)
+	{
+		inoutCommandList.ClearRenderTarget(myTangentNormalDebugTexture);
+		gbufferRenderTargets[GBuffer::TargetCount] = &myTangentNormalDebugTexture;
+	}
+	inoutCommandList.SetRenderTargets(gbufferRenderTargets.data(),
+		captureTangentNormals ? gbufferRenderTargets.size() : gbufferTargets.size(), &myDepthBuffer);
 	for (const RenderItem& item : sceneData.OpaqueRenderItems)
 	{
 		RenderMesh(inoutCommandList, *item.MeshComponent, item.World, RenderBlendFilter::OpaqueOnly, true);
@@ -623,12 +633,14 @@ void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const Actor& 
 		inoutCommandList.SetShaderResources(gbufferTargets.data(), gbufferTargets.size(), 0, PipeLineStage_PixelShader);
 		const Texture* screenSpaceAO = &myScreenSpaceAOTexture;
 		inoutCommandList.SetShaderResources(&screenSpaceAO, 1, GBuffer::TargetCount, PipeLineStage_PixelShader);
+		const Texture* tangentNormalDebug = &myTangentNormalDebugTexture;
+		inoutCommandList.SetShaderResources(&tangentNormalDebug, 1, GBuffer::TargetCount + 1, PipeLineStage_PixelShader);
 		const std::array<uint32_t, 4> renderPass = { static_cast<uint32_t>(myRenderPass), 0, 0, 0 };
 		UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::RenderPassDebugBuffer, renderPass, 5, PipeLineStage_PixelShader);
 		UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::LightBuffer, lightBuffer, 4, PipeLineStage_PixelShader);
 		inoutCommandList.SetPipelineState(&myRenderPassDebugPSO);
 		inoutCommandList.Draw(4);
-		const std::array<const Texture*, GBuffer::TargetCount + 1> nullDebugResources = {};
+		const std::array<const Texture*, GBuffer::TargetCount + 2> nullDebugResources = {};
 		inoutCommandList.SetShaderResources(nullDebugResources.data(), nullDebugResources.size(), 0, PipeLineStage_PixelShader);
 		inoutCommandList.EndEvent();
 	}
@@ -1017,7 +1029,9 @@ bool GraphicsEngine::CreateGBufferResources()
 		}
 	}
 
-	return myRHI.CreateRenderTargetTexture("Deferred_Lighting", clientSize.x, clientSize.y,
+	return myRHI.CreateRenderTargetTexture("TangentNormal_Debug", clientSize.x, clientSize.y,
+		static_cast<unsigned>(DXGI_FORMAT_R16G16B16A16_SNORM), myTangentNormalDebugTexture)
+		&& myRHI.CreateRenderTargetTexture("Deferred_Lighting", clientSize.x, clientSize.y,
 		static_cast<unsigned>(DXGI_FORMAT_R32G32B32A32_FLOAT), myDeferredLightingTexture)
 		&& myRHI.CreateRenderTargetTexture("ScreenSpace_AO", clientSize.x, clientSize.y,
 			static_cast<unsigned>(DXGI_FORMAT_R32_FLOAT), myScreenSpaceAOTexture);
