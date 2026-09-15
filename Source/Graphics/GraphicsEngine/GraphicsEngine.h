@@ -93,6 +93,7 @@ public:
 	void ExecuteCommandList(const GraphicsCommandList& aCommandList) const;
 
 	bool CreateMaterial(const MaterialDescription& aDescription, Material& outMaterial) const;
+	bool CreateFont(const std::filesystem::path& aFontPath, const std::filesystem::path& aFontAtlas, Font& outFont) const;
 
 	bool LoadTexture(const std::filesystem::path& aPath, Texture& outTexture) const;
 

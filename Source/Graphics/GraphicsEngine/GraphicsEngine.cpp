@@ -24,6 +24,8 @@
 #include <cctype>
 #include <cmath>
 #include <limits>
+#include <rapidjson/document.h>
+#include <rapidjson/istreamwrapper.h>
 #include <vector>
 
 namespace
@@ -457,6 +459,28 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path&
 		return false;
 	}
 
+	myFont = std::make_shared<Font>();
+
+	CreateFont("cascadiacode.json", "cascadiacode.dds", *myFont);
+
+	MaterialDescription fontMatDesc;
+	fontMatDesc.Domain = MaterialDomain::Forward;
+	fontMatDesc.Name = "FontMaterial";| I
+	fontMatDesc.VertexShader = "FontMaterial/FontMaterial_VS";
+	fontMatDesc.PixelShader = "FontMaterial/FontMaterial_PS";
+	fontMatDesc.PrimitiveTopology = PrimitiveTopology::TriangleList;
+	fontMatDesc.BlendMode = BlendMode::Alpha; // Can be Opaque if you Like. Depends on font effects/crispness.
+
+	std::shared_ptr<Material> fontMaterial = std::make_shared<Material>();
+	CreateMaterial(fontMatDesc, *fontMaterial);
+
+	myTextWidget = std::make_shared<TextWidget>("Text Widget 1");
+	myTextWidget->SetFont(myFont);
+	myTextWidget->SetSize(12);
+	myTextWidget->SetPosition(10, 10);
+	myTextWidget->SetText("Cascadia Code");
+	myTextWidget->SetFontMaterial(fontMaterial);
+	myTextWidget->SetBackgroundColor(Vector4f(0, 0, 0, 0.5f));
 	return true;
 }
 
@@ -652,6 +676,10 @@ void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const Actor& 
 	{
 		RenderMesh(inoutCommandList, *item.MeshComponent, item.World, RenderBlendFilter::BlendedOnly);
 	}
+
+
+	// once the 3d image is completed, we draw screenspace elements like text, UI, etc.
+	// TODO: continue text rendering 25mins in the video. 
 }
 
 void GraphicsEngine::Present() const
@@ -1354,6 +1382,58 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 	outMaterial.myDescription = aDescription;
 
 	return true;
+}
+
+bool GraphicsEngine::CreateFont(const std::filesystem::path &aFontPath, const std::filesystem::path &aFontAtlas, Font &outFont) const
+{
+	std::ifstream file(aFontPath, std::ios::binary);
+	ensure(file.is_open());
+	rapidjson::IStreamWrapper stream(file);
+	rapidjson::Document data;
+	data.ParseStream(stream);
+	ensure(!data.HasParseError());
+
+	const rapidjson::Value& atlas = data["atlas"];
+	const rapidjson::Value& metrics = data["metrics"];
+	unsigned width = atlas["width"].GetUint();
+	unsigned height = atlas["height"].GetUint();
+	float floatWidth = static_cast<float>(width);
+	float floatHeight = static_cast<float>(height);
+	float lineHeight = metrics["lineHeight"].GetFloat();
+	float ascender = metrics["ascender"].GetFloat();
+	float descender = metrics["descender"].GetFloat();
+
+	outFont.myLineHeight = lineHeight;
+	outFont.myAscender = ascender;
+	outFont.myDescender = descender;
+
+	for (const rapidjson::Value& glyph : data["glyphs"].GetArray())
+	{
+		Font::Glyph g;
+		g.Unicode = glyph["unicode"].GetUint();
+		g.Advance = glyph["advance"].GetFloat();
+		if (glyph.HasMember("planeBounds"))
+		{
+			const rapidjson::Value& planeBounds = glyph["planeBounds"];
+			const rapidjson::Value& atlasBounds = glyph["atlasBounds"];
+			g.PlaneBounds.Left = planeBounds["left"].GetFloat();
+			g.PlaneBounds.Bottom = planeBounds["bottom"].GetFloat();
+			g.PlaneBounds.Right = planeBounds["right"].GetFloat();
+			g.PlaneBounds.Top = planeBounds["top"].GetFloat();
+			g.AtlasBounds.Left = atlasBounds["left"].GetFloat();
+			g.AtlasBounds.Bottom = atlasBounds["bottom"].GetFloat();
+			g.AtlasBounds.Right = atlasBounds["right"].GetFloat();
+			g.AtlasBounds.Top = atlasBounds["top"].GetFloat();
+
+			g.AtlasBounds.Left /= floatWidth;
+			g.AtlasBounds.Bottom /= floatHeight;
+			g.AtlasBounds.Right /= floatWidth;
+			g.AtlasBounds.Top /= floatHeight;
+		}
+		outFont.myGlyphs.emplace(static_cast<char>(g.Unicode), std::move(g));
+	}
+
+	return LoadTexture(aFontAtlas, outFont.myAtlas);
 }
 
 bool GraphicsEngine::CreateDefaultTextures()
