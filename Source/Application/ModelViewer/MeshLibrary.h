@@ -14,7 +14,7 @@ public:
 	MeshLibrary();
 	~MeshLibrary();
 
-	void Initialize();
+	void Initialize(const std::filesystem::path& aContentRoot);
 
 	std::shared_ptr<Mesh> GetMesh(std::string_view aName) const;
 	bool LoadFBXMesh(const std::filesystem::path& aPath);
@@ -25,5 +25,6 @@ private:
 	void RegisterMesh(std::string aName, std::shared_ptr<Mesh> aMesh);
 	std::filesystem::path ResolvePath(const std::filesystem::path& aPath) const;
 
+	std::filesystem::path myContentRoot;
 	std::unordered_map<std::string, std::shared_ptr<Mesh>> myMeshes;
 };
