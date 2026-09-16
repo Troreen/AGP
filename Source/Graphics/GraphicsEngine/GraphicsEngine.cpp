@@ -56,7 +56,7 @@ namespace
 		constexpr float DirectionalRasterSlopeBias = 0.35f;
 		constexpr int LocalRasterDepthBias = 1;
 		constexpr float LocalRasterSlopeBias = 0.02f;
-		constexpr std::array<float, DirectionalCascadeCount> CascadeSplits = { 150.0f, 600.0f, 1600.0f, 5000.0f };
+		constexpr std::array<float, DirectionalCascadeCount> CascadeSplits = {150.0f, 600.0f, 1600.0f, 5000.0f};
 		constexpr float DirectionalCascadeSplitPaddingMin = 30.0f;
 		constexpr float DirectionalCascadeSplitPaddingScale = 0.08f;
 		constexpr float DirectionalCascadeLightPaddingMin = 250.0f;
@@ -95,7 +95,6 @@ namespace
 
 	using RenderItemPtrList = std::vector<const GraphicsEngine::RenderItemSnapshot*>;
 
-
 	bool IntersectsLightSpaceBounds(const CascadeShadowData& aCascade, const GraphicsEngine::RenderItemSnapshot& aRenderItem)
 	{
 		if (!aCascade.HasBounds || !aRenderItem.HasBounds)
@@ -105,22 +104,19 @@ namespace
 
 		const CU::Vector3f center = CU::Maths::TransformPoint(aRenderItem.BoundsCenter, aCascade.View);
 		const float radius = aRenderItem.BoundsRadius;
-		if (!IsFinite(center) || !std::isfinite(radius) || radius < 0.0f
-			|| !std::isfinite(aCascade.MinX) || !std::isfinite(aCascade.MaxX)
-			|| !std::isfinite(aCascade.MinY) || !std::isfinite(aCascade.MaxY)
-			|| !std::isfinite(aCascade.MinZ) || !std::isfinite(aCascade.MaxZ)) return true;
-		return center.x + radius >= aCascade.MinX
-			&& center.x - radius <= aCascade.MaxX
-			&& center.y + radius >= aCascade.MinY
-			&& center.y - radius <= aCascade.MaxY
-			&& center.z + radius >= aCascade.MinZ
-			&& center.z - radius <= aCascade.MaxZ;
+		if (!IsFinite(center) || !std::isfinite(radius) || radius < 0.0f || !std::isfinite(aCascade.MinX) ||
+		    !std::isfinite(aCascade.MaxX) || !std::isfinite(aCascade.MinY) || !std::isfinite(aCascade.MaxY) ||
+		    !std::isfinite(aCascade.MinZ) || !std::isfinite(aCascade.MaxZ))
+			return true;
+		return center.x + radius >= aCascade.MinX && center.x - radius <= aCascade.MaxX && center.y + radius >= aCascade.MinY &&
+		       center.y - radius <= aCascade.MaxY && center.z + radius >= aCascade.MinZ && center.z - radius <= aCascade.MaxZ;
 	}
 
 	bool IntersectsPointLightRadius(const GraphicsEngine::LightSnapshot& aLight, const GraphicsEngine::RenderItemSnapshot& aRenderItem)
 	{
-		if (!aRenderItem.HasBounds || !IsFinite(aLight.Position) || !IsFinite(aRenderItem.BoundsCenter)
-			|| !std::isfinite(aRenderItem.BoundsRadius) || aRenderItem.BoundsRadius < 0.0f || aLight.Radius <= 0.0f || !std::isfinite(aLight.Radius))
+		if (!aRenderItem.HasBounds || !IsFinite(aLight.Position) || !IsFinite(aRenderItem.BoundsCenter) ||
+		    !std::isfinite(aRenderItem.BoundsRadius) || aRenderItem.BoundsRadius < 0.0f || aLight.Radius <= 0.0f ||
+		    !std::isfinite(aLight.Radius))
 		{
 			return true;
 		}
@@ -129,7 +125,8 @@ namespace
 		return (aRenderItem.BoundsCenter - aLight.Position).LengthSqr() <= radius * radius;
 	}
 
-	RenderItemPtrList CullCastersForCascade(const std::vector<GraphicsEngine::RenderItemSnapshot>& aRenderItems, const CascadeShadowData& aCascade)
+	RenderItemPtrList CullCastersForCascade(const std::vector<GraphicsEngine::RenderItemSnapshot>& aRenderItems,
+	                                        const CascadeShadowData& aCascade)
 	{
 		RenderItemPtrList visibleCasters;
 		visibleCasters.reserve(aRenderItems.size());
@@ -143,13 +140,14 @@ namespace
 		return visibleCasters;
 	}
 
-	RenderItemPtrList CullCastersForFrustum(const std::vector<GraphicsEngine::RenderItemSnapshot>& aRenderItems, const CameraFrustum& aFrustum)
+	RenderItemPtrList CullCastersForFrustum(const std::vector<GraphicsEngine::RenderItemSnapshot>& aRenderItems,
+	                                        const CameraFrustum& aFrustum)
 	{
 		RenderItemPtrList visibleCasters;
 		visibleCasters.reserve(aRenderItems.size());
 		for (const GraphicsEngine::RenderItemSnapshot& item : aRenderItems)
 		{
-			if (!item.HasBounds || IntersectsFrustum(aFrustum, { item.BoundsCenter, item.BoundsRadius, item.HasBounds }))
+			if (!item.HasBounds || IntersectsFrustum(aFrustum, {item.BoundsCenter, item.BoundsRadius, item.HasBounds}))
 			{
 				visibleCasters.emplace_back(&item);
 			}
@@ -157,7 +155,8 @@ namespace
 		return visibleCasters;
 	}
 
-	RenderItemPtrList CullCastersForPointLight(const std::vector<GraphicsEngine::RenderItemSnapshot>& aRenderItems, const GraphicsEngine::LightSnapshot& aLight)
+	RenderItemPtrList CullCastersForPointLight(const std::vector<GraphicsEngine::RenderItemSnapshot>& aRenderItems,
+	                                           const GraphicsEngine::LightSnapshot& aLight)
 	{
 		RenderItemPtrList visibleCasters;
 		visibleCasters.reserve(aRenderItems.size());
@@ -181,10 +180,8 @@ namespace
 		return aLight.Intensity * 10000.0f;
 	}
 
-	BlendMode GetElementBlendMode(
-		const Mesh::Element& anElement,
-		const std::vector<std::shared_ptr<MaterialInterface>>& someMaterials,
-		const MaterialInterface& aFallbackMaterial)
+	BlendMode GetElementBlendMode(const Mesh::Element& anElement, const std::vector<std::shared_ptr<MaterialInterface>>& someMaterials,
+	                              const MaterialInterface& aFallbackMaterial)
 	{
 		if (anElement.MaterialIndex < someMaterials.size() && someMaterials[anElement.MaterialIndex] != nullptr)
 		{
@@ -196,12 +193,7 @@ namespace
 
 	CU::Matrix4f CreateNDCToTextureMatrix()
 	{
-		return {
-			0.5f, 0.0f, 0.0f, 0.0f,
-			0.0f, -0.5f, 0.0f, 0.0f,
-			0.0f, 0.0f, 1.0f, 0.0f,
-			0.5f, 0.5f, 0.0f, 1.0f
-		};
+		return {0.5f, 0.0f, 0.0f, 0.0f, 0.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.5f, 0.5f, 0.0f, 1.0f};
 	}
 
 	CU::Vector3f GetLightUpVector(const CU::Vector3f& aDirection)
@@ -226,19 +218,18 @@ namespace
 		const CU::Vector3f nearCenter = position + forward * aNearPlane;
 		const CU::Vector3f farCenter = position + forward * aFarPlane;
 
-		return {
-			nearCenter - right * (nearWidth * 0.5f) + up * (nearHeight * 0.5f),
-			nearCenter + right * (nearWidth * 0.5f) + up * (nearHeight * 0.5f),
-			nearCenter + right * (nearWidth * 0.5f) - up * (nearHeight * 0.5f),
-			nearCenter - right * (nearWidth * 0.5f) - up * (nearHeight * 0.5f),
-			farCenter - right * (farWidth * 0.5f) + up * (farHeight * 0.5f),
-			farCenter + right * (farWidth * 0.5f) + up * (farHeight * 0.5f),
-			farCenter + right * (farWidth * 0.5f) - up * (farHeight * 0.5f),
-			farCenter - right * (farWidth * 0.5f) - up * (farHeight * 0.5f)
-		};
+		return {nearCenter - right * (nearWidth * 0.5f) + up * (nearHeight * 0.5f),
+		        nearCenter + right * (nearWidth * 0.5f) + up * (nearHeight * 0.5f),
+		        nearCenter + right * (nearWidth * 0.5f) - up * (nearHeight * 0.5f),
+		        nearCenter - right * (nearWidth * 0.5f) - up * (nearHeight * 0.5f),
+		        farCenter - right * (farWidth * 0.5f) + up * (farHeight * 0.5f),
+		        farCenter + right * (farWidth * 0.5f) + up * (farHeight * 0.5f),
+		        farCenter + right * (farWidth * 0.5f) - up * (farHeight * 0.5f),
+		        farCenter - right * (farWidth * 0.5f) - up * (farHeight * 0.5f)};
 	}
 
-	CascadeShadowData CreateCascadeShadowData(const CU::Camera3D& aCamera, const GraphicsEngine::LightSnapshot& aLight, float aNearPlane, float aFarPlane)
+	CascadeShadowData CreateCascadeShadowData(const CU::Camera3D& aCamera, const GraphicsEngine::LightSnapshot& aLight, float aNearPlane,
+	                                          float aFarPlane)
 	{
 		const std::array<CU::Vector3f, 8> corners = GetFrustumCorners(aCamera, aNearPlane, aFarPlane);
 
@@ -278,12 +269,10 @@ namespace
 			maxZ = (std::max)(maxZ, lightSpaceCorner.z);
 		}
 
-		const float xyPadding = (std::max)(
-			ShadowConfig::DirectionalCascadeLightPaddingMin,
-			radius * ShadowConfig::DirectionalCascadeLightPaddingScale);
-		const float zPadding = (std::max)(
-			ShadowConfig::DirectionalCascadeLightPaddingMin,
-			radius * ShadowConfig::DirectionalCascadeDepthPaddingScale);
+		const float xyPadding =
+		    (std::max)(ShadowConfig::DirectionalCascadeLightPaddingMin, radius * ShadowConfig::DirectionalCascadeLightPaddingScale);
+		const float zPadding =
+		    (std::max)(ShadowConfig::DirectionalCascadeLightPaddingMin, radius * ShadowConfig::DirectionalCascadeDepthPaddingScale);
 
 		minX -= xyPadding;
 		maxX += xyPadding;
@@ -301,13 +290,7 @@ namespace
 		maxX = minX + width;
 		maxY = minY + height;
 
-		const CU::Matrix4f projection = CU::Maths::CreateOrthographicLH(
-			minX,
-			maxX,
-			minY,
-			maxY,
-			minZ,
-			maxZ);
+		const CU::Matrix4f projection = CU::Maths::CreateOrthographicLH(minX, maxX, minY, maxY, minZ, maxZ);
 
 		CascadeShadowData data;
 		data.View = view;
@@ -319,13 +302,8 @@ namespace
 		data.MinZ = minZ;
 		data.MaxZ = maxZ;
 		data.DepthRange = (std::max)(maxZ - minZ, 1.0f);
-		data.HasBounds =
-			std::isfinite(minX) && std::isfinite(maxX)
-			&& std::isfinite(minY) && std::isfinite(maxY)
-			&& std::isfinite(minZ) && std::isfinite(maxZ)
-			&& minX < maxX
-			&& minY < maxY
-			&& minZ < maxZ;
+		data.HasBounds = std::isfinite(minX) && std::isfinite(maxX) && std::isfinite(minY) && std::isfinite(maxY) && std::isfinite(minZ) &&
+		                 std::isfinite(maxZ) && minX < maxX && minY < maxY && minZ < maxZ;
 		return data;
 	}
 
@@ -339,40 +317,20 @@ namespace
 		const CU::Vector3f position = aLight.Position;
 		const CU::Vector3f direction = aLight.Direction.GetNormalized();
 		const CU::Matrix4f view = CU::Maths::CreateLookAtLH(position, position + direction, GetLightUpVector(direction));
-		const CU::Matrix4f projection = CU::Maths::CreatePerspectiveFovLH(
-			aLight.OuterCone * 2.0f,
-			1.0f,
-			1.0f,
-			aLight.Radius);
+		const CU::Matrix4f projection = CU::Maths::CreatePerspectiveFovLH(aLight.OuterCone * 2.0f, 1.0f, 1.0f, aLight.Radius);
 		return view * projection;
 	}
 
 	PointShadowBufferData CreatePointShadowBuffer(const GraphicsEngine::LightSnapshot& aLight)
 	{
 		const CU::Vector3f position = aLight.Position;
-		const CU::Matrix4f projection = CU::Maths::CreatePerspectiveFovLH(
-			CU::Maths::HalfPi<float>(),
-			1.0f,
-			1.0f,
-			aLight.Radius);
+		const CU::Matrix4f projection = CU::Maths::CreatePerspectiveFovLH(CU::Maths::HalfPi<float>(), 1.0f, 1.0f, aLight.Radius);
 
-		const std::array<CU::Vector3f, 6> directions = {
-			CU::Vector3f::UnitX,
-			-CU::Vector3f::UnitX,
-			CU::Vector3f::UnitY,
-			-CU::Vector3f::UnitY,
-			CU::Vector3f::UnitZ,
-			-CU::Vector3f::UnitZ
-		};
+		const std::array<CU::Vector3f, 6> directions = {CU::Vector3f::UnitX,  -CU::Vector3f::UnitX, CU::Vector3f::UnitY,
+		                                                -CU::Vector3f::UnitY, CU::Vector3f::UnitZ,  -CU::Vector3f::UnitZ};
 
-		const std::array<CU::Vector3f, 6> upVectors = {
-			CU::Vector3f::UnitY,
-			CU::Vector3f::UnitY,
-			-CU::Vector3f::UnitZ,
-			CU::Vector3f::UnitZ,
-			CU::Vector3f::UnitY,
-			CU::Vector3f::UnitY
-		};
+		const std::array<CU::Vector3f, 6> upVectors = {CU::Vector3f::UnitY, CU::Vector3f::UnitY, -CU::Vector3f::UnitZ,
+		                                               CU::Vector3f::UnitZ, CU::Vector3f::UnitY, CU::Vector3f::UnitY};
 
 		PointShadowBufferData buffer;
 		for (size_t face = 0; face < buffer.ViewProjection.size(); ++face)
@@ -385,7 +343,7 @@ namespace
 
 	CU::Vector4f MakeShadowSettings(float aDepthBias)
 	{
-		return { aDepthBias, 0.0f, 0.0f, 0.0f };
+		return {aDepthBias, 0.0f, 0.0f, 0.0f};
 	}
 
 	LightBuffer::Light* AddLightToBuffer(const GraphicsEngine::LightSnapshot& aLight, LightBuffer& inoutLightBuffer, float aShadowDepthBias)
@@ -434,7 +392,7 @@ namespace
 			return true;
 		}
 
-		return IntersectsFrustum(aFrustum, { aLight.Position, aLight.Radius, true });
+		return IntersectsFrustum(aFrustum, {aLight.Position, aLight.Radius, true});
 	}
 
 }
@@ -485,7 +443,7 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path&
 
 	if (!myRHI.Initialize(aWindowHandle, true, myBackBuffer, myDepthBuffer))
 	{
-		return false; // RHI logs this for us 
+		return false; // RHI logs this for us
 	}
 
 	if (!CreateDefaultTextures())
@@ -497,7 +455,7 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path&
 	{
 		return false;
 	}
-	
+
 	myMaterialDomainShaders.emplace(MaterialDomain::Surface, aShaderRoot / "Material" / "Surface_VS.hlsl");
 	myMaterialShadingModelShaders.emplace(ShadingModel::Unlit, aShaderRoot / "Material" / "Unlit_PS.hlsl");
 	myMaterialShadingModelShaders.emplace(ShadingModel::Lit, aShaderRoot / "Material" / "Lit_PS.hlsl");
@@ -513,7 +471,6 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path&
 		GELOG(Error, "Failed to create default material!");
 		return false;
 	}
-	
 
 	CreateConstantBuffer<FrameBuffer>(ConstantBuffer::FrameBuffer, "FrameBuffer");
 	CreateConstantBuffer<ObjectBuffer>(ConstantBuffer::ObjectBuffer, "ObjectBuffer");
@@ -682,7 +639,8 @@ bool GraphicsEngine::BuildRenderSnapshot(const Actor& aCameraActor, const World&
 				renderItem.JointTransforms = *jointTransforms;
 			}
 
-			const BoundingSphere worldBounds = TransformBoundingSphere(mesh->myLocalBoundsCenter, mesh->myLocalBoundsRadius, mesh->myHasLocalBounds, renderItem.World);
+			const BoundingSphere worldBounds =
+			    TransformBoundingSphere(mesh->myLocalBoundsCenter, mesh->myLocalBoundsRadius, mesh->myHasLocalBounds, renderItem.World);
 			renderItem.HasBounds = myCullingEnabled && worldBounds.IsValid && !renderItem.HasSkinning;
 			renderItem.BoundsCenter = worldBounds.Center;
 			renderItem.BoundsRadius = worldBounds.Radius;
@@ -693,12 +651,16 @@ bool GraphicsEngine::BuildRenderSnapshot(const Actor& aCameraActor, const World&
 			{
 				++outSnapshot.Stats.VisibleRenderItems;
 				const size_t itemIndex = outSnapshot.ShadowCasters.size() - 1;
-				const auto passes = RenderItemRouting::Classify(mesh->GetElements(), [&](const Mesh::Element& element)
-				{
-					return GetElementBlendMode(element, renderItem.Materials, myDefaultMaterial) == BlendMode::Opaque;
-				});
-				if (passes.Opaque) outSnapshot.OpaqueRenderItems.push_back(itemIndex);
-				if (passes.Blended) outSnapshot.BlendedRenderItems.push_back(itemIndex);
+				const auto passes = RenderItemRouting::Classify(mesh->GetElements(),
+				                                                [&](const Mesh::Element& element)
+				                                                {
+					                                                return GetElementBlendMode(element, renderItem.Materials,
+					                                                                           myDefaultMaterial) == BlendMode::Opaque;
+				                                                });
+				if (passes.Opaque)
+					outSnapshot.OpaqueRenderItems.push_back(itemIndex);
+				if (passes.Blended)
+					outSnapshot.BlendedRenderItems.push_back(itemIndex);
 			}
 		}
 	}
@@ -744,8 +706,8 @@ void GraphicsEngine::RenderSnapshot(GraphicsCommandList& inoutCommandList, const
 	PrepareSceneCommands(inoutCommandList, aSnapshot);
 	const auto& gbufferTextures = myGBuffer.GetTextures();
 	const std::array<const Texture*, GBuffer::TargetCount> gbufferTargets = {
-		&gbufferTextures[GBuffer::Albedo], &gbufferTextures[GBuffer::PixelNormal], &gbufferTextures[GBuffer::Surface],
-		&gbufferTextures[GBuffer::Emission], &gbufferTextures[GBuffer::WorldPosition] };
+	    &gbufferTextures[GBuffer::Albedo], &gbufferTextures[GBuffer::PixelNormal], &gbufferTextures[GBuffer::Surface],
+	    &gbufferTextures[GBuffer::Emission], &gbufferTextures[GBuffer::WorldPosition]};
 	RenderGBuffer(inoutCommandList, aSnapshot, gbufferTargets);
 	RenderAmbientOcclusion(inoutCommandList, gbufferTargets);
 	RenderDeferredLighting(inoutCommandList, lightBuffer, gbufferTargets);
@@ -755,7 +717,8 @@ void GraphicsEngine::RenderSnapshot(GraphicsCommandList& inoutCommandList, const
 	StoreLastRenderStats(frameStats);
 }
 
-std::vector<GraphicsEngine::ShadowRenderJob> GraphicsEngine::BuildShadowJobs(const RenderSceneSnapshot& aSnapshot, LightBuffer& lightBuffer, RenderStats& frameStats)
+std::vector<GraphicsEngine::ShadowRenderJob> GraphicsEngine::BuildShadowJobs(const RenderSceneSnapshot& aSnapshot, LightBuffer& lightBuffer,
+                                                                             RenderStats& frameStats)
 {
 	bool hasRenderedDirectionalShadow = false;
 	unsigned spotShadowCount = 0;
@@ -788,9 +751,8 @@ std::vector<GraphicsEngine::ShadowRenderJob> GraphicsEngine::BuildShadowJobs(con
 			{
 				const float cascadeFar = ShadowConfig::CascadeSplits[cascadeIndex];
 				const float cascadeLength = cascadeFar - cascadeNear;
-				const float cascadePadding = (std::max)(
-					ShadowConfig::DirectionalCascadeSplitPaddingMin,
-					cascadeLength * ShadowConfig::DirectionalCascadeSplitPaddingScale);
+				const float cascadePadding = (std::max)(ShadowConfig::DirectionalCascadeSplitPaddingMin,
+				                                        cascadeLength * ShadowConfig::DirectionalCascadeSplitPaddingScale);
 				const float fitNear = (std::max)(aSnapshot.Camera.GetNearPlane(), cascadeNear - cascadePadding);
 				const float fitFar = cascadeFar + cascadePadding;
 				cascadeData[cascadeIndex] = CreateCascadeShadowData(aSnapshot.Camera, lightSnapshot, fitNear, fitFar);
@@ -817,25 +779,15 @@ std::vector<GraphicsEngine::ShadowRenderJob> GraphicsEngine::BuildShadowJobs(con
 			const float baseDirectionalBias = GetShadowDepthBias(LightType::Directional);
 			const float referenceDepthRange = cascadeData[0].DepthRange;
 			light->NumCascades = ShadowConfig::DirectionalCascadeCount;
-			light->CascadeSplits = {
-				ShadowConfig::CascadeSplits[0],
-				ShadowConfig::CascadeSplits[1],
-				ShadowConfig::CascadeSplits[2],
-				ShadowConfig::CascadeSplits[3]
-			};
+			light->CascadeSplits = {ShadowConfig::CascadeSplits[0], ShadowConfig::CascadeSplits[1], ShadowConfig::CascadeSplits[2],
+			                        ShadowConfig::CascadeSplits[3]};
 			light->ShadowSettings = MakeShadowSettings(GetShadowDepthBias(LightType::Directional));
-			light->CascadeDepthBiases = {
-				baseDirectionalBias * referenceDepthRange / cascadeData[0].DepthRange,
-				baseDirectionalBias * referenceDepthRange / cascadeData[1].DepthRange,
-				baseDirectionalBias * referenceDepthRange / cascadeData[2].DepthRange,
-				baseDirectionalBias * referenceDepthRange / cascadeData[3].DepthRange
-			};
-			light->CascadeFilterWorldRadii = {
-				ShadowConfig::DirectionalFilterRadiusWorld,
-				ShadowConfig::DirectionalFilterRadiusWorld,
-				ShadowConfig::DirectionalFilterRadiusWorld,
-				ShadowConfig::DirectionalFilterRadiusWorld
-			};
+			light->CascadeDepthBiases = {baseDirectionalBias * referenceDepthRange / cascadeData[0].DepthRange,
+			                             baseDirectionalBias * referenceDepthRange / cascadeData[1].DepthRange,
+			                             baseDirectionalBias * referenceDepthRange / cascadeData[2].DepthRange,
+			                             baseDirectionalBias * referenceDepthRange / cascadeData[3].DepthRange};
+			light->CascadeFilterWorldRadii = {ShadowConfig::DirectionalFilterRadiusWorld, ShadowConfig::DirectionalFilterRadiusWorld,
+			                                  ShadowConfig::DirectionalFilterRadiusWorld, ShadowConfig::DirectionalFilterRadiusWorld};
 			hasRenderedDirectionalShadow = true;
 		}
 		else if (lightSnapshot.Type == LightType::Spot && spotShadowCount < MaxSpotShadowMaps)
@@ -892,21 +844,15 @@ std::vector<GraphicsEngine::ShadowRenderJob> GraphicsEngine::BuildShadowJobs(con
 	return shadowJobs;
 }
 
-void GraphicsEngine::RecordAndExecuteShadows(GraphicsCommandList& inoutCommandList, const std::vector<ShadowRenderJob>& shadowJobs, RenderStats& frameStats)
+void GraphicsEngine::RecordAndExecuteShadows(GraphicsCommandList& inoutCommandList, const std::vector<ShadowRenderJob>& shadowJobs,
+                                             RenderStats& frameStats)
 {
 	auto recordShadowJob = [this](GraphicsCommandList& inoutShadowCommandList, const ShadowRenderJob& aJob, bool aFinishCommandList)
 	{
 		ensure(aJob.ShadowMap != nullptr);
 		ensure(aJob.OverridePSO != nullptr);
-		RenderShadowMap(
-			inoutShadowCommandList,
-			aJob.EventName,
-			*aJob.ShadowMap,
-			aJob.FrameBufferData,
-			*aJob.OverridePSO,
-			aJob.OverrideStages,
-			aJob.HasPointShadowBuffer ? &aJob.PointShadowBuffer : nullptr,
-			aJob.RenderItems);
+		RenderShadowMap(inoutShadowCommandList, aJob.EventName, *aJob.ShadowMap, aJob.FrameBufferData, *aJob.OverridePSO,
+		                aJob.OverrideStages, aJob.HasPointShadowBuffer ? &aJob.PointShadowBuffer : nullptr, aJob.RenderItems);
 
 		if (aFinishCommandList)
 		{
@@ -929,19 +875,30 @@ void GraphicsEngine::RecordAndExecuteShadows(GraphicsCommandList& inoutCommandLi
 				{
 					auto& commandList = myShadowCommandLists[i];
 					commandList.ResetCommandList();
-					futures.emplace_back(std::async(std::launch::async, [&, i]
-					{
-						return recordShadowJob(myShadowCommandLists[i], shadowJobs[i], true);
-					}));
+					futures.emplace_back(std::async(std::launch::async,
+					                                [&, i]
+					                                {
+						                                return recordShadowJob(myShadowCommandLists[i], shadowJobs[i], true);
+					                                }));
 				}
 			}
-			catch (...) { recorded = false; }
+			catch (...)
+			{
+				recorded = false;
+			}
 			const auto waitStart = Clock::now();
 			// Join every worker before fallback, playback, or destroying job data.
 			for (auto& future : futures)
 			{
-				try { if (!future.get()) recorded = false; }
-				catch (...) { recorded = false; }
+				try
+				{
+					if (!future.get())
+						recorded = false;
+				}
+				catch (...)
+				{
+					recorded = false;
+				}
 			}
 			frameStats.ShadowWaitMilliseconds = ElapsedMilliseconds(waitStart);
 			if (recorded)
@@ -958,7 +915,8 @@ void GraphicsEngine::RecordAndExecuteShadows(GraphicsCommandList& inoutCommandLi
 			}
 		}
 		if (!recorded)
-			for (const auto& job : shadowJobs) recordShadowJob(inoutCommandList, job, false);
+			for (const auto& job : shadowJobs)
+				recordShadowJob(inoutCommandList, job, false);
 	}
 }
 
@@ -970,7 +928,8 @@ void GraphicsEngine::PrepareSceneCommands(GraphicsCommandList& inoutCommandList,
 	inoutCommandList.ClearDepthStencil(myDepthBuffer);
 	inoutCommandList.SetRenderTarget(&myBackBuffer, &myDepthBuffer);
 
-	inoutCommandList.SetShaderSamplers(mySamplerBindings.data(), mySamplerBindings.size(), 0, PipeLineStage_VertexShader | PipeLineStage_PixelShader);
+	inoutCommandList.SetShaderSamplers(mySamplerBindings.data(), mySamplerBindings.size(), 0,
+	                                   PipeLineStage_VertexShader | PipeLineStage_PixelShader);
 	BindPBLResources(inoutCommandList);
 	BindShadowResources(inoutCommandList);
 
@@ -978,12 +937,14 @@ void GraphicsEngine::PrepareSceneCommands(GraphicsCommandList& inoutCommandList,
 	fb.View = aSnapshot.Camera.GetViewMatrix();
 	fb.Projection = aSnapshot.Camera.GetProjectionMatrix();
 	const CU::Vector3f cameraPosition = aSnapshot.Camera.GetTransform().GetPosition();
-	fb.CameraPosition = { cameraPosition.x, cameraPosition.y, cameraPosition.z, 1.0f };
+	fb.CameraPosition = {cameraPosition.x, cameraPosition.y, cameraPosition.z, 1.0f};
 
-	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::FrameBuffer, fb, 0, PipeLineStage_VertexShader | PipeLineStage_PixelShader);
+	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::FrameBuffer, fb, 0,
+	                           PipeLineStage_VertexShader | PipeLineStage_PixelShader);
 }
 
-void GraphicsEngine::RenderGBuffer(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot, const GBufferBindings& gbufferTargets)
+void GraphicsEngine::RenderGBuffer(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot,
+                                   const GBufferBindings& gbufferTargets)
 {
 	// --- Deferred GBuffer ---
 	// Writes surface data and depth for SSAO, lighting, and forward transparency.
@@ -1004,7 +965,7 @@ void GraphicsEngine::RenderGBuffer(GraphicsCommandList& inoutCommandList, const 
 		gbufferRenderTargets[GBuffer::TargetCount] = &myTangentNormalDebugTexture;
 	}
 	inoutCommandList.SetRenderTargets(gbufferRenderTargets.data(),
-		captureTangentNormals ? gbufferRenderTargets.size() : gbufferTargets.size(), &myDepthBuffer);
+	                                  captureTangentNormals ? gbufferRenderTargets.size() : gbufferTargets.size(), &myDepthBuffer);
 	for (size_t itemIndex : aSnapshot.OpaqueRenderItems)
 	{
 		RenderMesh(inoutCommandList, aSnapshot.ShadowCasters[itemIndex], false, RenderBlendFilter::OpaqueOnly, true);
@@ -1030,7 +991,8 @@ void GraphicsEngine::RenderAmbientOcclusion(GraphicsCommandList& inoutCommandLis
 	inoutCommandList.EndEvent();
 }
 
-void GraphicsEngine::RenderDeferredLighting(GraphicsCommandList& inoutCommandList, const LightBuffer& lightBuffer, const GBufferBindings& gbufferTargets)
+void GraphicsEngine::RenderDeferredLighting(GraphicsCommandList& inoutCommandList, const LightBuffer& lightBuffer,
+                                            const GBufferBindings& gbufferTargets)
 {
 	// --- Deferred Lighting ---
 	// Reads GBuffer, SSAO, and completed shadow maps.
@@ -1051,10 +1013,17 @@ void GraphicsEngine::RenderDeferredLighting(GraphicsCommandList& inoutCommandLis
 
 		switch (singleLightBuffer.Lights[0].Type)
 		{
-		case static_cast<unsigned>(LightType::Directional): inoutCommandList.SetPipelineState(&myDeferredDirectionalPSO); break;
-		case static_cast<unsigned>(LightType::Point): inoutCommandList.SetPipelineState(&myDeferredPointPSO); break;
-		case static_cast<unsigned>(LightType::Spot): inoutCommandList.SetPipelineState(&myDeferredSpotPSO); break;
-		default: continue;
+		case static_cast<unsigned>(LightType::Directional):
+			inoutCommandList.SetPipelineState(&myDeferredDirectionalPSO);
+			break;
+		case static_cast<unsigned>(LightType::Point):
+			inoutCommandList.SetPipelineState(&myDeferredPointPSO);
+			break;
+		case static_cast<unsigned>(LightType::Spot):
+			inoutCommandList.SetPipelineState(&myDeferredSpotPSO);
+			break;
+		default:
+			continue;
 		}
 		inoutCommandList.Draw(4);
 	}
@@ -1068,11 +1037,13 @@ void GraphicsEngine::RenderDeferredLighting(GraphicsCommandList& inoutCommandLis
 	inoutCommandList.SetPipelineState(&myDeferredCompositePSO);
 	inoutCommandList.Draw(4);
 	const std::array<const Texture*, 1> nullDeferredLightingResource = {};
-	inoutCommandList.SetShaderResources(nullDeferredLightingResource.data(), nullDeferredLightingResource.size(), 0, PipeLineStage_PixelShader);
+	inoutCommandList.SetShaderResources(nullDeferredLightingResource.data(), nullDeferredLightingResource.size(), 0,
+	                                    PipeLineStage_PixelShader);
 	inoutCommandList.EndEvent();
 }
 
-void GraphicsEngine::RenderDebugView(GraphicsCommandList& inoutCommandList, const LightBuffer& lightBuffer, const GBufferBindings& gbufferTargets)
+void GraphicsEngine::RenderDebugView(GraphicsCommandList& inoutCommandList, const LightBuffer& lightBuffer,
+                                     const GBufferBindings& gbufferTargets)
 {
 	// --- Render Pass Debug ---
 	// Replaces the composite with the selected diagnostic view.
@@ -1085,7 +1056,7 @@ void GraphicsEngine::RenderDebugView(GraphicsCommandList& inoutCommandList, cons
 		inoutCommandList.SetShaderResources(&screenSpaceAO, 1, GBuffer::TargetCount, PipeLineStage_PixelShader);
 		const Texture* tangentNormalDebug = &myTangentNormalDebugTexture;
 		inoutCommandList.SetShaderResources(&tangentNormalDebug, 1, GBuffer::TargetCount + 1, PipeLineStage_PixelShader);
-		const std::array<uint32_t, 4> renderPass = { static_cast<uint32_t>(myRenderPass), 0, 0, 0 };
+		const std::array<uint32_t, 4> renderPass = {static_cast<uint32_t>(myRenderPass), 0, 0, 0};
 		UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::RenderPassDebugBuffer, renderPass, 5, PipeLineStage_PixelShader);
 		UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::LightBuffer, lightBuffer, 4, PipeLineStage_PixelShader);
 		inoutCommandList.SetPipelineState(&myRenderPassDebugPSO);
@@ -1096,7 +1067,8 @@ void GraphicsEngine::RenderDebugView(GraphicsCommandList& inoutCommandList, cons
 	}
 }
 
-void GraphicsEngine::RenderTransparentGeometry(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot, const LightBuffer& lightBuffer)
+void GraphicsEngine::RenderTransparentGeometry(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot,
+                                               const LightBuffer& lightBuffer)
 {
 	// --- Forward transparency ---
 	// Blended elements remain Forward rendered and use the depth written in GBuffer.
@@ -1118,25 +1090,33 @@ void GraphicsEngine::Present() const
 void GraphicsEngine::CycleRenderPass()
 {
 	const auto nextPass = static_cast<uint8_t>(myRenderPass) + 1;
-	myRenderPass = nextPass == static_cast<uint8_t>(RenderPass::Count)
-		? RenderPass::Lit
-		: static_cast<RenderPass>(nextPass);
+	myRenderPass = nextPass == static_cast<uint8_t>(RenderPass::Count) ? RenderPass::Lit : static_cast<RenderPass>(nextPass);
 }
 
 const char* GraphicsEngine::GetRenderPassName() const
 {
 	switch (myRenderPass)
 	{
-	case RenderPass::Lit: return "Lit";
-	case RenderPass::Albedo: return "Albedo (sRGB)";
-	case RenderPass::Roughness: return "Roughness (Linear Greyscale)";
-	case RenderPass::Metalness: return "Metalness (Linear Greyscale)";
-	case RenderPass::AmbientOcclusionTexture: return "Ambient Occlusion (Texture, Linear Greyscale)";
-	case RenderPass::AmbientOcclusionScreenSpace: return "Ambient Occlusion (Screen Space, Linear Greyscale)";
-	case RenderPass::NormalsTangentSpace: return "Normals (Tangent Space, Linear)";
-	case RenderPass::NormalsWorldSpace: return "Normals (World Space, Linear)";
-	case RenderPass::Shadows: return "Shadows (Directional)";
-	default: return "Unknown";
+	case RenderPass::Lit:
+		return "Lit";
+	case RenderPass::Albedo:
+		return "Albedo (sRGB)";
+	case RenderPass::Roughness:
+		return "Roughness (Linear Greyscale)";
+	case RenderPass::Metalness:
+		return "Metalness (Linear Greyscale)";
+	case RenderPass::AmbientOcclusionTexture:
+		return "Ambient Occlusion (Texture, Linear Greyscale)";
+	case RenderPass::AmbientOcclusionScreenSpace:
+		return "Ambient Occlusion (Screen Space, Linear Greyscale)";
+	case RenderPass::NormalsTangentSpace:
+		return "Normals (Tangent Space, Linear)";
+	case RenderPass::NormalsWorldSpace:
+		return "Normals (World Space, Linear)";
+	case RenderPass::Shadows:
+		return "Shadows (Directional)";
+	default:
+		return "Unknown";
 	}
 }
 
@@ -1144,27 +1124,23 @@ const char* GraphicsEngine::GetRenderPassName() const
 
 void GraphicsEngine::UnbindShadowResources(GraphicsCommandList& inoutCommandList) const
 {
-	std::array<const Texture*, ShadowConfig::DirectionalCascadeCount + ShadowConfig::MaxSpotMaps + ShadowConfig::MaxPointMaps> nullShadowResources = {};
-	inoutCommandList.SetShaderResources(
-		nullShadowResources.data(),
-		nullShadowResources.size(),
-		ShadowConfig::HighTextureSlotStart,
-		PipeLineStage_PixelShader | PipeLineStage_GeometryShader);
+	std::array<const Texture*, ShadowConfig::DirectionalCascadeCount + ShadowConfig::MaxSpotMaps + ShadowConfig::MaxPointMaps>
+	    nullShadowResources = {};
+	inoutCommandList.SetShaderResources(nullShadowResources.data(), nullShadowResources.size(), ShadowConfig::HighTextureSlotStart,
+	                                    PipeLineStage_PixelShader | PipeLineStage_GeometryShader);
 }
 
 void GraphicsEngine::BindPBLResources(GraphicsCommandList& inoutCommandList) const
 {
-	const std::array<const Texture*, 2> pblResources = { &myEnvironmentCubeTexture, &myBRDFLUTTexture };
-	inoutCommandList.SetShaderResources(
-		pblResources.data(),
-		pblResources.size(),
-		PBLConfig::EnvironmentCubeSlot,
-		PipeLineStage_PixelShader);
+	const std::array<const Texture*, 2> pblResources = {&myEnvironmentCubeTexture, &myBRDFLUTTexture};
+	inoutCommandList.SetShaderResources(pblResources.data(), pblResources.size(), PBLConfig::EnvironmentCubeSlot,
+	                                    PipeLineStage_PixelShader);
 }
 
 void GraphicsEngine::BindShadowResources(GraphicsCommandList& inoutCommandList) const
 {
-	std::array<const Texture*, ShadowConfig::DirectionalCascadeCount + ShadowConfig::MaxSpotMaps + ShadowConfig::MaxPointMaps> shadowResources = {};
+	std::array<const Texture*, ShadowConfig::DirectionalCascadeCount + ShadowConfig::MaxSpotMaps + ShadowConfig::MaxPointMaps>
+	    shadowResources = {};
 	for (size_t cascadeIndex = 0; cascadeIndex < myDirectionalShadowMaps.size(); ++cascadeIndex)
 	{
 		shadowResources[cascadeIndex] = &myDirectionalShadowMaps[cascadeIndex];
@@ -1178,24 +1154,16 @@ void GraphicsEngine::BindShadowResources(GraphicsCommandList& inoutCommandList) 
 		shadowResources[ShadowConfig::DirectionalCascadeCount + ShadowConfig::MaxSpotMaps + pointIndex] = &myPointShadowMaps[pointIndex];
 	}
 
-	inoutCommandList.SetShaderResources(
-		shadowResources.data(),
-		shadowResources.size(),
-		ShadowConfig::HighTextureSlotStart,
-		PipeLineStage_PixelShader);
+	inoutCommandList.SetShaderResources(shadowResources.data(), shadowResources.size(), ShadowConfig::HighTextureSlotStart,
+	                                    PipeLineStage_PixelShader);
 }
 
 // --- Shadow recording and tuning ---
 
-void GraphicsEngine::RenderShadowMap(
-	GraphicsCommandList& inoutCommandList,
-	std::string_view aEventName,
-	Texture& aShadowMap,
-	const FrameBuffer& aFrameBuffer,
-	const PipelineStateObject& aOverridePSO,
-	PipeLineStages aOverrideStages,
-	const void* aPointShadowBuffer,
-	const std::vector<const RenderItemSnapshot*>& aRenderItems)
+void GraphicsEngine::RenderShadowMap(GraphicsCommandList& inoutCommandList, std::string_view aEventName, Texture& aShadowMap,
+                                     const FrameBuffer& aFrameBuffer, const PipelineStateObject& aOverridePSO,
+                                     PipeLineStages aOverrideStages, const void* aPointShadowBuffer,
+                                     const std::vector<const RenderItemSnapshot*>& aRenderItems)
 {
 	inoutCommandList.BeginEvent(aEventName);
 	UnbindShadowResources(inoutCommandList);
@@ -1206,13 +1174,8 @@ void GraphicsEngine::RenderShadowMap(
 
 	if (aPointShadowBuffer != nullptr)
 	{
-		UpdateAndSetConstantBufferInternal(
-			inoutCommandList,
-			ConstantBuffer::PointShadowBuffer,
-			aPointShadowBuffer,
-			sizeof(PointShadowBufferData),
-			5,
-			PipeLineStage_GeometryShader);
+		UpdateAndSetConstantBufferInternal(inoutCommandList, ConstantBuffer::PointShadowBuffer, aPointShadowBuffer,
+		                                   sizeof(PointShadowBufferData), 5, PipeLineStage_GeometryShader);
 	}
 
 	for (const RenderItemSnapshot* item : aRenderItems)
@@ -1265,14 +1228,17 @@ void GraphicsEngine::AdjustShadowBias(LightType aType, float aDelta)
 	const float currentBias = GetShadowDepthBiasUnlocked(aType);
 	if (currentBias <= ShadowConfig::BiasMin || currentBias >= ShadowConfig::BiasMax)
 	{
-		const float defaultBias =
-			aType == LightType::Spot ? ShadowConfig::SpotShaderBias :
-			aType == LightType::Point ? ShadowConfig::PointShaderBias :
-			ShadowConfig::DirectionalShaderBias;
+		const float defaultBias = aType == LightType::Spot    ? ShadowConfig::SpotShaderBias
+		                          : aType == LightType::Point ? ShadowConfig::PointShaderBias
+		                                                      : ShadowConfig::DirectionalShaderBias;
 		*offset = std::clamp(defaultBias + *offset, ShadowConfig::BiasMin, ShadowConfig::BiasMax) - defaultBias;
 	}
 
-	GELOG(Log, "Shadow {} bias: {:.6f}", aType == LightType::Directional ? "directional" : aType == LightType::Spot ? "spot" : "point", GetShadowDepthBiasUnlocked(aType));
+	GELOG(Log, "Shadow {} bias: {:.6f}",
+	      aType == LightType::Directional ? "directional"
+	      : aType == LightType::Spot      ? "spot"
+	                                      : "point",
+	      GetShadowDepthBiasUnlocked(aType));
 }
 
 void GraphicsEngine::ResetShadowTuning()
@@ -1287,20 +1253,14 @@ void GraphicsEngine::ResetShadowTuning()
 void GraphicsEngine::LogShadowTuning() const
 {
 	std::scoped_lock lock(myShadowTuningMutex);
-	GELOG(Log, "Shadow tuning: cascades={}, splits={{ {:.1f}, {:.1f}, {:.1f}, {:.1f} }}, directionalBias={:.6f}, spotBias={:.6f}, pointBias={:.6f}, spotMaps={}, pointMaps={}",
-		ShadowConfig::DirectionalCascadeCount,
-		ShadowConfig::CascadeSplits[0],
-		ShadowConfig::CascadeSplits[1],
-		ShadowConfig::CascadeSplits[2],
-		ShadowConfig::CascadeSplits[3],
-		GetShadowDepthBiasUnlocked(LightType::Directional),
-		GetShadowDepthBiasUnlocked(LightType::Spot),
-		GetShadowDepthBiasUnlocked(LightType::Point),
-		ShadowConfig::MaxSpotMaps,
-		ShadowConfig::MaxPointMaps);
+	GELOG(
+	    Log,
+	    "Shadow tuning: cascades={}, splits={{ {:.1f}, {:.1f}, {:.1f}, {:.1f} }}, directionalBias={:.6f}, spotBias={:.6f}, pointBias={:.6f}, spotMaps={}, pointMaps={}",
+	    ShadowConfig::DirectionalCascadeCount, ShadowConfig::CascadeSplits[0], ShadowConfig::CascadeSplits[1],
+	    ShadowConfig::CascadeSplits[2], ShadowConfig::CascadeSplits[3], GetShadowDepthBiasUnlocked(LightType::Directional),
+	    GetShadowDepthBiasUnlocked(LightType::Spot), GetShadowDepthBiasUnlocked(LightType::Point), ShadowConfig::MaxSpotMaps,
+	    ShadowConfig::MaxPointMaps);
 }
-
-
 
 bool GraphicsEngine::CreateConstantBuffer(ConstantBuffer aBufferId, std::string_view aName, size_t aBufferSize)
 {
@@ -1309,15 +1269,15 @@ bool GraphicsEngine::CreateConstantBuffer(ConstantBuffer aBufferId, std::string_
 
 CU::Vector2u GraphicsEngine::GetClientSize() const
 {
-    return myRHI.GetClientSize();
+	return myRHI.GetClientSize();
 }
 
-bool GraphicsEngine::CreateCommandList(std::string_view aName, GraphicsCommandList &outCommandList) const
+bool GraphicsEngine::CreateCommandList(std::string_view aName, GraphicsCommandList& outCommandList) const
 {
-    return myRHI.CreateCommandList(aName, outCommandList);
+	return myRHI.CreateCommandList(aName, outCommandList);
 }
 
-void GraphicsEngine::ExecuteCommandList(const GraphicsCommandList &aCommandList) const
+void GraphicsEngine::ExecuteCommandList(const GraphicsCommandList& aCommandList) const
 {
 	myRHI.ExecuteCommandList(aCommandList);
 }
@@ -1327,29 +1287,27 @@ void GraphicsEngine::ExecuteCommandList(const GraphicsCommandList &aCommandList)
 bool GraphicsEngine::CreateGBufferResources()
 {
 	const CU::Vector2u clientSize = GetClientSize();
-	const std::array<std::string_view, GBuffer::TargetCount> names = {
-		"GBuffer_Albedo", "GBuffer_PixelNormal", "GBuffer_Surface", "GBuffer_Emission", "GBuffer_WorldPosition" };
+	const std::array<std::string_view, GBuffer::TargetCount> names = {"GBuffer_Albedo", "GBuffer_PixelNormal", "GBuffer_Surface",
+	                                                                  "GBuffer_Emission", "GBuffer_WorldPosition"};
 	const std::array<unsigned, GBuffer::TargetCount> formats = {
-		static_cast<unsigned>(DXGI_FORMAT_R8G8B8A8_UNORM),
-		static_cast<unsigned>(DXGI_FORMAT_R16G16B16A16_SNORM),
-		static_cast<unsigned>(DXGI_FORMAT_R8G8B8A8_UNORM),
-		static_cast<unsigned>(DXGI_FORMAT_R16G16B16A16_FLOAT),
-		static_cast<unsigned>(DXGI_FORMAT_R32G32B32A32_FLOAT) };
+	    static_cast<unsigned>(DXGI_FORMAT_R8G8B8A8_UNORM), static_cast<unsigned>(DXGI_FORMAT_R16G16B16A16_SNORM),
+	    static_cast<unsigned>(DXGI_FORMAT_R8G8B8A8_UNORM), static_cast<unsigned>(DXGI_FORMAT_R16G16B16A16_FLOAT),
+	    static_cast<unsigned>(DXGI_FORMAT_R32G32B32A32_FLOAT)};
 	for (size_t targetIndex = 0; targetIndex < names.size(); ++targetIndex)
 	{
-		if (!myRHI.CreateRenderTargetTexture(names[targetIndex], clientSize.x, clientSize.y,
-			formats[targetIndex], myGBuffer.GetTextures()[targetIndex]))
+		if (!myRHI.CreateRenderTargetTexture(names[targetIndex], clientSize.x, clientSize.y, formats[targetIndex],
+		                                     myGBuffer.GetTextures()[targetIndex]))
 		{
 			return false;
 		}
 	}
 
 	return myRHI.CreateRenderTargetTexture("TangentNormal_Debug", clientSize.x, clientSize.y,
-		static_cast<unsigned>(DXGI_FORMAT_R16G16B16A16_SNORM), myTangentNormalDebugTexture)
-		&& myRHI.CreateRenderTargetTexture("Deferred_Lighting", clientSize.x, clientSize.y,
-		static_cast<unsigned>(DXGI_FORMAT_R32G32B32A32_FLOAT), myDeferredLightingTexture)
-		&& myRHI.CreateRenderTargetTexture("ScreenSpace_AO", clientSize.x, clientSize.y,
-			static_cast<unsigned>(DXGI_FORMAT_R32_FLOAT), myScreenSpaceAOTexture);
+	                                       static_cast<unsigned>(DXGI_FORMAT_R16G16B16A16_SNORM), myTangentNormalDebugTexture) &&
+	       myRHI.CreateRenderTargetTexture("Deferred_Lighting", clientSize.x, clientSize.y,
+	                                       static_cast<unsigned>(DXGI_FORMAT_R32G32B32A32_FLOAT), myDeferredLightingTexture) &&
+	       myRHI.CreateRenderTargetTexture("ScreenSpace_AO", clientSize.x, clientSize.y, static_cast<unsigned>(DXGI_FORMAT_R32_FLOAT),
+	                                       myScreenSpaceAOTexture);
 }
 
 bool GraphicsEngine::CreateDeferredPipelineStates()
@@ -1358,7 +1316,8 @@ bool GraphicsEngine::CreateDeferredPipelineStates()
 	if (!myRHI.CompileShader(ShaderType::VertexShader, myShaderRoot / "Internal" / "FullTexture_VS.hlsl", nullptr, true, fullTextureVS))
 		return false;
 
-	auto createPipeline = [this, &fullTextureVS](std::string_view aName, std::string_view aPixelShader, BlendMode aBlendMode, PipelineStateObject& outPSO)
+	auto createPipeline =
+	    [this, &fullTextureVS](std::string_view aName, std::string_view aPixelShader, BlendMode aBlendMode, PipelineStateObject& outPSO)
 	{
 		const std::filesystem::path pixelShaderPath = myShaderRoot / "Internal" / aPixelShader;
 		MaterialShaderIncludeHandler includeHandler(myShaderRoot, pixelShaderPath, {});
@@ -1376,12 +1335,12 @@ bool GraphicsEngine::CreateDeferredPipelineStates()
 		return myRHI.CreatePipelineStateObject(description, outPSO);
 	};
 
-	return createPipeline("DeferredDirectionalPSO", "DeferredDirectional_PS.hlsl", BlendMode::Additive, myDeferredDirectionalPSO)
-		&& createPipeline("DeferredPointPSO", "DeferredPoint_PS.hlsl", BlendMode::Additive, myDeferredPointPSO)
-		&& createPipeline("DeferredSpotPSO", "DeferredSpot_PS.hlsl", BlendMode::Additive, myDeferredSpotPSO)
-		&& createPipeline("DeferredCompositePSO", "DeferredComposite_PS.hlsl", BlendMode::Opaque, myDeferredCompositePSO)
-		&& createPipeline("ScreenSpaceAOPSO", "ScreenSpaceAO_PS.hlsl", BlendMode::Opaque, myScreenSpaceAOPSO)
-		&& createPipeline("RenderPassDebugPSO", "RenderPassDebug_PS.hlsl", BlendMode::Opaque, myRenderPassDebugPSO);
+	return createPipeline("DeferredDirectionalPSO", "DeferredDirectional_PS.hlsl", BlendMode::Additive, myDeferredDirectionalPSO) &&
+	       createPipeline("DeferredPointPSO", "DeferredPoint_PS.hlsl", BlendMode::Additive, myDeferredPointPSO) &&
+	       createPipeline("DeferredSpotPSO", "DeferredSpot_PS.hlsl", BlendMode::Additive, myDeferredSpotPSO) &&
+	       createPipeline("DeferredCompositePSO", "DeferredComposite_PS.hlsl", BlendMode::Opaque, myDeferredCompositePSO) &&
+	       createPipeline("ScreenSpaceAOPSO", "ScreenSpaceAO_PS.hlsl", BlendMode::Opaque, myScreenSpaceAOPSO) &&
+	       createPipeline("RenderPassDebugPSO", "RenderPassDebug_PS.hlsl", BlendMode::Opaque, myRenderPassDebugPSO);
 }
 
 // --- Image-based lighting resources ---
@@ -1400,12 +1359,8 @@ bool GraphicsEngine::CreatePBLResources()
 
 bool GraphicsEngine::CreateBRDFLUT()
 {
-	if (!myRHI.CreateRenderTargetTexture(
-		"BRDF_LUT",
-		PBLConfig::BRDFLUTResolution,
-		PBLConfig::BRDFLUTResolution,
-		static_cast<unsigned>(DXGI_FORMAT_R16G16_FLOAT),
-		myBRDFLUTTexture))
+	if (!myRHI.CreateRenderTargetTexture("BRDF_LUT", PBLConfig::BRDFLUTResolution, PBLConfig::BRDFLUTResolution,
+	                                     static_cast<unsigned>(DXGI_FORMAT_R16G16_FLOAT), myBRDFLUTTexture))
 	{
 		return false;
 	}
@@ -1460,7 +1415,8 @@ bool GraphicsEngine::CreateShadowResources()
 {
 	for (size_t cascadeIndex = 0; cascadeIndex < myDirectionalShadowMaps.size(); ++cascadeIndex)
 	{
-		if (!CreateShadowMap(std::format("DirectionalShadowCascade{}", cascadeIndex), ShadowConfig::MapResolution, ShadowConfig::MapResolution, myDirectionalShadowMaps[cascadeIndex]))
+		if (!CreateShadowMap(std::format("DirectionalShadowCascade{}", cascadeIndex), ShadowConfig::MapResolution,
+		                     ShadowConfig::MapResolution, myDirectionalShadowMaps[cascadeIndex]))
 		{
 			return false;
 		}
@@ -1468,7 +1424,8 @@ bool GraphicsEngine::CreateShadowResources()
 
 	for (size_t spotIndex = 0; spotIndex < mySpotShadowMaps.size(); ++spotIndex)
 	{
-		if (!CreateShadowMap(std::format("SpotShadow{}", spotIndex), ShadowConfig::MapResolution, ShadowConfig::MapResolution, mySpotShadowMaps[spotIndex]))
+		if (!CreateShadowMap(std::format("SpotShadow{}", spotIndex), ShadowConfig::MapResolution, ShadowConfig::MapResolution,
+		                     mySpotShadowMaps[spotIndex]))
 		{
 			return false;
 		}
@@ -1476,7 +1433,8 @@ bool GraphicsEngine::CreateShadowResources()
 
 	for (size_t pointIndex = 0; pointIndex < myPointShadowMaps.size(); ++pointIndex)
 	{
-		if (!CreateShadowMap(std::format("PointShadow{}", pointIndex), ShadowConfig::MapResolution, ShadowConfig::MapResolution, myPointShadowMaps[pointIndex], true))
+		if (!CreateShadowMap(std::format("PointShadow{}", pointIndex), ShadowConfig::MapResolution, ShadowConfig::MapResolution,
+		                     myPointShadowMaps[pointIndex], true))
 		{
 			return false;
 		}
@@ -1551,7 +1509,7 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 		GELOG(Error, "Material has no name!");
 		return false;
 	}
-	
+
 	{
 		const std::filesystem::path& path = myMaterialDomainShaders.at(aDescription.Domain);
 		MaterialShaderIncludeHandler handler(myShaderRoot / "Material", path, aDescription.MaterialShaderCode);
@@ -1583,7 +1541,7 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 	RHIShaderReflectionInfo vsInfo, psInfo;
 	RHIShaderReflector::Reflect(materialVS.GetDataPtr(), materialVS.GetDataSize(), vsInfo);
 	RHIShaderReflector::Reflect(materialPS.GetDataPtr(), materialPS.GetDataSize(), psInfo);
-	
+
 	const RHIShaderReflectionInfo* materialBufferSource = nullptr;
 	static std::string materialBufferName = "MaterialBuffer";
 	if (vsInfo.ConstantBufferNameToIndex.contains(materialBufferName))
@@ -1594,11 +1552,12 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 	{
 		materialBufferSource = &psInfo;
 	}
-	
+
 	if (materialBufferSource)
 	{
-		const RHIShaderReflectionInfo::ConstantBufferInfo& info = materialBufferSource->ConstantBuffers[materialBufferSource->ConstantBufferNameToIndex.at(materialBufferName)];
-		
+		const RHIShaderReflectionInfo::ConstantBufferInfo& info =
+		    materialBufferSource->ConstantBuffers[materialBufferSource->ConstantBufferNameToIndex.at(materialBufferName)];
+
 		for (size_t i = 0; i < info.Members.size(); ++i)
 		{
 			const auto& member = info.Members[i];
@@ -1614,10 +1573,8 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 
 			outMaterial.myParameterNameToIndex.emplace(param.Name, parameterIndex);
 			outMaterial.myParameters.emplace_back(std::move(param));
-		
 		}
 	}
-
 
 	PipelineStateDescription matPSOdesc;
 	matPSOdesc.Name = std::format("{}_MAT_PSO", aDescription.Name);
@@ -1649,7 +1606,8 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 	CreateMaterialTextureSlots(vsInfo, outMaterial);
 	CreateMaterialTextureSlots(psInfo, outMaterial);
 
-	auto loadTextureOrFallback = [this](const std::filesystem::path& aTexturePath, const std::shared_ptr<Texture>& aFallback, std::string_view aTextureLabel)
+	auto loadTextureOrFallback =
+	    [this](const std::filesystem::path& aTexturePath, const std::shared_ptr<Texture>& aFallback, std::string_view aTextureLabel)
 	{
 		if (!aTexturePath.empty())
 		{
@@ -1665,9 +1623,12 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 		return aFallback;
 	};
 
-	outMaterial.SetTexture(Material::ALBEDO_TEXTURE_SLOT, loadTextureOrFallback(aDescription.AlbedoTexture, myDefaultAlbedoTexture, "albedo"));
-	outMaterial.SetTexture(Material::NORMAL_TEXTURE_SLOT, loadTextureOrFallback(aDescription.NormalTexture, myDefaultNormalTexture, "normal"));
-	outMaterial.SetTexture(Material::MATERIAL_TEXTURE_SLOT, loadTextureOrFallback(aDescription.MaterialTexture, myDefaultMaterialTexture, "material"));
+	outMaterial.SetTexture(Material::ALBEDO_TEXTURE_SLOT,
+	                       loadTextureOrFallback(aDescription.AlbedoTexture, myDefaultAlbedoTexture, "albedo"));
+	outMaterial.SetTexture(Material::NORMAL_TEXTURE_SLOT,
+	                       loadTextureOrFallback(aDescription.NormalTexture, myDefaultNormalTexture, "normal"));
+	outMaterial.SetTexture(Material::MATERIAL_TEXTURE_SLOT,
+	                       loadTextureOrFallback(aDescription.MaterialTexture, myDefaultMaterialTexture, "material"));
 
 	outMaterial.myPSO = matPSO;
 	outMaterial.myGBufferPSO = gbufferPSO;
@@ -1680,21 +1641,21 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 bool GraphicsEngine::CreateDefaultTextures()
 {
 	myDefaultAlbedoTexture = std::make_shared<Texture>();
-	if (!myRHI.CreateColorTexture("Default_Albedo_White", std::array<uint8_t, 4>{ 255, 255, 255, 255 }, *myDefaultAlbedoTexture))
+	if (!myRHI.CreateColorTexture("Default_Albedo_White", std::array<uint8_t, 4>{255, 255, 255, 255}, *myDefaultAlbedoTexture))
 	{
 		GELOG(Error, "Failed to create default albedo texture.");
 		return false;
 	}
 
 	myDefaultNormalTexture = std::make_shared<Texture>();
-	if (!myRHI.CreateColorTexture("Default_Normal_Flat", std::array<uint8_t, 4>{ 128, 128, 255, 255 }, *myDefaultNormalTexture))
+	if (!myRHI.CreateColorTexture("Default_Normal_Flat", std::array<uint8_t, 4>{128, 128, 255, 255}, *myDefaultNormalTexture))
 	{
 		GELOG(Error, "Failed to create default normal texture.");
 		return false;
 	}
 
 	myDefaultMaterialTexture = std::make_shared<Texture>();
-	if (!myRHI.CreateColorTexture("Default_Material_ORM", std::array<uint8_t, 4>{ 255, 128, 0, 255 }, *myDefaultMaterialTexture))
+	if (!myRHI.CreateColorTexture("Default_Material_ORM", std::array<uint8_t, 4>{255, 128, 0, 255}, *myDefaultMaterialTexture))
 	{
 		GELOG(Error, "Failed to create default material texture.");
 		return false;
@@ -1752,12 +1713,13 @@ bool GraphicsEngine::CreateConstantBufferInternal(ConstantBuffer aBufferId, std:
 	return true;
 }
 
-bool GraphicsEngine::UpdateAndSetConstantBufferInternal(GraphicsCommandList& inoutCommandList, ConstantBuffer aBufferId, const void *aData, size_t aDataSize, unsigned aSlot, PipeLineStages aStages)
+bool GraphicsEngine::UpdateAndSetConstantBufferInternal(GraphicsCommandList& inoutCommandList, ConstantBuffer aBufferId, const void* aData,
+                                                        size_t aDataSize, unsigned aSlot, PipeLineStages aStages)
 {
-    if (!myConstantBuffers.contains(aBufferId))
+	if (!myConstantBuffers.contains(aBufferId))
 	{
 		GELOG(Warning, "Requested constant buffer update failed because this buffer does not exist!");
-		return false;	
+		return false;
 	}
 
 	const Buffer& buffer = std::as_const(myConstantBuffers).at(aBufferId);
@@ -1778,20 +1740,22 @@ void GraphicsEngine::CreateMaterialTextureSlots(const RHIShaderReflectionInfo& a
 			continue;
 
 		std::string lowerName = shaderTextureSlot.Name;
-		std::ranges::transform(lowerName, lowerName.begin(), [](unsigned char aChar)
-		{
-			return static_cast<char>(std::tolower(aChar));
-		});
+		std::ranges::transform(lowerName, lowerName.begin(),
+		                       [](unsigned char aChar)
+		                       {
+			                       return static_cast<char>(std::tolower(aChar));
+		                       });
 
-		if (inoutMaterial.myTextureSlotNameToIndex.contains(lowerName) && inoutMaterial.myTextureSlotNameToIndex.at(lowerName) != shaderTextureSlot.BindPoint)
+		if (inoutMaterial.myTextureSlotNameToIndex.contains(lowerName) &&
+		    inoutMaterial.myTextureSlotNameToIndex.at(lowerName) != shaderTextureSlot.BindPoint)
 		{
-			GELOG(Warning, "Found texture {} in multiple places when setting up material. Only the first instance will be used!", shaderTextureSlot.Name);
+			GELOG(Warning, "Found texture {} in multiple places when setting up material. Only the first instance will be used!",
+			      shaderTextureSlot.Name);
 			continue;
 		}
 
 		inoutMaterial.myTextureSlotNameToIndex.emplace(lowerName, shaderTextureSlot.BindPoint);
 	}
-
 }
 
 GraphicsEngine::GraphicsEngine() = default;
@@ -1805,7 +1769,6 @@ void GraphicsEngine::PrepareSnapshotRenderResources(const RenderSceneSnapshot& a
 	{
 		PrepareRenderItemResources(item);
 	}
-
 }
 
 bool GraphicsEngine::PrepareRenderItemResources(const RenderItemSnapshot& aRenderItem) const
@@ -1869,7 +1832,8 @@ GraphicsEngine::RenderStats GraphicsEngine::GetLastRenderStats() const
 
 // --- Mesh submission ---
 
-void GraphicsEngine::RenderMesh(GraphicsCommandList& inoutCommandList, const RenderItemSnapshot& aRenderItem, bool aAllowLazyPrepare, RenderBlendFilter aBlendFilter, bool aUseGBufferPSO)
+void GraphicsEngine::RenderMesh(GraphicsCommandList& inoutCommandList, const RenderItemSnapshot& aRenderItem, bool aAllowLazyPrepare,
+                                RenderBlendFilter aBlendFilter, bool aUseGBufferPSO)
 {
 	const std::shared_ptr<Mesh>& mesh = aRenderItem.Mesh;
 	const std::vector<std::shared_ptr<MaterialInterface>>& materials = aRenderItem.Materials;
@@ -1951,8 +1915,9 @@ void GraphicsEngine::RenderMesh(GraphicsCommandList& inoutCommandList, const Ren
 					currentMaterial->RefreshMaterialData();
 				}
 
-				UpdateAndSetConstantBufferInternal(inoutCommandList, ConstantBuffer::MaterialBuffer, currentMaterial->GetParameterDataBlock(),
-					Material::MATERIAL_BUFFER_SIZE, 3, PipeLineStage_VertexShader | PipeLineStage_PixelShader);
+				UpdateAndSetConstantBufferInternal(inoutCommandList, ConstantBuffer::MaterialBuffer,
+				                                   currentMaterial->GetParameterDataBlock(), Material::MATERIAL_BUFFER_SIZE, 3,
+				                                   PipeLineStage_VertexShader | PipeLineStage_PixelShader);
 			}
 
 			std::array<const Texture*, Material::MAX_MATERIAL_TEXTURE_COUNT> textures = {};
@@ -1963,16 +1928,17 @@ void GraphicsEngine::RenderMesh(GraphicsCommandList& inoutCommandList, const Ren
 					textures[t] = texture.get();
 				}
 			}
-			inoutCommandList.SetShaderResources(textures.data(), textures.size(), 0, PipeLineStage_VertexShader | PipeLineStage_PixelShader);
+			inoutCommandList.SetShaderResources(textures.data(), textures.size(), 0,
+			                                    PipeLineStage_VertexShader | PipeLineStage_PixelShader);
 		}
 
 		inoutCommandList.DrawIndexed(element.NumIndices, element.IndexOffset);
 	}
 }
 
-bool GraphicsEngine::PrepareMeshForRendering(const Mesh &aMesh) const
+bool GraphicsEngine::PrepareMeshForRendering(const Mesh& aMesh) const
 {
-    if (!aMesh.myVertexBuffer.IsValid())
+	if (!aMesh.myVertexBuffer.IsValid())
 	{
 		if (!myRHI.CreateVertexBuffer(aMesh.myName, aMesh.myVertices, aMesh.myVertexBuffer))
 		{

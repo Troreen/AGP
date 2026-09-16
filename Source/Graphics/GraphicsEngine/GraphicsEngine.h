@@ -65,8 +65,7 @@ enum class ConstantBuffer : uint8_t
 
 class GraphicsEngine
 {
-public:
-
+  public:
 	// --- Snapshot data ---
 	// Transforms are copied; shared mesh/material contents stay stable during rendering.
 	struct RenderItemSnapshot
@@ -142,23 +141,22 @@ public:
 	const char* GetRenderPassName() const;
 
 	// --- Resource and command creation ---
-	template <class T>
-	bool CreateConstantBuffer(ConstantBuffer aBufferId, std::string_view aName) 
+	template <class T> bool CreateConstantBuffer(ConstantBuffer aBufferId, std::string_view aName)
 	{
 		return CreateConstantBufferInternal(aBufferId, aName, sizeof(T));
 	}
 
 	bool CreateConstantBuffer(ConstantBuffer aBufferId, std::string_view aName, size_t aBufferSize);
 
-
 	template <class T>
-	bool UpdateAndSetConstantBuffer(GraphicsCommandList& inoutCommandList, ConstantBuffer aBufferId, const T& aData, unsigned aSlot, PipeLineStages aStages)
+	bool UpdateAndSetConstantBuffer(GraphicsCommandList& inoutCommandList, ConstantBuffer aBufferId, const T& aData, unsigned aSlot,
+	                                PipeLineStages aStages)
 	{
 		return UpdateAndSetConstantBufferInternal(inoutCommandList, aBufferId, &aData, sizeof(T), aSlot, aStages);
 	}
 
 	CU::Vector2u GetClientSize() const;
-	
+
 	bool CreateCommandList(std::string_view aName, GraphicsCommandList& outCommandList) const;
 	void ExecuteCommandList(const GraphicsCommandList& aCommandList) const;
 	RenderStats GetLastRenderStats() const;
@@ -171,8 +169,8 @@ public:
 	void AdjustShadowBias(LightType aType, float aDelta);
 	void ResetShadowTuning();
 	void LogShadowTuning() const;
-private:
 
+  private:
 	enum class RenderBlendFilter : uint8_t
 	{
 		All,
@@ -185,7 +183,8 @@ private:
 	static constexpr unsigned MaxPointShadowMaps = 4;
 
 	bool CreateConstantBufferInternal(ConstantBuffer aBufferId, std::string_view aName, size_t aBufferSize);
-	bool UpdateAndSetConstantBufferInternal(GraphicsCommandList& inoutCommandList, ConstantBuffer aBufferId, const void* aData, size_t aDataSize, unsigned aSlot, PipeLineStages aStages);
+	bool UpdateAndSetConstantBufferInternal(GraphicsCommandList& inoutCommandList, ConstantBuffer aBufferId, const void* aData,
+	                                        size_t aDataSize, unsigned aSlot, PipeLineStages aStages);
 
 	void CreateMaterialTextureSlots(const RHIShaderReflectionInfo& aShaderInfo, Material& inoutMaterial) const;
 	bool CreatePBLResources();
@@ -203,21 +202,26 @@ private:
 
 	std::vector<ShadowRenderJob> BuildShadowJobs(const RenderSceneSnapshot& aSnapshot, LightBuffer& lightBuffer, RenderStats& frameStats);
 	// Joins all workers before playback or serial fallback; jobs and their snapshot remain alive throughout.
-	void RecordAndExecuteShadows(GraphicsCommandList& inoutCommandList, const std::vector<ShadowRenderJob>& shadowJobs, RenderStats& frameStats);
+	void RecordAndExecuteShadows(GraphicsCommandList& inoutCommandList, const std::vector<ShadowRenderJob>& shadowJobs,
+	                             RenderStats& frameStats);
 	// Establishes camera constants, samplers, environment and shadow bindings for the scene passes.
 	void PrepareSceneCommands(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot);
 	void RenderGBuffer(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot, const GBufferBindings& gbufferTargets);
 	void RenderAmbientOcclusion(GraphicsCommandList& inoutCommandList, const GBufferBindings& gbufferTargets);
 	// Includes the linear-light composite to the back buffer, within the Deferred Lighting GPU event.
-	void RenderDeferredLighting(GraphicsCommandList& inoutCommandList, const LightBuffer& lightBuffer, const GBufferBindings& gbufferTargets);
+	void RenderDeferredLighting(GraphicsCommandList& inoutCommandList, const LightBuffer& lightBuffer,
+	                            const GBufferBindings& gbufferTargets);
 	void RenderDebugView(GraphicsCommandList& inoutCommandList, const LightBuffer& lightBuffer, const GBufferBindings& gbufferTargets);
-	void RenderTransparentGeometry(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot, const LightBuffer& lightBuffer);
+	void RenderTransparentGeometry(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot,
+	                               const LightBuffer& lightBuffer);
 
 	void PrepareSnapshotRenderResources(const RenderSceneSnapshot& aSnapshot) const;
 	bool PrepareRenderItemResources(const RenderItemSnapshot& aRenderItem) const;
 	bool EnsureShadowCommandListCount(size_t aCount);
 	void StoreLastRenderStats(const RenderStats& aStats);
-	void RenderShadowMap(GraphicsCommandList& inoutCommandList, std::string_view aEventName, Texture& aShadowMap, const FrameBuffer& aFrameBuffer, const PipelineStateObject& aOverridePSO, PipeLineStages aOverrideStages, const void* aPointShadowBuffer, const std::vector<const RenderItemSnapshot*>& aRenderItems);
+	void RenderShadowMap(GraphicsCommandList& inoutCommandList, std::string_view aEventName, Texture& aShadowMap,
+	                     const FrameBuffer& aFrameBuffer, const PipelineStateObject& aOverridePSO, PipeLineStages aOverrideStages,
+	                     const void* aPointShadowBuffer, const std::vector<const RenderItemSnapshot*>& aRenderItems);
 	float GetShadowDepthBias(LightType aType) const;
 	float GetShadowDepthBiasUnlocked(LightType aType) const;
 
@@ -225,7 +229,8 @@ private:
 	~GraphicsEngine();
 
 	bool PrepareMeshForRendering(const Mesh& aMesh) const;
-	void RenderMesh(GraphicsCommandList& inoutCommandList, const RenderItemSnapshot& aRenderItem, bool aAllowLazyPrepare = false, RenderBlendFilter aBlendFilter = RenderBlendFilter::All, bool aUseGBufferPSO = false);
+	void RenderMesh(GraphicsCommandList& inoutCommandList, const RenderItemSnapshot& aRenderItem, bool aAllowLazyPrepare = false,
+	                RenderBlendFilter aBlendFilter = RenderBlendFilter::All, bool aUseGBufferPSO = false);
 	bool CreateDefaultTextures();
 
 	// --- Frame targets and state ---
