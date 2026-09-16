@@ -18,6 +18,9 @@ C++20 / DirectX 11 graphics programming project for the AGP assignments. The cur
 
 ## Repository Layout
 
+See the [engine map](Docs/Architecture.md) for startup, threading, snapshot
+ownership, the frame sequence, and code formatting conventions.
+
 - `AGP.sln` - Visual Studio solution.
 - `Source/Application/ModelViewer` - demo application, scene setup, controls, materials, primitive mesh generation.
 - `Source/Graphics/GraphicsEngine` - renderer, RHI, shader/material pipeline, shadow rendering.
