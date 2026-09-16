@@ -8,6 +8,7 @@
 
 class Buffer;
 class RenderHardwareInterface;
+class Sampler;
 class Texture;
 
 class GraphicsCommandList
@@ -24,7 +25,7 @@ public:
     GraphicsCommandList(GraphicsCommandList&& aOther) noexcept;
     GraphicsCommandList& operator=(GraphicsCommandList&& aOther) noexcept;
 
-    void FinishCommandList();
+	bool FinishCommandList();
     void ResetCommandList();
 
     bool IsReadyForExecution() const { return myCommandList; }
@@ -56,6 +57,7 @@ public:
     void EndEvent() const;
 
 private:
+	mutable bool myRecordingFailed = false;
     std::string myName;
 
     Microsoft::WRL::ComPtr<struct ID3D11DeviceContext> myContext;

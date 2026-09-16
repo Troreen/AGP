@@ -7,6 +7,7 @@
 #include "Ensure.h"
 #include "StringHelpers.h"
 
+#include <array>
 #include <cstring>
 #include <format>
 #include <utility>
@@ -41,16 +42,24 @@ GraphicsCommandList &GraphicsCommandList::operator=(GraphicsCommandList &&aOther
     return *this;
 }
 
-void GraphicsCommandList::FinishCommandList()
+bool GraphicsCommandList::FinishCommandList()
 {
 	ensure(!IsReadyForExecution());
-    myContext->FinishCommandList(false, &myCommandList);
-    const std::string name = std::format("{}_CMD", myName);
-    myCommandList->SetPrivateData(WKPDID_D3DDebugObjectName, static_cast<unsigned>(sizeof(char) * name.length()), name.data());
+	const HRESULT result = myContext->FinishCommandList(false, &myCommandList);
+	if (FAILED(result) || !myCommandList || myRecordingFailed)
+	{
+		myCommandList.Reset();
+		LOG(CmdLog, Error, "Command list {} could not be recorded.", myName);
+		return false;
+	}
+	const std::string name = std::format("{}_CMD", myName);
+	myCommandList->SetPrivateData(WKPDID_D3DDebugObjectName, static_cast<unsigned>(name.length()), name.data());
+	return true;
 }
 
 void GraphicsCommandList::ResetCommandList()
 {
+    myRecordingFailed = false;
     myCommandList.Reset();
 }
 
@@ -111,12 +120,14 @@ bool GraphicsCommandList::UpdateConstantBuffer(const Buffer &aConstantBuffer, co
     if (!aConstantBuffer.IsValid() || aConstantBuffer.myType != BufferType::ConstantBuffer)
 	{
 		LOG(CmdLog, Error, "Failed to update constant buffer! Buffer is either null or invalid type!");
+		myRecordingFailed = true;
 		return false;
 	}
 
 	if (aBufferDataSize > aConstantBuffer.mySize)
 	{
 		LOG(CmdLog, Error, "Failed to update constant buffer {}! Data provided is larger than the buffer capacity!", aConstantBuffer.myName);
+		myRecordingFailed = true;
 		return false;
 	}
 
@@ -126,6 +137,7 @@ bool GraphicsCommandList::UpdateConstantBuffer(const Buffer &aConstantBuffer, co
 	if (FAILED(result))
 	{
 		LOG(CmdLog, Error, "Failed to update constant buffer {}! Failed to map buffer!", aConstantBuffer.myName);
+		myRecordingFailed = true;
 		return false;
 	}
 
@@ -241,7 +253,19 @@ void GraphicsCommandList::ClearOverridePipelineState()
 
 void GraphicsCommandList::SetShaderResources(const Texture* const* aResourcesList, size_t aNumResources, unsigned aStartSlot, PipeLineStages aStages) const
 {
-	std::vector<ID3D11ShaderResourceView*> srvs(aNumResources);
+	constexpr size_t maxResourceSlots = D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT;
+	const bool isValidRange =
+		aNumResources <= maxResourceSlots
+		&& aStartSlot <= maxResourceSlots
+		&& aNumResources <= maxResourceSlots - aStartSlot;
+	ensure(isValidRange);
+	ensure(aResourcesList != nullptr || aNumResources == 0);
+	if (!isValidRange || (aResourcesList == nullptr && aNumResources > 0) || aNumResources == 0)
+	{
+		return;
+	}
+
+	std::array<ID3D11ShaderResourceView*, maxResourceSlots> srvs = {};
 	for (size_t t = 0; t < aNumResources; ++t)
 	{
 		if (const Texture* currentTexture = aResourcesList[t])
@@ -250,17 +274,30 @@ void GraphicsCommandList::SetShaderResources(const Texture* const* aResourcesLis
 		}
 	}
 
+	const unsigned numResources = static_cast<unsigned>(aNumResources);
 	if (aStages & PipeLineStage_VertexShader)
-		myContext->VSSetShaderResources(aStartSlot, static_cast<unsigned>(srvs.size()), srvs.data());
+		myContext->VSSetShaderResources(aStartSlot, numResources, srvs.data());
 	if (aStages & PipeLineStage_GeometryShader)
-		myContext->GSSetShaderResources(aStartSlot, static_cast<unsigned>(srvs.size()), srvs.data());
+		myContext->GSSetShaderResources(aStartSlot, numResources, srvs.data());
 	if (aStages & PipeLineStage_PixelShader)
-		myContext->PSSetShaderResources(aStartSlot, static_cast<unsigned>(srvs.size()), srvs.data());
+		myContext->PSSetShaderResources(aStartSlot, numResources, srvs.data());
 }
 
 void GraphicsCommandList::SetShaderSamplers(const Sampler* const* aSamplerList, size_t aNumSamplers, unsigned aStartSlot, PipeLineStages aStages) const
 {
-	std::vector<ID3D11SamplerState*> samplers(aNumSamplers);
+	constexpr size_t maxSamplerSlots = D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT;
+	const bool isValidRange =
+		aNumSamplers <= maxSamplerSlots
+		&& aStartSlot <= maxSamplerSlots
+		&& aNumSamplers <= maxSamplerSlots - aStartSlot;
+	ensure(isValidRange);
+	ensure(aSamplerList != nullptr || aNumSamplers == 0);
+	if (!isValidRange || (aSamplerList == nullptr && aNumSamplers > 0) || aNumSamplers == 0)
+	{
+		return;
+	}
+
+	std::array<ID3D11SamplerState*, maxSamplerSlots> samplers = {};
 	for (size_t s = 0; s < aNumSamplers; ++s)
 	{
 		if (const Sampler* currentSampler = aSamplerList[s])
@@ -269,12 +306,13 @@ void GraphicsCommandList::SetShaderSamplers(const Sampler* const* aSamplerList, 
 		}
 	}
 
+	const unsigned numSamplers = static_cast<unsigned>(aNumSamplers);
 	if (aStages & PipeLineStage_VertexShader)
-		myContext->VSSetSamplers(aStartSlot, static_cast<unsigned>(samplers.size()), samplers.data());
+		myContext->VSSetSamplers(aStartSlot, numSamplers, samplers.data());
 	if (aStages & PipeLineStage_GeometryShader)
-		myContext->GSSetSamplers(aStartSlot, static_cast<unsigned>(samplers.size()), samplers.data());
+		myContext->GSSetSamplers(aStartSlot, numSamplers, samplers.data());
 	if (aStages & PipeLineStage_PixelShader)
-		myContext->PSSetSamplers(aStartSlot, static_cast<unsigned>(samplers.size()), samplers.data());
+		myContext->PSSetSamplers(aStartSlot, numSamplers, samplers.data());
 }
 
 void GraphicsCommandList::Draw(unsigned aNumVertices) const
