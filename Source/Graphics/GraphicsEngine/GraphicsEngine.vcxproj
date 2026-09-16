@@ -213,6 +213,9 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Assets\Shaders"
     <ClInclude Include="Objects\Camera.h" />
     <ClInclude Include="Objects\Buffer.h" />
     <ClInclude Include="GraphicsEngine.h" />
+    <ClInclude Include="RenderCulling.h" />
+    <ClInclude Include="RenderItemRouting.h" />
+    <ClInclude Include="..\..\Utilities\StartupOptions.h" />
     <ClInclude Include="GraphicsEngine.pch.h" />
     <ClInclude Include="Objects\Sampler.h" />
     <ClInclude Include="Objects\Texture.h" />
