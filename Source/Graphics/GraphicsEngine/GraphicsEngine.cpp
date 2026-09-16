@@ -95,17 +95,6 @@ namespace
 
 	using RenderItemPtrList = std::vector<const GraphicsEngine::RenderItemSnapshot*>;
 
-	struct ShadowRenderJob
-	{
-		std::string EventName;
-		Texture* ShadowMap = nullptr;
-		FrameBuffer FrameBufferData;
-		const PipelineStateObject* OverridePSO = nullptr;
-		PipeLineStages OverrideStages = PipeLineStage_None;
-		PointShadowBufferData PointShadowBuffer;
-		bool HasPointShadowBuffer = false;
-		RenderItemPtrList RenderItems;
-	};
 
 	bool IntersectsLightSpaceBounds(const CascadeShadowData& aCascade, const GraphicsEngine::RenderItemSnapshot& aRenderItem)
 	{
@@ -450,6 +439,18 @@ namespace
 
 }
 
+struct GraphicsEngine::ShadowRenderJob
+{
+	std::string EventName;
+	Texture* ShadowMap = nullptr;
+	FrameBuffer FrameBufferData;
+	const PipelineStateObject* OverridePSO = nullptr;
+	PipeLineStages OverrideStages = PipeLineStage_None;
+	PointShadowBufferData PointShadowBuffer;
+	bool HasPointShadowBuffer = false;
+	RenderItemPtrList RenderItems;
+};
+
 // --- Snapshot storage ---
 
 void GraphicsEngine::RenderSceneSnapshot::Clear()
@@ -725,18 +726,37 @@ void GraphicsEngine::RenderSnapshot(GraphicsCommandList& inoutCommandList, const
 		return;
 	}
 
-	// --- Frame resource preparation ---
-	// Finish mesh/material mutations before workers read shared resources.
+	// Finish shared resource mutations before launching shadow workers.
 	const auto preparationStart = Clock::now();
 	PrepareSnapshotRenderResources(aSnapshot);
 	UnbindShadowResources(inoutCommandList);
-
 	RenderStats frameStats = aSnapshot.Stats;
 	frameStats.ResourcePreparationMilliseconds = ElapsedMilliseconds(preparationStart);
+
+	// Jobs borrow snapshot items; recording joins every worker before returning.
 	const auto shadowStart = Clock::now();
-	// --- Shadow jobs ---
-	// Jobs borrow snapshot items; the snapshot must remain held until every worker joins.
 	LightBuffer lightBuffer;
+	const auto shadowJobs = BuildShadowJobs(aSnapshot, lightBuffer, frameStats);
+	RecordAndExecuteShadows(inoutCommandList, shadowJobs, frameStats);
+	frameStats.ShadowRecordingMilliseconds = ElapsedMilliseconds(shadowStart);
+
+	const auto sceneStart = Clock::now();
+	PrepareSceneCommands(inoutCommandList, aSnapshot);
+	const auto& gbufferTextures = myGBuffer.GetTextures();
+	const std::array<const Texture*, GBuffer::TargetCount> gbufferTargets = {
+		&gbufferTextures[GBuffer::Albedo], &gbufferTextures[GBuffer::PixelNormal], &gbufferTextures[GBuffer::Surface],
+		&gbufferTextures[GBuffer::Emission], &gbufferTextures[GBuffer::WorldPosition] };
+	RenderGBuffer(inoutCommandList, aSnapshot, gbufferTargets);
+	RenderAmbientOcclusion(inoutCommandList, gbufferTargets);
+	RenderDeferredLighting(inoutCommandList, lightBuffer, gbufferTargets);
+	RenderDebugView(inoutCommandList, lightBuffer, gbufferTargets);
+	RenderTransparentGeometry(inoutCommandList, aSnapshot, lightBuffer);
+	frameStats.SceneRecordingMilliseconds = ElapsedMilliseconds(sceneStart);
+	StoreLastRenderStats(frameStats);
+}
+
+std::vector<GraphicsEngine::ShadowRenderJob> GraphicsEngine::BuildShadowJobs(const RenderSceneSnapshot& aSnapshot, LightBuffer& lightBuffer, RenderStats& frameStats)
+{
 	bool hasRenderedDirectionalShadow = false;
 	unsigned spotShadowCount = 0;
 	unsigned pointShadowCount = 0;
@@ -869,6 +889,11 @@ void GraphicsEngine::RenderSnapshot(GraphicsCommandList& inoutCommandList, const
 		}
 	}
 
+	return shadowJobs;
+}
+
+void GraphicsEngine::RecordAndExecuteShadows(GraphicsCommandList& inoutCommandList, const std::vector<ShadowRenderJob>& shadowJobs, RenderStats& frameStats)
+{
 	auto recordShadowJob = [this](GraphicsCommandList& inoutShadowCommandList, const ShadowRenderJob& aJob, bool aFinishCommandList)
 	{
 		ensure(aJob.ShadowMap != nullptr);
@@ -935,9 +960,10 @@ void GraphicsEngine::RenderSnapshot(GraphicsCommandList& inoutCommandList, const
 		if (!recorded)
 			for (const auto& job : shadowJobs) recordShadowJob(inoutCommandList, job, false);
 	}
-	frameStats.ShadowRecordingMilliseconds = ElapsedMilliseconds(shadowStart);
-	const auto sceneStart = Clock::now();
+}
 
+void GraphicsEngine::PrepareSceneCommands(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot)
+{
 	inoutCommandList.ClearOverridePipelineState();
 
 	inoutCommandList.ClearRenderTarget(myBackBuffer);
@@ -955,7 +981,10 @@ void GraphicsEngine::RenderSnapshot(GraphicsCommandList& inoutCommandList, const
 	fb.CameraPosition = { cameraPosition.x, cameraPosition.y, cameraPosition.z, 1.0f };
 
 	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::FrameBuffer, fb, 0, PipeLineStage_VertexShader | PipeLineStage_PixelShader);
+}
 
+void GraphicsEngine::RenderGBuffer(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot, const GBufferBindings& gbufferTargets)
+{
 	// --- Deferred GBuffer ---
 	// Writes surface data and depth for SSAO, lighting, and forward transparency.
 	// Non-blended geometry produces the five ordered GBuffer targets. The sampled
@@ -966,9 +995,6 @@ void GraphicsEngine::RenderSnapshot(GraphicsCommandList& inoutCommandList, const
 	{
 		inoutCommandList.ClearRenderTarget(target);
 	}
-	const std::array<const Texture*, GBuffer::TargetCount> gbufferTargets = {
-		&gbufferTextures[GBuffer::Albedo], &gbufferTextures[GBuffer::PixelNormal], &gbufferTextures[GBuffer::Surface],
-		&gbufferTextures[GBuffer::Emission], &gbufferTextures[GBuffer::WorldPosition] };
 	const bool captureTangentNormals = myRenderPass == RenderPass::NormalsTangentSpace;
 	std::array<const Texture*, GBuffer::TargetCount + 1> gbufferRenderTargets = {};
 	std::copy(gbufferTargets.begin(), gbufferTargets.end(), gbufferRenderTargets.begin());
@@ -985,7 +1011,10 @@ void GraphicsEngine::RenderSnapshot(GraphicsCommandList& inoutCommandList, const
 	}
 	inoutCommandList.SetRenderTargets(nullptr, 0, nullptr);
 	inoutCommandList.EndEvent();
+}
 
+void GraphicsEngine::RenderAmbientOcclusion(GraphicsCommandList& inoutCommandList, const GBufferBindings& gbufferTargets)
+{
 	// --- Screen Space Ambient Occlusion ---
 	// Reads GBuffer world positions and normals after its render targets are unbound.
 	// SSAO is generated from the deferred surface data so it can be inspected and
@@ -999,7 +1028,10 @@ void GraphicsEngine::RenderSnapshot(GraphicsCommandList& inoutCommandList, const
 	const std::array<const Texture*, GBuffer::TargetCount> nullGBufferResources = {};
 	inoutCommandList.SetShaderResources(nullGBufferResources.data(), nullGBufferResources.size(), 0, PipeLineStage_PixelShader);
 	inoutCommandList.EndEvent();
+}
 
+void GraphicsEngine::RenderDeferredLighting(GraphicsCommandList& inoutCommandList, const LightBuffer& lightBuffer, const GBufferBindings& gbufferTargets)
+{
 	// --- Deferred Lighting ---
 	// Reads GBuffer, SSAO, and completed shadow maps.
 	// Deferred lights are fullscreen additive passes. Accumulation stays linear until
@@ -1026,6 +1058,7 @@ void GraphicsEngine::RenderSnapshot(GraphicsCommandList& inoutCommandList, const
 		}
 		inoutCommandList.Draw(4);
 	}
+	const std::array<const Texture*, GBuffer::TargetCount> nullGBufferResources = {};
 	inoutCommandList.SetShaderResources(nullGBufferResources.data(), nullGBufferResources.size(), 0, PipeLineStage_PixelShader);
 	const Texture* nullScreenSpaceAOResource = nullptr;
 	inoutCommandList.SetShaderResources(&nullScreenSpaceAOResource, 1, GBuffer::TargetCount, PipeLineStage_PixelShader);
@@ -1037,7 +1070,10 @@ void GraphicsEngine::RenderSnapshot(GraphicsCommandList& inoutCommandList, const
 	const std::array<const Texture*, 1> nullDeferredLightingResource = {};
 	inoutCommandList.SetShaderResources(nullDeferredLightingResource.data(), nullDeferredLightingResource.size(), 0, PipeLineStage_PixelShader);
 	inoutCommandList.EndEvent();
+}
 
+void GraphicsEngine::RenderDebugView(GraphicsCommandList& inoutCommandList, const LightBuffer& lightBuffer, const GBufferBindings& gbufferTargets)
+{
 	// --- Render Pass Debug ---
 	// Replaces the composite with the selected diagnostic view.
 	if (myRenderPass != RenderPass::Lit)
@@ -1058,7 +1094,10 @@ void GraphicsEngine::RenderSnapshot(GraphicsCommandList& inoutCommandList, const
 		inoutCommandList.SetShaderResources(nullDebugResources.data(), nullDebugResources.size(), 0, PipeLineStage_PixelShader);
 		inoutCommandList.EndEvent();
 	}
+}
 
+void GraphicsEngine::RenderTransparentGeometry(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot, const LightBuffer& lightBuffer)
+{
 	// --- Forward transparency ---
 	// Blended elements remain Forward rendered and use the depth written in GBuffer.
 	inoutCommandList.SetRenderTarget(&myBackBuffer, &myDepthBuffer);
@@ -1067,9 +1106,6 @@ void GraphicsEngine::RenderSnapshot(GraphicsCommandList& inoutCommandList, const
 	{
 		RenderMesh(inoutCommandList, aSnapshot.ShadowCasters[itemIndex], false, RenderBlendFilter::BlendedOnly);
 	}
-
-	frameStats.SceneRecordingMilliseconds = ElapsedMilliseconds(sceneStart);
-	StoreLastRenderStats(frameStats);
 }
 
 void GraphicsEngine::Present() const

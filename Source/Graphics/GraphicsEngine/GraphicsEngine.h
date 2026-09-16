@@ -197,6 +197,22 @@ private:
 	bool CreateShadowPipelineStates();
 	void UnbindShadowResources(GraphicsCommandList& inoutCommandList) const;
 	void BindShadowResources(GraphicsCommandList& inoutCommandList) const;
+	// --- Frame recording ---
+	struct ShadowRenderJob;
+	using GBufferBindings = std::array<const Texture*, GBuffer::TargetCount>;
+
+	std::vector<ShadowRenderJob> BuildShadowJobs(const RenderSceneSnapshot& aSnapshot, LightBuffer& lightBuffer, RenderStats& frameStats);
+	// Joins all workers before playback or serial fallback; jobs and their snapshot remain alive throughout.
+	void RecordAndExecuteShadows(GraphicsCommandList& inoutCommandList, const std::vector<ShadowRenderJob>& shadowJobs, RenderStats& frameStats);
+	// Establishes camera constants, samplers, environment and shadow bindings for the scene passes.
+	void PrepareSceneCommands(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot);
+	void RenderGBuffer(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot, const GBufferBindings& gbufferTargets);
+	void RenderAmbientOcclusion(GraphicsCommandList& inoutCommandList, const GBufferBindings& gbufferTargets);
+	// Includes the linear-light composite to the back buffer, within the Deferred Lighting GPU event.
+	void RenderDeferredLighting(GraphicsCommandList& inoutCommandList, const LightBuffer& lightBuffer, const GBufferBindings& gbufferTargets);
+	void RenderDebugView(GraphicsCommandList& inoutCommandList, const LightBuffer& lightBuffer, const GBufferBindings& gbufferTargets);
+	void RenderTransparentGeometry(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot, const LightBuffer& lightBuffer);
+
 	void PrepareSnapshotRenderResources(const RenderSceneSnapshot& aSnapshot) const;
 	bool PrepareRenderItemResources(const RenderItemSnapshot& aRenderItem) const;
 	bool EnsureShadowCommandListCount(size_t aCount);
