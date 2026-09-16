@@ -450,6 +450,8 @@ namespace
 
 }
 
+// --- Snapshot storage ---
+
 void GraphicsEngine::RenderSceneSnapshot::Clear()
 {
 	HasCamera = false;
@@ -465,6 +467,8 @@ GraphicsEngine& GraphicsEngine::Get()
 	static GraphicsEngine myInstance;
 	return myInstance;
 }
+
+// --- Initialization ---
 
 bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path& aShaderRoot)
 {
@@ -589,6 +593,8 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path&
 	myConstantBuffersFrozen = true;
 	return true;
 }
+
+// --- Frame rendering ---
 
 void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const Actor& aCameraActor, const World& aWorld)
 {
@@ -719,6 +725,8 @@ void GraphicsEngine::RenderSnapshot(GraphicsCommandList& inoutCommandList, const
 		return;
 	}
 
+	// --- Frame resource preparation ---
+	// Finish mesh/material mutations before workers read shared resources.
 	const auto preparationStart = Clock::now();
 	PrepareSnapshotRenderResources(aSnapshot);
 	UnbindShadowResources(inoutCommandList);
@@ -726,6 +734,8 @@ void GraphicsEngine::RenderSnapshot(GraphicsCommandList& inoutCommandList, const
 	RenderStats frameStats = aSnapshot.Stats;
 	frameStats.ResourcePreparationMilliseconds = ElapsedMilliseconds(preparationStart);
 	const auto shadowStart = Clock::now();
+	// --- Shadow jobs ---
+	// Jobs borrow snapshot items; the snapshot must remain held until every worker joins.
 	LightBuffer lightBuffer;
 	bool hasRenderedDirectionalShadow = false;
 	unsigned spotShadowCount = 0;
@@ -946,6 +956,8 @@ void GraphicsEngine::RenderSnapshot(GraphicsCommandList& inoutCommandList, const
 
 	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::FrameBuffer, fb, 0, PipeLineStage_VertexShader | PipeLineStage_PixelShader);
 
+	// --- Deferred GBuffer ---
+	// Writes surface data and depth for SSAO, lighting, and forward transparency.
 	// Non-blended geometry produces the five ordered GBuffer targets. The sampled
 	// tangent normal is captured separately only for its dedicated debug view.
 	inoutCommandList.BeginEvent("Deferred GBuffer");
@@ -974,6 +986,8 @@ void GraphicsEngine::RenderSnapshot(GraphicsCommandList& inoutCommandList, const
 	inoutCommandList.SetRenderTargets(nullptr, 0, nullptr);
 	inoutCommandList.EndEvent();
 
+	// --- Screen Space Ambient Occlusion ---
+	// Reads GBuffer world positions and normals after its render targets are unbound.
 	// SSAO is generated from the deferred surface data so it can be inspected and
 	// used independently from the material's packed texture AO channel.
 	inoutCommandList.BeginEvent("Screen Space Ambient Occlusion");
@@ -986,6 +1000,8 @@ void GraphicsEngine::RenderSnapshot(GraphicsCommandList& inoutCommandList, const
 	inoutCommandList.SetShaderResources(nullGBufferResources.data(), nullGBufferResources.size(), 0, PipeLineStage_PixelShader);
 	inoutCommandList.EndEvent();
 
+	// --- Deferred Lighting ---
+	// Reads GBuffer, SSAO, and completed shadow maps.
 	// Deferred lights are fullscreen additive passes. Accumulation stays linear until
 	// the final composite pass, matching the Forward shader's gamma conversion.
 	inoutCommandList.BeginEvent("Deferred Lighting");
@@ -1022,6 +1038,8 @@ void GraphicsEngine::RenderSnapshot(GraphicsCommandList& inoutCommandList, const
 	inoutCommandList.SetShaderResources(nullDeferredLightingResource.data(), nullDeferredLightingResource.size(), 0, PipeLineStage_PixelShader);
 	inoutCommandList.EndEvent();
 
+	// --- Render Pass Debug ---
+	// Replaces the composite with the selected diagnostic view.
 	if (myRenderPass != RenderPass::Lit)
 	{
 		inoutCommandList.BeginEvent("Render Pass Debug");
@@ -1041,6 +1059,7 @@ void GraphicsEngine::RenderSnapshot(GraphicsCommandList& inoutCommandList, const
 		inoutCommandList.EndEvent();
 	}
 
+	// --- Forward transparency ---
 	// Blended elements remain Forward rendered and use the depth written in GBuffer.
 	inoutCommandList.SetRenderTarget(&myBackBuffer, &myDepthBuffer);
 	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::LightBuffer, lightBuffer, 4, PipeLineStage_PixelShader);
@@ -1057,6 +1076,8 @@ void GraphicsEngine::Present() const
 {
 	myRHI.Present();
 }
+
+// --- Diagnostics ---
 
 void GraphicsEngine::CycleRenderPass()
 {
@@ -1082,6 +1103,8 @@ const char* GraphicsEngine::GetRenderPassName() const
 	default: return "Unknown";
 	}
 }
+
+// --- Scene resource bindings ---
 
 void GraphicsEngine::UnbindShadowResources(GraphicsCommandList& inoutCommandList) const
 {
@@ -1125,6 +1148,8 @@ void GraphicsEngine::BindShadowResources(GraphicsCommandList& inoutCommandList) 
 		ShadowConfig::HighTextureSlotStart,
 		PipeLineStage_PixelShader);
 }
+
+// --- Shadow recording and tuning ---
 
 void GraphicsEngine::RenderShadowMap(
 	GraphicsCommandList& inoutCommandList,
@@ -1261,6 +1286,8 @@ void GraphicsEngine::ExecuteCommandList(const GraphicsCommandList &aCommandList)
 	myRHI.ExecuteCommandList(aCommandList);
 }
 
+// --- Deferred resources ---
+
 bool GraphicsEngine::CreateGBufferResources()
 {
 	const CU::Vector2u clientSize = GetClientSize();
@@ -1320,6 +1347,8 @@ bool GraphicsEngine::CreateDeferredPipelineStates()
 		&& createPipeline("ScreenSpaceAOPSO", "ScreenSpaceAO_PS.hlsl", BlendMode::Opaque, myScreenSpaceAOPSO)
 		&& createPipeline("RenderPassDebugPSO", "RenderPassDebug_PS.hlsl", BlendMode::Opaque, myRenderPassDebugPSO);
 }
+
+// --- Image-based lighting resources ---
 
 bool GraphicsEngine::CreatePBLResources()
 {
@@ -1388,6 +1417,8 @@ bool GraphicsEngine::CreateBRDFLUT()
 
 	return true;
 }
+
+// --- Shadow resources ---
 
 bool GraphicsEngine::CreateShadowResources()
 {
@@ -1460,6 +1491,8 @@ bool GraphicsEngine::CreateShadowPipelineStates()
 	pointShadowPSODesc.GeometryShader.ByteCodeSize = pointShadowGS.GetDataSize();
 	return myRHI.CreatePipelineStateObject(pointShadowPSODesc, myPointShadowOverridePSO);
 }
+
+// --- Materials and textures ---
 
 bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Material& outMaterial) const
 {
@@ -1664,6 +1697,8 @@ bool GraphicsEngine::CreateShadowMap(std::string_view aName, unsigned aWidth, un
 	return myRHI.CreateDepthStencil(aName, aWidth, aHeight, outShadowMap, aCubeMap);
 }
 
+// --- Constant buffers ---
+
 bool GraphicsEngine::CreateConstantBufferInternal(ConstantBuffer aBufferId, std::string_view aName, size_t aBufferSize)
 {
 	if (myConstantBuffersFrozen)
@@ -1725,6 +1760,8 @@ void GraphicsEngine::CreateMaterialTextureSlots(const RHIShaderReflectionInfo& a
 
 GraphicsEngine::GraphicsEngine() = default;
 GraphicsEngine::~GraphicsEngine() = default;
+
+// --- Resource preparation ---
 
 void GraphicsEngine::PrepareSnapshotRenderResources(const RenderSceneSnapshot& aSnapshot) const
 {
@@ -1793,6 +1830,8 @@ GraphicsEngine::RenderStats GraphicsEngine::GetLastRenderStats() const
 	std::scoped_lock lock(myRenderStatsMutex);
 	return myLastRenderStats;
 }
+
+// --- Mesh submission ---
 
 void GraphicsEngine::RenderMesh(GraphicsCommandList& inoutCommandList, const RenderItemSnapshot& aRenderItem, bool aAllowLazyPrepare, RenderBlendFilter aBlendFilter, bool aUseGBufferPSO)
 {

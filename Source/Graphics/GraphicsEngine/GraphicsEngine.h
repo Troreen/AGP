@@ -67,6 +67,8 @@ class GraphicsEngine
 {
 public:
 
+	// --- Snapshot data ---
+	// Transforms are copied; shared mesh/material contents stay stable during rendering.
 	struct RenderItemSnapshot
 	{
 		std::shared_ptr<Mesh> Mesh;
@@ -129,14 +131,17 @@ public:
 
 	static GraphicsEngine& Get();
 
+	// --- Frame rendering ---
 	bool Initialize(HWND aWindowHandle, const std::filesystem::path& aShaderRoot);
 	void Render(GraphicsCommandList& inoutCommandList, const Actor& aCameraActor, const World& aWorld);
 	bool BuildRenderSnapshot(const Actor& aCameraActor, const World& aWorld, RenderSceneSnapshot& outSnapshot) const;
 	void RenderSnapshot(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot);
 	void Present() const;
+	// --- Diagnostics ---
 	void CycleRenderPass();
 	const char* GetRenderPassName() const;
 
+	// --- Resource and command creation ---
 	template <class T>
 	bool CreateConstantBuffer(ConstantBuffer aBufferId, std::string_view aName) 
 	{
@@ -207,6 +212,7 @@ private:
 	void RenderMesh(GraphicsCommandList& inoutCommandList, const RenderItemSnapshot& aRenderItem, bool aAllowLazyPrepare = false, RenderBlendFilter aBlendFilter = RenderBlendFilter::All, bool aUseGBufferPSO = false);
 	bool CreateDefaultTextures();
 
+	// --- Frame targets and state ---
 	RenderHardwareInterface myRHI;
 	Texture myBackBuffer;
 	Texture myDepthBuffer;
@@ -238,10 +244,12 @@ private:
 
 	std::vector<Sampler> mySamplers;
 	std::vector<const Sampler*> mySamplerBindings;
+	// --- Shadow resources ---
 	std::vector<GraphicsCommandList> myShadowCommandLists;
 	std::array<Texture, DirectionalCascadeCount> myDirectionalShadowMaps;
 	std::array<Texture, MaxSpotShadowMaps> mySpotShadowMaps;
 	std::array<Texture, MaxPointShadowMaps> myPointShadowMaps;
+	// --- Lighting and material resources ---
 	Texture myEnvironmentCubeTexture;
 	Texture myBRDFLUTTexture;
 	std::shared_ptr<Texture> myDefaultAlbedoTexture;
@@ -249,6 +257,7 @@ private:
 	std::shared_ptr<Texture> myDefaultMaterialTexture;
 
 	Material myDefaultMaterial;
+	// --- Synchronized diagnostics and tuning ---
 	mutable std::mutex myShadowTuningMutex;
 	mutable std::mutex myRenderStatsMutex;
 	RenderStats myLastRenderStats;
