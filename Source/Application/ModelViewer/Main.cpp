@@ -1,14 +1,15 @@
-﻿#define WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
 #include <cstdio>
 #include <exception>
 
 #include "Application.h"
 #include "ModelViewer.h"
+#include "GameFramework/Runtime/GameApplication.h"
 #include "Windows.h"
 
 #include "StringHelpers.h"
 
-LRESULT CALLBACK WinProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam);
+
 
 int GuardedMain()
 {
@@ -77,17 +78,19 @@ int GuardedMain()
 
     MVLOG(Log, "ModelViewer starting...");
 
-    constexpr SIZE windowSize = { 1920, 1080 };
-    constexpr LPCWSTR windowTitle = L"AGP Modelviewer"; // L"" denotes "I want this to be a wide-string".
-
-    ModelViewer MV;
-    if (!MV.Initialize(windowSize, WinProc, windowTitle))
-    {
-        MVLOG(Error, "ModelViewer failed to initialize.");
-        return -1;
-    }
-
-    return MV.Run();
+    wchar_t executablePath[MAX_PATH] = {};
+    if (!GetModuleFileNameW(nullptr, executablePath, MAX_PATH)) return -1;
+    GameApplication::Config config;
+    config.Title = L"AGP Modelviewer";
+    config.ContentRoot = std::filesystem::path(executablePath).parent_path() / ".." / ".." / "Assets";
+    config.EnableRenderDiagnostics = true;
+    config.EnableMouseLook = true;
+    // Composition root for this repository's single game. The game object lives longer
+    // than the blocking host call. For the next game, change this type/configuration and
+    // content; window creation, ticking and shutdown stay inside GameApplication.
+    ModelViewer game;
+    GameApplication application;
+    return application.Run(game, config);
 }
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
@@ -116,14 +119,4 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     }
 
     return 0;
-}
-
-LRESULT CALLBACK WinProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam)
-{
-    if (uMsg == WM_DESTROY || uMsg == WM_CLOSE)
-    {
-        PostQuitMessage(0);
-    }
-
-    return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }

@@ -13,6 +13,9 @@ enum class LightType : uint32_t
 	Spot = 2,
 };
 
+// Gameplay-facing light properties; position/direction come from the owner actor.
+// Games set these values during callbacks, and snapshot extraction copies them for
+// the renderer. Game code does not schedule shadow work or build GPU light buffers.
 class LightComponent : public Component
 {
 public:

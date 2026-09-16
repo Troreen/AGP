@@ -1,6 +1,6 @@
 #include "CameraComponent.h"
 
-#include "Actor.h"
+#include "GameFramework/World/Actor.h"
 
 CameraComponent::CameraComponent(float aHorizontalFieldOfViewDegrees, float aNearPlane, float aFarPlane, const CommonUtilities::Vector2u& aResolution)
 	: myCamera(aHorizontalFieldOfViewDegrees, aNearPlane, aFarPlane, aResolution)

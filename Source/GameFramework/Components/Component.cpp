@@ -2,6 +2,10 @@
 
 #include <utility>
 
+void Component::FixedUpdate(float)
+{
+}
+
 void Component::Update(float)
 {
 }

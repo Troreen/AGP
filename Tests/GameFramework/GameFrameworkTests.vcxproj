@@ -8,20 +8,32 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="Configuration">
     <ConfigurationType>Application</ConfigurationType><PlatformToolset>v145</PlatformToolset>
+    <UseDebugLibraries Condition="'$(Configuration)'=='Debug'">true</UseDebugLibraries>
+    <UseDebugLibraries Condition="'$(Configuration)'!='Debug'">false</UseDebugLibraries>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <PropertyGroup>
     <OutDir>$(MSBuildThisFileDirectory)..\..\Bin\Tests\$(Configuration)\</OutDir>
-    <IntDir>$(MSBuildThisFileDirectory)..\..\Intermediate\EngineOptimisationsTests\$(Configuration)\</IntDir>
+    <IntDir>$(MSBuildThisFileDirectory)..\..\Intermediate\GameFrameworkTests\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
       <LanguageStandard>stdcpp20</LanguageStandard><ExceptionHandling>Sync</ExceptionHandling>
       <WarningLevel>Level4</WarningLevel>
-      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\..\Source;$(MSBuildThisFileDirectory)..\..\CommonUtilities\include;$(MSBuildThisFileDirectory)..\..\Source\Graphics\GraphicsEngine;$(MSBuildThisFileDirectory)..\..\Source\Utilities;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\..\CommonUtilities\include;$(MSBuildThisFileDirectory)..\..\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link><SubSystem>Console</SubSystem></Link>
   </ItemDefinitionGroup>
-  <ItemGroup><ClCompile Include="EngineOptimisationsTests.cpp" /></ItemGroup>
+  <ItemGroup><ClCompile Include="GameFrameworkTests.cpp" /></ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Source\GameFramework\GameFramework.vcxproj">
+      <Project>{d6f43e75-5c34-4dc2-98de-34c68f82833d}</Project>
+      <AdditionalProperties>SolutionDir=$(MSBuildThisFileDirectory)..\..\</AdditionalProperties>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Source\Utilities\Logger\Logger.vcxproj">
+      <Project>{5f2b1a1e-de2e-481a-a52f-394d4f48cf21}</Project>
+      <AdditionalProperties>SolutionDir=$(MSBuildThisFileDirectory)..\..\</AdditionalProperties>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

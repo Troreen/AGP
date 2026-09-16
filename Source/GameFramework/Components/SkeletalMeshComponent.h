@@ -9,6 +9,9 @@
 
 struct Animation;
 
+// Per-instance animation playback and joint poses over a shared mesh/skeleton.
+// The world advances animation during Update and snapshot extraction copies its pose.
+// Attach a controlling component before this component for same-frame play requests.
 class SkeletalMeshComponent final : public MeshComponentBase
 {
 public:

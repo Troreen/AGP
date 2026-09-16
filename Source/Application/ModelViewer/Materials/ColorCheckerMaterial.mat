@@ -4,7 +4,7 @@
   "shadingModel": "Lit",
   "blendMode": "Opaque",
   "materialShaderCode": "ColorCheckerMaterial.hlsli",
-  "albedoTexture": "../../../../Assets/Textures/T_Color_Checker_C.dds",
-  "normalTexture": "../../../../Assets/Textures/T_Color_Checker_N.dds",
-  "materialTexture": "../../../../Assets/Textures/T_Color_Checker_M.dds"
+  "albedoTexture": "../Textures/T_Color_Checker_C.dds",
+  "normalTexture": "../Textures/T_Color_Checker_N.dds",
+  "materialTexture": "../Textures/T_Color_Checker_M.dds"
 }

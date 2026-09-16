@@ -53,10 +53,11 @@ ready snapshots, and retains the currently rendered buffer until the consumer
 acquires a replacement. A producer cannot overwrite a held snapshot. Fixed
 updates run at 60 Hz, clamp elapsed time to 0.25 seconds, and perform at most five
 catch-up ticks. Key presses and mouse deltas accumulate until consumed, then clear
-after the first tick. Input is gated on window focus. F6 only cycles render views;
+after the first fixed tick. Variable Update/LateUpdate callbacks receive their own
+frame sample; see [GameFramework.md](GameFramework.md) for the full timing contract. Input is gated on window focus. F6 only cycles render views;
 the obsolete shadow-bias hotkeys are not restored.
 
-`ModelViewer` explicitly stops/joins its worker before its synchronization,
+`GameApplication` explicitly stops/joins its worker before its synchronization,
 snapshots, world, or assets are destroyed, including exception unwinding. Worker
 exceptions propagate to the main thread; failed snapshot builds cancel their
 queue slot. Statistics and shadow-tuning APIs are synchronized.

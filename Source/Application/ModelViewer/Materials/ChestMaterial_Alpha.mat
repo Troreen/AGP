@@ -4,7 +4,7 @@
   "shadingModel": "Lit",
   "blendMode": "Alpha",
   "materialShaderCode": "ChestMaterial.hlsli",
-  "albedoTexture": "../../../../Assets/Textures/T_Chest_C.dds",
-  "normalTexture": "../../../../Assets/Textures/T_Chest_N.dds",
-  "materialTexture": "../../../../Assets/Textures/T_Chest_M.dds"
+  "albedoTexture": "../Textures/T_Chest_C.dds",
+  "normalTexture": "../Textures/T_Chest_N.dds",
+  "materialTexture": "../Textures/T_Chest_M.dds"
 }

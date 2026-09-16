@@ -9,6 +9,9 @@
 #include <utility>
 #include <vector>
 
+// Importer adapter: translate FBX-specific structures into the mesh/skeleton/clip
+// types used by the engine. Game behavior should work with those engine types rather
+// than depend on importer details. This work currently happens before gameplay starts.
 namespace
 {
 	const CommonUtilities::Vector4f DefaultVertexColor = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -206,6 +209,9 @@ MeshLibrary::~MeshLibrary()
 	TGA::FBX::Importer::UninitImporter();
 }
 
+// Example content manifest in code. Load meshes before attaching named animation
+// clips to them. In a data-driven game, asset references should come from authored
+// data; keep the reusable importing mechanism separate from this game's catalog.
 void MeshLibrary::Initialize(const std::filesystem::path& aContentRoot)
 {
 	myContentRoot = aContentRoot;
@@ -280,6 +286,8 @@ bool MeshLibrary::LoadFBXMesh(const std::filesystem::path& aPath)
 	return true;
 }
 
+// Adds a named clip to a shared mesh asset, not to a live actor's playback state.
+// Finish this mutation during loading before render/gameplay consumers share assets.
 bool MeshLibrary::LoadFBXAnimation(std::string_view aMeshName, std::string aAnimationName, const std::filesystem::path& aPath)
 {
 	std::shared_ptr<Mesh> mesh = GetMesh(aMeshName);

@@ -1,6 +1,6 @@
 #include "World.h"
 
-#include "GameFrameworkLog.h"
+#include "GameFramework/Diagnostics/GameFrameworkLog.h"
 #include <cassert>
 #include <utility>
 
@@ -37,6 +37,18 @@ Actor* World::FindActor(const std::string& aName) const
 	return nullptr;
 }
 
+void World::FixedUpdate(float aDeltaTime)
+{
+	for (std::unique_ptr<Actor>& actor : myActors)
+	{
+		actor->FixedUpdate(aDeltaTime);
+	}
+}
+
+// Two separate world-wide passes ensure every actor finishes Update before any
+// actor starts LateUpdate. Within each pass, actor/component insertion order matters.
+// These loops do not defer collection edits: do not add/remove actors or components
+// from a component callback while the corresponding collection is being traversed.
 void World::Update(float aDeltaTime)
 {
 	for (std::unique_ptr<Actor>& actor : myActors)

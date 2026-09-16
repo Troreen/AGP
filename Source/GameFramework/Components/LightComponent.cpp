@@ -1,6 +1,6 @@
 #include "LightComponent.h"
 
-#include "Actor.h"
+#include "GameFramework/World/Actor.h"
 #include "Maths.hpp"
 
 #include <algorithm>

@@ -1,71 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    <Filter Include="Components">
+      <UniqueIdentifier>{dc4fc592-e4ef-51d9-929d-95c74aea29f8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    <Filter Include="Diagnostics">
+      <UniqueIdentifier>{9b7a1599-ce1d-56fb-a475-a4e63c803d84}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Input">
+      <UniqueIdentifier>{8ef294ff-cc48-5ad1-83c0-3a3d6670e84b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Runtime">
+      <UniqueIdentifier>{1a02a2ca-b433-524c-b9e0-71c54efd172c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Runtime\Internal">
+      <UniqueIdentifier>{0d8a0812-cb24-5812-a1c5-37c1e30a74b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="World">
+      <UniqueIdentifier>{8c530571-b7e3-5a4b-801b-a4f8ef2688f2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Actor.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Components\CameraComponent.h">
+      <Filter>Components</Filter>
     </ClInclude>
-    <ClInclude Include="CameraComponent.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Components\Component.h">
+      <Filter>Components</Filter>
     </ClInclude>
-    <ClInclude Include="Component.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Components\LightComponent.h">
+      <Filter>Components</Filter>
     </ClInclude>
-    <ClInclude Include="GameFrameworkLog.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Components\MeshComponentBase.h">
+      <Filter>Components</Filter>
     </ClInclude>
-    <ClInclude Include="LightComponent.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Components\SkeletalMeshComponent.h">
+      <Filter>Components</Filter>
     </ClInclude>
-    <ClInclude Include="MeshComponentBase.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Components\StaticMeshComponent.h">
+      <Filter>Components</Filter>
     </ClInclude>
-    <ClInclude Include="SkeletalMeshComponent.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Diagnostics\GameFrameworkLog.h">
+      <Filter>Diagnostics</Filter>
     </ClInclude>
-    <ClInclude Include="StaticMeshComponent.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Input\GameInput.h">
+      <Filter>Input</Filter>
     </ClInclude>
-    <ClInclude Include="World.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Runtime\GameApplication.h">
+      <Filter>Runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="Runtime\GameContext.h">
+      <Filter>Runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="Runtime\IGame.h">
+      <Filter>Runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="Runtime\Internal\GameLoop.h">
+      <Filter>Runtime\Internal</Filter>
+    </ClInclude>
+    <ClInclude Include="World\Actor.h">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="World\World.h">
+      <Filter>World</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Actor.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Components\CameraComponent.cpp">
+      <Filter>Components</Filter>
     </ClCompile>
-    <ClCompile Include="CameraComponent.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Components\Component.cpp">
+      <Filter>Components</Filter>
     </ClCompile>
-    <ClCompile Include="Component.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Components\LightComponent.cpp">
+      <Filter>Components</Filter>
     </ClCompile>
-    <ClCompile Include="GameFrameworkLog.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Components\MeshComponentBase.cpp">
+      <Filter>Components</Filter>
     </ClCompile>
-    <ClCompile Include="LightComponent.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Components\SkeletalMeshComponent.cpp">
+      <Filter>Components</Filter>
     </ClCompile>
-    <ClCompile Include="MeshComponentBase.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Components\StaticMeshComponent.cpp">
+      <Filter>Components</Filter>
     </ClCompile>
-    <ClCompile Include="SkeletalMeshComponent.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Diagnostics\GameFrameworkLog.cpp">
+      <Filter>Diagnostics</Filter>
     </ClCompile>
-    <ClCompile Include="StaticMeshComponent.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Runtime\GameApplication.cpp">
+      <Filter>Runtime</Filter>
     </ClCompile>
-    <ClCompile Include="World.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="World\Actor.cpp">
+      <Filter>World</Filter>
     </ClCompile>
+    <ClCompile Include="World\World.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" />
   </ItemGroup>
 </Project>

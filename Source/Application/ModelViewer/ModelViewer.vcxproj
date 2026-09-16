@@ -159,6 +159,8 @@ xcopy /E /I /R /Y "%SHADERSRC%" "%SHADERDEST%"</Command>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ModelViewerScene.h" />
+    <ClInclude Include="ModelViewerComponents.h" />
     <ClInclude Include="Application.h" />
     <ClInclude Include="ModelViewer.h" />
     <ClInclude Include="MeshLibrary.h" />
@@ -170,6 +172,8 @@ xcopy /E /I /R /Y "%SHADERSRC%" "%SHADERDEST%"</Command>
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ModelViewerScene.cpp" />
+    <ClCompile Include="ModelViewerComponents.cpp" />
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="..\..\Utilities\FreeFlyCameraController.cpp" />
     <ClCompile Include="Main.cpp" />

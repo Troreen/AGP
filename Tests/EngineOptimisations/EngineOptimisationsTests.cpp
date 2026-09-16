@@ -1,3 +1,4 @@
+#include "../../Source/GameFramework/Runtime/Internal/GameLoop.h"
 #define NOMINMAX
 #include "RenderCulling.h"
 #include "RenderItemRouting.h"
@@ -118,9 +119,65 @@ void TestWorker()
 	Check(caught, "worker exception was lost");
 }
 
+void TestGameLoop()
+{
+    using GameFrameworkInternal::GameLoop;
+    GameLoop loop(0.125f);
+    GameInput input;
+    input.KeysPressed[static_cast<size_t>(Keys::P)] = true;
+    input.KeysDown[static_cast<size_t>(Keys::P)] = true;
+    input.MouseDeltaX = 3;
+    int fixedCount = 0, updateCount = 0, lateCount = 0;
+    std::string order;
+    auto fixed = [&](float dt, const GameInput& sample)
+    {
+        Check(dt == 0.125f, "fixed delta changed");
+        Check(sample.IsKeyDown(Keys::P), "held input lost");
+        Check(sample.IsKeyPressed(Keys::P) == (fixedCount == 0), "fixed edge lost or repeated");
+        Check(sample.MouseDeltaX == (fixedCount == 0 ? 3.0f : 0.0f), "fixed mouse delta lost or repeated");
+        ++fixedCount; order += 'F';
+    };
+    auto update = [&](float, const GameInput& sample)
+    {
+        Check(sample.IsKeyPressed(Keys::P) == (updateCount == 0), "variable edge lost or repeated");
+        ++updateCount; order += 'U';
+    };
+    auto late = [&](float, const GameInput&) { ++lateCount; order += 'L'; };
+    loop.Advance(0.0625f, input, fixed, update, late);
+    Check(order == "UL", "frame without fixed tick has wrong order");
+    input.ClearPressed();
+    loop.Advance(0.25f, input, fixed, update, late);
+    Check(order == "ULFFUL" && fixedCount == 2 && lateCount == 2, "catch-up phase order");
+
+    GameInput older, newer;
+    older.KeysPressed[static_cast<size_t>(Keys::P)] = true;
+    older.MouseDeltaX = 2;
+    newer.MouseDeltaX = 4;
+    older.Merge(newer);
+    Check(older.IsKeyPressed(Keys::P) && !older.IsKeyDown(Keys::P) && older.MouseDeltaX == 6, "mailbox coalescing");
+    Check(!older.IsKeyDown(static_cast<Keys>(-1)), "invalid input key");
+
+    GameLoop bounded(0.001f);
+    int steps = 0;
+    bounded.Advance(10.0f, {}, [&](float, const GameInput&) { ++steps; }, [](float dt, const GameInput&) {
+        Check(dt == 0.25f, "variable delta not clamped");
+    }, [](float, const GameInput&) {});
+    Check(steps == 5, "unbounded fixed catch-up");
+    bool caught = false;
+    try { GameLoop invalid(0); } catch (const std::invalid_argument&) { caught = true; }
+    Check(caught, "invalid timestep accepted");
+    caught = false;
+    bool lateAfterFailure = false;
+    try { loop.Advance(0, {}, [](float, const GameInput&) {}, [](float, const GameInput&) {
+        throw std::runtime_error("expected gameplay failure");
+    }, [&](float, const GameInput&) { lateAfterFailure = true; }); }
+    catch (const std::runtime_error&) { caught = true; }
+    Check(caught && !lateAfterFailure, "gameplay failure swallowed or late ran after failure");
+}
+
 int main()
 {
-	try { TestCulling(); TestRouting(); TestQueue(); TestWorker(); }
+	try { TestCulling(); TestRouting(); TestQueue(); TestWorker(); TestGameLoop(); }
 	catch (const std::exception& error) { std::cerr << error.what() << '\n'; return 1; }
-	std::cout << "PASS: culling, transformed bounds, material routing, snapshot queue and worker failure\n";
+	std::cout << "PASS: culling, transformed bounds, material routing, snapshot queue, worker failure and gameplay loop\n";
 }

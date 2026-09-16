@@ -4,7 +4,7 @@
   "shadingModel": "Lit",
   "blendMode": "Opaque",
   "materialShaderCode": "FloorMaterial.hlsli",
-  "albedoTexture": "../../../../Assets/Textures/T_Marble_Tiles_C.dds",
-  "normalTexture": "../../../../Assets/Textures/T_Marble_Tiles_N.dds",
-  "materialTexture": "../../../../Assets/Textures/T_Marble_Tiles_ORM.dds"
+  "albedoTexture": "../Textures/T_Marble_Tiles_C.dds",
+  "normalTexture": "../Textures/T_Marble_Tiles_N.dds",
+  "materialTexture": "../Textures/T_Marble_Tiles_ORM.dds"
 }

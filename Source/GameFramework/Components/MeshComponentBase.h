@@ -11,6 +11,9 @@
 
 class Mesh;
 
+// Connects an actor to shared mesh/material assets. Per-actor transforms live on
+// the owner; asset data may be shared by many actors and render snapshots. Load and
+// configure shared assets before play; runtime asset editing needs a future safe API.
 class MeshComponentBase : public Component
 {
 public:

@@ -5,6 +5,9 @@
 #include "Camera3D.hpp"
 #include "Vector2.hpp"
 
+// Projection/view data attached to an actor. Moving the owner moves the viewpoint;
+// this component does not implement player controls. Select its actor through
+// GameContext::SetActiveCamera; the renderer extracts camera data for the snapshot.
 class CameraComponent final : public Component
 {
 public:

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Component.h"
+#include "GameFramework/Components/Component.h"
 
 #include "Transform.hpp"
 #include "Vector3.hpp"
@@ -13,6 +13,9 @@
 
 class World;
 
+// A world-owned entity: transform, activation state and an owned set of components.
+// Compose behavior with AddComponent rather than subclassing Actor (its destructor
+// is not virtual). Components share this actor transform; there is no hierarchy here.
 class Actor
 {
 public:
@@ -24,6 +27,9 @@ public:
 	Actor(Actor&&) = delete;
 	Actor& operator=(Actor&&) = delete;
 
+	// Called by World, with inactive actors skipped in every phase. Each enabled
+	// component runs in attachment order, so order dependencies must be deliberate.
+	void FixedUpdate(float aDeltaTime);
 	void Update(float aDeltaTime);
 	void LateUpdate(float aDeltaTime);
 
@@ -45,6 +51,10 @@ public:
 
 	World* GetWorld() const;
 
+	// Construct and attach a component. Its constructor runs BEFORE owner/name are
+	// assigned, so constructors must not use GetOwner(). There is no BeginPlay hook yet;
+	// owner-dependent setup can happen explicitly after attachment or on the first tick.
+	// The returned pointer is borrowed and becomes invalid when the component is removed.
 	template <typename T, typename... Args>
 	T* AddComponent(std::string aName, Args&&... someArgs)
 	{
@@ -102,6 +112,8 @@ public:
 		}
 	}
 
+	// Immediate removal, not a deferred command. Do not remove components from inside
+	// a tick over this actor, and do not retain references to a removed component.
 	template <typename T>
 	bool RemoveComponent()
 	{

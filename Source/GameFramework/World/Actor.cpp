@@ -1,6 +1,6 @@
 #include "Actor.h"
 
-#include "GameFrameworkLog.h"
+#include "GameFramework/Diagnostics/GameFrameworkLog.h"
 
 #include <algorithm>
 #include <cassert>
@@ -15,6 +15,22 @@ Actor::Actor(std::string aName)
 Actor::~Actor()
 {
 	RemoveAllComponents();
+}
+
+void Actor::FixedUpdate(float aDeltaTime)
+{
+	if (!myIsActive)
+	{
+		return;
+	}
+
+	for (std::unique_ptr<Component>& component : myComponents)
+	{
+		if (component->IsEnabled())
+		{
+			component->FixedUpdate(aDeltaTime);
+		}
+	}
 }
 
 void Actor::Update(float aDeltaTime)

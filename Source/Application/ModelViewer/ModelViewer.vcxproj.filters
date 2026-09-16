@@ -15,6 +15,8 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ModelViewerScene.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="ModelViewerComponents.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -41,6 +43,8 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ModelViewerScene.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="ModelViewerComponents.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="ModelViewer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

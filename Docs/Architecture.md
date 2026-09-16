@@ -1,32 +1,34 @@
 # Engine map
 
+For the game-facing API, callback timing and roadmap, see [GameFramework.md](GameFramework.md).
+
 Start with `GraphicsEngine::RenderSnapshot()` for the frame sequence and
-`ModelViewer::Run()` for the application loop. Paths below are relative to the
+`GameApplication::Run()` for the application loop. Paths below are relative to the
 repository root.
 
 ## Startup and shutdown
 
 `Source/Application/ModelViewer/Main.cpp` enters `GuardedMain()`, creates the
-viewer, initializes it, then calls `Run()`. `ModelViewer::Initialize()` creates
-the window and graphics engine, loads assets and the scene, and creates the
+game and passes it to the reusable host. `GameApplication` initialization creates
+the window and graphics engine, calls the game Initialize hook for assets and scene setup, and creates the
 scene command list. Graphics initialization creates frame targets, pipeline
 states, samplers, constant buffers, shadow maps, and environment resources.
 Constant-buffer registration closes before rendering starts.
 
-`Run()` starts the fixed-step update worker after initialization. Shutdown stops
-and joins that worker before releasing the held snapshot. The viewer destructor
+`Run()` starts the gameplay update worker after initialization. Shutdown stops
+and joins that worker before releasing the held snapshot. The host destructor
 also stops it so exception unwinding cannot destroy data still in use.
 
 ## Thread and snapshot ownership
 
 | Owner | Responsibility | Entry points |
 | --- | --- | --- |
-| Main/window thread | Window/input handling, GPU resource preparation, scene recording, command playback, presentation | `ModelViewer::Run()`, `GraphicsEngine::RenderSnapshot()` |
-| Update worker | World, animation, camera and light updates; snapshot construction | `RunFixedUpdateStep()`, `BuildAndPublishRenderSnapshot()` |
+| Main/window thread | Window/input handling, GPU resource preparation, scene recording, command playback, presentation | `GameApplication::Run()`, `GraphicsEngine::RenderSnapshot()` |
+| Update worker | World, animation, camera and light updates; snapshot construction | `GameApplication::Impl::Advance()`, `BuildAndPublishRenderSnapshot()` |
 | Shadow workers | Record independent shadow command lists from prepared resources | `RecordAndExecuteShadows()` |
 
-`Source/Utilities/FrameScheduler.h` supplies the fixed-step worker and triple
-buffer queue. The renderer holds a snapshot until a newer one is acquired;
+`Source/Utilities/FrameScheduler.h` supplies the triple buffer queue; GameFramework owns the gameplay worker
+and shared fixed/variable phase loop. The renderer holds a snapshot until a newer one is acquired;
 the producer cannot overwrite that held buffer. Obsolete ready snapshots can
 be dropped. The synchronous update mode uses the same snapshot path.
 
@@ -55,7 +57,7 @@ serial fallback, or destruction of job data.
 | `RenderDebugView()` | Optionally replaces the composite with the selected diagnostic view. |
 | `RenderTransparentGeometry()` | Draws blended elements back-to-front using the opaque depth buffer and full light buffer. |
 
-The viewer finishes and executes the scene command list, then presents. Pass
+The host finishes and executes the scene command list, then presents. Pass
 helpers rely on this order and the shared scene bindings; they are not independent
 rendering entry points. Resource unbinding beside each pass prevents read/write
 binding conflicts. CPU statistics retain separate preparation, shadow and scene
@@ -65,8 +67,8 @@ recording intervals; they do not measure GPU execution time.
 
 | Location | Responsibility |
 | --- | --- |
-| `Source/Application/ModelViewer` | Application loop, scene setup, input, mesh library, demo materials |
-| `Source/GameFramework` | World, actors, components, animation and lights |
+| `Source/Application/ModelViewer` | IGame implementation, scene setup, controls, mesh library, game materials |
+| `Source/GameFramework` | Reusable application host, game callbacks, input handoff, world, actors, components, animation and lights |
 | `Source/Graphics/GraphicsEngine/GraphicsEngine.cpp` | Frame orchestration, shadow calculations, resource and material creation |
 | `Source/Graphics/GraphicsEngine/RHI` | DirectX 11 device/context operations and command lists |
 | `Source/Graphics/GraphicsEngine/Objects` | Mesh, texture, buffer and other graphics wrappers |

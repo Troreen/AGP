@@ -4,6 +4,6 @@
   "shadingModel": "Lit",
   "blendMode": "Opaque",
   "materialShaderCode": "PyramidMaterial.hlsli",
-  "albedoTexture": "../../../../Assets/Textures/T_Default_C.dds",
-  "normalTexture": "../../../../Assets/Textures/T_Default_N.dds"
+  "albedoTexture": "../Textures/T_Default_C.dds",
+  "normalTexture": "../Textures/T_Default_N.dds"
 }

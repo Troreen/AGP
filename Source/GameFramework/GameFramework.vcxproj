@@ -142,26 +142,35 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Actor.h" />
-    <ClInclude Include="CameraComponent.h" />
-    <ClInclude Include="Component.h" />
-    <ClInclude Include="GameFrameworkLog.h" />
-    <ClInclude Include="LightComponent.h" />
-    <ClInclude Include="MeshComponentBase.h" />
-    <ClInclude Include="SkeletalMeshComponent.h" />
-    <ClInclude Include="StaticMeshComponent.h" />
-    <ClInclude Include="World.h" />
+    <ClInclude Include="Runtime\GameApplication.h" />
+    <ClInclude Include="Runtime\GameContext.h" />
+    <ClInclude Include="Input\GameInput.h" />
+    <ClInclude Include="Runtime\Internal\GameLoop.h" />
+    <ClInclude Include="Runtime\IGame.h" />
+    <ClInclude Include="World\Actor.h" />
+    <ClInclude Include="Components\CameraComponent.h" />
+    <ClInclude Include="Components\Component.h" />
+    <ClInclude Include="Diagnostics\GameFrameworkLog.h" />
+    <ClInclude Include="Components\LightComponent.h" />
+    <ClInclude Include="Components\MeshComponentBase.h" />
+    <ClInclude Include="Components\SkeletalMeshComponent.h" />
+    <ClInclude Include="Components\StaticMeshComponent.h" />
+    <ClInclude Include="World\World.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Actor.cpp" />
-    <ClCompile Include="CameraComponent.cpp" />
-    <ClCompile Include="Component.cpp" />
-    <ClCompile Include="GameFrameworkLog.cpp" />
-    <ClCompile Include="LightComponent.cpp" />
-    <ClCompile Include="MeshComponentBase.cpp" />
-    <ClCompile Include="SkeletalMeshComponent.cpp" />
-    <ClCompile Include="StaticMeshComponent.cpp" />
-    <ClCompile Include="World.cpp" />
+    <ClCompile Include="Runtime\GameApplication.cpp" />
+    <ClCompile Include="World\Actor.cpp" />
+    <ClCompile Include="Components\CameraComponent.cpp" />
+    <ClCompile Include="Components\Component.cpp" />
+    <ClCompile Include="Diagnostics\GameFrameworkLog.cpp" />
+    <ClCompile Include="Components\LightComponent.cpp" />
+    <ClCompile Include="Components\MeshComponentBase.cpp" />
+    <ClCompile Include="Components\SkeletalMeshComponent.cpp" />
+    <ClCompile Include="Components\StaticMeshComponent.cpp" />
+    <ClCompile Include="World\World.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
