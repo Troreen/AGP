@@ -23,7 +23,7 @@ namespace
 
 void Transform::EnsureMutationAllowed() const
 {
-    if (myWorld) myWorld->EnsureMutationAllowed();
+    if (myWorld) myWorld->EnsureComponentMutationAllowed(myComponent);
 }
 
 LocalPose Transform::GetLocalPose() const

@@ -20,12 +20,16 @@
     <ClCompile>
       <LanguageStandard>stdcpp20</LanguageStandard><ExceptionHandling>Sync</ExceptionHandling>
       <WarningLevel>Level4</WarningLevel>
-      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\..\CommonUtilities\include;$(MSBuildThisFileDirectory)..\..\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\..\CommonUtilities\include;$(MSBuildThisFileDirectory)..\..\Source;$(MSBuildThisFileDirectory)..\..\Source\Graphics;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <Link><SubSystem>Console</SubSystem></Link>
+    <Link><SubSystem>Console</SubSystem><AdditionalLibraryDirectories>$(MSBuildThisFileDirectory)..\..\Lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories><AdditionalDependencies>GraphicsEngine.lib;d3d11.lib;dxguid.lib;dxgi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies></Link>
   </ItemDefinitionGroup>
-  <ItemGroup><ClCompile Include="GameFrameworkTests.cpp" /></ItemGroup>
+  <ItemGroup><ClCompile Include="GameFrameworkTests.cpp" /><ClCompile Include="SceneConstructionTests.cpp" /></ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Source\Graphics\GraphicsEngine\GraphicsEngine.vcxproj">
+      <Project>{949cdb08-2579-4f0e-8ba4-5ae09a39c4df}</Project>
+      <AdditionalProperties>SolutionDir=$(MSBuildThisFileDirectory)..\..\</AdditionalProperties>
+    </ProjectReference>
     <ProjectReference Include="..\..\Source\GameFramework\GameFramework.vcxproj">
       <Project>{d6f43e75-5c34-4dc2-98de-34c68f82833d}</Project>
       <AdditionalProperties>SolutionDir=$(MSBuildThisFileDirectory)..\..\</AdditionalProperties>

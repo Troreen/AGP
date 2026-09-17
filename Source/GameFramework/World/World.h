@@ -7,6 +7,9 @@
 class CameraComponent;
 class SceneBuilder;
 class SceneComponent;
+class SceneService;
+class AssetLookup;
+class GameTime;
 namespace GameFrameworkInternal { class WorldAccess; }
 
 // The session owns a world and advances its objects automatically. Pointers
@@ -25,6 +28,9 @@ public:
     void DestroyActor(Actor& actor);
     void DestroyComponent(Component& component);
     const GameInput& GetInput() const { return myInput ? *myInput : myEmptyInput; }
+    SceneService& GetScenes() const;
+    const AssetLookup& GetAssets() const;
+    const GameTime& GetTime() const;
     bool SetActiveCamera(CameraComponent* camera);
     CameraComponent* GetActiveCamera() const;
 private:
@@ -39,6 +45,7 @@ private:
     bool AcceptsChanges() const { return !myClosing && myState != State::Ending; }
     const std::vector<std::unique_ptr<Actor>>& GetActors() const { return myActors; }
     void EnsureMutationAllowed() const;
+    void EnsureComponentMutationAllowed(const Component*) const;
     ObjectHandle Allocate(Actor* actor, Component* component);
     void Invalidate(const ObjectHandle& handle);
     void Attach(Actor& actor, std::unique_ptr<Component> component);
@@ -52,6 +59,9 @@ private:
     bool myInBoundary = false;
     const GameInput* myInput;
     GameInput myEmptyInput;
+    SceneService* myScenes = nullptr;
+    const AssetLookup* myAssets = nullptr;
+    const GameTime* myTime = nullptr;
     std::shared_ptr<GameFrameworkInternal::ObjectSlots> mySlots;
     std::vector<std::unique_ptr<Actor>> myActors;
     std::vector<std::unique_ptr<Actor>> myPendingActors;

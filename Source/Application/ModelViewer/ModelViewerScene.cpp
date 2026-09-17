@@ -1,11 +1,5 @@
 #include "ModelViewerScene.h"
-#include "GameFramework/Integration/GameFramework/Integration/LegacySceneBridge.h"
-#include "ModelViewerComponents.h"
 #include "Application.h"
-#include "GameFramework/Runtime/GameContext.h"
-#include "GameFramework/Components/LightComponent.h"
-#include "GameFramework/Components/StaticMeshComponent.h"
-#include "GameFramework/Components/SkeletalMeshComponent.h"
 #include "GraphicsEngine/GraphicsEngine.h"
 #include "GraphicsEngine/Materials/Material.h"
 #include "GraphicsEngine/Objects/Mesh.h"
@@ -15,93 +9,94 @@
 namespace
 {
     using Vector3f = CommonUtilities::Vector3f;
-    void AssignMaterialToAllSlots(MeshComponentBase& component, const std::shared_ptr<MaterialInterface>& material)
+    void Aim(LocalPose& pose, Vector3f target)
     {
-        if (!material || !component.HasMesh()) throw std::runtime_error("Missing mesh or material");
-        for (unsigned i = 0; i < component.GetMesh()->GetNumMaterialSlots(); ++i) component.SetMaterial(i,material);
+        const auto forward = (target-pose.Position).GetNormalized();
+        pose.Rotation = CommonUtilities::Quaternion<float>::CreateFromYawPitchRoll(std::atan2(forward.x,forward.z),-std::asin(forward.y),0);
     }
-    void Aim(CommonUtilities::Transform& transform, Vector3f target)
+    ComponentRecord ComponentData(const char* name, const char* type, PropertyMap fields = {})
+    { ComponentRecord c; c.Id = c.Name = name; c.Type = type; c.Properties = std::move(fields); return c; }
+    ActorRecord ActorData(const char* name, Vector3f position = {})
+    { ActorRecord a; a.Id = a.Name = name; a.Pose.Position = position; return a; }
+}
+GameFrameworkIntegration::SceneSourceResult ModelViewerScene::Load(const SceneId& id, GameFrameworkIntegration::SceneLoadContext& context)
+{
+    if (id.Value != "ModelViewer") throw std::runtime_error("Unknown ModelViewer scene: " + id.Value);
+    if (!myInitialized)
     {
-        const auto forward = (target-transform.GetPosition()).GetNormalized();
-        transform.SetYawPitchRollRadians(std::atan2(forward.x,forward.z),-std::asin(forward.y),0);
+        myContentRoot = context.ContentRoot;
+        myMeshLibrary.Initialize(myContentRoot);
+        myInitialized = true;
     }
-    ComponentDescription Behavior(const char* name, const char* type)
-    { ComponentDescription c; c.Name = name; c.Type = type; return c; }
-}
-void ModelViewerScene::Initialize(GameContext& context)
-{
-    myContentRoot = context.GetContentRoot();
-    myMeshLibrary.Initialize(myContentRoot);
-    Reload(context);
-}
-void ModelViewerScene::Reload(GameContext& context)
-{
-    const auto resolution = context.GetClientSize();
-    GameFrameworkIntegration::LegacySceneBridge::Request(context, [this,resolution](const ComponentRegistry& registry, const GameInput* input) { return Build(registry,input,resolution); });
-}
-SceneBuildResult ModelViewerScene::Build(const ComponentRegistry& registry, const GameInput* input, CommonUtilities::Vector2u resolution)
-{
-    // These descriptions stand in for imported engine-space data. Resource resolution
-    // stays in the game adapter; callbacks configure attached but unstarted components.
-    SceneDescription scene;
+    // The sample is an owned C++ source. Existing resource loading remains confined
+    // to this integration unit and executes only at the host's safe loading point.
+    SceneData scene;
+    scene.Source.File = "ModelViewer C++ source";
+    scene.RequireCamera = true;
     const auto materialRoot = myContentRoot / "Shaders";
     const Vector3f focus{25,0,260};
-    ActorDescription camera; camera.Id = "Camera Actor";
-    camera.LocalTransform.SetPosition({0,260,-950}); Aim(camera.LocalTransform,focus);
-    camera.Components.push_back(ComponentDescription::Make<CameraComponent>("Camera","agp.Camera",[resolution](auto& c) { c.SetPerspective(90,1,50000,resolution); }));
-    camera.Components.push_back(Behavior("Camera Controls","CameraControls"));
+    auto camera = ActorData("Camera Actor", {0,260,-950}); Aim(camera.Pose,focus);
+    camera.Components.push_back(ComponentData("Camera","agp.Camera"));
+    camera.Components.push_back(ComponentData("Camera Controls","CameraControls"));
     scene.Actors.push_back(std::move(camera));
-    scene.CameraActor = "Camera Actor"; scene.CameraComponent = "Camera";
+    scene.ActiveCamera = ObjectAddress{"Camera Actor","Camera"};
 
-    ActorDescription directional; directional.Id = "Directional Light Actor";
-    directional.LocalTransform.SetPosition({-450,650,-350}); Aim(directional.LocalTransform,focus);
-    directional.Components.push_back(ComponentDescription::Make<DirectionalLightComponent>("Directional Light","agp.DirectionalLight",[](auto& c) { c.SetColor({1,.96f,.9f}); c.SetIntensity(5); }));
+    auto directional = ActorData("Directional Light Actor",{-450,650,-350}); Aim(directional.Pose,focus);
+    directional.Components.push_back(ComponentData("Directional Light","agp.DirectionalLight",{{"color",Vector3f{1,.96f,.9f}},{"intensity",5.0}}));
     scene.Actors.push_back(std::move(directional));
-    ActorDescription point; point.Id = "Warm Character Point Actor"; point.LocalTransform.SetPosition({-90,180,150});
-    point.Components.push_back(ComponentDescription::Make<PointLightComponent>("Warm Character Point Light","agp.PointLight",[](auto& c) { c.SetColor({1,.42f,.22f}); c.SetIntensity(20); c.SetRadius(760); }));
+    auto point = ActorData("Warm Character Point Actor",{-90,180,150});
+    point.Components.push_back(ComponentData("Warm Character Point Light","agp.PointLight",{{"color",Vector3f{1,.42f,.22f}},{"intensity",20.0},{"radius",760.0}}));
     scene.Actors.push_back(std::move(point));
-    ActorDescription spot; spot.Id = "Spot Light Actor";
-    spot.LocalTransform.SetPosition({430,430,-210}); Aim(spot.LocalTransform,focus);
-    spot.Components.push_back(ComponentDescription::Make<SpotLightComponent>("Spot Light","agp.SpotLight",[](auto& c) { c.SetColor({.55f,.7f,1}); c.SetIntensity(30); c.SetRadius(1200); c.SetConeAnglesDegrees(18,34); }));
+    auto spot = ActorData("Spot Light Actor",{430,430,-210}); Aim(spot.Pose,focus);
+    spot.Components.push_back(ComponentData("Spot Light","agp.SpotLight",{{"color",Vector3f{.55f,.7f,1}},{"intensity",30.0},{"radius",1200.0},{"innerCone",18.0},{"outerCone",34.0}}));
     scene.Actors.push_back(std::move(spot));
 
+    auto bindMesh = [&](const char* meshName, const std::string& materialId, std::shared_ptr<MaterialInterface> material)
+    {
+        auto mesh = myMeshLibrary.GetMesh(meshName);
+        if (!mesh || !material) throw std::runtime_error("Missing sample mesh/material: " + std::string(meshName));
+        context.Assets.BindMesh(AssetId{meshName},mesh);
+        context.Assets.BindMaterial(AssetId{materialId},std::move(material));
+        return PropertyMap{{"mesh",AssetId{meshName}},{"materials",std::vector<AssetId>(mesh->GetNumMaterialSlots(),AssetId{materialId})}};
+    };
     auto meshActor = [&](const char* id, const char* name, const char* meshName, const char* materialName, Vector3f position, Vector3f rotation, Vector3f scale)
     {
-        ActorDescription actor; actor.Id = id;
-        actor.LocalTransform.SetPosition(position); actor.LocalTransform.SetRotation(rotation); actor.LocalTransform.SetScale(scale);
-        auto mesh = myMeshLibrary.GetMesh(meshName); auto material = GetMaterial(materialRoot/materialName);
-        actor.Components.push_back(ComponentDescription::Make<StaticMeshComponent>(name,"agp.StaticMesh",[mesh,material](auto& c)
-        { c.SetMesh(mesh); AssignMaterialToAllSlots(c,material); }));
+        auto actor = ActorData(id,position);
+        Transform pose; pose.SetLocalRotationDegrees(rotation.x,rotation.y,rotation.z);
+        actor.Pose.Rotation = pose.GetLocalRotation(); actor.Pose.Scale = scale;
+        actor.Components.push_back(ComponentData(name,"agp.StaticMesh",bindMesh(meshName,materialName,GetMaterial(materialRoot/materialName))));
         return actor;
     };
     scene.Actors.push_back(meshActor("Floor Actor","Floor Mesh Component","Floor","FloorMaterial.mat",{0,0,260},{0,-90,0},{1100,1100,1100}));
     auto chest = meshActor("SM_Chest Actor","SM_Chest Mesh Component","SM_Chest","ChestMaterial.mat",{135,0,285},{0,0,0},{1,1,1});
-    chest.Components.push_back(Behavior("Spin","Spin")); scene.Actors.push_back(std::move(chest));
+    chest.Components.push_back(ComponentData("Spin","Spin")); scene.Actors.push_back(std::move(chest));
     auto alpha = meshActor("SM_Chest Alpha Actor","SM_Chest Alpha Mesh Component","SM_Chest","ChestMaterial_Alpha.mat",{-200,0,-100},{0,0,0},{1,1,1});
+    // A fresh instance prevents preparation/reload from changing old-scene material contents.
     auto alphaMaterial = MaterialInstance::Create("ChestMaterial_Alpha_Instance",GetMaterial(materialRoot/"ChestMaterial_Alpha.mat"));
     if (!alphaMaterial) throw std::runtime_error("Could not create alpha chest material");
     alphaMaterial->SetValue("MB_Tint",CommonUtilities::Vector4f(1,1,1,.35f));
-    auto alphaMesh = myMeshLibrary.GetMesh("SM_Chest");
-    alpha.Components[0].Configure = [alphaMesh,alphaMaterial](Component& c)
-    { auto& mesh = dynamic_cast<StaticMeshComponent&>(c); mesh.SetMesh(alphaMesh); AssignMaterialToAllSlots(mesh,alphaMaterial); };
+    alpha.Components[0].Properties = bindMesh("SM_Chest","AlphaInstance",alphaMaterial);
     scene.Actors.push_back(std::move(alpha));
     scene.Actors.push_back(meshActor("SM_Color_Checker Actor","SM_Color_Checker Mesh Component","SM_Color_Checker","ColorCheckerMaterial.mat",{-145,40,365},{0,-90,0},{1,1,1}));
 
-    ActorDescription character; character.Id = "TGA Bro Actor";
-    character.LocalTransform.SetPosition({0,0,250}); character.LocalTransform.SetRotation(180,0,0);
-    character.Components.push_back(Behavior("Animation Controls","AnimationControls"));
-    auto characterMesh = myMeshLibrary.GetMesh("SK_C_TGA_Bro"); auto characterMaterial = GetMaterial(materialRoot/"CharacterMaterial.mat");
-    character.Components.push_back(ComponentDescription::Make<SkeletalMeshComponent>("TGA Bro Mesh Component","agp.SkeletalMesh",[characterMesh,characterMaterial](auto& c)
-    {
-        c.SetMesh(characterMesh); AssignMaterialToAllSlots(c,characterMaterial);
-        c.ConfigurePartialLayerFromJointName("RightShoulder"); c.PlayAnimation("Breathing",true);
-    }));
+    auto character = ActorData("TGA Bro Actor",{0,0,250});
+    character.Pose.Rotation = CommonUtilities::Quaternion<float>::CreateFromYawPitchRoll(CommonUtilities::Maths::DegreesToRadians(180.f),0,0);
+    character.Components.push_back(ComponentData("Animation Controls","AnimationControls"));
+    auto characterFields = bindMesh("SK_C_TGA_Bro","CharacterMaterial.mat",GetMaterial(materialRoot/"CharacterMaterial.mat"));
+    characterFields.emplace("partialRoot",std::string("RightShoulder"));
+    characterFields.emplace("animation",std::string("Breathing"));
+    character.Components.push_back(ComponentData("TGA Bro Mesh Component","agp.SkeletalMesh",std::move(characterFields)));
     scene.Actors.push_back(std::move(character));
-    ActorDescription controls; controls.Id = "Scene Controls"; controls.Components.push_back(Behavior("Light Controls","LightControls"));
+    auto controls = ActorData("Scene Controls");
+    controls.Components.push_back(ComponentData("Light Controls","LightControls",{
+        {"camera",ObjectAddress{"Camera Actor",{}}},
+        {"directional",ObjectAddress{"Directional Light Actor","Directional Light"}},
+        {"point",ObjectAddress{"Warm Character Point Actor","Warm Character Point Light"}},
+        {"spot",ObjectAddress{"Spot Light Actor","Spot Light"}}
+    }));
     scene.Actors.push_back(std::move(controls));
-    return SceneBuilder::Build(scene,registry,input);
+    return {std::move(scene),{}};
 }
-
 std::shared_ptr<MaterialInterface> ModelViewerScene::GetMaterial(const std::filesystem::path& aMaterialFile)
 {
 	const std::string cacheKey = aMaterialFile.lexically_normal().string();

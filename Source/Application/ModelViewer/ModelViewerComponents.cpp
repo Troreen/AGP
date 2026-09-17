@@ -113,11 +113,8 @@ void SpinComponent::FixedUpdate(float deltaTime)
 
 void LightControlsComponent::ResolveReferences(References& context)
 {
-    auto camera = context.Require<CameraComponent>("Camera Actor", "Camera");
-    if (auto* c = camera.Get()) myCamera = c->GetOwner()->GetHandle();
-    myDirectional = context.Require<DirectionalLightComponent>("Directional Light Actor", "Directional Light");
-    myPoints = { context.Require<PointLightComponent>("Warm Character Point Actor", "Warm Character Point Light") };
-    mySpot = context.Require<SpotLightComponent>("Spot Light Actor", "Spot Light");
+    if (!Camera.Get() || !Directional.Get() || !Point.Get() || !Spot.Get())
+        context.Error("lights", "Scene controls require the authored camera and light references");
 }
 void AnimationControlsComponent::ResolveReferences(References& context)
 {
@@ -166,11 +163,11 @@ void AnimationControlsComponent::Update(float)
 // the host publishes those values after all late updates finish.
 void LightControlsComponent::LateUpdate(float)
 {
-    auto* myCameraActor = myCamera.Get();
-    auto* myDirectionalLightComponent = myDirectional.Get();
-    auto* mySpotLightComponent = mySpot.Get();
+    auto* myCameraActor = Camera.Get();
+    auto* myDirectionalLightComponent = Directional.Get();
+    auto* mySpotLightComponent = Spot.Get();
     std::vector<PointLightComponent*> myPointLightComponents;
-    for (const auto& point : myPoints) if (auto* live = point.Get()) myPointLightComponents.push_back(live);
+    if (auto* live = Point.Get()) myPointLightComponents.push_back(live);
 	const GameInput& anInputFrame = GetInput();
 	const bool shiftDown =
 	    anInputFrame.IsKeyDown(Keys::SHIFT) || anInputFrame.IsKeyDown(Keys::LSHIFT) || anInputFrame.IsKeyDown(Keys::RSHIFT);

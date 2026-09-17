@@ -7,9 +7,53 @@
 #include <stdexcept>
 #include <limits>
 #include "GameFramework/Runtime/Internal/ObjectSlots.h"
-namespace { thread_local bool resolvingReferences = false; thread_local uint64_t rejectedMutations = 0; }
+#include "GameFramework/Runtime/Internal/WorldAccess.h"
+#include "GameFramework/Assets/AssetRefs.h"
+#include "GameFramework/Runtime/GameTime.h"
+namespace
+{
+    thread_local bool resolvingReferences = false;
+    thread_local const Component* configuringComponent = nullptr;
+    thread_local uint64_t rejectedMutations = 0;
+}
 void World::EnsureMutationAllowed() const
-{ if (resolvingReferences) { ++rejectedMutations; throw std::logic_error("Mutation is forbidden during ResolveReferences"); } }
+{
+    if (resolvingReferences || configuringComponent)
+    { ++rejectedMutations; throw std::logic_error("Structural or session mutation is forbidden during scene configuration/resolution"); }
+}
+void World::EnsureComponentMutationAllowed(const Component* component) const
+{
+    if (resolvingReferences || (configuringComponent && configuringComponent != component))
+    { ++rejectedMutations; throw std::logic_error("Only the reader target can be configured; resolution is read-only"); }
+}
+void GameFrameworkInternal::WorldAccess::Configure(Component& component, const std::function<void()>& callback)
+{
+    struct Guard
+    {
+        const Component* Previous = configuringComponent;
+        explicit Guard(const Component& target) { configuringComponent = &target; }
+        ~Guard() { configuringComponent = Previous; }
+    } guard(component);
+    const auto before = rejectedMutations;
+    callback();
+    if (rejectedMutations != before) throw std::logic_error("Forbidden mutation attempted by scene reader");
+}
+void GameFrameworkInternal::WorldAccess::Construct(const std::function<void()>& callback)
+{
+    struct Guard
+    {
+        bool Previous = resolvingReferences;
+        Guard() { resolvingReferences = true; }
+        ~Guard() { resolvingReferences = Previous; }
+    } guard;
+    const auto before = rejectedMutations;
+    callback();
+    if (rejectedMutations != before) throw std::logic_error("Forbidden mutation attempted by component factory");
+}
+SceneService& World::GetScenes() const
+{ if (!myScenes) throw std::logic_error("World has no scene service"); return *myScenes; }
+const AssetLookup& World::GetAssets() const { static const AssetLookup empty; return myAssets ? *myAssets : empty; }
+const GameTime& World::GetTime() const { static const GameTime empty; return myTime ? *myTime : empty; }
 
 Actor* ObjectHandle::ResolveActor() const
 {
@@ -65,7 +109,7 @@ Actor* World::FindActor(const std::string& name) const
 }
 void World::Attach(Actor& actor, std::unique_ptr<Component> component)
 {
-    if (auto* spatial = dynamic_cast<SceneComponent*>(component.get())) { spatial->myTransform.myWorld = this; spatial->myTransform.myValue.SetParent(&actor.myTransform.myValue); }
+    if (auto* spatial = dynamic_cast<SceneComponent*>(component.get())) { spatial->myTransform.myWorld = this; spatial->myTransform.myComponent = component.get(); spatial->myTransform.myValue.SetParent(&actor.myTransform.myValue); }
     component->myHandle = Allocate(nullptr, component.get());
     (myState == State::Constructing && !myInBoundary ? actor.myComponents : actor.myPendingComponents).push_back(std::move(component));
 }
@@ -100,6 +144,7 @@ bool World::ConnectBatch(const std::vector<Component*>& batch, SceneDiagnostics&
         const auto rejectedBefore = rejectedMutations;
         const auto errorsBefore = diagnostics.size();
         try { c->ResolveReferences(context); c->myConnected = true; }
+        catch (const std::bad_alloc&) { throw; }
         catch (const std::exception& e) { context.Error({}, e.what()); }
         catch (...) { context.Error({}, "Unknown exception in ResolveReferences"); }
         if (rejectedMutations != rejectedBefore && diagnostics.size() == errorsBefore)

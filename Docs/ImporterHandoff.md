@@ -1,5 +1,9 @@
 # Scene importer integration concerns
 
+This document preserves historical handoff assumptions, not a verified current Perforce contract. The actual scene importer, exporter guide and representative exports were unavailable in this checkout. M5 is blocked on the precise inputs recorded in [implementation evidence](SimplifiedGameFrameworkImplementation.md).
+
+The implemented AGP boundary is Integration/GameFramework/Integration/ISceneSource.h: a source returns owned SceneData or source-addressed errors and supplies ready resource bindings at the synchronous host loading point. ModelViewer and regression fixtures use this same path. No importer schema or coordinate conversion is inferred from these tests.
+
 ## Responsibility boundary
 
 The importer parses JSON into descriptions. The engine-side builder handles runtime
@@ -77,8 +81,8 @@ Asset resolution is TBD with the team responsible for asset management.
 - Parsing errors belong to the importer; registry/dependency/hierarchy validation
   belongs to the builder. Share checks where useful, but define who owns each one.
 - The engine rejects invalid scenes before activation. Its load orchestration
-  reports diagnostics, cleans up and asserts in development builds; assertions do
-  not replace returned errors or cleanup when disabled.
+  reports structured errors and preserves the old scene in Debug and Release.
+  An initial requested load failure returns nonzero after partial cleanup.
 - Request a fixture with a translated/rotated/scaled actor and at least three nested
   spatial components with non-identity offsets, plus expected world matrices.
 - Also test two same-type components with different names, multiple material slots,

@@ -1,6 +1,8 @@
 #pragma once
 class GameContext;
 class ComponentRegistry;
+struct SceneId;
+struct SceneLoadError;
 
 // All callbacks are serialized. Mutate gameplay state only inside these callbacks.
 // Start here when creating a game. Implement one IGame in the application project;
@@ -29,6 +31,10 @@ public:
 	// Runs after every component has completed Update and LateUpdate, before snapshot
 	// creation. Use for final session-wide adjustments that need the completed world.
 	virtual void LateUpdate(GameContext&, float) {}
+    // Called after the new world begins, before its first presentation.
+    virtual void OnSceneLoaded(GameContext&, const SceneId&) {}
+    // Data failures are nonfatal for replacement; initial failures return nonzero.
+    virtual void OnSceneLoadFailed(GameContext&, const SceneLoadError&) {}
 	// Runs after gameplay work is joined, including when Initialize partially fails.
 	// World remains borrowable, but additions and scene requests are closed. Keep
 	// state needed by component EndPlay alive until Run returns. Tolerate partial init.

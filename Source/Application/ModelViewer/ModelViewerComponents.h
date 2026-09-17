@@ -52,9 +52,8 @@ class LightControlsComponent final : public Component
 public:
 	void ResolveReferences(References& context) override;
 	void LateUpdate(float deltaTime) override;
-private:
-	ActorHandle myCamera;
-	ComponentHandle<DirectionalLightComponent> myDirectional;
-	std::vector<ComponentHandle<PointLightComponent>> myPoints;
-	ComponentHandle<SpotLightComponent> mySpot;
+    ActorRef Camera;
+    ComponentRef<DirectionalLightComponent> Directional;
+    ComponentRef<PointLightComponent> Point;
+    ComponentRef<SpotLightComponent> Spot;
 };

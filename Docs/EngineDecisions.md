@@ -127,7 +127,7 @@ JSON -> SceneImporter::ImportScene() -> ImportedSceneData
 - Collect as many useful errors as practical, identifying the actor, component and property involved.
 - Optional properties may use explicitly defined defaults. Unknown property names should be rejected to expose authoring mistakes.
 - Failed builds clean up temporary objects without invoking `BeginPlay`.
-- Replacement-load failure preserves the current scene and asserts in development builds; see E15.
+- Replacement-load failure preserves the current scene and reports structured errors in Debug and Release; see E15.
 
 ### E09 - Extensible component registration
 
@@ -196,18 +196,18 @@ JSON -> SceneImporter::ImportScene() -> ImportedSceneData
 - Resolve ambiguity by specifying the intended component name in code or scene configuration, and validate that the selected component matches the required type.
 - GetComponent<T> returns the first live match in attachment order, including pending additions; GetComponents<T> returns all. Required type-only resolution rejects ambiguity. Display names may repeat; FindActor returns null with a diagnostic on ambiguity and FindActors returns all. Authored IDs are distinct from display names.
 
-### E15 - Scene replacement failure and assertions
+### E15 - Scene replacement failure
 
 **Status: Agreed**
 
 - Prepare and validate a replacement scene before tearing down the current scene. The candidate is not yet active and does not receive gameplay ticks or `BeginPlay`.
 - On successful preparation, end the old scene, activate the new scene and release the old scene's resources. Temporary overlap in scene memory is accepted initially.
 - On import/build/validation failure, report detailed diagnostics, discard temporary candidate objects and retain the current scene. Do not activate a partial scene.
-- Treat a failed scene load as a development error: assert after diagnostics and cleanup. This is not merely a warning with silent fallback.
-- Validation and cleanup must execute independently of assertions. With assertions disabled, return/report the failure and keep the previous scene available.
-- An initial scene-load failure also asserts in development builds. With assertions disabled, report the startup failure without entering gameplay; there is no previous scene to restore.
+- Recoverable content/source/validation failures report SceneLoadError and OnSceneLoadFailed in Debug and Release; no unconditional assertion. This supersedes the earlier development-assert policy.
+- Keep the old world, selected camera, scene ID and checked references after rejected preparation. Reset input/time transients before callbacks resume.
+- An initial requested scene-load failure reports details, invokes partial session cleanup and returns a nonzero startup result; it does not run an empty bootstrap world.
 - This preservation guarantee covers preparation failures before committing the transition, not arbitrary failures inside lifecycle callbacks after the old scene has ended.
-- Exact error presentation and handling of lifecycle callback failures remain TBD.
+- BeginPlay/completion-hook exceptions after commit are fatal and clean up the session. Allocation failures are fatal. No ended world is revived.
 
 ### E16 - Inherited actor activation
 
@@ -281,7 +281,7 @@ JSON -> SceneImporter::ImportScene() -> ImportedSceneData
 | Frame order | Exact lifecycle/event flush points, tick dependencies, physics placement and overload policy. |
 | Hierarchy | Spatial attachment/root APIs, import conversion, reparenting, cycle validation and component attachment lifecycle; see E16-E18 and T02. |
 | Scene contract | Property value types, references, schema versioning, archetypes and schema-change ownership. |
-| Scene failure | Error presentation and lifecycle callback failures; preparation failure handling and development assertions are agreed in E15. |
+| Scene failure | Error presentation and lifecycle callback failures; preparation failure handling is implemented as structured errors in E15. |
 | Audio | Service integration, ownership of playing sounds and pause behavior. |
 | UI | Integration, focus/cursor ownership and its relationship to gameplay input. |
 | Save/load | Persistence boundaries, serialization/versioning and restoration of references. |

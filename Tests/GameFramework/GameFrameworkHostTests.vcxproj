@@ -22,14 +22,14 @@
     <ClCompile>
       <LanguageStandard>stdcpp20</LanguageStandard><ExceptionHandling>Sync</ExceptionHandling>
       <WarningLevel>Level4</WarningLevel>
-      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\..\CommonUtilities\include;$(MSBuildThisFileDirectory)..\..\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\..\CommonUtilities\include;$(MSBuildThisFileDirectory)..\..\Source;$(MSBuildThisFileDirectory)..\..\Source\Graphics;$(MSBuildThisFileDirectory)..\..\Source\Utilities;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link><SubSystem>Console</SubSystem>
       <AdditionalLibraryDirectories>$(SolutionDir)Lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>GraphicsEngine.lib;d3d11.lib;dxguid.lib;dxgi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup><ClCompile Include="GameFrameworkHostTests.cpp" /></ItemGroup>
+  <ItemGroup><ClCompile Include="GameFrameworkHostTests.cpp" /><ClCompile Include="RenderExtractionTests.cpp" /></ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Source\GameFramework\GameFramework.vcxproj">
       <Project>{d6f43e75-5c34-4dc2-98de-34c68f82833d}</Project>

@@ -8,7 +8,16 @@ class References
 public:
     References(Component& source, SceneDiagnostics& diagnostics) : mySource(source), myDiagnostics(diagnostics) {}
     void Error(std::string property, std::string message)
-    { myDiagnostics.push_back({mySource.GetOwner()->GetName(), mySource.GetName(), std::move(property), std::move(message)}); }
+    {
+        auto diagnostic = mySource.mySourceDiagnostic;
+        if (diagnostic.Actor.empty()) diagnostic.Actor = mySource.GetOwner()->GetName();
+        if (diagnostic.Component.empty()) diagnostic.Component = mySource.GetName();
+        if (!property.empty()) diagnostic.Property = diagnostic.Property.empty() ? std::move(property) : diagnostic.Property + "." + property;
+        diagnostic.Message = std::move(message);
+        diagnostic.Code = "dependency";
+        diagnostic.Phase = "resolve";
+        myDiagnostics.push_back(std::move(diagnostic));
+    }
     template<class T> ComponentHandle<T> Require(std::string name = {})
     { return Resolve<T>(*mySource.GetOwner(), name, false); }
     template<class T> ComponentHandle<T> Require(const std::string& actor, const std::string& component)
@@ -42,4 +51,3 @@ private:
     Component& mySource;
     SceneDiagnostics& myDiagnostics;
 };
-

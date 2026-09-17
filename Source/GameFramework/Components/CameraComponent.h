@@ -11,13 +11,17 @@
 class CameraComponent final : public SceneComponent
 {
 public:
-	CameraComponent() = default;
+    static constexpr float DefaultFieldOfView = 90.0f;
+    static constexpr float DefaultNearPlane = 1.0f;
+    static constexpr float DefaultFarPlane = 50000.0f;
+    CameraComponent();
 	CameraComponent(float aHorizontalFieldOfViewDegrees, float aNearPlane, float aFarPlane, const CommonUtilities::Vector2u& aResolution);
 
 	void Update(float aDeltaTime) override;
 	void LateUpdate(float aDeltaTime) override;
 
-	void SetPerspective(float aHorizontalFieldOfViewDegrees, float aNearPlane, float aFarPlane, const CommonUtilities::Vector2u& aResolution);
+    // Invalid projection values are rejected without changing the camera.
+	bool SetPerspective(float aHorizontalFieldOfViewDegrees, float aNearPlane, float aFarPlane, const CommonUtilities::Vector2u& aResolution);
 	void SyncCameraToOwner();
 
 	CommonUtilities::Camera3D& GetCamera();

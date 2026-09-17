@@ -2,22 +2,20 @@
 #include <filesystem>
 #include <unordered_map>
 #include "MeshLibrary.h"
-#include "GameFramework/Scenes/SceneBuilder.h"
-class GameContext;
+#include "GameFramework/Integration/GameFramework/Integration/ISceneSource.h"
 class MaterialInterface;
 
 // Game-owned scene authoring and the temporary synchronous asset adapter. Worlds
 // are owned by the host; this helper can safely survive any number of scene reloads.
-class ModelViewerScene final
+class ModelViewerScene final : public GameFrameworkIntegration::ISceneSource
 {
 public:
-    void Initialize(GameContext& context);
-    void Reload(GameContext& context);
+    GameFrameworkIntegration::SceneSourceResult Load(const SceneId&, GameFrameworkIntegration::SceneLoadContext&) override;
 private:
-    SceneBuildResult Build(const ComponentRegistry& registry, const GameInput* input, CommonUtilities::Vector2u resolution);
     std::shared_ptr<MaterialInterface> GetMaterial(const std::filesystem::path& file);
     MeshLibrary myMeshLibrary;
 
     std::filesystem::path myContentRoot;
+    bool myInitialized = false;
     std::unordered_map<std::string,std::shared_ptr<MaterialInterface>> myMaterialCache;
 };

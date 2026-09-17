@@ -108,7 +108,6 @@
 <ItemGroup><ClInclude Include="Scenes\ComponentRegistry.h"><Filter>Scenes</Filter></ClInclude></ItemGroup>
 <ItemGroup><ClCompile Include="Scenes\SceneBuilder.cpp"><Filter>Scenes</Filter></ClCompile></ItemGroup>
 <ItemGroup><ClInclude Include="Scenes\SceneBuilder.h"><Filter>Scenes</Filter></ClInclude></ItemGroup>
-<ItemGroup><ClInclude Include="Scenes\SceneDescription.h"><Filter>Scenes</Filter></ClInclude></ItemGroup>
 <ItemGroup><ClInclude Include="World\TransformOperations.h"><Filter>World</Filter></ClInclude></ItemGroup>
 <ItemGroup>
     <ClCompile Include="Runtime\GameContext.cpp" />
@@ -119,7 +118,6 @@
     <ClInclude Include="Runtime\Internal\WorldAccess.h" />
     <ClInclude Include="Runtime\Internal\InputAccess.h" />
     <ClInclude Include="World\ReparentMode.h" />
-    <ClInclude Include="Integration\GameFramework\Integration\LegacySceneBridge.h" />
     <ClInclude Include="Public\GameFramework\Actor.h" />
     <ClInclude Include="Public\GameFramework\Component.h" />
     <ClInclude Include="Public\GameFramework\GameApplication.h" />
@@ -138,5 +136,25 @@
     <ClInclude Include="Public\GameFramework\Registration\References.h" />
     <ClInclude Include="Scenes\References.h" />
     <ClInclude Include="Runtime\Internal\ObjectSlots.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Assets\AssetRefs.h" />
+    <ClInclude Include="Integration\GameFramework\Integration\AssetBindings.h" />
+    <ClInclude Include="Integration\GameFramework\Integration\ISceneSource.h" />
+    <ClInclude Include="Integration\GameFramework\Integration\SceneData.h" />
+    <ClInclude Include="Public\GameFramework\AssetRefs.h" />
+    <ClInclude Include="Public\GameFramework\GameTime.h" />
+    <ClInclude Include="Public\GameFramework\SceneLoadError.h" />
+    <ClInclude Include="Public\GameFramework\SceneService.h" />
+    <ClInclude Include="Public\GameFramework\Registration\SceneReader.h" />
+    <ClInclude Include="Runtime\GameTime.h" />
+    <ClInclude Include="Runtime\Internal\AssetAccess.h" />
+    <ClInclude Include="Runtime\Internal\SceneServiceAccess.h" />
+    <ClInclude Include="Runtime\Internal\TimeAccess.h" />
+    <ClCompile Include="Scenes\ComponentRegistry.cpp" />
+    <ClCompile Include="Scenes\SceneReader.cpp" />
+    <ClInclude Include="Scenes\SceneReader.h" />
+    <ClCompile Include="Scenes\SceneService.cpp" />
+    <ClInclude Include="Scenes\SceneService.h" />
   </ItemGroup>
 </Project>

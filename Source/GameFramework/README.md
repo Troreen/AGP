@@ -22,10 +22,12 @@ Engine implementation currently lives in Runtime, World, Components and Scenes.
 Lifecycle, ownership collections and input bookkeeping are private, independently
 of folder placement. `Scenes` is implemented; it is not a future directory.
 
-During M1/M2 only, ModelViewer and host regression fixtures use the explicit
-Integration `LegacySceneBridge` to submit old scene recipes. This bridge and the
-recipe protocol are removed by M3 in favor of owned data and scene-ID requests.
-They are not part of the ordinary gameplay API.
+SceneService accepts Load/Reload by SceneId. Integration/ISceneSource supplies owned
+SceneData and ready assets; the engine allocates registered types, reads checked
+properties, resolves IDs and validates before beginning. Rejected replacements
+preserve the current world in Debug and Release. LegacySceneBridge and executable
+scene recipes have been removed. ModelViewerScene is the temporary C++ source;
+real Perforce integration waits for verified importer contracts and fixtures.
 
 See [the game guide](../../Docs/GameFramework.md) and
 [implementation evidence](../../Docs/SimplifiedGameFrameworkImplementation.md).

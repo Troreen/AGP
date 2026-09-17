@@ -9,6 +9,9 @@
 #include <GameFramework/ObjectRef.h>
 #include <GameFramework/Registration/ComponentRegistry.h>
 #include <GameFramework/Registration/References.h>
+#include <GameFramework/Registration/SceneReader.h>
+#include <GameFramework/SceneService.h>
+#include <GameFramework/GameTime.h>
 #include <GameFramework/Transform.h>
 #include <type_traits>
 
@@ -68,9 +71,24 @@ class NeedsOffset final : public Component
     ComponentRef<SceneComponent> myOffset;
 };
 
+class AuthoredFollow final : public Component
+{
+public:
+    ActorRef Target;
+    float Speed=25;
+};
+
 class MinimalGame final : public IGame
 {
 public:
+    void RegisterComponents(ComponentRegistry& types) override
+    {
+        types.Register<AuthoredFollow>("sample.Follow",[](AuthoredFollow& component,SceneReader& data)
+        {
+            component.Speed=data.OptionalFloat("speed",25);
+            data.BindActor("target",component.Target,ReferenceRequirement::Required);
+        });
+    }
     void Initialize(GameContext& game) override
     {
         auto* actor=game.GetWorld().SpawnActor("Example");
@@ -96,4 +114,10 @@ int CompileGameplayExample()
     MinimalGame game;
     GameApplication::Config config;
     return GameApplication{}.Run(game,config);
+}
+
+void CompileSceneRequests(GameContext& game)
+{
+    game.GetScenes().Load(SceneId{"Levels/Town"});
+    game.GetScenes().Reload();
 }

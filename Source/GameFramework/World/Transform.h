@@ -4,6 +4,7 @@
 class World;
 class Actor;
 class SceneComponent;
+class Component;
 
 // Parentless local TRS data. Copy this value to copy a pose, never an attachment.
 struct LocalPose
@@ -58,6 +59,7 @@ private:
     void EnsureMutationAllowed() const;
     CommonUtilities::Transform myValue;
     World* myWorld = nullptr;
+    const Component* myComponent = nullptr;
     friend class World;
     friend class Actor;
     friend class SceneComponent;

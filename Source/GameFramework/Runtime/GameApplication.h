@@ -2,6 +2,7 @@
 #include <filesystem>
 #include <string>
 class IGame;
+namespace GameFrameworkIntegration { struct ApplicationSetup; }
 
 // Engine-owned host. Each game supplies configuration and an IGame instance.
 // Reusable runtime boundary: keep window handling, scheduling and rendering here,
@@ -36,6 +37,7 @@ public:
 	// return to the caller after worker cleanup. This is a single-session host; live
 	// scene replacement is supported; repeated renderer initialization is not promised.
 	int Run(IGame& game, const Config& config);
+    int Run(IGame& game, const Config& config, GameFrameworkIntegration::ApplicationSetup setup);
 private:
 	struct Impl;
 };

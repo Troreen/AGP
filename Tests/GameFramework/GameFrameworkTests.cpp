@@ -371,50 +371,21 @@ void TransformValidationAndAdmission()
     Check(!actor->GetTransform().SetWorldPosition({1,2,3}),"World editing accepted singular parent");
     MatrixNear(singularPose,actor->GetWorldMatrix());
 }
-ComponentRegistry Registry()
-{
-    ComponentRegistry registry; registry.Register<CameraComponent>("Camera"); registry.Register<Probe>("Probe"); registry.Register<Consumer>("Consumer"); registry.Register<SceneComponent>("Scene");
-    bool duplicate=false; try { registry.Register<Probe>("Probe"); } catch (const std::invalid_argument&) { duplicate=true; }
-    Check(duplicate,"Duplicate registration accepted"); RegistryAccess::Freeze(registry);
-    bool frozen=false; try { registry.Register<Probe>("Another"); } catch (const std::logic_error&) { frozen=true; }
-    Check(frozen,"Frozen registry changed"); return registry;
-}
-SceneDescription Description()
-{
-    SceneDescription scene; ActorDescription actor; actor.Id="Camera actor";
-    ComponentDescription camera; camera.Name="Camera"; camera.Type="Camera"; actor.Components.push_back(camera);
-    scene.Actors.push_back(actor); scene.CameraActor=actor.Id; scene.CameraComponent=camera.Name; return scene;
-}
 void BuilderAndDependencies()
 {
-    auto registry=Registry(); auto scene=Description();
-    auto consumer=ComponentDescription::Make<Consumer>("Consumer","Consumer",[](auto& c){c.ActorName="Later actor";c.ComponentName="Target";});
-    scene.Actors[0].Components.push_back(consumer);
-    ActorDescription later; later.Id="Later actor";
-    ComponentDescription target; target.Name="Target";target.Type="Probe";later.Components.push_back(target); scene.Actors.push_back(later);
-    auto result=SceneBuilder::Build(scene,registry); Check(bool(result),"Forward-reference candidate rejected");
-    Check(WorldAccess::GetState(*result.Candidate)==WorldAccess::State::Prepared && !result.Camera.Get()->HasBegunPlay(),"Builder activated candidate");
-    auto old=std::move(result.Candidate); WorldAccess::Activate(*old); auto oldHandle=old->FindActor("Later actor")->GetHandle();
-    auto invalid=scene; invalid.Actors[1].Components[0].Type="Unknown"; invalid.Actors.push_back(invalid.Actors[1]);
-    auto failed=SceneBuilder::Build(invalid,registry); Check(!failed && failed.Diagnostics.size()>=2 && oldHandle.Get(),"Invalid candidate corrupted active scene or lost diagnostics");
-    auto replacement=SceneBuilder::Build(scene,registry); Check(bool(replacement),"Replacement preparation failed");
-    WorldAccess::Shutdown(*old); old=std::move(replacement.Candidate); WorldAccess::Activate(*old); Check(!oldHandle.Get(),"Old handle resolved after replacement");
     for (int mode=0;mode<5;++mode)
     {
-        World world; auto* a=world.CreateActor("A"); auto* c=a->AddComponent<Consumer>("Consumer");
-        c->IsOptional=(mode==0 || mode==1);
-        if (mode==1) c->ComponentName="Provided missing target";
-        if (mode>=2) { a->AddComponent<Probe>("One"); a->AddComponent<Probe>("Two"); }
-        if (mode==3) c->ComponentName="Two";
-        if (mode==4) c->ComponentName="Consumer";
-        SceneDiagnostics diagnostics; const bool valid=WorldAccess::Prepare(world,diagnostics);
+        World world;auto* actor=world.SpawnActor("A");auto* consumer=actor->AddComponent<Consumer>("Consumer");
+        consumer->IsOptional=(mode==0 || mode==1);
+        if(mode==1) consumer->ComponentName="Provided missing target";
+        if(mode>=2) {actor->AddComponent<Probe>("One");actor->AddComponent<Probe>("Two");}
+        if(mode==3) consumer->ComponentName="Two";
+        if(mode==4) consumer->ComponentName="Consumer";
+        SceneDiagnostics diagnostics;const bool valid=WorldAccess::Prepare(world,diagnostics);
         Check(valid==(mode==0 || mode==3),"Optional, ambiguous or named type validation incorrect");
     }
-    std::string trace;
-    auto cleanup=Description(); cleanup.Actors[0].Components.push_back(ComponentDescription::Make<Probe>("Probe","Probe",[&](auto& p){p.Trace=&trace;}));
-    cleanup.CameraComponent="Missing"; auto failure=SceneBuilder::Build(cleanup,registry);
-    Check(!failure && trace=="ProbeD ","Candidate failure began gameplay or missed attachment cleanup");
 }
+void SceneConstructionTests();
 int main(int argc,char** argv)
 {
     if (argc>1 && std::string(argv[1])=="--logger-exit")
@@ -427,7 +398,7 @@ int main(int argc,char** argv)
     try
     {
         Lifecycle(); ClosingWorld(); PendingQueriesAndNames(); ResolveIsReadOnly(); LifecycleFailures(); CpuSessionHappyPath();
-        MutationsAndHandles(); FrozenBoundaries(); FrozenActorAdditions(); Hierarchy(); TransformValidationAndAdmission(); BuilderAndDependencies();
+        MutationsAndHandles(); FrozenBoundaries(); FrozenActorAdditions(); Hierarchy(); TransformValidationAndAdmission(); BuilderAndDependencies(); SceneConstructionTests();
         std::cout << "PASS: lifecycle, frozen mutations, stale handles, hierarchy, transforms, registry, dependencies and candidate scenes" << std::endl;
     }
     catch (const std::exception& error) { std::cerr<<error.what()<<'\n'; return 1; }

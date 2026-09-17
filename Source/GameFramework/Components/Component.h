@@ -2,11 +2,16 @@
 
 #include <string>
 #include "../World/ObjectHandle.h"
+#include "../Scenes/SceneDiagnostic.h"
 
 class Actor;
 class World;
 class References;
 struct GameInput;
+class SceneService;
+class AssetLookup;
+class GameTime;
+namespace GameFrameworkInternal { class WorldAccess; }
 
 // Base for engine features and game-authored behavior. Override only the phases
 // you need; the defaults do nothing. World/Actor call these hooks automatically
@@ -27,6 +32,9 @@ public:
     virtual void EndPlay() {}
     World& GetWorld() const;
     const GameInput& GetInput() const;
+    SceneService& GetScenes() const;
+    const AssetLookup& GetAssets() const;
+    const GameTime& GetTime() const;
     void Destroy();
     bool HasBegunPlay() const { return myBegun; }
     bool IsPendingDestroy() const { return myPendingDestroy; }
@@ -60,6 +68,9 @@ private:
     bool myAdmitted = false;
     bool myBegun = false;
     ObjectHandle myHandle;
+    SceneDiagnostic mySourceDiagnostic;
+    friend class References;
+    friend class GameFrameworkInternal::WorldAccess;
     friend class World;
     friend class SceneComponent;
 

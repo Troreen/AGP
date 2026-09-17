@@ -4,6 +4,7 @@
 
 #include "Application.h"
 #include "ModelViewer.h"
+#include "ModelViewerScene.h"
 #include "GameFramework/Runtime/GameApplication.h"
 #include "Windows.h"
 
@@ -90,7 +91,9 @@ int GuardedMain()
     // content; window creation, ticking and shutdown stay inside GameApplication.
     ModelViewer game;
     GameApplication application;
-    return application.Run(game, config);
+    GameFrameworkIntegration::ApplicationSetup setup;
+    setup.SceneSource = std::make_unique<ModelViewerScene>();
+    return application.Run(game, config, std::move(setup));
 }
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,

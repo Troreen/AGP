@@ -9,8 +9,13 @@
 #include "Internal/WorldAccess.h"
 #include "Internal/InputAccess.h"
 #include "Internal/RegistryAccess.h"
+#include "Internal/SceneServiceAccess.h"
+#include "Internal/TimeAccess.h"
+#include "GameFramework/Scenes/SceneBuilder.h"
 using GameFrameworkInternal::WorldAccess;
 using GameFrameworkInternal::InputAccess;
+using GameFrameworkInternal::SceneServiceAccess;
+using GameFrameworkInternal::TimeAccess;
 #include "GameFramework/Runtime/Internal/GameLoop.h"
 #include "IGame.h"
 #include "GameFramework/Diagnostics/GameFrameworkLog.h"
@@ -31,6 +36,8 @@ DEFINE_LOG_CATEGORY(LogRenderStats);
 
 namespace
 {
+    class InitialSceneLoadFailure final : public std::runtime_error
+    { public: InitialSceneLoadFailure() : std::runtime_error("Initial scene preparation failed") {} };
 	constexpr int KeyCount = 256;
 	bool IsVirtualKeyDown(int key) { return (GetAsyncKeyState(key) & 0x8000) != 0; }
 	LRESULT CALLBACK GameWindowProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
@@ -46,7 +53,12 @@ namespace
 // that concurrent period so game objects never need their own locks for normal ticks.
 struct GameApplication::Impl
 {
-	Impl(IGame& game, const Config& config) : myGame(game), myConfig(config), myLoop(config.FixedDeltaTime) {}
+	Impl(IGame& game, const Config& config, GameFrameworkIntegration::ApplicationSetup setup)
+        : myGame(game), myConfig(config), myLoop(config.FixedDeltaTime)
+    {
+        myContext.myState->mySource = std::move(setup.SceneSource);
+        TimeAccess::Initialize(myContext.myState->myTime, config.FixedDeltaTime);
+    }
 	~Impl()
 	{
 		Stop();
@@ -60,8 +72,11 @@ struct GameApplication::Impl
     void CloseSession()
     {
         myContext.myState->myClosing = true;
-        myContext.myState->mySceneFactory = {};
-        myContext.myState->mySceneRequested = false;
+        auto& scenes = SceneServiceAccess::Get(myContext.myState->myScenes);
+        std::scoped_lock lock(scenes.Mutex);
+        scenes.Accepting = false;
+        scenes.Pending.reset();
+        scenes.Requested = false;
         WorldAccess::Close(*myContext.myState->myWorld);
     }
 	// Wake before joining: the worker may be asleep waiting for input. Joining must
@@ -121,6 +136,7 @@ void GameApplication::Impl::Advance(float delta, const GameInput& input)
 		[this](float dt, const GameInput& sample)
 		{
 			myContext.myState->myInput = sample;
+			TimeAccess::Fixed(myContext.myState->myTime, dt);
 			myGame.FixedUpdate(myContext, dt);
 			WorldAccess::FixedUpdate(*myContext.myState->myWorld, dt);
 			++myTickCount;
@@ -128,6 +144,7 @@ void GameApplication::Impl::Advance(float delta, const GameInput& input)
 		[this](float dt, const GameInput& sample)
 		{
 			myContext.myState->myInput = sample;
+			TimeAccess::Frame(myContext.myState->myTime, dt);
 			myGame.Update(myContext, dt);
 			WorldAccess::Update(*myContext.myState->myWorld, dt);
 		},
@@ -171,7 +188,7 @@ int GameApplication::Impl::Run()
 	try
 	{
 		myGame.Initialize(myContext);
-        if (myContext.myState->mySceneRequested) ReplaceScene();
+        if (SceneServiceAccess::Get(myContext.myState->myScenes).Requested) ReplaceScene();
         SceneDiagnostics diagnostics;
         if (WorldAccess::GetState(*myContext.myState->myWorld) == WorldAccess::State::Constructing && !WorldAccess::Prepare(*myContext.myState->myWorld, diagnostics))
         {
@@ -208,13 +225,11 @@ int GameApplication::Impl::Run()
 				DispatchMessageW(&message);
 			}
 			if (quit) break;
-            if (myContext.myState->mySceneRequested)
+            if (SceneServiceAccess::Get(myContext.myState->myScenes).Requested)
             {
                 Stop();
                 if (myFailure) std::rethrow_exception(myFailure);
                 ReplaceScene();
-                myPendingInput = {}; myPendingDelta = 0; myHasPendingInput = false;
-                myContext.myState->myInput = {}; myLoop.Reset(); myHasMainThreadMouseLookAnchor = false;
                 myInputHandler.UpdateInput();
                 timer.Update();
                 if (threaded) Start();
@@ -281,8 +296,13 @@ int GameApplication::Impl::Run()
 
 int GameApplication::Run(IGame& game, const Config& config)
 {
-	Impl host(game, config);
-	return host.Run();
+    return Run(game, config, {});
+}
+int GameApplication::Run(IGame& game, const Config& config, GameFrameworkIntegration::ApplicationSetup setup)
+{
+    Impl host(game, config, std::move(setup));
+    try { return host.Run(); }
+    catch (const InitialSceneLoadFailure&) { return 1; }
 }
 
 // Platform input and cursor APIs stay here. Components receive copied values and
@@ -431,31 +451,71 @@ void GameApplication::Impl::Start()
 // BeginPlay failures after that point terminate the session, never revive ended objects.
 bool GameApplication::Impl::ReplaceScene()
 {
-    GameFrameworkIntegration::LegacySceneBridge::Factory factory;
+    auto& session = *myContext.myState;
+    auto& scenes = SceneServiceAccess::Get(session.myScenes);
+    SceneId requested;
     {
-        std::scoped_lock lock(myContext.myState->mySceneMutex);
-        factory = std::move(myContext.myState->mySceneFactory); myContext.myState->mySceneRequested = false;
+        std::scoped_lock lock(scenes.Mutex);
+        if (!scenes.Pending) return false;
+        requested = std::move(*scenes.Pending);
+        scenes.Pending.reset(); scenes.Requested = false;
+        scenes.Status = SceneLoadStatus::Loading;
     }
+    // Clear transients before candidate callbacks, including BeginPlay/result hooks.
+    // Elapsed gameplay time is session-wide; loading itself contributes no time.
+    myPendingInput = {}; myPendingDelta = 0; myHasPendingInput = false;
+    session.myInput = {}; myLoop.Reset(); myHasMainThreadMouseLookAnchor = false;
+    TimeAccess::ResetTransient(session.myTime);
+    // Candidate lookups stay alive until after its objects are destroyed on failure.
+    auto assets = std::make_unique<GameFrameworkIntegration::AssetBindings>();
     SceneBuildResult result;
-    try { if (factory) result = factory(myContext.myState->myRegistry, &myContext.myState->myInput); }
-    catch (const std::exception& e) { result.Diagnostics.push_back({{},{},{},e.what()}); }
-    catch (...) { result.Diagnostics.push_back({{},{},{},"Unknown scene factory exception"}); }
-    if (!result || WorldAccess::GetState(*result.Candidate) != WorldAccess::State::Prepared || !result.Camera.Get() || &result.Camera.Get()->GetWorld() != result.Candidate.get())
+    try
     {
-        for (const auto& d : result.Diagnostics) GFLOG(Error, "{} / {} / {}: {}", d.Actor,d.Component,d.Property,d.Message);
+        if (!session.mySource) throw std::runtime_error("No scene source installed in ApplicationSetup");
+        GameFrameworkIntegration::SceneLoadContext context{session.myContentRoot, session.myClientSize, *assets};
+        auto source = session.mySource->Load(requested, context);
+        result.Diagnostics = std::move(source.Diagnostics);
+        if (source.Data && result.Diagnostics.empty())
+        {
+            SceneBuildServices services{&session.myInput, assets.get(), &session.myScenes, &session.myTime, session.myClientSize};
+            result = SceneBuilder::Build(*source.Data, session.myRegistry, services);
+        }
+        else if (result.Diagnostics.empty()) throw std::runtime_error("Scene source returned no data or error details");
+    }
+    catch (const std::bad_alloc&) { throw; }
+    catch (const std::exception& e) { result.Diagnostics.push_back({{},{},{},e.what(),requested.Value,"source-failure","source",{}}); }
+    catch (...) { result.Diagnostics.push_back({{},{},{},"Unknown scene source exception",requested.Value,"source-failure","source",{}}); }
+    if (!result || WorldAccess::GetState(*result.Candidate) != WorldAccess::State::Prepared)
+    {
+        if (result.Diagnostics.empty()) result.Diagnostics.push_back({{},{},{},"Scene did not prepare",requested.Value,"preparation-failure","prepare",{}});
         result.Candidate.reset();
-        GFLOG(Error, "Scene preparation failed; previous scene retained");
-        assert(false && "Scene preparation failed");
-        if (WorldAccess::GetState(*myContext.myState->myWorld) != WorldAccess::State::Active) throw std::runtime_error("Initial scene preparation failed");
+        SceneLoadError error{requested, std::move(result.Diagnostics)};
+        {
+            std::scoped_lock lock(scenes.Mutex);
+            scenes.Error = error; scenes.Status = SceneLoadStatus::Failed;
+        }
+        for (const auto& d : error.Diagnostics) GFLOG(Error, "{} / {} / {} / {} [{}]: {}", d.File,d.Actor,d.Component,d.Property,d.Phase,d.Message);
+        myGame.OnSceneLoadFailed(myContext, error);
+        if (WorldAccess::GetState(*session.myWorld) != WorldAccess::State::Active) throw InitialSceneLoadFailure();
         return false;
     }
-    myContext.myState->myClosing = true;
-    WorldAccess::Shutdown(*myContext.myState->myWorld);
-    myContext.myState->myClosing = false;
-    myContext.myState->myWorld = std::move(result.Candidate);
-    myContext.myState->myWorld->SetActiveCamera(result.Camera.Get());
+    { std::scoped_lock lock(scenes.Mutex); scenes.Accepting = false; }
+    session.myClosing = true;
+    WorldAccess::Shutdown(*session.myWorld);
+    // Destroy the old world while its asset view is still available.
+    session.myWorld.reset();
     myRenderSnapshots.Reset();
-    WorldAccess::Activate(*myContext.myState->myWorld);
+    session.myAssets = std::move(assets);
+    session.myWorld = std::move(result.Candidate);
+    session.myClosing = false;
+    {
+        std::scoped_lock lock(scenes.Mutex);
+        scenes.BoundWorld = session.myWorld.get();
+        scenes.Current = std::move(requested); scenes.Error.reset(); scenes.Status = SceneLoadStatus::Loaded;
+        scenes.Accepting = true;
+    }
+    WorldAccess::Activate(*session.myWorld);
+    myGame.OnSceneLoaded(myContext, *scenes.Current);
     BuildAndPublishRenderSnapshot();
     return true;
 }

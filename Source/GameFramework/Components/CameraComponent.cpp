@@ -2,10 +2,16 @@
 #include "GameFramework/World/TransformOperations.h"
 
 #include "GameFramework/World/Actor.h"
+#include <cmath>
+#include <stdexcept>
+
+CameraComponent::CameraComponent() : myCamera(DefaultFieldOfView, DefaultNearPlane, DefaultFarPlane, CommonUtilities::Vector2u{1280,720}) {}
 
 CameraComponent::CameraComponent(float aHorizontalFieldOfViewDegrees, float aNearPlane, float aFarPlane, const CommonUtilities::Vector2u& aResolution)
-	: myCamera(aHorizontalFieldOfViewDegrees, aNearPlane, aFarPlane, aResolution)
+	: CameraComponent()
 {
+    if (!SetPerspective(aHorizontalFieldOfViewDegrees, aNearPlane, aFarPlane, aResolution))
+        throw std::invalid_argument("Invalid camera projection");
 }
 
 void CameraComponent::Update(float)
@@ -18,11 +24,20 @@ void CameraComponent::LateUpdate(float)
 	SyncCameraToOwner();
 }
 
-void CameraComponent::SetPerspective(float aHorizontalFieldOfViewDegrees, float aNearPlane, float aFarPlane, const CommonUtilities::Vector2u& aResolution)
+bool CameraComponent::SetPerspective(float aHorizontalFieldOfViewDegrees, float aNearPlane, float aFarPlane, const CommonUtilities::Vector2u& aResolution)
 {
     EnsureCanMutate();
-	myCamera = CommonUtilities::Camera3D(aHorizontalFieldOfViewDegrees, aNearPlane, aFarPlane, aResolution);
+    if (!std::isfinite(aHorizontalFieldOfViewDegrees) || aHorizontalFieldOfViewDegrees <= 0 || aHorizontalFieldOfViewDegrees >= 180 ||
+        !std::isfinite(aNearPlane) || !std::isfinite(aFarPlane) || aNearPlane <= 0 || aFarPlane <= aNearPlane ||
+        aResolution.x == 0 || aResolution.y == 0) return false;
+    CommonUtilities::Camera3D candidate(aHorizontalFieldOfViewDegrees, aNearPlane, aFarPlane, aResolution);
+    const auto projection = candidate.GetProjectionMatrix();
+    for (int row = 1; row <= 4; ++row)
+        for (int column = 1; column <= 4; ++column)
+            if (!std::isfinite(projection(row,column))) return false;
+    myCamera = std::move(candidate);
 	SyncCameraToOwner();
+    return true;
 }
 
 void CameraComponent::SyncCameraToOwner()

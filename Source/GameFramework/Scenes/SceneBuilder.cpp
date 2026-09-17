@@ -1,82 +1,164 @@
 #include "SceneBuilder.h"
-#include <unordered_set>
-#include <cmath>
+#include "../Runtime/Internal/WorldAccess.h"
+#include <map>
+#include <set>
 
-SceneBuildResult SceneBuilder::Build(const SceneDescription& scene, const ComponentRegistry& registry, const GameInput* input)
+namespace
 {
-    SceneBuildResult result;
-    auto error = [&](std::string actor, std::string component, std::string property, std::string message)
-    { result.Diagnostics.push_back({std::move(actor),std::move(component),std::move(property),std::move(message)}); };
-    if (!registry.IsFrozen()) error({},{},"registry","Registry must be frozen");
-    auto finiteTransform = [](const CommonUtilities::Transform& transform)
+    SceneDiagnostic Location(const SceneData& scene, const ActorRecord* actor = nullptr, const ComponentRecord* component = nullptr)
     {
-        const auto& matrix = transform.GetLocalMatrix();
-        for (int r=1;r<=4;++r) for (int c=1;c<=4;++c) if (!std::isfinite(matrix(r,c))) return false;
-        return true;
-    };
-    std::unordered_set<std::string> identities;
-    for (const auto& a : scene.Actors)
-    {
-        if (!finiteTransform(a.LocalTransform)) error(a.Id,{},"transform","Actor transform contains nonfinite values");
-        if (a.Id.empty() || !identities.insert(a.Id).second) error(a.Id,{},"id","Empty or duplicate actor ID");
-        std::unordered_set<std::string> names;
-        for (const auto& c : a.Components)
+        SceneDiagnostic result;
+        result.File = scene.Source.File;
+        result.Actor = scene.Source.Object;
+        result.Component = scene.Source.Component;
+        result.Property = scene.Source.Field;
+        if (actor)
         {
-            if (!finiteTransform(c.LocalTransform)) error(a.Id,c.Name,"transform","Component transform contains nonfinite values");
-            if (c.Name.empty() || !names.insert(c.Name).second) error(a.Id,c.Name,"name","Empty or duplicate component name");
-            if (!registry.Contains(c.Type)) error(a.Id,c.Name,"type","Unknown registered type: " + c.Type);
+            if (!actor->Source.File.empty()) result.File = actor->Source.File;
+            result.Actor = actor->Source.Object.empty() ? actor->Id : actor->Source.Object;
+            if (!actor->Source.Field.empty()) result.Property = actor->Source.Field;
+        }
+        if (component)
+        {
+            if (!component->Source.File.empty()) result.File = component->Source.File;
+            if (!component->Source.Object.empty()) result.Actor = component->Source.Object;
+            result.Component = component->Source.Component.empty() ? component->Id : component->Source.Component;
+            if (!component->Source.Field.empty()) result.Property = component->Source.Field;
+            result.Type = component->Type;
+        }
+        return result;
+    }
+    std::string Name(const ComponentRecord& component) { return component.Name.empty() ? component.Id : component.Name; }
+}
+
+SceneBuildResult SceneBuilder::Build(const SceneData& scene, const ComponentRegistry& registry, const SceneBuildServices& services)
+{
+    using GameFrameworkInternal::WorldAccess;
+    SceneBuildResult result;
+    auto error = [&](SceneDiagnostic source, std::string field, std::string message,
+        std::string code, std::string phase = "preflight")
+    {
+        source.Property = source.Property.empty() ? field : field.empty() ? source.Property : source.Property + "." + field;
+        source.Message = std::move(message); source.Code = std::move(code); source.Phase = std::move(phase);
+        result.Diagnostics.push_back(std::move(source));
+    };
+    if (!registry.IsFrozen()) error(Location(scene), "registry", "Registry must be frozen", "registry-not-frozen");
+    std::set<std::string> actorIds;
+    for (const auto& actor : scene.Actors)
+    {
+        if (actor.Id.empty() || !actorIds.insert(actor.Id).second)
+            error(Location(scene, &actor), "id", "Actor ID must be nonempty and unique", "invalid-id");
+        Transform pose;
+        if (!pose.SetLocalPose(actor.Pose)) error(Location(scene, &actor), "pose", "Actor pose is invalid", "invalid-pose");
+        std::set<std::string> ids, names;
+        for (const auto& component : actor.Components)
+        {
+            const auto source = Location(scene, &actor, &component);
+            if (component.Id.empty() || !ids.insert(component.Id).second)
+                error(source, "id", "Component ID must be nonempty and actor-local unique", "invalid-id");
+            if (Name(component).empty() || !names.insert(Name(component)).second)
+                error(source, "name", "Component instance name must be actor-local unique", "invalid-name");
+            if (!registry.Contains(component.Type)) error(source, "type", "Unknown registered component type: " + component.Type, "unknown-type");
+            if (component.Pose && !pose.SetLocalPose(*component.Pose)) error(source, "pose", "Component pose is invalid", "invalid-pose");
         }
     }
     if (!result.Diagnostics.empty()) return result;
-    auto candidate = std::make_unique<World>(input);
+
+    auto candidate = std::make_unique<World>(services.Input);
+    WorldAccess::BindServices(*candidate, services.Scenes, services.Assets, services.Time);
+    std::map<std::string, Actor*> actors;
+    std::map<std::pair<std::string, std::string>, Component*> components;
+    auto actorLookup = [&](const std::string& id) -> Actor*
+    { const auto it = actors.find(id); return it == actors.end() ? nullptr : it->second; };
+    auto componentLookup = [&](const ObjectAddress& address) -> Component*
+    { const auto it = components.find({address.ActorId, address.ComponentId}); return it == components.end() ? nullptr : it->second; };
     try
     {
-        // First attach every object so configuration and Connect can use forward references.
-        for (const auto& a : scene.Actors)
+        // Allocate everything before any registered reader can observe its peers.
+        for (const auto& actor : scene.Actors)
         {
-            auto* actor = candidate->CreateActor(a.Id);
-            actor->SetLocalPose({a.LocalTransform.GetPosition(), a.LocalTransform.GetRotation(), a.LocalTransform.GetScale()});
-            actor->SetActive(a.Active);
-            for (const auto& c : a.Components) registry.Create(c.Type,*actor,c.Name);
-        }
-        for (const auto& a : scene.Actors)
-        {
-            auto* actor = candidate->FindActor(a.Id);
-            if (!a.Parent.empty())
+            auto* runtimeActor = candidate->SpawnActor(actor.Name.empty() ? actor.Id : actor.Name);
+            actors.emplace(actor.Id, runtimeActor);
+            for (const auto& component : actor.Components)
             {
-                auto* parent = candidate->FindActor(a.Parent);
-                if (!parent || !actor->SetParent(parent,ReparentMode::KeepLocal)) error(a.Id,{},"parent","Missing or cyclic actor parent");
-            }
-            for (const auto& c : a.Components)
-            {
-                auto* component = actor->FindComponent(c.Name);
-                component->SetEnabled(c.Enabled);
-                if (auto* spatial = dynamic_cast<SceneComponent*>(component))
+                try
                 {
-                    // Copy values, never a source Transform's raw parent pointer.
-                    spatial->GetLocalTransform().SetPosition(c.LocalTransform.GetPosition());
-                    spatial->GetLocalTransform().SetRotation(c.LocalTransform.GetRotation());
-                    spatial->GetLocalTransform().SetScale(c.LocalTransform.GetScale());
-                    if (!c.Parent.empty())
+                    auto* runtimeComponent = registry.Create(component.Type, *runtimeActor, Name(component));
+                    components.emplace(std::make_pair(actor.Id, component.Id), runtimeComponent);
+                    auto source = Location(scene, &actor, &component); source.Phase = "resolve";
+                    WorldAccess::SetSource(*runtimeComponent, std::move(source));
+                }
+                catch (const std::bad_alloc&) { throw; }
+                catch (const std::exception& exception)
+                { error(Location(scene, &actor, &component), {}, exception.what(), "construction-failed", "allocation"); }
+                catch (...) { error(Location(scene, &actor, &component), {}, "Component factory threw", "construction-failed", "allocation"); }
+            }
+        }
+        if (!result.Diagnostics.empty()) return result;
+
+        // Apply hierarchy and basic values before readers, so configured cameras
+        // and spatial properties observe the final authored parent graph.
+        for (const auto& actor : scene.Actors)
+        {
+            auto* runtimeActor = actorLookup(actor.Id);
+            runtimeActor->SetLocalPose(actor.Pose); runtimeActor->SetActive(actor.Active);
+            if (!actor.Parent.empty())
+            {
+                auto* parent = actorLookup(actor.Parent);
+                if (!parent || !runtimeActor->SetParent(parent, ReparentMode::KeepLocal))
+                    error(Location(scene, &actor), "parent", "Missing or cyclic actor parent", "invalid-parent", "configuration");
+            }
+            for (const auto& component : actor.Components)
+            {
+                auto* runtimeComponent = componentLookup({actor.Id, component.Id});
+                runtimeComponent->SetEnabled(component.Enabled);
+                auto* spatial = dynamic_cast<SceneComponent*>(runtimeComponent);
+                if (!spatial && (component.Pose || !component.Parent.empty()))
+                    error(Location(scene, &actor, &component), "pose", "Nonspatial components cannot have pose or attachment fields", "nonspatial-transform", "configuration");
+                if (spatial)
+                {
+                    if (component.Pose) spatial->SetLocalPose(*component.Pose);
+                    if (!component.Parent.empty())
                     {
-                        auto* parent = actor->FindComponent<SceneComponent>(c.Parent);
-                        if (!parent || !spatial->SetParent(parent,ReparentMode::KeepLocal)) error(a.Id,c.Name,"parent","Missing, nonspatial or cyclic component parent");
+                        auto* parent = dynamic_cast<SceneComponent*>(componentLookup({actor.Id, component.Parent}));
+                        if (!parent || !spatial->SetParent(parent, ReparentMode::KeepLocal))
+                            error(Location(scene, &actor, &component), "parent", "Missing, nonspatial or cyclic component parent", "invalid-parent", "configuration");
                     }
                 }
-                else if (!c.Parent.empty()) error(a.Id,c.Name,"parent","Nonspatial components cannot attach");
-                try { if (c.Configure) c.Configure(*component); }
-                catch (const std::exception& e) { error(a.Id,c.Name,"configuration",e.what()); }
-                catch (...) { error(a.Id,c.Name,"configuration","Unknown configuration exception"); }
             }
         }
-        auto* cameraActor = candidate->FindActor(scene.CameraActor);
-        auto* camera = cameraActor ? cameraActor->FindComponent<CameraComponent>(scene.CameraComponent) : nullptr;
-        if (!camera) error(scene.CameraActor,scene.CameraComponent,"camera","Explicit camera reference must resolve to a CameraComponent");
-        else result.Camera = camera->GetHandle<CameraComponent>();
-        if (result.Diagnostics.empty()) candidate->Prepare(result.Diagnostics);
+        std::vector<std::unique_ptr<SceneReader>> readers;
+        for (const auto& actor : scene.Actors) for (const auto& component : actor.Components)
+        {
+            auto* runtimeComponent = componentLookup({actor.Id, component.Id});
+            auto reader = std::unique_ptr<SceneReader>(new SceneReader(component, Location(scene, &actor, &component),
+                result.Diagnostics, services.Assets, services.ClientSize, actorLookup, componentLookup));
+            try
+            {
+                WorldAccess::Configure(*runtimeComponent, [&] { registry.Configure(component.Type, *runtimeComponent, *reader); });
+            }
+            catch (const std::bad_alloc&) { throw; }
+            catch (const std::exception& exception)
+            { error(Location(scene, &actor, &component), {}, exception.what(), "configuration-failed", "configuration"); }
+            catch (...) { error(Location(scene, &actor, &component), {}, "Registered reader threw", "configuration-failed", "configuration"); }
+            reader->Finish(); readers.push_back(std::move(reader));
+        }
+        for (auto& reader : readers) reader->Resolve();
+        readers.clear(); // Drop fixup destinations before a failed candidate can die.
+
+        if (scene.ActiveCamera)
+        {
+            auto* camera = dynamic_cast<CameraComponent*>(componentLookup(*scene.ActiveCamera));
+            if (!camera || !camera->IsEnabled() || !camera->GetOwner()->IsActiveInHierarchy())
+                error(Location(scene), "camera", "Active camera must identify an enabled CameraComponent on an active actor", "invalid-camera", "presentation");
+            else { candidate->SetActiveCamera(camera); result.Camera = camera->GetRef<CameraComponent>(); }
+        }
+        else if (scene.RequireCamera) error(Location(scene), "camera", "This scene requires an explicit camera", "missing-camera", "presentation");
+        if (result.Diagnostics.empty()) WorldAccess::Prepare(*candidate, result.Diagnostics);
     }
-    catch (const std::exception& e) { error({},{},{},e.what()); }
-    catch (...) { error({},{},{},"Unknown scene construction exception"); }
+    catch (const std::bad_alloc&) { throw; }
+    catch (const std::exception& exception) { error(Location(scene), {}, exception.what(), "construction-failed", "construction"); }
+    catch (...) { error(Location(scene), {}, "Unknown scene construction exception", "construction-failed", "construction"); }
     if (result.Diagnostics.empty()) result.Candidate = std::move(candidate);
     return result;
 }

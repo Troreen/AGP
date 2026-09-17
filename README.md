@@ -13,7 +13,7 @@ C++20 / DirectX 11 graphics programming project for the AGP assignments. The cur
 - Directional cascaded shadow maps.
 - Spot light shadow maps.
 - Point light cube shadow maps.
-- Runtime shadow bias tuning controls.
+- Render-pass inspection and runtime lighting controls.
 - Demo scene with primitives, a textured floor, a chest mesh, and an animated character.
 
 ## Repository Layout
@@ -34,18 +34,16 @@ ownership, the frame sequence, and code formatting conventions.
 
 Open `AGP.sln` in Visual Studio and build the `Debug | x64` configuration.
 
-The ModelViewer expects to run with `Source/Application/ModelViewer` as the working directory because it resolves `Assets` relative to that path.
+ModelViewer resolves `Assets` from the executable location; it does not depend on
+its working directory. Run `Bin/Debug/ModelViewer.exe` or
+`Bin/Release/ModelViewer.exe`. The debug build opens a log console.
 
-## Running ModelViewer
-
-Run `Bin/Debug/ModelViewer.exe` after building, with this working directory:
-
-```text
-C:\Users\tarik\Documents\GitHub\AGP\Source\Application\ModelViewer
-```
-
-The debug build opens a console window for logs. The `P` key is useful while tuning lights and shadows because it prints copy-paste friendly placement and bias values.
-
+The sample installs a C++ scene source in Main.cpp. ModelViewer requests the scene
+by ID and registers only its gameplay behaviors. Mesh/material loading stays in
+ModelViewerScene.cpp; the engine constructs and starts registered components.
+Start with [the gameplay guide](Docs/GameFramework.md), then ModelViewer.cpp and
+ModelViewerComponents.cpp. Real Perforce scene integration requires the team inputs
+listed in [implementation evidence](Docs/SimplifiedGameFrameworkImplementation.md).
 ## Controls
 
 ### Camera
@@ -81,17 +79,21 @@ The number-row keys `7`, `8`, and `9` also work for the light controls.
 | `Shift + 9` / `Shift + Numpad 9` | Move the spot light to the camera and aim it along the current camera direction |
 | `P` | Log current light placement, active light count, and shadow tuning values |
 
-### Shadow Bias Tuning
-
-Shadow tuning changes are runtime-only. Restarting the application restores the defaults unless the tuned values are copied back into code.
+### Scene and diagnostics
 
 | Control | Action |
 | --- | --- |
-| `F5` | Reset runtime shadow tuning |
-| `F6` / `F7` | Decrease / increase directional shadow bias |
-| `F8` / `F9` | Decrease / increase spot shadow bias |
-| `F10` / `F11` | Decrease / increase point shadow bias |
+| `R` | Pause/resume chest rotation |
+| `F5` | Reload the current scene |
+| `F6` | Cycle renderer debug views |
+| `F7` | Spawn/destroy the component-offset hierarchy demo |
+| `Esc` | Quit |
 
+Renderer comparison switches remain available: `AGP_DISABLE_THREADED_UPDATE`,
+`AGP_DISABLE_PARALLEL_SHADOWS`, and the switches documented in
+[EngineOptimisations](Docs/EngineOptimisations.md). No performance improvement is
+claimed by the framework API changes. Shadow bias setters remain renderer tooling;
+there are no sample F5–F11 bias key bindings.
 ## Shadow Mapping Notes
 
 The current shadow setup keeps material textures in low texture slots and binds shadow resources at high slots:

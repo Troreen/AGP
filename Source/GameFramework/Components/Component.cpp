@@ -33,7 +33,7 @@ bool Component::IsEnabled() const
 
 void Component::SetEnabled(bool anIsEnabled)
 {
-    if (myOwner) GetWorld().EnsureMutationAllowed();
+    EnsureCanMutate();
 	if (myIsEnabled == anIsEnabled)
 	{
 		return;
@@ -59,6 +59,9 @@ World& Component::GetWorld() const
     return *myOwner->GetWorld();
 }
 const GameInput& Component::GetInput() const { return GetWorld().GetInput(); }
+SceneService& Component::GetScenes() const { return GetWorld().GetScenes(); }
+const AssetLookup& Component::GetAssets() const { return GetWorld().GetAssets(); }
+const GameTime& Component::GetTime() const { return GetWorld().GetTime(); }
 void Component::Destroy() { GetWorld().DestroyComponent(*this); }
 
-void Component::EnsureCanMutate() const { if (myOwner) GetWorld().EnsureMutationAllowed(); }
+void Component::EnsureCanMutate() const { if (myOwner) GetWorld().EnsureComponentMutationAllowed(this); }

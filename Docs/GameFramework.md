@@ -57,14 +57,12 @@ EndPlay follows Shutdown, so keep game state needed by EndPlay alive until Run r
 
 ## Migration status
 
-Scene construction, checked references, hierarchy and replacement already exist.
-ModelViewer's M1/M2 integration uses the explicitly temporary `LegacySceneBridge`
-and old scene descriptions. Normal game code cannot submit candidate worlds through
-GameContext. M3 replaces that integration bridge with owned SceneData and a scene-ID
-service. Invalid content still follows the old Debug assertion policy until M3.
+M1–M3 implement the core object model, owned scene data, registered readers and
+scene-ID requests. ModelViewer installs its C++ source once at application setup;
+game callbacks call GetScenes().Load(SceneId{"ModelViewer"}) or Reload(). The
+legacy scene factory/Configure-lambda bridge is removed. M4 completes renderer
+component isolation and physical public/private header separation.
 
-M2 implements the safe transform facade and consistent pending lookup. M4 closes
-mesh/camera/light renderer dependencies and completes physical header separation.
 No physics, animation graph, networking, editor, new asset manager or input system
 is part of this work. Actual Perforce scene integration requires verified team code
 and fixtures; the existing FBX asset importer is not that scene importer.
@@ -102,3 +100,45 @@ later callbacks skip it, and memory is collected later. Child-first EndPlay pair
 only completed BeginPlay calls; throwing EndPlay is logged and remaining cleanup
 continues. Use nonthrowing destructors/RAII for allocations that never began.
 OnDestroy and mixed local/effective activity notifications have been removed.
+
+## Registered scenes
+
+Include `<GameFramework/Registration/ComponentRegistry.h>` and
+`<GameFramework/Registration/SceneReader.h>` for the registration hook. Register
+stable names with a reader that configures only its own component:
+
+```cpp
+registry.Register<SpinComponent>("sample.Spin", [](SpinComponent& spin, SceneReader& fields)
+{
+    spin.SetDegreesPerSecond(fields.OptionalFloat("speed", 25.0f));
+});
+```
+
+The engine creates every component before reading values, then resolves ID-based
+bindings and optional sibling dependencies before any BeginPlay. Optional absent
+fields use defaults; present wrong types, unknown fields and supplied invalid refs
+are errors. BindActor/BindComponent destinations must be retained Ref fields on
+the component. Factories for unusual constructors return an unattached unique_ptr;
+the engine attaches it. Factories may only construct, and readers may only configure
+their target. Neither can mutate other objects or request session actions.
+
+Ordinary game callbacks include `<GameFramework/SceneService.h>` and call
+`game.GetScenes().Load(SceneId{"Level1"})`. The latest request before a host boundary
+wins. Reload requires a successfully loaded current ID. GetStatus, GetCurrent and
+GetLastError expose the result; OnSceneLoaded follows new-world BeginPlay and
+OnSceneLoadFailed reports preparation errors. Failed replacement preserves the
+current world, camera, ID and refs in Debug and Release. Initial requested-load
+failure returns nonzero after cleanup. Exceptions after commit end the session.
+Requests during old-world teardown reject; requests from new BeginPlay wait for
+the next boundary. Scene loading clears press/mouse edges and fixed accumulation;
+GameTime elapsed seconds count gameplay only and continue across replacements.
+
+Application integration adds the separate Integration include root and installs
+ApplicationSetup::SceneSource when calling Run. ISceneSource returns owned SceneData
+or explicit errors; valid empty data differs from failure. SourceLocation survives
+into diagnostics. Actor/component IDs address authored links independently of
+labels. Pose values are engine-space parent-local TRS. The source prepares immutable
+mesh/material resources using the existing backend and places them in candidate-local
+AssetBindings. GetAssets is ready-resource lookup, never a loader or new cache.
+The importer must not return actors or drive lifecycle. See ImporterHandoff.md for
+unverified Perforce requirements.

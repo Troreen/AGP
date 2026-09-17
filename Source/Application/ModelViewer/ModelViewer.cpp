@@ -1,21 +1,21 @@
 #include "ModelViewer.h"
-#include "ModelViewerScene.h"
+#include "GameFramework/Scenes/SceneService.h"
 #include "GameFramework/Runtime/GameContext.h"
+#include "GameFramework/World/World.h"
 #include "Application.h"
 #include "ModelViewerComponents.h"
 #include "GameFramework/Scenes/ComponentRegistry.h"
+#include "GameFramework/Scenes/SceneReader.h"
+#include "GameFramework/Components/LightComponent.h"
 #include "GameFramework/Components/StaticMeshComponent.h"
 
 ModelViewer::ModelViewer() = default;
 ModelViewer::~ModelViewer() = default;
 
-// Startup hook: compose the initial game world before gameplay and rendering run
-// concurrently. A future JSON import will replace the builder behind this call;
-// the application lifecycle and component behaviors can stay the same.
+// Request the authored sample. The installed source and engine handle construction.
 void ModelViewer::Initialize(GameContext& context)
 {
-	myScene = std::make_unique<ModelViewerScene>();
-	myScene->Initialize(context);
+    context.GetScenes().Load(SceneId{"ModelViewer"});
 	MVLOG(Log, "Game ready: RMB + WASD/Space/Ctrl camera, R pause chest spin, numpad 0-3 animation, 7-9 lights, Shift+7-9 place lights, F5 reload, F7 spawn/destroy hierarchy, Esc quit");
 }
 
@@ -25,7 +25,7 @@ void ModelViewer::Update(GameContext& context, float)
 {
 	// Session-level rules live here. Actor behavior is ticked by the world.
 	if (context.GetInput().IsKeyPressed(Keys::ESCAPE)) context.RequestQuit();
-    if (context.GetInput().IsKeyPressed(Keys::F5)) myScene->Reload(context);
+    if (context.GetInput().IsKeyPressed(Keys::F5)) context.GetScenes().Reload();
     if (context.GetInput().IsKeyPressed(Keys::F7))
     {
         auto& world = context.GetWorld();
@@ -50,13 +50,10 @@ void ModelViewer::Update(GameContext& context, float)
     }
 }
 
-// The host has joined gameplay work before entering this hook. Clear the selected
-// camera and release our helper/cache; the host still owns and later destroys World.
-// reset() is safe even if initialization failed before the helper was created.
+// The host has joined gameplay; the world remains borrowable during Shutdown.
 void ModelViewer::Shutdown(GameContext& context)
 {
 	context.SetActiveCamera(nullptr);
-	myScene.reset();
 }
 
 void ModelViewer::RegisterComponents(ComponentRegistry& registry)
@@ -64,5 +61,11 @@ void ModelViewer::RegisterComponents(ComponentRegistry& registry)
     registry.Register<CameraControlsComponent>("CameraControls");
     registry.Register<AnimationControlsComponent>("AnimationControls");
     registry.Register<SpinComponent>("Spin");
-    registry.Register<LightControlsComponent>("LightControls");
+    registry.Register<LightControlsComponent>("LightControls", [](LightControlsComponent& c, SceneReader& fields)
+    {
+        fields.BindActor("camera", c.Camera, ReferenceRequirement::Required);
+        fields.BindComponent("directional", c.Directional, ReferenceRequirement::Required);
+        fields.BindComponent("point", c.Point, ReferenceRequirement::Required);
+        fields.BindComponent("spot", c.Spot, ReferenceRequirement::Required);
+    });
 }
