@@ -182,6 +182,27 @@
   <ItemGroup><ClInclude Include="Scenes\SceneBuilder.h" /></ItemGroup>
   <ItemGroup><ClInclude Include="Scenes\SceneDescription.h" /></ItemGroup>
   <ItemGroup><ClInclude Include="World\TransformOperations.h" /></ItemGroup>
+<ItemGroup>
+    <ClCompile Include="Runtime\GameContext.cpp" />
+    <ClCompile Include="World\TransformOperations.cpp" />
+    <ClCompile Include="Scenes\BuiltInComponents.cpp" />
+    <ClInclude Include="Runtime\Internal\SessionState.h" />
+    <ClInclude Include="Runtime\Internal\RegistryAccess.h" />
+    <ClInclude Include="Runtime\Internal\WorldAccess.h" />
+    <ClInclude Include="Runtime\Internal\InputAccess.h" />
+    <ClInclude Include="World\ReparentMode.h" />
+    <ClInclude Include="Integration\GameFramework\Integration\LegacySceneBridge.h" />
+    <ClInclude Include="Public\GameFramework\Actor.h" />
+    <ClInclude Include="Public\GameFramework\Component.h" />
+    <ClInclude Include="Public\GameFramework\GameApplication.h" />
+    <ClInclude Include="Public\GameFramework\GameContext.h" />
+    <ClInclude Include="Public\GameFramework\GameInput.h" />
+    <ClInclude Include="Public\GameFramework\IGame.h" />
+    <ClInclude Include="Public\GameFramework\ObjectRef.h" />
+    <ClInclude Include="Public\GameFramework\SceneComponent.h" />
+    <ClInclude Include="Public\GameFramework\World.h" />
+    <ClInclude Include="Public\GameFramework\Registration\ComponentRegistry.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

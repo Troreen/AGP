@@ -2,6 +2,10 @@
 #include "GameFramework/Scenes/ConnectionContext.h"
 #include "GameFramework/Components/LightComponent.h"
 #include "GameFramework/Runtime/Internal/GameLoop.h"
+#include "GameFramework/Runtime/Internal/WorldAccess.h"
+#include "GameFramework/Runtime/Internal/RegistryAccess.h"
+using GameFrameworkInternal::WorldAccess;
+using GameFrameworkInternal::RegistryAccess;
 #include <cmath>
 #include <functional>
 #include <iostream>
@@ -23,13 +27,13 @@ void MatrixNear(const CommonUtilities::Matrix4f& a, const CommonUtilities::Matri
 void Start(World& world)
 {
     SceneDiagnostics diagnostics;
-    Check(world.Prepare(diagnostics),"Valid world failed preparation");
-    world.Activate();
+    Check(WorldAccess::Prepare(world,diagnostics),"Valid world failed preparation");
+    WorldAccess::Activate(world);
 }
 void Flush(World& world)
 {
     SceneDiagnostics diagnostics;
-    Check(world.Flush(diagnostics),"Valid mutation batch failed");
+    Check(WorldAccess::Flush(world,diagnostics),"Valid mutation batch failed");
 }
 struct Probe : Component
 {
@@ -69,16 +73,30 @@ void Lifecycle()
     auto* b=first->AddComponent<Probe>("B"); b->Trace=&trace; b->SetEnabled(false);
     auto* second=world.CreateActor("Second"); second->SetActive(false);
     auto* c=second->AddComponent<Probe>("C"); c->Trace=&trace;
-    world.Update(.02f); Check(trace.empty(),"Construction ticked");
+    WorldAccess::Update(world,.02f); Check(trace.empty(),"Construction ticked");
     Start(world); Check(trace=="AC BC CC AB BB CB ","Connect/Begin order or disabled initialization incorrect");
-    trace.clear(); world.FixedUpdate(.02f); world.Update(.02f);
+    trace.clear(); WorldAccess::FixedUpdate(world,.02f); WorldAccess::Update(world,.02f);
     Check(trace=="AF AU AL ","Disabled/inactive objects ticked");
     b->SetEnabled(true); second->SetActive(true); trace.clear();
-    world.FixedUpdate(.02f); world.Update(.02f);
+    WorldAccess::FixedUpdate(world,.02f); WorldAccess::Update(world,.02f);
     Check(trace=="AF BF CF AU BU CU AL BL CL ","Phase order changed");
-    trace.clear(); world.Shutdown();
+    trace.clear(); WorldAccess::Shutdown(world);
     Check(trace.find("CE BE AE ")==0,"EndPlay not reverse activation order");
     Check(!world.CreateActor("After shutdown"),"Shutdown allowed spawn");
+}
+void ClosingWorld()
+{
+    World world;
+    auto* actor=world.SpawnActor("Retained for shutdown");
+    auto* component=actor->AddComponent<Probe>("Existing");
+    auto actorRef=actor->GetRef();
+    auto componentRef=component->GetRef<Probe>();
+    Start(world);
+    WorldAccess::Close(world);
+    Check(!world.SpawnActor("Rejected") && !actor->AddComponent<Probe>("Rejected"),"Closing world accepted construction");
+    Check(actorRef.Get()==actor && componentRef.Get()==component,"Closing discarded shutdown borrows");
+    WorldAccess::Shutdown(world);
+    Check(!actorRef.Get() && !componentRef.Get(),"Shutdown retained live references");
 }
 void MutationsAndHandles()
 {
@@ -93,10 +111,10 @@ void MutationsAndHandles()
         expiredComponent=b->GetHandle<Probe>();
         Check(!ComponentHandle<SceneComponent>(expiredComponent).Get(),"Wrong-type handle resolved");
         a->OnUpdate=[&] { b->Destroy(); b->Destroy(); a->Destroy(); actor->AddComponent<Probe>("Next")->Trace=&trace; };
-        Start(world); trace.clear(); world.Update(.01f);
+        Start(world); trace.clear(); WorldAccess::Update(world,.01f);
         Check(trace=="AU ","Destroyed later component or pending spawn ticked");
         Check(!expiredComponent.Get() && !actor->FindComponent("B"),"Destroy did not invalidate lookup immediately");
-        trace.clear(); Flush(world); world.Update(.01f);
+        trace.clear(); Flush(world); WorldAccess::Update(world,.01f);
         Check(trace.find("BE AE")!=std::string::npos && trace.find("NextB")!=std::string::npos && trace.find("NextU")!=std::string::npos,"Boundary did not end old and begin new components");
         auto* replacement=actor->AddComponent<Probe>("B");
         Check(!expiredComponent.Get() && replacement,"Slot reuse revived an old handle");
@@ -104,7 +122,7 @@ void MutationsAndHandles()
         doomed->AddComponent<Probe>("Doomed")->Trace=&trace; doomed->Destroy(); trace.clear(); Flush(world);
         Check(trace.find("DoomedB")==std::string::npos && trace.find("DoomedE")==std::string::npos,"Destroyed pending object started");
         auto* invalid=actor->AddComponent<Invalid>("Invalid"); auto invalidHandle=invalid->GetHandle();
-        SceneDiagnostics errors; Check(!world.Flush(errors) && !errors.empty() && !invalidHandle.Get(),"Invalid runtime batch survived");
+        SceneDiagnostics errors; Check(!WorldAccess::Flush(world,errors) && !errors.empty() && !invalidHandle.Get(),"Invalid runtime batch survived");
         Check(actor->GetHandle().Get()==actor,"Invalid batch destroyed existing actor");
     }
     Check(!expired.Get() && !expiredComponent.Get(),"World destruction left handles alive");
@@ -124,20 +142,20 @@ void FrozenBoundaries()
         if (phase==4) source->OnLate=spawn;
         if (phase==5) source->OnCleanup=spawn;
         Start(world);
-        world.FixedUpdate(.01f); world.Update(.01f);
+        WorldAccess::FixedUpdate(world,.01f); WorldAccess::Update(world,.01f);
         if (phase==5) { source->Destroy(); Flush(world); }
         Check(spawned.Get() && !spawned.Get()->HasBegunPlay(),"Lifecycle addition joined the same frozen batch");
         Flush(world); Check(spawned.Get()->HasBegunPlay(),"Lifecycle addition never activated");
-        world.Shutdown();
+        WorldAccess::Shutdown(world);
     }
     // One boundary before all catch-up fixed steps, not one boundary per step.
     World world; auto* a=world.CreateActor("A"); auto* p=a->AddComponent<Probe>("P");
     ComponentHandle<Probe> spawned; int ticks=0;
     p->OnFixed=[&] { if (!spawned.Get()) { auto* n=a->AddComponent<Probe>("N"); n->OnFixed=[&]{++ticks;}; spawned=n->GetHandle<Probe>(); } };
     Start(world); GameFrameworkInternal::GameLoop loop(.01f); GameInput input;
-    Flush(world); loop.Advance(.035f,input,[&](float dt,const auto&){world.FixedUpdate(dt);},[&](float dt,const auto&){world.Update(dt);},[](float,const auto&){});
-    Check(ticks==0,"Spawn ticked inside same catch-up frame"); Flush(world); world.FixedUpdate(.01f); Check(ticks==1,"Spawn missed next frame");
-    world.Shutdown();
+    Flush(world); loop.Advance(.035f,input,[&](float dt,const auto&){WorldAccess::FixedUpdate(world,dt);},[&](float dt,const auto&){WorldAccess::Update(world,dt);},[](float,const auto&){});
+    Check(ticks==0,"Spawn ticked inside same catch-up frame"); Flush(world); WorldAccess::FixedUpdate(world,.01f); Check(ticks==1,"Spawn missed next frame");
+    WorldAccess::Shutdown(world);
 }
 void Hierarchy()
 {
@@ -171,13 +189,13 @@ void Hierarchy()
     auto handle=spatial->GetHandle<SceneComponent>();
     spatial->SetParent(pivot,ReparentMode::KeepLocal); Flush(world); pivot->Destroy(); Check(!handle.Get(),"Spatial subtree remained alive"); Flush(world);
     child->SetParent(root,ReparentMode::KeepLocal); Flush(world); auto childHandle=child->GetHandle(); root->Destroy();
-    Check(!childHandle.Get(),"Actor descendants remained alive"); Flush(world); Check(world.GetActors().empty(),"Subtree memory not collected");
+    Check(!childHandle.Get(),"Actor descendants remained alive"); Flush(world); Check(WorldAccess::GetActors(world).empty(),"Subtree memory not collected");
 }
 ComponentRegistry Registry()
 {
     ComponentRegistry registry; registry.Register<CameraComponent>("Camera"); registry.Register<Probe>("Probe"); registry.Register<Consumer>("Consumer"); registry.Register<SceneComponent>("Scene");
     bool duplicate=false; try { registry.Register<Probe>("Probe"); } catch (const std::invalid_argument&) { duplicate=true; }
-    Check(duplicate,"Duplicate registration accepted"); registry.Freeze();
+    Check(duplicate,"Duplicate registration accepted"); RegistryAccess::Freeze(registry);
     bool frozen=false; try { registry.Register<Probe>("Another"); } catch (const std::logic_error&) { frozen=true; }
     Check(frozen,"Frozen registry changed"); return registry;
 }
@@ -195,12 +213,12 @@ void BuilderAndDependencies()
     ActorDescription later; later.Id="Later actor";
     ComponentDescription target; target.Name="Target";target.Type="Probe";later.Components.push_back(target); scene.Actors.push_back(later);
     auto result=SceneBuilder::Build(scene,registry); Check(bool(result),"Forward-reference candidate rejected");
-    Check(result.Candidate->GetState()==World::State::Prepared && !result.Camera.Get()->HasBegunPlay(),"Builder activated candidate");
-    auto old=std::move(result.Candidate); old->Activate(); auto oldHandle=old->FindActor("Later actor")->GetHandle();
+    Check(WorldAccess::GetState(*result.Candidate)==WorldAccess::State::Prepared && !result.Camera.Get()->HasBegunPlay(),"Builder activated candidate");
+    auto old=std::move(result.Candidate); WorldAccess::Activate(*old); auto oldHandle=old->FindActor("Later actor")->GetHandle();
     auto invalid=scene; invalid.Actors[1].Components[0].Type="Unknown"; invalid.Actors.push_back(invalid.Actors[1]);
     auto failed=SceneBuilder::Build(invalid,registry); Check(!failed && failed.Diagnostics.size()>=2 && oldHandle.Get(),"Invalid candidate corrupted active scene or lost diagnostics");
     auto replacement=SceneBuilder::Build(scene,registry); Check(bool(replacement),"Replacement preparation failed");
-    old->Shutdown(); old=std::move(replacement.Candidate); old->Activate(); Check(!oldHandle.Get(),"Old handle resolved after replacement");
+    WorldAccess::Shutdown(*old); old=std::move(replacement.Candidate); WorldAccess::Activate(*old); Check(!oldHandle.Get(),"Old handle resolved after replacement");
     for (int mode=0;mode<5;++mode)
     {
         World world; auto* a=world.CreateActor("A"); auto* c=a->AddComponent<Consumer>("Consumer");
@@ -209,7 +227,7 @@ void BuilderAndDependencies()
         if (mode>=2) { a->AddComponent<Probe>("One"); a->AddComponent<Probe>("Two"); }
         if (mode==3) c->ComponentName="Two";
         if (mode==4) c->ComponentName="Consumer";
-        SceneDiagnostics diagnostics; const bool valid=world.Prepare(diagnostics);
+        SceneDiagnostics diagnostics; const bool valid=WorldAccess::Prepare(world,diagnostics);
         Check(valid==(mode==0 || mode==3),"Optional, ambiguous or named type validation incorrect");
     }
     std::string trace;
@@ -221,7 +239,7 @@ int main()
 {
     try
     {
-        Lifecycle(); MutationsAndHandles(); FrozenBoundaries(); Hierarchy(); BuilderAndDependencies();
+        Lifecycle(); ClosingWorld(); MutationsAndHandles(); FrozenBoundaries(); Hierarchy(); BuilderAndDependencies();
         std::cout << "PASS: lifecycle, frozen mutations, stale handles, hierarchy, transforms, registry, dependencies and candidate scenes\n";
     }
     catch (const std::exception& error) { std::cerr<<error.what()<<'\n'; return 1; }

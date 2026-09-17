@@ -13,7 +13,8 @@ class ModelViewer final : public IGame
 public:
 	ModelViewer();
 	~ModelViewer() override;
-	void Initialize(GameContext& context) override;
+	void RegisterComponents(ComponentRegistry& registry) override;
+    void Initialize(GameContext& context) override;
 	void Update(GameContext& context, float deltaTime) override;
 	void Shutdown(GameContext& context) override;
 private:

@@ -3,6 +3,7 @@
 #include "GameFramework/Runtime/GameContext.h"
 #include "Application.h"
 #include "ModelViewerComponents.h"
+#include "GameFramework/Scenes/ComponentRegistry.h"
 #include "GameFramework/Components/StaticMeshComponent.h"
 
 ModelViewer::ModelViewer() = default;
@@ -56,4 +57,12 @@ void ModelViewer::Shutdown(GameContext& context)
 {
 	context.SetActiveCamera(nullptr);
 	myScene.reset();
+}
+
+void ModelViewer::RegisterComponents(ComponentRegistry& registry)
+{
+    registry.Register<CameraControlsComponent>("CameraControls");
+    registry.Register<AnimationControlsComponent>("AnimationControls");
+    registry.Register<SpinComponent>("Spin");
+    registry.Register<LightControlsComponent>("LightControls");
 }

@@ -1,4 +1,5 @@
 #include "GraphicsEngine.pch.h"
+#include "GameFramework/Runtime/Internal/WorldAccess.h"
 #include "GraphicsEngine.h"
 
 #include "ConstantBuffers/AnimationBuffer.h"
@@ -582,7 +583,7 @@ bool GraphicsEngine::BuildRenderSnapshot(CameraComponent& camera, const World& a
 	outSnapshot.HasCamera = true;
 
 	const CameraFrustum cameraFrustum = CreateCameraFrustum(outSnapshot.Camera);
-	const std::vector<std::unique_ptr<Actor>>& actors = aWorld.GetActors();
+	const std::vector<std::unique_ptr<Actor>>& actors = GameFrameworkInternal::WorldAccess::GetActors(aWorld);
 	outSnapshot.ShadowCasters.reserve(actors.size());
 	outSnapshot.OpaqueRenderItems.reserve(actors.size());
 	outSnapshot.BlendedRenderItems.reserve(actors.size());

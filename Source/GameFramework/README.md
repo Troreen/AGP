@@ -1,47 +1,31 @@
-# GameFramework layout
+# GameFramework
 
-GameFramework is the reusable engine layer for the single game in this repository.
-Game rules, authored scenes and content catalogs belong in the application project.
+Gameplay uses `GameApplication`, `IGame`, `GameContext`, `World`, `Actor` and
+`Component`. The host owns frame advancement and lifecycle. Implement game hooks,
+spawn actors, add components, and keep checked `ActorRef`/`ComponentRef<T>` values
+when storing references between callbacks.
 
-```text
-GameFramework/
-  Runtime/           GameApplication, IGame, GameContext: session lifecycle and facade
-    Internal/        GameLoop: engine-only phase timing and fixed-step accumulation
-  Input/             GameInput: stable input samples delivered to game callbacks
-  World/             World and Actor: entity ownership, transforms and tick dispatch
-  Components/        Component base and built-in camera, light and mesh components
-  Diagnostics/       Framework logging category
-```
+The supported core include root is `Source/GameFramework/Public`, together with
+`CommonUtilities/include`. Include `<GameFramework/IGame.h>` and
+`<GameFramework/World.h>`, for example. Core headers compile without GraphicsEngine,
+D3D, platform or private include directories. Renderer component isolation and the
+physical public/private file move complete in milestone M4.
 
-Headers and implementations live together. Visual Studio filters mirror these
-directories. Include across subsystem boundaries using full framework paths, e.g.
-`#include "GameFramework/Runtime/GameContext.h"`; same-directory includes may use
-the filename alone. Consumers need `Source` on their include path, not every folder.
+`IGame::RegisterComponents` registers game types once. The engine registers its
+`agp.*` built-ins first and freezes registration before Initialize. A minimal game
+can compose its bootstrap world directly in Initialize. Components start
+successfully before their first tick; game code never prepares, activates, flushes,
+or advances the world manually.
 
-## Where to start
+Engine implementation currently lives in Runtime, World, Components and Scenes.
+`Runtime/Internal` access helpers are for the host, construction and CPU tests.
+Lifecycle, ownership collections and input bookkeeping are private, independently
+of folder placement. `Scenes` is implemented; it is not a future directory.
 
-- Game authors: `Runtime/IGame.h`, `Runtime/GameContext.h`, then `Components/Component.h`.
-- Engine lifecycle work: `Runtime/GameApplication.cpp` and `Runtime/Internal/GameLoop.h`.
-- Entity composition and ticking: `World/World.h` and `World/Actor.h`.
-- Working game example: `../Application/ModelViewer/ModelViewerScene.cpp` and
-  `../Application/ModelViewer/ModelViewerComponents.cpp`.
+During M1/M2 only, ModelViewer and host regression fixtures use the explicit
+Integration `LegacySceneBridge` to submit old scene recipes. This bridge and the
+recipe protocol are removed by M3 in favor of owned data and scene-ID requests.
+They are not part of the ordinary gameplay API.
 
-`Internal` marks implementation details, not a supported game-facing API. It is an
-organizational boundary, not compiler-enforced access control. Game code should
-use callbacks instead of including the internal scheduler.
-
-## Extending the layout
-
-Add folders when their implementation arrives:
-
-- `Scenes/`: scene descriptions, component registration, loading and reference
-  resolution. Keep JSON parsing separate from scene instantiation, and keep
-  game-specific component factories registered by the game.
-- `Assets/`: reusable asset lookup, importing and caching. The application's
-  MeshLibrary currently combines import mechanics with a game-specific catalog;
-  only the reusable mechanics should move here.
-
-Built-in components stay under `Components`; game-authored components stay in the
-application. GPU resources and rendering remain in GraphicsEngine. Avoid turning
-Runtime into a miscellaneous helpers folder. The layout does not remove existing
-framework/renderer dependencies or introduce a scene loader by itself.
+See [the game guide](../../Docs/GameFramework.md) and
+[implementation evidence](../../Docs/SimplifiedGameFrameworkImplementation.md).

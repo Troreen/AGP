@@ -5,6 +5,12 @@
 #include <Windows.h>
 #include "GameApplication.h"
 #include "GameContext.h"
+#include "Internal/SessionState.h"
+#include "Internal/WorldAccess.h"
+#include "Internal/InputAccess.h"
+#include "Internal/RegistryAccess.h"
+using GameFrameworkInternal::WorldAccess;
+using GameFrameworkInternal::InputAccess;
 #include "GameFramework/Runtime/Internal/GameLoop.h"
 #include "IGame.h"
 #include "GameFramework/Diagnostics/GameFrameworkLog.h"
@@ -51,6 +57,13 @@ struct GameApplication::Impl
 	void Advance(float delta, const GameInput& input);
     void Start();
     bool ReplaceScene();
+    void CloseSession()
+    {
+        myContext.myState->myClosing = true;
+        myContext.myState->mySceneFactory = {};
+        myContext.myState->mySceneRequested = false;
+        WorldAccess::Close(*myContext.myState->myWorld);
+    }
 	// Wake before joining: the worker may be asleep waiting for input. Joining must
 	// finish before any state captured by its callbacks can be destroyed.
 	void Stop()
@@ -99,7 +112,7 @@ struct GameApplication::Impl
 void GameApplication::Impl::Advance(float delta, const GameInput& input)
 {
 	SceneDiagnostics diagnostics;
-    if (!myContext.myWorld->Flush(diagnostics))
+    if (!WorldAccess::Flush(*myContext.myState->myWorld, diagnostics))
     {
         for (const auto& d : diagnostics) GFLOG(Error, "{} / {} / {}: {}", d.Actor, d.Component, d.Property, d.Message);
         assert(false && "Invalid runtime additions");
@@ -107,16 +120,16 @@ void GameApplication::Impl::Advance(float delta, const GameInput& input)
 	myLoop.Advance(delta, input,
 		[this](float dt, const GameInput& sample)
 		{
-			myContext.myInput = sample;
+			myContext.myState->myInput = sample;
 			myGame.FixedUpdate(myContext, dt);
-			myContext.myWorld->FixedUpdate(dt);
+			WorldAccess::FixedUpdate(*myContext.myState->myWorld, dt);
 			++myTickCount;
 		},
 		[this](float dt, const GameInput& sample)
 		{
-			myContext.myInput = sample;
+			myContext.myState->myInput = sample;
 			myGame.Update(myContext, dt);
-			myContext.myWorld->Update(dt);
+			WorldAccess::Update(*myContext.myState->myWorld, dt);
 		},
 		[this](float dt, const GameInput&)
 		{
@@ -142,29 +155,30 @@ int GameApplication::Impl::Run()
 	myMainWindowHandle = CreateWindowW(className, myConfig.Title.c_str(), WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT, myConfig.Width, myConfig.Height, nullptr, nullptr, windowClass.hInstance, nullptr);
 	if (!myMainWindowHandle) throw std::runtime_error("Could not create game window");
-	myContext.myContentRoot = std::filesystem::canonical(myConfig.ContentRoot);
+	myContext.myState->myContentRoot = std::filesystem::canonical(myConfig.ContentRoot);
 	GraphicsEngine& graphics = GraphicsEngine::Get();
-	if (!graphics.Initialize(myMainWindowHandle, myContext.myContentRoot / "Shaders") ||
+	if (!graphics.Initialize(myMainWindowHandle, myContext.myState->myContentRoot / "Shaders") ||
 		!graphics.CreateCommandList("Game Scene", myCommandList))
 		throw std::runtime_error("Could not initialize game graphics");
-	myContext.myClientSize = graphics.GetClientSize();
+	myContext.myState->myClientSize = graphics.GetClientSize();
 	myInputHandler.SetWindowHandle(myMainWindowHandle);
 	myInputHandler.SetAutoMouseCapture(false);
 
-	// Shutdown is called even after partial game initialization. No gameplay work outlives this scope.
+	GameFrameworkInternal::RegisterBuiltInComponents(myContext.myState->myRegistry);
+    myGame.RegisterComponents(myContext.myState->myRegistry);
+    GameFrameworkInternal::RegistryAccess::Freeze(myContext.myState->myRegistry);
+    // Shutdown is called even after partial game initialization. No gameplay work outlives this scope.
 	try
 	{
 		myGame.Initialize(myContext);
-        if (myContext.mySceneRequested) ReplaceScene();
+        if (myContext.myState->mySceneRequested) ReplaceScene();
         SceneDiagnostics diagnostics;
-        if (myContext.myWorld->GetState() == World::State::Constructing && !myContext.myWorld->Prepare(diagnostics))
+        if (WorldAccess::GetState(*myContext.myState->myWorld) == WorldAccess::State::Constructing && !WorldAccess::Prepare(*myContext.myState->myWorld, diagnostics))
         {
             for (const auto& d : diagnostics) GFLOG(Error, "{} / {}: {}", d.Actor, d.Component, d.Message);
-            myContext.myWorld->Shutdown();
-            assert(false && "Invalid initial scene");
             throw std::runtime_error("Invalid initial scene");
         }
-        if (myContext.myWorld->GetState() == World::State::Prepared) myContext.myWorld->Activate();
+        if (WorldAccess::GetState(*myContext.myState->myWorld) == WorldAccess::State::Prepared) WorldAccess::Activate(*myContext.myState->myWorld);
 		BuildAndPublishRenderSnapshot();
 		if (myConfig.ShowWindow)
         {
@@ -182,7 +196,7 @@ int GameApplication::Impl::Run()
 		// It exchanges copied input and completed snapshots instead.
 		CommonUtilities::Timer timer;
 		timer.Update();
-		while (!myContext.myQuitRequested)
+		while (!myContext.myState->myQuitRequested)
 		{
 			MSG message = {};
 			bool quit = false;
@@ -194,13 +208,13 @@ int GameApplication::Impl::Run()
 				DispatchMessageW(&message);
 			}
 			if (quit) break;
-            if (myContext.mySceneRequested)
+            if (myContext.myState->mySceneRequested)
             {
                 Stop();
                 if (myFailure) std::rethrow_exception(myFailure);
                 ReplaceScene();
                 myPendingInput = {}; myPendingDelta = 0; myHasPendingInput = false;
-                myContext.myInput = {}; myLoop.Reset(); myHasMainThreadMouseLookAnchor = false;
+                myContext.myState->myInput = {}; myLoop.Reset(); myHasMainThreadMouseLookAnchor = false;
                 myInputHandler.UpdateInput();
                 timer.Update();
                 if (threaded) Start();
@@ -218,7 +232,7 @@ int GameApplication::Impl::Run()
 				{
 					std::scoped_lock lock(myInputMutex);
 					if (myFailure) std::rethrow_exception(myFailure);
-					myPendingInput.Merge(input);
+					InputAccess::Merge(myPendingInput, input);
 					myPendingDelta = (std::min)(myPendingDelta + timer.GetDeltaTime(), 0.25f);
 					myHasPendingInput = true;
 				}
@@ -253,13 +267,15 @@ int GameApplication::Impl::Run()
 	{
 		Stop();
 		const auto failure = std::current_exception();
-		try { myGame.Shutdown(myContext); } catch (...) { GFLOG(Error, "Game Shutdown failed during exception cleanup"); }
-		myContext.myWorld->Shutdown();
+		CloseSession();
+        try { myGame.Shutdown(myContext); } catch (...) { GFLOG(Error, "Game Shutdown failed during exception cleanup"); }
+		WorldAccess::Shutdown(*myContext.myState->myWorld);
 		std::rethrow_exception(failure);
 	}
-	try { myGame.Shutdown(myContext); }
-    catch (...) { myContext.myWorld->Shutdown(); throw; }
-    myContext.myWorld->Shutdown();
+	CloseSession();
+        try { myGame.Shutdown(myContext); }
+    catch (...) { WorldAccess::Shutdown(*myContext.myState->myWorld); throw; }
+    WorldAccess::Shutdown(*myContext.myState->myWorld);
 	return 0;
 }
 
@@ -321,7 +337,7 @@ GameInput GameApplication::Impl::CaptureInputFrame()
 // must stay stable during play. Failed extraction must return its buffer to the queue.
 void GameApplication::Impl::BuildAndPublishRenderSnapshot()
 {
-	auto* camera = myContext.myCamera.Get();
+	auto* camera = myContext.myState->myWorld->GetActiveCamera();
     if (!camera || !camera->HasBegunPlay() || !camera->IsEnabled() || !camera->GetOwner()->IsActive())
     {
         if (!myMissingCameraReported) GFLOG(Warning, "No active camera; retaining the last completed frame");
@@ -338,7 +354,7 @@ void GameApplication::Impl::BuildAndPublishRenderSnapshot()
 
 	try
 	{
-		if (GraphicsEngine::Get().BuildRenderSnapshot(*camera, *myContext.myWorld, *snapshot))
+		if (GraphicsEngine::Get().BuildRenderSnapshot(*camera, *myContext.myState->myWorld, *snapshot))
 			myRenderSnapshots.Publish(snapshot);
 		else
 			myRenderSnapshots.CancelBuild(snapshot);
@@ -415,29 +431,31 @@ void GameApplication::Impl::Start()
 // BeginPlay failures after that point terminate the session, never revive ended objects.
 bool GameApplication::Impl::ReplaceScene()
 {
-    GameContext::SceneFactory factory;
+    GameFrameworkIntegration::LegacySceneBridge::Factory factory;
     {
-        std::scoped_lock lock(myContext.mySceneMutex);
-        factory = std::move(myContext.mySceneFactory); myContext.mySceneRequested = false;
+        std::scoped_lock lock(myContext.myState->mySceneMutex);
+        factory = std::move(myContext.myState->mySceneFactory); myContext.myState->mySceneRequested = false;
     }
     SceneBuildResult result;
-    try { if (factory) result = factory(&myContext.myInput); }
+    try { if (factory) result = factory(myContext.myState->myRegistry, &myContext.myState->myInput); }
     catch (const std::exception& e) { result.Diagnostics.push_back({{},{},{},e.what()}); }
     catch (...) { result.Diagnostics.push_back({{},{},{},"Unknown scene factory exception"}); }
-    if (!result || result.Candidate->GetState() != World::State::Prepared || !result.Camera.Get() || &result.Camera.Get()->GetWorld() != result.Candidate.get())
+    if (!result || WorldAccess::GetState(*result.Candidate) != WorldAccess::State::Prepared || !result.Camera.Get() || &result.Camera.Get()->GetWorld() != result.Candidate.get())
     {
         for (const auto& d : result.Diagnostics) GFLOG(Error, "{} / {} / {}: {}", d.Actor,d.Component,d.Property,d.Message);
         result.Candidate.reset();
         GFLOG(Error, "Scene preparation failed; previous scene retained");
         assert(false && "Scene preparation failed");
-        if (myContext.myWorld->GetState() != World::State::Active) throw std::runtime_error("Initial scene preparation failed");
+        if (WorldAccess::GetState(*myContext.myState->myWorld) != WorldAccess::State::Active) throw std::runtime_error("Initial scene preparation failed");
         return false;
     }
-    myContext.myWorld->Shutdown();
-    myContext.myWorld = std::move(result.Candidate);
-    myContext.myCamera = result.Camera;
+    myContext.myState->myClosing = true;
+    WorldAccess::Shutdown(*myContext.myState->myWorld);
+    myContext.myState->myClosing = false;
+    myContext.myState->myWorld = std::move(result.Candidate);
+    myContext.myState->myWorld->SetActiveCamera(result.Camera.Get());
     myRenderSnapshots.Reset();
-    myContext.myWorld->Activate();
+    WorldAccess::Activate(*myContext.myState->myWorld);
     BuildAndPublishRenderSnapshot();
     return true;
 }

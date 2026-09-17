@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GameFramework/Components/Component.h"
+#include "../Components/Component.h"
 
 #include "Transform.hpp"
 #include "TransformOperations.h"
@@ -13,6 +13,8 @@
 #include <vector>
 
 class World;
+class ConnectionContext;
+namespace GameFrameworkInternal { class WorldAccess; }
 
 // A world-owned entity: transform, activation state and an owned set of components.
 // Compose behavior with AddComponent rather than subclassing Actor (its destructor
@@ -27,12 +29,6 @@ public:
 	Actor& operator=(const Actor&) = delete;
 	Actor(Actor&&) = delete;
 	Actor& operator=(Actor&&) = delete;
-
-	// Called by World, with inactive actors skipped in every phase. Each enabled
-	// component runs in attachment order, so order dependencies must be deliberate.
-	void FixedUpdate(float aDeltaTime);
-	void Update(float aDeltaTime);
-	void LateUpdate(float aDeltaTime);
 
 	const std::string& GetName() const;
 	void SetName(std::string aName);
@@ -128,11 +124,16 @@ public:
     void Destroy();
     bool IsPendingDestroy() const { return myPendingDestroy; }
     ActorHandle GetHandle() const { return ActorHandle(myHandle); }
-    const std::vector<std::unique_ptr<Component>>& GetComponents() const { return myComponents; }
+    ActorHandle GetRef() const { return GetHandle(); }
 
 	void RemoveAllComponents();
 
 private:
+    // Engine phase dispatch preserves component attachment order.
+    void FixedUpdate(float aDeltaTime);
+    void Update(float aDeltaTime);
+    void LateUpdate(float aDeltaTime);
+    const std::vector<std::unique_ptr<Component>>& GetComponents() const { return myComponents; }
 	void SetWorld(World* aWorld);
     void AttachComponent(std::unique_ptr<Component> component);
     bool CanAttach() const;
@@ -151,4 +152,6 @@ private:
     std::vector<std::unique_ptr<Component>> myPendingComponents;
 
 	friend class World;
+    friend class ConnectionContext;
+    friend class GameFrameworkInternal::WorldAccess;
 };

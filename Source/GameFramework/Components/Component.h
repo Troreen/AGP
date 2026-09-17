@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "GameFramework/World/ObjectHandle.h"
+#include "../World/ObjectHandle.h"
 
 class Actor;
 class World;
@@ -27,6 +27,7 @@ public:
     void Destroy();
     bool HasBegunPlay() const { return myBegun; }
     bool IsPendingDestroy() const { return myPendingDestroy; }
+    template<class T = Component> ComponentHandle<T> GetRef() const { return GetHandle<T>(); }
     template<class T = Component> ComponentHandle<T> GetHandle() const { return ComponentHandle<T>(myHandle); }
 
 	// Constant-step simulation; zero to five calls per gameplay frame with current policy.

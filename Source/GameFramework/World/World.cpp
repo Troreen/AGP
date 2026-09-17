@@ -1,3 +1,4 @@
+#include "GameFramework/Components/CameraComponent.h"
 #include "World.h"
 #include "GameFramework/Scenes/ConnectionContext.h"
 #include "GameFramework/Diagnostics/GameFrameworkLog.h"
@@ -212,3 +213,11 @@ void World::Update(float delta)
     for (auto& a : myActors) a->Update(delta);
     for (auto& a : myActors) a->LateUpdate(delta);
 }
+
+bool World::SetActiveCamera(CameraComponent* camera)
+{
+    if (camera && (&camera->GetWorld() != this || camera->IsPendingDestroy())) return false;
+    myCamera = camera ? camera->GetHandle<CameraComponent>() : ComponentHandle<CameraComponent>{};
+    return true;
+}
+CameraComponent* World::GetActiveCamera() const { return myCamera.Get(); }

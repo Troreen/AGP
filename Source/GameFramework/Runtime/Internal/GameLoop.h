@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
-#include "GameFramework/Input/GameInput.h"
+#include "InputAccess.h"
 
 namespace GameFrameworkInternal
 {
@@ -26,7 +26,7 @@ namespace GameFrameworkInternal
 			delta = std::isfinite(delta) ? std::clamp(delta, 0.0f, 0.25f) : 0.0f;
 			// Retain fixed-phase input across frames with no fixed step. A press must reach
 			// the next fixed tick even if variable Update has already observed it.
-			myFixedInput.Merge(input);
+			InputAccess::Merge(myFixedInput, input);
 			myAccumulator += delta;
 			int steps = 0;
 			// Bound catch-up work so a slow frame cannot create an endless simulation backlog.
@@ -34,7 +34,7 @@ namespace GameFrameworkInternal
 			while (myAccumulator >= myFixedDelta && steps < 5)
 			{
 				fixed(myFixedDelta, myFixedInput);
-				myFixedInput.ClearPressed();
+				InputAccess::ClearPressed(myFixedInput);
 				myAccumulator -= myFixedDelta;
 				++steps;
 			}

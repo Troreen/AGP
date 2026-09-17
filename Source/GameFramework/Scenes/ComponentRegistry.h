@@ -1,9 +1,11 @@
 #pragma once
-#include "GameFramework/World/Actor.h"
+#include "../World/Actor.h"
 #include <functional>
 #include <unordered_map>
 #include <stdexcept>
 
+namespace GameFrameworkInternal { struct RegistryAccess; }
+class SceneBuilder;
 // Explicit registration keeps game types in the game project. Names are stable
 // runtime names; source exporter IDs belong to a separate import adapter.
 class ComponentRegistry
@@ -15,6 +17,9 @@ public:
         if (type.empty() || myFactories.contains(type)) throw std::invalid_argument("Duplicate or empty component type: " + type);
         myFactories.emplace(std::move(type), [](Actor& actor, const std::string& name) { return actor.AddComponent<T>(name); });
     }
+private:
+    friend struct GameFrameworkInternal::RegistryAccess;
+    friend class SceneBuilder;
     void Freeze() { myFrozen = true; }
     bool IsFrozen() const { return myFrozen; }
     bool Contains(const std::string& type) const { return myFactories.contains(type); }

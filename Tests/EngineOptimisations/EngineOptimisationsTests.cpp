@@ -145,7 +145,7 @@ void TestGameLoop()
     auto late = [&](float, const GameInput&) { ++lateCount; order += 'L'; };
     loop.Advance(0.0625f, input, fixed, update, late);
     Check(order == "UL", "frame without fixed tick has wrong order");
-    input.ClearPressed();
+    GameFrameworkInternal::InputAccess::ClearPressed(input);
     loop.Advance(0.25f, input, fixed, update, late);
     Check(order == "ULFFUL" && fixedCount == 2 && lateCount == 2, "catch-up phase order");
 
@@ -153,7 +153,7 @@ void TestGameLoop()
     older.KeysPressed[static_cast<size_t>(Keys::P)] = true;
     older.MouseDeltaX = 2;
     newer.MouseDeltaX = 4;
-    older.Merge(newer);
+    GameFrameworkInternal::InputAccess::Merge(older,newer);
     Check(older.IsKeyPressed(Keys::P) && !older.IsKeyDown(Keys::P) && older.MouseDeltaX == 6, "mailbox coalescing");
     Check(!older.IsKeyDown(static_cast<Keys>(-1)), "invalid input key");
 

@@ -47,3 +47,6 @@ public:
     T* Get() const { return dynamic_cast<T*>(ResolveComponent()); }
     explicit operator bool() const { return Get() != nullptr; }
 };
+
+using ActorRef = ActorHandle;
+template<class T> using ComponentRef = ComponentHandle<T>;

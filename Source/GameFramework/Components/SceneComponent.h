@@ -1,6 +1,6 @@
 #pragma once
 #include "Component.h"
-#include "GameFramework/World/TransformOperations.h"
+#include "../World/TransformOperations.h"
 
 // Spatial attachments are independent of behavior enablement. Local TRS is
 // authored relative to a sibling spatial parent, or to the owning actor at a root.
