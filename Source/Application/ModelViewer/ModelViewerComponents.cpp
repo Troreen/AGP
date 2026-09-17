@@ -1,4 +1,5 @@
 #include "ModelViewerComponents.h"
+#include "ModelViewerOrientation.h"
 #include "Application.h"
 #include "GameFramework/GameContext.h"
 #include "GameFramework/Components/LightComponent.h"
@@ -24,7 +25,9 @@ namespace
 			forward.Normalize();
 		}
 
-		anActor.GetTransform().SetLocalRotationRadians(std::atan2(forward.x, forward.z), -std::asin(std::clamp(forward.y, -1.f, 1.f)), 0);
+		const auto rotation =
+		    ModelViewerOrientation::CreateUprightRotation(std::atan2(forward.x, forward.z), -std::asin(std::clamp(forward.y, -1.f, 1.f)));
+		anActor.GetTransform().SetLocalRotation(rotation);
 	}
 
 	void PrintLightTuningValues(const DirectionalLightComponent* aDirectionalLightComponent,
@@ -77,7 +80,7 @@ void CameraControlsComponent::BeginPlay()
 	const auto direction = GetOwner()->GetTransform().GetLocalForward().GetNormalized();
 	myYaw = std::atan2(direction.x, direction.z);
 	myPitch = -std::asin(std::clamp(direction.y, -1.f, 1.f));
-	GetOwner()->GetTransform().SetLocalRotationRadians(myYaw, myPitch, 0);
+	GetOwner()->GetTransform().SetLocalRotation(ModelViewerOrientation::CreateUprightRotation(myYaw, myPitch));
 }
 
 void CameraControlsComponent::LateUpdate(float deltaTime)
@@ -88,7 +91,7 @@ void CameraControlsComponent::LateUpdate(float deltaTime)
 	{
 		myYaw += input.MouseDeltaX * .0025f;
 		myPitch = std::clamp(myPitch + input.MouseDeltaY * .0025f, -1.55334303f, 1.55334303f);
-		transform.SetLocalRotationRadians(myYaw, myPitch, 0);
+		transform.SetLocalRotation(ModelViewerOrientation::CreateUprightRotation(myYaw, myPitch));
 	}
 	const auto forward = transform.GetLocalForward().GetNormalized();
 	const auto right = transform.GetLocalRight().GetNormalized();

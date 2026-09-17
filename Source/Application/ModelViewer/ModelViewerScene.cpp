@@ -1,9 +1,11 @@
 #include "ModelViewerScene.h"
+#include "ModelViewerOrientation.h"
 #include "Application.h"
 #include "GraphicsEngine/GraphicsEngine.h"
 #include "GraphicsEngine/Materials/Material.h"
 #include "GraphicsEngine/Objects/Mesh.h"
 #include <cmath>
+#include <algorithm>
 #include <stdexcept>
 
 namespace
@@ -14,7 +16,7 @@ namespace
 	{
 		const auto forward = (target - pose.Position).GetNormalized();
 		pose.Rotation =
-		    CommonUtilities::Quaternion<float>::CreateFromYawPitchRoll(std::atan2(forward.x, forward.z), -std::asin(forward.y), 0);
+		    ModelViewerOrientation::CreateUprightRotation(std::atan2(forward.x, forward.z), -std::asin(std::clamp(forward.y, -1.f, 1.f)));
 	}
 
 	ComponentRecord ComponentData(const char* name, const char* type, PropertyMap fields = {})

@@ -161,6 +161,7 @@ xcopy /E /I /R /Y "%SHADERSRC%" "%SHADERDEST%"</Command>
   <ItemGroup>
     <ClInclude Include="ModelViewerScene.h" />
     <ClInclude Include="ModelViewerComponents.h" />
+    <ClInclude Include="ModelViewerOrientation.h" />
     <ClInclude Include="Application.h" />
     <ClInclude Include="ModelViewer.h" />
     <ClInclude Include="MeshLibrary.h" />

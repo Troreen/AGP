@@ -72,6 +72,15 @@ namespace
 			Check(requireActor("Directional Light Actor")->GetComponent<DirectionalLightComponent>(), "Actual directional light missing");
 			Check(requireActor("Warm Character Point Actor")->GetComponent<PointLightComponent>(), "Actual point light missing");
 			Check(requireActor("Spot Light Actor")->GetComponent<SpotLightComponent>(), "Actual spotlight missing");
+			const CommonUtilities::Vector3f focus{25, 0, 260};
+			for (auto* actor : {camera, requireActor("Directional Light Actor"), requireActor("Spot Light Actor")})
+			{
+				const auto expected = (focus - actor->GetTransform().GetWorldPosition()).GetNormalized();
+				const auto matrix = actor->GetTransform().GetWorldMatrix();
+				const CommonUtilities::Vector3f forward{matrix(3, 1), matrix(3, 2), matrix(3, 3)};
+				Check((forward.GetNormalized() - expected).Length() < 0.0001f,
+				      "Actual authored camera/light no longer points toward the scene focus");
+			}
 			if (Loads == 0)
 			{
 				OldCamera = camera->GetRef();
@@ -141,12 +150,18 @@ namespace
 	};
 }
 
+int RunCameraControlsTests();
+
 int main(int argc, char** argv)
 {
 	_CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
 	_CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
 	_set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
 	SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
+	if (argc > 1 && std::string(argv[1]) == "camera-controls")
+	{
+		return RunCameraControlsTests();
+	}
 	try
 	{
 		SampleGame game;
@@ -168,7 +183,7 @@ int main(int argc, char** argv)
 		Check(diagnostics.Errors.empty(), "D3D debug layer reported errors/corruption");
 		std::cout << (diagnostics.Available ? "PASS: D3D debug queue contains no ERROR/CORRUPTION messages\n"
 		                                    : "UNAVAILABLE: D3D debug queue; no clean-debug-layer claim\n");
-		std::cout << "PASS: actual ModelViewer registration, assets, authored source, callbacks, reload and hidden rendering ("
+		std::cout << "PASS: actual ModelViewer registration, assets, authored source/aim, callbacks, reload and hidden rendering ("
 		          << (config.ThreadedUpdate ? "threaded" : "sync") << ")\n";
 		return 0;
 	}

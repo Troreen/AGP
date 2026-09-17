@@ -56,6 +56,10 @@ listed in [implementation evidence](Docs/SimplifiedGameFrameworkImplementation.m
 | `Space` | Move up |
 | `Ctrl` | Move down |
 
+Mouse look keeps the camera upright relative to its actor parent: yaw follows
+parent up, while pitch rotates around the camera's turned local right axis and
+is limited to ±89°. The resulting local pose composes with any parent transform.
+
 ### Animation
 
 | Control | Action |

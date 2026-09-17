@@ -22,14 +22,14 @@
     <ClCompile>
       <LanguageStandard>stdcpp20</LanguageStandard><ExceptionHandling>Sync</ExceptionHandling>
       <WarningLevel>Level4</WarningLevel><PreprocessorDefinitions>FBXSDK_SHARED;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\..\CommonUtilities\include;$(MSBuildThisFileDirectory)..\..\Source;$(MSBuildThisFileDirectory)..\..\Source\Graphics;$(MSBuildThisFileDirectory)..\..\Source\Utilities;$(SolutionDir)Source\GameFramework\Public;$(SolutionDir)Source\GameFramework\Integration;$(SolutionDir)Source\Application\ModelViewer;$(SolutionDir)ThirdParty\TGAFBXImporter\source;$(SolutionDir)ThirdParty\TGAFBXImporter\FBXSDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\..\CommonUtilities\include;$(MSBuildThisFileDirectory)..\..\Source;$(MSBuildThisFileDirectory)..\..\Source\Graphics;$(MSBuildThisFileDirectory)..\..\Source\Utilities;$(SolutionDir)Source\GameFramework\Public;$(SolutionDir)Source\GameFramework\Integration;$(SolutionDir)Source\GameFramework\Private;$(SolutionDir)Source\Application\ModelViewer;$(SolutionDir)ThirdParty\TGAFBXImporter\source;$(SolutionDir)ThirdParty\TGAFBXImporter\FBXSDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link><SubSystem>Console</SubSystem>
       <AdditionalLibraryDirectories>$(SolutionDir)Lib\$(Configuration);$(SolutionDir)ThirdParty\TGAFBXImporter\FBXSDK\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>GraphicsEngine.lib;libfbxsdk.lib;libxml2-md.lib;zlib-md.lib;d3d11.lib;dxguid.lib;dxgi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup><ClCompile Include="ModelViewerRuntimeTests.cpp" />
+  <ItemGroup><ClCompile Include="ModelViewerRuntimeTests.cpp" /><ClCompile Include="CameraControlsTests.cpp" />
 <ClCompile Include="..\..\Source\Application\ModelViewer\ModelViewer.cpp" />
 <ClCompile Include="..\..\Source\Application\ModelViewer\ModelViewerComponents.cpp" />
 <ClCompile Include="..\..\Source\Application\ModelViewer\ModelViewerScene.cpp" />

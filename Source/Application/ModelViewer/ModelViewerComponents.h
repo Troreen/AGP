@@ -10,6 +10,8 @@ class SpotLightComponent;
 class SkeletalMeshComponent;
 
 // Game behaviors run on the gameplay owner. Service getters are valid after attachment.
+// The upright camera stores an actor-local orientation: yaw follows parent up,
+// and pitch follows the camera's yawed right axis without introducing roll.
 class CameraControlsComponent final : public Component
 {
 public:

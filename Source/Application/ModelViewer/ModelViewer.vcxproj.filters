@@ -17,6 +17,7 @@
   <ItemGroup>
     <ClInclude Include="ModelViewerScene.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="ModelViewerComponents.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="ModelViewerOrientation.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
