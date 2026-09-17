@@ -1,7 +1,6 @@
-#include "ModelViewerComponents.h"
-#include "GameFramework/World.h"
+#include "GameComponents.h"
+#include "GameFramework/World/World.h"
 #include "GameFramework/Components/LightComponent.h"
-#include "Runtime/Internal/WorldAccess.h"
 #include <cmath>
 #include <iostream>
 #include <stdexcept>
@@ -11,7 +10,6 @@ namespace
 {
 	using CommonUtilities::Quaternion;
 	using CommonUtilities::Vector3f;
-	using GameFrameworkInternal::WorldAccess;
 	constexpr float DegreesToRadians = 0.017453292519943295f;
 	constexpr float LookSensitivity = 0.0025f;
 
@@ -51,26 +49,15 @@ namespace
 	{
 	public:
 		GameInput Input;
-		std::unique_ptr<World> Session = WorldAccess::Create(&Input);
+		std::unique_ptr<World> Session = std::make_unique<World>(&Input);
 		Actor* Camera = nullptr;
 
-		explicit CameraFixture(const Quaternion<float>& authored = {}, float parentYaw = 0, float parentRoll = 0)
+		explicit CameraFixture(const Quaternion<float>& authored = {})
 		{
-			auto* parent = Session->SpawnActor("Camera parent");
-			parent->GetTransform().SetLocalRotationRadians(parentYaw * DegreesToRadians, 0, parentRoll * DegreesToRadians);
 			Camera = Session->SpawnActor("Controlled camera");
 			Camera->GetTransform().SetLocalRotation(authored);
-			if (!Camera->SetParent(parent, ReparentMode::KeepLocal))
-			{
-				throw std::runtime_error("Camera fixture parenting failed");
-			}
 			Camera->AddComponent<CameraControlsComponent>();
-			SceneDiagnostics diagnostics;
-			if (!WorldAccess::Prepare(*Session, diagnostics))
-			{
-				throw std::runtime_error("Camera fixture preparation failed");
-			}
-			WorldAccess::Activate(*Session);
+			Session->BeginPlay();
 		}
 
 		void Look(float yawDeltaDegrees, float pitchDeltaDegrees, bool active = true)
@@ -79,7 +66,7 @@ namespace
 			Input.MouseLookActive = active;
 			Input.MouseDeltaX = yawDeltaDegrees * DegreesToRadians / LookSensitivity;
 			Input.MouseDeltaY = pitchDeltaDegrees * DegreesToRadians / LookSensitivity;
-			WorldAccess::Update(*Session, 1.0f / 60.0f);
+			Session->Update(1.0f / 60.0f);
 		}
 
 		void ExpectLocal(float yawDegrees, float pitchDegrees, const std::string& label) const
@@ -116,58 +103,63 @@ namespace
 		fixture.ExpectLocal(25, -89, "Negative pitch clamp");
 	}
 
-	void StartupAimAndParent()
+	void StartupAim()
 	{
 		CameraFixture authored(AuthoredRotation(40, -25));
 		authored.ExpectLocal(40, -25, "Authored aim after BeginPlay");
 		authored.Look(0, 0, false);
 		authored.ExpectLocal(40, -25, "Authored aim without input");
-
-		CameraFixture parented({}, 60);
-		parented.Look(90, 30);
-		parented.ExpectLocal(90, 30, "Parented local controls");
-		const auto world = parented.Camera->GetTransform().GetWorldMatrix();
-		ExpectVector({world(3, 1), world(3, 2), world(3, 3)}, ExpectedForward(150, 30), "Rotated-parent world forward");
-		ExpectVector({world(1, 1), world(1, 2), world(1, 3)}, ExpectedRight(150), "Rotated-parent world right");
-
-		CameraFixture tilted({}, 0, 90);
-		tilted.Look(90, 30);
-		tilted.ExpectLocal(90, 30, "Tilted-parent local controls");
-		const auto tiltedWorld = tilted.Camera->GetTransform().GetWorldMatrix();
-		ExpectVector({tiltedWorld(3, 1), tiltedWorld(3, 2), tiltedWorld(3, 3)}, {0.5f, 0.8660254f, 0}, "Tilted-parent world forward");
-		ExpectVector({tiltedWorld(1, 1), tiltedWorld(1, 2), tiltedWorld(1, 3)}, {0, 0, -1}, "Tilted-parent world right");
 	}
 
 	void LightAimShortcuts()
 	{
 		GameInput input;
-		auto world = WorldAccess::Create(&input);
+		auto world = std::make_unique<World>(&input);
 		auto* camera = world->SpawnActor("Camera");
 		camera->GetTransform().SetLocalPosition({120, 230, -340});
 		camera->GetTransform().SetLocalRotation(AuthoredRotation(70, -35));
+		camera->AddComponent<CameraControlsComponent>();
 		auto* directional = world->SpawnActor("Directional")->AddComponent<DirectionalLightComponent>();
 		auto* point = world->SpawnActor("Point")->AddComponent<PointLightComponent>();
 		auto* spot = world->SpawnActor("Spot")->AddComponent<SpotLightComponent>();
 		auto* controls = world->SpawnActor("Controls")->AddComponent<LightControlsComponent>();
-		controls->Camera = camera->GetRef();
-		controls->Directional = directional->GetRef<DirectionalLightComponent>();
-		controls->Point = point->GetRef<PointLightComponent>();
-		controls->Spot = spot->GetRef<SpotLightComponent>();
-		SceneDiagnostics diagnostics;
-		if (!WorldAccess::Prepare(*world, diagnostics))
-		{
-			throw std::runtime_error("Light shortcut fixture preparation failed");
-		}
-		WorldAccess::Activate(*world);
+		controls->CameraName = "Camera";
+		controls->DirectionalName = "Directional";
+		controls->PointName = "Point";
+		controls->SpotName = "Spot";
+		world->BeginPlay();
+		input.MouseLookActive = true;
+		input.MouseDeltaX = 10 * DegreesToRadians / LookSensitivity;
 		input.KeysDown[static_cast<size_t>(Keys::SHIFT)] = true;
 		input.KeysPressed[static_cast<size_t>('7')] = true;
-		WorldAccess::Update(*world, 1.0f / 60.0f);
-		ExpectVector(directional->GetWorldDirection(), ExpectedForward(70, -35), "Shift+7 camera-aligned directional light");
+		world->Update(1.0f / 60.0f);
+		ExpectVector(directional->GetWorldDirection(), ExpectedForward(80, -35), "Shift+7 uses camera movement from the same Update");
+		input.MouseDeltaX = 0;
 		input.KeysPressed.fill(false);
 		input.KeysPressed[static_cast<size_t>('9')] = true;
-		WorldAccess::Update(*world, 1.0f / 60.0f);
-		ExpectVector(spot->GetWorldDirection(), ExpectedForward(70, -35), "Shift+9 camera-aligned spotlight");
+		world->Update(1.0f / 60.0f);
+		ExpectVector(spot->GetWorldDirection(), ExpectedForward(80, -35), "Shift+9 camera-aligned spotlight");
 		ExpectVector(spot->GetWorldPosition(), camera->GetTransform().GetWorldPosition(), "Shift+9 spotlight placement");
+	}
+
+	void FrameTimeSpin()
+	{
+		GameInput input;
+		auto world = std::make_unique<World>(&input);
+		auto* chest = world->SpawnActor("Chest");
+		chest->AddComponent<SpinComponent>();
+		world->BeginPlay();
+		world->Update(.002f);
+		ExpectVector(chest->GetTransform().GetLocalForward(), ExpectedForward(.05f, 0), "Spin advances on a short frame");
+		input.KeysPressed[static_cast<size_t>(Keys::R)] = true;
+		world->Update(0);
+		input.KeysPressed.fill(false);
+		input.KeysDown[static_cast<size_t>(Keys::R)] = true;
+		world->Update(.2f);
+		ExpectVector(chest->GetTransform().GetLocalForward(), ExpectedForward(.05f, 0), "Pressed R pauses; held R does not toggle again");
+		input.KeysPressed[static_cast<size_t>(Keys::R)] = true;
+		world->Update(.1f);
+		ExpectVector(chest->GetTransform().GetLocalForward(), ExpectedForward(2.55f, 0), "Second R press resumes frame-time spin");
 	}
 }
 
@@ -177,10 +169,10 @@ int RunCameraControlsTests()
 	{
 		CardinalYawPitch();
 		MixedInputAndClamp();
-		StartupAimAndParent();
+		StartupAim();
 		LightAimShortcuts();
-		std::cout
-		    << "PASS: actual camera controls preserve yaw-local pitch, startup aim, clamp, rotated-parent composition and light aim shortcuts\n";
+		FrameTimeSpin();
+		std::cout << "PASS: camera controls, same-frame light aiming and single-update chest spin\n";
 		return 0;
 	}
 	catch (const std::exception& error)

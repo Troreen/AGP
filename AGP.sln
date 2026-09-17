@@ -48,7 +48,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CommonUtilities", "CommonUt
 		CommonUtilities\include\Vector4.hpp = CommonUtilities\include\Vector4.hpp
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ModelViewer", "Source\Application\ModelViewer\ModelViewer.vcxproj", "{8B55EFBB-A7C8-47B8-A963-46AC7BA7FA8E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Game", "Source\Application\Game\Game.vcxproj", "{8B55EFBB-A7C8-47B8-A963-46AC7BA7FA8E}"
 	ProjectSection(ProjectDependencies) = postProject
 		{D6F43E75-5C34-4DC2-98DE-34C68F82833D} = {D6F43E75-5C34-4DC2-98DE-34C68F82833D}
 		{5F2B1A1E-DE2E-481A-A52F-394D4F48CF21} = {5F2B1A1E-DE2E-481A-A52F-394D4F48CF21}

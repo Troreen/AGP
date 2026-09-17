@@ -18,7 +18,7 @@
     <ClCompile>
       <LanguageStandard>stdcpp20</LanguageStandard><ExceptionHandling>Sync</ExceptionHandling>
       <WarningLevel>Level4</WarningLevel>
-      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\..\Source\GameFramework\Public;$(MSBuildThisFileDirectory)..\..\Source\GameFramework\Integration;$(MSBuildThisFileDirectory)..\..\Source\GameFramework\Private;$(MSBuildThisFileDirectory)..\..\Source;$(MSBuildThisFileDirectory)..\..\CommonUtilities\include;$(MSBuildThisFileDirectory)..\..\Source\Graphics\GraphicsEngine;$(MSBuildThisFileDirectory)..\..\Source\Utilities;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\..\Source;$(MSBuildThisFileDirectory)..\..\CommonUtilities\include;$(MSBuildThisFileDirectory)..\..\Source\Graphics\GraphicsEngine;$(MSBuildThisFileDirectory)..\..\Source\Utilities;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link><SubSystem>Console</SubSystem></Link>
   </ItemDefinitionGroup>

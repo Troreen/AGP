@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GameScene.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="GameComponents.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="GameOrientation.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameLog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PrimitiveMeshBuilder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshLibrary.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="GameScene.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="GameComponents.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PrimitiveMeshBuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshLibrary.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\TGAFBXImporter\source\Importer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\TGAFBXImporter\source\Internals.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\TGAFBXImporter\source\TgaFbxStructs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Game.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="small.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Game.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Materials\AxesMaterial.hlsli" />
+    <None Include="Materials\AxesMaterial.mat" />
+    <None Include="Materials\CharacterMaterial.hlsli" />
+    <None Include="Materials\CharacterMaterial.mat" />
+    <None Include="Materials\ChestMaterial.hlsli" />
+    <None Include="Materials\ChestMaterial.mat" />
+    <None Include="Materials\ColorCheckerMaterial.hlsli" />
+    <None Include="Materials\ColorCheckerMaterial.mat" />
+    <None Include="Materials\CubeMaterial.hlsli" />
+    <None Include="Materials\CubeMaterial.mat" />
+    <None Include="Materials\FloorMaterial.hlsli" />
+    <None Include="Materials\FloorMaterial.mat" />
+    <None Include="Materials\PyramidMaterial.hlsli" />
+    <None Include="Materials\PyramidMaterial.mat" />
+    <None Include="Materials\SphereMaterial.hlsli" />
+    <None Include="Materials\SphereMaterial.mat" />
+    <None Include="Materials\TestMaterial.hlsli" />
+    <None Include="Materials\TexturingExampleMaterial.hlsli" />
+    <None Include="Materials\TorusMaterial.hlsli" />
+    <None Include="Materials\TorusMaterial.mat" />
+  </ItemGroup>
+</Project>

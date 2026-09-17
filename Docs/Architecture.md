@@ -1,6 +1,6 @@
 # Engine map
 
-For the game-facing API, callback timing and roadmap, see [GameFramework.md](GameFramework.md).
+For the game-facing API and single-update flow, start with [GameFrameworkMVP.md](GameFrameworkMVP.md).
 
 Start with `GraphicsEngine::RenderSnapshot()` for the frame sequence and
 `GameApplication::Run()` for the application loop. Paths below are relative to the
@@ -8,40 +8,27 @@ repository root.
 
 ## Startup and shutdown
 
-`Source/Application/ModelViewer/Main.cpp` enters `GuardedMain()`, creates the
+`Source/Application/Game/Main.cpp` enters `GuardedMain()`, creates the
 game and passes it to the reusable host. `GameApplication` initialization creates
-the window and graphics engine, registers built-in/game components, calls Initialize for bootstrap composition or a scene-ID request, and creates the
+the window and graphics engine, registers built-in/game components, calls Initialize for bootstrap composition or a scene-name request, and creates the
 scene command list. Graphics initialization creates frame targets, pipeline
 states, samplers, constant buffers, shadow maps, and environment resources.
 Constant-buffer registration closes before rendering starts.
 
-`Run()` starts the gameplay update worker after initialization. Shutdown stops
-and joins that worker before releasing the held snapshot. The host destructor
-also stops it so exception unwinding cannot destroy data still in use.
+`Run()` owns one synchronous gameplay/render loop. It calls Game::Update,
+World::Update, WorldRenderer::Build, and then the existing renderer. All gameplay
+callbacks run on the application thread. Scene requests are processed between frames.
 
 ## Thread and snapshot ownership
 
-| Owner | Responsibility | Entry points |
-| --- | --- | --- |
-| Main/window thread | Window/input handling, GPU resource preparation, scene recording, command playback, presentation | `GameApplication::Run()`, `GraphicsEngine::RenderSnapshot()` |
-| Update worker | World, animation, camera and light updates; snapshot construction | `GameApplication::Impl::Advance()`, `BuildAndPublishRenderSnapshot()` |
-| Shadow workers | Record independent shadow command lists from prepared resources | `RecordAndExecuteShadows()` |
+The application thread handles window/input, gameplay, snapshot extraction and GPU
+playback. The renderer can still record shadow passes on its own workers and joins
+them before playback. The MVP has no gameplay worker, mailbox or snapshot queue.
 
-`Source/Utilities/FrameScheduler.h` supplies the triple buffer queue; GameFramework owns the gameplay worker
-and shared fixed/variable phase loop. The renderer holds a snapshot until a newer one is acquired;
-the producer cannot overwrite that held buffer. Obsolete ready snapshots can
-be dropped. The synchronous update mode uses the same snapshot path.
-
-`GameFrameworkInternal::WorldRenderBridge::Build()` copies camera/light values, world transforms and joint
-matrices. Meshes and materials are shared references: their contents must remain
-stable while rendering runs. GraphicsEngine receives copied data only; its finalization step performs existing bounds, culling and material routing. A missing camera publishes an empty frame and clears the backbuffer. GPU buffer creation and dirty material refreshes
-finish on the main thread before shadow workers start reading them.
-
-Despite its name, `RenderSceneSnapshot::ShadowCasters` stores the complete enabled
-and visible mesh collection. Opaque and blended lists index that collection; mixed-material
-meshes can appear in both. Shadow jobs borrow pointers into it and remain valid
-only while the snapshot is held. Every worker is joined before shadow playback,
-serial fallback, or destruction of job data.
+WorldRenderer copies camera/light properties, mesh/material bindings, Actor transforms
+and skeletal joint poses. GraphicsEngine then performs its existing culling and pass
+sequence. A missing camera produces an empty frame. Scene construction and graphics
+resource loading happen synchronously before rendering resumes.
 
 ## Frame sequence
 
@@ -67,10 +54,12 @@ recording intervals; they do not measure GPU execution time.
 
 | Location | Responsibility |
 | --- | --- |
-| `Source/Application/ModelViewer` | IGame implementation, scene setup, controls, mesh library, game materials |
-| `Source/GameFramework/Public/GameFramework` | Supported gameplay and registration headers |
-| `Source/GameFramework/Integration/GameFramework/Integration` | Owned scene input/source and ready asset bindings |
-| `Source/GameFramework/Private` | Host, construction, lifecycle, extraction bridge and component implementations |
+| `Source/Application/Game` | IGame implementation, scene setup, controls, mesh library, game materials |
+| `Source/GameFramework/Runtime` | Main loop, context, input and game callbacks |
+| `Source/GameFramework/World` | World, Actor, Component and Transform ownership and lifecycle |
+| `Source/GameFramework/Components` | Scene offsets, cameras, lights and meshes |
+| `Source/GameFramework/Scenes` | Scene descriptions, assets, properties and component construction |
+| `Source/GameFramework/Rendering` | Adapter to the existing renderer |
 | `Source/Graphics/GraphicsEngine/GraphicsEngine.cpp` | Frame orchestration, shadow calculations, resource and material creation |
 | `Source/Graphics/GraphicsEngine/RHI` | DirectX 11 device/context operations and command lists |
 | `Source/Graphics/GraphicsEngine/Objects` | Mesh, texture, buffer and other graphics wrappers |

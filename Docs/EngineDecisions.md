@@ -1,3 +1,5 @@
+> Historical architecture notes from game-framework; not the current MVP contract. See [GameFrameworkMVP.md](GameFrameworkMVP.md).
+
 # Engine architecture decisions
 
 This register records agreed architectural direction and outstanding decisions.

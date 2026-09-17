@@ -104,7 +104,7 @@ std::string Logger::Timestamp(bool aIncludeDate /*= false*/) const
 
 void Logger::LogIntl(const LogCategoryBase& aCategory, LogVerbosity::Type aVerbosity, const char* aMessage)
 {
-	// [hh:mm:ss][   LOG   ][ModelViewer] ModelViewer starting...
+	// [hh:mm:ss][   LOG   ][Game] Game starting...
 	SetConsoleTextAttribute(myStdErrHandle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 
 	myStream << "[" << Timestamp() << "] ";

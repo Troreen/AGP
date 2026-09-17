@@ -1,28 +1,22 @@
-# GameFramework
+# GameFramework MVP
 
-Gameplay uses `GameApplication`, `IGame`, `GameContext`, `World`, `Actor` and
-`Component`. The host owns frame advancement and lifecycle. Implement game hooks,
-spawn actors, add components, and keep checked `ActorRef`/`ComponentRef<T>` values
-when storing references between callbacks.
+Start with [the MVP guide](../../Docs/GameFrameworkMVP.md).
 
-The supported core include root is `Source/GameFramework/Public`, together with
-`CommonUtilities/include`. Include `<GameFramework/IGame.h>` and
-`<GameFramework/World.h>`, for example. All public headers compile without GraphicsEngine, D3D, platform or private include directories.
+Headers sit beside their implementations in five folders:
 
-`IGame::RegisterComponents` registers game types once. The engine registers its
-`agp.*` built-ins first and freezes registration before Initialize. A minimal game
-can compose its bootstrap world directly in Initialize. Components start
-successfully before their first tick; game code never prepares, activates, flushes,
-or advances the world manually.
+- Runtime: application loop, context, input and game callbacks.
+- World: World, Actor, Component and Transform ownership and lifecycle.
+- Components: scene offsets, cameras, lights and meshes.
+- Scenes: scene descriptions, assets, property reading and component construction.
+- Rendering: the adapter to the existing renderer.
 
-Implementations and engine-only access live in Private. Integration contains the source/data/ready-resource boundary. Public contains actual supported definitions; temporary forwarding headers and legacy API aliases are removed. World construction and lifecycle are host-only.
+Gameplay uses the headers in Runtime, World, Components and Scenes. Rendering
+contains engine implementation details. Includes follow the folder layout, for
+example `GameFramework/World/Actor.h`.
 
-SceneService accepts Load/Reload by SceneId. Integration/ISceneSource supplies owned
-SceneData and ready assets; the engine allocates registered types, reads checked
-properties, resolves IDs and validates before beginning. Rejected replacements
-preserve the current world in Debug and Release. LegacySceneBridge and executable
-scene recipes have been removed. ModelViewerScene is the temporary C++ source;
-real Perforce integration waits for verified importer contracts and fixtures.
+The application runs Game::Update, World::Update, then the existing renderer.
+World owns Actors; Actors own Components. Components have BeginPlay, Update and
+EndPlay. Scene descriptions create registered components through a small property
+reader. Scene loading is synchronous.
 
-See [the game guide](../../Docs/GameFramework.md) and
-[implementation evidence](../../Docs/SimplifiedGameFrameworkImplementation.md).
+The original advanced implementation remains on the game-framework branch.

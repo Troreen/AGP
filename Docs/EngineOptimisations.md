@@ -13,7 +13,7 @@ G-buffer targets and the optional tangent-normal target retain their slots.
 All four sampler addresses are cached after sampler creation has finished.
 Shader resource and sampler binding use bounded stack arrays.
 
-`GameFrameworkInternal::WorldRenderBridge::Build(world, graphics, snapshot)` copies camera/light values,
+`WorldRenderer::Build(world, graphics, snapshot)` copies camera/light values,
 mesh/material references, world transforms, and skinning matrices. Each mesh
 instance is stored once in `ShadowCasters`, which is also the complete enabled/visible
 mesh collection. Visible opaque and blended lists contain indices into this
@@ -23,7 +23,7 @@ pointer lists into the held snapshot. No render operation reads live actors.
 Opaque indices sort front-to-back and blended indices back-to-front by squared
 distance from the camera to the instance origin, with stable ties. Element-level
 blend filtering and G-buffer pipeline selection remain in `RenderMesh`.
-GraphicsEngine finalizes copied bounds/culling/material routing and renders snapshots; the live-world compatibility Render wrapper has been removed. Threaded and synchronous hosts use the same bridge.
+GraphicsEngine finalizes copied bounds/culling/material routing and renders snapshots; the live-world compatibility Render wrapper has been removed. The MVP host builds and renders the snapshot synchronously.
 
 ## Culling
 
@@ -44,29 +44,17 @@ light order and shadow limits remain in effect.
 
 | Owner | Work |
 | --- | --- |
-| Main/window thread | Win32 events, copied input, cursor, F6/title, GPU resource preparation, scene recording, playback, Present |
-| Update worker | World/camera/animation/light mutation and snapshot building |
+| Main/window thread | Win32/input, gameplay, snapshot construction, GPU resource preparation, scene recording, playback, Present |
 | Shadow workers | Independent command recording from held snapshots and prepared resources |
 
-The triple-buffer queue publishes the newest completed snapshot, drops obsolete
-ready snapshots, and retains the currently rendered buffer until the consumer
-acquires a replacement. A producer cannot overwrite a held snapshot. Fixed
-updates run at 60 Hz, clamp elapsed time to 0.25 seconds, and perform at most five
-catch-up ticks. Key presses and mouse deltas accumulate until consumed, then clear
-after the first fixed tick. Variable Update/LateUpdate callbacks receive their own
-frame sample; see [GameFramework.md](GameFramework.md) for the full timing contract. Input is gated on window focus. F6 only cycles render views;
-the obsolete shadow-bias hotkeys are not restored.
+The MVP runs gameplay on the main thread and builds one snapshot after each Update.
+Delta time is capped at 250 ms. Input is sampled once and gated on window focus.
+The advanced gameplay worker/queue remains on the game-framework branch.
+The standalone scheduling utility tests still cover the older reusable queue/worker,
+but those utilities are no longer part of the gameplay path.
 
-`GameApplication` explicitly stops/joins its worker before its synchronization,
-snapshots, world, or assets are destroyed, including exception unwinding. Worker
-exceptions propagate to the main thread; failed snapshot builds cancel their
-queue slot. Statistics and shadow-tuning APIs are synchronized.
-
-Mesh and material contents must remain stable after initialization while the
-update worker runs. Component resource references may change. Main-thread
-preparation creates mesh buffers and refreshes material data, including fallback
-materials, before launching shadow workers. Constant-buffer registration closes
-after graphics initialization; updates use each command list's own D3D context.
+Mesh/material resource preparation completes before renderer shadow workers begin.
+No gameplay mutation overlaps rendering. See [GameFrameworkMVP.md](GameFrameworkMVP.md).
 
 Shadow jobs use one cached deferred context per pass and per-frame `std::async`
 workers. Every job completes before deterministic playback on the main thread.
@@ -78,30 +66,28 @@ render target and pipeline override.
 
 ## Startup comparison switches
 
-Set environment variables to exactly `1` before launching ModelViewer. They are
+Set environment variables to exactly `1` before launching Game. They are
 read during startup and must not be toggled while workers are running.
 
 | Variable | Effect |
 | --- | --- |
 | `AGP_DISABLE_CULLING` | Retain all enabled meshes/lights in camera and shadow selection |
-| `AGP_DISABLE_THREADED_UPDATE` | Run the same fixed-step update on the main thread |
 | `AGP_DISABLE_PARALLEL_SHADOWS` | Record identical shadow jobs serially in the main list |
 
 Unset variables enable the optimizations. For example, from PowerShell:
 
 ```powershell
 $env:AGP_DISABLE_PARALLEL_SHADOWS = '1'
-& .\Bin\Release\ModelViewer.exe
+& .\Bin\Release\Game.exe
 Remove-Item Env:AGP_DISABLE_PARALLEL_SHADOWS
 ```
 
 P prints statistics in both Debug and Release: visible/total meshes, opaque and
 blended list sizes, relevant lights, per-pass shadow-caster submissions/culls,
-command-list counts, queue publications/reuse/drops, and CPU milliseconds for
+command-list counts and CPU milliseconds for
 snapshot construction, preparation, shadows (including the wait subset), and
 scene recording. Caster counts describe mesh submissions, not individual element
 draw calls. Timings exclude GPU execution; they are not frame-time measurements.
-The worker tick count is zero in synchronous mode.
 
 ## Automated validation
 
@@ -109,8 +95,8 @@ Standalone tests require the existing Visual Studio v145 toolchain and Windows
 SDK; no testing framework or external package is introduced.
 
 ```powershell
-msbuild AGP.sln /t:ModelViewer /p:Configuration=Debug /p:Platform=x64 /m
-msbuild AGP.sln /t:ModelViewer /p:Configuration=Release /p:Platform=x64 /m
+msbuild AGP.sln /t:Game /p:Configuration=Debug /p:Platform=x64 /m
+msbuild AGP.sln /t:Game /p:Configuration=Release /p:Platform=x64 /m
 msbuild Tests\EngineOptimisations\EngineOptimisationsTests.vcxproj /p:Configuration=Debug /p:Platform=x64
 & .\Bin\Tests\Debug\EngineOptimisationsTests.exe
 ```
@@ -134,7 +120,7 @@ resolution, camera, scene state, animation state, and presentation settings.
 Check Lit and every F6 view, both transparent chests and their overlap, animated
 limbs, offscreen shadow casters, cascade boundaries, and light-radius edges.
 Exercise mouse look, focus changes, animation/light controls, repeated shutdown,
-and update/render imbalance. Inspect the D3D debug layer for binding hazards,
+and repeated scene replacement. Inspect the D3D debug layer for binding hazards,
 constant-buffer errors, and command-list failures. Record frame-time distributions
 as well as CPU stage times and work counts in a culling-heavy scene.
 

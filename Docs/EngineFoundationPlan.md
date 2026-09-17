@@ -1,3 +1,5 @@
+> Historical architecture notes from game-framework; not the current MVP contract. See [GameFrameworkMVP.md](GameFrameworkMVP.md).
+
 # Engine foundations while scene importing is in progress
 
 Historical foundation plan. Its Connect/OnDestroy hooks, exposed lifecycle and scene recipes are superseded by the implemented [gameplay guide](GameFramework.md) and [implementation record](SimplifiedGameFrameworkImplementation.md). Retained below for design history, not current API instructions.
@@ -5,7 +7,7 @@ Historical foundation plan. Its Connect/OnDestroy hooks, exposed lifecycle and s
 ## Objective and scope
 
 Implement the runtime foundations already agreed in EngineDecisions.md without
-depending on completion of the JSON parser. Keep ModelViewer runnable throughout.
+depending on completion of the JSON parser. Keep Game runnable throughout.
 Use directly constructed C++ test scenes until the importer adapter is available.
 
 This is an implementation plan, not a claim that these capabilities exist. The
@@ -26,7 +28,7 @@ work and decisions. Existing input samples and asset-loading code remain usable.
 | 2 | Actor hierarchy and spatial component transforms | Stage 1 |
 | 3 | Type registration and dependency resolution | Stage 1; can be developed before Stage 2 finishes |
 | 4 | Candidate-world construction and scene replacement | Stages 1-3; description/asset contract checkpoint |
-| 5 | ModelViewer driven through the builder, then importer adapter | Stage 4; parser needed only for the final adapter |
+| 5 | Game driven through the builder, then importer adapter | Stage 4; parser needed only for the final adapter |
 
 Each stage updates tests, Visual Studio project/filter entries and self-contained
 onboarding comments. Source comments must not refer developers to private Docs files.
@@ -83,7 +85,7 @@ Preserve unrelated working-tree changes and keep each stage independently builda
 - Activate the initial world after IGame::Initialize and before the first snapshot.
   Join gameplay work before session shutdown, preserve the game Shutdown hook's
   access to an alive world, then finish world teardown before destroying services.
-- Replace persistent raw references in ModelViewer behaviors and active-camera
+- Replace persistent raw references in Game behaviors and active-camera
   selection with handles. Move lazy owner-dependent setup to BeginPlay.
 - Test lifecycle order, disabled/inactive initialization, self-destruction, removal
   of a later component during iteration, spawning in every phase, repeated destroy,
@@ -137,7 +139,7 @@ Preserve unrelated working-tree changes and keep each stage independently builda
   parented camera/light direction, actor activation inheritance and subtree deletion.
 - Test reparent modes, singular parents, shear rejection for TRS edits and cycle
   rejection. Verify parent removal leaves no dangling Transform parent pointers.
-- Add a small visible hierarchy example to ModelViewer using existing assets; verify
+- Add a small visible hierarchy example to Game using existing assets; verify
   geometry, lights, cameras and shadows agree on component world placement.
 
 ## Stage 3 - Registration and dependency resolution
@@ -212,7 +214,7 @@ description and the input adapter without changing lifecycle or registry semanti
   failure during replacement. Verify no stale camera or previous-scene snapshot is
   submitted after the new scene has been committed.
 
-## Stage 5 - ModelViewer and importer integration
+## Stage 5 - Game and importer integration
 
 - Describe the existing camera, meshes, animated actor and lights through the agreed
   C++ scene description and registry. Keep game behaviors in the application project.
@@ -231,7 +233,7 @@ description and the input adapter without changing lifecycle or registry semanti
 
 ## Completion checks
 
-- ModelViewer builds in Debug and Release x64 after each stage; run CPU lifecycle,
+- Game builds in Debug and Release x64 after each stage; run CPU lifecycle,
   hierarchy, dependency, builder and existing scheduling regression suites as added.
 - Manually verify both host modes: camera movement, animation switching, light
   controls, chest rotation, hierarchy placement, destruction and successful reload.
