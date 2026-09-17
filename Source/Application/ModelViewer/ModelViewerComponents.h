@@ -15,10 +15,10 @@ class CameraControlsComponent final : public Component
 public:
 	void BeginPlay() override;
 	void LateUpdate(float deltaTime) override;
+
 private:
 	float myYaw = 0;
-    float myPitch = 0;
-
+	float myPitch = 0;
 };
 
 // Update example: issue playback requests to a sibling SkeletalMeshComponent.
@@ -28,8 +28,9 @@ class AnimationControlsComponent final : public Component
 public:
 	void ResolveReferences(References& context) override;
 	void Update(float deltaTime) override;
+
 private:
-    ComponentRef<SkeletalMeshComponent> myMesh;
+	ComponentRef<SkeletalMeshComponent> myMesh;
 };
 
 // FixedUpdate example: simulate a simple rotation at the configured constant step.
@@ -39,6 +40,7 @@ class SpinComponent final : public Component
 {
 public:
 	void FixedUpdate(float deltaTime) override;
+
 private:
 	float myYaw = 0;
 	bool mySpinning = true;
@@ -52,8 +54,8 @@ class LightControlsComponent final : public Component
 public:
 	void ResolveReferences(References& context) override;
 	void LateUpdate(float deltaTime) override;
-    ActorRef Camera;
-    ComponentRef<DirectionalLightComponent> Directional;
-    ComponentRef<PointLightComponent> Point;
-    ComponentRef<SpotLightComponent> Spot;
+	ActorRef Camera;
+	ComponentRef<DirectionalLightComponent> Directional;
+	ComponentRef<PointLightComponent> Point;
+	ComponentRef<SpotLightComponent> Spot;
 };

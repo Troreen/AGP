@@ -29,7 +29,9 @@ bool GetDeferredSurface(FullTextureVertex aPixel, out float3 outDiffuse, out flo
 	outViewDir = float3(0.0f, 0.0f, 1.0f);
     const float4 albedo = GBufferAlbedo.Sample(TrilinearClamp, aPixel.UV);
     if (albedo.a == 0.0f)
+    {
         return false;
+    }
 
     const float3 material = GBufferSurface.Sample(TrilinearClamp, aPixel.UV).rgb;
     const float metalness = saturate(material.b);

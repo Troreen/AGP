@@ -11,14 +11,8 @@ namespace
 }
 
 FreeFlyCameraController::FreeFlyCameraController()
-	: myInputHandler(nullptr)
-	, myTransform(nullptr)
-	, myMoveSpeed(LOC_DEFAULT_MOVE_SPEED)
-	, myLookSensitivity(LOC_DEFAULT_LOOK_SENSITIVITY)
-	, myYawRadians(0.f)
-	, myPitchRadians(0.f)
-	, myMaxPitchRadians(LOC_DEFAULT_MAX_PITCH_RADIANS)
-	, myHasMouseLookAnchor(false)
+    : myInputHandler(nullptr), myTransform(nullptr), myMoveSpeed(LOC_DEFAULT_MOVE_SPEED), myLookSensitivity(LOC_DEFAULT_LOOK_SENSITIVITY),
+      myYawRadians(0.f), myPitchRadians(0.f), myMaxPitchRadians(LOC_DEFAULT_MAX_PITCH_RADIANS), myHasMouseLookAnchor(false)
 {
 }
 
@@ -37,8 +31,10 @@ void FreeFlyCameraController::Init(CommonUtilities::Transform& aTransform)
 	myYawRadians = std::atan2(startForward.x, startForward.z);
 	myPitchRadians = -std::asin(std::clamp(startForward.y, -1.f, 1.f));
 
-	CommonUtilities::Quaternion<float> yawRotation = CommonUtilities::Quaternion<float>::CreateFromAxisAngle(CommonUtilities::Vector3<float>::UnitY, myYawRadians);
-	CommonUtilities::Quaternion<float> pitchRotation = CommonUtilities::Quaternion<float>::CreateFromAxisAngle(CommonUtilities::Vector3<float>::UnitX, myPitchRadians);
+	CommonUtilities::Quaternion<float> yawRotation =
+	    CommonUtilities::Quaternion<float>::CreateFromAxisAngle(CommonUtilities::Vector3<float>::UnitY, myYawRadians);
+	CommonUtilities::Quaternion<float> pitchRotation =
+	    CommonUtilities::Quaternion<float>::CreateFromAxisAngle(CommonUtilities::Vector3<float>::UnitX, myPitchRadians);
 	CommonUtilities::Quaternion<float> cameraRotation = yawRotation * pitchRotation;
 	cameraRotation.Normalize();
 	myTransform->SetRotation(cameraRotation);
@@ -59,18 +55,14 @@ void FreeFlyCameraController::Update(float aTimeDelta)
 	const HWND windowHandle = myInputHandler->GetWindowHandle();
 	const bool isFocused = windowHandle != nullptr && GetForegroundWindow() == windowHandle;
 	const bool rightMouseDown =
-		myInputHandler->IsMouseButtonDown(Keys::MOUSERBUTTON) ||
-		(isFocused && isVirtualKeyDown(static_cast<int>(Keys::MOUSERBUTTON)));
+	    myInputHandler->IsMouseButtonDown(Keys::MOUSERBUTTON) || (isFocused && isVirtualKeyDown(static_cast<int>(Keys::MOUSERBUTTON)));
 
 	if (isFocused && rightMouseDown)
 	{
 		RECT clientRect = {};
 		if (GetClientRect(windowHandle, &clientRect) != 0)
 		{
-			const POINT centerPoint = {
-				(clientRect.right - clientRect.left) / 2,
-				(clientRect.bottom - clientRect.top) / 2
-			};
+			const POINT centerPoint = {(clientRect.right - clientRect.left) / 2, (clientRect.bottom - clientRect.top) / 2};
 
 			if (myHasMouseLookAnchor)
 			{
@@ -85,8 +77,10 @@ void FreeFlyCameraController::Update(float aTimeDelta)
 				myPitchRadians += mouseDeltaY * myLookSensitivity;
 				myPitchRadians = std::clamp(myPitchRadians, -myMaxPitchRadians, myMaxPitchRadians);
 
-				CommonUtilities::Quaternion<float> yawRotation = CommonUtilities::Quaternion<float>::CreateFromAxisAngle(CommonUtilities::Vector3<float>::UnitY, myYawRadians);
-				CommonUtilities::Quaternion<float> pitchRotation = CommonUtilities::Quaternion<float>::CreateFromAxisAngle(CommonUtilities::Vector3<float>::UnitX, myPitchRadians);
+				CommonUtilities::Quaternion<float> yawRotation =
+				    CommonUtilities::Quaternion<float>::CreateFromAxisAngle(CommonUtilities::Vector3<float>::UnitY, myYawRadians);
+				CommonUtilities::Quaternion<float> pitchRotation =
+				    CommonUtilities::Quaternion<float>::CreateFromAxisAngle(CommonUtilities::Vector3<float>::UnitX, myPitchRadians);
 				CommonUtilities::Quaternion<float> cameraRotation = yawRotation * pitchRotation;
 				cameraRotation.Normalize();
 				myTransform->SetRotation(cameraRotation);
@@ -133,8 +127,10 @@ void FreeFlyCameraController::Update(float aTimeDelta, const InputState& anInput
 		myPitchRadians += anInputState.MouseDeltaY * myLookSensitivity;
 		myPitchRadians = std::clamp(myPitchRadians, -myMaxPitchRadians, myMaxPitchRadians);
 
-		CommonUtilities::Quaternion<float> yawRotation = CommonUtilities::Quaternion<float>::CreateFromAxisAngle(CommonUtilities::Vector3<float>::UnitY, myYawRadians);
-		CommonUtilities::Quaternion<float> pitchRotation = CommonUtilities::Quaternion<float>::CreateFromAxisAngle(CommonUtilities::Vector3<float>::UnitX, myPitchRadians);
+		CommonUtilities::Quaternion<float> yawRotation =
+		    CommonUtilities::Quaternion<float>::CreateFromAxisAngle(CommonUtilities::Vector3<float>::UnitY, myYawRadians);
+		CommonUtilities::Quaternion<float> pitchRotation =
+		    CommonUtilities::Quaternion<float>::CreateFromAxisAngle(CommonUtilities::Vector3<float>::UnitX, myPitchRadians);
 		CommonUtilities::Quaternion<float> cameraRotation = yawRotation * pitchRotation;
 		cameraRotation.Normalize();
 		myTransform->SetRotation(cameraRotation);

@@ -7,5 +7,6 @@ Bin/**
 Lib/**
 Source/Graphics/GraphicsEngine/TemporaryShaders/**
 Source/Graphics/GraphicsEngine/InterOp/DDSTextureLoader11.*
+Source/Application/ModelViewer/resource.h
 **/*.generated.h
 **/*.generated.hpp

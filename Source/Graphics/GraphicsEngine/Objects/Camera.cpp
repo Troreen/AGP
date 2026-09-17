@@ -2,21 +2,20 @@
 #include "Camera.h"
 #include "Maths.hpp"
 
-Camera::Camera()
-	: myProjection(Matrix4f()), myNearPlane (0), myFarPlane(0), myHorizontalFoV(0), myVerticalFoV(0)
+Camera::Camera() : myProjection(Matrix4f()), myNearPlane(0), myFarPlane(0), myHorizontalFoV(0), myVerticalFoV(0)
 {
-} 
+}
 
 Camera::Camera(float aHorizontalFoV, float aNearPlane, float aFarPlane, Vector2f aResolution)
 {
 	myNearPlane = aNearPlane;
 	myFarPlane = aFarPlane;
-	myHorizontalFoV = aHorizontalFoV;	
+	myHorizontalFoV = aHorizontalFoV;
 
 	const float hFoVRad = Maths::DegreesToRadians(aHorizontalFoV);
 
 	const float vFoVRad = 2 * std::atan(std::tan(hFoVRad * 0.5f) * (static_cast<float>(aResolution.y) / static_cast<float>(aResolution.x)));
-	
+
 	myVerticalFoV = Maths::RadiansToDegrees(vFoVRad);
 
 	const float myXScale = 1 / std::tan(hFoVRad * 0.5f);

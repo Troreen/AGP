@@ -11,7 +11,7 @@ public:
 	ModelViewer();
 	~ModelViewer() override;
 	void RegisterComponents(ComponentRegistry& registry) override;
-    void Initialize(GameContext& context) override;
+	void Initialize(GameContext& context) override;
 	void Update(GameContext& context, float deltaTime) override;
 	void Shutdown(GameContext& context) override;
 };

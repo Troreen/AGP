@@ -27,9 +27,15 @@ RenderHardwareInterface::~RenderHardwareInterface() = default;
 RenderHardwareInterface::DebugMessages RenderHardwareInterface::CollectDeviceDiagnostics() const
 {
 	DebugMessages result;
-	if (!myDevice) return result;
+	if (!myDevice)
+	{
+		return result;
+	}
 	ComPtr<ID3D11InfoQueue> queue;
-	if (FAILED(myDevice.As(&queue))) return result;
+	if (FAILED(myDevice.As(&queue)))
+	{
+		return result;
+	}
 	result.Available = true;
 	const auto count = queue->GetNumStoredMessagesAllowedByRetrievalFilter();
 	for (UINT64 index = 0; index < count; ++index)
@@ -50,7 +56,10 @@ RenderHardwareInterface::DebugMessages RenderHardwareInterface::CollectDeviceDia
 		if (message->Severity == D3D11_MESSAGE_SEVERITY_ERROR || message->Severity == D3D11_MESSAGE_SEVERITY_CORRUPTION)
 		{
 			std::string description(message->pDescription, message->DescriptionByteLength);
-			while (!description.empty() && description.back() == '\0') description.pop_back();
+			while (!description.empty() && description.back() == '\0')
+			{
+				description.pop_back();
+			}
 			result.Errors.push_back(std::move(description));
 		}
 	}
@@ -90,41 +99,20 @@ bool RenderHardwareInterface::Initialize(HWND aWindowHandle, bool aEnableDebug, 
 			selectedAdapter = adapter;
 			selectedAdapterDesc = desc;
 		}
-	} 
+	}
 
 	const wchar_t* wideAdapterName = selectedAdapterDesc.Description;
 	const std::string adapterName = str::wide_to_utf8(wideAdapterName);
 	LOG(RhiLog, Log, "Selected adapter: {}", adapterName);
 
-
-	result = D3D11CreateDevice(
-		selectedAdapter.Get(),
-		D3D_DRIVER_TYPE_UNKNOWN,
-		NULL,
-		aEnableDebug ? D3D11_CREATE_DEVICE_DEBUG : 0,
-		NULL, 
-		0,
-		D3D11_SDK_VERSION,
-		&myDevice,
-		NULL,
-		&myContext
-	);
+	result = D3D11CreateDevice(selectedAdapter.Get(), D3D_DRIVER_TYPE_UNKNOWN, NULL, aEnableDebug ? D3D11_CREATE_DEVICE_DEBUG : 0, NULL, 0,
+	                           D3D11_SDK_VERSION, &myDevice, NULL, &myContext);
 
 	if (FAILED(result) && aEnableDebug)
 	{
 		LOG(RhiLog, Warning, "Failed to create D3D11 debug device. Retrying without the debug layer.");
-		result = D3D11CreateDevice(
-			selectedAdapter.Get(),
-			D3D_DRIVER_TYPE_UNKNOWN,
-			NULL,
-			0,
-			NULL,
-			0,
-			D3D11_SDK_VERSION,
-			&myDevice,
-			NULL,
-			&myContext
-		);
+		result = D3D11CreateDevice(selectedAdapter.Get(), D3D_DRIVER_TYPE_UNKNOWN, NULL, 0, NULL, 0, D3D11_SDK_VERSION, &myDevice, NULL,
+		                           &myContext);
 	}
 
 	if (FAILED(result))
@@ -140,10 +128,7 @@ bool RenderHardwareInterface::Initialize(HWND aWindowHandle, bool aEnableDebug, 
 		ComPtr<ID3D11InfoQueue> infoQueue;
 		deviceDebug->QueryInterface(IID_PPV_ARGS(&infoQueue));
 
-		D3D11_MESSAGE_ID mask[] =
-		{
-			D3D11_MESSAGE_ID_SETPRIVATEDATA_CHANGINGPARAMS
-		};
+		D3D11_MESSAGE_ID mask[] = {D3D11_MESSAGE_ID_SETPRIVATEDATA_CHANGINGPARAMS};
 
 		D3D11_INFO_QUEUE_FILTER filter = {};
 		filter.DenyList.NumIDs = _countof(mask);
@@ -174,9 +159,10 @@ bool RenderHardwareInterface::Initialize(HWND aWindowHandle, bool aEnableDebug, 
 		LOG(RhiLog, Error, "Failed to create Swap Chain!");
 		return false;
 	}
-	
+
 	const std::string swapChainName = "SwapChain";
-	mySwapChain->SetPrivateData(WKPDID_D3DDebugObjectName, static_cast<unsigned>(swapChainName.size() * sizeof(char)), swapChainName.data());
+	mySwapChain->SetPrivateData(WKPDID_D3DDebugObjectName, static_cast<unsigned>(swapChainName.size() * sizeof(char)),
+	                            swapChainName.data());
 
 	ComPtr<ID3D11Texture2D> backBufferTexture;
 	result = mySwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &backBufferTexture);
@@ -198,7 +184,7 @@ bool RenderHardwareInterface::Initialize(HWND aWindowHandle, bool aEnableDebug, 
 	SetObjectName(outBackBuffer.myRTV, "BackBufferRTV");
 
 	CommonUtilities::Vector2u clientSize = GetClientSize();
-	Viewport viewport = { 0, 0, static_cast<float>(clientSize.x), static_cast<float>(clientSize.y), 0, 1 };
+	Viewport viewport = {0, 0, static_cast<float>(clientSize.x), static_cast<float>(clientSize.y), 0, 1};
 	outBackBuffer.myViewport = viewport;
 
 	D3D11_TEXTURE2D_DESC depthDesc = {};
@@ -249,12 +235,12 @@ CommonUtilities::Vector2u RenderHardwareInterface::GetClientSize() const
 	const unsigned width = clientRect.right - clientRect.left;
 	const unsigned height = clientRect.bottom - clientRect.top;
 
-	return { width, height };
+	return {width, height};
 }
 
-bool RenderHardwareInterface::CreateVertexBuffer(std::string_view aName, const std::vector<Vertex> &aVertexList, Buffer &outBuffer) const
+bool RenderHardwareInterface::CreateVertexBuffer(std::string_view aName, const std::vector<Vertex>& aVertexList, Buffer& outBuffer) const
 {
-	if(aVertexList.empty())
+	if (aVertexList.empty())
 	{
 		LOG(RhiLog, Error, "Failed to create vertex buffer for {}! Vertex list is empty.", aName);
 		return false;
@@ -287,9 +273,9 @@ bool RenderHardwareInterface::CreateVertexBuffer(std::string_view aName, const s
 	return true;
 }
 
-bool RenderHardwareInterface::CreateIndexBuffer(std::string_view aName, const std::vector<unsigned> &aIndexList, Buffer &outBuffer) const
+bool RenderHardwareInterface::CreateIndexBuffer(std::string_view aName, const std::vector<unsigned>& aIndexList, Buffer& outBuffer) const
 {
-    if(aIndexList.empty())
+	if (aIndexList.empty())
 	{
 		LOG(RhiLog, Error, "Failed to create index buffer for {}! Index list is empty.", aName);
 		return false;
@@ -322,7 +308,7 @@ bool RenderHardwareInterface::CreateIndexBuffer(std::string_view aName, const st
 	return true;
 }
 
-bool RenderHardwareInterface::CreateConstantBuffer(std::string_view aName, size_t aSize, Buffer &outBuffer) const
+bool RenderHardwareInterface::CreateConstantBuffer(std::string_view aName, size_t aSize, Buffer& outBuffer) const
 {
 	if (aSize > 65536)
 	{
@@ -353,7 +339,8 @@ bool RenderHardwareInterface::CreateConstantBuffer(std::string_view aName, size_
 	return true;
 }
 
-bool RenderHardwareInterface::CreateDepthStencil(std::string_view aName, unsigned aWidth, unsigned aHeight, Texture& outDepthStencil, bool aCubeMap) const
+bool RenderHardwareInterface::CreateDepthStencil(std::string_view aName, unsigned aWidth, unsigned aHeight, Texture& outDepthStencil,
+                                                 bool aCubeMap) const
 {
 	ensure(!aName.empty());
 
@@ -432,28 +419,29 @@ bool RenderHardwareInterface::CreateDepthStencil(std::string_view aName, unsigne
 	const std::string srvName = std::format("{}_SRV", aName);
 	SetObjectName(outDepthStencil.mySRV, srvName);
 
-	outDepthStencil.myViewport = { 0, 0, static_cast<float>(aWidth), static_cast<float>(aHeight), 0, 1 };
+	outDepthStencil.myViewport = {0, 0, static_cast<float>(aWidth), static_cast<float>(aHeight), 0, 1};
 	outDepthStencil.myName = aName;
 
 	return true;
 }
 
-bool RenderHardwareInterface::CreatePipelineStateObject(const PipelineStateDescription& aDescription, PipelineStateObject &outPSO) const
+bool RenderHardwareInterface::CreatePipelineStateObject(const PipelineStateDescription& aDescription, PipelineStateObject& outPSO) const
 {
-    ensure(!aDescription.Name.empty());
+	ensure(!aDescription.Name.empty());
 
 	bool hasErrored = false;
 
 	if (aDescription.VertexShader.ByteCode)
 	{
 		ComPtr<ID3D11VertexShader> shader;
-		const HRESULT result = myDevice->CreateVertexShader(aDescription.VertexShader.ByteCode, aDescription.VertexShader.ByteCodeSize, nullptr, &shader);
+		const HRESULT result =
+		    myDevice->CreateVertexShader(aDescription.VertexShader.ByteCode, aDescription.VertexShader.ByteCodeSize, nullptr, &shader);
 		if (FAILED(result))
 		{
 			LOG(RhiLog, Error, "Failed to create vertex shader for the pipeline state object {}!", aDescription.Name);
 			hasErrored = true;
 		}
-		else 
+		else
 		{
 			const std::string shaderName = std::format("{}_VS", aDescription.Name);
 			SetObjectName(shader, shaderName);
@@ -464,13 +452,14 @@ bool RenderHardwareInterface::CreatePipelineStateObject(const PipelineStateDescr
 	if (aDescription.PixelShader.ByteCode)
 	{
 		ComPtr<ID3D11PixelShader> shader;
-		const HRESULT result = myDevice->CreatePixelShader(aDescription.PixelShader.ByteCode, aDescription.PixelShader.ByteCodeSize, nullptr, &shader);
+		const HRESULT result =
+		    myDevice->CreatePixelShader(aDescription.PixelShader.ByteCode, aDescription.PixelShader.ByteCodeSize, nullptr, &shader);
 		if (FAILED(result))
 		{
 			LOG(RhiLog, Error, "Failed to create pixel shader for the pipeline state object {}!", aDescription.Name);
 			hasErrored = true;
 		}
-		else 
+		else
 		{
 			const std::string shaderName = std::format("{}_PS", aDescription.Name);
 			SetObjectName(shader, shaderName);
@@ -481,7 +470,8 @@ bool RenderHardwareInterface::CreatePipelineStateObject(const PipelineStateDescr
 	if (aDescription.GeometryShader.ByteCode)
 	{
 		ComPtr<ID3D11GeometryShader> shader;
-		const HRESULT result = myDevice->CreateGeometryShader(aDescription.GeometryShader.ByteCode, aDescription.GeometryShader.ByteCodeSize, nullptr, &shader);
+		const HRESULT result = myDevice->CreateGeometryShader(aDescription.GeometryShader.ByteCode,
+		                                                      aDescription.GeometryShader.ByteCodeSize, nullptr, &shader);
 		if (FAILED(result))
 		{
 			LOG(RhiLog, Error, "Failed to create geometry shader for the pipeline state object {}!", aDescription.Name);
@@ -506,7 +496,7 @@ bool RenderHardwareInterface::CreatePipelineStateObject(const PipelineStateDescr
 			element.SemanticName = desc.Semantic.c_str();
 			element.SemanticIndex = desc.SemanticIndex;
 			element.Format = static_cast<DXGI_FORMAT>(desc.Format);
-			
+
 			element.InputSlot = 0;
 			element.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 			element.AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
@@ -517,13 +507,9 @@ bool RenderHardwareInterface::CreatePipelineStateObject(const PipelineStateDescr
 
 		ComPtr<ID3D11InputLayout> inputLayout;
 
-		const HRESULT result = myDevice->CreateInputLayout(
-			elements.data(), 
-			static_cast<unsigned>(elements.size()),
-			aDescription.VertexShader.ByteCode,
-			aDescription.VertexShader.ByteCodeSize,
-			&inputLayout 
-		);
+		const HRESULT result =
+		    myDevice->CreateInputLayout(elements.data(), static_cast<unsigned>(elements.size()), aDescription.VertexShader.ByteCode,
+		                                aDescription.VertexShader.ByteCodeSize, &inputLayout);
 		if (FAILED(result))
 		{
 			LOG(RhiLog, Error, "Failed to create input layout for the pipeline state object {}!", aDescription.Name);
@@ -566,13 +552,12 @@ bool RenderHardwareInterface::CreatePipelineStateObject(const PipelineStateDescr
 		outPSO.myRasterizerState = rasterizerState;
 	}
 
-
 	switch (aDescription.BlendMode)
 	{
 	case BlendMode::Opaque:
 		outPSO.myBlendState = nullptr;
 		break;
-		
+
 	case BlendMode::Alpha:
 	{
 		D3D11_RENDER_TARGET_BLEND_DESC blend = {};
@@ -637,9 +622,9 @@ bool RenderHardwareInterface::CreatePipelineStateObject(const PipelineStateDescr
 	return !hasErrored;
 }
 
-bool RenderHardwareInterface::CreateCommandList(std::string_view aName, GraphicsCommandList &outCommandList) const
+bool RenderHardwareInterface::CreateCommandList(std::string_view aName, GraphicsCommandList& outCommandList) const
 {
-    ensure(!outCommandList.myContext);
+	ensure(!outCommandList.myContext);
 
 	const HRESULT result = myDevice->CreateDeferredContext(0, &outCommandList.myContext);
 	if (FAILED(result))
@@ -656,7 +641,8 @@ bool RenderHardwareInterface::CreateCommandList(std::string_view aName, Graphics
 	return true;
 }
 
-bool RenderHardwareInterface::CreateRenderTargetTexture(std::string_view aName, unsigned aWidth, unsigned aHeight, unsigned aFormat, Texture& outTexture) const
+bool RenderHardwareInterface::CreateRenderTargetTexture(std::string_view aName, unsigned aWidth, unsigned aHeight, unsigned aFormat,
+                                                        Texture& outTexture) const
 {
 	ensure(!aName.empty());
 	ensure(aWidth > 0);
@@ -717,25 +703,20 @@ bool RenderHardwareInterface::CreateRenderTargetTexture(std::string_view aName, 
 	outTexture.myResource = texture;
 	outTexture.myRTV = rtv;
 	outTexture.mySRV = srv;
-	outTexture.myViewport = { 0, 0, static_cast<float>(aWidth), static_cast<float>(aHeight), 0, 1 };
+	outTexture.myViewport = {0, 0, static_cast<float>(aWidth), static_cast<float>(aHeight), 0, 1};
 	outTexture.myName = aName;
 
 	return true;
 }
 
-bool RenderHardwareInterface::CreateTexture(std::string_view aName, const uint8_t* aByteCode, size_t aByteCodeSize, Texture& outTexture) const
+bool RenderHardwareInterface::CreateTexture(std::string_view aName, const uint8_t* aByteCode, size_t aByteCodeSize,
+                                            Texture& outTexture) const
 {
 	ensure(!aName.empty());
 
 	ComPtr<ID3D11Resource> resource;
 	ComPtr<ID3D11ShaderResourceView> srv;
-	const HRESULT result = DirectX::CreateDDSTextureFromMemory(
-		myDevice.Get(),
-		aByteCode,
-		aByteCodeSize,
-		&resource,
-		&srv
-	); 
+	const HRESULT result = DirectX::CreateDDSTextureFromMemory(myDevice.Get(), aByteCode, aByteCodeSize, &resource, &srv);
 	if (FAILED(result))
 	{
 		LOG(RhiLog, Error, "Failed to load texture {}!", aName);
@@ -751,7 +732,6 @@ bool RenderHardwareInterface::CreateTexture(std::string_view aName, const uint8_
 	outTexture.myName = aName;
 
 	return true;
-
 }
 
 bool RenderHardwareInterface::CreateColorTexture(std::string_view aName, const std::array<uint8_t, 4>& aColor, Texture& outTexture) const
@@ -820,7 +800,7 @@ bool RenderHardwareInterface::CreateSampler(const SamplerDescription& aDescripti
 	samplerDesc.BorderColor[3] = aDescription.BorderColor.w;
 
 	const HRESULT result = myDevice->CreateSamplerState(&samplerDesc, &outSampler.mySampler);
-	if(FAILED(result))
+	if (FAILED(result))
 	{
 		LOG(RhiLog, Error, "Failed to create sampler state {}!", aDescription.Name);
 		return false;
@@ -831,7 +811,7 @@ bool RenderHardwareInterface::CreateSampler(const SamplerDescription& aDescripti
 	return true;
 }
 
-void RenderHardwareInterface::ExecuteCommandList(const GraphicsCommandList &aCommandList) const
+void RenderHardwareInterface::ExecuteCommandList(const GraphicsCommandList& aCommandList) const
 {
 	ensure(aCommandList.IsReadyForExecution());
 	myContext->ExecuteCommandList(aCommandList.myCommandList.Get(), false);
@@ -842,22 +822,22 @@ void RenderHardwareInterface::Present() const
 	mySwapChain->Present(0, DXGI_PRESENT_ALLOW_TEARING);
 }
 
-bool RenderHardwareInterface::CompileShader(ShaderType aShaderType, const std::filesystem::path &aPath, 
-	ID3DInclude *aIncludeHandler, bool aCompileDebug, Shader &outShader) const
+bool RenderHardwareInterface::CompileShader(ShaderType aShaderType, const std::filesystem::path& aPath, ID3DInclude* aIncludeHandler,
+                                            bool aCompileDebug, Shader& outShader) const
 {
-    std::ifstream codeFile(aPath, std::ios::binary);
+	std::ifstream codeFile(aPath, std::ios::binary);
 	std::ostringstream codeFileStream;
 	codeFileStream << codeFile.rdbuf();
 	codeFile.close();
 	const std::string shaderSource = codeFileStream.str();
 
-	if	(shaderSource.empty())
+	if (shaderSource.empty())
 	{
 		LOG(RhiLog, Error, "Failed to compile shader {}! Shader source is empty.", aPath.string());
 		return false;
 	}
 
-	std::string shaderTarget(6, ' '); 
+	std::string shaderTarget(6, ' ');
 	switch (aShaderType)
 	{
 	case ShaderType::VertexShader:
@@ -881,28 +861,17 @@ bool RenderHardwareInterface::CompileShader(ShaderType aShaderType, const std::f
 	unsigned shaderFlags = D3DCOMPILE_WARNINGS_ARE_ERRORS;
 	if (aCompileDebug)
 	{
-		shaderMacros.emplace_back(D3D_SHADER_MACRO{ .Name = "_DEBUG", .Definition = "1" });
+		shaderMacros.emplace_back(D3D_SHADER_MACRO{.Name = "_DEBUG", .Definition = "1"});
 		shaderFlags |= D3DCOMPILE_DEBUG;
 	}
 
-	shaderMacros.emplace_back(D3D_SHADER_MACRO{ .Name = nullptr, .Definition = nullptr });
+	shaderMacros.emplace_back(D3D_SHADER_MACRO{.Name = nullptr, .Definition = nullptr});
 
 	ComPtr<ID3DBlob> compiledShader;
 	ComPtr<ID3DBlob> errorMessages;
 
-	const HRESULT result = D3DCompile(
-		shaderSource.data(),
-		shaderSource.size(),
-		aPath.string().c_str(),
-		shaderMacros.data(),
-		aIncludeHandler,
-		"main",
-		shaderTarget.c_str(),
-		shaderFlags,
-		0,
-		&compiledShader,
-		&errorMessages
-	);
+	const HRESULT result = D3DCompile(shaderSource.data(), shaderSource.size(), aPath.string().c_str(), shaderMacros.data(),
+	                                  aIncludeHandler, "main", shaderTarget.c_str(), shaderFlags, 0, &compiledShader, &errorMessages);
 
 	if (FAILED(result))
 	{
@@ -917,7 +886,6 @@ bool RenderHardwareInterface::CompileShader(ShaderType aShaderType, const std::f
 
 	return true;
 }
-
 
 void RenderHardwareInterface::SetObjectName(const Microsoft::WRL::ComPtr<ID3D11DeviceChild>& aObject, std::string_view aName) const
 {

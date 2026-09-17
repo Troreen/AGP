@@ -132,7 +132,6 @@ namespace
 			return BlendMode::Alpha;
 		}
 
-
 		return BlendMode::Opaque;
 	}
 }
@@ -166,18 +165,20 @@ bool LoadMaterialDescription(const std::filesystem::path& aPath, MaterialDescrip
 
 bool Material::IsMaterialDataDirty() const
 {
-    return false;
+	return false;
 }
 
 void Material::RefreshMaterialData() const
 {
-    // Nothing here for Material.
+	// Nothing here for Material.
 }
 
 const MaterialParameterInfo* Material::GetParameterByIndex(unsigned aIndex) const
 {
-    if (myParameters.size() <= aIndex)
-        return nullptr;
+	if (myParameters.size() <= aIndex)
+	{
+		return nullptr;
+	}
 
 	return &myParameters[aIndex];
 }
@@ -186,7 +187,9 @@ const MaterialParameterInfo* Material::GetParameterByName(const std::string& aNa
 {
 	const auto it = myParameterNameToIndex.find(aName);
 	if (it == myParameterNameToIndex.end())
+	{
 		return nullptr;
+	}
 
 	return &myParameters[it->second];
 }
@@ -213,7 +216,9 @@ bool Material::SetTexture(const std::string& aName, const std::shared_ptr<Textur
 bool Material::SetTexture(unsigned aSlot, const std::shared_ptr<Texture>& aTexture)
 {
 	if (aSlot >= MAX_MATERIAL_TEXTURE_COUNT)
+	{
 		return false;
+	}
 
 	myTextures[aSlot] = aTexture;
 	return true;
@@ -228,12 +233,15 @@ std::shared_ptr<Texture> Material::GetTexture(const std::string& aName) const
 std::shared_ptr<Texture> Material::GetTexture(unsigned aSlot) const
 {
 	if (aSlot >= MAX_MATERIAL_TEXTURE_COUNT)
+	{
 		return nullptr;
+	}
 
 	return myTextures[aSlot];
 }
 
-std::shared_ptr<MaterialInstance> MaterialInstance::Create(std::string_view aName, const std::shared_ptr<MaterialInterface>& aMaterialInterface)
+std::shared_ptr<MaterialInstance> MaterialInstance::Create(std::string_view aName,
+                                                           const std::shared_ptr<MaterialInterface>& aMaterialInterface)
 {
 	std::shared_ptr<MaterialInstance> instance = std::make_shared<MaterialInstance>();
 	instance->myParentMaterial = aMaterialInterface;
@@ -261,7 +269,9 @@ void MaterialInstance::RefreshMaterialData() const
 		for (size_t i = 0; i < myOverridenParameters.size(); i++)
 		{
 			if (!myOverridenParameters[i])
+			{
 				continue;
+			}
 
 			overriddenParams.emplace_back(*GetParameterByIndex(static_cast<unsigned>(i)));
 		}
@@ -285,8 +295,6 @@ void MaterialInstance::RefreshMaterialData() const
 	}
 
 	myIsParameterDataDirty = false;
-
-
 }
 
 unsigned MaterialInstance::GetTextureSlotByName(const std::string& aName) const
@@ -303,7 +311,9 @@ bool MaterialInstance::SetTexture(const std::string& aName, const std::shared_pt
 bool MaterialInstance::SetTexture(unsigned aSlot, const std::shared_ptr<Texture>& aTexture)
 {
 	if (aSlot >= MAX_MATERIAL_TEXTURE_COUNT)
+	{
 		return false;
+	}
 
 	myTextures[aSlot] = aTexture;
 	return true;
@@ -318,7 +328,9 @@ std::shared_ptr<Texture> MaterialInstance::GetTexture(const std::string& aName) 
 std::shared_ptr<Texture> MaterialInstance::GetTexture(unsigned aSlot) const
 {
 	if (aSlot >= MAX_MATERIAL_TEXTURE_COUNT)
+	{
 		return nullptr;
+	}
 
 	if (!myTextures[aSlot].has_value())
 	{
@@ -330,11 +342,11 @@ std::shared_ptr<Texture> MaterialInstance::GetTexture(unsigned aSlot) const
 
 bool MaterialInstance::SetRawParameterValue(const MaterialParameterInfo& aParamInfo, const void* aPtr, size_t aPtrSize)
 {
-	if (aParamInfo.Offset > MATERIAL_BUFFER_SIZE
-		|| aParamInfo.Offset + aParamInfo.Size > MATERIAL_BUFFER_SIZE
-		|| aParamInfo.Size > aPtrSize
-		)
+	if (aParamInfo.Offset > MATERIAL_BUFFER_SIZE || aParamInfo.Offset + aParamInfo.Size > MATERIAL_BUFFER_SIZE ||
+	    aParamInfo.Size > aPtrSize)
+	{
 		return false;
+	}
 
 	if (aParamInfo.Index >= myOverridenParameters.size())
 	{
@@ -348,4 +360,3 @@ bool MaterialInstance::SetRawParameterValue(const MaterialParameterInfo& aParamI
 
 	return true;
 }
-

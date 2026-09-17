@@ -11,7 +11,11 @@
 
 class Mesh;
 class SkeletalMeshComponent;
-namespace GameFrameworkInternal { class RenderAccess; }
+
+namespace GameFrameworkInternal
+{
+	class RenderAccess;
+}
 
 // Connects a spatial attachment to shared mesh/material assets. Component offsets
 // compose with the owner; assets are shared by actors and render snapshots. Load and
@@ -23,17 +27,21 @@ public:
 	explicit MeshComponentBase(MeshAsset aMesh);
 	~MeshComponentBase() override = default;
 
-    // An empty binding clears the mesh. This never loads resources.
+	// An empty binding clears the mesh. This never loads resources.
 	void SetMesh(MeshAsset aMesh);
 	MeshAsset GetMesh() const;
 	bool HasMesh() const;
 
-    // Invalid slots or empty materials leave the existing binding unchanged.
+	// Invalid slots or empty materials leave the existing binding unchanged.
 	bool SetMaterial(unsigned aMaterialIndex, MaterialAsset aMaterial);
-    MaterialAsset GetMaterial(unsigned index) const;
-    unsigned GetMaterialCount() const { return static_cast<unsigned>(myMaterials.size()); }
+	MaterialAsset GetMaterial(unsigned index) const;
 
-    // Visibility affects extraction only; hidden skeletal meshes continue playback.
+	unsigned GetMaterialCount() const
+	{
+		return static_cast<unsigned>(myMaterials.size());
+	}
+
+	// Visibility affects extraction only; hidden skeletal meshes continue playback.
 	void SetVisible(bool aVisible);
 	bool IsVisible() const;
 
@@ -41,11 +49,11 @@ protected:
 	virtual void OnMeshChanged();
 
 private:
-    virtual bool HasSkinning() const;
-    virtual const std::array<CU::Matrix4f, 128>* GetJointTransforms() const;
-    std::shared_ptr<Mesh> myMesh;
+	virtual bool HasSkinning() const;
+	virtual const std::array<CU::Matrix4f, 128>* GetJointTransforms() const;
+	std::shared_ptr<Mesh> myMesh;
 	std::vector<std::shared_ptr<MaterialInterface>> myMaterials;
-    bool myVisible = true;
-    friend class SkeletalMeshComponent;
-    friend class GameFrameworkInternal::RenderAccess;
+	bool myVisible = true;
+	friend class SkeletalMeshComponent;
+	friend class GameFrameworkInternal::RenderAccess;
 };

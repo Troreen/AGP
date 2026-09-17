@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "RHIStructs.h"
 
@@ -60,7 +60,8 @@ struct RHIShaderReflectionInfo
 	ShaderType Type = ShaderType::Unknown;
 };
 
-struct RHIShaderReflector
+class RHIShaderReflector
 {
+public:
 	static bool Reflect(const uint8_t* aShaderData, size_t aShaderDataSize, RHIShaderReflectionInfo& outReflectionInfo);
 };

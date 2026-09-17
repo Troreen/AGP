@@ -1,7 +1,9 @@
 #pragma once
 #include <string>
-struct SceneId
+
+class SceneId
 {
-    std::string Value;
-    bool operator==(const SceneId&) const = default;
+public:
+	std::string Value;
+	bool operator==(const SceneId&) const = default;
 };

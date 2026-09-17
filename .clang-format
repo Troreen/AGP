@@ -12,9 +12,13 @@ FixNamespaceComments: false
 BreakStringLiterals: false
 SortIncludes: Never
 ReflowComments: Never
-AllowShortFunctionsOnASingleLine: Empty
+AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: Never
 AllowShortLoopsOnASingleLine: false
 AllowShortBlocksOnASingleLine: Never
 AllowShortLambdasOnASingleLine: None
+InsertBraces: true
+AccessModifierOffset: -4
+SeparateDefinitionBlocks: Always
+LambdaBodyIndentation: OuterScope
 LineEnding: CRLF

@@ -1,4 +1,4 @@
-﻿#include "GraphicsEngine.pch.h"
+#include "GraphicsEngine.pch.h"
 #include "RHIShaderReflectionInfo.h"
 #include "RHIStructs.h"
 #include <d3dcompiler.h>
@@ -7,9 +7,9 @@
 
 using namespace Microsoft::WRL;
 
-template<>
-struct std::hash<RHIShaderReflectionInfo::ResourceBinding>
+template <> class std::hash<RHIShaderReflectionInfo::ResourceBinding>
 {
+public:
 	size_t operator()(const RHIShaderReflectionInfo::ResourceBinding& x) const noexcept
 	{
 		return std::hash<std::string>{}(x.Name);
@@ -77,12 +77,14 @@ namespace
 		return typeString;
 	}
 
-	void ReflectVariable(std::string_view aDomain, ID3D11ShaderReflectionType* aVarType, const D3D11_SHADER_VARIABLE_DESC* aVarDesc, const D3D11_SHADER_TYPE_DESC& aVarTypeDesc, RHIShaderReflectionInfo::ConstantBufferInfo& inoutBufferInfo, size_t& inoutOffset)
+	void ReflectVariable(std::string_view aDomain, ID3D11ShaderReflectionType* aVarType, const D3D11_SHADER_VARIABLE_DESC* aVarDesc,
+	                     const D3D11_SHADER_TYPE_DESC& aVarTypeDesc, RHIShaderReflectionInfo::ConstantBufferInfo& inoutBufferInfo,
+	                     size_t& inoutOffset)
 	{
-		if(aVarTypeDesc.Members > 0)
+		if (aVarTypeDesc.Members > 0)
 		{
 			// This is a struct or class or similar. It has child members.
-			for(unsigned m = 0; m < aVarTypeDesc.Members; ++m)
+			for (unsigned m = 0; m < aVarTypeDesc.Members; ++m)
 			{
 				ID3D11ShaderReflectionType* memberType = aVarType->GetMemberTypeByIndex(m);
 
@@ -108,7 +110,9 @@ namespace
 		{
 			RHIShaderReflectionInfo::ConstantBufferInfo::MemberInfo memInfo;
 			if (aDomain.starts_with("__"))
+			{
 				return;
+			}
 			memInfo.Name = aDomain;
 			std::string typeString = DeriveHLSLType(aVarTypeDesc);
 			memInfo.Type = typeString.c_str();
@@ -119,7 +123,7 @@ namespace
 				ensure(typeString == aVarTypeDesc.Name);
 			}
 			memInfo.Size = static_cast<size_t>(aVarTypeDesc.Rows * aVarTypeDesc.Columns) * sizeof(float);
-			if(aVarDesc && aVarDesc->DefaultValue != nullptr)
+			if (aVarDesc && aVarDesc->DefaultValue != nullptr)
 			{
 				memcpy_s(memInfo.Default, 64, aVarDesc->DefaultValue, aVarDesc->Size);
 			}
@@ -203,7 +207,8 @@ namespace
 bool RHIShaderReflector::Reflect(const uint8_t* aShaderData, size_t aShaderDataSize, RHIShaderReflectionInfo& outReflectionInfo)
 {
 	ComPtr<ID3D11ShaderReflection> shaderRefl;
-	HRESULT reflectResult = D3DReflect(aShaderData, aShaderDataSize, IID_ID3D11ShaderReflection, reinterpret_cast<void**>(shaderRefl.GetAddressOf()));
+	HRESULT reflectResult =
+	    D3DReflect(aShaderData, aShaderDataSize, IID_ID3D11ShaderReflection, reinterpret_cast<void**>(shaderRefl.GetAddressOf()));
 	if (SUCCEEDED(reflectResult))
 	{
 		return ReflectShader(shaderRefl, outReflectionInfo);
@@ -211,4 +216,3 @@ bool RHIShaderReflector::Reflect(const uint8_t* aShaderData, size_t aShaderDataS
 
 	return false;
 }
-

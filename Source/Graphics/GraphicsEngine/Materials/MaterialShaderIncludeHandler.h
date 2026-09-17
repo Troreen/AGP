@@ -11,14 +11,14 @@
 class MaterialShaderIncludeHandler : public ID3DInclude
 {
 public:
-	MaterialShaderIncludeHandler(const std::filesystem::path& aShaderRoot, const std::filesystem::path& aShaderProgramPath, const std::filesystem::path& aMaterialProgramPath);
+	MaterialShaderIncludeHandler(const std::filesystem::path& aShaderRoot, const std::filesystem::path& aShaderProgramPath,
+	                             const std::filesystem::path& aMaterialProgramPath);
 	virtual ~MaterialShaderIncludeHandler() = default;
 
 	HRESULT Open(D3D_INCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID* ppData, UINT* pBytes) override;
 	HRESULT Close(LPCVOID pData) override;
 
 private:
-
 	struct LiveFileInfo
 	{
 		std::string Data;

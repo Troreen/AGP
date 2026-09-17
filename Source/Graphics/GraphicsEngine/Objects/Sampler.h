@@ -49,14 +49,12 @@ class Sampler
 {
 	friend class RenderHardwareInterface;
 	friend class GraphicsCommandList;
+
 public:
 	Sampler();
 	~Sampler();
 
 private:
-
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> mySampler;
 	SamplerDescription myDescription;
-
 };
-

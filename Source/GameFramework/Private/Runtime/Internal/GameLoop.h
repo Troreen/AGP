@@ -15,12 +15,21 @@ namespace GameFrameworkInternal
 	public:
 		explicit GameLoop(float fixedDelta) : myFixedDelta(fixedDelta)
 		{
-			if (!std::isfinite(fixedDelta) || fixedDelta <= 0) throw std::invalid_argument("FixedDeltaTime must be positive and finite");
+			if (!std::isfinite(fixedDelta) || fixedDelta <= 0)
+			{
+				throw std::invalid_argument("FixedDeltaTime must be positive and finite");
+			}
 		}
-		void Reset() { myAccumulator = 0; myFixedInput = {}; }
-        // Advance one gameplay frame, which may combine several platform frames.
+
+		void Reset()
+		{
+			myAccumulator = 0;
+			myFixedInput = {};
+		}
+
+		// Advance one gameplay frame, which may combine several platform frames.
 		// A fixed step is not guaranteed on every call; variable Update and Late always run.
-		template<class Fixed, class Update, class Late>
+		template <class Fixed, class Update, class Late>
 		void Advance(float delta, const GameInput& input, Fixed fixed, Update update, Late late)
 		{
 			delta = std::isfinite(delta) ? std::clamp(delta, 0.0f, 0.25f) : 0.0f;
@@ -41,11 +50,14 @@ namespace GameFrameworkInternal
 			// Drop excess whole steps but preserve the fractional remainder. Under overload
 			// simulation deliberately loses time; this is not a deterministic replay clock.
 			if (steps == 5 && myAccumulator >= myFixedDelta)
+			{
 				myAccumulator = std::fmod(myAccumulator, myFixedDelta);
+			}
 			// These phases see the original frame input, independently of fixed consumption.
 			update(delta, input);
 			late(delta, input);
 		}
+
 	private:
 		float myFixedDelta;
 		float myAccumulator = 0;

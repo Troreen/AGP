@@ -36,10 +36,20 @@ enum class ShadingModel : uint8_t
 enum class MaterialParameterType : uint8_t
 {
 	Unknown,
-	Float, Float2, Float3, Float4,
-	Int, Int2, Int3, Int4,
-	Uint, Uint2, Uint3, Uint4,
-	Bool, Matrix4x4
+	Float,
+	Float2,
+	Float3,
+	Float4,
+	Int,
+	Int2,
+	Int3,
+	Int4,
+	Uint,
+	Uint2,
+	Uint3,
+	Uint4,
+	Bool,
+	Matrix4x4
 };
 
 /**
@@ -62,7 +72,6 @@ struct MaterialParameterInfo
 class MaterialInterface
 {
 public:
-
 	// Maximum allowed size of the HLSL MaterialParametersBuffer constant buffer.
 	// This is to make sure we don't underflow data storage on the C++ side.
 	// This cannot be more than 65535 (64 kB)! Hard limit for CBuffers.
@@ -108,7 +117,7 @@ public:
 	// /**
 	//  * Refreshes the MaterialParametersBuffer settings. Also asks our Parent, if there is one, for
 	//  * updated MaterialParametersBuffer settings.
-	//  * @return 
+	//  * @return
 	//  */
 	virtual void RefreshMaterialData() const = 0;
 
@@ -125,7 +134,7 @@ public:
 	// /**
 	//  * Retrieve the list of Parameters for this Material.
 	//  */
-	virtual const std::vector<MaterialParameterInfo>& GetParameters() const = 0;	
+	virtual const std::vector<MaterialParameterInfo>& GetParameters() const = 0;
 
 	// /**
 	//  * Retrieves a pointer to the MaterialParameterInfo based on the Parameter Index.
@@ -145,5 +154,4 @@ public:
 	virtual bool SetTexture(unsigned aSlot, const std::shared_ptr<Texture>& aTexture) = 0;
 	virtual std::shared_ptr<Texture> GetTexture(const std::string& aName) const = 0;
 	virtual std::shared_ptr<Texture> GetTexture(unsigned aSlot) const = 0;
-
 };

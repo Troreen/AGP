@@ -16,30 +16,29 @@ DECLARE_LOG_CATEGORY_WITH_NAME(CmdLog, CommandList, Verbose);
 
 DEFINE_LOG_CATEGORY(CmdLog);
 
-
 GraphicsCommandList::GraphicsCommandList() = default;
 
 GraphicsCommandList::~GraphicsCommandList() = default;
 
-GraphicsCommandList::GraphicsCommandList(GraphicsCommandList &&aOther) noexcept
+GraphicsCommandList::GraphicsCommandList(GraphicsCommandList&& aOther) noexcept
 {
-    *this = std::move(aOther);
+	*this = std::move(aOther);
 }
 
-GraphicsCommandList &GraphicsCommandList::operator=(GraphicsCommandList &&aOther) noexcept
+GraphicsCommandList& GraphicsCommandList::operator=(GraphicsCommandList&& aOther) noexcept
 {
-    if (this != &aOther)
-    {
-        myContext.Reset();
-        myCommandList.Reset();
-        myUDA.Reset();
+	if (this != &aOther)
+	{
+		myContext.Reset();
+		myCommandList.Reset();
+		myUDA.Reset();
 
-        aOther.myContext.Swap(myContext);
-        aOther.myCommandList.Swap(myCommandList);
-        aOther.myUDA.Swap(myUDA);
-        myName = std::move(aOther.myName);
-    }
-    return *this;
+		aOther.myContext.Swap(myContext);
+		aOther.myCommandList.Swap(myCommandList);
+		aOther.myUDA.Swap(myUDA);
+		myName = std::move(aOther.myName);
+	}
+	return *this;
 }
 
 bool GraphicsCommandList::FinishCommandList()
@@ -59,18 +58,18 @@ bool GraphicsCommandList::FinishCommandList()
 
 void GraphicsCommandList::ResetCommandList()
 {
-    myRecordingFailed = false;
-    myCommandList.Reset();
+	myRecordingFailed = false;
+	myCommandList.Reset();
 }
 
 void GraphicsCommandList::ClearRenderTarget(const Texture& aTarget) const
 {
 	ensure(!IsReadyForExecution());
-	float clearColor[4] = { 0, 0, 0, 0 };	 
+	float clearColor[4] = {0, 0, 0, 0};
 	myContext->ClearRenderTargetView(aTarget.myRTV.Get(), clearColor);
 }
 
-void GraphicsCommandList::ClearDepthStencil(const Texture &aTarget) const
+void GraphicsCommandList::ClearDepthStencil(const Texture& aTarget) const
 {
 	ensure(!IsReadyForExecution());
 	myContext->ClearDepthStencilView(aTarget.myDSV.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
@@ -86,7 +85,7 @@ void GraphicsCommandList::SetRenderTargets(const Texture* const* aTargets, size_
 	ensure(!IsReadyForExecution());
 	std::vector<ID3D11RenderTargetView*> rtvs(aNumTargets);
 	ID3D11DepthStencilView* dsv = nullptr;
-	D3D11_VIEWPORT viewport = { 0, 0, 0, 0, 0, 1 };
+	D3D11_VIEWPORT viewport = {0, 0, 0, 0, 0, 1};
 
 	if (aNumTargets > 0 && aTargets[0])
 	{
@@ -104,7 +103,7 @@ void GraphicsCommandList::SetRenderTargets(const Texture* const* aTargets, size_
 	if (aDepthStencil)
 	{
 		dsv = aDepthStencil->myDSV.Get();
-		if(aNumTargets == 0 || !aTargets[0])
+		if (aNumTargets == 0 || !aTargets[0])
 		{
 			memcpy_s(&viewport, sizeof(D3D11_VIEWPORT), &aDepthStencil->myViewport, sizeof(Viewport));
 		}
@@ -114,10 +113,10 @@ void GraphicsCommandList::SetRenderTargets(const Texture* const* aTargets, size_
 	myContext->RSSetViewports(1, &viewport);
 }
 
-bool GraphicsCommandList::UpdateConstantBuffer(const Buffer &aConstantBuffer, const void *aBufferData, size_t aBufferDataSize) const
+bool GraphicsCommandList::UpdateConstantBuffer(const Buffer& aConstantBuffer, const void* aBufferData, size_t aBufferDataSize) const
 {
 	ensure(!IsReadyForExecution());
-    if (!aConstantBuffer.IsValid() || aConstantBuffer.myType != BufferType::ConstantBuffer)
+	if (!aConstantBuffer.IsValid() || aConstantBuffer.myType != BufferType::ConstantBuffer)
 	{
 		LOG(CmdLog, Error, "Failed to update constant buffer! Buffer is either null or invalid type!");
 		myRecordingFailed = true;
@@ -126,14 +125,15 @@ bool GraphicsCommandList::UpdateConstantBuffer(const Buffer &aConstantBuffer, co
 
 	if (aBufferDataSize > aConstantBuffer.mySize)
 	{
-		LOG(CmdLog, Error, "Failed to update constant buffer {}! Data provided is larger than the buffer capacity!", aConstantBuffer.myName);
+		LOG(CmdLog, Error, "Failed to update constant buffer {}! Data provided is larger than the buffer capacity!",
+		    aConstantBuffer.myName);
 		myRecordingFailed = true;
 		return false;
 	}
 
 	D3D11_MAPPED_SUBRESOURCE resource = {};
-	
-	const HRESULT result = myContext->Map(aConstantBuffer.myBuffer.Get(), 0,  D3D11_MAP_WRITE_DISCARD, 0, &resource);
+
+	const HRESULT result = myContext->Map(aConstantBuffer.myBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
 	if (FAILED(result))
 	{
 		LOG(CmdLog, Error, "Failed to update constant buffer {}! Failed to map buffer!", aConstantBuffer.myName);
@@ -147,7 +147,7 @@ bool GraphicsCommandList::UpdateConstantBuffer(const Buffer &aConstantBuffer, co
 	return true;
 }
 
-void GraphicsCommandList::SetVertexBuffer(const Buffer *aBuffer) const
+void GraphicsCommandList::SetVertexBuffer(const Buffer* aBuffer) const
 {
 	ensure(!IsReadyForExecution());
 	constexpr unsigned offset = 0;
@@ -163,7 +163,7 @@ void GraphicsCommandList::SetVertexBuffer(const Buffer *aBuffer) const
 	}
 }
 
-void GraphicsCommandList::SetIndexBuffer(const Buffer *aBuffer) const
+void GraphicsCommandList::SetIndexBuffer(const Buffer* aBuffer) const
 {
 	ensure(!IsReadyForExecution());
 	if (aBuffer)
@@ -177,7 +177,7 @@ void GraphicsCommandList::SetIndexBuffer(const Buffer *aBuffer) const
 	}
 }
 
-void GraphicsCommandList::SetConstantBuffer(const Buffer *aBuffer, unsigned aSlot, PipeLineStages aStages) const
+void GraphicsCommandList::SetConstantBuffer(const Buffer* aBuffer, unsigned aSlot, PipeLineStages aStages) const
 {
 	ensure(!IsReadyForExecution());
 	ID3D11Buffer* buffer = nullptr;
@@ -198,35 +198,30 @@ void GraphicsCommandList::SetConstantBuffer(const Buffer *aBuffer, unsigned aSlo
 	{
 		myContext->PSSetConstantBuffers(aSlot, 1, &buffer);
 	}
-	
 }
 
-void GraphicsCommandList::SetPipelineState(const PipelineStateObject *aPSO)
+void GraphicsCommandList::SetPipelineState(const PipelineStateObject* aPSO)
 {
 	ensure(!IsReadyForExecution());
 	const PipelineStateObject& pipelineState = *aPSO;
-	myContext->IASetPrimitiveTopology(static_cast<D3D11_PRIMITIVE_TOPOLOGY>(aPSO->myTopology)); 
+	myContext->IASetPrimitiveTopology(static_cast<D3D11_PRIMITIVE_TOPOLOGY>(aPSO->myTopology));
 	myContext->IASetInputLayout(aPSO->myInputLayout.Get());
 
-	myContext->VSSetShader(
-		IsOverrideActive(PipeLineStage_VertexShader) ? myOverridePipelineState.myVertexShader.Get() : pipelineState.myVertexShader.Get(),
-		nullptr,
-		0);
-	myContext->GSSetShader(
-		IsOverrideActive(PipeLineStage_GeometryShader) ? myOverridePipelineState.myGeometryShader.Get() : pipelineState.myGeometryShader.Get(),
-		nullptr,
-		0);
-	myContext->PSSetShader(
-		IsOverrideActive(PipeLineStage_PixelShader) ? myOverridePipelineState.myPixelShader.Get() : pipelineState.myPixelShader.Get(),
-		nullptr,
-		0);
-	myContext->RSSetState(
-		IsOverrideActive(PipeLineStage_Rasterizer) ? myOverridePipelineState.myRasterizerState.Get() : pipelineState.myRasterizerState.Get());
-	constexpr float blendFactor[4] = { 0, 0, 0, 0 };
-	myContext->OMSetBlendState(
-		IsOverrideActive(PipeLineStage_Blend) ? myOverridePipelineState.myBlendState.Get() : pipelineState.myBlendState.Get(),
-		blendFactor,
-		0xFFFFFFFF);
+	myContext->VSSetShader(IsOverrideActive(PipeLineStage_VertexShader) ? myOverridePipelineState.myVertexShader.Get()
+	                                                                    : pipelineState.myVertexShader.Get(),
+	                       nullptr, 0);
+	myContext->GSSetShader(IsOverrideActive(PipeLineStage_GeometryShader) ? myOverridePipelineState.myGeometryShader.Get()
+	                                                                      : pipelineState.myGeometryShader.Get(),
+	                       nullptr, 0);
+	myContext->PSSetShader(IsOverrideActive(PipeLineStage_PixelShader) ? myOverridePipelineState.myPixelShader.Get()
+	                                                                   : pipelineState.myPixelShader.Get(),
+	                       nullptr, 0);
+	myContext->RSSetState(IsOverrideActive(PipeLineStage_Rasterizer) ? myOverridePipelineState.myRasterizerState.Get()
+	                                                                 : pipelineState.myRasterizerState.Get());
+	constexpr float blendFactor[4] = {0, 0, 0, 0};
+	myContext->OMSetBlendState(IsOverrideActive(PipeLineStage_Blend) ? myOverridePipelineState.myBlendState.Get()
+	                                                                 : pipelineState.myBlendState.Get(),
+	                           blendFactor, 0xFFFFFFFF);
 
 	const std::string message = std::format("Change Pipeline State - {}", aPSO->myName);
 	SetMarker(message);
@@ -251,13 +246,12 @@ void GraphicsCommandList::ClearOverridePipelineState()
 	myCurrentOverrides = PipeLineStage_None;
 }
 
-void GraphicsCommandList::SetShaderResources(const Texture* const* aResourcesList, size_t aNumResources, unsigned aStartSlot, PipeLineStages aStages) const
+void GraphicsCommandList::SetShaderResources(const Texture* const* aResourcesList, size_t aNumResources, unsigned aStartSlot,
+                                             PipeLineStages aStages) const
 {
 	constexpr size_t maxResourceSlots = D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT;
 	const bool isValidRange =
-		aNumResources <= maxResourceSlots
-		&& aStartSlot <= maxResourceSlots
-		&& aNumResources <= maxResourceSlots - aStartSlot;
+	    aNumResources <= maxResourceSlots && aStartSlot <= maxResourceSlots && aNumResources <= maxResourceSlots - aStartSlot;
 	ensure(isValidRange);
 	ensure(aResourcesList != nullptr || aNumResources == 0);
 	if (!isValidRange || (aResourcesList == nullptr && aNumResources > 0) || aNumResources == 0)
@@ -276,20 +270,25 @@ void GraphicsCommandList::SetShaderResources(const Texture* const* aResourcesLis
 
 	const unsigned numResources = static_cast<unsigned>(aNumResources);
 	if (aStages & PipeLineStage_VertexShader)
+	{
 		myContext->VSSetShaderResources(aStartSlot, numResources, srvs.data());
+	}
 	if (aStages & PipeLineStage_GeometryShader)
+	{
 		myContext->GSSetShaderResources(aStartSlot, numResources, srvs.data());
+	}
 	if (aStages & PipeLineStage_PixelShader)
+	{
 		myContext->PSSetShaderResources(aStartSlot, numResources, srvs.data());
+	}
 }
 
-void GraphicsCommandList::SetShaderSamplers(const Sampler* const* aSamplerList, size_t aNumSamplers, unsigned aStartSlot, PipeLineStages aStages) const
+void GraphicsCommandList::SetShaderSamplers(const Sampler* const* aSamplerList, size_t aNumSamplers, unsigned aStartSlot,
+                                            PipeLineStages aStages) const
 {
 	constexpr size_t maxSamplerSlots = D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT;
 	const bool isValidRange =
-		aNumSamplers <= maxSamplerSlots
-		&& aStartSlot <= maxSamplerSlots
-		&& aNumSamplers <= maxSamplerSlots - aStartSlot;
+	    aNumSamplers <= maxSamplerSlots && aStartSlot <= maxSamplerSlots && aNumSamplers <= maxSamplerSlots - aStartSlot;
 	ensure(isValidRange);
 	ensure(aSamplerList != nullptr || aNumSamplers == 0);
 	if (!isValidRange || (aSamplerList == nullptr && aNumSamplers > 0) || aNumSamplers == 0)
@@ -308,11 +307,17 @@ void GraphicsCommandList::SetShaderSamplers(const Sampler* const* aSamplerList, 
 
 	const unsigned numSamplers = static_cast<unsigned>(aNumSamplers);
 	if (aStages & PipeLineStage_VertexShader)
+	{
 		myContext->VSSetSamplers(aStartSlot, numSamplers, samplers.data());
+	}
 	if (aStages & PipeLineStage_GeometryShader)
+	{
 		myContext->GSSetSamplers(aStartSlot, numSamplers, samplers.data());
+	}
 	if (aStages & PipeLineStage_PixelShader)
+	{
 		myContext->PSSetSamplers(aStartSlot, numSamplers, samplers.data());
+	}
 }
 
 void GraphicsCommandList::Draw(unsigned aNumVertices) const
@@ -346,6 +351,6 @@ void GraphicsCommandList::BeginEvent(std::string_view aEvent) const
 void GraphicsCommandList::EndEvent() const
 {
 	ensure(!IsReadyForExecution());
-	
+
 	myUDA->EndEvent();
 }

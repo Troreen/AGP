@@ -10,33 +10,31 @@
 
 #include "StringHelpers.h"
 
-
-
 int GuardedMain()
 {
 #ifdef _DEBUG
-    // Request a console window.
-    AllocConsole();
+	// Request a console window.
+	AllocConsole();
 
-    // Redirect stdout and stderr to the console. (std::cout and std::cerr)
-    FILE* consoleOut;
+	// Redirect stdout and stderr to the console. (std::cout and std::cerr)
+	FILE* consoleOut;
 	FILE* consoleErr;
-    freopen_s(&consoleOut, "CONOUT$", "w", stdout);  // NOLINT(cert-err33-c)
-    setvbuf(consoleOut, nullptr, _IONBF, 1024);  // NOLINT(cert-err33-c)
-	freopen_s(&consoleErr, "CONOUT$", "w", stderr);  // NOLINT(cert-err33-c)
-    setvbuf(consoleErr, nullptr, _IONBF, 1024);  // NOLINT(cert-err33-c)
+	freopen_s(&consoleOut, "CONOUT$", "w", stdout); // NOLINT(cert-err33-c)
+	setvbuf(consoleOut, nullptr, _IONBF, 1024);     // NOLINT(cert-err33-c)
+	freopen_s(&consoleErr, "CONOUT$", "w", stderr); // NOLINT(cert-err33-c)
+	setvbuf(consoleErr, nullptr, _IONBF, 1024);     // NOLINT(cert-err33-c)
 
-    // Resize the console window to 1280 x 720 and force update.
+	// Resize the console window to 1280 x 720 and force update.
 	const HWND consoleWindow = GetConsoleWindow();
-    RECT consoleSize;
-    GetWindowRect(consoleWindow, &consoleSize);
-    MoveWindow(consoleWindow, consoleSize.left, consoleSize.top, 1280, 720, true);
+	RECT consoleSize;
+	GetWindowRect(consoleWindow, &consoleSize);
+	MoveWindow(consoleWindow, consoleSize.left, consoleSize.top, 1280, 720, true);
 
-    // Read below about strings to understand this.
+	// Read below about strings to understand this.
 	SetConsoleOutputCP(CP_UTF8);
 #endif
 
-    /*
+	/*
      * A note about strings:
      * Strings in C++ are terrible things. They come in a variety of formats which causes issues.
      * The reason for this is that, as a programmer, you would want one string format that can
@@ -77,49 +75,49 @@ int GuardedMain()
      * read your strings in the same format, and always treat them as byte blocks, you'll be fine.
      */
 
-    MVLOG(Log, "ModelViewer starting...");
+	MVLOG(Log, "ModelViewer starting...");
 
-    wchar_t executablePath[MAX_PATH] = {};
-    if (!GetModuleFileNameW(nullptr, executablePath, MAX_PATH)) return -1;
-    GameApplication::Config config;
-    config.Title = L"AGP Modelviewer";
-    config.ContentRoot = std::filesystem::path(executablePath).parent_path() / ".." / ".." / "Assets";
-    config.EnableRenderDiagnostics = true;
-    config.EnableMouseLook = true;
-    // Composition root for this repository's single game. The game object lives longer
-    // than the blocking host call. For the next game, change this type/configuration and
-    // content; window creation, ticking and shutdown stay inside GameApplication.
-    ModelViewer game;
-    GameApplication application;
-    GameFrameworkIntegration::ApplicationSetup setup;
-    setup.SceneSource = std::make_unique<ModelViewerScene>();
-    return application.Run(game, config, std::move(setup));
+	wchar_t executablePath[MAX_PATH] = {};
+	if (!GetModuleFileNameW(nullptr, executablePath, MAX_PATH))
+	{
+		return -1;
+	}
+	GameApplication::Config config;
+	config.Title = L"AGP Modelviewer";
+	config.ContentRoot = std::filesystem::path(executablePath).parent_path() / ".." / ".." / "Assets";
+	config.EnableRenderDiagnostics = true;
+	config.EnableMouseLook = true;
+	// Composition root for this repository's single game. The game object lives longer
+	// than the blocking host call. For the next game, change this type/configuration and
+	// content; window creation, ticking and shutdown stay inside GameApplication.
+	ModelViewer game;
+	GameApplication application;
+	GameFrameworkIntegration::ApplicationSetup setup;
+	setup.SceneSource = std::make_unique<ModelViewerScene>();
+	return application.Run(game, config, std::move(setup));
 }
 
-int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
-    _In_opt_ HINSTANCE hPrevInstance,
-    _In_ LPWSTR    lpCmdLine,
-    _In_ int       nCmdShow)
+int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
 {
-    UNREFERENCED_PARAMETER(hInstance);
-    UNREFERENCED_PARAMETER(hPrevInstance);
-    UNREFERENCED_PARAMETER(lpCmdLine);
-    UNREFERENCED_PARAMETER(nCmdShow);
+	UNREFERENCED_PARAMETER(hInstance);
+	UNREFERENCED_PARAMETER(hPrevInstance);
+	UNREFERENCED_PARAMETER(lpCmdLine);
+	UNREFERENCED_PARAMETER(nCmdShow);
 
-    try
+	try
 	{
 		return GuardedMain();
 	}
-    catch(const std::exception& e)
-    {
-        std::string message = e.what();
-        if(!str::is_valid_utf8(message))
-        {
-	        message = str::acp_to_utf8(message);
-        }
-        MVLOG(Error, "Exception caught!\n{}", message);
-        return -1;
-    }
+	catch (const std::exception& e)
+	{
+		std::string message = e.what();
+		if (!str::is_valid_utf8(message))
+		{
+			message = str::acp_to_utf8(message);
+		}
+		MVLOG(Error, "Exception caught!\n{}", message);
+		return -1;
+	}
 
-    return 0;
+	return 0;
 }

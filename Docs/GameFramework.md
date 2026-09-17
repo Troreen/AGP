@@ -26,8 +26,13 @@ public:
     void Update(GameContext& game, float dt) override
     {
         if (auto* player = myPlayer.Get())
+        {
             player->GetTransform().SetLocalPosition({0, 0, dt * 100});
-        if (game.GetInput().IsKeyPressed(Keys::ESCAPE)) game.RequestQuit();
+        }
+        if (game.GetInput().IsKeyPressed(Keys::ESCAPE))
+        {
+            game.RequestQuit();
+        }
     }
 private:
     ActorRef myPlayer;

@@ -13,7 +13,9 @@ struct FullTextureVertex
 float4 main(FullTextureVertex aPixel) : SV_TARGET
 {
     if (GBufferAlbedo.Sample(TrilinearClamp, aPixel.UV).a == 0.0f)
+    {
         return 1.0f;
+    }
 
     const float3 position = GBufferWorldPosition.Sample(TrilinearClamp, aPixel.UV).xyz;
     const float3 normal = normalize(GBufferNormal.Sample(TrilinearClamp, aPixel.UV).xyz);

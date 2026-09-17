@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 // Include your Common Utilities Types here as needed
 #include "Matrix.hpp"
 #include "Vector.hpp"
@@ -15,18 +15,21 @@ namespace MaterialHelpers
 {
 	static MaterialParameterType HLSLTypeToMaterialParameterType(const std::string& aHLSLTypeName)
 	{
-		static std::unordered_map<std::string, MaterialParameterType> HLSLTypeToMaterialParameterType = {
-			{ "float",		MaterialParameterType::Float },
-			{ "bool",			MaterialParameterType::Int },		// This is because bool is 1 byte on CPU, and 4 bytes on GPU.
-			{ "float2",		MaterialParameterType::Float2 },
-			{ "float3",		MaterialParameterType::Float3 },
-			{ "float4",		MaterialParameterType::Float4 },
-			{ "dword",		MaterialParameterType::Uint }		// Single uint shows up as a DWORD definition.
-		};
+		static std::unordered_map<std::string, MaterialParameterType> HLSLTypeToMaterialParameterType =
+		    {
+		        {"float", MaterialParameterType::Float},
+		        {"bool", MaterialParameterType::Int}, // This is because bool is 1 byte on CPU, and 4 bytes on GPU.
+		        {"float2", MaterialParameterType::Float2},
+		        {"float3", MaterialParameterType::Float3},
+		        {"float4", MaterialParameterType::Float4},
+		        {"dword", MaterialParameterType::Uint} // Single uint shows up as a DWORD definition.
+		    };
 
 		auto it = HLSLTypeToMaterialParameterType.find(aHLSLTypeName);
 		if (it == HLSLTypeToMaterialParameterType.end())
+		{
 			return MaterialParameterType::Unknown;
+		}
 
 		return it->second;
 	}
@@ -37,26 +40,29 @@ namespace MaterialHelpers
 	 * By default, this Template indicates an unsupported Type.
 	 * @tparam T The C++ type to store Traits for.
 	 */
-	template<typename T>
-	struct MaterialParameterTraits
+	template <typename T> class MaterialParameterTraits
 	{
+	public:
 		static constexpr bool Supported = false;
 		static bool IsA(const MaterialParameterInfo&) = delete;
 	};
 
-	/**
+/**
 	 * Helper Macro that makes defining MaterialParameterTraits easier.
 	 * Generates copies of the MaterialParameterTraits template with the
 	 * supplied values and type.
 	 * @param CppType The C++ Type we're defining Traits for.
 	 * @param EnumType The MaterialParameterType enum value that equals the C++ type.
 	 */
-	#define DECLARE_MATERIAL_PARAMETER_TRAIT(CppType, EnumType) \
-	template<> struct MaterialParameterTraits<CppType> { \
-		static constexpr bool Supported = true; \
-		static bool IsA(const MaterialParameterInfo& aInfo) { \
-			return aInfo.Type == (EnumType) && aInfo.Size == sizeof(CppType); \
-		} \
+#define DECLARE_MATERIAL_PARAMETER_TRAIT(CppType, EnumType)                                                                                \
+	template <> class MaterialParameterTraits<CppType>                                                                                     \
+	{                                                                                                                                      \
+	public:                                                                                                                                \
+		static constexpr bool Supported = true;                                                                                            \
+		static bool IsA(const MaterialParameterInfo& aInfo)                                                                                \
+		{                                                                                                                                  \
+			return aInfo.Type == (EnumType) && aInfo.Size == sizeof(CppType);                                                              \
+		}                                                                                                                                  \
 	};
 
 	// Register the types I want to use in the MaterialParametersBuffer in HLSL.

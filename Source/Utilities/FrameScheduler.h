@@ -14,8 +14,7 @@
 
 namespace EngineScheduling
 {
-	template <class SnapshotType, size_t BufferCount>
-	class TripleBufferedSnapshotQueue
+	template <class SnapshotType, size_t BufferCount> class TripleBufferedSnapshotQueue
 	{
 	public:
 		static_assert(BufferCount >= 2);
@@ -90,7 +89,10 @@ namespace EngineScheduling
 			{
 				return &buffer.Snapshot == aSnapshot && buffer.State == SnapshotState::Building;
 			});
-			if (!isBuilding) return;
+			if (!isBuilding)
+			{
+				return;
+			}
 			for (size_t bufferIndex = 0; bufferIndex < myBuffers.size(); ++bufferIndex)
 			{
 				SnapshotBuffer& buffer = myBuffers[bufferIndex];
@@ -144,8 +146,7 @@ namespace EngineScheduling
 				return &myBuffers[selectedIndex].Snapshot;
 			}
 
-			if (myRenderingSnapshotIndex != InvalidSnapshotIndex
-				&& myBuffers[myRenderingSnapshotIndex].State == SnapshotState::Rendering)
+			if (myRenderingSnapshotIndex != InvalidSnapshotIndex && myBuffers[myRenderingSnapshotIndex].State == SnapshotState::Rendering)
 			{
 				++myStats.ReusedSnapshots;
 				return &myBuffers[myRenderingSnapshotIndex].Snapshot;
@@ -206,8 +207,7 @@ namespace EngineScheduling
 		mutable std::mutex myMutex;
 	};
 
-	template <class InputFrameType>
-	class FixedStepUpdateWorker
+	template <class InputFrameType> class FixedStepUpdateWorker
 	{
 	public:
 		struct Config
@@ -227,12 +227,8 @@ namespace EngineScheduling
 			Stop();
 		}
 
-		void Start(
-			Config aConfig,
-			ConsumeInputFn aConsumeInput,
-			FixedUpdateFn aFixedUpdate,
-			PublishSnapshotFn aPublishSnapshot,
-			IdleWaitFn anIdleWait)
+		void Start(Config aConfig, ConsumeInputFn aConsumeInput, FixedUpdateFn aFixedUpdate, PublishSnapshotFn aPublishSnapshot,
+		           IdleWaitFn anIdleWait)
 		{
 			Stop();
 			myTickCount = 0;
@@ -240,21 +236,20 @@ namespace EngineScheduling
 				std::scoped_lock lock(myFailureMutex);
 				myFailure = nullptr;
 			}
-			myWorker = std::jthread(
-				[this,
-				config = aConfig,
-				consumeInput = std::move(aConsumeInput),
-				fixedUpdate = std::move(aFixedUpdate),
-				publishSnapshot = std::move(aPublishSnapshot),
-				idleWait = std::move(anIdleWait)](std::stop_token stopToken)
+			myWorker =
+			    std::jthread([this, config = aConfig, consumeInput = std::move(aConsumeInput), fixedUpdate = std::move(aFixedUpdate),
+			                  publishSnapshot = std::move(aPublishSnapshot), idleWait = std::move(anIdleWait)](std::stop_token stopToken)
+			{
+				try
 				{
-					try { Run(stopToken, config, consumeInput, fixedUpdate, publishSnapshot, idleWait); }
-					catch (...)
-					{
-						std::scoped_lock lock(myFailureMutex);
-						myFailure = std::current_exception();
-					}
-				});
+					Run(stopToken, config, consumeInput, fixedUpdate, publishSnapshot, idleWait);
+				}
+				catch (...)
+				{
+					std::scoped_lock lock(myFailureMutex);
+					myFailure = std::current_exception();
+				}
+			});
 		}
 
 		void Stop()
@@ -276,17 +271,15 @@ namespace EngineScheduling
 		void RethrowIfFailed() const
 		{
 			std::scoped_lock lock(myFailureMutex);
-			if (myFailure) std::rethrow_exception(myFailure);
+			if (myFailure)
+			{
+				std::rethrow_exception(myFailure);
+			}
 		}
 
 	private:
-		void Run(
-			std::stop_token aStopToken,
-			const Config& aConfig,
-			const ConsumeInputFn& aConsumeInput,
-			const FixedUpdateFn& aFixedUpdate,
-			const PublishSnapshotFn& aPublishSnapshot,
-			const IdleWaitFn& anIdleWait)
+		void Run(std::stop_token aStopToken, const Config& aConfig, const ConsumeInputFn& aConsumeInput, const FixedUpdateFn& aFixedUpdate,
+		         const PublishSnapshotFn& aPublishSnapshot, const IdleWaitFn& anIdleWait)
 		{
 			using namespace std::chrono_literals;
 
@@ -301,9 +294,8 @@ namespace EngineScheduling
 				aConsumeInput(latestInputFrame);
 
 				const auto currentTime = std::chrono::steady_clock::now();
-				const float deltaTime = (std::min)(
-					std::chrono::duration<float>(currentTime - previousTime).count(),
-					aConfig.MaxFrameDeltaTime);
+				const float deltaTime =
+				    (std::min)(std::chrono::duration<float>(currentTime - previousTime).count(), aConfig.MaxFrameDeltaTime);
 				previousTime = currentTime;
 				fixedUpdateAccumulator += deltaTime;
 

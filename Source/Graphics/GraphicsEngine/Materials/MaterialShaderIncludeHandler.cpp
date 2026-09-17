@@ -4,15 +4,15 @@
 
 using namespace Microsoft::WRL;
 
-MaterialShaderIncludeHandler::MaterialShaderIncludeHandler(const std::filesystem::path& aShaderRoot, const std::filesystem::path& aShaderProgramPath, const std::filesystem::path& aMaterialProgramPath)
-	: myShaderRoot(aShaderRoot)
-	, myShaderProgramPath(aShaderProgramPath)
-	, myMaterialProgramPath(aMaterialProgramPath)
+MaterialShaderIncludeHandler::MaterialShaderIncludeHandler(const std::filesystem::path& aShaderRoot,
+                                                           const std::filesystem::path& aShaderProgramPath,
+                                                           const std::filesystem::path& aMaterialProgramPath)
+    : myShaderRoot(aShaderRoot), myShaderProgramPath(aShaderProgramPath), myMaterialProgramPath(aMaterialProgramPath)
 {
-		
 }
 
-HRESULT MaterialShaderIncludeHandler::Open(D3D_INCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID* ppData, UINT* pBytes)
+HRESULT MaterialShaderIncludeHandler::Open(D3D_INCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID* ppData,
+                                           UINT* pBytes)
 {
 	// Not used.
 	IncludeType;
@@ -33,7 +33,7 @@ HRESULT MaterialShaderIncludeHandler::Open(D3D_INCLUDE_TYPE IncludeType, LPCSTR 
 		sourcePath = myMaterialProgramPath;
 	}
 	else
-	{		
+	{
 		// Build the include folder for the file name.
 		sourcePath = programPath / pFileName;
 	}
@@ -48,7 +48,7 @@ HRESULT MaterialShaderIncludeHandler::Open(D3D_INCLUDE_TYPE IncludeType, LPCSTR 
 		{
 			const std::filesystem::path& parentPath = it->second.Path.parent_path();
 			sourcePath = std::filesystem::weakly_canonical(parentPath / pFileName);
-			
+
 			// If this file doesn't exist, check if it's relative to the shader path.
 			if (!std::filesystem::exists(sourcePath))
 			{
@@ -90,7 +90,9 @@ HRESULT MaterialShaderIncludeHandler::Close(LPCVOID pData)
 {
 	auto it = myOpenFiles.find(pData);
 	if (it == myOpenFiles.end())
+	{
 		return E_FAIL;
+	}
 
 	myOpenFiles.erase(it);
 	return S_OK;

@@ -12,7 +12,7 @@ MeshComponentBase::MeshComponentBase(MeshAsset aMesh)
 
 void MeshComponentBase::SetMesh(MeshAsset aMesh)
 {
-    EnsureCanMutate();
+	EnsureCanMutate();
 	myMesh = GameFrameworkInternal::AssetAccess::Mesh(aMesh);
 
 	myMaterials.clear();
@@ -36,17 +36,23 @@ bool MeshComponentBase::HasMesh() const
 
 bool MeshComponentBase::SetMaterial(unsigned aMaterialIndex, MaterialAsset aMaterial)
 {
-    EnsureCanMutate();
-    if (aMaterialIndex >= myMaterials.size() || !aMaterial) return false;
+	EnsureCanMutate();
+	if (aMaterialIndex >= myMaterials.size() || !aMaterial)
+	{
+		return false;
+	}
 	myMaterials[aMaterialIndex] = GameFrameworkInternal::AssetAccess::Material(aMaterial);
-    return true;
+	return true;
 }
+
 MaterialAsset MeshComponentBase::GetMaterial(unsigned index) const
-{ return index < myMaterials.size() ? GameFrameworkInternal::AssetAccess::WrapMaterial(myMaterials[index]) : MaterialAsset{}; }
+{
+	return index < myMaterials.size() ? GameFrameworkInternal::AssetAccess::WrapMaterial(myMaterials[index]) : MaterialAsset{};
+}
 
 void MeshComponentBase::SetVisible(bool aVisible)
 {
-    EnsureCanMutate();
+	EnsureCanMutate();
 	myVisible = aVisible;
 }
 

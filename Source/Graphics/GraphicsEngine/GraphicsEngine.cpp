@@ -31,6 +31,7 @@ namespace
 {
 	using namespace RenderCulling;
 	using Clock = std::chrono::steady_clock;
+
 	double ElapsedMilliseconds(Clock::time_point start)
 	{
 		return std::chrono::duration<double, std::milli>(Clock::now() - start).count();
@@ -103,7 +104,9 @@ namespace
 		if (!IsFinite(center) || !std::isfinite(radius) || radius < 0.0f || !std::isfinite(aCascade.MinX) ||
 		    !std::isfinite(aCascade.MaxX) || !std::isfinite(aCascade.MinY) || !std::isfinite(aCascade.MaxY) ||
 		    !std::isfinite(aCascade.MinZ) || !std::isfinite(aCascade.MaxZ))
+		{
 			return true;
+		}
 		return center.x + radius >= aCascade.MinX && center.x - radius <= aCascade.MaxX && center.y + radius >= aCascade.MinY &&
 		       center.y - radius <= aCascade.MaxY && center.z + radius >= aCascade.MinZ && center.z - radius <= aCascade.MaxZ;
 	}
@@ -538,50 +541,69 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path&
 
 void GraphicsEngine::FinalizeRenderSnapshot(RenderSceneSnapshot& snapshot) const
 {
-    const auto snapshotStart = Clock::now();
-    if (!snapshot.HasCamera) return;
-    const CameraFrustum cameraFrustum = CreateCameraFrustum(snapshot.Camera);
-    snapshot.Stats.TotalLights = static_cast<uint32_t>(snapshot.RelevantLights.size());
-    if (myCullingEnabled)
-        std::erase_if(snapshot.RelevantLights, [&](const LightSnapshot& light) { return !IsRelevantLight(cameraFrustum, light); });
-    snapshot.Stats.RelevantLights = static_cast<uint32_t>(snapshot.RelevantLights.size());
-    snapshot.OpaqueRenderItems.clear();
-    snapshot.BlendedRenderItems.clear();
-    snapshot.OpaqueRenderItems.reserve(snapshot.ShadowCasters.size());
-    snapshot.BlendedRenderItems.reserve(snapshot.ShadowCasters.size());
-    snapshot.Stats.TotalRenderItems = static_cast<uint32_t>(snapshot.ShadowCasters.size());
-    snapshot.Stats.VisibleRenderItems = 0;
-    for (size_t itemIndex = 0; itemIndex < snapshot.ShadowCasters.size(); ++itemIndex)
-    {
-        auto& renderItem = snapshot.ShadowCasters[itemIndex];
-        const auto& mesh = renderItem.Mesh;
-        if (!mesh) continue;
-        const BoundingSphere worldBounds =
-            TransformBoundingSphere(mesh->myLocalBoundsCenter, mesh->myLocalBoundsRadius, mesh->myHasLocalBounds, renderItem.World);
-        renderItem.HasBounds = myCullingEnabled && worldBounds.IsValid && !renderItem.HasSkinning;
-        renderItem.BoundsCenter = worldBounds.Center;
-        renderItem.BoundsRadius = worldBounds.Radius;
-        if (!renderItem.HasBounds || IntersectsFrustum(cameraFrustum, worldBounds))
-        {
-            ++snapshot.Stats.VisibleRenderItems;
-            const auto passes = RenderItemRouting::Classify(mesh->GetElements(), [&](const Mesh::Element& element)
-            { return GetElementBlendMode(element, renderItem.Materials, myDefaultMaterial) == BlendMode::Opaque; });
-            if (passes.Opaque) snapshot.OpaqueRenderItems.push_back(itemIndex);
-            if (passes.Blended) snapshot.BlendedRenderItems.push_back(itemIndex);
-        }
-    }
-    snapshot.Stats.ShadowCasters = static_cast<uint32_t>(snapshot.ShadowCasters.size());
-    snapshot.Stats.OpaqueRenderItems = static_cast<uint32_t>(snapshot.OpaqueRenderItems.size());
-    snapshot.Stats.BlendedRenderItems = static_cast<uint32_t>(snapshot.BlendedRenderItems.size());
-    const CU::Vector3f cameraPosition = snapshot.Camera.GetTransform().GetPosition();
-    auto distance = [&](size_t index)
-    {
-        const auto& world = snapshot.ShadowCasters[index].World;
-        const float d = (CU::Vector3f(world(4, 1), world(4, 2), world(4, 3)) - cameraPosition).LengthSqr();
-        return std::isfinite(d) ? d : 0.0f;
-    };
-    RenderItemRouting::Sort(snapshot.OpaqueRenderItems, snapshot.BlendedRenderItems, distance);
-    snapshot.Stats.SnapshotMilliseconds = ElapsedMilliseconds(snapshotStart);
+	const auto snapshotStart = Clock::now();
+	if (!snapshot.HasCamera)
+	{
+		return;
+	}
+	const CameraFrustum cameraFrustum = CreateCameraFrustum(snapshot.Camera);
+	snapshot.Stats.TotalLights = static_cast<uint32_t>(snapshot.RelevantLights.size());
+	if (myCullingEnabled)
+	{
+		std::erase_if(snapshot.RelevantLights, [&cameraFrustum](const LightSnapshot& light)
+		{
+			return !IsRelevantLight(cameraFrustum, light);
+		});
+	}
+	snapshot.Stats.RelevantLights = static_cast<uint32_t>(snapshot.RelevantLights.size());
+	snapshot.OpaqueRenderItems.clear();
+	snapshot.BlendedRenderItems.clear();
+	snapshot.OpaqueRenderItems.reserve(snapshot.ShadowCasters.size());
+	snapshot.BlendedRenderItems.reserve(snapshot.ShadowCasters.size());
+	snapshot.Stats.TotalRenderItems = static_cast<uint32_t>(snapshot.ShadowCasters.size());
+	snapshot.Stats.VisibleRenderItems = 0;
+	for (size_t itemIndex = 0; itemIndex < snapshot.ShadowCasters.size(); ++itemIndex)
+	{
+		auto& renderItem = snapshot.ShadowCasters[itemIndex];
+		const auto& mesh = renderItem.Mesh;
+		if (!mesh)
+		{
+			continue;
+		}
+		const BoundingSphere worldBounds =
+		    TransformBoundingSphere(mesh->myLocalBoundsCenter, mesh->myLocalBoundsRadius, mesh->myHasLocalBounds, renderItem.World);
+		renderItem.HasBounds = myCullingEnabled && worldBounds.IsValid && !renderItem.HasSkinning;
+		renderItem.BoundsCenter = worldBounds.Center;
+		renderItem.BoundsRadius = worldBounds.Radius;
+		if (!renderItem.HasBounds || IntersectsFrustum(cameraFrustum, worldBounds))
+		{
+			++snapshot.Stats.VisibleRenderItems;
+			const auto passes = RenderItemRouting::Classify(mesh->GetElements(), [this, &renderItem](const Mesh::Element& element)
+			{
+				return GetElementBlendMode(element, renderItem.Materials, myDefaultMaterial) == BlendMode::Opaque;
+			});
+			if (passes.Opaque)
+			{
+				snapshot.OpaqueRenderItems.push_back(itemIndex);
+			}
+			if (passes.Blended)
+			{
+				snapshot.BlendedRenderItems.push_back(itemIndex);
+			}
+		}
+	}
+	snapshot.Stats.ShadowCasters = static_cast<uint32_t>(snapshot.ShadowCasters.size());
+	snapshot.Stats.OpaqueRenderItems = static_cast<uint32_t>(snapshot.OpaqueRenderItems.size());
+	snapshot.Stats.BlendedRenderItems = static_cast<uint32_t>(snapshot.BlendedRenderItems.size());
+	const CU::Vector3f cameraPosition = snapshot.Camera.GetTransform().GetPosition();
+	auto distance = [&snapshot, cameraPosition](size_t index)
+	{
+		const auto& world = snapshot.ShadowCasters[index].World;
+		const float d = (CU::Vector3f(world(4, 1), world(4, 2), world(4, 3)) - cameraPosition).LengthSqr();
+		return std::isfinite(d) ? d : 0.0f;
+	};
+	RenderItemRouting::Sort(snapshot.OpaqueRenderItems, snapshot.BlendedRenderItems, distance);
+	snapshot.Stats.SnapshotMilliseconds = ElapsedMilliseconds(snapshotStart);
 }
 
 void GraphicsEngine::RenderSnapshot(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot)
@@ -785,11 +807,10 @@ void GraphicsEngine::RecordAndExecuteShadows(GraphicsCommandList& inoutCommandLi
 				{
 					auto& commandList = myShadowCommandLists[i];
 					commandList.ResetCommandList();
-					futures.emplace_back(std::async(std::launch::async,
-					                                [&, i]
-					                                {
-						                                return recordShadowJob(myShadowCommandLists[i], shadowJobs[i], true);
-					                                }));
+					futures.emplace_back(std::async(std::launch::async, [this, &recordShadowJob, &shadowJobs, i]
+					{
+						return recordShadowJob(myShadowCommandLists[i], shadowJobs[i], true);
+					}));
 				}
 			}
 			catch (...)
@@ -803,7 +824,9 @@ void GraphicsEngine::RecordAndExecuteShadows(GraphicsCommandList& inoutCommandLi
 				try
 				{
 					if (!future.get())
+					{
 						recorded = false;
+					}
 				}
 				catch (...)
 				{
@@ -814,7 +837,9 @@ void GraphicsEngine::RecordAndExecuteShadows(GraphicsCommandList& inoutCommandLi
 			if (recorded)
 			{
 				for (size_t i = 0; i < shadowJobs.size(); ++i)
+				{
 					ExecuteCommandList(myShadowCommandLists[i]);
+				}
 				frameStats.ShadowCommandListsRecorded = static_cast<uint32_t>(shadowJobs.size());
 				frameStats.ShadowCommandListsExecuted = static_cast<uint32_t>(shadowJobs.size());
 			}
@@ -825,8 +850,12 @@ void GraphicsEngine::RecordAndExecuteShadows(GraphicsCommandList& inoutCommandLi
 			}
 		}
 		if (!recorded)
+		{
 			for (const auto& job : shadowJobs)
+			{
 				recordShadowJob(inoutCommandList, job, false);
+			}
+		}
 	}
 }
 
@@ -1140,14 +1169,14 @@ void GraphicsEngine::AdjustShadowBias(RenderLightType aType, float aDelta)
 	{
 		const float defaultBias = aType == RenderLightType::Spot    ? ShadowConfig::SpotShaderBias
 		                          : aType == RenderLightType::Point ? ShadowConfig::PointShaderBias
-		                                                      : ShadowConfig::DirectionalShaderBias;
+		                                                            : ShadowConfig::DirectionalShaderBias;
 		*offset = std::clamp(defaultBias + *offset, ShadowConfig::BiasMin, ShadowConfig::BiasMax) - defaultBias;
 	}
 
 	GELOG(Log, "Shadow {} bias: {:.6f}",
 	      aType == RenderLightType::Directional ? "directional"
 	      : aType == RenderLightType::Spot      ? "spot"
-	                                      : "point",
+	                                            : "point",
 	      GetShadowDepthBiasUnlocked(aType));
 }
 
@@ -1224,7 +1253,9 @@ bool GraphicsEngine::CreateDeferredPipelineStates()
 {
 	Shader fullTextureVS;
 	if (!myRHI.CompileShader(ShaderType::VertexShader, myShaderRoot / "Internal" / "FullTexture_VS.hlsl", nullptr, true, fullTextureVS))
+	{
 		return false;
+	}
 
 	auto createPipeline =
 	    [this, &fullTextureVS](std::string_view aName, std::string_view aPixelShader, BlendMode aBlendMode, PipelineStateObject& outPSO)
@@ -1233,7 +1264,9 @@ bool GraphicsEngine::CreateDeferredPipelineStates()
 		MaterialShaderIncludeHandler includeHandler(myShaderRoot, pixelShaderPath, {});
 		Shader pixelShader;
 		if (!myRHI.CompileShader(ShaderType::PixelShader, pixelShaderPath, &includeHandler, true, pixelShader))
+		{
 			return false;
+		}
 		PipelineStateDescription description;
 		description.Name = aName;
 		description.VertexShader.ByteCode = fullTextureVS.GetDataPtr();
@@ -1424,20 +1457,26 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 		const std::filesystem::path& path = myMaterialDomainShaders.at(aDescription.Domain);
 		MaterialShaderIncludeHandler handler(myShaderRoot / "Material", path, aDescription.MaterialShaderCode);
 		if (!myRHI.CompileShader(ShaderType::VertexShader, path, &handler, true, materialVS))
+		{
 			return false;
+		}
 	}
 
 	{
 		const std::filesystem::path& path = myMaterialShadingModelShaders.at(aDescription.ShadingModel);
 		MaterialShaderIncludeHandler handler(myShaderRoot / "Material", path, aDescription.MaterialShaderCode);
 		if (!myRHI.CompileShader(ShaderType::PixelShader, path, &handler, true, materialPS))
+		{
 			return false;
+		}
 	}
 
 	const std::filesystem::path gbufferPath = myShaderRoot / "Material" / "GBuffer_PS.hlsl";
 	MaterialShaderIncludeHandler gbufferHandler(myShaderRoot / "Material", gbufferPath, aDescription.MaterialShaderCode);
 	if (!myRHI.CompileShader(ShaderType::PixelShader, gbufferPath, &gbufferHandler, true, gbufferPS))
+	{
 		return false;
+	}
 
 	memset(outMaterial.myData, 0, Material::MATERIAL_BUFFER_SIZE);
 	outMaterial.myParameters.clear();
@@ -1647,14 +1686,15 @@ void GraphicsEngine::CreateMaterialTextureSlots(const RHIShaderReflectionInfo& a
 	for (const auto& shaderTextureSlot : aShaderInfo.Bindings)
 	{
 		if (shaderTextureSlot.Type != 2 || shaderTextureSlot.BindPoint >= Material::MAX_MATERIAL_TEXTURE_COUNT)
+		{
 			continue;
+		}
 
 		std::string lowerName = shaderTextureSlot.Name;
-		std::ranges::transform(lowerName, lowerName.begin(),
-		                       [](unsigned char aChar)
-		                       {
-			                       return static_cast<char>(std::tolower(aChar));
-		                       });
+		std::ranges::transform(lowerName, lowerName.begin(), [](unsigned char aChar)
+		{
+			return static_cast<char>(std::tolower(aChar));
+		});
 
 		if (inoutMaterial.myTextureSlotNameToIndex.contains(lowerName) &&
 		    inoutMaterial.myTextureSlotNameToIndex.at(lowerName) != shaderTextureSlot.BindPoint)

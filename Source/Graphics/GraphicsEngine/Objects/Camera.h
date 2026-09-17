@@ -11,7 +11,10 @@ public:
 	Camera();
 	Camera(float aHorizontalFoV, float aNearPlane, float aFarPlane, Vector2f aResolution);
 
-	inline const Matrix4f& GetProjection() const { return myProjection; }
+	inline const Matrix4f& GetProjection() const
+	{
+		return myProjection;
+	}
 
 private:
 	Matrix4f myProjection;
@@ -21,4 +24,3 @@ private:
 	float myHorizontalFoV;
 	float myVerticalFoV;
 };
-

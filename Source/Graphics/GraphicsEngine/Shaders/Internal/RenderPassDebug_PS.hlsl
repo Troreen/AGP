@@ -23,7 +23,9 @@ float3 CalculateLightOnly(float3 aNormal, float3 aWorldPosition, float3 aViewDir
     for (uint lightIndex = 0; lightIndex < MAX_LIGHTS; ++lightIndex)
     {
         if (lightIndex >= LB_NumActiveLights)
+        {
             continue;
+        }
 
         const Light light = LB_Lights[lightIndex];
         if (light.Type == LIGHT_TYPE_DIRECTIONAL)
@@ -50,20 +52,43 @@ float4 main(FullTextureVertex aPixel) : SV_TARGET
 {
     const float4 albedo = GBufferAlbedo.Sample(TrilinearClamp, aPixel.UV);
     if (albedo.a == 0.0f)
+    {
         return 0.0f;
+    }
 
     const float3 material = GBufferSurface.Sample(TrilinearClamp, aPixel.UV).rgb;
     float3 result = 0.0f;
 
     // RenderPass values are deliberately stable because the label and shortcut
     // are exposed to users in every build configuration.
-    if (DebugRenderPass == 1)          result = pow(saturate(albedo.rgb), 1.0f / 2.2f); // Albedo, sRGB
-    else if (DebugRenderPass == 2)     result = material.ggg;                            // Roughness, linear
-    else if (DebugRenderPass == 3)     result = material.bbb;                            // Metalness, linear
-    else if (DebugRenderPass == 4)     result = material.rrr;                            // Texture AO, linear
-    else if (DebugRenderPass == 5)     result = ScreenSpaceAO.Sample(TrilinearClamp, aPixel.UV).rrr;
-    else if (DebugRenderPass == 6)     result = GBufferTangentNormal.Sample(TrilinearClamp, aPixel.UV).xyz * 0.5f + 0.5f;
-    else if (DebugRenderPass == 7)     result = GBufferNormal.Sample(TrilinearClamp, aPixel.UV).xyz * 0.5f + 0.5f;
+    if (DebugRenderPass == 1)
+    {
+        result = pow(saturate(albedo.rgb), 1.0f / 2.2f); // Albedo, sRGB
+    }
+    else if (DebugRenderPass == 2)
+    {
+        result = material.ggg; // Roughness, linear
+    }
+    else if (DebugRenderPass == 3)
+    {
+        result = material.bbb; // Metalness, linear
+    }
+    else if (DebugRenderPass == 4)
+    {
+        result = material.rrr; // Texture AO, linear
+    }
+    else if (DebugRenderPass == 5)
+    {
+        result = ScreenSpaceAO.Sample(TrilinearClamp, aPixel.UV).rrr;
+    }
+    else if (DebugRenderPass == 6)
+    {
+        result = GBufferTangentNormal.Sample(TrilinearClamp, aPixel.UV).xyz * 0.5f + 0.5f;
+    }
+    else if (DebugRenderPass == 7)
+    {
+        result = GBufferNormal.Sample(TrilinearClamp, aPixel.UV).xyz * 0.5f + 0.5f;
+    }
     else if (DebugRenderPass == 8)
     {
         const float3 normal = normalize(GBufferNormal.Sample(TrilinearClamp, aPixel.UV).xyz);

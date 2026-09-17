@@ -11,6 +11,7 @@
 namespace
 {
 	using Vector3f = CommonUtilities::Vector3f;
+
 	void AimActorAlongCameraForward(Actor& anActor, const Transform& aCameraTransform)
 	{
 		Vector3f forward = aCameraTransform.GetLocalForward();
@@ -23,8 +24,7 @@ namespace
 			forward.Normalize();
 		}
 
-        anActor.GetTransform().SetLocalRotationRadians(std::atan2(forward.x, forward.z),
-            -std::asin(std::clamp(forward.y, -1.f, 1.f)), 0);
+		anActor.GetTransform().SetLocalRotationRadians(std::atan2(forward.x, forward.z), -std::asin(std::clamp(forward.y, -1.f, 1.f)), 0);
 	}
 
 	void PrintLightTuningValues(const DirectionalLightComponent* aDirectionalLightComponent,
@@ -74,51 +74,83 @@ namespace
 // Owner-dependent initialization happens once, after scene validation.
 void CameraControlsComponent::BeginPlay()
 {
-    const auto direction = GetOwner()->GetTransform().GetLocalForward().GetNormalized();
-    myYaw = std::atan2(direction.x, direction.z);
-    myPitch = -std::asin(std::clamp(direction.y, -1.f, 1.f));
-    GetOwner()->GetTransform().SetLocalRotationRadians(myYaw,myPitch,0);
+	const auto direction = GetOwner()->GetTransform().GetLocalForward().GetNormalized();
+	myYaw = std::atan2(direction.x, direction.z);
+	myPitch = -std::asin(std::clamp(direction.y, -1.f, 1.f));
+	GetOwner()->GetTransform().SetLocalRotationRadians(myYaw, myPitch, 0);
 }
+
 void CameraControlsComponent::LateUpdate(float deltaTime)
 {
-    const auto& input = GetInput();
-    auto& transform = GetOwner()->GetTransform();
-    if (input.MouseLookActive)
-    {
-        myYaw += input.MouseDeltaX * .0025f;
-        myPitch = std::clamp(myPitch + input.MouseDeltaY * .0025f, -1.55334303f, 1.55334303f);
-        transform.SetLocalRotationRadians(myYaw,myPitch,0);
-    }
-    const auto forward = transform.GetLocalForward().GetNormalized();
-    const auto right = transform.GetLocalRight().GetNormalized();
-    Vector3f motion{};
-    if (input.IsKeyDown(Keys::W)) motion += forward;
-    if (input.IsKeyDown(Keys::S)) motion -= forward;
-    if (input.IsKeyDown(Keys::D)) motion += right;
-    if (input.IsKeyDown(Keys::A)) motion -= right;
-    if (input.IsKeyDown(Keys::SPACE)) motion += Vector3f::UnitY;
-    if (input.IsKeyDown(Keys::CONTROL)) motion -= Vector3f::UnitY;
-    if (motion.LengthSqr() > 0) transform.SetLocalPosition(transform.GetLocalPosition() + motion.GetNormalized() * (500.f * deltaTime));
+	const auto& input = GetInput();
+	auto& transform = GetOwner()->GetTransform();
+	if (input.MouseLookActive)
+	{
+		myYaw += input.MouseDeltaX * .0025f;
+		myPitch = std::clamp(myPitch + input.MouseDeltaY * .0025f, -1.55334303f, 1.55334303f);
+		transform.SetLocalRotationRadians(myYaw, myPitch, 0);
+	}
+	const auto forward = transform.GetLocalForward().GetNormalized();
+	const auto right = transform.GetLocalRight().GetNormalized();
+	Vector3f motion{};
+	if (input.IsKeyDown(Keys::W))
+	{
+		motion += forward;
+	}
+	if (input.IsKeyDown(Keys::S))
+	{
+		motion -= forward;
+	}
+	if (input.IsKeyDown(Keys::D))
+	{
+		motion += right;
+	}
+	if (input.IsKeyDown(Keys::A))
+	{
+		motion -= right;
+	}
+	if (input.IsKeyDown(Keys::SPACE))
+	{
+		motion += Vector3f::UnitY;
+	}
+	if (input.IsKeyDown(Keys::CONTROL))
+	{
+		motion -= Vector3f::UnitY;
+	}
+	if (motion.LengthSqr() > 0)
+	{
+		transform.SetLocalPosition(transform.GetLocalPosition() + motion.GetNormalized() * (500.f * deltaTime));
+	}
 }
+
 // Only this phase handles the R action. Handling it again in Update would observe
 // the same physical press in both input domains and could toggle twice. Held motion
 // uses dt; mouse deltas elsewhere are already accumulated movement, not a rate.
 void SpinComponent::FixedUpdate(float deltaTime)
 {
-	if (GetInput().IsKeyPressed(Keys::R)) mySpinning = !mySpinning;
-	if (!mySpinning) return;
+	if (GetInput().IsKeyPressed(Keys::R))
+	{
+		mySpinning = !mySpinning;
+	}
+	if (!mySpinning)
+	{
+		return;
+	}
 	myYaw = std::fmod(myYaw + 25.0f * deltaTime, 360.0f);
 	GetOwner()->GetTransform().SetLocalRotationDegrees(myYaw, 0, 0);
 }
 
 void LightControlsComponent::ResolveReferences(References& context)
 {
-    if (!Camera.Get() || !Directional.Get() || !Point.Get() || !Spot.Get())
-        context.Error("lights", "Scene controls require the authored camera and light references");
+	if (!Camera.Get() || !Directional.Get() || !Point.Get() || !Spot.Get())
+	{
+		context.Error("lights", "Scene controls require the authored camera and light references");
+	}
 }
+
 void AnimationControlsComponent::ResolveReferences(References& context)
 {
-    myMesh = context.Require<SkeletalMeshComponent>();
+	myMesh = context.Require<SkeletalMeshComponent>();
 }
 
 // Connect validates the required sibling once. Its handle can become empty if
@@ -163,11 +195,14 @@ void AnimationControlsComponent::Update(float)
 // the host publishes those values after all late updates finish.
 void LightControlsComponent::LateUpdate(float)
 {
-    auto* myCameraActor = Camera.Get();
-    auto* myDirectionalLightComponent = Directional.Get();
-    auto* mySpotLightComponent = Spot.Get();
-    std::vector<PointLightComponent*> myPointLightComponents;
-    if (auto* live = Point.Get()) myPointLightComponents.push_back(live);
+	auto* myCameraActor = Camera.Get();
+	auto* myDirectionalLightComponent = Directional.Get();
+	auto* mySpotLightComponent = Spot.Get();
+	std::vector<PointLightComponent*> myPointLightComponents;
+	if (auto* live = Point.Get())
+	{
+		myPointLightComponents.push_back(live);
+	}
 	const GameInput& anInputFrame = GetInput();
 	const bool shiftDown =
 	    anInputFrame.IsKeyDown(Keys::SHIFT) || anInputFrame.IsKeyDown(Keys::LSHIFT) || anInputFrame.IsKeyDown(Keys::RSHIFT);
@@ -264,8 +299,7 @@ void LightControlsComponent::LateUpdate(float)
 		}
 	}
 
-	if ((anInputFrame.IsKeyPressed(Keys::NUMPAD9) || anInputFrame.KeysPressed[static_cast<size_t>('9')]) &&
-	    mySpotLightComponent != nullptr)
+	if ((anInputFrame.IsKeyPressed(Keys::NUMPAD9) || anInputFrame.KeysPressed[static_cast<size_t>('9')]) && mySpotLightComponent != nullptr)
 	{
 		mySpotLightComponent->SetEnabled(!mySpotLightComponent->IsEnabled());
 	}

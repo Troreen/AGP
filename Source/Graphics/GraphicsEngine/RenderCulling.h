@@ -11,6 +11,7 @@ namespace RenderCulling
 	{
 		return std::isfinite(v.x) && std::isfinite(v.y) && std::isfinite(v.z);
 	}
+
 	struct BoundingSphere
 	{
 		CU::Vector3f Center = CU::Vector3f::Zero;
@@ -34,7 +35,7 @@ namespace RenderCulling
 	inline FrustumPlane CreateFrustumPlane(const CU::Vector4f& aPlane)
 	{
 		FrustumPlane plane;
-		plane.Normal = { aPlane.x, aPlane.y, aPlane.z };
+		plane.Normal = {aPlane.x, aPlane.y, aPlane.z};
 		const float normalLength = plane.Normal.Length();
 		if (!std::isfinite(normalLength) || !std::isfinite(aPlane.w) || normalLength <= 0.000001f)
 		{
@@ -112,18 +113,23 @@ namespace RenderCulling
 		const float xy = std::abs(axisX.Dot(axisY));
 		const float xz = std::abs(axisX.Dot(axisZ));
 		const float yz = std::abs(axisY.Dot(axisZ));
-		return std::sqrt((std::max)({ axisX.LengthSqr() + xy + xz,
-			axisY.LengthSqr() + xy + yz, axisZ.LengthSqr() + xz + yz }));
+		return std::sqrt((std::max)({axisX.LengthSqr() + xy + xz, axisY.LengthSqr() + xy + yz, axisZ.LengthSqr() + xz + yz}));
 	}
 
 	inline BoundingSphere TransformBoundingSphere(const CU::Vector3f& aCenter, float aRadius, bool aIsValid, const CU::Matrix4f& aTransform)
 	{
 		for (int row = 1; row <= 4; ++row)
+		{
 			for (int col = 1; col <= 4; ++col)
-				if (!std::isfinite(aTransform(row, col))) return {};
-		if (!aIsValid || !IsFinite(aCenter) || !std::isfinite(aRadius) || aRadius < 0.0f
-			|| aTransform(1, 4) != 0.0f || aTransform(2, 4) != 0.0f
-			|| aTransform(3, 4) != 0.0f || aTransform(4, 4) != 1.0f)
+			{
+				if (!std::isfinite(aTransform(row, col)))
+				{
+					return {};
+				}
+			}
+		}
+		if (!aIsValid || !IsFinite(aCenter) || !std::isfinite(aRadius) || aRadius < 0.0f || aTransform(1, 4) != 0.0f ||
+		    aTransform(2, 4) != 0.0f || aTransform(3, 4) != 0.0f || aTransform(4, 4) != 1.0f)
 		{
 			return {};
 		}

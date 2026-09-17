@@ -94,15 +94,30 @@ visible together. Avoid helpers whose only purpose is to shorten a few lines.
 
 The root `.clang-format` uses Allman braces, four-column tab indentation and a
 140-column limit. `.editorconfig` supplies matching settings for owned C++ files.
-Use clang-format 22 (the initial rollout used 22.1.3), formatting only files in
-the current increment, for example:
+Authored source and tests follow these readability rules:
+
+- Always brace control-flow bodies, including single-statement branches and loops.
+- Expand function and lambda bodies; keep separate operations on separate lines.
+- Use `struct` only for data. Types with constructors, operators or other member
+  functions are `class`, with explicit access sections. Preserve public aggregate
+  data where callers rely on aggregate initialization.
+- Name each lambda capture. Use `[]` when nothing is captured, `[this]` for member
+  access, and explicit value/reference captures for local dependencies. Capture
+  asynchronous loop indices by value and keep referenced data alive until work joins.
+
+Use clang-format 22 (the readability pass used 22.1.3) on edited C++ files, for example:
 
 ```powershell
 clang-format -i Source/Graphics/GraphicsEngine/GraphicsEngine.cpp Source/Graphics/GraphicsEngine/GraphicsEngine.h
-clang-format --dry-run --Werror Source/Graphics/GraphicsEngine/GraphicsEngine.cpp Source/Graphics/GraphicsEngine/GraphicsEngine.h
 ```
 
-Keep formatting-only commits separate from structural edits. Vendor libraries,
-the imported DDS loader, generated shader output and runtime asset copies are
-excluded by `.clang-format-ignore`. Apply the convention gradually; the initial
-reference files are `GraphicsEngine.cpp`, `GraphicsEngine.h` and `ModelViewer.cpp`.
+The formatter inserts braces and expands short bodies. Explicit captures and the
+class/struct distinction still require code review. With 22.1.3, dry-run can report
+blank-line replacements on already formatted CRLF files when SeparateDefinitionBlocks
+is enabled; compare formatter output with the file before treating that as drift.
+
+Keep unrelated formatting separate from behavior changes. Vendor libraries,
+CommonUtilities, the imported DDS loader, generated resources/shaders and runtime
+asset copies are excluded by `.clang-format-ignore`. The authored C++ source and
+tests have received the full readability pass; authored HLSL control-flow bodies
+also use braces. Runtime shader copies are refreshed by the existing build.

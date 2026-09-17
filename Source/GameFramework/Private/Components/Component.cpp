@@ -33,14 +33,13 @@ bool Component::IsEnabled() const
 
 void Component::SetEnabled(bool anIsEnabled)
 {
-    EnsureCanMutate();
+	EnsureCanMutate();
 	if (myIsEnabled == anIsEnabled)
 	{
 		return;
 	}
 
 	myIsEnabled = anIsEnabled;
-
 }
 
 void Component::SetOwner(Actor* anOwner)
@@ -55,13 +54,42 @@ void Component::SetName(std::string aName)
 
 World& Component::GetWorld() const
 {
-    if (!myOwner || !myOwner->GetWorld()) throw std::logic_error("Component is not attached");
-    return *myOwner->GetWorld();
+	if (!myOwner || !myOwner->GetWorld())
+	{
+		throw std::logic_error("Component is not attached");
+	}
+	return *myOwner->GetWorld();
 }
-const GameInput& Component::GetInput() const { return GetWorld().GetInput(); }
-SceneService& Component::GetScenes() const { return GetWorld().GetScenes(); }
-const AssetLookup& Component::GetAssets() const { return GetWorld().GetAssets(); }
-const GameTime& Component::GetTime() const { return GetWorld().GetTime(); }
-void Component::Destroy() { GetWorld().DestroyComponent(*this); }
 
-void Component::EnsureCanMutate() const { if (myOwner) GetWorld().EnsureComponentMutationAllowed(this); }
+const GameInput& Component::GetInput() const
+{
+	return GetWorld().GetInput();
+}
+
+SceneService& Component::GetScenes() const
+{
+	return GetWorld().GetScenes();
+}
+
+const AssetLookup& Component::GetAssets() const
+{
+	return GetWorld().GetAssets();
+}
+
+const GameTime& Component::GetTime() const
+{
+	return GetWorld().GetTime();
+}
+
+void Component::Destroy()
+{
+	GetWorld().DestroyComponent(*this);
+}
+
+void Component::EnsureCanMutate() const
+{
+	if (myOwner)
+	{
+		GetWorld().EnsureComponentMutationAllowed(this);
+	}
+}

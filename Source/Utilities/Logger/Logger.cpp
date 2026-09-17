@@ -1,47 +1,47 @@
 #include "Logger.h"
 #pragma region WindowsIncludes
-#define	WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
 
-#define NOGDICAPMASKS     
-#define NOVIRTUALKEYCODES 
-#define NOWINMESSAGES     
-#define NOWINSTYLES       
-#define NOSYSMETRICS      
-#define NOMENUS           
-#define NOICONS           
-#define NOKEYSTATES       
-#define NOSYSCOMMANDS     
-#define NORASTEROPS       
-#define NOSHOWWINDOW      
-#define OEMRESOURCE       
-#define NOATOM            
-#define NOCLIPBOARD       
-#define NOCOLOR           
-#define NOCTLMGR          
-#define NODRAWTEXT        
-#define NOGDI             
-#define NOKERNEL          
-//#define NOUSER            
+#define NOGDICAPMASKS
+#define NOVIRTUALKEYCODES
+#define NOWINMESSAGES
+#define NOWINSTYLES
+#define NOSYSMETRICS
+#define NOMENUS
+#define NOICONS
+#define NOKEYSTATES
+#define NOSYSCOMMANDS
+#define NORASTEROPS
+#define NOSHOWWINDOW
+#define OEMRESOURCE
+#define NOATOM
+#define NOCLIPBOARD
+#define NOCOLOR
+#define NOCTLMGR
+#define NODRAWTEXT
+#define NOGDI
+#define NOKERNEL
+//#define NOUSER
 //#define NONLS - Required for CP_ACP and WideCharToMultiByte
-#define NOMB              
-#define NOMEMMGR          
-#define NOMETAFILE        
-#define NOMINMAX          
-#define NOMSG             
-#define NOOPENFILE        
-#define NOSCROLL          
-#define NOSERVICE         
-#define NOSOUND           
-#define NOTEXTMETRIC      
-#define NOWH              
-#define NOWINOFFSETS      
-#define NOCOMM            
-#define NOKANJI           
-#define NOHELP            
-#define NOPROFILER        
-#define NODEFERWINDOWPOS  
+#define NOMB
+#define NOMEMMGR
+#define NOMETAFILE
+#define NOMINMAX
+#define NOMSG
+#define NOOPENFILE
+#define NOSCROLL
+#define NOSERVICE
+#define NOSOUND
+#define NOTEXTMETRIC
+#define NOWH
+#define NOWINOFFSETS
+#define NOCOMM
+#define NOKANJI
+#define NOHELP
+#define NOPROFILER
+#define NODEFERWINDOWPOS
 #define NOMCX
-#include <Windows.h>  
+#include <Windows.h>
 #pragma endregion
 
 #include <fstream>
@@ -53,20 +53,21 @@ unsigned Logger::LogCategoryBase::ourNextId = 0;
 
 Logger::LogStream::~LogStream()
 {
-	if(File.is_open())
+	if (File.is_open())
 	{
 		File.flush();
 		File.close();
 	}
 }
 
-Logger::LogCategoryBase::LogCategoryBase(std::string aName, LogVerbosity::Type aVerbosity): Name(std::move(aName)), Verbosity(aVerbosity), Id(ourNextId++)
-{  }
+Logger::LogCategoryBase::LogCategoryBase(std::string aName, LogVerbosity::Type aVerbosity)
+    : Name(std::move(aName)), Verbosity(aVerbosity), Id(ourNextId++)
+{
+}
 
 Logger::LogCategoryBase::~LogCategoryBase() = default;
 
-Logger::Logger()
-	: myStdErrHandle(GetStdHandle(STD_ERROR_HANDLE)), myIsRunning(true)
+Logger::Logger() : myStdErrHandle(GetStdHandle(STD_ERROR_HANDLE)), myIsRunning(true)
 {
 	myLogThread = std::thread(&Logger::WorkerThread, this);
 }
@@ -104,37 +105,37 @@ std::string Logger::Timestamp(bool aIncludeDate /*= false*/) const
 void Logger::LogIntl(const LogCategoryBase& aCategory, LogVerbosity::Type aVerbosity, const char* aMessage)
 {
 	// [hh:mm:ss][   LOG   ][ModelViewer] ModelViewer starting...
-	SetConsoleTextAttribute(myStdErrHandle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);	
+	SetConsoleTextAttribute(myStdErrHandle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 
 	myStream << "[" << Timestamp() << "] ";
 
-	switch(aVerbosity)
+	switch (aVerbosity)
 	{
 	case LogVerbosity::None:
 		break;
 	case LogVerbosity::Fatal:
 	case LogVerbosity::Error:
-		{
-			SetConsoleTextAttribute(myStdErrHandle, BACKGROUND_RED);
-			myStream << "[  ERROR  ]";
-			SetConsoleTextAttribute(myStdErrHandle, FOREGROUND_RED | FOREGROUND_INTENSITY);
-		}
-		break;
+	{
+		SetConsoleTextAttribute(myStdErrHandle, BACKGROUND_RED);
+		myStream << "[  ERROR  ]";
+		SetConsoleTextAttribute(myStdErrHandle, FOREGROUND_RED | FOREGROUND_INTENSITY);
+	}
+	break;
 	case LogVerbosity::Warning:
-		{
-			SetConsoleTextAttribute(myStdErrHandle, BACKGROUND_RED | BACKGROUND_GREEN);
-			myStream << "[ WARNING ]";
-			SetConsoleTextAttribute(myStdErrHandle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-		}
-		break;
+	{
+		SetConsoleTextAttribute(myStdErrHandle, BACKGROUND_RED | BACKGROUND_GREEN);
+		myStream << "[ WARNING ]";
+		SetConsoleTextAttribute(myStdErrHandle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+	}
+	break;
 	case LogVerbosity::Log:
 	case LogVerbosity::Verbose:
-		{
-			SetConsoleTextAttribute(myStdErrHandle, BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE);
-			myStream << "[   LOG   ]";
-			SetConsoleTextAttribute(myStdErrHandle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
-		}
-		break;
+	{
+		SetConsoleTextAttribute(myStdErrHandle, BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE);
+		myStream << "[   LOG   ]";
+		SetConsoleTextAttribute(myStdErrHandle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+	}
+	break;
 	}
 
 	myStream << " [" << aCategory.Name << "] ";
@@ -154,7 +155,7 @@ void Logger::WorkerThread()
 
 	const size_t lastSlashPos = imageFileName.find_last_of('\\');
 	std::string inFileNameOnly = imageFileName;
-	if(lastSlashPos != std::string::npos)
+	if (lastSlashPos != std::string::npos)
 	{
 		inFileNameOnly = inFileNameOnly.substr(lastSlashPos + 1);
 	}
@@ -162,7 +163,7 @@ void Logger::WorkerThread()
 	inFileNameOnly = inFileNameOnly.substr(0, inFileNameOnly.size() - 4);
 
 	myLogFilePath = LOGGING_PATH;
-	if(!myLogFilePath.has_filename())
+	if (!myLogFilePath.has_filename())
 	{
 		TCHAR exeFileName[MAX_PATH];
 		GetModuleFileName(NULL, exeFileName, MAX_PATH);
@@ -179,27 +180,29 @@ void Logger::WorkerThread()
 
 	std::queue<LogEntry> localLogQueue;
 
-	while(true)
+	while (true)
 	{
 		// Lock and swap the queues
 		{
-			std::unique_lock lock(myQueueMutex);	
+			std::unique_lock lock(myQueueMutex);
 
 			// Sleep until log messages arrive or dtor runs.
-			myQueueCV.wait(lock, [&]
+			myQueueCV.wait(lock, [this]
 			{
 				return !myIsRunning.load(std::memory_order_acquire) || !myLogQueue.empty();
 			});
 
 			// Finish if dtor ran.
 			if (!myIsRunning.load(std::memory_order_relaxed) && myLogQueue.empty())
+			{
 				break;
+			}
 
 			// Swap queues for processing.
 			std::swap(localLogQueue, myLogQueue);
-		}		
+		}
 
-		while(!localLogQueue.empty())
+		while (!localLogQueue.empty())
 		{
 			const LogEntry& entry = localLogQueue.front();
 			LogIntl(*entry.Category, entry.Verbosity, entry.Message.c_str());
@@ -210,7 +213,7 @@ void Logger::WorkerThread()
 
 void Logger::Log(const LogCategoryBase& aCategory, LogVerbosity::Type aVerbosity, const char* aMessage)
 {
-	if(aCategory.Verbosity >= aVerbosity)
+	if (aCategory.Verbosity >= aVerbosity)
 	{
 		Logger& logger = Get();
 		if (logger.myFilter.empty() || logger.myFilter.contains(aCategory))

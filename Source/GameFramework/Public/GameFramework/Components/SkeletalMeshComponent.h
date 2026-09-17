@@ -7,7 +7,7 @@
 #include <string>
 #include <string_view>
 
-struct Animation;
+class Animation;
 
 // Per-instance animation playback and joint poses over a shared mesh/skeleton.
 // The world advances animation during Update and snapshot extraction copies its pose.
@@ -20,7 +20,6 @@ public:
 
 	void Update(float aDeltaTime) override;
 
-
 	bool PlayAnimation(std::string_view anAnimationName, bool aShouldLoop);
 	bool PlayPartialAnimation(std::string_view anAnimationName, bool aShouldLoop);
 	bool ConfigurePartialLayerFromJointName(std::string_view aRootJointName);
@@ -29,8 +28,9 @@ protected:
 	void OnMeshChanged() override;
 
 private:
-    bool HasSkinning() const override;
-    const std::array<CU::Matrix4f, 128>* GetJointTransforms() const override;
+	bool HasSkinning() const override;
+	const std::array<CU::Matrix4f, 128>* GetJointTransforms() const override;
+
 	struct PlaybackState
 	{
 		std::shared_ptr<Animation> CurrentAnimation;

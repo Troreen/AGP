@@ -27,7 +27,12 @@
 #include "Materials/MaterialInterface.h"
 #include "Materials/Material.h"
 
-enum class RenderLightType : uint32_t { Directional = 0, Point = 1, Spot = 2 };
+enum class RenderLightType : uint32_t
+{
+	Directional = 0,
+	Point = 1,
+	Spot = 2
+};
 
 // Kept available in every build; these are user-facing renderer diagnostics.
 enum class RenderPass : uint8_t
@@ -61,7 +66,7 @@ enum class ConstantBuffer : uint8_t
 
 class GraphicsEngine
 {
-  public:
+public:
 	// --- Snapshot data ---
 	// Transforms are copied; shared mesh/material contents stay stable during rendering.
 	struct RenderItemSnapshot
@@ -111,8 +116,9 @@ class GraphicsEngine
 		double SceneRecordingMilliseconds = 0.0;
 	};
 
-	struct RenderSceneSnapshot
+	class RenderSceneSnapshot
 	{
+	public:
 		bool HasCamera = false;
 		CU::Camera3D Camera;
 		std::vector<RenderItemSnapshot> ShadowCasters;
@@ -129,9 +135,14 @@ class GraphicsEngine
 	// --- Frame rendering ---
 	bool Initialize(HWND aWindowHandle, const std::filesystem::path& aShaderRoot);
 	// Finish culling and routing after integration has copied scene values.
-    void FinalizeRenderSnapshot(RenderSceneSnapshot& snapshot) const;
-    void RenderSnapshot(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot);
-    RenderHardwareInterface::DebugMessages CollectDeviceDiagnostics() const { return myRHI.CollectDeviceDiagnostics(); }
+	void FinalizeRenderSnapshot(RenderSceneSnapshot& snapshot) const;
+	void RenderSnapshot(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot);
+
+	RenderHardwareInterface::DebugMessages CollectDeviceDiagnostics() const
+	{
+		return myRHI.CollectDeviceDiagnostics();
+	}
+
 	void Present() const;
 	// --- Diagnostics ---
 	void CycleRenderPass();
@@ -167,7 +178,7 @@ class GraphicsEngine
 	void ResetShadowTuning();
 	void LogShadowTuning() const;
 
-  private:
+private:
 	enum class RenderBlendFilter : uint8_t
 	{
 		All,

@@ -87,4 +87,3 @@ enum class BlendMode : uint8_t
 	Alpha,
 	Additive
 };
-

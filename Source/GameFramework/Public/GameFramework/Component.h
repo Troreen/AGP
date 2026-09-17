@@ -7,11 +7,15 @@
 class Actor;
 class World;
 class References;
-struct GameInput;
+class GameInput;
 class SceneService;
 class AssetLookup;
 class GameTime;
-namespace GameFrameworkInternal { class WorldAccess; }
+
+namespace GameFrameworkInternal
+{
+	class WorldAccess;
+}
 
 // Base for engine features and game-authored behavior. Override only the phases
 // you need; the defaults do nothing. World/Actor call these hooks automatically
@@ -21,24 +25,45 @@ class Component
 {
 public:
 	Component() = default;
-    virtual ~Component() = default;
-    Component(const Component&) = delete;
-    Component& operator=(const Component&) = delete;
+	virtual ~Component() = default;
+	Component(const Component&) = delete;
+	Component& operator=(const Component&) = delete;
 
-    // ResolveReferences validates dependencies after all objects have been configured. BeginPlay
-    // starts behavior only after the entire batch passes validation, even if disabled.
-    virtual void ResolveReferences(References&) {}
-    virtual void BeginPlay() {}
-    virtual void EndPlay() {}
-    World& GetWorld() const;
-    const GameInput& GetInput() const;
-    SceneService& GetScenes() const;
-    const AssetLookup& GetAssets() const;
-    const GameTime& GetTime() const;
-    void Destroy();
-    bool HasBegunPlay() const { return myBegun; }
-    bool IsPendingDestroy() const { return myPendingDestroy; }
-    template<class T = Component> ComponentRef<T> GetRef() const { return ComponentRef<T>(myHandle); }
+	// ResolveReferences validates dependencies after all objects have been configured. BeginPlay
+	// starts behavior only after the entire batch passes validation, even if disabled.
+	virtual void ResolveReferences(References&)
+	{
+	}
+
+	virtual void BeginPlay()
+	{
+	}
+
+	virtual void EndPlay()
+	{
+	}
+
+	World& GetWorld() const;
+	const GameInput& GetInput() const;
+	SceneService& GetScenes() const;
+	const AssetLookup& GetAssets() const;
+	const GameTime& GetTime() const;
+	void Destroy();
+
+	bool HasBegunPlay() const
+	{
+		return myBegun;
+	}
+
+	bool IsPendingDestroy() const
+	{
+		return myPendingDestroy;
+	}
+
+	template <class T = Component> ComponentRef<T> GetRef() const
+	{
+		return ComponentRef<T>(myHandle);
+	}
 
 	// Constant-step simulation; zero to five calls per gameplay frame with current policy.
 	virtual void FixedUpdate(float aDeltaTime);
@@ -46,7 +71,7 @@ public:
 	virtual void Update(float aDeltaTime);
 	// Post-update adjustments, such as cameras that depend on the completed pose.
 	virtual void LateUpdate(float aDeltaTime);
-    const std::string& GetName() const;
+	const std::string& GetName() const;
 	// Assigned after construction by AddComponent; null inside the component constructor.
 	Actor* GetOwner() const;
 
@@ -54,7 +79,8 @@ public:
 	void SetEnabled(bool anIsEnabled);
 
 protected:
-    void EnsureCanMutate() const;
+	void EnsureCanMutate() const;
+
 private:
 	void SetOwner(Actor* anOwner);
 	void SetName(std::string aName);
@@ -62,16 +88,16 @@ private:
 	std::string myName;
 	Actor* myOwner = nullptr;
 	bool myIsEnabled = true;
-    bool myPendingDestroy = false;
-    bool myConnected = false;
-    bool myAdmitted = false;
-    bool myBegun = false;
-    GameFrameworkInternal::ObjectIdentity myHandle;
-    SceneDiagnostic mySourceDiagnostic;
-    friend class References;
-    friend class GameFrameworkInternal::WorldAccess;
-    friend class World;
-    friend class SceneComponent;
+	bool myPendingDestroy = false;
+	bool myConnected = false;
+	bool myAdmitted = false;
+	bool myBegun = false;
+	GameFrameworkInternal::ObjectIdentity myHandle;
+	SceneDiagnostic mySourceDiagnostic;
+	friend class References;
+	friend class GameFrameworkInternal::WorldAccess;
+	friend class World;
+	friend class SceneComponent;
 
 	friend class Actor;
 };

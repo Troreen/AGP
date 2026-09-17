@@ -18,12 +18,12 @@ namespace
 
 	void FinalizeNormalsAndTangents(std::vector<Vertex>& inoutVertices, const std::vector<unsigned>& aIndices);
 
-	const Color DefaultVertexColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+	const Color DefaultVertexColor = {1.0f, 1.0f, 1.0f, 1.0f};
 
-	Vertex MakeVertex(const Point3& aPosition, const Color& aColor = DefaultVertexColor, const UV& aUV = { 0.0f, 0.0f })
+	Vertex MakeVertex(const Point3& aPosition, const Color& aColor = DefaultVertexColor, const UV& aUV = {0.0f, 0.0f})
 	{
 		Vertex vertex;
-		vertex.Position = { aPosition.x, aPosition.y, aPosition.z, 1.0f };
+		vertex.Position = {aPosition.x, aPosition.y, aPosition.z, 1.0f};
 		vertex.Color = aColor;
 		vertex.UV0 = aUV;
 		vertex.UV1 = aUV;
@@ -39,29 +39,33 @@ namespace
 		element.NumIndices = static_cast<unsigned>(aIndices.size());
 
 		auto mesh = std::make_shared<Mesh>();
-		mesh->Initialize(aName, { element }, std::move(aVertices), std::move(aIndices));
+		mesh->Initialize(aName, {element}, std::move(aVertices), std::move(aIndices));
 		return mesh;
 	}
 
-	void AddQuad(std::vector<Vertex>& outVertices, std::vector<unsigned>& outIndices,
-		const Point3& aPoint0, const Point3& aPoint1, const Point3& aPoint2, const Point3& aPoint3,
-		const Color* aColorOverride = nullptr,
-		const UV& aUV0 = { 0.0f, 1.0f }, const UV& aUV1 = { 1.0f, 1.0f }, const UV& aUV2 = { 1.0f, 0.0f }, const UV& aUV3 = { 0.0f, 0.0f });
+	void AddQuad(std::vector<Vertex>& outVertices, std::vector<unsigned>& outIndices, const Point3& aPoint0, const Point3& aPoint1,
+	             const Point3& aPoint2, const Point3& aPoint3, const Color* aColorOverride = nullptr, const UV& aUV0 = {0.0f, 1.0f},
+	             const UV& aUV1 = {1.0f, 1.0f}, const UV& aUV2 = {1.0f, 0.0f}, const UV& aUV3 = {0.0f, 0.0f});
 
-	void AddBox(std::vector<Vertex>& outVertices, std::vector<unsigned>& outIndices,
-		const Point3& aMin, const Point3& aMax, const Color& aColor)
+	void AddBox(std::vector<Vertex>& outVertices, std::vector<unsigned>& outIndices, const Point3& aMin, const Point3& aMax,
+	            const Color& aColor)
 	{
-		AddQuad(outVertices, outIndices, Point3(aMin.x, aMin.y, aMin.z), Point3(aMax.x, aMin.y, aMin.z), Point3(aMax.x, aMax.y, aMin.z), Point3(aMin.x, aMax.y, aMin.z), &aColor);
-		AddQuad(outVertices, outIndices, Point3(aMax.x, aMin.y, aMax.z), Point3(aMin.x, aMin.y, aMax.z), Point3(aMin.x, aMax.y, aMax.z), Point3(aMax.x, aMax.y, aMax.z), &aColor);
-		AddQuad(outVertices, outIndices, Point3(aMin.x, aMin.y, aMax.z), Point3(aMin.x, aMin.y, aMin.z), Point3(aMin.x, aMax.y, aMin.z), Point3(aMin.x, aMax.y, aMax.z), &aColor);
-		AddQuad(outVertices, outIndices, Point3(aMax.x, aMin.y, aMin.z), Point3(aMax.x, aMin.y, aMax.z), Point3(aMax.x, aMax.y, aMax.z), Point3(aMax.x, aMax.y, aMin.z), &aColor);
-		AddQuad(outVertices, outIndices, Point3(aMin.x, aMax.y, aMin.z), Point3(aMax.x, aMax.y, aMin.z), Point3(aMax.x, aMax.y, aMax.z), Point3(aMin.x, aMax.y, aMax.z), &aColor);
-		AddQuad(outVertices, outIndices, Point3(aMin.x, aMin.y, aMax.z), Point3(aMax.x, aMin.y, aMax.z), Point3(aMax.x, aMin.y, aMin.z), Point3(aMin.x, aMin.y, aMin.z), &aColor);
+		AddQuad(outVertices, outIndices, Point3(aMin.x, aMin.y, aMin.z), Point3(aMax.x, aMin.y, aMin.z), Point3(aMax.x, aMax.y, aMin.z),
+		        Point3(aMin.x, aMax.y, aMin.z), &aColor);
+		AddQuad(outVertices, outIndices, Point3(aMax.x, aMin.y, aMax.z), Point3(aMin.x, aMin.y, aMax.z), Point3(aMin.x, aMax.y, aMax.z),
+		        Point3(aMax.x, aMax.y, aMax.z), &aColor);
+		AddQuad(outVertices, outIndices, Point3(aMin.x, aMin.y, aMax.z), Point3(aMin.x, aMin.y, aMin.z), Point3(aMin.x, aMax.y, aMin.z),
+		        Point3(aMin.x, aMax.y, aMax.z), &aColor);
+		AddQuad(outVertices, outIndices, Point3(aMax.x, aMin.y, aMin.z), Point3(aMax.x, aMin.y, aMax.z), Point3(aMax.x, aMax.y, aMax.z),
+		        Point3(aMax.x, aMax.y, aMin.z), &aColor);
+		AddQuad(outVertices, outIndices, Point3(aMin.x, aMax.y, aMin.z), Point3(aMax.x, aMax.y, aMin.z), Point3(aMax.x, aMax.y, aMax.z),
+		        Point3(aMin.x, aMax.y, aMax.z), &aColor);
+		AddQuad(outVertices, outIndices, Point3(aMin.x, aMin.y, aMax.z), Point3(aMax.x, aMin.y, aMax.z), Point3(aMax.x, aMin.y, aMin.z),
+		        Point3(aMin.x, aMin.y, aMin.z), &aColor);
 	}
 
-	void AddTriangle(std::vector<Vertex>& outVertices, std::vector<unsigned>& outIndices,
-		const Point3& aPoint0, const Point3& aPoint1, const Point3& aPoint2,
-		const UV& aUV0 = { 0.0f, 1.0f }, const UV& aUV1 = { 0.5f, 0.0f }, const UV& aUV2 = { 1.0f, 1.0f })
+	void AddTriangle(std::vector<Vertex>& outVertices, std::vector<unsigned>& outIndices, const Point3& aPoint0, const Point3& aPoint1,
+	                 const Point3& aPoint2, const UV& aUV0 = {0.0f, 1.0f}, const UV& aUV1 = {0.5f, 0.0f}, const UV& aUV2 = {1.0f, 1.0f})
 	{
 		const unsigned firstVertex = static_cast<unsigned>(outVertices.size());
 		outVertices.push_back(MakeVertex(aPoint0, DefaultVertexColor, aUV0));
@@ -73,10 +77,9 @@ namespace
 		outIndices.push_back(firstVertex + 2);
 	}
 
-	void AddQuad(std::vector<Vertex>& outVertices, std::vector<unsigned>& outIndices,
-		const Point3& aPoint0, const Point3& aPoint1, const Point3& aPoint2, const Point3& aPoint3,
-		const Color* aColorOverride,
-		const UV& aUV0, const UV& aUV1, const UV& aUV2, const UV& aUV3)
+	void AddQuad(std::vector<Vertex>& outVertices, std::vector<unsigned>& outIndices, const Point3& aPoint0, const Point3& aPoint1,
+	             const Point3& aPoint2, const Point3& aPoint3, const Color* aColorOverride, const UV& aUV0, const UV& aUV1, const UV& aUV2,
+	             const UV& aUV3)
 	{
 		const unsigned firstVertex = static_cast<unsigned>(outVertices.size());
 		const Color& color = aColorOverride ? *aColorOverride : DefaultVertexColor;
@@ -93,9 +96,9 @@ namespace
 		outIndices.push_back(firstVertex + 2);
 	}
 
-	void AddReversedQuad(std::vector<Vertex>& outVertices, std::vector<unsigned>& outIndices,
-		const Point3& aPoint0, const Point3& aPoint1, const Point3& aPoint2, const Point3& aPoint3,
-		const UV& aUV0 = { 0.0f, 1.0f }, const UV& aUV1 = { 1.0f, 1.0f }, const UV& aUV2 = { 1.0f, 0.0f }, const UV& aUV3 = { 0.0f, 0.0f })
+	void AddReversedQuad(std::vector<Vertex>& outVertices, std::vector<unsigned>& outIndices, const Point3& aPoint0, const Point3& aPoint1,
+	                     const Point3& aPoint2, const Point3& aPoint3, const UV& aUV0 = {0.0f, 1.0f}, const UV& aUV1 = {1.0f, 1.0f},
+	                     const UV& aUV2 = {1.0f, 0.0f}, const UV& aUV3 = {0.0f, 0.0f})
 	{
 		const unsigned firstVertex = static_cast<unsigned>(outVertices.size());
 		outVertices.push_back(MakeVertex(aPoint0, DefaultVertexColor, aUV0));
@@ -114,10 +117,8 @@ namespace
 	Point3 GetSpherePoint(float aLatitudeRadians, float aLongitudeRadians, float aRadius)
 	{
 		const float ringRadius = std::cos(aLatitudeRadians) * aRadius;
-		return Point3(
-			std::sin(aLongitudeRadians) * ringRadius,
-			std::sin(aLatitudeRadians) * aRadius,
-			std::cos(aLongitudeRadians) * ringRadius);
+		return Point3(std::sin(aLongitudeRadians) * ringRadius, std::sin(aLatitudeRadians) * aRadius,
+		              std::cos(aLongitudeRadians) * ringRadius);
 	}
 
 	std::shared_ptr<Mesh> CreateSphereMesh(std::string_view aName, int aLatitudeSegments, int aLongitudeSegments, float aRadius)
@@ -129,26 +130,26 @@ namespace
 
 		for (int latitude = 0; latitude < aLatitudeSegments; ++latitude)
 		{
-			const float latitude0 = -CommonUtilities::Maths::HalfPi<float>() + CommonUtilities::Maths::Pi<float>() * static_cast<float>(latitude) / static_cast<float>(aLatitudeSegments);
-			const float latitude1 = -CommonUtilities::Maths::HalfPi<float>() + CommonUtilities::Maths::Pi<float>() * static_cast<float>(latitude + 1) / static_cast<float>(aLatitudeSegments);
+			const float latitude0 = -CommonUtilities::Maths::HalfPi<float>() + CommonUtilities::Maths::Pi<float>() *
+			                                                                       static_cast<float>(latitude) /
+			                                                                       static_cast<float>(aLatitudeSegments);
+			const float latitude1 = -CommonUtilities::Maths::HalfPi<float>() + CommonUtilities::Maths::Pi<float>() *
+			                                                                       static_cast<float>(latitude + 1) /
+			                                                                       static_cast<float>(aLatitudeSegments);
 			const float v0 = 1.0f - static_cast<float>(latitude) / static_cast<float>(aLatitudeSegments);
 			const float v1 = 1.0f - static_cast<float>(latitude + 1) / static_cast<float>(aLatitudeSegments);
 
 			for (int longitude = 0; longitude < aLongitudeSegments; ++longitude)
 			{
-				const float longitude0 = CommonUtilities::Maths::TwoPi<float>() * static_cast<float>(longitude) / static_cast<float>(aLongitudeSegments);
-				const float longitude1 = CommonUtilities::Maths::TwoPi<float>() * static_cast<float>(longitude + 1) / static_cast<float>(aLongitudeSegments);
+				const float longitude0 =
+				    CommonUtilities::Maths::TwoPi<float>() * static_cast<float>(longitude) / static_cast<float>(aLongitudeSegments);
+				const float longitude1 =
+				    CommonUtilities::Maths::TwoPi<float>() * static_cast<float>(longitude + 1) / static_cast<float>(aLongitudeSegments);
 				const float u0 = static_cast<float>(longitude) / static_cast<float>(aLongitudeSegments);
 				const float u1 = static_cast<float>(longitude + 1) / static_cast<float>(aLongitudeSegments);
-				AddReversedQuad(vertices, indices,
-					GetSpherePoint(latitude0, longitude0, aRadius),
-					GetSpherePoint(latitude0, longitude1, aRadius),
-					GetSpherePoint(latitude1, longitude1, aRadius),
-					GetSpherePoint(latitude1, longitude0, aRadius),
-					UV{ u0, v0 },
-					UV{ u1, v0 },
-					UV{ u1, v1 },
-					UV{ u0, v1 });
+				AddReversedQuad(vertices, indices, GetSpherePoint(latitude0, longitude0, aRadius),
+				                GetSpherePoint(latitude0, longitude1, aRadius), GetSpherePoint(latitude1, longitude1, aRadius),
+				                GetSpherePoint(latitude1, longitude0, aRadius), UV{u0, v0}, UV{u1, v0}, UV{u1, v1}, UV{u0, v1});
 			}
 		}
 
@@ -158,10 +159,7 @@ namespace
 	Point3 GetTorusPoint(float aMajorRadians, float aMinorRadians, float aMajorRadius, float aMinorRadius)
 	{
 		const float tubeX = aMajorRadius + std::cos(aMinorRadians) * aMinorRadius;
-		return Point3(
-			std::sin(aMajorRadians) * tubeX,
-			std::sin(aMinorRadians) * aMinorRadius,
-			std::cos(aMajorRadians) * tubeX);
+		return Point3(std::sin(aMajorRadians) * tubeX, std::sin(aMinorRadians) * aMinorRadius, std::cos(aMajorRadians) * tubeX);
 	}
 
 	Point3 GetPosition(const Vertex& aVertex)
@@ -278,21 +276,15 @@ std::shared_ptr<Mesh> PrimitiveMeshBuilder::CreateFloor()
 	std::vector<Vertex> vertices;
 	std::vector<unsigned> indices;
 
-	AddReversedQuad(vertices, indices,
-		Point3(-0.5f, -0.5f, 0.0f),
-		Point3(0.5f, -0.5f, 0.0f),
-		Point3(0.5f, 0.5f, 0.0f),
-		Point3(-0.5f, 0.5f, 0.0f));
+	AddReversedQuad(vertices, indices, Point3(-0.5f, -0.5f, 0.0f), Point3(0.5f, -0.5f, 0.0f), Point3(0.5f, 0.5f, 0.0f),
+	                Point3(-0.5f, 0.5f, 0.0f));
 
 	const unsigned firstVertex = static_cast<unsigned>(vertices.size());
-	vertices.push_back(MakeVertex(Point3(-0.48f, -0.48f, 0.001f), DefaultVertexColor, UV{ 0.02f, 0.98f }));
-	vertices.push_back(MakeVertex(Point3(0.48f, 0.48f, 0.001f), DefaultVertexColor, UV{ 0.98f, 0.02f }));
-	vertices.push_back(MakeVertex(Point3(-0.48f, 0.48f, 0.001f), DefaultVertexColor, UV{ 0.02f, 0.02f }));
-	vertices.push_back(MakeVertex(Point3(0.48f, -0.48f, 0.001f), DefaultVertexColor, UV{ 0.98f, 0.98f }));
-	indices.insert(indices.end(), {
-		firstVertex, firstVertex + 1, firstVertex + 2,
-		firstVertex, firstVertex + 3, firstVertex + 1
-	});
+	vertices.push_back(MakeVertex(Point3(-0.48f, -0.48f, 0.001f), DefaultVertexColor, UV{0.02f, 0.98f}));
+	vertices.push_back(MakeVertex(Point3(0.48f, 0.48f, 0.001f), DefaultVertexColor, UV{0.98f, 0.02f}));
+	vertices.push_back(MakeVertex(Point3(-0.48f, 0.48f, 0.001f), DefaultVertexColor, UV{0.02f, 0.02f}));
+	vertices.push_back(MakeVertex(Point3(0.48f, -0.48f, 0.001f), DefaultVertexColor, UV{0.98f, 0.98f}));
+	indices.insert(indices.end(), {firstVertex, firstVertex + 1, firstVertex + 2, firstVertex, firstVertex + 3, firstVertex + 1});
 
 	return CreateMesh("Floor", std::move(vertices), std::move(indices));
 }
@@ -302,12 +294,15 @@ std::shared_ptr<Mesh> PrimitiveMeshBuilder::CreateCube()
 	std::vector<Vertex> vertices;
 	std::vector<unsigned> indices;
 
-	AddQuad(vertices, indices, Point3(-0.5f, -0.5f, -0.5f), Point3(0.5f, -0.5f, -0.5f), Point3(0.5f, 0.5f, -0.5f), Point3(-0.5f, 0.5f, -0.5f));
+	AddQuad(vertices, indices, Point3(-0.5f, -0.5f, -0.5f), Point3(0.5f, -0.5f, -0.5f), Point3(0.5f, 0.5f, -0.5f),
+	        Point3(-0.5f, 0.5f, -0.5f));
 	AddQuad(vertices, indices, Point3(0.5f, -0.5f, 0.5f), Point3(-0.5f, -0.5f, 0.5f), Point3(-0.5f, 0.5f, 0.5f), Point3(0.5f, 0.5f, 0.5f));
-	AddQuad(vertices, indices, Point3(-0.5f, -0.5f, 0.5f), Point3(-0.5f, -0.5f, -0.5f), Point3(-0.5f, 0.5f, -0.5f), Point3(-0.5f, 0.5f, 0.5f));
+	AddQuad(vertices, indices, Point3(-0.5f, -0.5f, 0.5f), Point3(-0.5f, -0.5f, -0.5f), Point3(-0.5f, 0.5f, -0.5f),
+	        Point3(-0.5f, 0.5f, 0.5f));
 	AddQuad(vertices, indices, Point3(0.5f, -0.5f, -0.5f), Point3(0.5f, -0.5f, 0.5f), Point3(0.5f, 0.5f, 0.5f), Point3(0.5f, 0.5f, -0.5f));
 	AddQuad(vertices, indices, Point3(-0.5f, 0.5f, -0.5f), Point3(0.5f, 0.5f, -0.5f), Point3(0.5f, 0.5f, 0.5f), Point3(-0.5f, 0.5f, 0.5f));
-	AddQuad(vertices, indices, Point3(-0.5f, -0.5f, 0.5f), Point3(0.5f, -0.5f, 0.5f), Point3(0.5f, -0.5f, -0.5f), Point3(-0.5f, -0.5f, -0.5f));
+	AddQuad(vertices, indices, Point3(-0.5f, -0.5f, 0.5f), Point3(0.5f, -0.5f, 0.5f), Point3(0.5f, -0.5f, -0.5f),
+	        Point3(-0.5f, -0.5f, -0.5f));
 
 	return CreateMesh("Cube", std::move(vertices), std::move(indices));
 }
@@ -375,15 +370,10 @@ std::shared_ptr<Mesh> PrimitiveMeshBuilder::CreateTorus()
 			const float minor1 = CommonUtilities::Maths::TwoPi<float>() * static_cast<float>(minor + 1) / static_cast<float>(minorSegments);
 			const float v0 = static_cast<float>(minor) / static_cast<float>(minorSegments);
 			const float v1 = static_cast<float>(minor + 1) / static_cast<float>(minorSegments);
-			AddReversedQuad(vertices, indices,
-				GetTorusPoint(major0, minor0, majorRadius, minorRadius),
-				GetTorusPoint(major1, minor0, majorRadius, minorRadius),
-				GetTorusPoint(major1, minor1, majorRadius, minorRadius),
-				GetTorusPoint(major0, minor1, majorRadius, minorRadius),
-				UV{ u0, v0 },
-				UV{ u1, v0 },
-				UV{ u1, v1 },
-				UV{ u0, v1 });
+			AddReversedQuad(vertices, indices, GetTorusPoint(major0, minor0, majorRadius, minorRadius),
+			                GetTorusPoint(major1, minor0, majorRadius, minorRadius),
+			                GetTorusPoint(major1, minor1, majorRadius, minorRadius),
+			                GetTorusPoint(major0, minor1, majorRadius, minorRadius), UV{u0, v0}, UV{u1, v0}, UV{u1, v1}, UV{u0, v1});
 		}
 	}
 
@@ -400,20 +390,14 @@ std::shared_ptr<Mesh> PrimitiveMeshBuilder::CreateAxes()
 	vertices.reserve(72);
 	indices.reserve(108);
 
-	AddBox(vertices, indices,
-		Point3(0.0f, -halfThickness, -halfThickness),
-		Point3(length, halfThickness, halfThickness),
-		Color{ 1.0f, 0.0f, 0.0f, 1.0f });
+	AddBox(vertices, indices, Point3(0.0f, -halfThickness, -halfThickness), Point3(length, halfThickness, halfThickness),
+	       Color{1.0f, 0.0f, 0.0f, 1.0f});
 
-	AddBox(vertices, indices,
-		Point3(-halfThickness, 0.0f, -halfThickness),
-		Point3(halfThickness, length, halfThickness),
-		Color{ 0.0f, 1.0f, 0.0f, 1.0f });
+	AddBox(vertices, indices, Point3(-halfThickness, 0.0f, -halfThickness), Point3(halfThickness, length, halfThickness),
+	       Color{0.0f, 1.0f, 0.0f, 1.0f});
 
-	AddBox(vertices, indices,
-		Point3(-halfThickness, -halfThickness, 0.0f),
-		Point3(halfThickness, halfThickness, length),
-		Color{ 0.0f, 0.2f, 1.0f, 1.0f });
+	AddBox(vertices, indices, Point3(-halfThickness, -halfThickness, 0.0f), Point3(halfThickness, halfThickness, length),
+	       Color{0.0f, 0.2f, 1.0f, 1.0f});
 
 	return CreateMesh("WorldAxes", std::move(vertices), std::move(indices));
 }

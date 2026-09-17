@@ -2,7 +2,11 @@
 #include <filesystem>
 #include <string>
 class IGame;
-namespace GameFrameworkIntegration { struct ApplicationSetup; }
+
+namespace GameFrameworkIntegration
+{
+	struct ApplicationSetup;
+}
 
 // Engine-owned host. Each game supplies configuration and an IGame instance.
 // Reusable runtime boundary: keep window handling, scheduling and rendering here,
@@ -26,18 +30,20 @@ public:
 		// A debugging option, not a different gameplay API. Both modes use the same
 		// callback sequence. AGP_DISABLE_THREADED_UPDATE also forces synchronous mode.
 		bool ThreadedUpdate = true;
-        // Hidden windows support automated host tests with the real graphics path.
-        bool ShowWindow = true;
+		// Hidden windows support automated host tests with the real graphics path.
+		bool ShowWindow = true;
 		// Optional engine diagnostics: F6 cycles render passes and P prints statistics.
 		bool EnableRenderDiagnostics = false;
 		bool EnableMouseLook = false; // Hold RMB for relative mouse input.
 	};
+
 	// Blocks until exit; joins gameplay work before returning or throwing.
 	// The caller owns game and must keep it alive for this blocking call. Exceptions
 	// return to the caller after worker cleanup. This is a single-session host; live
 	// scene replacement is supported; repeated renderer initialization is not promised.
 	int Run(IGame& game, const Config& config);
-    int Run(IGame& game, const Config& config, GameFrameworkIntegration::ApplicationSetup setup);
+	int Run(IGame& game, const Config& config, GameFrameworkIntegration::ApplicationSetup setup);
+
 private:
-	struct Impl;
+	class Impl;
 };

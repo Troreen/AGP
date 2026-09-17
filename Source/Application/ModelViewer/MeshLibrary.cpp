@@ -14,7 +14,7 @@
 // than depend on importer details. This work currently happens before gameplay starts.
 namespace
 {
-	const CommonUtilities::Vector4f DefaultVertexColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+	const CommonUtilities::Vector4f DefaultVertexColor = {1.0f, 1.0f, 1.0f, 1.0f};
 
 	bool HasImportedColor(const TGA::FBX::Vertex& aVertex)
 	{
@@ -23,20 +23,15 @@ namespace
 
 	CommonUtilities::Matrix4f ConvertMatrix(const TGA::FBX::Matrix& aSourceMatrix)
 	{
-		return {
-			aSourceMatrix(1, 1), aSourceMatrix(1, 2), aSourceMatrix(1, 3), aSourceMatrix(1, 4),
-			aSourceMatrix(2, 1), aSourceMatrix(2, 2), aSourceMatrix(2, 3), aSourceMatrix(2, 4),
-			aSourceMatrix(3, 1), aSourceMatrix(3, 2), aSourceMatrix(3, 3), aSourceMatrix(3, 4),
-			aSourceMatrix(4, 1), aSourceMatrix(4, 2), aSourceMatrix(4, 3), aSourceMatrix(4, 4)
-		};
+		return {aSourceMatrix(1, 1), aSourceMatrix(1, 2), aSourceMatrix(1, 3), aSourceMatrix(1, 4),
+		        aSourceMatrix(2, 1), aSourceMatrix(2, 2), aSourceMatrix(2, 3), aSourceMatrix(2, 4),
+		        aSourceMatrix(3, 1), aSourceMatrix(3, 2), aSourceMatrix(3, 3), aSourceMatrix(3, 4),
+		        aSourceMatrix(4, 1), aSourceMatrix(4, 2), aSourceMatrix(4, 3), aSourceMatrix(4, 4)};
 	}
 
 	CommonUtilities::Vector3f ConvertDirection(const float* aSourceVector, const CommonUtilities::Vector3f& aFallback)
 	{
-		CommonUtilities::Vector3f direction(
-			aSourceVector[0],
-			aSourceVector[1],
-			aSourceVector[2]);
+		CommonUtilities::Vector3f direction(aSourceVector[0], aSourceVector[1], aSourceVector[2]);
 
 		if (direction.LengthSqr() <= 0.000001f)
 		{
@@ -49,59 +44,31 @@ namespace
 	Vertex ConvertVertex(const TGA::FBX::Vertex& aSourceVertex, const CommonUtilities::Vector4f& aFallbackColor)
 	{
 		Vertex vertex;
-		vertex.Position = {
-			aSourceVertex.Position[0],
-			aSourceVertex.Position[1],
-			aSourceVertex.Position[2],
-			aSourceVertex.Position[3]
-		};
+		vertex.Position = {aSourceVertex.Position[0], aSourceVertex.Position[1], aSourceVertex.Position[2], aSourceVertex.Position[3]};
 
 		if (HasImportedColor(aSourceVertex))
 		{
-			vertex.Color = {
-				aSourceVertex.VertexColors[0][0],
-				aSourceVertex.VertexColors[0][1],
-				aSourceVertex.VertexColors[0][2],
-				aSourceVertex.VertexColors[0][3]
-			};
+			vertex.Color = {aSourceVertex.VertexColors[0][0], aSourceVertex.VertexColors[0][1], aSourceVertex.VertexColors[0][2],
+			                aSourceVertex.VertexColors[0][3]};
 		}
 		else
 		{
 			vertex.Color = aFallbackColor;
 		}
 
-		vertex.BoneIDs = {
-			aSourceVertex.BoneIDs[0],
-			aSourceVertex.BoneIDs[1],
-			aSourceVertex.BoneIDs[2],
-			aSourceVertex.BoneIDs[3]
-		};
+		vertex.BoneIDs = {aSourceVertex.BoneIDs[0], aSourceVertex.BoneIDs[1], aSourceVertex.BoneIDs[2], aSourceVertex.BoneIDs[3]};
 
-		vertex.SkinWeights = {
-			aSourceVertex.BoneWeights[0],
-			aSourceVertex.BoneWeights[1],
-			aSourceVertex.BoneWeights[2],
-			aSourceVertex.BoneWeights[3]
-		};
+		vertex.SkinWeights = {aSourceVertex.BoneWeights[0], aSourceVertex.BoneWeights[1], aSourceVertex.BoneWeights[2],
+		                      aSourceVertex.BoneWeights[3]};
 
-		vertex.UV0 = {
-			aSourceVertex.UVs[0][0],
-			aSourceVertex.UVs[0][1]
-		};
+		vertex.UV0 = {aSourceVertex.UVs[0][0], aSourceVertex.UVs[0][1]};
 
-		vertex.UV1 = {
-			aSourceVertex.UVs[1][0],
-			aSourceVertex.UVs[1][1]
-		};
+		vertex.UV1 = {aSourceVertex.UVs[1][0], aSourceVertex.UVs[1][1]};
 
 		vertex.Normal = ConvertDirection(aSourceVertex.Normal, CommonUtilities::Vector3f::UnitZ);
 		vertex.Tangent = ConvertDirection(aSourceVertex.Tangent, CommonUtilities::Vector3f::UnitX);
 
-		const float totalWeight =
-			vertex.SkinWeights.x +
-			vertex.SkinWeights.y +
-			vertex.SkinWeights.z +
-			vertex.SkinWeights.w;
+		const float totalWeight = vertex.SkinWeights.x + vertex.SkinWeights.y + vertex.SkinWeights.z + vertex.SkinWeights.w;
 		if (totalWeight > 0.0f)
 		{
 			vertex.SkinWeights.x /= totalWeight;
@@ -164,11 +131,8 @@ namespace
 		return animation;
 	}
 
-	void AppendElement(
-		const TGA::FBX::Mesh::Element& aSourceElement,
-		std::vector<Mesh::Element>& outElements,
-		std::vector<Vertex>& outVertices,
-		std::vector<unsigned>& outIndices)
+	void AppendElement(const TGA::FBX::Mesh::Element& aSourceElement, std::vector<Mesh::Element>& outElements,
+	                   std::vector<Vertex>& outVertices, std::vector<unsigned>& outIndices)
 	{
 		if (aSourceElement.Vertices.empty() || aSourceElement.Indices.empty())
 		{

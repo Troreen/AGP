@@ -9,15 +9,14 @@ SkeletalMeshComponent::SkeletalMeshComponent()
 	OnMeshChanged();
 }
 
-SkeletalMeshComponent::SkeletalMeshComponent(MeshAsset aMesh)
-	: MeshComponentBase(std::move(aMesh))
+SkeletalMeshComponent::SkeletalMeshComponent(MeshAsset aMesh) : MeshComponentBase(std::move(aMesh))
 {
 	OnMeshChanged();
 }
 
 void SkeletalMeshComponent::Update(float aDeltaTime)
 {
-    EnsureCanMutate();
+	EnsureCanMutate();
 	if (!HasSkinning())
 	{
 		return;
@@ -43,7 +42,7 @@ const std::array<CU::Matrix4f, 128>* SkeletalMeshComponent::GetJointTransforms()
 
 bool SkeletalMeshComponent::PlayAnimation(std::string_view anAnimationName, bool aShouldLoop)
 {
-    EnsureCanMutate();
+	EnsureCanMutate();
 	if (myMesh == nullptr)
 	{
 		return false;
@@ -73,7 +72,7 @@ bool SkeletalMeshComponent::PlayAnimation(std::string_view anAnimationName, bool
 
 bool SkeletalMeshComponent::PlayPartialAnimation(std::string_view anAnimationName, bool aShouldLoop)
 {
-    EnsureCanMutate();
+	EnsureCanMutate();
 	if (myMesh == nullptr)
 	{
 		return false;
@@ -103,7 +102,7 @@ bool SkeletalMeshComponent::PlayPartialAnimation(std::string_view anAnimationNam
 
 bool SkeletalMeshComponent::ConfigurePartialLayerFromJointName(std::string_view aRootJointName)
 {
-    EnsureCanMutate();
+	EnsureCanMutate();
 	myPartialLayerMask.fill(false);
 
 	if (myMesh == nullptr)
@@ -242,7 +241,8 @@ const CU::Matrix4f& SkeletalMeshComponent::GetLocalTransformForJoint(size_t aJoi
 		return selectedTransform->second;
 	}
 
-	if (selectedLayer == &myPartialLayer && myBaseLayer.CurrentAnimation != nullptr && myBaseLayer.CurrentFrame < myBaseLayer.CurrentAnimation->Frames.size())
+	if (selectedLayer == &myPartialLayer && myBaseLayer.CurrentAnimation != nullptr &&
+	    myBaseLayer.CurrentFrame < myBaseLayer.CurrentAnimation->Frames.size())
 	{
 		const Animation::Frame& baseFrame = myBaseLayer.CurrentAnimation->Frames[myBaseLayer.CurrentFrame];
 		const auto baseTransform = baseFrame.Transforms.find(jointName);

@@ -60,40 +60,44 @@ namespace LogVerbosity
 		Error,
 		Warning,
 		Log,
-		Verbose,		
+		Verbose,
 	};
 }
 
 class Logger
 {
 public:
-	struct LogCategoryBase
+	class LogCategoryBase
 	{
+	public:
 		std::string Name;
 		LogVerbosity::Type Verbosity = LogVerbosity::Warning;
 		unsigned Id;
 
-		bool operator==(const LogCategoryBase& aOther) const { return Id == aOther.Id; }
+		bool operator==(const LogCategoryBase& aOther) const
+		{
+			return Id == aOther.Id;
+		}
 
 		virtual ~LogCategoryBase();
 
 	protected:
 		LogCategoryBase(std::string aName, LogVerbosity::Type aVerbosity);
-		
 
 		static unsigned ourNextId;
 	};
 
-	template<uint8_t V>
-	struct LogCategory : public LogCategoryBase
+	template <uint8_t V> class LogCategory : public LogCategoryBase
 	{
-		__forceinline LogCategory(const std::string& aName)
-			: LogCategoryBase(aName, static_cast<LogVerbosity::Type>(V))
-		{  }
+	public:
+		__forceinline LogCategory(const std::string& aName) : LogCategoryBase(aName, static_cast<LogVerbosity::Type>(V))
+		{
+		}
 	};
 
-	struct LogCategoryHash
+	class LogCategoryHash
 	{
+	public:
 		size_t operator()(const Logger::LogCategoryBase& x) const noexcept
 		{
 			return static_cast<size_t>(x.Id);
@@ -122,12 +126,12 @@ private:
 		thisLogger.myLogThread.join();
 	}
 
-	struct LogStream
+	class LogStream
 	{
+	public:
 		std::ofstream File;
 
-		template<typename T>
-		LogStream& operator<<(const T& aValue)
+		template <typename T> LogStream& operator<<(const T& aValue)
 		{
 			std::cerr << aValue;
 			File << aValue;
@@ -135,20 +139,21 @@ private:
 		}
 
 		typedef LogStream& (*MyStreamManipulator)(LogStream&);
-	    LogStream& operator<<(MyStreamManipulator manip)
-	    {
-	        return manip(*this);
-	    }
 
-	    static LogStream& endl(LogStream& stream)
-	    {
-	        // print a new line
-	        std::cerr << '\n';
+		LogStream& operator<<(MyStreamManipulator manip)
+		{
+			return manip(*this);
+		}
+
+		static LogStream& endl(LogStream& stream)
+		{
+			// print a new line
+			std::cerr << '\n';
 			std::cerr.flush();
 			stream.File << '\n';
 			stream.File.flush();
-	        return stream;
-	    }
+			return stream;
+		}
 
 		~LogStream();
 	};
@@ -172,11 +177,10 @@ private:
 	std::atomic_bool myIsRunning;
 
 public:
-
-	template<typename... Args>
+	template <typename... Args>
 	static void Log(const LogCategoryBase& aCategory, LogVerbosity::Type aVerbosity, const char* aMessage, Args... args)
 	{
-		if(aCategory.Verbosity >= aVerbosity)
+		if (aCategory.Verbosity >= aVerbosity)
 		{
 			const std::string s = std::vformat(aMessage, std::make_format_args(args...));
 			Log(aCategory, aVerbosity, s.c_str());
@@ -192,18 +196,24 @@ public:
 	static void ClearFilters();
 };
 
-#define DECLARE_LOG_CATEGORY(CategoryId, DefaultVerbosity) extern struct LoggerCategory##CategoryId : public Logger::LogCategory<LogVerbosity::DefaultVerbosity> \
-	{ \
-		FORCEINLINE LoggerCategory##CategoryId() : Logger::LogCategory<LogVerbosity::DefaultVerbosity>(#CategoryId) {} \
+#define DECLARE_LOG_CATEGORY(CategoryId, DefaultVerbosity)                                                                                 \
+	extern class LoggerCategory##CategoryId : public Logger::LogCategory<LogVerbosity::DefaultVerbosity>                                   \
+	{                                                                                                                                      \
+	public:                                                                                                                                \
+		FORCEINLINE LoggerCategory##CategoryId() : Logger::LogCategory<LogVerbosity::DefaultVerbosity>(#CategoryId)                        \
+		{                                                                                                                                  \
+		}                                                                                                                                  \
 	} CategoryId;
 
-#define DECLARE_LOG_CATEGORY_WITH_NAME(CategoryId, CategoryName, DefaultVerbosity) extern struct LoggerCategory##CategoryId : public Logger::LogCategory<LogVerbosity::DefaultVerbosity> \
-	{ \
-		FORCEINLINE LoggerCategory##CategoryId() : Logger::LogCategory<LogVerbosity::DefaultVerbosity>(#CategoryName) {} \
+#define DECLARE_LOG_CATEGORY_WITH_NAME(CategoryId, CategoryName, DefaultVerbosity)                                                         \
+	extern class LoggerCategory##CategoryId : public Logger::LogCategory<LogVerbosity::DefaultVerbosity>                                   \
+	{                                                                                                                                      \
+	public:                                                                                                                                \
+		FORCEINLINE LoggerCategory##CategoryId() : Logger::LogCategory<LogVerbosity::DefaultVerbosity>(#CategoryName)                      \
+		{                                                                                                                                  \
+		}                                                                                                                                  \
 	} CategoryId;
 
 #define DEFINE_LOG_CATEGORY(CategoryName) LoggerCategory##CategoryName CategoryName
 #define INT_LOG_MESSAGE()
 #define LOG(Category, Verbosity, Message, ...) Logger::Log(Category, LogVerbosity::Verbosity, Message, ##__VA_ARGS__)
-
-

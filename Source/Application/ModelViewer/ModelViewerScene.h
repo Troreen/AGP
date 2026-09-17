@@ -10,12 +10,13 @@ class MaterialInterface;
 class ModelViewerScene final : public GameFrameworkIntegration::ISceneSource
 {
 public:
-    GameFrameworkIntegration::SceneSourceResult Load(const SceneId&, GameFrameworkIntegration::SceneLoadContext&) override;
-private:
-    std::shared_ptr<MaterialInterface> GetMaterial(const std::filesystem::path& file);
-    MeshLibrary myMeshLibrary;
+	GameFrameworkIntegration::SceneSourceResult Load(const SceneId&, GameFrameworkIntegration::SceneLoadContext&) override;
 
-    std::filesystem::path myContentRoot;
-    bool myInitialized = false;
-    std::unordered_map<std::string,std::shared_ptr<MaterialInterface>> myMaterialCache;
+private:
+	std::shared_ptr<MaterialInterface> GetMaterial(const std::filesystem::path& file);
+	MeshLibrary myMeshLibrary;
+
+	std::filesystem::path myContentRoot;
+	bool myInitialized = false;
+	std::unordered_map<std::string, std::shared_ptr<MaterialInterface>> myMaterialCache;
 };
