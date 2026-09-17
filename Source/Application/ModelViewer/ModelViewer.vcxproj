@@ -119,7 +119,7 @@
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;FBXSDK_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(SolutionDir)Source\Graphics;$(SolutionDir)Source\Utilities;$(ProjectDir);$(SolutionDir)ThirdParty\TGAFBXImporter\source;$(SolutionDir)ThirdParty\TGAFBXImporter\FBXSDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Source\GameFramework\Public;$(SolutionDir)Source\GameFramework\Integration;$(SolutionDir)Source;$(SolutionDir)Source\Graphics;$(SolutionDir)Source\Utilities;$(ProjectDir);$(SolutionDir)ThirdParty\TGAFBXImporter\source;$(SolutionDir)ThirdParty\TGAFBXImporter\FBXSDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -147,7 +147,7 @@ xcopy /E /I /R /Y "%SHADERSRC%" "%SHADERDEST%"</Command>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;FBXSDK_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(SolutionDir)Source\Graphics;$(SolutionDir)Source\Utilities;$(ProjectDir);$(SolutionDir)ThirdParty\TGAFBXImporter\source;$(SolutionDir)ThirdParty\TGAFBXImporter\FBXSDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Source\GameFramework\Public;$(SolutionDir)Source\GameFramework\Integration;$(SolutionDir)Source;$(SolutionDir)Source\Graphics;$(SolutionDir)Source\Utilities;$(ProjectDir);$(SolutionDir)ThirdParty\TGAFBXImporter\source;$(SolutionDir)ThirdParty\TGAFBXImporter\FBXSDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

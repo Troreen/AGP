@@ -1,5 +1,7 @@
 # Engine foundations while scene importing is in progress
 
+Historical foundation plan. Its Connect/OnDestroy hooks, exposed lifecycle and scene recipes are superseded by the implemented [gameplay guide](GameFramework.md) and [implementation record](SimplifiedGameFrameworkImplementation.md). Retained below for design history, not current API instructions.
+
 ## Objective and scope
 
 Implement the runtime foundations already agreed in EngineDecisions.md without

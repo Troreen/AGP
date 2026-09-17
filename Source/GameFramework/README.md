@@ -7,9 +7,7 @@ when storing references between callbacks.
 
 The supported core include root is `Source/GameFramework/Public`, together with
 `CommonUtilities/include`. Include `<GameFramework/IGame.h>` and
-`<GameFramework/World.h>`, for example. Core headers compile without GraphicsEngine,
-D3D, platform or private include directories. Renderer component isolation and the
-physical public/private file move complete in milestone M4.
+`<GameFramework/World.h>`, for example. All public headers compile without GraphicsEngine, D3D, platform or private include directories.
 
 `IGame::RegisterComponents` registers game types once. The engine registers its
 `agp.*` built-ins first and freezes registration before Initialize. A minimal game
@@ -17,10 +15,7 @@ can compose its bootstrap world directly in Initialize. Components start
 successfully before their first tick; game code never prepares, activates, flushes,
 or advances the world manually.
 
-Engine implementation currently lives in Runtime, World, Components and Scenes.
-`Runtime/Internal` access helpers are for the host, construction and CPU tests.
-Lifecycle, ownership collections and input bookkeeping are private, independently
-of folder placement. `Scenes` is implemented; it is not a future directory.
+Implementations and engine-only access live in Private. Integration contains the source/data/ready-resource boundary. Public contains actual supported definitions; temporary forwarding headers and legacy API aliases are removed. World construction and lifecycle are host-only.
 
 SceneService accepts Load/Reload by SceneId. Integration/ISceneSource supplies owned
 SceneData and ready assets; the engine allocates registered types, reads checked

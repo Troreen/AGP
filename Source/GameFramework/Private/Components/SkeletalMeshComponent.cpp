@@ -1,0 +1,274 @@
+#include "GameFramework/Components/SkeletalMeshComponent.h"
+
+#include "GraphicsEngine/Objects/Mesh.h"
+
+#include <utility>
+
+SkeletalMeshComponent::SkeletalMeshComponent()
+{
+	OnMeshChanged();
+}
+
+SkeletalMeshComponent::SkeletalMeshComponent(MeshAsset aMesh)
+	: MeshComponentBase(std::move(aMesh))
+{
+	OnMeshChanged();
+}
+
+void SkeletalMeshComponent::Update(float aDeltaTime)
+{
+    EnsureCanMutate();
+	if (!HasSkinning())
+	{
+		return;
+	}
+
+	const bool baseChanged = AdvancePlayback(myBaseLayer, aDeltaTime);
+	const bool partialChanged = AdvancePlayback(myPartialLayer, aDeltaTime);
+	if (baseChanged || partialChanged)
+	{
+		RebuildJointTransforms();
+	}
+}
+
+bool SkeletalMeshComponent::HasSkinning() const
+{
+	return myMesh != nullptr && myMesh->HasSkeleton() && myBaseLayer.Active;
+}
+
+const std::array<CU::Matrix4f, 128>* SkeletalMeshComponent::GetJointTransforms() const
+{
+	return &myJointTransforms;
+}
+
+bool SkeletalMeshComponent::PlayAnimation(std::string_view anAnimationName, bool aShouldLoop)
+{
+    EnsureCanMutate();
+	if (myMesh == nullptr)
+	{
+		return false;
+	}
+
+	std::shared_ptr<Animation> animation = myMesh->GetAnimation(anAnimationName);
+	if (animation == nullptr)
+	{
+		return false;
+	}
+
+	if (myBaseLayer.Active && myBaseLayer.AnimationName == anAnimationName)
+	{
+		myBaseLayer.Looping = aShouldLoop;
+		return true;
+	}
+
+	myBaseLayer.CurrentAnimation = std::move(animation);
+	myBaseLayer.AnimationName = std::string(anAnimationName);
+	myBaseLayer.CurrentFrame = 0;
+	myBaseLayer.Timer = 0.0f;
+	myBaseLayer.Looping = aShouldLoop;
+	myBaseLayer.Active = true;
+	RebuildJointTransforms();
+	return true;
+}
+
+bool SkeletalMeshComponent::PlayPartialAnimation(std::string_view anAnimationName, bool aShouldLoop)
+{
+    EnsureCanMutate();
+	if (myMesh == nullptr)
+	{
+		return false;
+	}
+
+	std::shared_ptr<Animation> animation = myMesh->GetAnimation(anAnimationName);
+	if (animation == nullptr)
+	{
+		return false;
+	}
+
+	if (myPartialLayer.Active && myPartialLayer.AnimationName == anAnimationName)
+	{
+		myPartialLayer.Looping = aShouldLoop;
+		return true;
+	}
+
+	myPartialLayer.CurrentAnimation = std::move(animation);
+	myPartialLayer.AnimationName = std::string(anAnimationName);
+	myPartialLayer.CurrentFrame = 0;
+	myPartialLayer.Timer = 0.0f;
+	myPartialLayer.Looping = aShouldLoop;
+	myPartialLayer.Active = true;
+	RebuildJointTransforms();
+	return true;
+}
+
+bool SkeletalMeshComponent::ConfigurePartialLayerFromJointName(std::string_view aRootJointName)
+{
+    EnsureCanMutate();
+	myPartialLayerMask.fill(false);
+
+	if (myMesh == nullptr)
+	{
+		return false;
+	}
+
+	const Skeleton* skeleton = myMesh->GetSkeleton();
+	if (skeleton == nullptr)
+	{
+		return false;
+	}
+
+	const auto rootJoint = skeleton->JointNameToIndex.find(std::string(aRootJointName));
+	if (rootJoint == skeleton->JointNameToIndex.end())
+	{
+		return false;
+	}
+
+	MarkJointAndChildren(rootJoint->second);
+	return true;
+}
+
+void SkeletalMeshComponent::OnMeshChanged()
+{
+	myBaseLayer = {};
+	myPartialLayer = {};
+	myPartialLayerMask.fill(false);
+	ResetJointTransforms();
+}
+
+void SkeletalMeshComponent::ResetJointTransforms()
+{
+	for (CU::Matrix4f& transform : myJointTransforms)
+	{
+		transform = CU::Matrix4f();
+	}
+}
+
+bool SkeletalMeshComponent::AdvancePlayback(PlaybackState& aPlayback, float aDeltaTime)
+{
+	if (!aPlayback.Active || aPlayback.CurrentAnimation == nullptr || !aPlayback.CurrentAnimation->IsValid())
+	{
+		return false;
+	}
+
+	const float frameTime = 1.0f / aPlayback.CurrentAnimation->FramesPerSecond;
+	aPlayback.Timer += aDeltaTime;
+
+	bool advanced = false;
+	while (aPlayback.Timer >= frameTime)
+	{
+		aPlayback.Timer -= frameTime;
+		advanced = true;
+
+		if (aPlayback.CurrentFrame + 1 < aPlayback.CurrentAnimation->Frames.size())
+		{
+			++aPlayback.CurrentFrame;
+			continue;
+		}
+
+		if (aPlayback.Looping)
+		{
+			aPlayback.CurrentFrame = 0;
+		}
+		else
+		{
+			aPlayback.Active = false;
+			break;
+		}
+	}
+
+	return advanced;
+}
+
+void SkeletalMeshComponent::RebuildJointTransforms()
+{
+	ResetJointTransforms();
+
+	if (!HasSkinning())
+	{
+		return;
+	}
+
+	UpdateJointPose(0, CU::Matrix4f());
+}
+
+void SkeletalMeshComponent::UpdateJointPose(size_t aJointIndex, const CU::Matrix4f& aParentJointTransform)
+{
+	const Skeleton* skeleton = myMesh != nullptr ? myMesh->GetSkeleton() : nullptr;
+	if (skeleton == nullptr || aJointIndex >= skeleton->Joints.size() || aJointIndex >= myJointTransforms.size())
+	{
+		return;
+	}
+
+	const Skeleton::Joint& joint = skeleton->Joints[aJointIndex];
+	const CU::Matrix4f jointTransform = GetLocalTransformForJoint(aJointIndex) * aParentJointTransform;
+	myJointTransforms[aJointIndex] = joint.BindPoseInverse * jointTransform;
+
+	for (const int childIndex : joint.Children)
+	{
+		if (childIndex >= 0)
+		{
+			UpdateJointPose(static_cast<size_t>(childIndex), jointTransform);
+		}
+	}
+}
+
+const CU::Matrix4f& SkeletalMeshComponent::GetLocalTransformForJoint(size_t aJointIndex) const
+{
+	static const CU::Matrix4f identity;
+
+	const Skeleton* skeleton = myMesh != nullptr ? myMesh->GetSkeleton() : nullptr;
+	if (skeleton == nullptr || aJointIndex >= skeleton->Joints.size())
+	{
+		return identity;
+	}
+
+	const std::string& jointName = skeleton->Joints[aJointIndex].Name;
+
+	const PlaybackState* selectedLayer = &myBaseLayer;
+	if (myPartialLayer.Active && aJointIndex < myPartialLayerMask.size() && myPartialLayerMask[aJointIndex])
+	{
+		selectedLayer = &myPartialLayer;
+	}
+
+	if (selectedLayer->CurrentAnimation == nullptr || selectedLayer->CurrentFrame >= selectedLayer->CurrentAnimation->Frames.size())
+	{
+		return identity;
+	}
+
+	const Animation::Frame& selectedFrame = selectedLayer->CurrentAnimation->Frames[selectedLayer->CurrentFrame];
+	const auto selectedTransform = selectedFrame.Transforms.find(jointName);
+	if (selectedTransform != selectedFrame.Transforms.end())
+	{
+		return selectedTransform->second;
+	}
+
+	if (selectedLayer == &myPartialLayer && myBaseLayer.CurrentAnimation != nullptr && myBaseLayer.CurrentFrame < myBaseLayer.CurrentAnimation->Frames.size())
+	{
+		const Animation::Frame& baseFrame = myBaseLayer.CurrentAnimation->Frames[myBaseLayer.CurrentFrame];
+		const auto baseTransform = baseFrame.Transforms.find(jointName);
+		if (baseTransform != baseFrame.Transforms.end())
+		{
+			return baseTransform->second;
+		}
+	}
+
+	return identity;
+}
+
+void SkeletalMeshComponent::MarkJointAndChildren(size_t aJointIndex)
+{
+	const Skeleton* skeleton = myMesh != nullptr ? myMesh->GetSkeleton() : nullptr;
+	if (skeleton == nullptr || aJointIndex >= skeleton->Joints.size() || aJointIndex >= myPartialLayerMask.size())
+	{
+		return;
+	}
+
+	myPartialLayerMask[aJointIndex] = true;
+	for (const int childIndex : skeleton->Joints[aJointIndex].Children)
+	{
+		if (childIndex >= 0)
+		{
+			MarkJointAndChildren(static_cast<size_t>(childIndex));
+		}
+	}
+}

@@ -1,2 +1,8 @@
 #pragma once
-#include "../../Scenes/SceneService.h"
+#include "GameFramework/SceneId.h"
+#include "GameFramework/SceneDiagnostic.h"
+struct SceneLoadError
+{
+    SceneId Scene;
+    SceneDiagnostics Diagnostics;
+};

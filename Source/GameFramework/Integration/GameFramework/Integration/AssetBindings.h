@@ -1,6 +1,5 @@
 #pragma once
-#include "../../../Assets/AssetRefs.h"
-#include "../../../Runtime/Internal/AssetAccess.h"
+#include "GameFramework/AssetRefs.h"
 #include <unordered_map>
 namespace GameFrameworkIntegration
 {
@@ -10,9 +9,9 @@ namespace GameFrameworkIntegration
     {
     public:
         void BindMesh(const AssetId& id, std::shared_ptr<::Mesh> mesh)
-        { myMeshes.insert_or_assign(id.Value, GameFrameworkInternal::AssetAccess::WrapMesh(std::move(mesh))); }
+        { MeshAsset value; value.myResource = std::move(mesh); myMeshes.insert_or_assign(id.Value, std::move(value)); }
         void BindMaterial(const AssetId& id, std::shared_ptr<::MaterialInterface> material)
-        { myMaterials.insert_or_assign(id.Value, GameFrameworkInternal::AssetAccess::WrapMaterial(std::move(material))); }
+        { MaterialAsset value; value.myResource = std::move(material); myMaterials.insert_or_assign(id.Value, std::move(value)); }
         MeshAsset FindMesh(const AssetId& id) const override
         { auto i = myMeshes.find(id.Value); return i == myMeshes.end() ? MeshAsset{} : i->second; }
         MaterialAsset FindMaterial(const AssetId& id) const override

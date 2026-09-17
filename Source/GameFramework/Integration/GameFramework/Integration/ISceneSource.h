@@ -1,7 +1,7 @@
 #pragma once
-#include "SceneData.h"
-#include "AssetBindings.h"
-#include "../../../Scenes/SceneService.h"
+#include "GameFramework/Integration/SceneData.h"
+#include "GameFramework/Integration/AssetBindings.h"
+#include "GameFramework/SceneService.h"
 #include "Vector2.hpp"
 #include <filesystem>
 #include <optional>

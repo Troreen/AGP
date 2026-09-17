@@ -13,9 +13,9 @@ G-buffer targets and the optional tangent-normal target retain their slots.
 All four sampler addresses are cached after sampler creation has finished.
 Shader resource and sampler binding use bounded stack arrays.
 
-`BuildRenderSnapshot(camera, world, snapshot)` copies camera/light values,
+`GameFrameworkInternal::WorldRenderBridge::Build(world, graphics, snapshot)` copies camera/light values,
 mesh/material references, world transforms, and skinning matrices. Each mesh
-instance is stored once in `ShadowCasters`, which is also the complete enabled
+instance is stored once in `ShadowCasters`, which is also the complete enabled/visible
 mesh collection. Visible opaque and blended lists contain indices into this
 collection; mixed-material meshes enter both lists. Shadows use temporary
 pointer lists into the held snapshot. No render operation reads live actors.
@@ -23,7 +23,7 @@ pointer lists into the held snapshot. No render operation reads live actors.
 Opaque indices sort front-to-back and blended indices back-to-front by squared
 distance from the camera to the instance origin, with stable ties. Element-level
 blend filtering and G-buffer pipeline selection remain in `RenderMesh`.
-`Render(commandList, camera, world)` remains a synchronous compatibility wrapper.
+GraphicsEngine finalizes copied bounds/culling/material routing and renders snapshots; the live-world compatibility Render wrapper has been removed. Threaded and synchronous hosts use the same bridge.
 
 ## Culling
 

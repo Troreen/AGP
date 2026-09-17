@@ -1,5 +1,5 @@
 #pragma once
-#include "GameFramework/Runtime/IGame.h"
+#include "GameFramework/IGame.h"
 
 // The game entry object. For another project, replace this class and its content
 // while reusing GameFramework. It owns game-session setup, not the engine loop.

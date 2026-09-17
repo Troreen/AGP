@@ -22,7 +22,7 @@
     <ClCompile>
       <LanguageStandard>stdcpp20</LanguageStandard><ExceptionHandling>Sync</ExceptionHandling>
       <WarningLevel>Level4</WarningLevel>
-      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\..\CommonUtilities\include;$(MSBuildThisFileDirectory)..\..\Source;$(MSBuildThisFileDirectory)..\..\Source\Graphics;$(MSBuildThisFileDirectory)..\..\Source\Utilities;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\..\Source\GameFramework\Public;$(MSBuildThisFileDirectory)..\..\Source\GameFramework\Integration;$(MSBuildThisFileDirectory)..\..\Source\GameFramework\Private;$(MSBuildThisFileDirectory)..\..\CommonUtilities\include;$(MSBuildThisFileDirectory)..\..\Source;$(MSBuildThisFileDirectory)..\..\Source\Graphics;$(MSBuildThisFileDirectory)..\..\Source\Utilities;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link><SubSystem>Console</SubSystem>
       <AdditionalLibraryDirectories>$(SolutionDir)Lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>

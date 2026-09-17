@@ -5,7 +5,7 @@
 #include "Application.h"
 #include "ModelViewer.h"
 #include "ModelViewerScene.h"
-#include "GameFramework/Runtime/GameApplication.h"
+#include "GameFramework/GameApplication.h"
 #include "Windows.h"
 
 #include "StringHelpers.h"

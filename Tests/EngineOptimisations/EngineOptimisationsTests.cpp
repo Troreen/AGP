@@ -1,4 +1,4 @@
-#include "../../Source/GameFramework/Runtime/Internal/GameLoop.h"
+#include "Runtime/Internal/GameLoop.h"
 #define NOMINMAX
 #include "RenderCulling.h"
 #include "RenderItemRouting.h"

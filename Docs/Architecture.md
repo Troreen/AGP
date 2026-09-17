@@ -10,7 +10,7 @@ repository root.
 
 `Source/Application/ModelViewer/Main.cpp` enters `GuardedMain()`, creates the
 game and passes it to the reusable host. `GameApplication` initialization creates
-the window and graphics engine, calls the game Initialize hook for assets and scene setup, and creates the
+the window and graphics engine, registers built-in/game components, calls Initialize for bootstrap composition or a scene-ID request, and creates the
 scene command list. Graphics initialization creates frame targets, pipeline
 states, samplers, constant buffers, shadow maps, and environment resources.
 Constant-buffer registration closes before rendering starts.
@@ -32,13 +32,13 @@ and shared fixed/variable phase loop. The renderer holds a snapshot until a newe
 the producer cannot overwrite that held buffer. Obsolete ready snapshots can
 be dropped. The synchronous update mode uses the same snapshot path.
 
-`BuildRenderSnapshot()` copies camera/light values, world transforms and joint
+`GameFrameworkInternal::WorldRenderBridge::Build()` copies camera/light values, world transforms and joint
 matrices. Meshes and materials are shared references: their contents must remain
-stable while rendering runs. GPU buffer creation and dirty material refreshes
+stable while rendering runs. GraphicsEngine receives copied data only; its finalization step performs existing bounds, culling and material routing. A missing camera publishes an empty frame and clears the backbuffer. GPU buffer creation and dirty material refreshes
 finish on the main thread before shadow workers start reading them.
 
 Despite its name, `RenderSceneSnapshot::ShadowCasters` stores the complete enabled
-mesh collection. Opaque and blended lists index that collection; mixed-material
+and visible mesh collection. Opaque and blended lists index that collection; mixed-material
 meshes can appear in both. Shadow jobs borrow pointers into it and remain valid
 only while the snapshot is held. Every worker is joined before shadow playback,
 serial fallback, or destruction of job data.
@@ -68,7 +68,9 @@ recording intervals; they do not measure GPU execution time.
 | Location | Responsibility |
 | --- | --- |
 | `Source/Application/ModelViewer` | IGame implementation, scene setup, controls, mesh library, game materials |
-| `Source/GameFramework` | Reusable application host, game callbacks, input handoff, world, actors, components, animation and lights |
+| `Source/GameFramework/Public/GameFramework` | Supported gameplay and registration headers |
+| `Source/GameFramework/Integration/GameFramework/Integration` | Owned scene input/source and ready asset bindings |
+| `Source/GameFramework/Private` | Host, construction, lifecycle, extraction bridge and component implementations |
 | `Source/Graphics/GraphicsEngine/GraphicsEngine.cpp` | Frame orchestration, shadow calculations, resource and material creation |
 | `Source/Graphics/GraphicsEngine/RHI` | DirectX 11 device/context operations and command lists |
 | `Source/Graphics/GraphicsEngine/Objects` | Mesh, texture, buffer and other graphics wrappers |

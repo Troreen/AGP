@@ -4,6 +4,7 @@
 #include <wrl.h>
 #include <Windows.h>
 #include <string_view>
+#include <string>
 #include <vector>
 
 #include "RHIStructs.h"
@@ -28,6 +29,14 @@ class Shader;
 class RenderHardwareInterface
 {
 public:	
+	struct DebugMessages
+	{
+		bool Available = false;
+		std::vector<std::string> Errors;
+	};
+	// Validation tooling: returns stored error/corruption messages without clearing
+	// them. Available is false when no D3D debug layer is attached to the device.
+	DebugMessages CollectDeviceDiagnostics() const;
 	RenderHardwareInterface();
 	~RenderHardwareInterface();
 

@@ -21,78 +21,78 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Components\CameraComponent.h">
+    <ClInclude Include="Public\GameFramework\Components\CameraComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
-    <ClInclude Include="Components\Component.h">
+    <ClInclude Include="Public\GameFramework\Component.h">
       <Filter>Components</Filter>
     </ClInclude>
-    <ClInclude Include="Components\LightComponent.h">
+    <ClInclude Include="Public\GameFramework\Components\LightComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
-    <ClInclude Include="Components\MeshComponentBase.h">
+    <ClInclude Include="Public\GameFramework\Components\MeshComponentBase.h">
       <Filter>Components</Filter>
     </ClInclude>
-    <ClInclude Include="Components\SkeletalMeshComponent.h">
+    <ClInclude Include="Public\GameFramework\Components\SkeletalMeshComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
-    <ClInclude Include="Components\StaticMeshComponent.h">
+    <ClInclude Include="Public\GameFramework\Components\StaticMeshComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
-    <ClInclude Include="Diagnostics\GameFrameworkLog.h">
+    <ClInclude Include="Private\Diagnostics\GameFrameworkLog.h">
       <Filter>Diagnostics</Filter>
     </ClInclude>
-    <ClInclude Include="Input\GameInput.h">
+    <ClInclude Include="Public\GameFramework\GameInput.h">
       <Filter>Input</Filter>
     </ClInclude>
-    <ClInclude Include="Runtime\GameApplication.h">
+    <ClInclude Include="Public\GameFramework\GameApplication.h">
       <Filter>Runtime</Filter>
     </ClInclude>
-    <ClInclude Include="Runtime\GameContext.h">
+    <ClInclude Include="Public\GameFramework\GameContext.h">
       <Filter>Runtime</Filter>
     </ClInclude>
-    <ClInclude Include="Runtime\IGame.h">
+    <ClInclude Include="Public\GameFramework\IGame.h">
       <Filter>Runtime</Filter>
     </ClInclude>
-    <ClInclude Include="Runtime\Internal\GameLoop.h">
+    <ClInclude Include="Private\Runtime\Internal\GameLoop.h">
       <Filter>Runtime\Internal</Filter>
     </ClInclude>
-    <ClInclude Include="World\Actor.h">
+    <ClInclude Include="Public\GameFramework\Actor.h">
       <Filter>World</Filter>
     </ClInclude>
-    <ClInclude Include="World\World.h">
+    <ClInclude Include="Public\GameFramework\World.h">
       <Filter>World</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Components\CameraComponent.cpp">
+    <ClCompile Include="Private\Components\CameraComponent.cpp">
       <Filter>Components</Filter>
     </ClCompile>
-    <ClCompile Include="Components\Component.cpp">
+    <ClCompile Include="Private\Components\Component.cpp">
       <Filter>Components</Filter>
     </ClCompile>
-    <ClCompile Include="Components\LightComponent.cpp">
+    <ClCompile Include="Private\Components\LightComponent.cpp">
       <Filter>Components</Filter>
     </ClCompile>
-    <ClCompile Include="Components\MeshComponentBase.cpp">
+    <ClCompile Include="Private\Components\MeshComponentBase.cpp">
       <Filter>Components</Filter>
     </ClCompile>
-    <ClCompile Include="Components\SkeletalMeshComponent.cpp">
+    <ClCompile Include="Private\Components\SkeletalMeshComponent.cpp">
       <Filter>Components</Filter>
     </ClCompile>
-    <ClCompile Include="Components\StaticMeshComponent.cpp">
+    <ClCompile Include="Private\Components\StaticMeshComponent.cpp">
       <Filter>Components</Filter>
     </ClCompile>
-    <ClCompile Include="Diagnostics\GameFrameworkLog.cpp">
+    <ClCompile Include="Private\Diagnostics\GameFrameworkLog.cpp">
       <Filter>Diagnostics</Filter>
     </ClCompile>
-    <ClCompile Include="Runtime\GameApplication.cpp">
+    <ClCompile Include="Private\Runtime\GameApplication.cpp">
       <Filter>Runtime</Filter>
     </ClCompile>
-    <ClCompile Include="World\Actor.cpp">
+    <ClCompile Include="Private\World\Actor.cpp">
       <Filter>World</Filter>
     </ClCompile>
-    <ClCompile Include="World\World.cpp">
+    <ClCompile Include="Private\World\World.cpp">
       <Filter>World</Filter>
     </ClCompile>
   </ItemGroup>
@@ -101,60 +101,60 @@
   </ItemGroup>
 <ItemGroup><Filter Include="Scenes"><UniqueIdentifier>{59ed8998-4b27-4663-8ce4-dd1a46da6d66}</UniqueIdentifier></Filter></ItemGroup>
 <ItemGroup></ItemGroup>
-<ItemGroup><ClInclude Include="Scenes\SceneDiagnostic.h"><Filter>Scenes</Filter></ClInclude></ItemGroup>
-<ItemGroup><ClInclude Include="World\ObjectHandle.h"><Filter>World</Filter></ClInclude></ItemGroup>
-<ItemGroup><ClCompile Include="Components\SceneComponent.cpp"><Filter>Components</Filter></ClCompile></ItemGroup>
-<ItemGroup><ClInclude Include="Components\SceneComponent.h"><Filter>Components</Filter></ClInclude></ItemGroup>
-<ItemGroup><ClInclude Include="Scenes\ComponentRegistry.h"><Filter>Scenes</Filter></ClInclude></ItemGroup>
-<ItemGroup><ClCompile Include="Scenes\SceneBuilder.cpp"><Filter>Scenes</Filter></ClCompile></ItemGroup>
-<ItemGroup><ClInclude Include="Scenes\SceneBuilder.h"><Filter>Scenes</Filter></ClInclude></ItemGroup>
-<ItemGroup><ClInclude Include="World\TransformOperations.h"><Filter>World</Filter></ClInclude></ItemGroup>
+<ItemGroup><ClInclude Include="Public\GameFramework\SceneDiagnostic.h"><Filter>Scenes</Filter></ClInclude></ItemGroup>
+<ItemGroup><ClInclude Include="Public\GameFramework\ObjectRef.h"><Filter>World</Filter></ClInclude></ItemGroup>
+<ItemGroup><ClCompile Include="Private\Components\SceneComponent.cpp"><Filter>Components</Filter></ClCompile></ItemGroup>
+<ItemGroup><ClInclude Include="Public\GameFramework\SceneComponent.h"><Filter>Components</Filter></ClInclude></ItemGroup>
+<ItemGroup><ClInclude Include="Public\GameFramework\Registration\ComponentRegistry.h"><Filter>Scenes</Filter></ClInclude></ItemGroup>
+<ItemGroup><ClCompile Include="Private\Scenes\SceneBuilder.cpp"><Filter>Scenes</Filter></ClCompile></ItemGroup>
+<ItemGroup><ClInclude Include="Private\Scenes\SceneBuilder.h"><Filter>Scenes</Filter></ClInclude></ItemGroup>
+<ItemGroup><ClInclude Include="Private\World\TransformOperations.h"><Filter>World</Filter></ClInclude></ItemGroup>
 <ItemGroup>
-    <ClCompile Include="Runtime\GameContext.cpp" />
-    <ClCompile Include="World\TransformOperations.cpp" />
-    <ClCompile Include="Scenes\BuiltInComponents.cpp" />
-    <ClInclude Include="Runtime\Internal\SessionState.h" />
-    <ClInclude Include="Runtime\Internal\RegistryAccess.h" />
-    <ClInclude Include="Runtime\Internal\WorldAccess.h" />
-    <ClInclude Include="Runtime\Internal\InputAccess.h" />
-    <ClInclude Include="World\ReparentMode.h" />
-    <ClInclude Include="Public\GameFramework\Actor.h" />
-    <ClInclude Include="Public\GameFramework\Component.h" />
-    <ClInclude Include="Public\GameFramework\GameApplication.h" />
-    <ClInclude Include="Public\GameFramework\GameContext.h" />
-    <ClInclude Include="Public\GameFramework\GameInput.h" />
-    <ClInclude Include="Public\GameFramework\IGame.h" />
-    <ClInclude Include="Public\GameFramework\ObjectRef.h" />
-    <ClInclude Include="Public\GameFramework\SceneComponent.h" />
-    <ClInclude Include="Public\GameFramework\World.h" />
-    <ClInclude Include="Public\GameFramework\Registration\ComponentRegistry.h" />
+    <ClCompile Include="Private\Runtime\GameContext.cpp" />
+    <ClCompile Include="Private\World\TransformOperations.cpp" />
+    <ClCompile Include="Private\Scenes\BuiltInComponents.cpp" />
+    <ClInclude Include="Private\Runtime\Internal\SessionState.h" />
+    <ClInclude Include="Private\Runtime\Internal\RegistryAccess.h" />
+    <ClInclude Include="Private\Runtime\Internal\WorldAccess.h" />
+    <ClInclude Include="Private\Runtime\Internal\InputAccess.h" />
+    <ClInclude Include="Public\GameFramework\ReparentMode.h" />
+
+
+
+
+
+
+
+
+
+
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="World\Transform.cpp" />
-    <ClInclude Include="World\Transform.h" />
+    <ClCompile Include="Private\World\Transform.cpp" />
     <ClInclude Include="Public\GameFramework\Transform.h" />
+
     <ClInclude Include="Public\GameFramework\Registration\References.h" />
-    <ClInclude Include="Scenes\References.h" />
-    <ClInclude Include="Runtime\Internal\ObjectSlots.h" />
+
+    <ClInclude Include="Private\Runtime\Internal\ObjectSlots.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Assets\AssetRefs.h" />
+    <ClInclude Include="Public\GameFramework\AssetRefs.h" />
     <ClInclude Include="Integration\GameFramework\Integration\AssetBindings.h" />
     <ClInclude Include="Integration\GameFramework\Integration\ISceneSource.h" />
     <ClInclude Include="Integration\GameFramework\Integration\SceneData.h" />
-    <ClInclude Include="Public\GameFramework\AssetRefs.h" />
+
     <ClInclude Include="Public\GameFramework\GameTime.h" />
     <ClInclude Include="Public\GameFramework\SceneLoadError.h" />
     <ClInclude Include="Public\GameFramework\SceneService.h" />
     <ClInclude Include="Public\GameFramework\Registration\SceneReader.h" />
-    <ClInclude Include="Runtime\GameTime.h" />
-    <ClInclude Include="Runtime\Internal\AssetAccess.h" />
-    <ClInclude Include="Runtime\Internal\SceneServiceAccess.h" />
-    <ClInclude Include="Runtime\Internal\TimeAccess.h" />
-    <ClCompile Include="Scenes\ComponentRegistry.cpp" />
-    <ClCompile Include="Scenes\SceneReader.cpp" />
-    <ClInclude Include="Scenes\SceneReader.h" />
-    <ClCompile Include="Scenes\SceneService.cpp" />
-    <ClInclude Include="Scenes\SceneService.h" />
+
+    <ClInclude Include="Private\Runtime\Internal\AssetAccess.h" />
+    <ClInclude Include="Private\Runtime\Internal\SceneServiceAccess.h" />
+    <ClInclude Include="Private\Runtime\Internal\TimeAccess.h" />
+    <ClCompile Include="Private\Scenes\ComponentRegistry.cpp" />
+    <ClCompile Include="Private\Scenes\SceneReader.cpp" />
+
+    <ClCompile Include="Private\Scenes\SceneService.cpp" />
+
   </ItemGroup>
-</Project>
+<ItemGroup><ClInclude Include="Public\GameFramework\SceneId.h" /><ClInclude Include="Private\Runtime\Internal\RenderAccess.h" /><ClCompile Include="Private\Runtime\Internal\WorldRenderBridge.cpp" /><ClInclude Include="Private\Runtime\Internal\WorldRenderBridge.h" /></ItemGroup></Project>

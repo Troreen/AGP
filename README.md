@@ -77,7 +77,7 @@ The number-row keys `7`, `8`, and `9` also work for the light controls.
 | `Shift + 7` / `Shift + Numpad 7` | Aim the directional light along the current camera direction |
 | `Shift + 8` / `Shift + Numpad 8` | Move the first point light to the current camera position |
 | `Shift + 9` / `Shift + Numpad 9` | Move the spot light to the camera and aim it along the current camera direction |
-| `P` | Log current light placement, active light count, and shadow tuning values |
+| `P` | Log current light placement, active light count, and renderer statistics |
 
 ### Scene and diagnostics
 

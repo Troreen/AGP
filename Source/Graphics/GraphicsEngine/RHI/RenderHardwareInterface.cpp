@@ -2,6 +2,7 @@
 #include "RenderHardwareInterface.h"
 
 #include <d3dcompiler.h>
+#include <d3d11sdklayers.h>
 
 #include "StringHelpers.h"
 #include "GraphicsEngine/Objects/Texture.h"
@@ -22,6 +23,39 @@ DEFINE_LOG_CATEGORY(RhiLog);
 RenderHardwareInterface::RenderHardwareInterface() = default;
 
 RenderHardwareInterface::~RenderHardwareInterface() = default;
+
+RenderHardwareInterface::DebugMessages RenderHardwareInterface::CollectDeviceDiagnostics() const
+{
+	DebugMessages result;
+	if (!myDevice) return result;
+	ComPtr<ID3D11InfoQueue> queue;
+	if (FAILED(myDevice.As(&queue))) return result;
+	result.Available = true;
+	const auto count = queue->GetNumStoredMessagesAllowedByRetrievalFilter();
+	for (UINT64 index = 0; index < count; ++index)
+	{
+		SIZE_T length = 0;
+		if (FAILED(queue->GetMessage(index, nullptr, &length)) || length < sizeof(D3D11_MESSAGE))
+		{
+			result.Errors.push_back("Could not read a stored D3D debug message");
+			continue;
+		}
+		std::vector<uint64_t> storage((length + sizeof(uint64_t) - 1) / sizeof(uint64_t));
+		auto* message = reinterpret_cast<D3D11_MESSAGE*>(storage.data());
+		if (FAILED(queue->GetMessage(index, message, &length)))
+		{
+			result.Errors.push_back("Could not retrieve a stored D3D debug message");
+			continue;
+		}
+		if (message->Severity == D3D11_MESSAGE_SEVERITY_ERROR || message->Severity == D3D11_MESSAGE_SEVERITY_CORRUPTION)
+		{
+			std::string description(message->pDescription, message->DescriptionByteLength);
+			while (!description.empty() && description.back() == '\0') description.pop_back();
+			result.Errors.push_back(std::move(description));
+		}
+	}
+	return result;
+}
 
 bool RenderHardwareInterface::Initialize(HWND aWindowHandle, bool aEnableDebug, Texture& outBackBuffer, Texture& outDepthStencil)
 {

@@ -1,7 +1,7 @@
 #pragma once
-#include "../../../World/Transform.h"
-#include "../../../Scenes/SceneDiagnostic.h"
-#include "../../../Assets/AssetRefs.h"
+#include "GameFramework/Transform.h"
+#include "GameFramework/SceneDiagnostic.h"
+#include "GameFramework/AssetRefs.h"
 #include "Vector4.hpp"
 #include <cstdint>
 #include <map>

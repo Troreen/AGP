@@ -2,7 +2,7 @@
 #include <filesystem>
 #include <unordered_map>
 #include "MeshLibrary.h"
-#include "GameFramework/Integration/GameFramework/Integration/ISceneSource.h"
+#include "GameFramework/Integration/ISceneSource.h"
 class MaterialInterface;
 
 // Game-owned scene authoring and the temporary synchronous asset adapter. Worlds

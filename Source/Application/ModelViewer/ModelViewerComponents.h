@@ -1,5 +1,5 @@
 #pragma once
-#include "GameFramework/Components/Component.h"
+#include "GameFramework/Component.h"
 
 #include <vector>
 
@@ -29,7 +29,7 @@ public:
 	void ResolveReferences(References& context) override;
 	void Update(float deltaTime) override;
 private:
-    ComponentHandle<SkeletalMeshComponent> myMesh;
+    ComponentRef<SkeletalMeshComponent> myMesh;
 };
 
 // FixedUpdate example: simulate a simple rotation at the configured constant step.

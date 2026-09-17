@@ -27,12 +27,7 @@
 #include "Materials/MaterialInterface.h"
 #include "Materials/Material.h"
 
-class Actor;
-class CameraComponent;
-class LightComponent;
-class MeshComponentBase;
-class World;
-enum class LightType : uint32_t;
+enum class RenderLightType : uint32_t { Directional = 0, Point = 1, Spot = 2 };
 
 // Kept available in every build; these are user-facing renderer diagnostics.
 enum class RenderPass : uint8_t
@@ -83,7 +78,7 @@ class GraphicsEngine
 
 	struct LightSnapshot
 	{
-		LightType Type{};
+		RenderLightType Type{};
 		CU::Vector3f Color = CU::Vector3f::One;
 		float Intensity = 0.0f;
 		CU::Vector3f Position = CU::Vector3f::Zero;
@@ -133,10 +128,10 @@ class GraphicsEngine
 
 	// --- Frame rendering ---
 	bool Initialize(HWND aWindowHandle, const std::filesystem::path& aShaderRoot);
-	void Render(GraphicsCommandList& inoutCommandList, const Actor& aCameraActor, const World& aWorld);
-	bool BuildRenderSnapshot(const Actor& aCameraActor, const World& aWorld, RenderSceneSnapshot& outSnapshot) const;
-    bool BuildRenderSnapshot(CameraComponent& camera, const World& world, RenderSceneSnapshot& snapshot) const;
-	void RenderSnapshot(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot);
+	// Finish culling and routing after integration has copied scene values.
+    void FinalizeRenderSnapshot(RenderSceneSnapshot& snapshot) const;
+    void RenderSnapshot(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot);
+    RenderHardwareInterface::DebugMessages CollectDeviceDiagnostics() const { return myRHI.CollectDeviceDiagnostics(); }
 	void Present() const;
 	// --- Diagnostics ---
 	void CycleRenderPass();
@@ -168,7 +163,7 @@ class GraphicsEngine
 	bool LoadTexture(const std::filesystem::path& aPath, Texture& outTexture) const;
 
 	bool CreateShadowMap(std::string_view aName, unsigned aWidth, unsigned aHeight, Texture& outShadowMap, bool aCubeMap = false) const;
-	void AdjustShadowBias(LightType aType, float aDelta);
+	void AdjustShadowBias(RenderLightType aType, float aDelta);
 	void ResetShadowTuning();
 	void LogShadowTuning() const;
 
@@ -224,8 +219,8 @@ class GraphicsEngine
 	void RenderShadowMap(GraphicsCommandList& inoutCommandList, std::string_view aEventName, Texture& aShadowMap,
 	                     const FrameBuffer& aFrameBuffer, const PipelineStateObject& aOverridePSO, PipeLineStages aOverrideStages,
 	                     const void* aPointShadowBuffer, const std::vector<const RenderItemSnapshot*>& aRenderItems);
-	float GetShadowDepthBias(LightType aType) const;
-	float GetShadowDepthBiasUnlocked(LightType aType) const;
+	float GetShadowDepthBias(RenderLightType aType) const;
+	float GetShadowDepthBiasUnlocked(RenderLightType aType) const;
 
 	GraphicsEngine();
 	~GraphicsEngine();

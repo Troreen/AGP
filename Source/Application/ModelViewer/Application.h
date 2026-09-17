@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Logger/Logger.h"
 
 #if _DEBUG

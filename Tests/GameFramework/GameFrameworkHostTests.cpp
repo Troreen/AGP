@@ -3,22 +3,23 @@
 #endif
 #include <Windows.h>
 #include <crtdbg.h>
-#include "GameFramework/Runtime/GameApplication.h"
-#include "GameFramework/Runtime/GameContext.h"
-#include "GameFramework/Runtime/IGame.h"
-#include "GameFramework/Integration/GameFramework/Integration/ISceneSource.h"
-#include "GameFramework/Runtime/Internal/WorldAccess.h"
+#include "GameFramework/GameApplication.h"
+#include "GameFramework/GameContext.h"
+#include "GameFramework/IGame.h"
+#include "GameFramework/Integration/ISceneSource.h"
+#include "Runtime/Internal/WorldAccess.h"
 #include "GameFramework/Components/CameraComponent.h"
-#include "GameFramework/Scenes/ComponentRegistry.h"
-#include "GameFramework/Scenes/References.h"
-#include "GameFramework/Scenes/SceneReader.h"
-#include "GameFramework/Runtime/GameTime.h"
+#include "GameFramework/Registration/ComponentRegistry.h"
+#include "GameFramework/Registration/References.h"
+#include "GameFramework/Registration/SceneReader.h"
+#include "GameFramework/GameTime.h"
 #include <algorithm>
 #include <chrono>
 #include <functional>
 #include <iostream>
 #include <thread>
 #include <stdexcept>
+#include "GraphicsEngine/GraphicsEngine.h"
 
 using namespace GameFrameworkIntegration;
 void Check(bool condition,const char* message) { if (!condition) throw std::runtime_error(message); }
@@ -70,13 +71,14 @@ public:
     {
         return Scenario=="direct" || Scenario=="initialize-failure" || Scenario=="bootstrap-invalid" || Scenario=="runtime-invalid" || Scenario=="resolve-quit";
     }
-    bool IsRecoverable() const {return Scenario=="invalid" || Scenario=="source-failure" || Scenario=="source-throw";}
+    bool IsRecoverable() const {return Scenario=="invalid" || Scenario=="source-failure" || Scenario=="source-throw" || Scenario=="source-mutation";}
     SceneSourceResult ReadScene(const SceneId& id)
     {
         Check(std::this_thread::get_id()==Platform,"Scene source executed on gameplay worker");++Builds;
         if(Scenario=="empty"){SceneSourceResult result;result.Data=SceneData{};return result;}
         if (id.Value=="SourceThrow") throw std::runtime_error("Expected source exception");
         if (id.Value=="SourceBadAlloc") throw std::bad_alloc{};
+        if (id.Value=="SourceMutation") {try {Original.Get()->SetActive(false);} catch(const std::logic_error&) {}}
         if (id.Value=="SourceFailure")
         {
             SceneSourceResult result;result.Diagnostics.push_back({"export-object","","source","Expected adapter rejection","host-fixture.scene","adapter-failed","source",""});return result;
@@ -144,7 +146,7 @@ public:
         Check(context.GetScenes().GetStatus()==SceneLoadStatus::Failed && context.GetScenes().GetLastError().has_value(),"Failure status unavailable in callback");
         if (Original.Get())
         {
-            Check(OriginalComponent.Get() && context.GetWorld().GetActiveCamera()==OriginalCamera.Get() && Begins==1 && Ends==0,"Rejected load damaged old world or camera");
+            Check(Original.Get()->IsActive() && OriginalComponent.Get() && context.GetWorld().GetActiveCamera()==OriginalCamera.Get() && Begins==1 && Ends==0,"Rejected load damaged old world or camera");
             Check(context.GetScenes().GetCurrent()==std::optional<SceneId>{SceneId{"Initial"}},"Rejected load changed current scene identity");
         }
     }
@@ -185,7 +187,7 @@ public:
             OriginalComponent=actor->GetComponent<Lifetime>()->GetRef<Lifetime>();
             OriginalCamera=context.GetWorld().GetActiveCamera()->GetRef<CameraComponent>();Phase=1;
             if (Scenario=="reload") Check(context.GetScenes().Reload(),"Reload refused current scene");
-            else context.GetScenes().Load(SceneId{Scenario=="invalid" ? "Invalid" : Scenario=="source-failure" ? "SourceFailure" : Scenario=="source-throw" ? "SourceThrow" : Scenario=="source-badalloc" ? "SourceBadAlloc" : Scenario=="begin-failure" ? "BeginFailure" : "Replacement"});
+            else context.GetScenes().Load(SceneId{Scenario=="invalid" ? "Invalid" : Scenario=="source-failure" ? "SourceFailure" : Scenario=="source-throw" ? "SourceThrow" : Scenario=="source-mutation" ? "SourceMutation" : Scenario=="source-badalloc" ? "SourceBadAlloc" : Scenario=="begin-failure" ? "BeginFailure" : "Replacement"});
             Check(Original.Get() && OriginalComponent.Get(),"Load replaced world inline");return;
         }
         if (IsRecoverable() && Phase==1)
@@ -234,6 +236,10 @@ int main(int argc,char** argv)
     try
     {
         const int result=GameApplication{}.Run(game,config,std::move(setup));
+        const auto device=GraphicsEngine::Get().CollectDeviceDiagnostics();
+        for(const auto& error:device.Errors) std::cerr<<error<<'\n';
+        Check(device.Errors.empty(),"D3D debug layer reported errors/corruption");
+        std::cout<<(device.Available ? "PASS: D3D debug queue contains no ERROR/CORRUPTION messages\n" : "UNAVAILABLE: D3D debug queue; no clean-debug-layer claim\n");
         Check(!game.SourceDestroyedEarly && (game.SourceDestroyed || game.Scenario=="no-source"),"Source lifetime ended before component cleanup");
         if(game.Scenario=="initial-invalid" || game.Scenario=="no-source")
         {

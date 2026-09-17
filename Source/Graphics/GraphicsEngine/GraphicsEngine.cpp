@@ -1,15 +1,10 @@
 #include "GraphicsEngine.pch.h"
-#include "GameFramework/Runtime/Internal/WorldAccess.h"
 #include "GraphicsEngine.h"
 
 #include "ConstantBuffers/AnimationBuffer.h"
 #include "ConstantBuffers/FrameBuffer.h"
 #include "ConstantBuffers/LightBuffer.h"
 #include "ConstantBuffers/ObjectBuffer.h"
-#include "GameFramework/Components/CameraComponent.h"
-#include "GameFramework/Components/LightComponent.h"
-#include "GameFramework/Components/MeshComponentBase.h"
-#include "GameFramework/World/World.h"
 #include "RHI/GraphicsCommandList.h"
 #include "RHI/RHIShaderReflectionInfo.h"
 
@@ -173,7 +168,7 @@ namespace
 
 	float GetRenderIntensity(const GraphicsEngine::LightSnapshot& aLight)
 	{
-		if (aLight.Type == LightType::Directional)
+		if (aLight.Type == RenderLightType::Directional)
 		{
 			return aLight.Intensity;
 		}
@@ -372,23 +367,9 @@ namespace
 		return &light;
 	}
 
-	GraphicsEngine::LightSnapshot CreateLightSnapshot(const LightComponent& aLightComponent)
-	{
-		GraphicsEngine::LightSnapshot light;
-		light.Type = aLightComponent.GetLightType();
-		light.Color = aLightComponent.GetColor();
-		light.Intensity = aLightComponent.GetIntensity();
-		light.Position = aLightComponent.GetWorldPosition();
-		light.Direction = aLightComponent.GetWorldDirection();
-		light.InnerCone = aLightComponent.GetInnerCone();
-		light.OuterCone = aLightComponent.GetOuterCone();
-		light.Radius = aLightComponent.GetRadius();
-		return light;
-	}
-
 	bool IsRelevantLight(const CameraFrustum& aFrustum, const GraphicsEngine::LightSnapshot& aLight)
 	{
-		if (aLight.Type == LightType::Directional)
+		if (aLight.Type == RenderLightType::Directional)
 		{
 			return true;
 		}
@@ -555,137 +536,65 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path&
 
 // --- Frame rendering ---
 
-void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const Actor& aCameraActor, const World& aWorld)
-{
-	RenderSceneSnapshot snapshot;
-	if (!BuildRenderSnapshot(aCameraActor, aWorld, snapshot))
-	{
-		return;
-	}
-
-	RenderSnapshot(inoutCommandList, snapshot);
-}
-
-bool GraphicsEngine::BuildRenderSnapshot(const Actor& aCameraActor, const World& aWorld, RenderSceneSnapshot& outSnapshot) const
-{
-    auto* camera = aCameraActor.GetComponent<CameraComponent>();
-    return camera && BuildRenderSnapshot(*camera,aWorld,outSnapshot);
-}
-
-bool GraphicsEngine::BuildRenderSnapshot(CameraComponent& camera, const World& aWorld, RenderSceneSnapshot& outSnapshot) const
+void GraphicsEngine::FinalizeRenderSnapshot(RenderSceneSnapshot& snapshot) const
 {
     const auto snapshotStart = Clock::now();
-    outSnapshot.Clear();
-    if (!camera.IsEnabled() || !camera.GetOwner()->IsActive()) return false;
-    auto* cameraComponent = &camera;
-	cameraComponent->SyncCameraToOwner();
-	outSnapshot.Camera = cameraComponent->GetCamera();
-	outSnapshot.HasCamera = true;
-
-	const CameraFrustum cameraFrustum = CreateCameraFrustum(outSnapshot.Camera);
-	const std::vector<std::unique_ptr<Actor>>& actors = GameFrameworkInternal::WorldAccess::GetActors(aWorld);
-	outSnapshot.ShadowCasters.reserve(actors.size());
-	outSnapshot.OpaqueRenderItems.reserve(actors.size());
-	outSnapshot.BlendedRenderItems.reserve(actors.size());
-	outSnapshot.RelevantLights.reserve(actors.size());
-
-	std::vector<LightComponent*> actorLights;
-	std::vector<MeshComponentBase*> meshComponents;
-	for (const std::unique_ptr<Actor>& actor : actors)
-	{
-		if (!actor || !actor->IsActive())
-		{
-			continue;
-		}
-
-		actorLights.clear();
-		actor->GetComponentsOfType(actorLights);
-		for (const LightComponent* lightComponent : actorLights)
-		{
-			if (lightComponent == nullptr || !lightComponent->HasBegunPlay() || !lightComponent->IsEnabled())
-			{
-				continue;
-			}
-
-			++outSnapshot.Stats.TotalLights;
-			const LightSnapshot light = CreateLightSnapshot(*lightComponent);
-			if (!myCullingEnabled || IsRelevantLight(cameraFrustum, light))
-			{
-				outSnapshot.RelevantLights.emplace_back(light);
-			}
-		}
-
-		meshComponents.clear();
-		actor->GetComponentsOfType(meshComponents);
-		for (const MeshComponentBase* meshComponent : meshComponents)
-		{
-			if (meshComponent == nullptr || !meshComponent->HasBegunPlay() || !meshComponent->IsEnabled() || !meshComponent->HasMesh())
-			{
-				continue;
-			}
-
-			const std::shared_ptr<Mesh> mesh = meshComponent->GetMesh();
-			if (mesh == nullptr)
-			{
-				continue;
-			}
-
-			RenderItemSnapshot renderItem;
-			renderItem.Mesh = mesh;
-			renderItem.Materials = meshComponent->GetMaterialList();
-			renderItem.World = meshComponent->GetWorldMatrix();
-			renderItem.HasSkinning = meshComponent->HasSkinning();
-			if (const std::array<CU::Matrix4f, 128>* jointTransforms = meshComponent->GetJointTransforms())
-			{
-				renderItem.JointTransforms = *jointTransforms;
-			}
-
-			const BoundingSphere worldBounds =
-			    TransformBoundingSphere(mesh->myLocalBoundsCenter, mesh->myLocalBoundsRadius, mesh->myHasLocalBounds, renderItem.World);
-			renderItem.HasBounds = myCullingEnabled && worldBounds.IsValid && !renderItem.HasSkinning;
-			renderItem.BoundsCenter = worldBounds.Center;
-			renderItem.BoundsRadius = worldBounds.Radius;
-
-			outSnapshot.ShadowCasters.emplace_back(renderItem);
-			++outSnapshot.Stats.TotalRenderItems;
-			if (!renderItem.HasBounds || IntersectsFrustum(cameraFrustum, worldBounds))
-			{
-				++outSnapshot.Stats.VisibleRenderItems;
-				const size_t itemIndex = outSnapshot.ShadowCasters.size() - 1;
-				const auto passes = RenderItemRouting::Classify(mesh->GetElements(),
-				                                                [&](const Mesh::Element& element)
-				                                                {
-					                                                return GetElementBlendMode(element, renderItem.Materials,
-					                                                                           myDefaultMaterial) == BlendMode::Opaque;
-				                                                });
-				if (passes.Opaque)
-					outSnapshot.OpaqueRenderItems.push_back(itemIndex);
-				if (passes.Blended)
-					outSnapshot.BlendedRenderItems.push_back(itemIndex);
-			}
-		}
-	}
-
-	outSnapshot.Stats.ShadowCasters = static_cast<uint32_t>(outSnapshot.ShadowCasters.size());
-	outSnapshot.Stats.OpaqueRenderItems = static_cast<uint32_t>(outSnapshot.OpaqueRenderItems.size());
-	outSnapshot.Stats.BlendedRenderItems = static_cast<uint32_t>(outSnapshot.BlendedRenderItems.size());
-	const CU::Vector3f cameraPosition = outSnapshot.Camera.GetTransform().GetPosition();
-	auto distance = [&](size_t index)
-	{
-		const auto& world = outSnapshot.ShadowCasters[index].World;
-		const float d = (CU::Vector3f(world(4, 1), world(4, 2), world(4, 3)) - cameraPosition).LengthSqr();
-		return std::isfinite(d) ? d : 0.0f;
-	};
-	RenderItemRouting::Sort(outSnapshot.OpaqueRenderItems, outSnapshot.BlendedRenderItems, distance);
-	outSnapshot.Stats.SnapshotMilliseconds = ElapsedMilliseconds(snapshotStart);
-	outSnapshot.Stats.RelevantLights = static_cast<uint32_t>(outSnapshot.RelevantLights.size());
-	return true;
+    if (!snapshot.HasCamera) return;
+    const CameraFrustum cameraFrustum = CreateCameraFrustum(snapshot.Camera);
+    snapshot.Stats.TotalLights = static_cast<uint32_t>(snapshot.RelevantLights.size());
+    if (myCullingEnabled)
+        std::erase_if(snapshot.RelevantLights, [&](const LightSnapshot& light) { return !IsRelevantLight(cameraFrustum, light); });
+    snapshot.Stats.RelevantLights = static_cast<uint32_t>(snapshot.RelevantLights.size());
+    snapshot.OpaqueRenderItems.clear();
+    snapshot.BlendedRenderItems.clear();
+    snapshot.OpaqueRenderItems.reserve(snapshot.ShadowCasters.size());
+    snapshot.BlendedRenderItems.reserve(snapshot.ShadowCasters.size());
+    snapshot.Stats.TotalRenderItems = static_cast<uint32_t>(snapshot.ShadowCasters.size());
+    snapshot.Stats.VisibleRenderItems = 0;
+    for (size_t itemIndex = 0; itemIndex < snapshot.ShadowCasters.size(); ++itemIndex)
+    {
+        auto& renderItem = snapshot.ShadowCasters[itemIndex];
+        const auto& mesh = renderItem.Mesh;
+        if (!mesh) continue;
+        const BoundingSphere worldBounds =
+            TransformBoundingSphere(mesh->myLocalBoundsCenter, mesh->myLocalBoundsRadius, mesh->myHasLocalBounds, renderItem.World);
+        renderItem.HasBounds = myCullingEnabled && worldBounds.IsValid && !renderItem.HasSkinning;
+        renderItem.BoundsCenter = worldBounds.Center;
+        renderItem.BoundsRadius = worldBounds.Radius;
+        if (!renderItem.HasBounds || IntersectsFrustum(cameraFrustum, worldBounds))
+        {
+            ++snapshot.Stats.VisibleRenderItems;
+            const auto passes = RenderItemRouting::Classify(mesh->GetElements(), [&](const Mesh::Element& element)
+            { return GetElementBlendMode(element, renderItem.Materials, myDefaultMaterial) == BlendMode::Opaque; });
+            if (passes.Opaque) snapshot.OpaqueRenderItems.push_back(itemIndex);
+            if (passes.Blended) snapshot.BlendedRenderItems.push_back(itemIndex);
+        }
+    }
+    snapshot.Stats.ShadowCasters = static_cast<uint32_t>(snapshot.ShadowCasters.size());
+    snapshot.Stats.OpaqueRenderItems = static_cast<uint32_t>(snapshot.OpaqueRenderItems.size());
+    snapshot.Stats.BlendedRenderItems = static_cast<uint32_t>(snapshot.BlendedRenderItems.size());
+    const CU::Vector3f cameraPosition = snapshot.Camera.GetTransform().GetPosition();
+    auto distance = [&](size_t index)
+    {
+        const auto& world = snapshot.ShadowCasters[index].World;
+        const float d = (CU::Vector3f(world(4, 1), world(4, 2), world(4, 3)) - cameraPosition).LengthSqr();
+        return std::isfinite(d) ? d : 0.0f;
+    };
+    RenderItemRouting::Sort(snapshot.OpaqueRenderItems, snapshot.BlendedRenderItems, distance);
+    snapshot.Stats.SnapshotMilliseconds = ElapsedMilliseconds(snapshotStart);
 }
 
 void GraphicsEngine::RenderSnapshot(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot)
 {
 	if (!aSnapshot.HasCamera)
 	{
+		// An empty presentation is still a completed frame. Clear the swapchain
+		// target so a removed/disabled camera cannot retain a stale scene image.
+		inoutCommandList.ClearOverridePipelineState();
+		inoutCommandList.ClearRenderTarget(myBackBuffer);
+		inoutCommandList.ClearDepthStencil(myDepthBuffer);
+		inoutCommandList.SetRenderTarget(&myBackBuffer, &myDepthBuffer);
+		StoreLastRenderStats(aSnapshot.Stats);
 		return;
 	}
 
@@ -744,7 +653,7 @@ std::vector<GraphicsEngine::ShadowRenderJob> GraphicsEngine::BuildShadowJobs(con
 			break;
 		}
 
-		if (lightSnapshot.Type == LightType::Directional && !hasRenderedDirectionalShadow)
+		if (lightSnapshot.Type == RenderLightType::Directional && !hasRenderedDirectionalShadow)
 		{
 			float cascadeNear = aSnapshot.Camera.GetNearPlane();
 			std::array<CascadeShadowData, ShadowConfig::DirectionalCascadeCount> cascadeData = {};
@@ -777,12 +686,12 @@ std::vector<GraphicsEngine::ShadowRenderJob> GraphicsEngine::BuildShadowJobs(con
 				cascadeNear = cascadeFar;
 			}
 
-			const float baseDirectionalBias = GetShadowDepthBias(LightType::Directional);
+			const float baseDirectionalBias = GetShadowDepthBias(RenderLightType::Directional);
 			const float referenceDepthRange = cascadeData[0].DepthRange;
 			light->NumCascades = ShadowConfig::DirectionalCascadeCount;
 			light->CascadeSplits = {ShadowConfig::CascadeSplits[0], ShadowConfig::CascadeSplits[1], ShadowConfig::CascadeSplits[2],
 			                        ShadowConfig::CascadeSplits[3]};
-			light->ShadowSettings = MakeShadowSettings(GetShadowDepthBias(LightType::Directional));
+			light->ShadowSettings = MakeShadowSettings(GetShadowDepthBias(RenderLightType::Directional));
 			light->CascadeDepthBiases = {baseDirectionalBias * referenceDepthRange / cascadeData[0].DepthRange,
 			                             baseDirectionalBias * referenceDepthRange / cascadeData[1].DepthRange,
 			                             baseDirectionalBias * referenceDepthRange / cascadeData[2].DepthRange,
@@ -791,7 +700,7 @@ std::vector<GraphicsEngine::ShadowRenderJob> GraphicsEngine::BuildShadowJobs(con
 			                                  ShadowConfig::DirectionalFilterRadiusWorld, ShadowConfig::DirectionalFilterRadiusWorld};
 			hasRenderedDirectionalShadow = true;
 		}
-		else if (lightSnapshot.Type == LightType::Spot && spotShadowCount < MaxSpotShadowMaps)
+		else if (lightSnapshot.Type == RenderLightType::Spot && spotShadowCount < MaxSpotShadowMaps)
 		{
 			const CU::Matrix4f lightViewProjection = CreateSpotViewProjection(lightSnapshot);
 			FrameBuffer shadowFrameBuffer;
@@ -812,10 +721,10 @@ std::vector<GraphicsEngine::ShadowRenderJob> GraphicsEngine::BuildShadowJobs(con
 			light->ShadowMapIndex = spotShadowCount;
 			light->NumCascades = 1;
 			light->LightViewProjTexture[0] = CreateLightViewProjectionTexture(lightViewProjection);
-			light->ShadowSettings = MakeShadowSettings(GetShadowDepthBias(LightType::Spot));
+			light->ShadowSettings = MakeShadowSettings(GetShadowDepthBias(RenderLightType::Spot));
 			++spotShadowCount;
 		}
-		else if (lightSnapshot.Type == LightType::Point && pointShadowCount < MaxPointShadowMaps)
+		else if (lightSnapshot.Type == RenderLightType::Point && pointShadowCount < MaxPointShadowMaps)
 		{
 			const PointShadowBufferData pointShadowBuffer = CreatePointShadowBuffer(lightSnapshot);
 			FrameBuffer shadowFrameBuffer;
@@ -837,7 +746,7 @@ std::vector<GraphicsEngine::ShadowRenderJob> GraphicsEngine::BuildShadowJobs(con
 
 			light->ShadowMapIndex = pointShadowCount;
 			light->NumCascades = 1;
-			light->ShadowSettings = MakeShadowSettings(GetShadowDepthBias(LightType::Point));
+			light->ShadowSettings = MakeShadowSettings(GetShadowDepthBias(RenderLightType::Point));
 			++pointShadowCount;
 		}
 	}
@@ -1014,13 +923,13 @@ void GraphicsEngine::RenderDeferredLighting(GraphicsCommandList& inoutCommandLis
 
 		switch (singleLightBuffer.Lights[0].Type)
 		{
-		case static_cast<unsigned>(LightType::Directional):
+		case static_cast<unsigned>(RenderLightType::Directional):
 			inoutCommandList.SetPipelineState(&myDeferredDirectionalPSO);
 			break;
-		case static_cast<unsigned>(LightType::Point):
+		case static_cast<unsigned>(RenderLightType::Point):
 			inoutCommandList.SetPipelineState(&myDeferredPointPSO);
 			break;
-		case static_cast<unsigned>(LightType::Spot):
+		case static_cast<unsigned>(RenderLightType::Spot):
 			inoutCommandList.SetPipelineState(&myDeferredSpotPSO);
 			break;
 		default:
@@ -1191,20 +1100,20 @@ void GraphicsEngine::RenderShadowMap(GraphicsCommandList& inoutCommandList, std:
 	inoutCommandList.EndEvent();
 }
 
-float GraphicsEngine::GetShadowDepthBias(LightType aType) const
+float GraphicsEngine::GetShadowDepthBias(RenderLightType aType) const
 {
 	std::scoped_lock lock(myShadowTuningMutex);
 	return GetShadowDepthBiasUnlocked(aType);
 }
 
-float GraphicsEngine::GetShadowDepthBiasUnlocked(LightType aType) const
+float GraphicsEngine::GetShadowDepthBiasUnlocked(RenderLightType aType) const
 {
 	float bias = ShadowConfig::DirectionalShaderBias + myDirectionalShadowBiasOffset;
-	if (aType == LightType::Spot)
+	if (aType == RenderLightType::Spot)
 	{
 		bias = ShadowConfig::SpotShaderBias + mySpotShadowBiasOffset;
 	}
-	else if (aType == LightType::Point)
+	else if (aType == RenderLightType::Point)
 	{
 		bias = ShadowConfig::PointShaderBias + myPointShadowBiasOffset;
 	}
@@ -1212,15 +1121,15 @@ float GraphicsEngine::GetShadowDepthBiasUnlocked(LightType aType) const
 	return std::clamp(bias, ShadowConfig::BiasMin, ShadowConfig::BiasMax);
 }
 
-void GraphicsEngine::AdjustShadowBias(LightType aType, float aDelta)
+void GraphicsEngine::AdjustShadowBias(RenderLightType aType, float aDelta)
 {
 	std::scoped_lock lock(myShadowTuningMutex);
 	float* offset = &myDirectionalShadowBiasOffset;
-	if (aType == LightType::Spot)
+	if (aType == RenderLightType::Spot)
 	{
 		offset = &mySpotShadowBiasOffset;
 	}
-	else if (aType == LightType::Point)
+	else if (aType == RenderLightType::Point)
 	{
 		offset = &myPointShadowBiasOffset;
 	}
@@ -1229,15 +1138,15 @@ void GraphicsEngine::AdjustShadowBias(LightType aType, float aDelta)
 	const float currentBias = GetShadowDepthBiasUnlocked(aType);
 	if (currentBias <= ShadowConfig::BiasMin || currentBias >= ShadowConfig::BiasMax)
 	{
-		const float defaultBias = aType == LightType::Spot    ? ShadowConfig::SpotShaderBias
-		                          : aType == LightType::Point ? ShadowConfig::PointShaderBias
+		const float defaultBias = aType == RenderLightType::Spot    ? ShadowConfig::SpotShaderBias
+		                          : aType == RenderLightType::Point ? ShadowConfig::PointShaderBias
 		                                                      : ShadowConfig::DirectionalShaderBias;
 		*offset = std::clamp(defaultBias + *offset, ShadowConfig::BiasMin, ShadowConfig::BiasMax) - defaultBias;
 	}
 
 	GELOG(Log, "Shadow {} bias: {:.6f}",
-	      aType == LightType::Directional ? "directional"
-	      : aType == LightType::Spot      ? "spot"
+	      aType == RenderLightType::Directional ? "directional"
+	      : aType == RenderLightType::Spot      ? "spot"
 	                                      : "point",
 	      GetShadowDepthBiasUnlocked(aType));
 }
@@ -1258,8 +1167,8 @@ void GraphicsEngine::LogShadowTuning() const
 	    Log,
 	    "Shadow tuning: cascades={}, splits={{ {:.1f}, {:.1f}, {:.1f}, {:.1f} }}, directionalBias={:.6f}, spotBias={:.6f}, pointBias={:.6f}, spotMaps={}, pointMaps={}",
 	    ShadowConfig::DirectionalCascadeCount, ShadowConfig::CascadeSplits[0], ShadowConfig::CascadeSplits[1],
-	    ShadowConfig::CascadeSplits[2], ShadowConfig::CascadeSplits[3], GetShadowDepthBiasUnlocked(LightType::Directional),
-	    GetShadowDepthBiasUnlocked(LightType::Spot), GetShadowDepthBiasUnlocked(LightType::Point), ShadowConfig::MaxSpotMaps,
+	    ShadowConfig::CascadeSplits[2], ShadowConfig::CascadeSplits[3], GetShadowDepthBiasUnlocked(RenderLightType::Directional),
+	    GetShadowDepthBiasUnlocked(RenderLightType::Spot), GetShadowDepthBiasUnlocked(RenderLightType::Point), ShadowConfig::MaxSpotMaps,
 	    ShadowConfig::MaxPointMaps);
 }
 

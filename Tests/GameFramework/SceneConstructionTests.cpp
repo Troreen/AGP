@@ -1,10 +1,12 @@
-#include "GameFramework/Scenes/SceneBuilder.h"
-#include "GameFramework/Scenes/SceneReader.h"
-#include "GameFramework/Scenes/References.h"
-#include "GameFramework/Runtime/Internal/RegistryAccess.h"
-#include "GameFramework/Runtime/Internal/WorldAccess.h"
-#include "GameFramework/Integration/GameFramework/Integration/SceneData.h"
-#include "GameFramework/Integration/GameFramework/Integration/AssetBindings.h"
+#include "Runtime/Internal/RenderAccess.h"
+#include "GameFramework/Components/SkeletalMeshComponent.h"
+#include "Scenes/SceneBuilder.h"
+#include "GameFramework/Registration/SceneReader.h"
+#include "GameFramework/Registration/References.h"
+#include "Runtime/Internal/RegistryAccess.h"
+#include "Runtime/Internal/WorldAccess.h"
+#include "GameFramework/Integration/SceneData.h"
+#include "GameFramework/Integration/AssetBindings.h"
 #include "GraphicsEngine/Objects/Mesh.h"
 #include "GraphicsEngine/Objects/Vertex.h"
 #include <algorithm>
@@ -166,11 +168,11 @@ void CameraPolicy(const ComponentRegistry& registry)
     auto& projection=scene.Actors[0].Components.back().Properties;
     projection["near"]=1e30;projection["far"]=2e30;ExpectRejected(scene,registry,"invalid-value","projection");
     projection.clear();projection["fov"]=1e-38;ExpectRejected(scene,registry,"invalid-value","projection");
-    World world;auto* camera=world.SpawnActor("Camera")->AddComponent<CameraComponent>();
+    auto worldStorage=GameFrameworkInternal::WorldAccess::Create(); World& world=*worldStorage;auto* camera=world.SpawnActor("Camera")->AddComponent<CameraComponent>();
     Check(camera->SetPerspective(90,1,5000,{1280,720}),"Valid direct projection rejected");
-    const auto before=camera->GetCamera().GetProjectionMatrix();
+    const auto before=GameFrameworkInternal::RenderAccess::Camera(*camera).GetProjectionMatrix();
     Check(!camera->SetPerspective(90,1e30f,2e30f,{1280,720}) && !camera->SetPerspective(1e-38f,1,5000,{1280,720}),"Finite inputs yielding nonfinite projection accepted");
-    const auto after=camera->GetCamera().GetProjectionMatrix();
+    const auto after=GameFrameworkInternal::RenderAccess::Camera(*camera).GetProjectionMatrix();
     for(int r=1;r<=4;++r)for(int c=1;c<=4;++c)Near(after(r,c),before(r,c),"Rejected projection changed camera");
 }
 void MaterialSlotFailures(const ComponentRegistry& registry)
@@ -190,9 +192,10 @@ void MaterialSlotFailures(const ComponentRegistry& registry)
 }
 void ConstructionCannotMutateLiveWorld()
 {
-    for(int phase=0;phase<2;++phase)
+    for(int phase=0;phase<3;++phase)
     {
-        World live;auto* existing=live.SpawnActor("Live");auto reference=existing->GetRef();
+        auto liveStorage=GameFrameworkInternal::WorldAccess::Create(); World& live=*liveStorage;auto* existing=live.SpawnActor("Live");auto reference=existing->GetRef();
+        auto* capturedSkin=existing->AddComponent<SkeletalMeshComponent>();
         ComponentRegistry registry;
         if(phase==0)
             registry.RegisterFactory<AuthoredProbe>("test.CapturedMutation",[&]
@@ -203,7 +206,7 @@ void ConstructionCannotMutateLiveWorld()
         else
             registry.Register<AuthoredProbe>("test.CapturedMutation",[&](AuthoredProbe&,SceneReader&)
             {
-                try {existing->GetTransform().SetLocalPosition({10,20,30});}catch(const std::logic_error&){}
+                try {if(phase==1)existing->GetTransform().SetLocalPosition({10,20,30});else capturedSkin->Update(.5f);}catch(const std::logic_error&){}
             });
         RegistryAccess::Freeze(registry);
         auto scene=Fixture();scene.Actors.resize(1);scene.Actors[0].Components[0].Type="test.CapturedMutation";

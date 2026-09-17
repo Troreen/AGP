@@ -1,11 +1,11 @@
 #include "ModelViewerComponents.h"
 #include "Application.h"
-#include "GameFramework/Runtime/GameContext.h"
+#include "GameFramework/GameContext.h"
 #include "GameFramework/Components/LightComponent.h"
 #include "GameFramework/Components/CameraComponent.h"
 #include "GameFramework/Components/SkeletalMeshComponent.h"
 #include <cmath>
-#include "GameFramework/Scenes/References.h"
+#include "GameFramework/Registration/References.h"
 #include <utility>
 
 namespace
@@ -13,7 +13,7 @@ namespace
 	using Vector3f = CommonUtilities::Vector3f;
 	void AimActorAlongCameraForward(Actor& anActor, const Transform& aCameraTransform)
 	{
-		Vector3f forward = aCameraTransform.GetForward();
+		Vector3f forward = aCameraTransform.GetLocalForward();
 		if (forward.LengthSqr() <= 0.0f)
 		{
 			forward = Vector3f::UnitZ;
@@ -23,8 +23,8 @@ namespace
 			forward.Normalize();
 		}
 
-		const Vector3f position = anActor.GetTransform().GetPosition();
-		anActor.LookAt(position + forward);
+        anActor.GetTransform().SetLocalRotationRadians(std::atan2(forward.x, forward.z),
+            -std::asin(std::clamp(forward.y, -1.f, 1.f)), 0);
 	}
 
 	void PrintLightTuningValues(const DirectionalLightComponent* aDirectionalLightComponent,
@@ -74,7 +74,7 @@ namespace
 // Owner-dependent initialization happens once, after scene validation.
 void CameraControlsComponent::BeginPlay()
 {
-    const auto direction = GetOwner()->GetTransform().GetForward().GetNormalized();
+    const auto direction = GetOwner()->GetTransform().GetLocalForward().GetNormalized();
     myYaw = std::atan2(direction.x, direction.z);
     myPitch = -std::asin(std::clamp(direction.y, -1.f, 1.f));
     GetOwner()->GetTransform().SetLocalRotationRadians(myYaw,myPitch,0);
@@ -89,8 +89,8 @@ void CameraControlsComponent::LateUpdate(float deltaTime)
         myPitch = std::clamp(myPitch + input.MouseDeltaY * .0025f, -1.55334303f, 1.55334303f);
         transform.SetLocalRotationRadians(myYaw,myPitch,0);
     }
-    const auto forward = transform.GetForward().GetNormalized();
-    const auto right = transform.GetRight().GetNormalized();
+    const auto forward = transform.GetLocalForward().GetNormalized();
+    const auto right = transform.GetLocalRight().GetNormalized();
     Vector3f motion{};
     if (input.IsKeyDown(Keys::W)) motion += forward;
     if (input.IsKeyDown(Keys::S)) motion -= forward;
@@ -108,7 +108,7 @@ void SpinComponent::FixedUpdate(float deltaTime)
 	if (GetInput().IsKeyPressed(Keys::R)) mySpinning = !mySpinning;
 	if (!mySpinning) return;
 	myYaw = std::fmod(myYaw + 25.0f * deltaTime, 360.0f);
-	GetOwner()->SetRotation(myYaw, 0, 0);
+	GetOwner()->GetTransform().SetLocalRotationDegrees(myYaw, 0, 0);
 }
 
 void LightControlsComponent::ResolveReferences(References& context)
@@ -180,7 +180,7 @@ void LightControlsComponent::LateUpdate(float)
 	if (shiftDown && myCameraActor != nullptr)
 	{
 		const Transform& cameraTransform = myCameraActor->GetTransform();
-		const Vector3f cameraPosition = cameraTransform.GetPosition();
+		const Vector3f cameraPosition = cameraTransform.GetLocalPosition();
 
 		if ((anInputFrame.IsKeyPressed(Keys::NUMPAD7) || anInputFrame.KeysPressed[static_cast<size_t>('7')]) &&
 		    myDirectionalLightComponent != nullptr)
@@ -206,7 +206,7 @@ void LightControlsComponent::LateUpdate(float)
 
 				if (Actor* lightActor = pointLightComponent->GetOwner())
 				{
-					lightActor->SetPosition(cameraPosition);
+					lightActor->GetTransform().SetLocalPosition(cameraPosition);
 					MVLOG(Log, "Moved point light to camera position: {{ {:.2f}, {:.2f}, {:.2f} }}", cameraPosition.x, cameraPosition.y,
 					      cameraPosition.z);
 					break;
@@ -220,7 +220,7 @@ void LightControlsComponent::LateUpdate(float)
 		{
 			if (Actor* lightActor = mySpotLightComponent->GetOwner())
 			{
-				lightActor->SetPosition(cameraPosition);
+				lightActor->GetTransform().SetLocalPosition(cameraPosition);
 				AimActorAlongCameraForward(*lightActor, cameraTransform);
 				const Vector3f direction = mySpotLightComponent->GetWorldDirection();
 				MVLOG(

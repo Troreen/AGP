@@ -57,11 +57,9 @@ EndPlay follows Shutdown, so keep game state needed by EndPlay alive until Run r
 
 ## Migration status
 
-M1–M3 implement the core object model, owned scene data, registered readers and
+M1–M4 implement the core object model, owned scene data, registered readers and
 scene-ID requests. ModelViewer installs its C++ source once at application setup;
-game callbacks call GetScenes().Load(SceneId{"ModelViewer"}) or Reload(). The
-legacy scene factory/Configure-lambda bridge is removed. M4 completes renderer
-component isolation and physical public/private header separation.
+game callbacks call GetScenes().Load(SceneId{"ModelViewer"}) or Reload(). The legacy scene factory/Configure-lambda bridge is removed. Public contains the supported definitions, Private contains engine implementation, and Integration contains the source/data boundary.
 
 No physics, animation graph, networking, editor, new asset manager or input system
 is part of this work. Actual Perforce scene integration requires verified team code
@@ -142,3 +140,27 @@ mesh/material resources using the existing backend and places them in candidate-
 AssetBindings. GetAssets is ready-resource lookup, never a loader or new cache.
 The importer must not return actors or drive lifecycle. See ImporterHandoff.md for
 unverified Perforce requirements.
+
+## Meshes, cameras and rendering
+
+Mesh components bind MeshAsset and MaterialAsset values obtained from GetAssets.
+SetMesh accepts a ready binding (empty clears it); SetMaterial returns false for
+an invalid slot or empty binding without changing the previous material. GetMesh,
+GetMaterial and GetMaterialCount support copying bindings between components.
+Gameplay cannot access mutable backend resources or skeletal joint arrays.
+SetVisible only controls drawing/shadows; hidden skeletal meshes still update.
+SetEnabled controls gameplay updates and render eligibility.
+
+Select cameras through World::SetActiveCamera. Invalid SetPerspective input or
+an overflowing derived projection returns false and preserves the old projection.
+Camera scale is stripped during extraction, including a stable fallback for
+collapsed inherited axes. Destroyed, inactive, disabled or unstarted cameras
+produce an empty frame; the host stays responsive and never retains a stale scene
+image indefinitely. Gameplay never synchronizes a camera or builds snapshots.
+
+Use only GetTransform with explicitly named local/world operations. ActorRef and
+ComponentRef are the retained reference types. World construction, slot tables,
+phase dispatch, renderer extraction, camera backend access and raw resource access
+are internal. Sources also run under the engine mutation guard: failing preparation
+cannot change captured gameplay objects through engine APIs. Ordinary C++ code
+must still honor ownership and avoid arbitrary external/custom-field side effects.

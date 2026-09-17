@@ -150,11 +150,11 @@ JSON -> SceneImporter::ImportScene() -> ImportedSceneData
 - Support parent-child actor relationships and inherited transforms.
 - Destroying a parent also destroys its children.
 - Transform parenting is separate from ordinary cross-actor references.
-- Activation inheritance follows E16; local/world transform support follows E17. Reparenting behavior and the imported parent representation remain TBD.
+- Activation inheritance follows E16; local/world transform support follows E17. Reparenting applies immediately with KeepLocal/KeepWorld and atomic rejection of cycles/cross-world links or unsupported KeepWorld poses; exporter representation still requires real fixtures.
 
 ### E11 - Requests and notifications
 
-**Status: Agreed**
+**Status: Future direction; generic event system deferred**
 
 - Use direct calls for requests to known components/services.
 - Use typed events for notifications that may interest several consumers.
@@ -164,7 +164,7 @@ JSON -> SceneImporter::ImportScene() -> ImportedSceneData
 
 ### E12 - Pause and time
 
-**Status: Agreed**
+**Status: Future pause/scaling direction, deferred. Current GameTime exposes callback delta, fixed delta and session elapsed gameplay seconds only.**
 
 - Provide scaled game time and unscaled time.
 - Ordinary gameplay uses game time and stops receiving update callbacks while paused, rather than repeatedly receiving zero delta time.
@@ -177,12 +177,12 @@ JSON -> SceneImporter::ImportScene() -> ImportedSceneData
 
 **Status: Agreed**
 
-- Components can find siblings through typed lookup, such as `GetComponent<SkeletalMeshComponent>()`; exact API signatures remain to be defined.
-- Required dependencies are checked during connection/validation, before any `BeginPlay` calls.
+- Components find siblings through GetComponent<T>(), GetComponents<T>() and References::Require/Optional.
+- Required dependencies are checked during ResolveReferences validation, before any `BeginPlay` calls.
 - A missing required dependency rejects scene activation with a diagnostic identifying the actor, dependent component and missing requirement.
 - Optional dependencies may be absent and must be handled explicitly by the consuming component.
 - The engine does not automatically add missing components; authored composition and configuration remain explicit.
-- Dependency declaration syntax and validation of runtime composition changes remain TBD. Required dependency ambiguity follows E14.
+- SceneReader binds authored IDs; runtime additions undergo read-only whole-batch validation before beginning. Required dependency ambiguity follows E14.
 
 ### E14 - Multiple components and explicit dependency selection
 

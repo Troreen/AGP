@@ -13,6 +13,11 @@
 #include <GameFramework/SceneService.h>
 #include <GameFramework/GameTime.h>
 #include <GameFramework/Transform.h>
+#include <GameFramework/AssetRefs.h>
+#include <GameFramework/Components/CameraComponent.h>
+#include <GameFramework/Components/StaticMeshComponent.h>
+#include <GameFramework/Components/SkeletalMeshComponent.h>
+#include <GameFramework/Components/LightComponent.h>
 #include <type_traits>
 
 // This translation unit has only Public and shared-math include directories.
@@ -35,7 +40,7 @@ static_assert(!CanPrepare<World> && !CanFlush<World> && !CanQueue<World>);
 static_assert(!CanFreeze<ComponentRegistry>);
 static_assert(!CanSeeOwnedActors<World> && !CanSeeOwnedComponents<Actor>);
 static_assert(!CanClearInput<GameInput> && !CanMergeInput<GameInput>);
-static_assert(!std::is_copy_constructible_v<World>);
+static_assert(!std::is_copy_constructible_v<World> && !std::is_default_constructible_v<World> && !std::is_constructible_v<World,const GameInput*>);
 static_assert(std::is_final_v<Actor> && !std::is_constructible_v<Actor,std::string>);
 static_assert(!std::is_copy_constructible_v<Transform> && !std::is_move_constructible_v<Transform>);
 static_assert(!std::is_copy_assignable_v<Transform> && !std::is_move_assignable_v<Transform>);
@@ -44,6 +49,14 @@ static_assert(!CanSetRawParent<Transform>);
 static_assert(!std::is_constructible_v<ActorRef,ComponentRef<Component>>);
 static_assert(!std::is_constructible_v<ComponentRef<SceneComponent>,ActorRef>);
 static_assert(!std::is_constructible_v<ComponentRef<SceneComponent>,ComponentRef<Component>>);
+template<class T> concept CanBorrowBackendCamera = requires(T& value) { value.GetCamera(); };
+template<class T> concept CanBorrowBackendJoints = requires(T& value) { value.GetJointTransforms(); };
+template<class T> concept CanSeeMaterialList = requires(T& value) { value.GetMaterialList(); };
+template<class T> concept CanSetActorPosition = requires(T& value) { value.SetPosition({0,0,0}); };
+static_assert(!CanBorrowBackendCamera<CameraComponent> && !CanBorrowBackendJoints<SkeletalMeshComponent>);
+static_assert(!CanSeeMaterialList<MeshComponentBase> && !CanSetActorPosition<Actor>);
+static_assert(std::is_same_v<decltype(std::declval<StaticMeshComponent&>().GetMesh()),MeshAsset>);
+static_assert(std::is_same_v<decltype(std::declval<StaticMeshComponent&>().GetMaterial(0)),MaterialAsset>);
 
 class GameplayProbe final : public Component
 {
@@ -120,4 +133,17 @@ void CompileSceneRequests(GameContext& game)
 {
     game.GetScenes().Load(SceneId{"Levels/Town"});
     game.GetScenes().Reload();
+}
+
+void CompileReadyAssetsAndPresentation(GameContext& game)
+{
+    auto* actor=game.GetWorld().SpawnActor("Prop");
+    auto* mesh=actor->AddComponent<StaticMeshComponent>();
+    mesh->SetMesh(game.GetAssets().FindMesh(AssetId{"props/chest"}));
+    if (mesh->GetMaterialCount()>0)
+        mesh->SetMaterial(0,game.GetAssets().FindMaterial(AssetId{"materials/wood"}));
+    mesh->SetVisible(false);
+    auto* camera=game.GetWorld().SpawnActor("View")->AddComponent<CameraComponent>();
+    camera->SetPerspective(90,1,10000,{1280,720});
+    game.GetWorld().SetActiveCamera(camera);
 }
