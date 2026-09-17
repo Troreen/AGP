@@ -22,6 +22,7 @@ const CU::Vector3f& LightComponent::GetColor() const
 
 void LightComponent::SetColor(const CU::Vector3f& aColor)
 {
+    EnsureCanMutate();
 	myColor = aColor;
 }
 
@@ -32,6 +33,7 @@ float LightComponent::GetIntensity() const
 
 void LightComponent::SetIntensity(float anIntensity)
 {
+    EnsureCanMutate();
 	myIntensity = std::max(0.0f, anIntensity);
 }
 
@@ -42,6 +44,7 @@ float LightComponent::GetRadius() const
 
 void LightComponent::SetRadius(float aRadius)
 {
+    EnsureCanMutate();
 	myRadius = std::max(1.0f, aRadius);
 }
 
@@ -57,6 +60,7 @@ float LightComponent::GetOuterCone() const
 
 void LightComponent::SetConeAnglesDegrees(float anInnerConeDegrees, float anOuterConeDegrees)
 {
+    EnsureCanMutate();
 	const float innerDegrees = std::clamp(anInnerConeDegrees, 0.0f, 89.0f);
 	const float outerDegrees = std::clamp(anOuterConeDegrees, innerDegrees, 89.0f);
 	myInnerCone = CU::Maths::DegreesToRadians(innerDegrees);

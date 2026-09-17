@@ -1,12 +1,12 @@
 #pragma once
-#include "GameFramework/World/World.h"
+#include "../World/World.h"
 
 // Connection is a validation pass, not initialization. All configured peers exist,
 // including forward references. Save handles returned here for later callbacks.
-class ConnectionContext
+class References
 {
 public:
-    ConnectionContext(Component& source, SceneDiagnostics& diagnostics) : mySource(source), myDiagnostics(diagnostics) {}
+    References(Component& source, SceneDiagnostics& diagnostics) : mySource(source), myDiagnostics(diagnostics) {}
     void Error(std::string property, std::string message)
     { myDiagnostics.push_back({mySource.GetOwner()->GetName(), mySource.GetName(), std::move(property), std::move(message)}); }
     template<class T> ComponentHandle<T> Require(std::string name = {})
@@ -30,10 +30,10 @@ private:
     {
         T* found = nullptr;
         size_t count = 0;
-        for (const auto& c : actor.GetComponents())
+        for (auto* c : actor.GetComponents<Component>())
         {
             if (c->IsPendingDestroy() || (!name.empty() && c->GetName() != name)) continue;
-            if (auto* typed = dynamic_cast<T*>(c.get())) { found = typed; ++count; }
+            if (auto* typed = dynamic_cast<T*>(c)) { found = typed; ++count; }
         }
         if (count == 1) return found->template GetHandle<T>();
         if (count || !allowAbsent) Error(name, count ? "Ambiguous component dependency" : "Missing component or incorrect type");
@@ -42,3 +42,4 @@ private:
     Component& mySource;
     SceneDiagnostics& myDiagnostics;
 };
+

@@ -35,7 +35,7 @@ SceneBuildResult SceneBuilder::Build(const SceneDescription& scene, const Compon
         for (const auto& a : scene.Actors)
         {
             auto* actor = candidate->CreateActor(a.Id);
-            actor->GetLocalTransform() = a.LocalTransform; actor->GetLocalTransform().SetParent(nullptr);
+            actor->SetLocalPose({a.LocalTransform.GetPosition(), a.LocalTransform.GetRotation(), a.LocalTransform.GetScale()});
             actor->SetActive(a.Active);
             for (const auto& c : a.Components) registry.Create(c.Type,*actor,c.Name);
         }

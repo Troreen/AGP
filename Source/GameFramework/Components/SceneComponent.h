@@ -1,26 +1,29 @@
 #pragma once
 #include "Component.h"
-#include "../World/TransformOperations.h"
+#include "../World/Transform.h"
+#include "../World/ReparentMode.h"
 
 // Spatial attachments are independent of behavior enablement. Local TRS is
 // authored relative to a sibling spatial parent, or to the owning actor at a root.
 class SceneComponent : public Component
 {
 public:
-    CommonUtilities::Transform& GetLocalTransform() { return myTransform; }
-    const CommonUtilities::Transform& GetLocalTransform() const { return myTransform; }
+    Transform& GetTransform() { return myTransform; }
+    const Transform& GetTransform() const { return myTransform; }
+    Transform& GetLocalTransform() { return myTransform; }
+    const Transform& GetLocalTransform() const { return myTransform; }
+    LocalPose GetLocalPose() const { return myTransform.GetLocalPose(); }
+    bool SetLocalPose(const LocalPose& pose) { return myTransform.SetLocalPose(pose); }
     // World edits reject singular parents or local shear without changing the pose.
-    bool SetWorldMatrix(const CommonUtilities::Matrix4f& matrix) { return GameFrameworkInternal::SetWorldMatrix(myTransform,matrix); }
+    bool SetWorldMatrix(const CommonUtilities::Matrix4f& matrix) { return myTransform.SetWorldMatrix(matrix); }
     CommonUtilities::Matrix4f GetWorldMatrix() const { return myTransform.GetWorldMatrix(); }
     CommonUtilities::Vector3f GetWorldPosition() const;
     CommonUtilities::Vector3f GetWorldDirection() const;
     SceneComponent* GetParent() const { return myParent.Get(); }
-    // During play, true means queued; boundary validation may still reject a request
-    // if another structural change invalidated its target in the same frame.
+    // Applies immediately. Failure preserves both the previous parent and pose.
     bool SetParent(SceneComponent* parent, ReparentMode mode);
 private:
-    bool ApplyParent(SceneComponent* parent, ReparentMode mode);
-    CommonUtilities::Transform myTransform;
+    Transform myTransform;
     ComponentHandle<SceneComponent> myParent;
     friend class World;
 };

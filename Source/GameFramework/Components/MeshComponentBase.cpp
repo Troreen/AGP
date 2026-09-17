@@ -12,6 +12,7 @@ MeshComponentBase::MeshComponentBase(std::shared_ptr<Mesh> aMesh)
 
 void MeshComponentBase::SetMesh(std::shared_ptr<Mesh> aMesh)
 {
+    EnsureCanMutate();
 	myMesh = std::move(aMesh);
 
 	myMaterials.clear();
@@ -35,12 +36,14 @@ bool MeshComponentBase::HasMesh() const
 
 void MeshComponentBase::SetMaterial(unsigned aMaterialIndex, const std::shared_ptr<MaterialInterface>& aMaterial)
 {
+    EnsureCanMutate();
 	ensure(aMaterialIndex < myMaterials.size());
 	myMaterials[aMaterialIndex] = aMaterial;
 }
 
 void MeshComponentBase::SetVisible(bool aVisible)
 {
+    EnsureCanMutate();
 	SetEnabled(aVisible);
 }
 

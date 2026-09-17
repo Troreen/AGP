@@ -115,7 +115,7 @@ void GameApplication::Impl::Advance(float delta, const GameInput& input)
     if (!WorldAccess::Flush(*myContext.myState->myWorld, diagnostics))
     {
         for (const auto& d : diagnostics) GFLOG(Error, "{} / {} / {}: {}", d.Actor, d.Component, d.Property, d.Message);
-        assert(false && "Invalid runtime additions");
+        // Rejected additions are reported; the established world continues.
     }
 	myLoop.Advance(delta, input,
 		[this](float dt, const GameInput& sample)

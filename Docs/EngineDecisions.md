@@ -70,14 +70,14 @@ requirements.
 **Status: Agreed**
 
 1. Construct actors/components and apply configuration.
-2. Connect references after the objects exist.
+2. ResolveReferences validates dependencies after all objects exist; structural and engine-property mutations are rejected during this pass.
 3. Invoke `BeginPlay` for gameplay initialization.
 4. Run normal update callbacks.
 5. Invoke `EndPlay` when leaving the scene or destroying the object.
 
 - Constructors store configuration; setup requiring the owner, services or other components happens after attachment and reference resolution.
 - Loaded objects and runtime-spawned objects follow the same lifecycle principles.
-- A connected dependency is not necessarily one whose `BeginPlay` has already run. Detailed initialization ordering remains TBD.
+- A resolved dependency need not have completed BeginPlay. The complete frozen batch validates before any start; initially inactive/disabled components still begin once. Only completed BeginPlay calls receive EndPlay. Destructors handle never-started cleanup through RAII.
 
 ### E05 - Safe spawning, destruction and references
 
@@ -88,7 +88,7 @@ requirements.
 - Destruction marks an actor for removal immediately, preventing subsequent gameplay ticks. Cleanup and memory release occur at a safe boundary; an already executing callback is not interrupted.
 - Stored actor/component references use checked handles so a destroyed target resolves as unavailable rather than leaving a dangling pointer.
 - Game code does not manage deletion queues or synchronization.
-- Exact activation/removal boundaries and handle APIs remain TBD.
+- ActorRef and ComponentRef<T> resolve checked non-owning identities. Add/Get sees pending objects immediately; one start-of-frame batch is frozen before all catch-up ticks. Destroy invalidates refs immediately and cleanup runs at the next boundary.
 
 ### E06 - Scene replacement and persistent session state
 
@@ -194,7 +194,7 @@ JSON -> SceneImporter::ImportScene() -> ImportedSceneData
 - A required dependency identified only by type must resolve to exactly one matching component: zero matches is a missing dependency; multiple matches is an ambiguous dependency.
 - Missing or ambiguous required dependencies reject scene activation during validation. Do not silently choose the first attached component.
 - Resolve ambiguity by specifying the intended component name in code or scene configuration, and validate that the selected component matches the required type.
-- These are dependency-resolution rules; exact public lookup signatures and general-purpose single-result lookup behavior remain TBD.
+- GetComponent<T> returns the first live match in attachment order, including pending additions; GetComponents<T> returns all. Required type-only resolution rejects ambiguity. Display names may repeat; FindActor returns null with a diagnostic on ambiguity and FindActors returns all. Authored IDs are distinct from display names.
 
 ### E15 - Scene replacement failure and assertions
 
@@ -217,7 +217,7 @@ JSON -> SceneImporter::ImportScene() -> ImportedSceneData
 - An actor is effectively active only when its local state and the states of all its ancestors are active.
 - Deactivating a parent stops gameplay ticks for its descendants without overwriting their local active states or their components' enabled states.
 - Reactivating a parent restores ticking only for descendants that are otherwise active; individually disabled children remain disabled.
-- Exact query/notification APIs and effects on rendering, physics and audio remain TBD.
+- IsLocallyActive and IsActiveInHierarchy distinguish local/effective actor activity. There are no activity-change callbacks. Spatial component enablement does not propagate to children. Physics and audio remain deferred.
 
 ### E17 - Local and world transform support
 
@@ -225,19 +225,19 @@ JSON -> SceneImporter::ImportScene() -> ImportedSceneData
 
 - The engine must support both local and world transforms.
 - Do not assume the external export stores local transforms everywhere. The importer/builder contract must identify each transform's space and conversion rules.
-- CommonUtilities::Transform already provides a parent pointer and local/world matrices. Complete actor/component hierarchy ownership and explicit world-space editing still require design work.
-- Reparenting preservation rules, matrix conventions, axis/unit conversion and handling of non-uniform scale remain TBD.
+- The noncopyable framework Transform facade hides backend parent pointers; copy parentless LocalPose values explicitly. Actors own permanent root transforms. SetParent applies immediately and reports its actual result.
+- Row-vector composition is world = local * parentWorld. KeepLocal/KeepWorld are explicit; singular inversions and unrepresentable local shear reject without modifying pose or parent. Negative/nonuniform/zero local scale is allowed. Export axis/unit conventions remain unverified team inputs.
 
 ### E18 - Spatial components and local transform inheritance
 
-**Status: Agreed direction; implementation pending**
+**Status: Implemented locally; external adapter verification pending**
 
 - Support transform-bearing spatial components, represented by a SceneComponent layer over the ordinary Component base. Non-spatial behavior components do not need an independent transform.
 - Spatial components store local transforms and inherit their parent's transform, with access to the resulting world transform.
 - Mesh, light and camera components use their own resolved world transforms rather than only their actor's transform.
-- The attachment model must connect parentless spatial components to the owning actor's transform. Exact root-component API and attachment restrictions remain to be finalized.
+- Parentless spatial components inherit their actor root. Component parents must have the same owner; actor parents must belong to the same world. Admitted children cannot attach below a pending parent.
 - Imported actor-relative matrices must be converted to runtime parent-local transforms at the import/build boundary; do not assume exported component Transform already has runtime local semantics.
-- Reparenting policy, non-invertible/non-uniform transforms, component subtree destruction and activation inheritance for component attachments remain TBD. Actor hierarchy decisions do not automatically settle those component policies.
+- Destroying an actor or spatial component destroys its attachment subtree; detach first to retain children. Teardown is child-first and reverse start order among peers. Component parent enablement does not control child enablement.
 
 ## Team-owned work and open decisions
 
@@ -260,7 +260,7 @@ JSON -> SceneImporter::ImportScene() -> ImportedSceneData
 - Proposed `vector<ComponentData>` storage would slice derived mesh/light fields. Agree on a value variant or polymorphic owning representation that preserves the concrete payload.
 - Material descriptions should be separate from actor component descriptions; material parent references must not be confused with transform parents.
 - Agree on the supported subset of documented TypeIDs, fixed-size matrix representation, component identity/reference rules and game mapping of Archetype. Unsupported types must be handled explicitly under strict scene validation rather than silently dropped.
-- Transform-bearing scene components are agreed in E18. Current runtime render components still use their actor transform; implementing independent component transforms and adapting the builder remain pending.
+- Runtime render components use their composed component world transform. Export conversion still requires real nested fixtures; historical source assertions below are not reverified against current Perforce code.
 - Importer handoff concerns are collected in `ImporterHandoff.md`.
 
 ### T01 - Asset access and management

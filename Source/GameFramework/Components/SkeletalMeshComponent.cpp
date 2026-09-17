@@ -42,6 +42,7 @@ const std::array<CU::Matrix4f, 128>* SkeletalMeshComponent::GetJointTransforms()
 
 bool SkeletalMeshComponent::PlayAnimation(std::string_view anAnimationName, bool aShouldLoop)
 {
+    EnsureCanMutate();
 	if (myMesh == nullptr)
 	{
 		return false;
@@ -71,6 +72,7 @@ bool SkeletalMeshComponent::PlayAnimation(std::string_view anAnimationName, bool
 
 bool SkeletalMeshComponent::PlayPartialAnimation(std::string_view anAnimationName, bool aShouldLoop)
 {
+    EnsureCanMutate();
 	if (myMesh == nullptr)
 	{
 		return false;
@@ -100,6 +102,7 @@ bool SkeletalMeshComponent::PlayPartialAnimation(std::string_view anAnimationNam
 
 bool SkeletalMeshComponent::ConfigurePartialLayerFromJointName(std::string_view aRootJointName)
 {
+    EnsureCanMutate();
 	myPartialLayerMask.fill(false);
 
 	if (myMesh == nullptr)

@@ -18,9 +18,11 @@ namespace GameFrameworkInternal
         for (int r = 0; r < 4; ++r) for (int c = 0; c < 4; ++c) result(r + 1, c + 1) = data.m[r][c];
         return result;
     }
-    // Reject shear and singular transforms instead of silently losing information.
+    // Reject nonfinite values and shear instead of silently losing information.
     bool SetLocalMatrix(CommonUtilities::Transform& target, const CommonUtilities::Matrix4f& matrix)
     {
+        for (int r = 1; r <= 4; ++r) for (int c = 1; c <= 4; ++c)
+            if (!std::isfinite(matrix(r,c))) return false;
         DirectX::XMVECTOR scale, rotation, position;
         if (!DirectX::XMMatrixDecompose(&scale, &rotation, &position, ToDirectX(matrix))) return false;
         DirectX::XMFLOAT3 s, p; DirectX::XMFLOAT4 q;
@@ -28,7 +30,7 @@ namespace GameFrameworkInternal
         CommonUtilities::Transform candidate({p.x,p.y,p.z}, {q.w,q.x,q.y,q.z}, {s.x,s.y,s.z});
         auto rebuilt = candidate.GetLocalMatrix();
         for (int r = 1; r <= 4; ++r) for (int c = 1; c <= 4; ++c)
-            if (!std::isfinite(matrix(r,c)) || std::abs(rebuilt(r,c)-matrix(r,c)) > 0.0001f * (1.f + std::abs(matrix(r,c)))) return false;
+            if (!std::isfinite(rebuilt(r,c)) || std::abs(rebuilt(r,c)-matrix(r,c)) > 0.0001f * (1.f + std::abs(matrix(r,c)))) return false;
         target.SetPosition(candidate.GetPosition()); target.SetRotation(candidate.GetRotation()); target.SetScale(candidate.GetScale());
         return true;
     }

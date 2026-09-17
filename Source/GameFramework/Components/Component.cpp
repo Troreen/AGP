@@ -16,18 +16,6 @@ void Component::LateUpdate(float)
 {
 }
 
-void Component::OnDestroy()
-{
-}
-
-void Component::OnActiveChanged(bool)
-{
-}
-
-void Component::OnEnabledChanged(bool)
-{
-}
-
 const std::string& Component::GetName() const
 {
 	return myName;
@@ -45,13 +33,14 @@ bool Component::IsEnabled() const
 
 void Component::SetEnabled(bool anIsEnabled)
 {
+    if (myOwner) GetWorld().EnsureMutationAllowed();
 	if (myIsEnabled == anIsEnabled)
 	{
 		return;
 	}
 
 	myIsEnabled = anIsEnabled;
-	OnEnabledChanged(myIsEnabled);
+
 }
 
 void Component::SetOwner(Actor* anOwner)
@@ -71,3 +60,5 @@ World& Component::GetWorld() const
 }
 const GameInput& Component::GetInput() const { return GetWorld().GetInput(); }
 void Component::Destroy() { GetWorld().DestroyComponent(*this); }
+
+void Component::EnsureCanMutate() const { if (myOwner) GetWorld().EnsureMutationAllowed(); }

@@ -1,11 +1,7 @@
 #pragma once
-
 #include "../Components/Component.h"
-
-#include "Transform.hpp"
-#include "TransformOperations.h"
-#include "Vector3.hpp"
-
+#include "Transform.h"
+#include "ReparentMode.h"
 #include <memory>
 #include <string>
 #include <type_traits>
@@ -13,145 +9,110 @@
 #include <vector>
 
 class World;
-class ConnectionContext;
 namespace GameFrameworkInternal { class WorldAccess; }
 
-// A world-owned entity: transform, activation state and an owned set of components.
-// Compose behavior with AddComponent rather than subclassing Actor (its destructor
-// is not virtual). Persistent references use handles; raw pointers are temporary borrows.
-class Actor
+// A world-owned component container. Display names can repeat; refs are identity.
+// Returned pointers are short borrows. Additions start automatically next frame.
+class Actor final
 {
 public:
-	explicit Actor(std::string aName);
-	~Actor();
-
-	Actor(const Actor&) = delete;
-	Actor& operator=(const Actor&) = delete;
-	Actor(Actor&&) = delete;
-	Actor& operator=(Actor&&) = delete;
-
-	const std::string& GetName() const;
-	void SetName(std::string aName);
-
-	bool IsActive() const;
-	void SetActive(bool anIsActive);
-
-	CommonUtilities::Transform& GetTransform();
-	const CommonUtilities::Transform& GetTransform() const;
-
-	void SetTranslation(const CommonUtilities::Vector3<float>& aTranslation);
-	void SetPosition(const CommonUtilities::Vector3<float>& aPosition);
-	void SetRotation(const CommonUtilities::Quaternion<float>& aRotation);
-	void SetRotation(float aYawDegrees, float aPitchDegrees, float aRollDegrees);
-	void SetScale(const CommonUtilities::Vector3<float>& aScale);
-	void LookAt(const CommonUtilities::Vector3<float>& aTarget);
-
-	World* GetWorld() const;
-    CommonUtilities::Transform& GetLocalTransform() { return myTransform; }
-    const CommonUtilities::Transform& GetLocalTransform() const { return myTransform; }
-    // World edits reject singular parents or local shear without changing the pose.
-    bool SetWorldMatrix(const CommonUtilities::Matrix4f& matrix) { return GameFrameworkInternal::SetWorldMatrix(myTransform,matrix); }
-    CommonUtilities::Matrix4f GetWorldMatrix() const { return myTransform.GetWorldMatrix(); }
-    Actor* GetParent() const { return myParent.Get(); }
+    ~Actor();
+    Actor(const Actor&) = delete;
+    Actor& operator=(const Actor&) = delete;
+    Actor(Actor&&) = delete;
+    Actor& operator=(Actor&&) = delete;
+    const std::string& GetName() const;
+    void SetName(std::string name);
+    bool IsActive() const;
+    bool IsActiveInHierarchy() const { return IsActive(); }
     bool IsLocallyActive() const { return myIsActive; }
+    void SetActive(bool active);
+    Transform& GetTransform() { return myTransform; }
+    const Transform& GetTransform() const { return myTransform; }
+    Transform& GetLocalTransform() { return myTransform; }
+    const Transform& GetLocalTransform() const { return myTransform; }
+    LocalPose GetLocalPose() const { return myTransform.GetLocalPose(); }
+    bool SetLocalPose(const LocalPose& pose) { return myTransform.SetLocalPose(pose); }
+    void SetTranslation(const CommonUtilities::Vector3f& value) { myTransform.SetLocalPosition(value); }
+    void SetPosition(const CommonUtilities::Vector3f& value) { myTransform.SetLocalPosition(value); }
+    void SetRotation(const CommonUtilities::Quaternion<float>& value) { myTransform.SetLocalRotation(value); }
+    void SetRotation(float yaw, float pitch, float roll) { myTransform.SetLocalRotationDegrees(yaw,pitch,roll); }
+    void SetScale(const CommonUtilities::Vector3f& value) { myTransform.SetLocalScale(value); }
+    void LookAt(const CommonUtilities::Vector3f& target);
+    bool SetWorldMatrix(const CommonUtilities::Matrix4f& matrix) { return myTransform.SetWorldMatrix(matrix); }
+    CommonUtilities::Matrix4f GetWorldMatrix() const { return myTransform.GetWorldMatrix(); }
+    World* GetWorld() const;
+    Actor* GetParent() const { return myParent.Get(); }
+    // Immediate: false preserves both links and local pose.
     bool SetParent(Actor* parent, ReparentMode mode);
 
-    // Constructors run before owner/name attachment. Configure the returned object;
-    // Connect and BeginPlay run later at the world boundary, never inside AddComponent.
-	template <typename T, typename... Args>
-	T* AddComponent(std::string aName, Args&&... someArgs)
-	{
-		static_assert(std::is_base_of_v<Component, T>, "T must derive from Component");
-
-		if (!CanAttach()) return nullptr;
-		if (!CanAddComponentName(aName))
-		{
-			ReportDuplicateComponentName(aName);
-			return nullptr;
-		}
-
-		auto component = std::make_unique<T>(std::forward<Args>(someArgs)...);
-		T* rawComponent = component.get();
-		rawComponent->SetOwner(this);
-		rawComponent->SetName(std::move(aName));
-
-		AttachComponent(std::move(component));
-		return rawComponent;
-	}
-
-	Component* FindComponent(const std::string& aName) const;
-
-	template <typename T>
-	T* FindComponent(const std::string& aName) const
-	{
-		static_assert(std::is_base_of_v<Component, T>, "T must derive from Component");
-		return dynamic_cast<T*>(FindComponent(aName));
-	}
-
-	template <typename T>
-	T* GetComponent() const
-	{
-		static_assert(std::is_base_of_v<Component, T>, "T must derive from Component");
-
-		for (const std::unique_ptr<Component>& component : myComponents)
-		{
-			if (T* casted = component->IsPendingDestroy() ? nullptr : dynamic_cast<T*>(component.get()))
-			{
-				return casted;
-			}
-		}
-
-		return nullptr;
-	}
-
-	template <typename T>
-	void GetComponentsOfType(std::vector<T*>& outComponents) const
-	{
-		for (const std::unique_ptr<Component>& component : myComponents)
-		{
-			if (T* casted = component->IsPendingDestroy() ? nullptr : dynamic_cast<T*>(component.get()))
-			{
-				outComponents.push_back(casted);
-			}
-		}
-	}
-
-    template <typename T> bool RemoveComponent()
+    template<class T> T* AddComponent() { return AddComponent<T>(NextComponentName()); }
+    template<class T, class... Args> T* AddComponent(std::string name, Args&&... args)
     {
-        if (auto* component = GetComponent<T>()) { component->Destroy(); return true; }
-        return false;
+        static_assert(std::is_base_of_v<Component,T>);
+        if (!CanAttach()) return nullptr;
+        if (!CanAddComponentName(name)) ReportDuplicateComponentName(name);
+        auto component = std::make_unique<T>(std::forward<Args>(args)...);
+        auto* result = component.get();
+        result->SetOwner(this);
+        result->SetName(std::move(name));
+        AttachComponent(std::move(component));
+        return result;
     }
+    Component* FindComponent(const std::string& name) const;
+    template<class T> T* FindComponent(const std::string& name) const
+    { return dynamic_cast<T*>(FindComponent(name)); }
+    template<class T> T* GetComponent() const
+    {
+        for (const auto* list : {&myComponents, &myPendingComponents})
+            for (const auto& component : *list)
+                if (!component->IsPendingDestroy())
+                    if (auto* result = dynamic_cast<T*>(component.get())) return result;
+        return nullptr;
+    }
+    template<class T> std::vector<T*> GetComponents() const
+    {
+        std::vector<T*> result;
+        GetComponentsOfType(result);
+        return result;
+    }
+    template<class T> void GetComponentsOfType(std::vector<T*>& result) const
+    {
+        for (const auto* list : {&myComponents, &myPendingComponents})
+            for (const auto& component : *list)
+                if (!component->IsPendingDestroy())
+                    if (auto* typed = dynamic_cast<T*>(component.get())) result.push_back(typed);
+    }
+    template<class T> bool RemoveComponent()
+    { if (auto* c = GetComponent<T>()) { c->Destroy(); return true; } return false; }
+    void RemoveAllComponents();
     void Destroy();
     bool IsPendingDestroy() const { return myPendingDestroy; }
-    ActorHandle GetHandle() const { return ActorHandle(myHandle); }
-    ActorHandle GetRef() const { return GetHandle(); }
-
-	void RemoveAllComponents();
-
+    ActorRef GetRef() const { return ActorRef(myHandle); }
+    ActorHandle GetHandle() const { return GetRef(); }
 private:
-    // Engine phase dispatch preserves component attachment order.
-    void FixedUpdate(float aDeltaTime);
-    void Update(float aDeltaTime);
-    void LateUpdate(float aDeltaTime);
+    explicit Actor(std::string name);
+    void FixedUpdate(float delta);
+    void Update(float delta);
+    void LateUpdate(float delta);
     const std::vector<std::unique_ptr<Component>>& GetComponents() const { return myComponents; }
-	void SetWorld(World* aWorld);
+    void SetWorld(World* world);
     void AttachComponent(std::unique_ptr<Component> component);
     bool CanAttach() const;
-    bool ApplyParent(Actor* parent, ReparentMode mode);
-    ActorHandle myParent;
-	bool CanAddComponentName(const std::string& aName) const;
-	void ReportDuplicateComponentName(const std::string& aName) const;
-
-	std::string myName;
-	bool myIsActive = true;
+    bool CanAddComponentName(const std::string& name) const;
+    void ReportDuplicateComponentName(const std::string& name) const;
+    std::string NextComponentName() const;
+    ActorRef myParent;
+    std::string myName;
+    bool myIsActive = true;
     bool myPendingDestroy = false;
+    bool myAdmitted = false;
     ObjectHandle myHandle;
-	World* myWorld = nullptr;
-	CommonUtilities::Transform myTransform;
-	std::vector<std::unique_ptr<Component>> myComponents;
+    World* myWorld = nullptr;
+    Transform myTransform;
+    std::vector<std::unique_ptr<Component>> myComponents;
     std::vector<std::unique_ptr<Component>> myPendingComponents;
-
-	friend class World;
-    friend class ConnectionContext;
+    friend class World;
+    friend class SceneComponent;
     friend class GameFrameworkInternal::WorldAccess;
 };

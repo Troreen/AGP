@@ -1,4 +1,5 @@
 #include "CameraComponent.h"
+#include "GameFramework/World/TransformOperations.h"
 
 #include "GameFramework/World/Actor.h"
 
@@ -19,6 +20,7 @@ void CameraComponent::LateUpdate(float)
 
 void CameraComponent::SetPerspective(float aHorizontalFieldOfViewDegrees, float aNearPlane, float aFarPlane, const CommonUtilities::Vector2u& aResolution)
 {
+    EnsureCanMutate();
 	myCamera = CommonUtilities::Camera3D(aHorizontalFieldOfViewDegrees, aNearPlane, aFarPlane, aResolution);
 	SyncCameraToOwner();
 }

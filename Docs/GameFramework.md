@@ -26,7 +26,7 @@ public:
     void Update(GameContext& game, float dt) override
     {
         if (auto* player = myPlayer.Get())
-            player->SetPosition({0, 0, dt * 100});
+            player->GetTransform().SetLocalPosition({0, 0, dt * 100});
         if (game.GetInput().IsKeyPressed(Keys::ESCAPE)) game.RequestQuit();
     }
 private:
@@ -63,7 +63,7 @@ and old scene descriptions. Normal game code cannot submit candidate worlds thro
 GameContext. M3 replaces that integration bridge with owned SceneData and a scene-ID
 service. Invalid content still follows the old Debug assertion policy until M3.
 
-M2 supplies the safe transform facade and consistent pending lookup. M4 closes
+M2 implements the safe transform facade and consistent pending lookup. M4 closes
 mesh/camera/light renderer dependencies and completes physical header separation.
 No physics, animation graph, networking, editor, new asset manager or input system
 is part of this work. Actual Perforce scene integration requires verified team code
@@ -71,3 +71,34 @@ and fixtures; the existing FBX asset importer is not that scene importer.
 
 See [implementation evidence](SimplifiedGameFrameworkImplementation.md) for build,
 test and review results and [the plan](SimplifiedGameFrameworkPlan.md) for contracts.
+
+## Objects, transforms and references
+
+`AddComponent<T>()` generates an instance name; the named overload accepts explicit
+names and constructor arguments. Duplicate/empty explicit names throw. `GetComponent<T>()`
+returns the first live attached match, including pending additions; `GetComponents<T>()`
+returns all. Required dependency resolution rejects multiple matches. Actor display
+names can repeat; `FindActor(name)` returns null and diagnoses ambiguity, while
+`FindActors(name)` returns all. Renaming does not affect stored refs.
+
+Use `GetTransform().SetLocalPosition`, `SetLocalRotationDegrees`, `SetLocalScale`,
+`SetWorldPosition` or `SetWorldMatrix`. Setters return false without changing values
+when the requested pose is invalid. Copy `LocalPose` through Get/SetLocalPose;
+Transform itself cannot be copied or used to assign raw parent pointers.
+`SetParent(parent, ReparentMode::KeepLocal/KeepWorld)` is immediate and returns its
+actual result. KeepWorld rejects singular parents or a resulting local shear.
+Actors parent within one world; spatial components parent within one actor.
+An admitted child cannot parent under a pending addition until its next boundary.
+
+An optional `ResolveReferences(References&)` validates sibling requirements before
+BeginPlay. Engine mutation APIs throw during resolution, and even a swallowed
+mutation exception rejects the batch. Resolution must not perform external side
+effects or mutate custom peer fields. Whole-batch validation precedes all BeginPlay
+calls. Inactive/disabled components still begin once. Additions from BeginPlay,
+fixed/update/late callbacks or ordinary EndPlay wait for the next frame boundary.
+
+Destroy marks the attachment subtree immediately: queries and refs stop resolving,
+later callbacks skip it, and memory is collected later. Child-first EndPlay pairs
+only completed BeginPlay calls; throwing EndPlay is logged and remaining cleanup
+continues. Use nonthrowing destructors/RAII for allocations that never began.
+OnDestroy and mixed local/effective activity notifications have been removed.

@@ -1,10 +1,15 @@
 #include "GameFramework/Components/CameraComponent.h"
 #include "World.h"
-#include "GameFramework/Scenes/ConnectionContext.h"
+#include "GameFramework/Scenes/References.h"
 #include "GameFramework/Diagnostics/GameFrameworkLog.h"
 #include <algorithm>
 #include "GameFramework/Components/SceneComponent.h"
 #include <stdexcept>
+#include <limits>
+#include "GameFramework/Runtime/Internal/ObjectSlots.h"
+namespace { thread_local bool resolvingReferences = false; thread_local uint64_t rejectedMutations = 0; }
+void World::EnsureMutationAllowed() const
+{ if (resolvingReferences) { ++rejectedMutations; throw std::logic_error("Mutation is forbidden during ResolveReferences"); } }
 
 Actor* ObjectHandle::ResolveActor() const
 {
@@ -25,7 +30,7 @@ World::~World() { Shutdown(); }
 ObjectHandle World::Allocate(Actor* actor, Component* component)
 {
     size_t index = 0;
-    while (index < mySlots->slots.size() && (mySlots->slots[index].actor || mySlots->slots[index].component)) ++index;
+    while (index < mySlots->slots.size() && (mySlots->slots[index].actor || mySlots->slots[index].component || mySlots->slots[index].generation == 0)) ++index;
     if (index == mySlots->slots.size()) mySlots->slots.emplace_back();
     auto& slot = mySlots->slots[index]; slot.actor = actor; slot.component = component;
     ObjectHandle handle; handle.mySlots = mySlots; handle.myIndex = index; handle.myGeneration = slot.generation;
@@ -33,31 +38,40 @@ ObjectHandle World::Allocate(Actor* actor, Component* component)
 }
 void World::Invalidate(const ObjectHandle& handle)
 {
-    auto& slot = mySlots->slots[handle.myIndex]; slot.actor = nullptr; slot.component = nullptr; ++slot.generation;
+    auto& slot = mySlots->slots[handle.myIndex]; slot.actor = nullptr; slot.component = nullptr; slot.generation = slot.generation == std::numeric_limits<uint64_t>::max() ? 0 : slot.generation + 1;
 }
 Actor* World::CreateActor(std::string name)
 {
+    EnsureMutationAllowed();
     if (!AcceptsChanges()) return nullptr;
-    if (name.empty() || FindActor(name)) throw std::invalid_argument("Actor name must be nonempty and unique: " + name);
-    auto actor = std::make_unique<Actor>(std::move(name));
+    auto actor = std::unique_ptr<Actor>(new Actor(std::move(name)));
     auto* raw = actor.get(); raw->SetWorld(this); raw->myHandle = Allocate(raw, nullptr);
     (myState == State::Constructing && !myInBoundary ? myActors : myPendingActors).push_back(std::move(actor));
     return raw;
 }
+std::vector<Actor*> World::FindActors(const std::string& name) const
+{
+    std::vector<Actor*> result;
+    for (const auto* list : {&myActors, &myPendingActors})
+        for (const auto& actor : *list)
+            if (!actor->myPendingDestroy && actor->GetName() == name) result.push_back(actor.get());
+    return result;
+}
 Actor* World::FindActor(const std::string& name) const
 {
-    for (const auto& actor : myActors) if (!actor->myPendingDestroy && actor->GetName() == name) return actor.get();
-    for (const auto& actor : myPendingActors) if (!actor->myPendingDestroy && actor->GetName() == name) return actor.get();
-    return nullptr;
+    auto matches = FindActors(name);
+    if (matches.size() > 1) GFLOG(Warning, "Ambiguous actor display name: {}", name);
+    return matches.size() == 1 ? matches.front() : nullptr;
 }
 void World::Attach(Actor& actor, std::unique_ptr<Component> component)
 {
-    if (auto* spatial = dynamic_cast<SceneComponent*>(component.get())) spatial->myTransform.SetParent(&actor.myTransform);
+    if (auto* spatial = dynamic_cast<SceneComponent*>(component.get())) { spatial->myTransform.myWorld = this; spatial->myTransform.myValue.SetParent(&actor.myTransform.myValue); }
     component->myHandle = Allocate(nullptr, component.get());
     (myState == State::Constructing && !myInBoundary ? actor.myComponents : actor.myPendingComponents).push_back(std::move(component));
 }
 void World::DestroyActor(Actor& actor)
 {
+    EnsureMutationAllowed();
     if (actor.GetWorld() != this || actor.myPendingDestroy) return;
     // Mark descendants before invalidating the parent handle used to find them.
     for (auto* list : {&myActors, &myPendingActors})
@@ -67,6 +81,7 @@ void World::DestroyActor(Actor& actor)
 }
 void World::DestroyComponent(Component& component)
 {
+    EnsureMutationAllowed();
     if (&component.GetWorld() != this || component.myPendingDestroy) return;
     if (auto* spatial = dynamic_cast<SceneComponent*>(&component))
         for (auto* list : {&component.GetOwner()->myComponents, &component.GetOwner()->myPendingComponents})
@@ -77,18 +92,24 @@ void World::DestroyComponent(Component& component)
 bool World::ConnectBatch(const std::vector<Component*>& batch, SceneDiagnostics& diagnostics)
 {
     const auto before = diagnostics.size();
+    struct Guard { bool previous = resolvingReferences; Guard() { resolvingReferences = true; } ~Guard() { resolvingReferences = previous; } } guard;
     for (auto* c : batch)
     {
         if (c->myPendingDestroy) continue;
-        ConnectionContext context(*c, diagnostics);
-        try { c->Connect(context); c->myConnected = true; }
+        References context(*c, diagnostics);
+        const auto rejectedBefore = rejectedMutations;
+        const auto errorsBefore = diagnostics.size();
+        try { c->ResolveReferences(context); c->myConnected = true; }
         catch (const std::exception& e) { context.Error({}, e.what()); }
-        catch (...) { context.Error({}, "Unknown exception in Connect"); }
+        catch (...) { context.Error({}, "Unknown exception in ResolveReferences"); }
+        if (rejectedMutations != rejectedBefore && diagnostics.size() == errorsBefore)
+            context.Error({}, "Mutation attempted during ResolveReferences");
     }
     return diagnostics.size() == before;
 }
 void World::BeginBatch(const std::vector<Component*>& batch)
 {
+    myActivationOrder.reserve(myActivationOrder.size() + batch.size());
     for (auto* c : batch)
         if (!c->myPendingDestroy && c->myConnected && !c->myBegun)
         {
@@ -110,6 +131,7 @@ void World::Activate()
 {
     if (myState != State::Prepared) throw std::logic_error("Activate requires a prepared world");
     myState = State::Active;
+    for (auto& a : myActors) { a->myAdmitted = true; for (auto& c : a->myComponents) c->myAdmitted = true; }
     std::vector<Component*> batch;
     for (auto& a : myActors) for (auto& c : a->myComponents) batch.push_back(c.get());
     BeginBatch(batch);
@@ -120,7 +142,6 @@ bool World::Flush(SceneDiagnostics& diagnostics)
     const auto errorCount = diagnostics.size();
     // Freeze before any teardown or connection callback; reentrant additions wait.
     auto actors = std::move(myPendingActors); myPendingActors.clear();
-    auto commands = std::move(myCommands); myCommands.clear();
     std::vector<std::pair<Actor*, std::vector<std::unique_ptr<Component>>>> additions;
     for (auto& a : myActors) { additions.emplace_back(a.get(), std::move(a->myPendingComponents)); a->myPendingComponents.clear(); }
     for (auto& a : actors) { additions.emplace_back(a.get(), std::move(a->myPendingComponents)); a->myPendingComponents.clear(); }
@@ -129,7 +150,6 @@ bool World::Flush(SceneDiagnostics& diagnostics)
     std::vector<Component*> batch;
     for (auto& [a, components] : additions) for (auto& c : components)
     { batch.push_back(c.get()); a->myComponents.push_back(std::move(c)); }
-    for (auto& command : commands) command(diagnostics);
     const bool valid = ConnectBatch(batch, diagnostics) && diagnostics.size() == errorCount;
     if (!valid)
     {
@@ -139,6 +159,7 @@ bool World::Flush(SceneDiagnostics& diagnostics)
     CollectDestroyed();
     if (valid)
     {
+        for (auto& a : myActors) { a->myAdmitted = true; for (auto& c : a->myComponents) c->myAdmitted = true; }
         // Destroyed objects have been collected; resolve saved identities instead.
         std::vector<Component*> live;
         for (auto& a : myActors) for (auto& c : a->myComponents)
@@ -173,8 +194,8 @@ void World::CollectDestroyed() noexcept
     auto depth = [](Component* c)
     {
         size_t n = 0;
-        const CommonUtilities::Transform* t = &c->GetOwner()->GetLocalTransform();
-        if (auto* spatial = dynamic_cast<SceneComponent*>(c)) t = &spatial->myTransform;
+        const CommonUtilities::Transform* t = &c->GetOwner()->myTransform.myValue;
+        if (auto* spatial = dynamic_cast<SceneComponent*>(c)) t = &spatial->myTransform.myValue;
         while (t->GetParent()) { ++n; t = t->GetParent(); } return n;
     };
     std::stable_sort(endOrder.begin(),endOrder.end(),[&](auto* a,auto* b) { return depth(a) > depth(b); });
@@ -186,12 +207,11 @@ void World::CollectDestroyed() noexcept
     std::stable_sort(removedComponents.begin(),removedComponents.end(),[&](const auto& a,const auto& b) { return depth(a.get()) > depth(b.get()); });
     for (auto& c : removedComponents)
     {
-        try { c->OnDestroy(); } catch (...) { GFLOG(Error, "OnDestroy failed during cleanup"); }
         Invalidate(c->myHandle);
     }
     // Keep all objects allocated until every parent pointer is detached.
-    for (auto& c : removedComponents) if (auto* spatial = dynamic_cast<SceneComponent*>(c.get())) spatial->myTransform.SetParent(nullptr);
-    for (auto& a : removedActors) { a->myTransform.SetParent(nullptr); Invalidate(a->myHandle); }
+    for (auto& c : removedComponents) if (auto* spatial = dynamic_cast<SceneComponent*>(c.get())) spatial->myTransform.myValue.SetParent(nullptr);
+    for (auto& a : removedActors) { a->myTransform.myValue.SetParent(nullptr); Invalidate(a->myHandle); }
     removedComponents.clear(); // Component destructors may still inspect their owner.
     removedActors.clear();
 }
@@ -200,7 +220,7 @@ void World::Shutdown() noexcept
     if (myState == State::Ending) return;
     myState = State::Ending;
     for (auto* list : {&myActors, &myPendingActors}) for (auto& a : *list) DestroyActor(*a);
-    CollectDestroyed(); myCommands.clear(); mySlots.reset();
+    CollectDestroyed(); mySlots.reset();
 }
 void World::FixedUpdate(float delta)
 {
@@ -216,6 +236,7 @@ void World::Update(float delta)
 
 bool World::SetActiveCamera(CameraComponent* camera)
 {
+    EnsureMutationAllowed();
     if (camera && (&camera->GetWorld() != this || camera->IsPendingDestroy())) return false;
     myCamera = camera ? camera->GetHandle<CameraComponent>() : ComponentHandle<CameraComponent>{};
     return true;

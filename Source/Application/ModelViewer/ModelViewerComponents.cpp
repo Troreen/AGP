@@ -5,13 +5,13 @@
 #include "GameFramework/Components/CameraComponent.h"
 #include "GameFramework/Components/SkeletalMeshComponent.h"
 #include <cmath>
-#include "GameFramework/Scenes/ConnectionContext.h"
+#include "GameFramework/Scenes/References.h"
 #include <utility>
 
 namespace
 {
 	using Vector3f = CommonUtilities::Vector3f;
-	void AimActorAlongCameraForward(Actor& anActor, const CommonUtilities::Transform& aCameraTransform)
+	void AimActorAlongCameraForward(Actor& anActor, const Transform& aCameraTransform)
 	{
 		Vector3f forward = aCameraTransform.GetForward();
 		if (forward.LengthSqr() <= 0.0f)
@@ -72,23 +72,34 @@ namespace
 }
 
 // Owner-dependent initialization happens once, after scene validation.
-void CameraControlsComponent::BeginPlay() { myController.Init(GetOwner()->GetTransform()); }
+void CameraControlsComponent::BeginPlay()
+{
+    const auto direction = GetOwner()->GetTransform().GetForward().GetNormalized();
+    myYaw = std::atan2(direction.x, direction.z);
+    myPitch = -std::asin(std::clamp(direction.y, -1.f, 1.f));
+    GetOwner()->GetTransform().SetLocalRotationRadians(myYaw,myPitch,0);
+}
 void CameraControlsComponent::LateUpdate(float deltaTime)
 {
-	const GameInput& input = GetInput();
-	FreeFlyCameraController::InputState camera;
-	camera.MoveForward = input.IsKeyDown(Keys::W);
-	camera.MoveBackward = input.IsKeyDown(Keys::S);
-	camera.MoveRight = input.IsKeyDown(Keys::D);
-	camera.MoveLeft = input.IsKeyDown(Keys::A);
-	camera.MoveUp = input.IsKeyDown(Keys::SPACE);
-	camera.MoveDown = input.IsKeyDown(Keys::CONTROL);
-	camera.MouseLookActive = input.MouseLookActive;
-	camera.MouseDeltaX = input.MouseDeltaX;
-	camera.MouseDeltaY = input.MouseDeltaY;
-	myController.Update(deltaTime, camera);
+    const auto& input = GetInput();
+    auto& transform = GetOwner()->GetTransform();
+    if (input.MouseLookActive)
+    {
+        myYaw += input.MouseDeltaX * .0025f;
+        myPitch = std::clamp(myPitch + input.MouseDeltaY * .0025f, -1.55334303f, 1.55334303f);
+        transform.SetLocalRotationRadians(myYaw,myPitch,0);
+    }
+    const auto forward = transform.GetForward().GetNormalized();
+    const auto right = transform.GetRight().GetNormalized();
+    Vector3f motion{};
+    if (input.IsKeyDown(Keys::W)) motion += forward;
+    if (input.IsKeyDown(Keys::S)) motion -= forward;
+    if (input.IsKeyDown(Keys::D)) motion += right;
+    if (input.IsKeyDown(Keys::A)) motion -= right;
+    if (input.IsKeyDown(Keys::SPACE)) motion += Vector3f::UnitY;
+    if (input.IsKeyDown(Keys::CONTROL)) motion -= Vector3f::UnitY;
+    if (motion.LengthSqr() > 0) transform.SetLocalPosition(transform.GetLocalPosition() + motion.GetNormalized() * (500.f * deltaTime));
 }
-
 // Only this phase handles the R action. Handling it again in Update would observe
 // the same physical press in both input domains and could toggle twice. Held motion
 // uses dt; mouse deltas elsewhere are already accumulated movement, not a rate.
@@ -100,7 +111,7 @@ void SpinComponent::FixedUpdate(float deltaTime)
 	GetOwner()->SetRotation(myYaw, 0, 0);
 }
 
-void LightControlsComponent::Connect(ConnectionContext& context)
+void LightControlsComponent::ResolveReferences(References& context)
 {
     auto camera = context.Require<CameraComponent>("Camera Actor", "Camera");
     if (auto* c = camera.Get()) myCamera = c->GetOwner()->GetHandle();
@@ -108,7 +119,7 @@ void LightControlsComponent::Connect(ConnectionContext& context)
     myPoints = { context.Require<PointLightComponent>("Warm Character Point Actor", "Warm Character Point Light") };
     mySpot = context.Require<SpotLightComponent>("Spot Light Actor", "Spot Light");
 }
-void AnimationControlsComponent::Connect(ConnectionContext& context)
+void AnimationControlsComponent::ResolveReferences(References& context)
 {
     myMesh = context.Require<SkeletalMeshComponent>();
 }
@@ -171,7 +182,7 @@ void LightControlsComponent::LateUpdate(float)
 
 	if (shiftDown && myCameraActor != nullptr)
 	{
-		const CommonUtilities::Transform& cameraTransform = myCameraActor->GetTransform();
+		const Transform& cameraTransform = myCameraActor->GetTransform();
 		const Vector3f cameraPosition = cameraTransform.GetPosition();
 
 		if ((anInputFrame.IsKeyPressed(Keys::NUMPAD7) || anInputFrame.KeysPressed[static_cast<size_t>('7')]) &&
@@ -262,4 +273,3 @@ void LightControlsComponent::LateUpdate(float)
 		mySpotLightComponent->SetEnabled(!mySpotLightComponent->IsEnabled());
 	}
 }
-

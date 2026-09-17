@@ -172,7 +172,7 @@
   <ItemGroup>
     <None Include="README.md" />
   </ItemGroup>
-  <ItemGroup><ClInclude Include="Scenes\ConnectionContext.h" /></ItemGroup>
+
   <ItemGroup><ClInclude Include="Scenes\SceneDiagnostic.h" /></ItemGroup>
   <ItemGroup><ClInclude Include="World\ObjectHandle.h" /></ItemGroup>
   <ItemGroup><ClCompile Include="Components\SceneComponent.cpp" /></ItemGroup>
@@ -202,6 +202,14 @@
     <ClInclude Include="Public\GameFramework\SceneComponent.h" />
     <ClInclude Include="Public\GameFramework\World.h" />
     <ClInclude Include="Public\GameFramework\Registration\ComponentRegistry.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="World\Transform.cpp" />
+    <ClInclude Include="World\Transform.h" />
+    <ClInclude Include="Public\GameFramework\Transform.h" />
+    <ClInclude Include="Public\GameFramework\Registration\References.h" />
+    <ClInclude Include="Scenes\References.h" />
+    <ClInclude Include="Runtime\Internal\ObjectSlots.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

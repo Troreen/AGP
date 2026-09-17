@@ -100,7 +100,7 @@
     <None Include="README.md" />
   </ItemGroup>
 <ItemGroup><Filter Include="Scenes"><UniqueIdentifier>{59ed8998-4b27-4663-8ce4-dd1a46da6d66}</UniqueIdentifier></Filter></ItemGroup>
-<ItemGroup><ClInclude Include="Scenes\ConnectionContext.h"><Filter>Scenes</Filter></ClInclude></ItemGroup>
+<ItemGroup></ItemGroup>
 <ItemGroup><ClInclude Include="Scenes\SceneDiagnostic.h"><Filter>Scenes</Filter></ClInclude></ItemGroup>
 <ItemGroup><ClInclude Include="World\ObjectHandle.h"><Filter>World</Filter></ClInclude></ItemGroup>
 <ItemGroup><ClCompile Include="Components\SceneComponent.cpp"><Filter>Components</Filter></ClCompile></ItemGroup>
@@ -130,5 +130,13 @@
     <ClInclude Include="Public\GameFramework\SceneComponent.h" />
     <ClInclude Include="Public\GameFramework\World.h" />
     <ClInclude Include="Public\GameFramework\Registration\ComponentRegistry.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="World\Transform.cpp" />
+    <ClInclude Include="World\Transform.h" />
+    <ClInclude Include="Public\GameFramework\Transform.h" />
+    <ClInclude Include="Public\GameFramework\Registration\References.h" />
+    <ClInclude Include="Scenes\References.h" />
+    <ClInclude Include="Runtime\Internal\ObjectSlots.h" />
   </ItemGroup>
 </Project>

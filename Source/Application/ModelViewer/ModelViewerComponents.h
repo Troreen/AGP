@@ -1,6 +1,6 @@
 #pragma once
 #include "GameFramework/Components/Component.h"
-#include "FreeFlyCameraController.h"
+
 #include <vector>
 
 class GameContext;
@@ -16,7 +16,8 @@ public:
 	void BeginPlay() override;
 	void LateUpdate(float deltaTime) override;
 private:
-	FreeFlyCameraController myController;
+	float myYaw = 0;
+    float myPitch = 0;
 
 };
 
@@ -25,7 +26,7 @@ private:
 class AnimationControlsComponent final : public Component
 {
 public:
-	void Connect(ConnectionContext& context) override;
+	void ResolveReferences(References& context) override;
 	void Update(float deltaTime) override;
 private:
     ComponentHandle<SkeletalMeshComponent> myMesh;
@@ -49,7 +50,7 @@ private:
 class LightControlsComponent final : public Component
 {
 public:
-	void Connect(ConnectionContext& context) override;
+	void ResolveReferences(References& context) override;
 	void LateUpdate(float deltaTime) override;
 private:
 	ActorHandle myCamera;

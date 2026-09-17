@@ -8,6 +8,8 @@
 #include <GameFramework/GameInput.h>
 #include <GameFramework/ObjectRef.h>
 #include <GameFramework/Registration/ComponentRegistry.h>
+#include <GameFramework/Registration/References.h>
+#include <GameFramework/Transform.h>
 #include <type_traits>
 
 // This translation unit has only Public and shared-math include directories.
@@ -31,6 +33,14 @@ static_assert(!CanFreeze<ComponentRegistry>);
 static_assert(!CanSeeOwnedActors<World> && !CanSeeOwnedComponents<Actor>);
 static_assert(!CanClearInput<GameInput> && !CanMergeInput<GameInput>);
 static_assert(!std::is_copy_constructible_v<World>);
+static_assert(std::is_final_v<Actor> && !std::is_constructible_v<Actor,std::string>);
+static_assert(!std::is_copy_constructible_v<Transform> && !std::is_move_constructible_v<Transform>);
+static_assert(!std::is_copy_assignable_v<Transform> && !std::is_move_assignable_v<Transform>);
+template<class T> concept CanSetRawParent = requires(T& value) { value.SetParent(&value); };
+static_assert(!CanSetRawParent<Transform>);
+static_assert(!std::is_constructible_v<ActorRef,ComponentRef<Component>>);
+static_assert(!std::is_constructible_v<ComponentRef<SceneComponent>,ActorRef>);
+static_assert(!std::is_constructible_v<ComponentRef<SceneComponent>,ComponentRef<Component>>);
 
 class GameplayProbe final : public Component
 {
@@ -40,6 +50,24 @@ class GameplayProbe final : public Component
     }
 };
 
+class FollowTarget final : public Component
+{
+public:
+    ActorRef Target;
+private:
+    void LateUpdate(float) override
+    {
+        if (auto* target=Target.Get())
+            GetOwner()->GetTransform().SetWorldPosition(target->GetTransform().GetWorldPosition());
+    }
+};
+
+class NeedsOffset final : public Component
+{
+    void ResolveReferences(References& references) override {myOffset=references.Require<SceneComponent>("Offset");}
+    ComponentRef<SceneComponent> myOffset;
+};
+
 class MinimalGame final : public IGame
 {
 public:
@@ -47,6 +75,9 @@ public:
     {
         auto* actor=game.GetWorld().SpawnActor("Example");
         auto* behavior=actor->AddComponent<GameplayProbe>("Behavior");
+        actor->GetTransform().SetLocalPosition({100,0,250});
+        auto* unnamed=actor->AddComponent<SceneComponent>();
+        unnamed->GetTransform().SetLocalScale({2,2,2});
         myActor=actor->GetRef();
         myBehavior=behavior->GetRef<GameplayProbe>();
     }

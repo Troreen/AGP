@@ -5,7 +5,7 @@
 
 class Actor;
 class World;
-class ConnectionContext;
+class References;
 struct GameInput;
 
 // Base for engine features and game-authored behavior. Override only the phases
@@ -15,11 +15,14 @@ struct GameInput;
 class Component
 {
 public:
-	virtual ~Component() = default;
+	Component() = default;
+    virtual ~Component() = default;
+    Component(const Component&) = delete;
+    Component& operator=(const Component&) = delete;
 
-    // Connect resolves references after all objects have been configured. BeginPlay
+    // ResolveReferences validates dependencies after all objects have been configured. BeginPlay
     // starts behavior only after the entire batch passes validation, even if disabled.
-    virtual void Connect(ConnectionContext&) {}
+    virtual void ResolveReferences(References&) {}
     virtual void BeginPlay() {}
     virtual void EndPlay() {}
     World& GetWorld() const;
@@ -36,19 +39,15 @@ public:
 	virtual void Update(float aDeltaTime);
 	// Post-update adjustments, such as cameras that depend on the completed pose.
 	virtual void LateUpdate(float aDeltaTime);
-	// Called by Actor before removal/destruction. This is not scene EndPlay. Avoid
-	// assuming sibling components still exist; teardown invalidates borrowed references.
-	virtual void OnDestroy();
-	virtual void OnActiveChanged(bool anIsActive);
-	virtual void OnEnabledChanged(bool anIsEnabled);
-
-	const std::string& GetName() const;
+    const std::string& GetName() const;
 	// Assigned after construction by AddComponent; null inside the component constructor.
 	Actor* GetOwner() const;
 
 	bool IsEnabled() const;
 	void SetEnabled(bool anIsEnabled);
 
+protected:
+    void EnsureCanMutate() const;
 private:
 	void SetOwner(Actor* anOwner);
 	void SetName(std::string aName);
@@ -58,9 +57,11 @@ private:
 	bool myIsEnabled = true;
     bool myPendingDestroy = false;
     bool myConnected = false;
+    bool myAdmitted = false;
     bool myBegun = false;
     ObjectHandle myHandle;
     friend class World;
+    friend class SceneComponent;
 
 	friend class Actor;
 };

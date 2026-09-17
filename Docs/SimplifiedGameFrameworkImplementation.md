@@ -12,7 +12,7 @@
 ## Milestone progress
 
 - M1: complete — core Public include facade; private World/Actor dispatch and ownership collections; private input bookkeeping; GameContext Pimpl; engine built-in registration followed by game registration and engine freeze; world camera selection; explicit legacy scene integration bridge for ModelViewer/host tests only.
-- M2: pending — object, transform and lifetime contracts.
+- M2: complete — safe Transform/LocalPose, immediate parenting/admission checks, consistent pending queries, duplicate display-name handling, private Actor construction, stricter refs, read-only dependency resolution, RAII cleanup.
 - M3: pending — owned scene data, registered readers and scene service.
 - M4: pending — renderer boundary and ModelViewer migration.
 - M5: blocked by external inputs — repository inspection found `ThirdParty/TGAFBXImporter`, which imports mesh/animation assets, but no actual Perforce scene importer, current headers/changelist, exporter implementation, or representative scene exports. The historical `ImporterHandoff.md` is not evidence of a verified contract.
@@ -41,3 +41,21 @@ M5 requires a pinned Perforce changelist and importer/asset owners; owned result
 Independent testing agent executed ModelViewer, framework, optimisations, host and PublicGameplayConsumer builds in Debug/Release x64: all 10 passed. Framework and optimisation CPU suites passed in both configurations. Host checks passed 28/28: direct bootstrap, registration failure, Initialize failure, bootstrap validation failure, valid replacement and BeginPlay failure in both modes/configurations, plus legacy invalid/recovery and initial-invalid in Release. The four known Debug legacy-factory assertion cases were not repeated; M3 removes that policy. Public include traces contained no DirectX, D3D, Windows, RHI, GraphicsEngine or internal scheduler headers. Logs: Intermediate/SimplifiedFramework/m1-*.log. Independent review's bootstrap teardown finding is fixed and covered by bootstrap-invalid in Debug/Release, threaded/sync.
 
 A preserved baseline Release executable was launched with computer-use and its lit scene captured under Intermediate/SimplifiedFramework/visual-baseline/lit.png (executable SHA256 250075F72FE82E86711403035892E8CBFEB7AB610EFEA9F649A3E222DD07A48C). Floor, opaque/alpha chests, checker and character rendered. Automated keyboard attempts did not establish R/F7/F6 behavior; hierarchy-named capture is only an attempted control capture, not hierarchy evidence. These captures are qualitative, with uncontrolled animation timing, not pixel equivalence or a full visual acceptance pass.
+
+## M2 decisions and independent review
+
+- Actor runtime identity remains its checked slot/generation token, separate from mutable display labels. Authored ID mapping is introduced with owned scene records in M3; the temporary recipe source still uses unique IDs as its labels.
+- ResolveReferences uses a serialized-thread guard across worlds. Engine structural/property edits, scene requests and quit requests throw; a swallowed mutation exception still rejects validation. Custom C++ fields/external side effects remain the component author's read-only contract.
+- Pending typed lookup required moving begun checks into existing mesh/light extraction now, ahead of M4 relocation; otherwise a component added during Update could render before BeginPlay.
+- Invalid runtime addition batches now report errors and retain established objects in Debug too; this part of the nonasserting policy moves forward from M3 to support the M2 failure contract.
+- Review found RequestQuit could bypass resolution restrictions and terminate a retained scene. It now uses the same guard; the independent resolve-quit host regression passes in both modes/configurations.
+- The sample camera controls use the same input sample, speed, sensitivity, pitch clamp and movement logic through the safe facade. The old utility controller remains available for unrelated consumers but is no longer a gameplay header dependency.
+- Camera degenerate-axis fallback under zero inherited scale is recorded for M4 camera/extraction validation. No new renderer passes were changed.
+
+### Supporting logger shutdown correction
+
+New warning/error regression paths exposed a Release process-exit hang absent from the initial baseline cases. The first fix closes an existing condition-variable lost-wakeup window by changing the stop predicate under the wait mutex and draining queued entries. That correction alone did not resolve the observed hang. Instrumentation then showed every CPU test completed while the log worker had emitted nothing; its first Timestamp call dynamically initialized static strings during CRT teardown. Replacing those format strings with constant literals removes late destructor registration from the worker. The Release CPU suite passes; ten bounded diagnostic-and-exit runs all returned zero and emitted every queued message. Independent review passed. This supporting change is required to execute the framework failure-path tests reliably and does not alter logging APIs.
+
+### M2 validation
+
+Independent testing passed all ten project/configuration builds (ModelViewer, framework, optimisations, host and isolated public consumer, Debug/Release x64). Framework and optimisation CPU suites passed in both configurations. The host matrix passed 36/36 cases across Debug/Release and threaded/synchronous modes, including rejected runtime additions and swallowed resolver quit attempts. After the logger correction, ModelViewer/framework/public/host builds were refreshed successfully in both configurations and CPU suites rerun. Tests cover pending lookup, duplicate names, multiple same-type components, all spawn phases, immediate hierarchy, invalid poses, read-only resolution across worlds, stale refs and exception cleanup. Public include traces remain isolated. Logs: Intermediate/SimplifiedFramework/m2-*.log. M4 will perform complete visual/control acceptance; none is inferred from these automated checks.

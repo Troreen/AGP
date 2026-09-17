@@ -21,6 +21,7 @@ public:
     Actor* CreateActor(std::string name);
     Actor* SpawnActor(std::string name) { return CreateActor(std::move(name)); }
     Actor* FindActor(const std::string& name) const;
+    std::vector<Actor*> FindActors(const std::string& name) const;
     void DestroyActor(Actor& actor);
     void DestroyComponent(Component& component);
     const GameInput& GetInput() const { return myInput ? *myInput : myEmptyInput; }
@@ -37,8 +38,7 @@ private:
     State GetState() const { return myState; }
     bool AcceptsChanges() const { return !myClosing && myState != State::Ending; }
     const std::vector<std::unique_ptr<Actor>>& GetActors() const { return myActors; }
-    // Engine hierarchy commands capture handles, never borrowed object pointers.
-    void QueueStructure(std::function<void(SceneDiagnostics&)> command) { myCommands.push_back(std::move(command)); }
+    void EnsureMutationAllowed() const;
     ObjectHandle Allocate(Actor* actor, Component* component);
     void Invalidate(const ObjectHandle& handle);
     void Attach(Actor& actor, std::unique_ptr<Component> component);
@@ -56,9 +56,11 @@ private:
     std::vector<std::unique_ptr<Actor>> myActors;
     std::vector<std::unique_ptr<Actor>> myPendingActors;
     std::vector<Component*> myActivationOrder;
-    std::vector<std::function<void(SceneDiagnostics&)>> myCommands;
+
     ComponentHandle<CameraComponent> myCamera;
     friend class Actor;
+    friend class Component;
+    friend class Transform;
     friend class SceneComponent;
     friend class SceneBuilder;
     friend class GameFrameworkInternal::WorldAccess;

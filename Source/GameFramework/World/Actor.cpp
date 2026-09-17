@@ -1,5 +1,6 @@
 #include "Actor.h"
 #include "World.h"
+#include "TransformOperations.h"
 
 #include "GameFramework/Diagnostics/GameFrameworkLog.h"
 
@@ -72,68 +73,21 @@ const std::string& Actor::GetName() const
 	return myName;
 }
 
-void Actor::SetName(std::string aName)
+void Actor::SetName(std::string name)
 {
-	if (aName.empty() || (myWorld && myWorld->FindActor(aName) && myWorld->FindActor(aName) != this))
-        throw std::invalid_argument("Actor name must remain nonempty and unique");
-    myName = std::move(aName);
+    if (myWorld) myWorld->EnsureMutationAllowed();
+    myName = std::move(name);
 }
-
 bool Actor::IsActive() const
 {
 	return myIsActive && !myPendingDestroy && (!GetParent() || GetParent()->IsActive());
 }
 
-void Actor::SetActive(bool anIsActive)
+void Actor::SetActive(bool active)
 {
-	if (myIsActive == anIsActive)
-	{
-		return;
-	}
-
-	myIsActive = anIsActive;
-
-	for (std::unique_ptr<Component>& component : myComponents)
-	{
-		component->OnActiveChanged(myIsActive);
-	}
+    if (myWorld) myWorld->EnsureMutationAllowed();
+    myIsActive = active;
 }
-
-CommonUtilities::Transform& Actor::GetTransform()
-{
-	return myTransform;
-}
-
-const CommonUtilities::Transform& Actor::GetTransform() const
-{
-	return myTransform;
-}
-
-void Actor::SetTranslation(const CommonUtilities::Vector3<float>& aTranslation)
-{
-	myTransform.SetPosition(aTranslation);
-}
-
-void Actor::SetPosition(const CommonUtilities::Vector3<float>& aPosition)
-{
-	myTransform.SetPosition(aPosition);
-}
-
-void Actor::SetRotation(const CommonUtilities::Quaternion<float>& aRotation)
-{
-	myTransform.SetRotation(aRotation);
-}
-
-void Actor::SetRotation(float aYawDegrees, float aPitchDegrees, float aRollDegrees)
-{
-	myTransform.SetRotation(aYawDegrees, aPitchDegrees, aRollDegrees);
-}
-
-void Actor::SetScale(const CommonUtilities::Vector3<float>& aScale)
-{
-	myTransform.SetScale(aScale);
-}
-
 void Actor::LookAt(const CommonUtilities::Vector3<float>& aTarget)
 {
 	const CommonUtilities::Vector3<float> position = myTransform.GetPosition();
@@ -181,7 +135,7 @@ void Actor::AttachComponent(std::unique_ptr<Component> component)
 
 void Actor::SetWorld(World* aWorld)
 {
-	myWorld = aWorld;
+	myWorld = aWorld; myTransform.myWorld = aWorld;
 }
 
 bool Actor::CanAddComponentName(const std::string& aName) const
@@ -189,32 +143,28 @@ bool Actor::CanAddComponentName(const std::string& aName) const
 	return !aName.empty() && FindComponent(aName) == nullptr;
 }
 
-void Actor::ReportDuplicateComponentName(const std::string& aName) const
+void Actor::ReportDuplicateComponentName(const std::string& name) const
 {
-	GFLOG(Error, "Actor '{}' could not add component '{}'. Component names must be non-empty and unique per actor.", myName, aName);
-	assert(false && "Duplicate or empty component name");
+    throw std::invalid_argument("Component names must be nonempty and unique: " + name);
 }
-
-bool Actor::CanAttach() const { return myWorld && myWorld->AcceptsChanges() && !myPendingDestroy; }
-
-bool Actor::ApplyParent(Actor* parent, ReparentMode mode)
+std::string Actor::NextComponentName() const
 {
-    if (myPendingDestroy || (parent && (parent->GetWorld() != myWorld || parent->myPendingDestroy))) return false;
-    for (auto* p = parent; p; p = p->GetParent()) if (p == this) return false;
-    if (!GameFrameworkInternal::ChangeParent(myTransform, parent ? &parent->myTransform : nullptr, mode)) return false;
-    myParent = parent ? parent->GetHandle() : ActorHandle{}; return true;
+    size_t number = myComponents.size() + myPendingComponents.size();
+    std::string name;
+    do { name = "Component " + std::to_string(++number); } while (FindComponent(name));
+    return name;
+}
+bool Actor::CanAttach() const
+{
+    if (myWorld) myWorld->EnsureMutationAllowed();
+    return myWorld && myWorld->AcceptsChanges() && !myPendingDestroy;
 }
 bool Actor::SetParent(Actor* parent, ReparentMode mode)
 {
     if (!CanAttach() || (parent && (parent->GetWorld() != myWorld || parent->myPendingDestroy))) return false;
+    if (parent && myAdmitted && !parent->myAdmitted) return false;
     for (auto* p = parent; p; p = p->GetParent()) if (p == this) return false;
-    if (myWorld->GetState() != World::State::Active) return ApplyParent(parent, mode);
-    auto self = GetHandle(); auto target = parent ? parent->GetHandle() : ActorHandle{};
-    myWorld->QueueStructure([self,target,hasParent = parent != nullptr,mode](SceneDiagnostics& errors)
-    {
-        auto* object = self.Get(); if (!object) return;
-        if ((hasParent && !target.Get()) || !object->ApplyParent(target.Get(),mode))
-            errors.push_back({object->GetName(),{},"parent","Invalid actor attachment"});
-    });
+    if (!GameFrameworkInternal::ChangeParent(myTransform.myValue, parent ? &parent->myTransform.myValue : nullptr, mode)) return false;
+    myParent = parent ? parent->GetRef() : ActorRef{};
     return true;
 }

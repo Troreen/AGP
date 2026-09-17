@@ -11,6 +11,7 @@ namespace GameFrameworkInternal
         static bool Prepare(World& world, SceneDiagnostics& diagnostics) { return world.Prepare(diagnostics); }
         static void Activate(World& world) { world.Activate(); }
         static bool Flush(World& world, SceneDiagnostics& diagnostics) { return world.Flush(diagnostics); }
+        static void EnsureMutationAllowed(const World& world) { world.EnsureMutationAllowed(); }
         static void Close(World& world) noexcept { world.myClosing = true; }
         static void Shutdown(World& world) noexcept { world.Shutdown(); }
         static void FixedUpdate(World& world, float delta) { world.FixedUpdate(delta); }

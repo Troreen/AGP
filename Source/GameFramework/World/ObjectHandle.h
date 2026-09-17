@@ -1,51 +1,48 @@
 #pragma once
 #include <cstdint>
 #include <memory>
-#include <vector>
 
 class Actor;
 class Component;
 class World;
+class ActorHandle;
+template<class T> class ComponentHandle;
+namespace GameFrameworkInternal { struct ObjectSlots; }
 
-namespace GameFrameworkInternal
-{
-    // Only the gameplay owner accesses these slots. Weak ownership prevents handles
-    // keeping a scene alive; generations prevent reuse from reviving old references.
-    struct ObjectSlots
-    {
-        struct Slot { Actor* actor = nullptr; Component* component = nullptr; uint64_t generation = 1; };
-        std::vector<Slot> slots;
-    };
-}
-
+// Type-erased identity is implementation storage, never a conversion API.
 class ObjectHandle
 {
-public:
+private:
     Actor* ResolveActor() const;
     Component* ResolveComponent() const;
-private:
     std::weak_ptr<GameFrameworkInternal::ObjectSlots> mySlots;
     size_t myIndex = 0;
     uint64_t myGeneration = 0;
     friend class World;
+    friend class ActorHandle;
+    template<class T> friend class ComponentHandle;
 };
 
-class ActorHandle : public ObjectHandle
+class ActorHandle : private ObjectHandle
 {
 public:
     ActorHandle() = default;
-    explicit ActorHandle(const ObjectHandle& handle) : ObjectHandle(handle) {}
     Actor* Get() const { return ResolveActor(); }
     explicit operator bool() const { return Get() != nullptr; }
+private:
+    explicit ActorHandle(const ObjectHandle& handle) : ObjectHandle(handle) {}
+    friend class Actor;
 };
 
-template<class T> class ComponentHandle : public ObjectHandle
+template<class T> class ComponentHandle : private ObjectHandle
 {
 public:
     ComponentHandle() = default;
-    explicit ComponentHandle(const ObjectHandle& handle) : ObjectHandle(handle) {}
     T* Get() const { return dynamic_cast<T*>(ResolveComponent()); }
     explicit operator bool() const { return Get() != nullptr; }
+private:
+    explicit ComponentHandle(const ObjectHandle& handle) : ObjectHandle(handle) {}
+    friend class Component;
 };
 
 using ActorRef = ActorHandle;

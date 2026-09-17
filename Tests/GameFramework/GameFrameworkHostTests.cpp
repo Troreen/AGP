@@ -8,7 +8,7 @@
 #include "GameFramework/Runtime/IGame.h"
 #include "GameFramework/Integration/GameFramework/Integration/LegacySceneBridge.h"
 #include "GameFramework/Runtime/Internal/WorldAccess.h"
-#include "GameFramework/Scenes/ConnectionContext.h"
+#include "GameFramework/Scenes/References.h"
 #include <atomic>
 #include <chrono>
 #include <iostream>
@@ -22,7 +22,12 @@ struct Lifetime : Component
     int* Ends=nullptr;
     bool ThrowOnBegin=false;
     bool RejectBootstrap=false;
-    void Connect(ConnectionContext& references) override { if (RejectBootstrap) references.Error("fixture","Invalid bootstrap"); }
+    std::function<void()> ResolveAttempt;
+    void ResolveReferences(References& references) override
+    {
+        if (ResolveAttempt) ResolveAttempt();
+        if (RejectBootstrap) references.Error("fixture","Invalid bootstrap");
+    }
     void BeginPlay() override { if (ThrowOnBegin) throw std::runtime_error("Expected BeginPlay failure"); ++*Begins; }
     void EndPlay() override { ++*Ends; }
 };
@@ -37,6 +42,7 @@ public:
 
     ActorHandle Original;
     ComponentHandle<Lifetime> OriginalComponent;
+    ComponentRef<Lifetime> RejectedAddition;
     int Phase=0;
     std::chrono::steady_clock::time_point Deadline;
     void Request(GameContext& context,bool invalid=false,bool throwing=false)
@@ -64,7 +70,7 @@ public:
         ++Initializations;
         Check(Registrations==1,"Game registration did not precede Initialize");
         Deadline=std::chrono::steady_clock::now()+std::chrono::seconds(15);
-        if (Scenario=="direct" || Scenario=="initialize-failure" || Scenario=="bootstrap-invalid")
+        if (Scenario=="direct" || Scenario=="initialize-failure" || Scenario=="bootstrap-invalid" || Scenario=="runtime-invalid" || Scenario=="resolve-quit")
         {
             auto* actor=context.GetWorld().SpawnActor("Direct camera");
             auto* camera=actor->AddComponent<CameraComponent>("Camera");
@@ -83,6 +89,18 @@ public:
         ++Updates;
         Check((std::this_thread::get_id()!=Platform)==Threaded,"Wrong thread for gameplay mode");
         Check(std::chrono::steady_clock::now()<Deadline,"Host transition timed out");
+        if (Scenario=="runtime-invalid" || Scenario=="resolve-quit")
+        {
+            if (Phase++==0)
+            {
+                auto* invalid=Original.Get()->AddComponent<Lifetime>("Rejected addition");
+                invalid->Begins=&Begins;invalid->Ends=&Ends;invalid->RejectBootstrap=Scenario=="runtime-invalid";
+                if (Scenario=="resolve-quit") invalid->ResolveAttempt=[&context] {try {context.RequestQuit();} catch (const std::logic_error&) {}};
+                RejectedAddition=invalid->GetRef<Lifetime>();return;
+            }
+            Check(!RejectedAddition.Get() && Original.Get() && OriginalComponent.Get() && Begins==1 && Ends==0,"Runtime rejection damaged current scene or began invalid component");
+            Succeeded=true;context.RequestQuit();return;
+        }
         if (Scenario=="direct")
         {
             Check(Begins==1 && Ends==0 && Builds==0,"Direct bootstrap did not begin automatically");
@@ -108,7 +126,7 @@ public:
     {
         ++Shutdowns;
         Check(context.GetWorld().SpawnActor("During shutdown")==nullptr,"Shutdown allowed new actors");
-        if (Scenario=="bootstrap-invalid" || Scenario=="initialize-failure" || Scenario=="direct")
+        if (Scenario=="bootstrap-invalid" || Scenario=="initialize-failure" || Scenario=="direct" || Scenario=="runtime-invalid" || Scenario=="resolve-quit")
         {
             Check(Original.Get() && OriginalComponent.Get(),"Shutdown lost bootstrap borrows");
             Check(!Original.Get()->AddComponent<Lifetime>("During shutdown"),"Shutdown allowed new components");
@@ -129,7 +147,7 @@ int main(int argc,char** argv)
     try
     {
         GameApplication app;app.Run(game,config);
-        Check(game.Succeeded && game.Shutdowns==1 && game.Ends==(game.Scenario=="direct" ? 1 : 2),"Host did not complete orderly teardown");
+        Check(game.Succeeded && game.Shutdowns==1 && game.Ends==((game.Scenario=="direct" || game.Scenario=="runtime-invalid" || game.Scenario=="resolve-quit") ? 1 : 2),"Host did not complete orderly teardown");
         std::cout<<"PASS: host scene replacement and shutdown ("<<(game.Threaded?"threaded":"sync")<<")\n";
     }
     catch (const std::exception& e)

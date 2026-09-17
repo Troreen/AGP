@@ -602,7 +602,7 @@ bool GraphicsEngine::BuildRenderSnapshot(CameraComponent& camera, const World& a
 		actor->GetComponentsOfType(actorLights);
 		for (const LightComponent* lightComponent : actorLights)
 		{
-			if (lightComponent == nullptr || !lightComponent->IsEnabled())
+			if (lightComponent == nullptr || !lightComponent->HasBegunPlay() || !lightComponent->IsEnabled())
 			{
 				continue;
 			}
@@ -619,7 +619,7 @@ bool GraphicsEngine::BuildRenderSnapshot(CameraComponent& camera, const World& a
 		actor->GetComponentsOfType(meshComponents);
 		for (const MeshComponentBase* meshComponent : meshComponents)
 		{
-			if (meshComponent == nullptr || !meshComponent->IsEnabled() || !meshComponent->HasMesh())
+			if (meshComponent == nullptr || !meshComponent->HasBegunPlay() || !meshComponent->IsEnabled() || !meshComponent->HasMesh())
 			{
 				continue;
 			}
