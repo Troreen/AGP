@@ -7,24 +7,17 @@ class GameContext;
 class DirectionalLightComponent;
 class PointLightComponent;
 class SpotLightComponent;
+class SkeletalMeshComponent;
 
-// These components belong to this game, not GameFramework. Constructors receive
-// GameContext explicitly instead of discovering global input or engine threads.
-// Context references are borrowed for the session; access them only during hooks.
-// AddComponent assigns the owner after construction, so owner-dependent work waits
-// until attachment is complete. See ModelViewerScene.cpp for the wiring examples.
-// Game behaviors: the world calls these automatically on enabled, active actors.
-// LateUpdate example: convert game input into camera movement after ordinary
-// updates. The reusable camera math helper does not choose this game's key bindings.
+// Game behaviors run on the gameplay owner. Service getters are valid after attachment.
 class CameraControlsComponent final : public Component
 {
 public:
-	explicit CameraControlsComponent(GameContext& context) : myContext(context) {}
+	void BeginPlay() override;
 	void LateUpdate(float deltaTime) override;
 private:
-	GameContext& myContext;
 	FreeFlyCameraController myController;
-	bool myInitialized = false;
+
 };
 
 // Update example: issue playback requests to a sibling SkeletalMeshComponent.
@@ -32,10 +25,10 @@ private:
 class AnimationControlsComponent final : public Component
 {
 public:
-	explicit AnimationControlsComponent(GameContext& context) : myContext(context) {}
+	void Connect(ConnectionContext& context) override;
 	void Update(float deltaTime) override;
 private:
-	GameContext& myContext;
+    ComponentHandle<SkeletalMeshComponent> myMesh;
 };
 
 // FixedUpdate example: simulate a simple rotation at the configured constant step.
@@ -44,28 +37,23 @@ private:
 class SpinComponent final : public Component
 {
 public:
-	explicit SpinComponent(GameContext& context) : myContext(context) {}
 	void FixedUpdate(float deltaTime) override;
 private:
-	GameContext& myContext;
 	float myYaw = 0;
 	bool mySpinning = true;
 };
 
 // Attached to a scene-controls actor after the camera so LateUpdate uses its final pose.
 // Cross-actor behavior example: references are wired during scene creation.
-// These are non-owning raw pointers, valid for this session; scene unloading will
-// require a proper entity-reference/lifecycle system before such links can persist.
+// Handles become empty when a target is destroyed or its scene unloads.
 class LightControlsComponent final : public Component
 {
 public:
-	LightControlsComponent(GameContext& context, Actor* camera, DirectionalLightComponent* directional,
-		std::vector<PointLightComponent*> points, SpotLightComponent* spot);
+	void Connect(ConnectionContext& context) override;
 	void LateUpdate(float deltaTime) override;
 private:
-	GameContext& myContext;
-	Actor* myCameraActor;
-	DirectionalLightComponent* myDirectionalLightComponent;
-	std::vector<PointLightComponent*> myPointLightComponents;
-	SpotLightComponent* mySpotLightComponent;
+	ActorHandle myCamera;
+	ComponentHandle<DirectionalLightComponent> myDirectional;
+	std::vector<ComponentHandle<PointLightComponent>> myPoints;
+	ComponentHandle<SpotLightComponent> mySpot;
 };

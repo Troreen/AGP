@@ -28,6 +28,7 @@
 #include "Materials/Material.h"
 
 class Actor;
+class CameraComponent;
 class LightComponent;
 class MeshComponentBase;
 class World;
@@ -134,6 +135,7 @@ class GraphicsEngine
 	bool Initialize(HWND aWindowHandle, const std::filesystem::path& aShaderRoot);
 	void Render(GraphicsCommandList& inoutCommandList, const Actor& aCameraActor, const World& aWorld);
 	bool BuildRenderSnapshot(const Actor& aCameraActor, const World& aWorld, RenderSceneSnapshot& outSnapshot) const;
+    bool BuildRenderSnapshot(CameraComponent& camera, const World& world, RenderSceneSnapshot& snapshot) const;
 	void RenderSnapshot(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot);
 	void Present() const;
 	// --- Diagnostics ---

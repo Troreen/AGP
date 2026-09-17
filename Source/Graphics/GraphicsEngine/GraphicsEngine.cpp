@@ -567,16 +567,16 @@ void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const Actor& 
 
 bool GraphicsEngine::BuildRenderSnapshot(const Actor& aCameraActor, const World& aWorld, RenderSceneSnapshot& outSnapshot) const
 {
-	const auto snapshotStart = Clock::now();
-	outSnapshot.Clear();
+    auto* camera = aCameraActor.GetComponent<CameraComponent>();
+    return camera && BuildRenderSnapshot(*camera,aWorld,outSnapshot);
+}
 
-	CameraComponent* cameraComponent = aCameraActor.GetComponent<CameraComponent>();
-	if (cameraComponent == nullptr)
-	{
-		GELOG(Warning, "Could not build render snapshot because camera actor '{}' has no CameraComponent.", aCameraActor.GetName());
-		return false;
-	}
-
+bool GraphicsEngine::BuildRenderSnapshot(CameraComponent& camera, const World& aWorld, RenderSceneSnapshot& outSnapshot) const
+{
+    const auto snapshotStart = Clock::now();
+    outSnapshot.Clear();
+    if (!camera.IsEnabled() || !camera.GetOwner()->IsActive()) return false;
+    auto* cameraComponent = &camera;
 	cameraComponent->SyncCameraToOwner();
 	outSnapshot.Camera = cameraComponent->GetCamera();
 	outSnapshot.HasCamera = true;
@@ -632,7 +632,7 @@ bool GraphicsEngine::BuildRenderSnapshot(const Actor& aCameraActor, const World&
 			RenderItemSnapshot renderItem;
 			renderItem.Mesh = mesh;
 			renderItem.Materials = meshComponent->GetMaterialList();
-			renderItem.World = actor->GetTransform().GetWorldMatrix();
+			renderItem.World = meshComponent->GetWorldMatrix();
 			renderItem.HasSkinning = meshComponent->HasSkinning();
 			if (const std::array<CU::Matrix4f, 128>* jointTransforms = meshComponent->GetJointTransforms())
 			{

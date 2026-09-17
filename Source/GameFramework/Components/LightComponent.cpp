@@ -63,34 +63,8 @@ void LightComponent::SetConeAnglesDegrees(float anInnerConeDegrees, float anOute
 	myOuterCone = CU::Maths::DegreesToRadians(outerDegrees);
 }
 
-CU::Vector3f LightComponent::GetWorldPosition() const
-{
-	const Actor* owner = GetOwner();
-	if (owner == nullptr)
-	{
-		return CU::Vector3f::Zero;
-	}
-
-	const CU::Matrix4f world = owner->GetTransform().GetWorldMatrix();
-	return { world(4, 1), world(4, 2), world(4, 3) };
-}
-
-CU::Vector3f LightComponent::GetWorldDirection() const
-{
-	const Actor* owner = GetOwner();
-	if (owner == nullptr)
-	{
-		return CU::Vector3f::UnitZ;
-	}
-
-	CU::Vector3f direction = owner->GetTransform().GetForward();
-	if (direction.LengthSqr() <= 0.000001f)
-	{
-		return CU::Vector3f::UnitZ;
-	}
-
-	return direction.GetNormalized();
-}
+CU::Vector3f LightComponent::GetWorldPosition() const { return SceneComponent::GetWorldPosition(); }
+CU::Vector3f LightComponent::GetWorldDirection() const { return SceneComponent::GetWorldDirection(); }
 
 DirectionalLightComponent::DirectionalLightComponent()
 	: LightComponent(LightType::Directional)

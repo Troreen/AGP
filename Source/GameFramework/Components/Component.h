@@ -1,8 +1,12 @@
 #pragma once
 
 #include <string>
+#include "GameFramework/World/ObjectHandle.h"
 
 class Actor;
+class World;
+class ConnectionContext;
+struct GameInput;
 
 // Base for engine features and game-authored behavior. Override only the phases
 // you need; the defaults do nothing. World/Actor call these hooks automatically
@@ -12,6 +16,18 @@ class Component
 {
 public:
 	virtual ~Component() = default;
+
+    // Connect resolves references after all objects have been configured. BeginPlay
+    // starts behavior only after the entire batch passes validation, even if disabled.
+    virtual void Connect(ConnectionContext&) {}
+    virtual void BeginPlay() {}
+    virtual void EndPlay() {}
+    World& GetWorld() const;
+    const GameInput& GetInput() const;
+    void Destroy();
+    bool HasBegunPlay() const { return myBegun; }
+    bool IsPendingDestroy() const { return myPendingDestroy; }
+    template<class T = Component> ComponentHandle<T> GetHandle() const { return ComponentHandle<T>(myHandle); }
 
 	// Constant-step simulation; zero to five calls per gameplay frame with current policy.
 	virtual void FixedUpdate(float aDeltaTime);
@@ -39,6 +55,11 @@ private:
 	std::string myName;
 	Actor* myOwner = nullptr;
 	bool myIsEnabled = true;
+    bool myPendingDestroy = false;
+    bool myConnected = false;
+    bool myBegun = false;
+    ObjectHandle myHandle;
+    friend class World;
 
 	friend class Actor;
 };

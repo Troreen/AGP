@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Component.h"
+#include "SceneComponent.h"
 #include "Matrix.hpp"
 
 #include <array>
@@ -11,10 +11,10 @@
 
 class Mesh;
 
-// Connects an actor to shared mesh/material assets. Per-actor transforms live on
-// the owner; asset data may be shared by many actors and render snapshots. Load and
+// Connects a spatial attachment to shared mesh/material assets. Component offsets
+// compose with the owner; assets are shared by actors and render snapshots. Load and
 // configure shared assets before play; runtime asset editing needs a future safe API.
-class MeshComponentBase : public Component
+class MeshComponentBase : public SceneComponent
 {
 public:
 	MeshComponentBase() = default;

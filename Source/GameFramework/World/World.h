@@ -1,40 +1,50 @@
 #pragma once
-
 #include "Actor.h"
+#include "GameFramework/Input/GameInput.h"
+#include "GameFramework/Scenes/SceneDiagnostic.h"
+#include <functional>
 
-#include <memory>
-#include <string>
-#include <vector>
-
-// Owns the session actor collection and dispatches component phases. Game code
-// creates actors here during initialization or top-level game callbacks. The current
-// world has no deferred mutation, actor destruction, or scene-replacement service.
+// One serialized gameplay owner controls a world. Requests made inside hooks are
+// queued; the host flushes once before the next frame's fixed steps.
 class World
 {
 public:
-	World();
-	~World();
-
-	World(const World&) = delete;
-	World& operator=(const World&) = delete;
-	World(World&&) = delete;
-	World& operator=(World&&) = delete;
-
-	// Names must be non-empty and unique when creating actors. Results are borrowed
-	// pointers, not stable serialized IDs; a future scene loader needs explicit IDs.
-	Actor* CreateActor(std::string aName);
-	Actor* FindActor(const std::string& aName) const;
-
-	// Host-owned ticking. Update includes both the Update and LateUpdate passes.
-	// Do not invoke these manually from IGame or components: it would double-tick state.
-	void FixedUpdate(float aDeltaTime);
-	void Update(float aDeltaTime);
-
-	const std::vector<std::unique_ptr<Actor>>& GetActors() const;
-
+    enum class State { Constructing, Prepared, Active, Ending };
+    explicit World(const GameInput* input = nullptr);
+    ~World();
+    World(const World&) = delete;
+    World& operator=(const World&) = delete;
+    Actor* CreateActor(std::string name);
+    Actor* FindActor(const std::string& name) const;
+    void DestroyActor(Actor& actor);
+    void DestroyComponent(Component& component);
+    bool Prepare(SceneDiagnostics& diagnostics);
+    void Activate();
+    bool Flush(SceneDiagnostics& diagnostics);
+    void Shutdown() noexcept;
+    void FixedUpdate(float delta);
+    void Update(float delta);
+    State GetState() const { return myState; }
+    bool AcceptsChanges() const { return myState != State::Ending; }
+    const GameInput& GetInput() const { return myInput ? *myInput : myEmptyInput; }
+    const std::vector<std::unique_ptr<Actor>>& GetActors() const { return myActors; }
+    // Engine hierarchy commands capture handles, never borrowed object pointers.
+    void QueueStructure(std::function<void(SceneDiagnostics&)> command) { myCommands.push_back(std::move(command)); }
 private:
-	bool CanAddActorName(const std::string& aName) const;
-	void ReportDuplicateActorName(const std::string& aName) const;
-
-	std::vector<std::unique_ptr<Actor>> myActors;
+    ObjectHandle Allocate(Actor* actor, Component* component);
+    void Invalidate(const ObjectHandle& handle);
+    void Attach(Actor& actor, std::unique_ptr<Component> component);
+    void CollectDestroyed() noexcept;
+    bool ConnectBatch(const std::vector<Component*>& batch, SceneDiagnostics& diagnostics);
+    void BeginBatch(const std::vector<Component*>& batch);
+    State myState = State::Constructing;
+    bool myInBoundary = false;
+    const GameInput* myInput;
+    GameInput myEmptyInput;
+    std::shared_ptr<GameFrameworkInternal::ObjectSlots> mySlots;
+    std::vector<std::unique_ptr<Actor>> myActors;
+    std::vector<std::unique_ptr<Actor>> myPendingActors;
+    std::vector<Component*> myActivationOrder;
+    std::vector<std::function<void(SceneDiagnostics&)>> myCommands;
+    friend class Actor;
 };

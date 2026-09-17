@@ -1,229 +1,119 @@
 #include "ModelViewerScene.h"
 #include "ModelViewerComponents.h"
-#include "GraphicsEngine/GraphicsEngine.h"
-#include "GraphicsEngine/Objects/Mesh.h"
-
-#include <cstddef>
-#include <memory>
-#include <string>
-
 #include "Application.h"
 #include "GameFramework/Runtime/GameContext.h"
-#include "GameFramework/World/Actor.h"
-#include "GameFramework/Components/CameraComponent.h"
 #include "GameFramework/Components/LightComponent.h"
-#include "GameFramework/Components/SkeletalMeshComponent.h"
 #include "GameFramework/Components/StaticMeshComponent.h"
+#include "GameFramework/Components/SkeletalMeshComponent.h"
+#include "GraphicsEngine/GraphicsEngine.h"
 #include "GraphicsEngine/Materials/Material.h"
+#include "GraphicsEngine/Objects/Mesh.h"
+#include <cmath>
+#include <stdexcept>
 
 namespace
 {
-	using Vector3f = CommonUtilities::Vector3f;
-	using Vector4f = CommonUtilities::Vector4f;
-	// The build copies game materials and shader snippets into Assets/Shaders.
-	// Material texture paths are relative to that runtime directory (../Textures),
-	// not to this source file or the process working directory.
-	std::filesystem::path GetMaterialRoot(const std::filesystem::path& aContentRoot)
-	{
-		return aContentRoot / "Shaders";
-	}
-
-	// Example authoring shortcut: apply one material to every submesh slot.
-	// A data-driven scene can instead author different materials for individual slots.
-	void AssignMaterialToAllSlots(MeshComponentBase* aMeshComponent, const std::shared_ptr<MaterialInterface>& aMaterial)
-	{
-		if (aMeshComponent == nullptr || aMaterial == nullptr || !aMeshComponent->HasMesh())
-		{
-			return;
-		}
-
-		const std::shared_ptr<Mesh> mesh = aMeshComponent->GetMesh();
-		for (size_t materialIndex = 0; materialIndex < mesh->GetNumMaterialSlots(); ++materialIndex)
-		{
-			aMeshComponent->SetMaterial(static_cast<unsigned>(materialIndex), aMaterial);
-		}
-	}
-
-	PointLightComponent* CreatePointLight(World& aWorld, const char* aName, const Vector3f& aPosition, const Vector3f& aColor,
-	                                      float anIntensity, float aRadius)
-	{
-		Actor* pointLightActor = aWorld.CreateActor(std::string(aName) + " Actor");
-		if (pointLightActor == nullptr)
-		{
-			return nullptr;
-		}
-
-		pointLightActor->SetTranslation(aPosition);
-		PointLightComponent* pointLightComponent = pointLightActor->AddComponent<PointLightComponent>(std::string(aName) + " Light");
-		if (pointLightComponent != nullptr)
-		{
-			pointLightComponent->SetColor(aColor);
-			pointLightComponent->SetIntensity(anIntensity);
-			pointLightComponent->SetRadius(aRadius);
-		}
-
-		return pointLightComponent;
-	}
+    using Vector3f = CommonUtilities::Vector3f;
+    void AssignMaterialToAllSlots(MeshComponentBase& component, const std::shared_ptr<MaterialInterface>& material)
+    {
+        if (!material || !component.HasMesh()) throw std::runtime_error("Missing mesh or material");
+        for (unsigned i = 0; i < component.GetMesh()->GetNumMaterialSlots(); ++i) component.SetMaterial(i,material);
+    }
+    void Aim(CommonUtilities::Transform& transform, Vector3f target)
+    {
+        const auto forward = (target-transform.GetPosition()).GetNormalized();
+        transform.SetYawPitchRollRadians(std::atan2(forward.x,forward.z),-std::asin(forward.y),0);
+    }
+    ComponentDescription Behavior(const char* name, const char* type)
+    { ComponentDescription c; c.Name = name; c.Type = type; return c; }
 }
-
-// Load the mesh/animation catalog first, instantiate the scene second, then select
-// the camera. This all runs during IGame::Initialize, before concurrent rendering.
-// Future asset services should preserve that safe handoff when adding async loading.
 void ModelViewerScene::Initialize(GameContext& context)
 {
-	myContext = &context;
-	myContentRoot = context.GetContentRoot();
-	myMeshLibrary.Initialize(myContentRoot);
-	LoadScene();
-	context.SetActiveCamera(myCameraActor);
+    myContentRoot = context.GetContentRoot();
+    myMeshLibrary.Initialize(myContentRoot);
+    // Engine and game types deliberately use the same extension point.
+    myRegistry.Register<SceneComponent>("Scene");
+    myRegistry.Register<CameraComponent>("Camera");
+    myRegistry.Register<StaticMeshComponent>("StaticMesh");
+    myRegistry.Register<SkeletalMeshComponent>("SkeletalMesh");
+    myRegistry.Register<DirectionalLightComponent>("DirectionalLight");
+    myRegistry.Register<PointLightComponent>("PointLight");
+    myRegistry.Register<SpotLightComponent>("SpotLight");
+    myRegistry.Register<CameraControlsComponent>("CameraControls");
+    myRegistry.Register<AnimationControlsComponent>("AnimationControls");
+    myRegistry.Register<SpinComponent>("Spin");
+    myRegistry.Register<LightControlsComponent>("LightControls");
+    myRegistry.Freeze();
+    Reload(context);
 }
-
-// This function is an executable example of scene authoring, not the intended
-// long-term scene format. Names, transforms, asset references and behavior settings
-// are the data a future JSON import should supply. The C++ component implementations
-// remain responsible for behavior after loading; JSON does not need to know threading.
-void ModelViewerScene::LoadScene()
+void ModelViewerScene::Reload(GameContext& context)
 {
-	myAnimatedMeshComponent = nullptr;
-	myDirectionalLightComponent = nullptr;
-	myPointLightComponents.clear();
-	mySpotLightComponent = nullptr;
-	const std::filesystem::path materialRoot = GetMaterialRoot(myContentRoot);
-	const Vector3f sceneFocus = {25.0f, 0.0f, 260.0f};
-	const Vector3f floorPosition = {0.0f, 0.0f, 260.0f};
-	const Vector3f characterPosition = {0.0f, 0.0f, 250.0f};
-	const Vector3f chestPosition = {135.0f, 0.0f, 285.0f};
-	const Vector3f chestAlphaPosition = {-200.0f, 0.0f, -100.0f};
-	const Vector3f colorCheckerPosition = {-145.0f, 40.0f, 365.0f};
+    const auto resolution = context.GetClientSize();
+    context.RequestScene([this,resolution](const GameInput* input) { return Build(input,resolution); });
+}
+SceneBuildResult ModelViewerScene::Build(const GameInput* input, CommonUtilities::Vector2u resolution)
+{
+    // These descriptions stand in for imported engine-space data. Resource resolution
+    // stays in the game adapter; callbacks configure attached but unstarted components.
+    SceneDescription scene;
+    const auto materialRoot = myContentRoot / "Shaders";
+    const Vector3f focus{25,0,260};
+    ActorDescription camera; camera.Id = "Camera Actor";
+    camera.LocalTransform.SetPosition({0,260,-950}); Aim(camera.LocalTransform,focus);
+    camera.Components.push_back(ComponentDescription::Make<CameraComponent>("Camera","Camera",[resolution](auto& c) { c.SetPerspective(90,1,50000,resolution); }));
+    camera.Components.push_back(Behavior("Camera Controls","CameraControls"));
+    scene.Actors.push_back(std::move(camera));
+    scene.CameraActor = "Camera Actor"; scene.CameraComponent = "Camera";
 
-	// --- Camera actor ---
-	// Engine CameraComponent supplies projection data; game CameraControlsComponent
-	// supplies movement. This demonstrates composing reusable features with game rules.
-	// Create the camera before scene controls so its LateUpdate runs first.
-	{
-		myCameraActor = myContext->GetWorld().CreateActor("Camera Actor");
-		if (myCameraActor != nullptr)
-		{
-			myCameraActor->AddComponent<CameraComponent>("Camera", 90.0f, 1.0f, 50000.0f, myContext->GetClientSize());
+    ActorDescription directional; directional.Id = "Directional Light Actor";
+    directional.LocalTransform.SetPosition({-450,650,-350}); Aim(directional.LocalTransform,focus);
+    directional.Components.push_back(ComponentDescription::Make<DirectionalLightComponent>("Directional Light","DirectionalLight",[](auto& c) { c.SetColor({1,.96f,.9f}); c.SetIntensity(5); }));
+    scene.Actors.push_back(std::move(directional));
+    ActorDescription point; point.Id = "Warm Character Point Actor"; point.LocalTransform.SetPosition({-90,180,150});
+    point.Components.push_back(ComponentDescription::Make<PointLightComponent>("Warm Character Point Light","PointLight",[](auto& c) { c.SetColor({1,.42f,.22f}); c.SetIntensity(20); c.SetRadius(760); }));
+    scene.Actors.push_back(std::move(point));
+    ActorDescription spot; spot.Id = "Spot Light Actor";
+    spot.LocalTransform.SetPosition({430,430,-210}); Aim(spot.LocalTransform,focus);
+    spot.Components.push_back(ComponentDescription::Make<SpotLightComponent>("Spot Light","SpotLight",[](auto& c) { c.SetColor({.55f,.7f,1}); c.SetIntensity(30); c.SetRadius(1200); c.SetConeAnglesDegrees(18,34); }));
+    scene.Actors.push_back(std::move(spot));
 
-			myCameraActor->SetTranslation({0.0f, 260.0f, -950.0f});
-			myCameraActor->LookAt(sceneFocus);
-			myCameraActor->AddComponent<CameraControlsComponent>("Camera Controls", *myContext);
-		}
-	}
+    auto meshActor = [&](const char* id, const char* name, const char* meshName, const char* materialName, Vector3f position, Vector3f rotation, Vector3f scale)
+    {
+        ActorDescription actor; actor.Id = id;
+        actor.LocalTransform.SetPosition(position); actor.LocalTransform.SetRotation(rotation); actor.LocalTransform.SetScale(scale);
+        auto mesh = myMeshLibrary.GetMesh(meshName); auto material = GetMaterial(materialRoot/materialName);
+        actor.Components.push_back(ComponentDescription::Make<StaticMeshComponent>(name,"StaticMesh",[mesh,material](auto& c)
+        { c.SetMesh(mesh); AssignMaterialToAllSlots(c,material); }));
+        return actor;
+    };
+    scene.Actors.push_back(meshActor("Floor Actor","Floor Mesh Component","Floor","FloorMaterial.mat",{0,0,260},{0,-90,0},{1100,1100,1100}));
+    auto chest = meshActor("SM_Chest Actor","SM_Chest Mesh Component","SM_Chest","ChestMaterial.mat",{135,0,285},{0,0,0},{1,1,1});
+    chest.Components.push_back(Behavior("Spin","Spin")); scene.Actors.push_back(std::move(chest));
+    auto alpha = meshActor("SM_Chest Alpha Actor","SM_Chest Alpha Mesh Component","SM_Chest","ChestMaterial_Alpha.mat",{-200,0,-100},{0,0,0},{1,1,1});
+    auto alphaMaterial = MaterialInstance::Create("ChestMaterial_Alpha_Instance",GetMaterial(materialRoot/"ChestMaterial_Alpha.mat"));
+    if (!alphaMaterial) throw std::runtime_error("Could not create alpha chest material");
+    alphaMaterial->SetValue("MB_Tint",CommonUtilities::Vector4f(1,1,1,.35f));
+    auto alphaMesh = myMeshLibrary.GetMesh("SM_Chest");
+    alpha.Components[0].Configure = [alphaMesh,alphaMaterial](Component& c)
+    { auto& mesh = dynamic_cast<StaticMeshComponent&>(c); mesh.SetMesh(alphaMesh); AssignMaterialToAllSlots(mesh,alphaMaterial); };
+    scene.Actors.push_back(std::move(alpha));
+    scene.Actors.push_back(meshActor("SM_Color_Checker Actor","SM_Color_Checker Mesh Component","SM_Color_Checker","ColorCheckerMaterial.mat",{-145,40,365},{0,-90,0},{1,1,1}));
 
-	// --- Lighting ---
-	// Create ordinary actors with engine light components. The later LightControls
-	// component receives references to these lights; the renderer discovers them from
-	// the world, so game code never registers lights with render workers.
-	{
-		Actor* directionalLightActor = myContext->GetWorld().CreateActor("Directional Light Actor");
-		if (directionalLightActor != nullptr)
-		{
-			directionalLightActor->SetTranslation({-450.0f, 650.0f, -350.0f});
-			directionalLightActor->LookAt(sceneFocus);
-			myDirectionalLightComponent = directionalLightActor->AddComponent<DirectionalLightComponent>("Directional Light");
-			if (myDirectionalLightComponent != nullptr)
-			{
-				myDirectionalLightComponent->SetColor({1.0f, 0.96f, 0.9f});
-				myDirectionalLightComponent->SetIntensity(5.0f);
-			}
-		}
-
-		myPointLightComponents.push_back(
-		    CreatePointLight(myContext->GetWorld(), "Warm Character Point", {-90.0f, 180.0f, 150.0f}, {1.0f, 0.42f, 0.22f}, 20.0f, 760.0f));
-
-		Actor* spotLightActor = myContext->GetWorld().CreateActor("Spot Light Actor");
-		if (spotLightActor != nullptr)
-		{
-			spotLightActor->SetTranslation({430.0f, 430.0f, -210.0f});
-			spotLightActor->LookAt(sceneFocus);
-			mySpotLightComponent = spotLightActor->AddComponent<SpotLightComponent>("Spot Light");
-			if (mySpotLightComponent != nullptr)
-			{
-				mySpotLightComponent->SetColor({0.55f, 0.7f, 1.0f});
-				mySpotLightComponent->SetIntensity(30.0f);
-				mySpotLightComponent->SetRadius(1200.0f);
-				mySpotLightComponent->SetConeAnglesDegrees(18.0f, 34.0f);
-			}
-		}
-	}
-
-	// --- Mesh actors and game behavior ---
-	// Several actors can share a mesh/material while retaining independent transforms.
-	// The opaque chest gains a SpinComponent; the floor has no behavior to tick.
-	CreateStaticMeshActor("Floor Actor", "Floor Mesh Component", "Floor", materialRoot / "FloorMaterial.mat", floorPosition,
-	                      {0.0f, -90.0f, 0.0f}, {1100.0f, 1100.0f, 1100.0f});
-
-	StaticMeshComponent* chest = CreateStaticMeshActor("SM_Chest Actor", "SM_Chest Mesh Component", "SM_Chest", materialRoot / "ChestMaterial.mat", chestPosition,
-	                      {0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f});
-
-	if (chest) chest->GetOwner()->AddComponent<SpinComponent>("Spin", *myContext); //TODO: context shouldnt be passed around like this. figure out a better way to access input handling
-
-	// Create a material instance when one actor needs different authored parameters.
-	// Configure it during initialization; changing shared material contents during live
-	// rendering is not supported by the current snapshot ownership contract.
-	StaticMeshComponent* alphaChestMeshComponent =
-	    CreateStaticMeshActor("SM_Chest Alpha Actor", "SM_Chest Alpha Mesh Component", "SM_Chest", materialRoot / "ChestMaterial_Alpha.mat",
-	                          chestAlphaPosition, {0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f});
-
-	if (alphaChestMeshComponent != nullptr)
-	{
-		if (const std::shared_ptr<MaterialInterface> alphaBaseMaterial = GetMaterial(materialRoot / "ChestMaterial_Alpha.mat"))
-		{
-			if (const std::shared_ptr<MaterialInstance> alphaChestMaterial =
-			        MaterialInstance::Create("ChestMaterial_Alpha_Instance", alphaBaseMaterial))
-			{
-				alphaChestMaterial->SetValue("MB_Tint", Vector4f(1.0f, 1.0f, 1.0f, 0.35f));
-				AssignMaterialToAllSlots(alphaChestMeshComponent, alphaChestMaterial);
-			}
-		}
-	}
-
-	CreateStaticMeshActor("SM_Color_Checker Actor", "SM_Color_Checker Mesh Component", "SM_Color_Checker",
-	                      materialRoot / "ColorCheckerMaterial.mat", colorCheckerPosition, {0.0f, -90.0f, 0.0f}, {1.0f, 1.0f, 1.0f});
-
-	// --- Animated actor ---
-	// The mesh library supplies named animation assets. Game controls choose playback;
-	// SkeletalMeshComponent owns the per-actor playback state and advances the pose.
-	if (std::shared_ptr<Mesh> characterMesh = GetRegisteredMesh("SK_C_TGA_Bro"))
-	{
-		Actor* characterActor = myContext->GetWorld().CreateActor("TGA Bro Actor");
-		if (characterActor != nullptr)
-		{
-			// Controls precede the mesh so animation requests apply in this frame.
-			characterActor->AddComponent<AnimationControlsComponent>("Animation Controls", *myContext);
-			myAnimatedMeshComponent = characterActor->AddComponent<SkeletalMeshComponent>("TGA Bro Mesh Component", characterMesh);
-			characterActor->SetTranslation(characterPosition);
-			characterActor->SetRotation(180.0f, 0.0f, 0.0f);
-			characterActor->SetScale({1.0f, 1.0f, 1.0f});
-
-			if (myAnimatedMeshComponent != nullptr)
-			{
-				AssignMaterialToAllSlots(myAnimatedMeshComponent, GetMaterial(materialRoot / "CharacterMaterial.mat"));
-
-				// TODO Engine future:
-				// Replace hardcoded joint mask with data-driven animation mask assets.
-				// Masks should be authored externally and resolved to joint indices when loading the skeleton.
-				myAnimatedMeshComponent->ConfigurePartialLayerFromJointName("RightShoulder");
-				myAnimatedMeshComponent->PlayAnimation("Breathing", true);
-			}
-		}
-	}
-	// --- Cross-actor controls ---
-	// An actor need not render anything. This one hosts behavior that operates on the
-	// lights and camera. It is inserted last so its LateUpdate sees the camera after
-	// CameraControls has moved it. This is explicit insertion order, not a dependency graph.
-	Actor* sceneControls = myContext->GetWorld().CreateActor("Scene Controls");
-	sceneControls->AddComponent<LightControlsComponent>("Light Controls", *myContext, myCameraActor,
-		myDirectionalLightComponent, myPointLightComponents, mySpotLightComponent);
-
+    ActorDescription character; character.Id = "TGA Bro Actor";
+    character.LocalTransform.SetPosition({0,0,250}); character.LocalTransform.SetRotation(180,0,0);
+    character.Components.push_back(Behavior("Animation Controls","AnimationControls"));
+    auto characterMesh = myMeshLibrary.GetMesh("SK_C_TGA_Bro"); auto characterMaterial = GetMaterial(materialRoot/"CharacterMaterial.mat");
+    character.Components.push_back(ComponentDescription::Make<SkeletalMeshComponent>("TGA Bro Mesh Component","SkeletalMesh",[characterMesh,characterMaterial](auto& c)
+    {
+        c.SetMesh(characterMesh); AssignMaterialToAllSlots(c,characterMaterial);
+        c.ConfigurePartialLayerFromJointName("RightShoulder"); c.PlayAnimation("Breathing",true);
+    }));
+    scene.Actors.push_back(std::move(character));
+    ActorDescription controls; controls.Id = "Scene Controls"; controls.Components.push_back(Behavior("Light Controls","LightControls"));
+    scene.Actors.push_back(std::move(controls));
+    return SceneBuilder::Build(scene,myRegistry,input);
 }
 
-// Initialization-only material loading/cache for this example. The description
-// loader resolves paths relative to the .mat file; graphics creates the render asset.
-// A reusable content service should eventually own this mechanism while the game
-// continues to choose which material assets its scenes reference.
 std::shared_ptr<MaterialInterface> ModelViewerScene::GetMaterial(const std::filesystem::path& aMaterialFile)
 {
 	const std::string cacheKey = aMaterialFile.lexically_normal().string();
@@ -248,41 +138,5 @@ std::shared_ptr<MaterialInterface> ModelViewerScene::GetMaterial(const std::file
 
 	const auto materialResult = myMaterialCache.emplace(cacheKey, material);
 	return materialResult.first->second;
-}
-
-// Small scene-authoring helper: resolve shared assets, create a world-owned actor,
-// attach its render component, then apply authored transform/material values.
-// A future scene factory can perform these same steps from SceneDescription data.
-StaticMeshComponent* ModelViewerScene::CreateStaticMeshActor(const std::string& anActorName, const std::string& aComponentName,
-														const std::string& aMeshName, const std::filesystem::path& aMaterialFile,
-														const CommonUtilities::Vector3<float>& aPosition,
-														const CommonUtilities::Vector3<float>& aRotationDegrees,
-														const CommonUtilities::Vector3<float>& aScale)
-{
-	const std::shared_ptr<Mesh> mesh = GetRegisteredMesh(aMeshName);
-	if (mesh == nullptr)
-	{
-		MVLOG(Warning, "Scene mesh '{}' is not registered.", aMeshName);
-		return nullptr;
-	}
-
-	Actor* actor = myContext->GetWorld().CreateActor(anActorName);
-	if (actor == nullptr)
-	{
-		return nullptr;
-	}
-
-	StaticMeshComponent* meshComponent = actor->AddComponent<StaticMeshComponent>(aComponentName, mesh);
-	actor->SetTranslation(aPosition);
-	actor->SetRotation(aRotationDegrees.x, aRotationDegrees.y, aRotationDegrees.z);
-	actor->SetScale(aScale);
-
-	AssignMaterialToAllSlots(meshComponent, GetMaterial(aMaterialFile));
-	return meshComponent;
-}
-
-std::shared_ptr<Mesh> ModelViewerScene::GetRegisteredMesh(const std::string& aName) const
-{
-	return myMeshLibrary.GetMesh(aName);
 }
 

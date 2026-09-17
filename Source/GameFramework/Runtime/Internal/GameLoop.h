@@ -17,7 +17,8 @@ namespace GameFrameworkInternal
 		{
 			if (!std::isfinite(fixedDelta) || fixedDelta <= 0) throw std::invalid_argument("FixedDeltaTime must be positive and finite");
 		}
-		// Advance one gameplay frame, which may combine several platform frames.
+		void Reset() { myAccumulator = 0; myFixedInput = {}; }
+        // Advance one gameplay frame, which may combine several platform frames.
 		// A fixed step is not guaranteed on every call; variable Update and Late always run.
 		template<class Fixed, class Update, class Late>
 		void Advance(float delta, const GameInput& input, Fixed fixed, Update update, Late late)

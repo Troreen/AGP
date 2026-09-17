@@ -172,6 +172,16 @@
   <ItemGroup>
     <None Include="README.md" />
   </ItemGroup>
+  <ItemGroup><ClInclude Include="Scenes\ConnectionContext.h" /></ItemGroup>
+  <ItemGroup><ClInclude Include="Scenes\SceneDiagnostic.h" /></ItemGroup>
+  <ItemGroup><ClInclude Include="World\ObjectHandle.h" /></ItemGroup>
+  <ItemGroup><ClCompile Include="Components\SceneComponent.cpp" /></ItemGroup>
+  <ItemGroup><ClInclude Include="Components\SceneComponent.h" /></ItemGroup>
+  <ItemGroup><ClInclude Include="Scenes\ComponentRegistry.h" /></ItemGroup>
+  <ItemGroup><ClCompile Include="Scenes\SceneBuilder.cpp" /></ItemGroup>
+  <ItemGroup><ClInclude Include="Scenes\SceneBuilder.h" /></ItemGroup>
+  <ItemGroup><ClInclude Include="Scenes\SceneDescription.h" /></ItemGroup>
+  <ItemGroup><ClInclude Include="World\TransformOperations.h" /></ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

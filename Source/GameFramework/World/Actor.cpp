@@ -1,4 +1,5 @@
 #include "Actor.h"
+#include "World.h"
 
 #include "GameFramework/Diagnostics/GameFrameworkLog.h"
 
@@ -6,6 +7,7 @@
 #include <cassert>
 #include <cmath>
 #include <utility>
+#include <stdexcept>
 
 Actor::Actor(std::string aName)
 	: myName(std::move(aName))
@@ -14,19 +16,19 @@ Actor::Actor(std::string aName)
 
 Actor::~Actor()
 {
-	RemoveAllComponents();
+	// World performs lifecycle cleanup before releasing ownership.
 }
 
 void Actor::FixedUpdate(float aDeltaTime)
 {
-	if (!myIsActive)
+	if (!IsActive())
 	{
 		return;
 	}
 
 	for (std::unique_ptr<Component>& component : myComponents)
 	{
-		if (component->IsEnabled())
+		if (IsActive() && component->myBegun && component->IsEnabled())
 		{
 			component->FixedUpdate(aDeltaTime);
 		}
@@ -35,14 +37,14 @@ void Actor::FixedUpdate(float aDeltaTime)
 
 void Actor::Update(float aDeltaTime)
 {
-	if (!myIsActive)
+	if (!IsActive())
 	{
 		return;
 	}
 
 	for (std::unique_ptr<Component>& component : myComponents)
 	{
-		if (component->IsEnabled())
+		if (IsActive() && component->myBegun && component->IsEnabled())
 		{
 			component->Update(aDeltaTime);
 		}
@@ -51,14 +53,14 @@ void Actor::Update(float aDeltaTime)
 
 void Actor::LateUpdate(float aDeltaTime)
 {
-	if (!myIsActive)
+	if (!IsActive())
 	{
 		return;
 	}
 
 	for (std::unique_ptr<Component>& component : myComponents)
 	{
-		if (component->IsEnabled())
+		if (IsActive() && component->myBegun && component->IsEnabled())
 		{
 			component->LateUpdate(aDeltaTime);
 		}
@@ -72,12 +74,14 @@ const std::string& Actor::GetName() const
 
 void Actor::SetName(std::string aName)
 {
-	myName = std::move(aName);
+	if (aName.empty() || (myWorld && myWorld->FindActor(aName) && myWorld->FindActor(aName) != this))
+        throw std::invalid_argument("Actor name must remain nonempty and unique");
+    myName = std::move(aName);
 }
 
 bool Actor::IsActive() const
 {
-	return myIsActive;
+	return myIsActive && !myPendingDestroy && (!GetParent() || GetParent()->IsActive());
 }
 
 void Actor::SetActive(bool anIsActive)
@@ -153,23 +157,26 @@ Component* Actor::FindComponent(const std::string& aName) const
 {
 	for (const std::unique_ptr<Component>& component : myComponents)
 	{
-		if (component->GetName() == aName)
+		if (!component->IsPendingDestroy() && component->GetName() == aName)
 		{
 			return component.get();
 		}
 	}
 
+    for (const auto& component : myPendingComponents)
+        if (!component->IsPendingDestroy() && component->GetName() == aName) return component.get();
 	return nullptr;
 }
 
 void Actor::RemoveAllComponents()
 {
-	for (auto it = myComponents.rbegin(); it != myComponents.rend(); ++it)
-	{
-		(*it)->OnDestroy();
-	}
-
-	myComponents.clear();
+    for (auto& c : myComponents) c->Destroy();
+    for (auto& c : myPendingComponents) c->Destroy();
+}
+void Actor::Destroy() { if (myWorld) myWorld->DestroyActor(*this); }
+void Actor::AttachComponent(std::unique_ptr<Component> component)
+{
+    myWorld->Attach(*this, std::move(component));
 }
 
 void Actor::SetWorld(World* aWorld)
@@ -186,4 +193,28 @@ void Actor::ReportDuplicateComponentName(const std::string& aName) const
 {
 	GFLOG(Error, "Actor '{}' could not add component '{}'. Component names must be non-empty and unique per actor.", myName, aName);
 	assert(false && "Duplicate or empty component name");
+}
+
+bool Actor::CanAttach() const { return myWorld && myWorld->AcceptsChanges() && !myPendingDestroy; }
+
+bool Actor::ApplyParent(Actor* parent, ReparentMode mode)
+{
+    if (myPendingDestroy || (parent && (parent->GetWorld() != myWorld || parent->myPendingDestroy))) return false;
+    for (auto* p = parent; p; p = p->GetParent()) if (p == this) return false;
+    if (!GameFrameworkInternal::ChangeParent(myTransform, parent ? &parent->myTransform : nullptr, mode)) return false;
+    myParent = parent ? parent->GetHandle() : ActorHandle{}; return true;
+}
+bool Actor::SetParent(Actor* parent, ReparentMode mode)
+{
+    if (!CanAttach() || (parent && (parent->GetWorld() != myWorld || parent->myPendingDestroy))) return false;
+    for (auto* p = parent; p; p = p->GetParent()) if (p == this) return false;
+    if (myWorld->GetState() != World::State::Active) return ApplyParent(parent, mode);
+    auto self = GetHandle(); auto target = parent ? parent->GetHandle() : ActorHandle{};
+    myWorld->QueueStructure([self,target,hasParent = parent != nullptr,mode](SceneDiagnostics& errors)
+    {
+        auto* object = self.Get(); if (!object) return;
+        if ((hasParent && !target.Get()) || !object->ApplyParent(target.Get(),mode))
+            errors.push_back({object->GetName(),{},"parent","Invalid actor attachment"});
+    });
+    return true;
 }

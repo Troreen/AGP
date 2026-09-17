@@ -99,4 +99,15 @@
   <ItemGroup>
     <None Include="README.md" />
   </ItemGroup>
+<ItemGroup><Filter Include="Scenes"><UniqueIdentifier>{59ed8998-4b27-4663-8ce4-dd1a46da6d66}</UniqueIdentifier></Filter></ItemGroup>
+<ItemGroup><ClInclude Include="Scenes\ConnectionContext.h"><Filter>Scenes</Filter></ClInclude></ItemGroup>
+<ItemGroup><ClInclude Include="Scenes\SceneDiagnostic.h"><Filter>Scenes</Filter></ClInclude></ItemGroup>
+<ItemGroup><ClInclude Include="World\ObjectHandle.h"><Filter>World</Filter></ClInclude></ItemGroup>
+<ItemGroup><ClCompile Include="Components\SceneComponent.cpp"><Filter>Components</Filter></ClCompile></ItemGroup>
+<ItemGroup><ClInclude Include="Components\SceneComponent.h"><Filter>Components</Filter></ClInclude></ItemGroup>
+<ItemGroup><ClInclude Include="Scenes\ComponentRegistry.h"><Filter>Scenes</Filter></ClInclude></ItemGroup>
+<ItemGroup><ClCompile Include="Scenes\SceneBuilder.cpp"><Filter>Scenes</Filter></ClCompile></ItemGroup>
+<ItemGroup><ClInclude Include="Scenes\SceneBuilder.h"><Filter>Scenes</Filter></ClInclude></ItemGroup>
+<ItemGroup><ClInclude Include="Scenes\SceneDescription.h"><Filter>Scenes</Filter></ClInclude></ItemGroup>
+<ItemGroup><ClInclude Include="World\TransformOperations.h"><Filter>World</Filter></ClInclude></ItemGroup>
 </Project>

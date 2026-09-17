@@ -1,6 +1,8 @@
 #include "Component.h"
 
 #include <utility>
+#include "GameFramework/World/World.h"
+#include <stdexcept>
 
 void Component::FixedUpdate(float)
 {
@@ -38,7 +40,7 @@ Actor* Component::GetOwner() const
 
 bool Component::IsEnabled() const
 {
-	return myIsEnabled;
+	return myIsEnabled && !myPendingDestroy;
 }
 
 void Component::SetEnabled(bool anIsEnabled)
@@ -61,3 +63,11 @@ void Component::SetName(std::string aName)
 {
 	myName = std::move(aName);
 }
+
+World& Component::GetWorld() const
+{
+    if (!myOwner || !myOwner->GetWorld()) throw std::logic_error("Component is not attached");
+    return *myOwner->GetWorld();
+}
+const GameInput& Component::GetInput() const { return GetWorld().GetInput(); }
+void Component::Destroy() { GetWorld().DestroyComponent(*this); }

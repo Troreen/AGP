@@ -2,8 +2,10 @@
 #include "Application.h"
 #include "GameFramework/Runtime/GameContext.h"
 #include "GameFramework/Components/LightComponent.h"
+#include "GameFramework/Components/CameraComponent.h"
 #include "GameFramework/Components/SkeletalMeshComponent.h"
 #include <cmath>
+#include "GameFramework/Scenes/ConnectionContext.h"
 #include <utility>
 
 namespace
@@ -69,17 +71,11 @@ namespace
 
 }
 
-// Lazy owner-dependent setup: GetOwner() was unavailable in the constructor.
-// After initializing the controller, consume the facade's copied input. No Win32
-// polling, locks, frame scheduling or rendering calls belong in this component.
+// Owner-dependent initialization happens once, after scene validation.
+void CameraControlsComponent::BeginPlay() { myController.Init(GetOwner()->GetTransform()); }
 void CameraControlsComponent::LateUpdate(float deltaTime)
 {
-	if (!myInitialized)
-	{
-		myController.Init(GetOwner()->GetTransform());
-		myInitialized = true;
-	}
-	const GameInput& input = myContext.GetInput();
+	const GameInput& input = GetInput();
 	FreeFlyCameraController::InputState camera;
 	camera.MoveForward = input.IsKeyDown(Keys::W);
 	camera.MoveBackward = input.IsKeyDown(Keys::S);
@@ -98,27 +94,33 @@ void CameraControlsComponent::LateUpdate(float deltaTime)
 // uses dt; mouse deltas elsewhere are already accumulated movement, not a rate.
 void SpinComponent::FixedUpdate(float deltaTime)
 {
-	if (myContext.GetInput().IsKeyPressed(Keys::R)) mySpinning = !mySpinning;
+	if (GetInput().IsKeyPressed(Keys::R)) mySpinning = !mySpinning;
 	if (!mySpinning) return;
 	myYaw = std::fmod(myYaw + 25.0f * deltaTime, 360.0f);
 	GetOwner()->SetRotation(myYaw, 0, 0);
 }
 
-LightControlsComponent::LightControlsComponent(GameContext& context, Actor* camera,
-	DirectionalLightComponent* directional, std::vector<PointLightComponent*> points, SpotLightComponent* spot)
-	: myContext(context), myCameraActor(camera), myDirectionalLightComponent(directional),
-	  myPointLightComponents(std::move(points)), mySpotLightComponent(spot)
+void LightControlsComponent::Connect(ConnectionContext& context)
 {
+    auto camera = context.Require<CameraComponent>("Camera Actor", "Camera");
+    if (auto* c = camera.Get()) myCamera = c->GetOwner()->GetHandle();
+    myDirectional = context.Require<DirectionalLightComponent>("Directional Light Actor", "Directional Light");
+    myPoints = { context.Require<PointLightComponent>("Warm Character Point Actor", "Warm Character Point Light") };
+    mySpot = context.Require<SpotLightComponent>("Spot Light Actor", "Spot Light");
+}
+void AnimationControlsComponent::Connect(ConnectionContext& context)
+{
+    myMesh = context.Require<SkeletalMeshComponent>();
 }
 
-// Find the sibling after attachment, when the scene is fully constructed. Missing
-// render components simply make the control inert. Number-pad 0-2 choose looping
+// Connect validates the required sibling once. Its handle can become empty if
+// the mesh is removed during play. Number-pad 0-2 choose looping
 // base clips; 3 requests a partial wave with a full-body fallback.
 void AnimationControlsComponent::Update(float)
 
 {
-	const GameInput& anInputFrame = myContext.GetInput();
-	auto* myAnimatedMeshComponent = GetOwner()->GetComponent<SkeletalMeshComponent>();
+	const GameInput& anInputFrame = GetInput();
+	auto* myAnimatedMeshComponent = myMesh.Get();
 	if (myAnimatedMeshComponent == nullptr)
 	{
 		return;
@@ -153,7 +155,12 @@ void AnimationControlsComponent::Update(float)
 // the host publishes those values after all late updates finish.
 void LightControlsComponent::LateUpdate(float)
 {
-	const GameInput& anInputFrame = myContext.GetInput();
+    auto* myCameraActor = myCamera.Get();
+    auto* myDirectionalLightComponent = myDirectional.Get();
+    auto* mySpotLightComponent = mySpot.Get();
+    std::vector<PointLightComponent*> myPointLightComponents;
+    for (const auto& point : myPoints) if (auto* live = point.Get()) myPointLightComponents.push_back(live);
+	const GameInput& anInputFrame = GetInput();
 	const bool shiftDown =
 	    anInputFrame.IsKeyDown(Keys::SHIFT) || anInputFrame.IsKeyDown(Keys::LSHIFT) || anInputFrame.IsKeyDown(Keys::RSHIFT);
 

@@ -18,6 +18,7 @@
 #include <cstring>
 #include <exception>
 #include <thread>
+#include <cassert>
 
 DECLARE_LOG_CATEGORY_WITH_NAME(LogRenderStats, RenderStats, Log);
 DEFINE_LOG_CATEGORY(LogRenderStats);
@@ -48,11 +49,16 @@ struct GameApplication::Impl
 	}
 	int Run();
 	void Advance(float delta, const GameInput& input);
+    void Start();
+    bool ReplaceScene();
 	// Wake before joining: the worker may be asleep waiting for input. Joining must
 	// finish before any state captured by its callbacks can be destroyed.
 	void Stop()
 	{
-		myWorker.request_stop();
+		{
+            std::scoped_lock lock(myInputMutex);
+            myWorker.request_stop();
+        }
 		myInputCondition.notify_all();
 		if (myWorker.joinable()) myWorker.join();
 	}
@@ -68,6 +74,7 @@ struct GameApplication::Impl
 	HWND myMainWindowHandle = nullptr;
 	CommonUtilities::InputHandler myInputHandler;
 	bool myHasMainThreadMouseLookAnchor = false;
+    bool myMissingCameraReported = false;
 	GraphicsCommandList myCommandList;
 	// The renderer retains a completed snapshot while gameplay writes another slot.
 	// World mutation does not wait for presentation; obsolete ready frames may be dropped.
@@ -91,19 +98,25 @@ struct GameApplication::Impl
 // This function is used unchanged by both runtime modes.
 void GameApplication::Impl::Advance(float delta, const GameInput& input)
 {
+	SceneDiagnostics diagnostics;
+    if (!myContext.myWorld->Flush(diagnostics))
+    {
+        for (const auto& d : diagnostics) GFLOG(Error, "{} / {} / {}: {}", d.Actor, d.Component, d.Property, d.Message);
+        assert(false && "Invalid runtime additions");
+    }
 	myLoop.Advance(delta, input,
 		[this](float dt, const GameInput& sample)
 		{
 			myContext.myInput = sample;
 			myGame.FixedUpdate(myContext, dt);
-			myContext.myWorld.FixedUpdate(dt);
+			myContext.myWorld->FixedUpdate(dt);
 			++myTickCount;
 		},
 		[this](float dt, const GameInput& sample)
 		{
 			myContext.myInput = sample;
 			myGame.Update(myContext, dt);
-			myContext.myWorld.Update(dt);
+			myContext.myWorld->Update(dt);
 		},
 		[this](float dt, const GameInput&)
 		{
@@ -142,44 +155,28 @@ int GameApplication::Impl::Run()
 	try
 	{
 		myGame.Initialize(myContext);
+        if (myContext.mySceneRequested) ReplaceScene();
+        SceneDiagnostics diagnostics;
+        if (myContext.myWorld->GetState() == World::State::Constructing && !myContext.myWorld->Prepare(diagnostics))
+        {
+            for (const auto& d : diagnostics) GFLOG(Error, "{} / {}: {}", d.Actor, d.Component, d.Message);
+            myContext.myWorld->Shutdown();
+            assert(false && "Invalid initial scene");
+            throw std::runtime_error("Invalid initial scene");
+        }
+        if (myContext.myWorld->GetState() == World::State::Prepared) myContext.myWorld->Activate();
 		BuildAndPublishRenderSnapshot();
-		ShowWindow(myMainWindowHandle, SW_SHOW);
-		SetForegroundWindow(myMainWindowHandle);
+		if (myConfig.ShowWindow)
+        {
+            ShowWindow(myMainWindowHandle, SW_SHOW);
+            SetForegroundWindow(myMainWindowHandle);
+        }
 		if (myConfig.EnableRenderDiagnostics) UpdateRenderPassTitle();
 		// --- Gameplay execution ---
 		// Threading is an engine implementation choice. Games see the same serialized
 		// callbacks regardless of this switch; a gameplay frame need not match a display frame.
 		const bool threaded = myConfig.ThreadedUpdate && !StartupOptions::Disabled(L"AGP_DISABLE_THREADED_UPDATE");
-		if (threaded)
-		{
-			myWorker = std::jthread([this](std::stop_token stop)
-			{
-				try
-				{
-					while (!stop.stop_requested())
-					{
-						GameInput input;
-						float delta;
-						{
-							std::unique_lock lock(myInputMutex);
-							myInputCondition.wait(lock, [&] { return stop.stop_requested() || myHasPendingInput; });
-							if (stop.stop_requested()) break;
-							input = myPendingInput;
-							delta = myPendingDelta;
-							myPendingInput = {};
-							myPendingDelta = 0;
-							myHasPendingInput = false;
-						}
-						Advance(delta, input);
-					}
-				}
-				catch (...)
-				{
-					std::scoped_lock lock(myInputMutex);
-					myFailure = std::current_exception();
-				}
-			});
-		}
+		if (threaded) Start();
 		// --- Platform frames and rendering ---
 		// The main thread never reads live actor transforms while gameplay is running.
 		// It exchanges copied input and completed snapshots instead.
@@ -197,6 +194,17 @@ int GameApplication::Impl::Run()
 				DispatchMessageW(&message);
 			}
 			if (quit) break;
+            if (myContext.mySceneRequested)
+            {
+                Stop();
+                if (myFailure) std::rethrow_exception(myFailure);
+                ReplaceScene();
+                myPendingInput = {}; myPendingDelta = 0; myHasPendingInput = false;
+                myContext.myInput = {}; myLoop.Reset(); myHasMainThreadMouseLookAnchor = false;
+                myInputHandler.UpdateInput();
+                timer.Update();
+                if (threaded) Start();
+            }
 			timer.Update();
 			myInputHandler.UpdateInput();
 			const GameInput input = CaptureInputFrame();
@@ -246,9 +254,12 @@ int GameApplication::Impl::Run()
 		Stop();
 		const auto failure = std::current_exception();
 		try { myGame.Shutdown(myContext); } catch (...) { GFLOG(Error, "Game Shutdown failed during exception cleanup"); }
+		myContext.myWorld->Shutdown();
 		std::rethrow_exception(failure);
 	}
-	myGame.Shutdown(myContext);
+	try { myGame.Shutdown(myContext); }
+    catch (...) { myContext.myWorld->Shutdown(); throw; }
+    myContext.myWorld->Shutdown();
 	return 0;
 }
 
@@ -310,10 +321,14 @@ GameInput GameApplication::Impl::CaptureInputFrame()
 // must stay stable during play. Failed extraction must return its buffer to the queue.
 void GameApplication::Impl::BuildAndPublishRenderSnapshot()
 {
-	if (myContext.myCamera == nullptr)
-	{
-		return;
-	}
+	auto* camera = myContext.myCamera.Get();
+    if (!camera || !camera->HasBegunPlay() || !camera->IsEnabled() || !camera->GetOwner()->IsActive())
+    {
+        if (!myMissingCameraReported) GFLOG(Warning, "No active camera; retaining the last completed frame");
+        myMissingCameraReported = true;
+        return;
+    }
+    myMissingCameraReported = false;
 
 	GraphicsEngine::RenderSceneSnapshot* snapshot = myRenderSnapshots.BeginBuild();
 	if (snapshot == nullptr)
@@ -323,7 +338,7 @@ void GameApplication::Impl::BuildAndPublishRenderSnapshot()
 
 	try
 	{
-		if (GraphicsEngine::Get().BuildRenderSnapshot(*myContext.myCamera, myContext.myWorld, *snapshot))
+		if (GraphicsEngine::Get().BuildRenderSnapshot(*camera, *myContext.myWorld, *snapshot))
 			myRenderSnapshots.Publish(snapshot);
 		else
 			myRenderSnapshots.CancelBuild(snapshot);
@@ -363,4 +378,66 @@ void GameApplication::Impl::LogRuntimeStats() const
 	LOG(LogRenderStats, Log, "Snapshot worker: fixed ticks {}, published {}, reused previous {}, dropped ready {}",
 	    myTickCount.load(), snapshotStats.PublishedSnapshots, snapshotStats.ReusedSnapshots,
 	    snapshotStats.DroppedReadySnapshots);
+}
+
+void GameApplication::Impl::Start()
+{
+			myWorker = std::jthread([this](std::stop_token stop)
+			{
+				try
+				{
+					while (!stop.stop_requested())
+					{
+						GameInput input;
+						float delta;
+						{
+							std::unique_lock lock(myInputMutex);
+							myInputCondition.wait(lock, [&] { return stop.stop_requested() || myHasPendingInput; });
+							if (stop.stop_requested()) break;
+							input = myPendingInput;
+							delta = myPendingDelta;
+							myPendingInput = {};
+							myPendingDelta = 0;
+							myHasPendingInput = false;
+						}
+						Advance(delta, input);
+					}
+				}
+				catch (...)
+				{
+					std::scoped_lock lock(myInputMutex);
+					myFailure = std::current_exception();
+				}
+			});
+}
+
+// Preparation is isolated from the live world. The commit point is Shutdown:
+// BeginPlay failures after that point terminate the session, never revive ended objects.
+bool GameApplication::Impl::ReplaceScene()
+{
+    GameContext::SceneFactory factory;
+    {
+        std::scoped_lock lock(myContext.mySceneMutex);
+        factory = std::move(myContext.mySceneFactory); myContext.mySceneRequested = false;
+    }
+    SceneBuildResult result;
+    try { if (factory) result = factory(&myContext.myInput); }
+    catch (const std::exception& e) { result.Diagnostics.push_back({{},{},{},e.what()}); }
+    catch (...) { result.Diagnostics.push_back({{},{},{},"Unknown scene factory exception"}); }
+    if (!result || result.Candidate->GetState() != World::State::Prepared || !result.Camera.Get() || &result.Camera.Get()->GetWorld() != result.Candidate.get())
+    {
+        for (const auto& d : result.Diagnostics) GFLOG(Error, "{} / {} / {}: {}", d.Actor,d.Component,d.Property,d.Message);
+        result.Candidate.reset();
+        GFLOG(Error, "Scene preparation failed; previous scene retained");
+        assert(false && "Scene preparation failed");
+        if (myContext.myWorld->GetState() != World::State::Active) throw std::runtime_error("Initial scene preparation failed");
+        return false;
+    }
+    myContext.myWorld->Shutdown();
+    myContext.myWorld = std::move(result.Candidate);
+    myContext.myCamera = result.Camera;
+    myRenderSnapshots.Reset();
+    myContext.myWorld->Activate();
+    BuildAndPublishRenderSnapshot();
+    return true;
 }

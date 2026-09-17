@@ -1,14 +1,14 @@
 #pragma once
 
-#include "Component.h"
+#include "SceneComponent.h"
 
 #include "Camera3D.hpp"
 #include "Vector2.hpp"
 
-// Projection/view data attached to an actor. Moving the owner moves the viewpoint;
-// this component does not implement player controls. Select its actor through
+// Projection/view data attached to a spatial hierarchy. This component does not
+// implement player controls. Select the specific CameraComponent through
 // GameContext::SetActiveCamera; the renderer extracts camera data for the snapshot.
-class CameraComponent final : public Component
+class CameraComponent final : public SceneComponent
 {
 public:
 	CameraComponent() = default;
