@@ -3,7 +3,7 @@
 The newer Perforce importer is not in this checkout. Do not infer its schema,
 coordinate system or material conventions from the current C++ sample.
 
-The boundary is `Source/GameFramework/Scenes/SceneData.h`.
+The boundary is `Source/Engine/GameFramework/Scenes/SceneData.h`.
 A SceneSource callback returns owned ActorRecord and ComponentRecord values.
 The registry builds runtime objects and applies properties; the importer must
 not create Actors, drive lifecycle or reference private engine implementation.

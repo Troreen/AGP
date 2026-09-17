@@ -55,17 +55,17 @@ recording intervals; they do not measure GPU execution time.
 | Location | Responsibility |
 | --- | --- |
 | `Source/Application/Game` | IGame implementation, scene setup, controls, mesh library, game materials |
-| `Source/GameFramework/Runtime` | Main loop, context, input and game callbacks |
-| `Source/GameFramework/World` | World, Actor, Component and Transform ownership and lifecycle |
-| `Source/GameFramework/Components` | Scene offsets, cameras, lights and meshes |
-| `Source/GameFramework/Scenes` | Scene descriptions, assets, properties and component construction |
-| `Source/GameFramework/Rendering` | Adapter to the existing renderer |
-| `Source/Graphics/GraphicsEngine/GraphicsEngine.cpp` | Frame orchestration, shadow calculations, resource and material creation |
-| `Source/Graphics/GraphicsEngine/RHI` | DirectX 11 device/context operations and command lists |
-| `Source/Graphics/GraphicsEngine/Objects` | Mesh, texture, buffer and other graphics wrappers |
-| `Source/Graphics/GraphicsEngine/Materials` | Material descriptions, parameters, shader compilation support |
-| `Source/Graphics/GraphicsEngine/ConstantBuffers` | CPU structures uploaded to shaders |
-| `Source/Graphics/GraphicsEngine/Shaders` | Internal passes and material shader code |
+| `Source/Engine/GameFramework/Runtime` | Main loop, context, input and game callbacks |
+| `Source/Engine/GameFramework/World` | World, Actor, Component and Transform ownership and lifecycle |
+| `Source/Engine/GameFramework/Components` | Scene offsets, cameras, lights and meshes |
+| `Source/Engine/GameFramework/Scenes` | Scene descriptions, assets, properties and component construction |
+| `Source/Engine/GameFramework/Rendering` | Adapter to the existing renderer |
+| `Source/Engine/GraphicsEngine/GraphicsEngine.cpp` | Frame orchestration, shadow calculations, resource and material creation |
+| `Source/Engine/GraphicsEngine/RHI` | DirectX 11 device/context operations and command lists |
+| `Source/Engine/GraphicsEngine/Objects` | Mesh, texture, buffer and other graphics wrappers |
+| `Source/Engine/GraphicsEngine/Materials` | Material descriptions, parameters, shader compilation support |
+| `Source/Engine/GraphicsEngine/ConstantBuffers` | CPU structures uploaded to shaders |
+| `Source/Engine/GraphicsEngine/Shaders` | Internal passes and material shader code |
 | `Source/Utilities` | Scheduling, startup options, camera controls and logging |
 | `CommonUtilities/include` | Shared math, input and timer utilities |
 | `Tests/EngineOptimisations` | CPU regression coverage for culling, routing and scheduling |
@@ -97,7 +97,7 @@ Authored source and tests follow these readability rules:
 Use clang-format 22 (the readability pass used 22.1.3) on edited C++ files, for example:
 
 ```powershell
-clang-format -i Source/Graphics/GraphicsEngine/GraphicsEngine.cpp Source/Graphics/GraphicsEngine/GraphicsEngine.h
+clang-format -i Source/Engine/GraphicsEngine/GraphicsEngine.cpp Source/Engine/GraphicsEngine/GraphicsEngine.h
 ```
 
 The formatter inserts braces and expands short bodies. Explicit captures and the

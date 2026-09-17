@@ -95,10 +95,16 @@ std::string Logger::Timestamp(bool aIncludeDate /*= false*/) const
 	const std::time_t time = std::chrono::system_clock::to_time_t(now);
 
 	tm timeInfo{};
-	const int error = localtime_s(&timeInfo, &time);
+	if (localtime_s(&timeInfo, &time) != 0)
+	{
+		return {};
+	}
 
 	char buffer[20]{};
-	const size_t wcsTimeErr = strftime(buffer, 20, aIncludeDate ? dateFormat : noDateFormat, &timeInfo);
+	if (strftime(buffer, sizeof(buffer), aIncludeDate ? dateFormat : noDateFormat, &timeInfo) == 0)
+	{
+		return {};
+	}
 	return buffer;
 }
 

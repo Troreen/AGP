@@ -23,8 +23,8 @@ ownership, the frame sequence, and code formatting conventions.
 
 - `AGP.sln` - Visual Studio solution.
 - `Source/Application/Game` - demo application, scene setup, controls, materials, primitive mesh generation.
-- `Source/Graphics/GraphicsEngine` - renderer, RHI, shader/material pipeline, shadow rendering.
-- `Source/GameFramework` - actors, components, world, camera, lights, mesh components.
+- `Source/Engine/GraphicsEngine` - renderer, RHI, shader/material pipeline, shadow rendering.
+- `Source/Engine/GameFramework` - actors, components, world, camera, lights, mesh components.
 - `Source/Utilities` - logging, camera controller, string helpers, common utilities glue.
 - `CommonUtilities/include` - math, input, timer, and utility types.
 - `Assets` - runtime meshes, animations, textures, and copied shader files.

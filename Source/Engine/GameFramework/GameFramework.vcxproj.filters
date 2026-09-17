@@ -1,0 +1,150 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Components">
+      <UniqueIdentifier>{6B7DD516-5735-1764-C03C-F0BFAC13B254}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rendering">
+      <UniqueIdentifier>{E3AE1F7C-4F19-D4F2-9857-85980401B247}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Runtime">
+      <UniqueIdentifier>{4995DAC4-B574-5960-BE8C-E4362AEBBFC1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scenes">
+      <UniqueIdentifier>{86EEB3D0-7290-DEA6-5B4B-F2FA478C65F7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SimdJson">
+      <UniqueIdentifier>{0CA52CAD-F871-87B8-218B-75600DB7BC46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UnrealSceneImporter">
+      <UniqueIdentifier>{4C139078-B874-6D86-41E2-B338AD42A445}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="World">
+      <UniqueIdentifier>{4D25640E-B939-8CBF-82BB-2F1FEE8E88F0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AudioManager.h" />
+    <ClInclude Include="Components\CameraComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\LightComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\MeshComponentBase.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\SceneComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\SkeletalMeshComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\StaticMeshComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="GameFrameworkLog.h" />
+    <ClInclude Include="Rendering\WorldRenderer.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Runtime\GameApplication.h">
+      <Filter>Runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="Runtime\GameContext.h">
+      <Filter>Runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="Runtime\GameInput.h">
+      <Filter>Runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="Runtime\IGame.h">
+      <Filter>Runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\AssetRefs.h">
+      <Filter>Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\ComponentRegistry.h">
+      <Filter>Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\SceneData.h">
+      <Filter>Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\SceneReader.h">
+      <Filter>Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="ServiceLocator.h" />
+    <ClInclude Include="SimdJson\simdjson.h">
+      <Filter>SimdJson</Filter>
+    </ClInclude>
+    <ClInclude Include="UnrealSceneImporter\UnrealSceneImporter.h">
+      <Filter>UnrealSceneImporter</Filter>
+    </ClInclude>
+    <ClInclude Include="UnrealSceneImporter\UnrealSceneStructs.h">
+      <Filter>UnrealSceneImporter</Filter>
+    </ClInclude>
+    <ClInclude Include="World\Actor.h">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="World\Component.h">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="World\Transform.h">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="World\World.h">
+      <Filter>World</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AudioManager.cpp" />
+    <ClCompile Include="Components\CameraComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\LightComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\MeshComponentBase.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\SceneComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\SkeletalMeshComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="GameFrameworkLog.cpp" />
+    <ClCompile Include="Rendering\WorldRenderer.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Runtime\GameApplication.cpp">
+      <Filter>Runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="Runtime\GameContext.cpp">
+      <Filter>Runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="Scenes\BuiltInComponents.cpp">
+      <Filter>Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="Scenes\ComponentRegistry.cpp">
+      <Filter>Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="ServiceLocator.cpp" />
+    <ClCompile Include="SimdJson\simdjson.cpp">
+      <Filter>SimdJson</Filter>
+    </ClCompile>
+    <ClCompile Include="UnrealSceneImporter\UnrealSceneImporter.cpp">
+      <Filter>UnrealSceneImporter</Filter>
+    </ClCompile>
+    <ClCompile Include="World\Actor.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="World\Component.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="World\Transform.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="World\World.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

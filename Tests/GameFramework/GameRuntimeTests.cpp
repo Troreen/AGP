@@ -231,7 +231,7 @@ int main(int argc, char** argv)
 	config.ShowWindow = false;
 	config.Width = 640;
 	config.Height = 360;
-	config.ContentRoot = std::filesystem::current_path() / "Assets";
+	config.ContentRoot = std::filesystem::current_path() / "Content";
 	try
 	{
 		if (scenario == "sample")

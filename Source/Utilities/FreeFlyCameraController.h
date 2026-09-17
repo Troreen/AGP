@@ -1,7 +1,11 @@
 #pragma once
-
-#include "InputHandler.h"
 #include "Transform.hpp"
+#include <vector>
+
+namespace CommonUtilities
+{
+	struct InputEvent;
+}
 
 class FreeFlyCameraController
 {
@@ -20,8 +24,8 @@ public:
 	};
 
 	FreeFlyCameraController();
+	~FreeFlyCameraController();
 
-	void Init(CommonUtilities::InputHandler& anInputHandler, CommonUtilities::Transform& aTransform);
 	void Init(CommonUtilities::Transform& aTransform);
 	void Update(float aTimeDelta);
 	void Update(float aTimeDelta, const InputState& anInputState);
@@ -33,8 +37,10 @@ public:
 	float GetLookSensitivity() const;
 
 private:
-	CommonUtilities::InputHandler* myInputHandler;
 	CommonUtilities::Transform* myTransform;
+	CommonUtilities::Vector3f myMoveBuffer;
+
+	std::vector<unsigned> myInputEventListenerIDs;
 
 	float myMoveSpeed;
 	float myLookSensitivity;
@@ -42,4 +48,6 @@ private:
 	float myPitchRadians;
 	float myMaxPitchRadians;
 	bool myHasMouseLookAnchor;
+
+	void HandleLockedMouseMove(const CommonUtilities::InputEvent& anEvent);
 };

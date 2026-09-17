@@ -1,0 +1,685 @@
+#include "ModelViewer.h"
+#include "../../Engine/GameFramework/AudioManager.h"
+
+#include <algorithm>
+#include <memory>
+#include <string>
+#include <utility>
+
+#include "Application.h"
+#include "GameFramework/Actor.h"
+#include "GameFramework/Components/CameraComponent.h"
+#include "GameFramework/Components/LightComponent.h"
+#include "GameFramework/Components/SkeletalMeshComponent.h"
+#include "GameFramework/Components/StaticMeshComponent.h"
+#include "GameFramework/ServiceLocator.h"
+#include "GraphicsEngine/Materials/Material.h"
+#include "GameFramework/UnrealSceneImporter/UnrealSceneImporter.h"
+
+ModelViewer::~ModelViewer()
+{
+    CommonUtilities::InputMapper& inputMapper = *ServiceLocator::GetInstance().GetInputMapper();
+    inputMapper.ClearBindingsFromAction("PLAY_BREATHING_ANIM");
+    inputMapper.ClearBindingsFromAction("PLAY_WALK_ANIM");
+    inputMapper.ClearBindingsFromAction("PLAY_RUN_ANIM");
+    inputMapper.ClearBindingsFromAction("PLAY_WAVE_ANIM");
+
+    for (unsigned eventListenerID : myInputEventListenerIDs)
+    {
+        inputMapper.RemoveEventListener(eventListenerID);
+    }
+
+    delete myOwnedInputHandler;
+    myOwnedInputHandler = nullptr;
+
+    delete myOwnedXInputHandler;
+    myOwnedXInputHandler = nullptr;
+}
+
+namespace
+{
+	using Vector3f = CommonUtilities::Vector3f;
+    using Vector4f = CommonUtilities::Vector4f;
+
+	std::filesystem::path GetMaterialRoot(const std::filesystem::path& aContentRoot)
+	{
+		return aContentRoot.parent_path() / "Source" / "Application" / "Game" / "Materials";
+	}
+
+	void AssignMaterialToAllSlots(MeshComponentBase* aMeshComponent, const std::shared_ptr<MaterialInterface>& aMaterial)
+	{
+		if (aMeshComponent == nullptr || aMaterial == nullptr || !aMeshComponent->HasMesh())
+		{
+			return;
+		}
+
+		const std::shared_ptr<Mesh> mesh = aMeshComponent->GetMesh();
+		for (size_t materialIndex = 0; materialIndex < mesh->GetNumMaterialSlots(); ++materialIndex)
+		{
+			aMeshComponent->SetMaterial(static_cast<unsigned>(materialIndex), aMaterial);
+		}
+	}
+
+	void AimActorAlongCameraForward(Actor& anActor, const CommonUtilities::Transform& aCameraTransform)
+	{
+		Vector3f forward = aCameraTransform.GetForward();
+		if (forward.LengthSqr() <= 0.0f)
+		{
+			forward = Vector3f::UnitZ;
+		}
+		else
+		{
+			forward.Normalize();
+		}
+
+		const Vector3f position = anActor.GetTransform().GetPosition();
+		anActor.LookAt(position + forward);
+	}
+
+	void PrintLightTuningValues(
+		const DirectionalLightComponent* aDirectionalLightComponent,
+		const std::vector<PointLightComponent*>& somePointLightComponents,
+		const SpotLightComponent* aSpotLightComponent)
+	{
+		unsigned activeLightCount = 0;
+		if (aDirectionalLightComponent != nullptr)
+		{
+			activeLightCount += aDirectionalLightComponent->IsEnabled() ? 1 : 0;
+			const Vector3f direction = aDirectionalLightComponent->GetWorldDirection();
+			MVLOG(Log, "Directional light direction: {{ {:.2f}, {:.2f}, {:.2f} }}, intensity: {:.2f}",
+				direction.x, direction.y, direction.z, aDirectionalLightComponent->GetIntensity());
+		}
+
+		for (size_t pointIndex = 0; pointIndex < somePointLightComponents.size(); ++pointIndex)
+		{
+			const PointLightComponent* pointLightComponent = somePointLightComponents[pointIndex];
+			if (pointLightComponent == nullptr)
+			{
+				continue;
+			}
+
+			activeLightCount += pointLightComponent->IsEnabled() ? 1 : 0;
+			const Vector3f position = pointLightComponent->GetWorldPosition();
+			MVLOG(Log, "Point light {} position: {{ {:.2f}, {:.2f}, {:.2f} }}, intensity: {:.2f}, radius: {:.2f}",
+				pointIndex, position.x, position.y, position.z, pointLightComponent->GetIntensity(), pointLightComponent->GetRadius());
+		}
+
+		if (aSpotLightComponent != nullptr)
+		{
+			activeLightCount += aSpotLightComponent->IsEnabled() ? 1 : 0;
+			const Vector3f position = aSpotLightComponent->GetWorldPosition();
+			const Vector3f direction = aSpotLightComponent->GetWorldDirection();
+			MVLOG(Log, "Spot light position: {{ {:.2f}, {:.2f}, {:.2f} }}, direction: {{ {:.2f}, {:.2f}, {:.2f} }}, intensity: {:.2f}, radius: {:.2f}",
+				position.x, position.y, position.z,
+				direction.x, direction.y, direction.z,
+				aSpotLightComponent->GetIntensity(), aSpotLightComponent->GetRadius());
+		}
+
+		MVLOG(Log, "Active demo lights: {}", activeLightCount);
+		GraphicsEngine::Get().LogShadowTuning();
+	}
+
+	PointLightComponent* CreatePointLight(
+		World& aWorld,
+		const char* aName,
+		const Vector3f& aPosition,
+		const Vector3f& aColor,
+		float anIntensity,
+		float aRadius)
+	{
+		Actor* pointLightActor = aWorld.CreateActor(std::string(aName) + " Actor");
+		if (pointLightActor == nullptr)
+		{
+			return nullptr;
+		}
+
+		pointLightActor->SetTranslation(aPosition);
+		PointLightComponent* pointLightComponent = pointLightActor->AddComponent<PointLightComponent>(std::string(aName) + " Light");
+		if (pointLightComponent != nullptr)
+		{
+			pointLightComponent->SetColor(aColor);
+			pointLightComponent->SetIntensity(anIntensity);
+			pointLightComponent->SetRadius(aRadius);
+		}
+
+		return pointLightComponent;
+	}
+}
+
+bool ModelViewer::Initialize(SIZE aWindowSize, WNDPROC aWindowProcess, LPCWSTR aWindowTitle)
+{
+	constexpr LPCWSTR windowClassName = L"ModelViewerMainWindow";
+
+    // First we create our Window Class
+    WNDCLASS windowClass = {};
+    windowClass.style = CS_VREDRAW | CS_HREDRAW | CS_OWNDC;
+    windowClass.lpfnWndProc = aWindowProcess;
+    windowClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
+    windowClass.lpszClassName = windowClassName;
+    RegisterClass(&windowClass);
+
+    // Put the window in the middle of the screen regardless of resolution.
+    LONG posX = (GetSystemMetrics(SM_CXSCREEN) - aWindowSize.cx) / 2;
+	posX = std::max<LONG>(posX, 0);
+
+	LONG posY = (GetSystemMetrics(SM_CYSCREEN) - aWindowSize.cy) / 2;
+	posY = std::max<LONG>(posY, 0);
+
+	// Then we use the class to create our window
+    myMainWindowHandle = CreateWindow(
+        windowClassName,                                // Classname
+        aWindowTitle,                                   // Window Title
+        /*WS_OVERLAPPEDWINDOW |*/ WS_POPUP,                 // Flags
+        posX,
+        posY,
+        aWindowSize.cx,
+        aWindowSize.cy,
+        nullptr, nullptr, nullptr,
+        nullptr
+    );
+
+    std::filesystem::path contentPath = std::filesystem::current_path() / ".." / ".." / ".." / "Content";
+	contentPath = std::filesystem::canonical(contentPath);
+	myContentRoot = contentPath;
+
+    UnrealSceneImporter importer;
+
+    UnrealSceneData unrealData = importer.ImportScene(myContentRoot / "ExportedScenes/TestExportMap_Level.json");
+
+    //SceneData sceneData = converter.ConvertFromUnreal(unrealData)
+
+	{   // Graphics Init
+        MVLOG(Log, "Initializing Graphics Engine...");
+
+        GraphicsEngine& GE = GraphicsEngine::Get();
+
+	    if(!GE.Initialize(myMainWindowHandle, contentPath / "Shaders"))
+	        return false;
+
+        if (!GE.CreateCommandList("Model Viewer", myCommandList))
+        {
+            return false;
+        }
+    }
+
+    myOwnedInputHandler = new CommonUtilities::InputHandler(myMainWindowHandle);
+    myOwnedXInputHandler = new CommonUtilities::XInputHandler;
+
+    CommonUtilities::InputMapper* inputMapper = ServiceLocator::GetInstance().SetInputMapper(new CommonUtilities::InputMapper);
+    inputMapper->Init(myOwnedInputHandler, myOwnedXInputHandler);
+
+    inputMapper->BindActionToInputCode("PLAY_BREATHING_ANIM", EKeyCode::NUMPAD0);
+    inputMapper->BindActionToInputCode("PLAY_WALK_ANIM", EKeyCode::NUMPAD1);
+    inputMapper->BindActionToInputCode("PLAY_RUN_ANIM", EKeyCode::NUMPAD2);
+    inputMapper->BindActionToInputCode("PLAY_WAVE_ANIM", EKeyCode::NUMPAD3);
+
+    myInputEventListenerIDs.push_back(
+        inputMapper->AddEventListener("PLAY_BREATHING_ANIM", [this](const CommonUtilities::InputEvent& anEvent) {
+            if (anEvent.inputData.isPressed && myAnimatedMeshComponent)
+            {
+                myAnimatedMeshComponent->PlayAnimation("Breathing", true);
+            }
+        })
+    );
+
+    myInputEventListenerIDs.push_back(
+        inputMapper->AddEventListener("PLAY_WALK_ANIM", [this](const CommonUtilities::InputEvent& anEvent) {
+            if (anEvent.inputData.isPressed && myAnimatedMeshComponent)
+            {
+                myAnimatedMeshComponent->PlayAnimation("Walk", true);
+            }
+        })
+    );
+
+    myInputEventListenerIDs.push_back(
+        inputMapper->AddEventListener("PLAY_RUN_ANIM", [this](const CommonUtilities::InputEvent& anEvent) {
+            if (anEvent.inputData.isPressed && myAnimatedMeshComponent)
+            {
+                myAnimatedMeshComponent->PlayAnimation("Run", true);
+            }
+        })
+    );
+
+    myInputEventListenerIDs.push_back(
+        inputMapper->AddEventListener("PLAY_WAVE_ANIM", [this](const CommonUtilities::InputEvent& anEvent) {
+            if (anEvent.inputData.isPressed && myAnimatedMeshComponent && !myAnimatedMeshComponent->PlayPartialAnimation("Wave", false))
+            {
+                myAnimatedMeshComponent->PlayAnimation("Breathing", true);
+            }
+        })
+    );
+
+    myMeshLibrary.Initialize(myContentRoot);
+    AudioManager::GetInstance()->Init();
+
+    LoadScene();
+
+    if (myCameraActor != nullptr)
+    {
+        myCameraController.Init(myCameraActor->GetTransform());
+    }
+
+    MVLOG(Log, "Ready!");
+
+    // Show our program window and give it focus.
+    ShowWindow(myMainWindowHandle, SW_SHOW);
+    SetForegroundWindow(myMainWindowHandle);
+    Application.Timer.Update();
+
+    return true;
+}
+
+int ModelViewer::Run()
+{
+    MSG msg;
+    ZeroMemory(&msg, sizeof(MSG));
+
+    myIsRunning = true;
+
+    while (myIsRunning)
+    {
+        while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+        {
+            myOwnedInputHandler->UpdateEvents(msg.message, msg.wParam, msg.lParam);
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+
+            if (msg.message == WM_QUIT)
+            {
+                myIsRunning = false;
+            }
+        }
+
+        Application.Timer.Update();
+        const float deltaTime = Application.Timer.GetDeltaTime();
+
+        ServiceLocator::GetInstance().GetInputMapper()->Update();
+        myCameraController.Update(deltaTime);
+        HandleLightInput();
+        UpdateScene(deltaTime);
+
+        myCommandList.ResetCommandList();
+        GraphicsEngine& GE = GraphicsEngine::Get();
+        if (myCameraActor != nullptr)
+        {
+            GE.Render(myCommandList, *myCameraActor, myWorld);
+            myCommandList.FinishCommandList();
+            GE.ExecuteCommandList(myCommandList);
+            GE.Present();
+        }
+        
+    }
+
+    return 0;
+}
+
+void ModelViewer::LoadScene()
+{
+    mySpinningActors.clear();
+    myAnimatedMeshComponent = nullptr;
+    myDirectionalLightComponent = nullptr;
+    myPointLightComponents.clear();
+    mySpotLightComponent = nullptr;
+    const std::filesystem::path materialRoot = GetMaterialRoot(myContentRoot);
+    const Vector3f sceneFocus = { 25.0f, 0.0f, 260.0f };
+    const Vector3f floorPosition = { 0.0f, 0.0f, 260.0f };
+    const Vector3f characterPosition = { 0.0f, 0.0f, 250.0f };
+    const Vector3f chestPosition = { 135.0f, 0.0f, 285.0f };
+    const Vector3f chestAlphaPosition = { -200.0f, 0.0f, -100.0f };
+    const Vector3f chestAlphaPosition2 = { 0.0f, 0.0f, -100.0f };
+    const Vector3f colorCheckerPosition = { -145.0f, 40.0f, 365.0f };
+    const Vector3f smoothSpherePosition = { 320.0f, 100.0f, 430.0f };
+
+    {
+        myCameraActor = myWorld.CreateActor("Camera Actor");
+        if (myCameraActor != nullptr)
+        {
+            myCameraActor->AddComponent<CameraComponent>(
+                "Camera",
+                90.0f,
+                1.0f,
+                50000.0f,
+                GraphicsEngine::Get().GetClientSize());
+
+            myCameraActor->SetTranslation({ 0.0f, 260.0f, -950.0f });
+            myCameraActor->LookAt(sceneFocus);
+        }
+    }
+
+    {
+        Actor* directionalLightActor = myWorld.CreateActor("Directional Light Actor");
+        if (directionalLightActor != nullptr)
+        {
+            directionalLightActor->SetTranslation({ -450.0f, 650.0f, -350.0f });
+            directionalLightActor->LookAt(sceneFocus);
+            myDirectionalLightComponent = directionalLightActor->AddComponent<DirectionalLightComponent>("Directional Light");
+            if (myDirectionalLightComponent != nullptr)
+            {
+                myDirectionalLightComponent->SetColor({ 1.0f, 0.96f, 0.9f });
+                myDirectionalLightComponent->SetIntensity(11.0f);
+            }
+        }
+
+        myPointLightComponents.push_back(CreatePointLight(myWorld, "Warm Character Point", { -90.0f, 180.0f, 150.0f }, { 1.0f, 0.42f, 0.22f }, 420.0f, 760.0f));
+        //myPointLightComponents.push_back(CreatePointLight(myWorld, "Cool Character Point", { 60.0f, 75.0f, 330.0f }, { 0.25f, 0.55f, 1.0f }, 500.0f, 620.0f));
+        //myPointLightComponents.push_back(CreatePointLight(myWorld, "Chest Accent Point", { 170.0f, 25.0f, 235.0f }, { 0.35f, 1.0f, 0.55f }, 560.0f, 560.0f));
+
+        Actor* spotLightActor = myWorld.CreateActor("Spot Light Actor");
+        if (spotLightActor != nullptr)
+        {
+            spotLightActor->SetTranslation({ 430.0f, 430.0f, -210.0f });
+            spotLightActor->LookAt(sceneFocus);
+            mySpotLightComponent = spotLightActor->AddComponent<SpotLightComponent>("Spot Light");
+            if (mySpotLightComponent != nullptr)
+            {
+                mySpotLightComponent->SetColor({ 0.55f, 0.7f, 1.0f });
+                mySpotLightComponent->SetIntensity(2800.0f);
+                mySpotLightComponent->SetRadius(1200.0f);
+                mySpotLightComponent->SetConeAnglesDegrees(18.0f, 34.0f);
+            }
+        }
+    }
+
+    CreateStaticMeshActor("Floor Actor", "Floor Mesh Component", "Floor",
+        materialRoot / "FloorMaterial.mat",
+        floorPosition,
+        { 0.0f, -90.0f, 0.0f },
+        { 1100.0f, 1100.0f, 1100.0f });
+
+    CreateStaticMeshActor("SM_Chest Actor", "SM_Chest Mesh Component", "SM_Chest",
+        materialRoot / "ChestMaterial.mat",
+        chestPosition,
+        { 0.0f, 0.0f, 0.0f },
+        { 1.0f, 1.0f, 1.0f });
+
+    StaticMeshComponent* alphaChestMeshComponent = CreateStaticMeshActor("SM_Chest Alpha Actor", "SM_Chest Alpha Mesh Component", "SM_Chest",
+        materialRoot / "ChestMaterial_Alpha.mat",
+        chestAlphaPosition,
+        { 0.0f, 0.0f, 0.0f },
+        { 1.0f, 1.0f, 1.0f });
+
+        
+        
+        if (alphaChestMeshComponent != nullptr)
+        {
+            if (const std::shared_ptr<MaterialInterface> alphaBaseMaterial = GetMaterial(materialRoot / "ChestMaterial_Alpha.mat"))
+            {
+                if (const std::shared_ptr<MaterialInstance> alphaChestMaterial = MaterialInstance::Create("ChestMaterial_Alpha_Instance", alphaBaseMaterial))
+                {
+                    alphaChestMaterial->SetValue("MB_Tint", Vector4f(1.0f, 1.0f, 1.0f, 0.35f));
+                    AssignMaterialToAllSlots(alphaChestMeshComponent, alphaChestMaterial);
+                }
+            }
+        }
+    StaticMeshComponent* alphaChestMeshComponent2 = CreateStaticMeshActor("SM_Chest Alpha Actor 2", "SM_Chest Alpha Mesh Component 2", "SM_Chest",
+        materialRoot / "ChestMaterial_Alpha.mat",
+        chestAlphaPosition2,
+        { 0.0f, 0.0f, 0.0f },
+        { 1.0f, 1.0f, 1.0f });
+    
+    if (alphaChestMeshComponent2 != nullptr)
+        {
+            if (const std::shared_ptr<MaterialInterface> alphaBaseMaterial = GetMaterial(materialRoot / "ChestMaterial_Alpha.mat"))
+            {
+                if (const std::shared_ptr<MaterialInstance> alphaChestMaterial = MaterialInstance::Create("ChestMaterial_Alpha_Instance", alphaBaseMaterial))
+                {
+                    alphaChestMaterial->SetValue("MB_Tint", Vector4f(1.0f, 1.0f, 1.0f, 0.75f));
+                    AssignMaterialToAllSlots(alphaChestMeshComponent2, alphaChestMaterial);
+                }
+            }
+        }
+        
+    CreateStaticMeshActor("SM_Color_Checker Actor", "SM_Color_Checker Mesh Component", "SM_Color_Checker",
+        materialRoot / "ColorCheckerMaterial.mat",
+        colorCheckerPosition,
+        { 0.0f, -90.0f, 0.0f },
+        { 1.0f, 1.0f, 1.0f });
+
+    if (std::shared_ptr<Mesh> characterMesh = GetRegisteredMesh("SK_C_TGA_Bro"))
+    {
+        Actor* characterActor = myWorld.CreateActor("TGA Bro Actor");
+        if (characterActor != nullptr)
+        {
+            myAnimatedMeshComponent = characterActor->AddComponent<SkeletalMeshComponent>("TGA Bro Mesh Component", characterMesh);
+            characterActor->SetTranslation(characterPosition);
+            characterActor->SetRotation(180.0f, 0.0f, 0.0f);
+            characterActor->SetScale({ 1.0f, 1.0f, 1.0f });
+
+            if (myAnimatedMeshComponent != nullptr)
+            {
+                AssignMaterialToAllSlots(myAnimatedMeshComponent, GetMaterial(materialRoot / "CharacterMaterial.mat"));
+
+                // TODO Engine future:
+                // Replace hardcoded joint mask with data-driven animation mask assets.
+                // Masks should be authored externally and resolved to joint indices when loading the skeleton.
+                myAnimatedMeshComponent->ConfigurePartialLayerFromJointName("RightShoulder");
+                myAnimatedMeshComponent->PlayAnimation("Breathing", true);
+            }
+        }
+    }
+}
+
+std::shared_ptr<MaterialInterface> ModelViewer::GetMaterial(const std::filesystem::path& aMaterialFile)
+{
+    const std::string cacheKey = aMaterialFile.lexically_normal().string();
+    if (const auto materialIt = myMaterialCache.find(cacheKey); materialIt != myMaterialCache.end())
+    {
+        return materialIt->second;
+    }
+
+    MaterialDescription description;
+    if (!LoadMaterialDescription(aMaterialFile, description))
+    {
+        MVLOG(Warning, "Could not load material description '{}'.", aMaterialFile.string());
+        return nullptr;
+    }
+
+    std::shared_ptr<Material> material = std::make_shared<Material>();
+    if (!GraphicsEngine::Get().CreateMaterial(description, *material))
+    {
+        MVLOG(Warning, "Could not create material '{}'.", description.Name);
+        return nullptr;
+    }
+
+    const auto materialResult = myMaterialCache.emplace(cacheKey, material);
+    return materialResult.first->second;
+}
+
+StaticMeshComponent* ModelViewer::CreateStaticMeshActor(
+    const std::string& anActorName,
+    const std::string& aComponentName,
+    const std::string& aMeshName,
+    const std::filesystem::path& aMaterialFile,
+    const CommonUtilities::Vector3<float>& aPosition,
+    const CommonUtilities::Vector3<float>& aRotationDegrees,
+    const CommonUtilities::Vector3<float>& aScale)
+{
+    const std::shared_ptr<Mesh> mesh = GetRegisteredMesh(aMeshName);
+    if (mesh == nullptr)
+    {
+        MVLOG(Warning, "Scene mesh '{}' is not registered.", aMeshName);
+        return nullptr;
+    }
+
+    Actor* actor = myWorld.CreateActor(anActorName);
+    if (actor == nullptr)
+    {
+        return nullptr;
+    }
+
+    StaticMeshComponent* meshComponent = actor->AddComponent<StaticMeshComponent>(aComponentName, mesh);
+    actor->SetTranslation(aPosition);
+    actor->SetRotation(aRotationDegrees.x, aRotationDegrees.y, aRotationDegrees.z);
+    actor->SetScale(aScale);
+
+    AssignMaterialToAllSlots(meshComponent, GetMaterial(aMaterialFile));
+    return meshComponent;
+}
+
+std::shared_ptr<Mesh> ModelViewer::GetRegisteredMesh(const std::string& aName) const
+{
+    return myMeshLibrary.GetMesh(aName);
+}
+
+void ModelViewer::HandleLightInput()
+{
+    // Reverting to polling behaviour rather than implementing InputMapper here, because fuck all this shit.
+
+    CommonUtilities::InputHandler& inputHandler = *ServiceLocator::GetInstance().GetInputMapper()->GetInputHandler();
+
+    const bool shiftDown = inputHandler.IsKeyDown(static_cast<int>(EKeyCode::SHIFT));
+    GraphicsEngine& graphicsEngine = GraphicsEngine::Get();
+
+    if (inputHandler.IsKeyPressed(static_cast<int>(EKeyCode::F5)))
+    {
+        graphicsEngine.ResetShadowTuning();
+    }
+
+    if (inputHandler.IsKeyPressed(static_cast<int>(EKeyCode::F6)))
+    {
+        graphicsEngine.AdjustShadowBias(LightType::Directional, -0.00005f);
+    }
+
+    if (inputHandler.IsKeyPressed(static_cast<int>(EKeyCode::F7)))
+    {
+        graphicsEngine.AdjustShadowBias(LightType::Directional, 0.00005f);
+    }
+
+    if (inputHandler.IsKeyPressed(static_cast<int>(EKeyCode::F8)))
+    {
+        graphicsEngine.AdjustShadowBias(LightType::Spot, -0.00002f);
+    }
+
+    if (inputHandler.IsKeyPressed(static_cast<int>(EKeyCode::F9)))
+    {
+        graphicsEngine.AdjustShadowBias(LightType::Spot, 0.00002f);
+    }
+
+    if (inputHandler.IsKeyPressed(static_cast<int>(EKeyCode::F10)))
+    {
+        graphicsEngine.AdjustShadowBias(LightType::Point, -0.00005f);
+    }
+
+    if (inputHandler.IsKeyPressed(static_cast<int>(EKeyCode::F11)))
+    {
+        graphicsEngine.AdjustShadowBias(LightType::Point, 0.00005f);
+    }
+
+    if (inputHandler.IsKeyPressed(static_cast<int>(EKeyCode::P)))
+    {
+        PrintLightTuningValues(myDirectionalLightComponent, myPointLightComponents, mySpotLightComponent);
+    }
+
+    if (shiftDown && myCameraActor != nullptr)
+    {
+        const CommonUtilities::Transform& cameraTransform = myCameraActor->GetTransform();
+        const Vector3f cameraPosition = cameraTransform.GetPosition();
+
+        if (inputHandler.IsKeyPressed(static_cast<int>(EKeyCode::NUMPAD7)) && myDirectionalLightComponent != nullptr)
+        {
+            if (Actor* lightActor = myDirectionalLightComponent->GetOwner())
+            {
+                AimActorAlongCameraForward(*lightActor, cameraTransform);
+                const Vector3f direction = myDirectionalLightComponent->GetWorldDirection();
+                MVLOG(Log, "Aimed directional light from camera direction: {{ {:.2f}, {:.2f}, {:.2f} }}",
+                    direction.x, direction.y, direction.z);
+            }
+            return;
+        }
+
+        if (inputHandler.IsKeyPressed(static_cast<int>(EKeyCode::NUMPAD8)))
+        {
+            for (PointLightComponent* pointLightComponent : myPointLightComponents)
+            {
+                if (pointLightComponent == nullptr)
+                {
+                    continue;
+                }
+
+                if (Actor* lightActor = pointLightComponent->GetOwner())
+                {
+                    lightActor->SetPosition(cameraPosition);
+                    MVLOG(Log, "Moved point light to camera position: {{ {:.2f}, {:.2f}, {:.2f} }}",
+                        cameraPosition.x, cameraPosition.y, cameraPosition.z);
+                    break;
+                }
+            }
+            return;
+        }
+
+        if (inputHandler.IsKeyPressed(static_cast<int>(EKeyCode::NUMPAD9)) && mySpotLightComponent != nullptr)
+        {
+            if (Actor* lightActor = mySpotLightComponent->GetOwner())
+            {
+                lightActor->SetPosition(cameraPosition);
+                AimActorAlongCameraForward(*lightActor, cameraTransform);
+                const Vector3f direction = mySpotLightComponent->GetWorldDirection();
+                MVLOG(Log, "Moved spot light to camera and aimed forward. Position: {{ {:.2f}, {:.2f}, {:.2f} }}, direction: {{ {:.2f}, {:.2f}, {:.2f} }}",
+                    cameraPosition.x, cameraPosition.y, cameraPosition.z,
+                    direction.x, direction.y, direction.z);
+            }
+            return;
+        }
+    }
+
+    if (inputHandler.IsKeyPressed(static_cast<int>(EKeyCode::NUMPAD7)) && myDirectionalLightComponent != nullptr)
+    {
+        myDirectionalLightComponent->SetEnabled(!myDirectionalLightComponent->IsEnabled());
+    }
+
+    if (inputHandler.IsKeyPressed(static_cast<int>(EKeyCode::NUMPAD8)))
+    {
+        bool shouldEnable = true;
+        bool foundPointLight = false;
+        for (const PointLightComponent* pointLightComponent : myPointLightComponents)
+        {
+            if (pointLightComponent != nullptr)
+            {
+                shouldEnable = !pointLightComponent->IsEnabled();
+                foundPointLight = true;
+                break;
+            }
+        }
+
+        if (foundPointLight)
+        {
+            for (PointLightComponent* pointLightComponent : myPointLightComponents)
+            {
+                if (pointLightComponent != nullptr)
+                {
+                    pointLightComponent->SetEnabled(shouldEnable);
+                }
+            }
+        }
+    }
+
+    if (inputHandler.IsKeyPressed(static_cast<int>(EKeyCode::NUMPAD9)) && mySpotLightComponent != nullptr)
+    {
+        mySpotLightComponent->SetEnabled(!mySpotLightComponent->IsEnabled());
+    }
+}
+
+void ModelViewer::UpdateScene(float aDeltaTime)
+{
+    for (SpinningActor& spinningActor : mySpinningActors)
+    {
+        if (spinningActor.Instance == nullptr)
+        {
+            continue;
+        }
+
+        spinningActor.RotationDegrees += spinningActor.RotationSpeedDegrees * aDeltaTime;
+        spinningActor.Instance->SetRotation(
+            spinningActor.RotationDegrees.x,
+            spinningActor.RotationDegrees.y,
+            spinningActor.RotationDegrees.z);
+    }
+
+    if (!AudioManager::GetInstance()->IsEventPlaying(SoundID::eMainTheme))
+    {
+        AudioManager::GetInstance()->PlayMusic(SoundID::eMainTheme);
+    }
+
+    AudioManager::GetInstance()->Update(aDeltaTime);
+    myWorld.Update(aDeltaTime);
+}

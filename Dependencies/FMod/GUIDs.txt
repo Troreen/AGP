@@ -1,0 +1,6 @@
+{28f9e5ae-083b-41b4-b503-88dd0d4451bd} bank:/Master
+{b0e4c57a-7940-0df6-334a-0223fcb75725} bank:/Master.strings
+{342fb274-1ef7-4334-aa79-ecabd7396f82} bus:/
+{7387e4e5-871b-4d1f-84b4-faeec4d85ee1} bus:/MUSIC
+{e3ce3b43-4d75-48c3-b87e-6d44c1d67214} bus:/SFX
+{f421ce15-a3f8-40a6-b593-6d5008b7fbbd} event:/FMODTest

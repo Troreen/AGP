@@ -17,15 +17,14 @@
     <IntDir>$(MSBuildThisFileDirectory)..\..\Intermediate\GameRuntimeTests\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup><SolutionDir>$(MSBuildThisFileDirectory)..\..\</SolutionDir></PropertyGroup>
-  <Import Project="$(SolutionDir)Source\CommonUtilities.props" />
   <ItemDefinitionGroup>
     <ClCompile>
       <LanguageStandard>stdcpp20</LanguageStandard><ExceptionHandling>Sync</ExceptionHandling>
       <WarningLevel>Level4</WarningLevel><PreprocessorDefinitions>FBXSDK_SHARED;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\..\CommonUtilities\include;$(MSBuildThisFileDirectory)..\..\Source;$(MSBuildThisFileDirectory)..\..\Source\Graphics;$(MSBuildThisFileDirectory)..\..\Source\Utilities;$(SolutionDir)Source;$(SolutionDir)Source\Application\Game;$(SolutionDir)ThirdParty\TGAFBXImporter\source;$(SolutionDir)ThirdParty\TGAFBXImporter\FBXSDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Source\Engine;$(SolutionDir)Source;$(SolutionDir)Source\Utilities;$(SolutionDir)Source\Utilities\CommonUtilities;$(SolutionDir)Source\Application\Game;$(SolutionDir)Dependencies\TGAFBXImporter\source;$(SolutionDir)Dependencies\TGAFBXImporter\FBXSDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link><SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>$(SolutionDir)Lib\$(Configuration);$(SolutionDir)ThirdParty\TGAFBXImporter\FBXSDK\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Lib\$(Configuration);$(SolutionDir)Dependencies\TGAFBXImporter\FBXSDK\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>GraphicsEngine.lib;libfbxsdk.lib;libxml2-md.lib;zlib-md.lib;d3d11.lib;dxguid.lib;dxgi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -35,12 +34,16 @@
 <ClCompile Include="..\..\Source\Application\Game\GameScene.cpp" />
 <ClCompile Include="..\..\Source\Application\Game\MeshLibrary.cpp" />
 <ClCompile Include="..\..\Source\Application\Game\PrimitiveMeshBuilder.cpp" />
-<ClCompile Include="..\..\ThirdParty\TGAFBXImporter\source\Importer.cpp" />
-<ClCompile Include="..\..\ThirdParty\TGAFBXImporter\source\Internals.cpp" />
-<ClCompile Include="..\..\ThirdParty\TGAFBXImporter\source\TgaFbxStructs.cpp" /></ItemGroup>
+<ClCompile Include="..\..\Dependencies\TGAFBXImporter\source\Importer.cpp" />
+<ClCompile Include="..\..\Dependencies\TGAFBXImporter\source\Internals.cpp" />
+<ClCompile Include="..\..\Dependencies\TGAFBXImporter\source\TgaFbxStructs.cpp" /></ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\GameFramework\GameFramework.vcxproj">
-      <Project>{d6f43e75-5c34-4dc2-98de-34c68f82833d}</Project>
+    <ProjectReference Include="..\..\Source\Engine\GameFramework\GameFramework.vcxproj">
+      <Project>{cd9f039d-3960-7fd3-029b-c8506e1ac4af}</Project>
+      <AdditionalProperties>SolutionDir=$(MSBuildThisFileDirectory)..\..\</AdditionalProperties>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Source\Utilities\CommonUtilities\CommonUtilities.vcxproj">
+      <Project>{aa29e689-16b5-534e-1fc6-d6428bd0af4e}</Project>
       <AdditionalProperties>SolutionDir=$(MSBuildThisFileDirectory)..\..\</AdditionalProperties>
     </ProjectReference>
     <ProjectReference Include="..\..\Source\Utilities\Logger\Logger.vcxproj">

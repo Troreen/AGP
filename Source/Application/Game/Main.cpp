@@ -27,7 +27,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ int)
 		}
 
 		GameApplication::Config config;
-		config.ContentRoot = std::filesystem::path(executablePath).parent_path() / ".." / ".." / "Assets";
+	config.ContentRoot = std::filesystem::path(executablePath).parent_path() / ".." / ".." / "Content";
 		config.EnableRenderDiagnostics = true;
 		config.EnableMouseLook = true;
 

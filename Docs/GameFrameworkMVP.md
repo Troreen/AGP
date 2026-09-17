@@ -14,13 +14,13 @@ Read these files in order:
 
 1. `Source/Application/Game/Main.cpp`: create Game and its scene source, call Run.
 2. `Source/Application/Game/Game.cpp`: register behavior, request a scene, handle session input.
-3. `Source/GameFramework/Scenes/SceneData.h`: the entire scene-description boundary.
-4. `Source/GameFramework/Scenes/ComponentRegistry.cpp`: descriptions become owned runtime objects.
-5. `Source/GameFramework/World/World.h`, `Actor.h`, `Component.h`: ownership and the small API.
-6. `Source/GameFramework/World/World.cpp` and `Actor.cpp`: startup, Update and destruction.
+3. `Source/Engine/GameFramework/Scenes/SceneData.h`: the entire scene-description boundary.
+4. `Source/Engine/GameFramework/Scenes/ComponentRegistry.cpp`: descriptions become owned runtime objects.
+5. `Source/Engine/GameFramework/World/World.h`, `Actor.h`, `Component.h`: ownership and the small API.
+6. `Source/Engine/GameFramework/World/World.cpp` and `Actor.cpp`: startup, Update and destruction.
 7. `Source/Application/Game/GameComponents.cpp`: camera, spin, animation and light behavior.
-8. `Source/GameFramework/Runtime/GameApplication.cpp`: the actual main loop and scene replacement.
-9. `Source/GameFramework/Rendering/WorldRenderer.cpp`: values copied to the existing renderer.
+8. `Source/Engine/GameFramework/Runtime/GameApplication.cpp`: the actual main loop and scene replacement.
+9. `Source/Engine/GameFramework/Rendering/WorldRenderer.cpp`: values copied to the existing renderer.
 
 ## Ownership and flow
 

@@ -20,18 +20,18 @@
     <ClCompile>
       <LanguageStandard>stdcpp20</LanguageStandard><ExceptionHandling>Sync</ExceptionHandling>
       <WarningLevel>Level4</WarningLevel>
-      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\..\Source;$(MSBuildThisFileDirectory)..\..\CommonUtilities\include;$(MSBuildThisFileDirectory)..\..\Source\Graphics;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\..\Source\Engine;$(MSBuildThisFileDirectory)..\..\Source;$(MSBuildThisFileDirectory)..\..\Source\Utilities\CommonUtilities;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link><SubSystem>Console</SubSystem><AdditionalLibraryDirectories>$(MSBuildThisFileDirectory)..\..\Lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories><AdditionalDependencies>GraphicsEngine.lib;d3d11.lib;dxguid.lib;dxgi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies></Link>
   </ItemDefinitionGroup>
   <ItemGroup><ClCompile Include="GameFrameworkTests.cpp" /></ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\Graphics\GraphicsEngine\GraphicsEngine.vcxproj">
-      <Project>{949cdb08-2579-4f0e-8ba4-5ae09a39c4df}</Project>
+    <ProjectReference Include="..\..\Source\Engine\GraphicsEngine\GraphicsEngine.vcxproj">
+      <Project>{ac8e76be-985c-6ac4-81f0-daea6d5d4629}</Project>
       <AdditionalProperties>SolutionDir=$(MSBuildThisFileDirectory)..\..\</AdditionalProperties>
     </ProjectReference>
-    <ProjectReference Include="..\..\Source\GameFramework\GameFramework.vcxproj">
-      <Project>{d6f43e75-5c34-4dc2-98de-34c68f82833d}</Project>
+    <ProjectReference Include="..\..\Source\Engine\GameFramework\GameFramework.vcxproj">
+      <Project>{cd9f039d-3960-7fd3-029b-c8506e1ac4af}</Project>
       <AdditionalProperties>SolutionDir=$(MSBuildThisFileDirectory)..\..\</AdditionalProperties>
     </ProjectReference>
     <ProjectReference Include="..\..\Source\Utilities\Logger\Logger.vcxproj">
