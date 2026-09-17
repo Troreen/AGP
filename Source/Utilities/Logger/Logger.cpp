@@ -73,15 +73,22 @@ Logger::Logger()
 
 Logger::~Logger()
 {
-	myIsRunning = false;
+	// Change the wait predicate under the same mutex as WorkerThread's wait.
+	// Otherwise shutdown can notify between its predicate check and sleeping.
+	{
+		std::scoped_lock lock(myQueueMutex);
+		myIsRunning = false;
+	}
 	myQueueCV.notify_all();
 	myLogThread.join();
 }
 
 std::string Logger::Timestamp(bool aIncludeDate /*= false*/) const
 {
-	static std::string dateFormat = "%Y-%m-%d %H:%M:%S";
-	static std::string noDateFormat = "%H:%M:%S";
+	// The worker can format its first entry while main is joining it during CRT
+	// exit. Avoid registering function-local static string destructors at that time.
+	constexpr const char* dateFormat = "%Y-%m-%d %H:%M:%S";
+	constexpr const char* noDateFormat = "%H:%M:%S";
 
 	const std::chrono::time_point now = std::chrono::system_clock::now();
 	const std::time_t time = std::chrono::system_clock::to_time_t(now);
@@ -90,7 +97,7 @@ std::string Logger::Timestamp(bool aIncludeDate /*= false*/) const
 	const int error = localtime_s(&timeInfo, &time);
 
 	char buffer[20]{};
-	const size_t wcsTimeErr = strftime(buffer, 20, aIncludeDate ? dateFormat.c_str() : noDateFormat.c_str(), &timeInfo);
+	const size_t wcsTimeErr = strftime(buffer, 20, aIncludeDate ? dateFormat : noDateFormat, &timeInfo);
 	return buffer;
 }
 
@@ -172,7 +179,7 @@ void Logger::WorkerThread()
 
 	std::queue<LogEntry> localLogQueue;
 
-	while(myIsRunning.load())
+	while(true)
 	{
 		// Lock and swap the queues
 		{
