@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64"><Configuration>Debug</Configuration><Platform>x64</Platform></ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64"><Configuration>Release</Configuration><Platform>x64</Platform></ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals"><WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion></PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType><PlatformToolset>v145</PlatformToolset>
+    <UseDebugLibraries Condition="'$(Configuration)'=='Debug'">true</UseDebugLibraries>
+    <UseDebugLibraries Condition="'$(Configuration)'!='Debug'">false</UseDebugLibraries>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <PropertyGroup>
+    <OutDir>$(MSBuildThisFileDirectory)..\..\Bin\Tests\$(Configuration)\</OutDir>
+    <IntDir>$(MSBuildThisFileDirectory)..\..\Intermediate\GameFrameworkTests\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <LanguageStandard>stdcpp20</LanguageStandard><ExceptionHandling>Sync</ExceptionHandling>
+      <WarningLevel>Level4</WarningLevel>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\..\Source\Engine;$(MSBuildThisFileDirectory)..\..\Source;$(MSBuildThisFileDirectory)..\..\Source\Utilities\CommonUtilities;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link><SubSystem>Console</SubSystem><AdditionalLibraryDirectories>$(MSBuildThisFileDirectory)..\..\Lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories><AdditionalDependencies>GraphicsEngine.lib;d3d11.lib;dxguid.lib;dxgi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies></Link>
+  </ItemDefinitionGroup>
+  <ItemGroup><ClCompile Include="GameFrameworkTests.cpp" /></ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Source\Engine\GraphicsEngine\GraphicsEngine.vcxproj">
+      <Project>{ac8e76be-985c-6ac4-81f0-daea6d5d4629}</Project>
+      <AdditionalProperties>SolutionDir=$(MSBuildThisFileDirectory)..\..\</AdditionalProperties>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Source\Engine\GameFramework\GameFramework.vcxproj">
+      <Project>{cd9f039d-3960-7fd3-029b-c8506e1ac4af}</Project>
+      <AdditionalProperties>SolutionDir=$(MSBuildThisFileDirectory)..\..\</AdditionalProperties>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Source\Utilities\Logger\Logger.vcxproj">
+      <Project>{5f2b1a1e-de2e-481a-a52f-394d4f48cf21}</Project>
+      <AdditionalProperties>SolutionDir=$(MSBuildThisFileDirectory)..\..\</AdditionalProperties>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>

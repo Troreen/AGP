@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Dependencies">
+      <UniqueIdentifier>{6C01343A-5864-C3DE-01EA-FB94ED2B8F61}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Dependencies\TGAFBXImporter">
+      <UniqueIdentifier>{098D22A3-759A-5089-FE80-4C746A8D1C40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Dependencies\TGAFBXImporter\source">
+      <UniqueIdentifier>{098BBF4F-F5C6-C2B9-5ED9-DAB04A346BD4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Game.h" />
+    <ClInclude Include="GameComponents.h" />
+    <ClInclude Include="GameLog.h" />
+    <ClInclude Include="GameOrientation.h" />
+    <ClInclude Include="GameScene.h" />
+    <ClInclude Include="MeshLibrary.h" />
+    <ClInclude Include="PrimitiveMeshBuilder.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="targetver.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\Dependencies\TGAFBXImporter\source\Importer.cpp">
+      <Filter>Dependencies\TGAFBXImporter\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Dependencies\TGAFBXImporter\source\Internals.cpp">
+      <Filter>Dependencies\TGAFBXImporter\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Dependencies\TGAFBXImporter\source\TgaFbxStructs.cpp">
+      <Filter>Dependencies\TGAFBXImporter\source</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GameComponents.cpp" />
+    <ClCompile Include="GameScene.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="MeshLibrary.cpp" />
+    <ClCompile Include="PrimitiveMeshBuilder.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Game.ico" />
+    <None Include="ModelViewer.ico" />
+    <None Include="small.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Game.rc" />
+  </ItemGroup>
+</Project>

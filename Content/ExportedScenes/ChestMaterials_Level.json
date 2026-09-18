@@ -1,0 +1,183 @@
+{
+  "Actors": [
+    {
+      "Name": "Chest_Opaque",
+      "Archetype": "StaticMeshActor",
+      "Transform": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 250, -300, 0, 1],
+      "Tags": ["Showcase", "Chest"],
+      "Components": [
+        {
+          "Name": "ChestMesh",
+          "TypeID": 1,
+          "Parent": "",
+          "Tags": ["Opaque"],
+          "Transform": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+          "TransformBreakdown": {
+            "RelativeTransformNoScale": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+            "WorldTransform": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 250, -300, 0, 1],
+            "WorldTransformNoScale": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 250, -300, 0, 1],
+            "RelativeScale": [1, 1, 1],
+            "WorldScale": [1, 1, 1],
+            "RelativeRotationPYR": [0, 0, 0],
+            "WorldRotationPYR": [0, 0, 0]
+          },
+          "Mesh": "SM_Chest",
+          "ContentPath": "/Game/Meshes/Props/SM_Chest.SM_Chest",
+          "Materials": [
+            {
+              "Name": "MI_Chest_Opaque",
+              "Parent": "Shaders/ChestMaterial.mat",
+              "Parameters": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Name": "Chest_AmberGlass",
+      "Archetype": "StaticMeshActor",
+      "Transform": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 250, 0, 0, 1],
+      "Tags": ["Showcase", "Chest"],
+      "Components": [
+        {
+          "Name": "ChestMesh",
+          "TypeID": 1,
+          "Parent": "",
+          "Tags": ["Translucent", "Tinted"],
+          "Transform": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+          "TransformBreakdown": {
+            "RelativeTransformNoScale": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+            "WorldTransform": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 250, 0, 0, 1],
+            "WorldTransformNoScale": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 250, 0, 0, 1],
+            "RelativeScale": [1, 1, 1],
+            "WorldScale": [1, 1, 1],
+            "RelativeRotationPYR": [0, 0, 0],
+            "WorldRotationPYR": [0, 0, 0]
+          },
+          "Mesh": "SM_Chest",
+          "ContentPath": "/Game/Meshes/Props/SM_Chest.SM_Chest",
+          "Materials": [
+            {
+              "Name": "MI_Chest_AmberGlass",
+              "Parent": "Shaders/ChestMaterial_Alpha.mat",
+              "Parameters": [
+                {
+                  "Name": "MB_Tint",
+                  "Type": 1,
+                  "Value": [1.0, 0.55, 0.15, 0.65]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Name": "Chest_MarbleGlass",
+      "Archetype": "StaticMeshActor",
+      "Transform": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 250, 300, 0, 1],
+      "Tags": ["Showcase", "Chest"],
+      "Components": [
+        {
+          "Name": "ChestMesh",
+          "TypeID": 1,
+          "Parent": "",
+          "Tags": ["Translucent", "TextureOverride"],
+          "Transform": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+          "TransformBreakdown": {
+            "RelativeTransformNoScale": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+            "WorldTransform": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 250, 300, 0, 1],
+            "WorldTransformNoScale": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 250, 300, 0, 1],
+            "RelativeScale": [1, 1, 1],
+            "WorldScale": [1, 1, 1],
+            "RelativeRotationPYR": [0, 0, 0],
+            "WorldRotationPYR": [0, 0, 0]
+          },
+          "Mesh": "SM_Chest",
+          "ContentPath": "/Game/Meshes/Props/SM_Chest.SM_Chest",
+          "Materials": [
+            {
+              "Name": "MI_Chest_MarbleGlass",
+              "Parent": "Shaders/ChestMaterial_Alpha2.mat",
+              "Parameters": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Name": "SunLight",
+      "Archetype": "DirectionalLight",
+      "Transform": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+      "Tags": ["Showcase", "Lighting", "Sun"],
+      "Components": [
+        {
+          "Name": "DirectionalLightComponent0",
+          "TypeID": 5,
+          "Parent": "",
+          "Tags": [],
+          "Transform": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+          "TransformBreakdown": {
+            "RelativeTransformNoScale": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+            "WorldTransform": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+            "WorldTransformNoScale": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+            "RelativeScale": [1, 1, 1],
+            "WorldScale": [1, 1, 1],
+            "RelativeRotationPYR": [0, 0, 0],
+            "WorldRotationPYR": [0, 0, 0]
+          },
+          "Color": [1.0, 0.92, 0.78, 1.0],
+          "Intensity": 2.5
+        }
+      ]
+    },
+    {
+      "Name": "DoubleLight",
+      "Archetype": "",
+      "Transform": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 150, 0, 150, 1],
+      "Tags": ["Showcase", "Lighting", "CodeConfigured"],
+      "Components": [
+        {
+          "Name": "CenterPointLight",
+          "TypeID": 3,
+          "Parent": "",
+          "Tags": ["Center"],
+          "Transform": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+          "TransformBreakdown": {
+            "RelativeTransformNoScale": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+            "WorldTransform": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 150, 0, 150, 1],
+            "WorldTransformNoScale": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 150, 0, 150, 1],
+            "RelativeScale": [1, 1, 1],
+            "WorldScale": [1, 1, 1],
+            "RelativeRotationPYR": [0, 0, 0],
+            "WorldRotationPYR": [0, 0, 0]
+          },
+          "Color": [1.0, 0.2, 0.08, 1.0],
+          "Intensity": 14.0,
+          "FalloffExponent": 18.0,
+          "AttenuationRadius": 900.0
+        },
+        {
+          "Name": "OrbitPointLight",
+          "TypeID": 3,
+          "Parent": "",
+          "Tags": ["Offset", "Orbiting"],
+          "Transform": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 250, 0, 1],
+          "TransformBreakdown": {
+            "RelativeTransformNoScale": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 250, 0, 1],
+            "WorldTransform": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 150, 250, 150, 1],
+            "WorldTransformNoScale": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 150, 250, 150, 1],
+            "RelativeScale": [1, 1, 1],
+            "WorldScale": [1, 1, 1],
+            "RelativeRotationPYR": [0, 0, 0],
+            "WorldRotationPYR": [0, 0, 0]
+          },
+          "Color": [0.08, 0.35, 1.0, 1.0],
+          "Intensity": 14.0,
+          "FalloffExponent": 18.0,
+          "AttenuationRadius": 900.0
+        }
+      ]
+    }
+  ]
+}

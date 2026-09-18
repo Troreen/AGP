@@ -1,0 +1,11 @@
+#include "GraphicsEngine.pch.h"
+#include "Vertex.h"
+
+const std::vector<VertexElementDesc> Vertex::Description = {{"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT},
+                                                            {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT},
+                                                            {"BONEIDS", 0, DXGI_FORMAT_R32G32B32A32_UINT},
+                                                            {"SKINWEIGHTS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT},
+                                                            {"UV", 0, DXGI_FORMAT_R32G32_FLOAT},
+                                                            {"UV", 1, DXGI_FORMAT_R32G32_FLOAT},
+                                                            {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT},
+                                                            {"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT}};

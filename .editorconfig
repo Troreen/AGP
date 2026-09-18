@@ -1,0 +1,19 @@
+root = true
+
+[{Source,Tests}/**.{cpp,h,hpp}]
+charset = utf-8
+indent_style = tab
+indent_size = 4
+tab_width = 4
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[Source/Graphics/GraphicsEngine/{TemporaryShaders/**,InterOp/DDSTextureLoader11.*}]
+charset = unset
+indent_style = unset
+indent_size = unset
+tab_width = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset

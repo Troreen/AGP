@@ -1,0 +1,23 @@
+#pragma once
+
+enum class EGamepadCode : unsigned
+{
+	DPAD_UP        = 0x0001,
+	DPAD_DOWN      = 0x0002,
+	DPAD_LEFT      = 0x0004,
+	DPAD_RIGHT     = 0x0008,
+	BUTTON_START   = 0x0010,
+	BUTTON_BACK    = 0x0020,
+	THUMB_LEFT     = 0x0040,
+	THUMB_RIGHT    = 0x0080,
+	SHOULDER_LEFT  = 0x0100,
+	SHOULDER_RIGHT = 0x0200,
+	BUTTON_A       = 0x1000,
+	BUTTON_B       = 0x2000,
+	BUTTON_X       = 0x4000,
+	BUTTON_Y       = 0x8000,
+	TRIGGER_LEFT   = 0x8001,
+	TRIGGER_RIGHT  = 0x8002,
+	ANALOG_LEFT    = 0x8003,
+	ANALOG_RIGHT   = 0x8004
+};

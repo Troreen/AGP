@@ -3,17 +3,17 @@ setlocal EnableExtensions EnableDelayedExpansion
 
 set "SOLUTION=AGP.sln"
 set "PLATFORM=x64"
-set "APP_NAME=ModelViewer.exe"
+set "APP_NAME=Game.exe"
 set "APP_CONFIG=Debug"
 
 set "OUTDIR=HandIn"
 set "SOLUTION_OUT=%OUTDIR%\AGP_Solution"
 set "APP_OUT=%OUTDIR%\AGP_App"
-set "APP_RUNTIME_DIR=%APP_OUT%\Source\Application\ModelViewer"
+set "APP_RUNTIME_DIR=%APP_OUT%\Source\Application\Game"
 
 pushd "%~dp0"
 
-"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -Command "if (Get-Process -Name 'ModelViewer' -ErrorAction SilentlyContinue) { exit 1 }"
+"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -Command "if (Get-Process -Name 'Game' -ErrorAction SilentlyContinue) { exit 1 }"
 if errorlevel 1 (
     echo ERROR: "%APP_NAME%" is already running. Close it from the taskbar or Task Manager before packaging.
     goto :Fail
@@ -68,7 +68,7 @@ if errorlevel 8 goto :CopyFail
 robocopy "Assets" "%APP_OUT%\Assets" /E /XF ".gitignore" ".gitattributes" "*.tmp"
 if errorlevel 8 goto :CopyFail
 
-robocopy "Source\Application\ModelViewer\Materials" "%APP_OUT%\Source\Application\ModelViewer\Materials" /E /XF ".gitignore" ".gitattributes" "*.tmp"
+robocopy "Source\Application\Game\Materials" "%APP_OUT%\Source\Application\Game\Materials" /E /XF ".gitignore" ".gitattributes" "*.tmp"
 if errorlevel 8 goto :CopyFail
 
 call :WriteLauncher
@@ -133,11 +133,11 @@ exit /B 0
 :WriteLauncher
 (
     echo @echo off
-    echo pushd "%%~dp0Source\Application\ModelViewer"
+    echo pushd "%%~dp0Source\Application\Game"
     echo start "" "%APP_NAME%"
     echo popd
-) > "%APP_OUT%\RunModelViewer.bat"
-if not exist "%APP_OUT%\RunModelViewer.bat" (
+) > "%APP_OUT%\RunGame.bat"
+if not exist "%APP_OUT%\RunGame.bat" (
     echo ERROR: Could not write app launcher.
     exit /B 1
 )

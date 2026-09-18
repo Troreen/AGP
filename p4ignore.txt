@@ -1,0 +1,36 @@
+/Content
+
+# Ignore the local directory in TGE root
+/Local
+
+# Ignore the Lib directory in TGE root
+/Lib
+
+# Ignore the Intermediate directory in root
+/Intermediate
+
+# ignore all Temp direcoties
+Temp/ 
+
+**.cso
+**.obj
+**.log
+
+Makefile
+.vs
+*.sln
+**.props
+**.vcxproj
+**.vcxproj.*
+
+# Ignore the bin directory in TGE root. Remove these lines if the Bin directory is used as the binary distribuition for the team
+/Bin 
+/bin 
+
+.gitignore
+/.git
+README.md
+/.log
+.clang-format
+.clang-format-ignore
+/Docs
