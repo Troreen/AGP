@@ -3,8 +3,8 @@
 // Used by Game.rc
 //
 #define IDC_MYICON                      2
-#define IDD_GAME_DIALOG          102
-#define IDI_GAME                 107
+#define IDD_GAME_DIALOG                 102
+#define IDI_GAME                        107
 #define IDR_MAINFRAME                   128
 #define IDC_STATIC                      -1
 
