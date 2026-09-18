@@ -1,5 +1,6 @@
 #pragma once
 #include "GameFramework/World/World.h"
+#include "Vector2.hpp"
 #include <filesystem>
 #include <optional>
 
@@ -16,7 +17,7 @@ public:
 		return *myWorld;
 	}
 
-	const GameInput& GetInput() const
+	InputSystem& GetInputSystem()
 	{
 		return myInput;
 	}
@@ -46,7 +47,7 @@ public:
 	}
 
 private:
-	GameInput myInput;
+	InputSystem myInput;
 	std::unique_ptr<World> myWorld;
 	std::optional<std::string> myPendingScene;
 	std::string mySceneName;

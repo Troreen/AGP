@@ -1,366 +1,305 @@
 #include "UnrealSceneImporter.h"
 #include <SimdJson/simdjson.h>
 
-UnrealSceneData UnrealSceneImporter::ImportScene(std::filesystem::path aJSONPath)
+#include <stdexcept>
+
+namespace
 {
-	simdjson::padded_string json = simdjson::padded_string::load(aJSONPath.c_str());
-	simdjson::dom::parser parser;
-	simdjson::dom::object root;
-	auto error = parser.parse(json).get(root);
+	using Element = simdjson::dom::element;
+	using Object = simdjson::dom::object;
 
-	// TODO: create structs with level data
-	//std::cout << root["Actors"].get_array().size() << std::endl;
-
-	if (error)
+	std::string ReadString(const Object& object, const char* key)
 	{
-		return {};
+		return std::string(std::string_view(object[key].get_string().value()));
 	}
 
-	UnrealSceneData unrealData = {};
-
-	for (auto actor : root["Actors"])
+	std::string ReadOptionalString(const Object& object, const char* key)
 	{
-		UnrealActorData actorData = {};
-		//std::cout << actor["Name"].get_c_str() << std::endl;
-		actorData.name = actor["Name"];
-		actorData.archetype = actor["Archetype"];
-		for (auto tag : actor["Tags"])
+		const auto field = object[key];
+		return field.error() == simdjson::NO_SUCH_FIELD || field.is_null()
+			? std::string{}
+			: std::string(std::string_view(field.get_string().value()));
+	}
+
+	float ReadNumber(const Object& object, const char* key)
+	{
+		return static_cast<float>(object[key].get_double().value());
+	}
+
+	CommonUtilities::Matrix4f ReadMatrix(const Element& element)
+	{
+		const auto values = element.get_array().value();
+		if (values.size() != 16)
 		{
-			std::string actorTag(tag.get_c_str());
-			actorData.tags.emplace_back(actorTag);
+			throw std::runtime_error("matrix must contain 16 numbers");
 		}
 
+		// UnrealSceneAdapter owns axis mapping, unit conversion and matrix decomposition.
+		// Keeping the exported matrix unchanged here prevents those rules being duplicated
+		// in every component branch, as they were in the first integration implementation.
+		CommonUtilities::Matrix4f result;
+		size_t index = 0;
+		for (const auto value : values)
 		{
-			auto matrix = actor["Transform"].get_array().value();
-			actorData.transform =
-			{
-				static_cast<float>(matrix.at(5).get_double().value()),
-				static_cast<float>(matrix.at(6).get_double().value()),
-				static_cast<float>(matrix.at(4).get_double().value()),
-				static_cast<float>(matrix.at(3).get_double().value()),
-				static_cast<float>(matrix.at(9).get_double().value()),
-				static_cast<float>(matrix.at(10).get_double().value()),
-				static_cast<float>(matrix.at(8).get_double().value()),
-				static_cast<float>(matrix.at(7).get_double().value()),
-				static_cast<float>(matrix.at(1).get_double().value()),
-				static_cast<float>(matrix.at(3).get_double().value()),
-				static_cast<float>(matrix.at(0).get_double().value()),
-				static_cast<float>(matrix.at(11).get_double().value()),
-				static_cast<float>(matrix.at(12).get_double().value()),
-				static_cast<float>(matrix.at(13).get_double().value()),
-				static_cast<float>(matrix.at(14).get_double().value()),
-				static_cast<float>(matrix.at(15).get_double().value())
-
-			};
+			result(static_cast<int>(index / 4 + 1), static_cast<int>(index % 4 + 1)) =
+				static_cast<float>(value.get_double().value());
+			++index;
 		}
+		return result;
+	}
 
-		for (auto component : actor["Components"])
+	CommonUtilities::Vector3f ReadVector3(const Element& element)
+	{
+		const auto values = element.get_array().value();
+		if (values.size() != 3)
 		{
-			switch (static_cast<UnrealComponentType>(component["TypeID"].get_int64().value()))
+			throw std::runtime_error("vector must contain 3 numbers");
+		}
+		return {
+			static_cast<float>(values.at(0).get_double().value()),
+			static_cast<float>(values.at(1).get_double().value()),
+			static_cast<float>(values.at(2).get_double().value())};
+	}
+
+	CommonUtilities::Vector3f ReadVector3Object(const Object& object)
+	{
+		return {ReadNumber(object, "x"), ReadNumber(object, "y"), ReadNumber(object, "z")};
+	}
+
+	CommonUtilities::Vector4f ReadVector4(const Element& element)
+	{
+		const auto values = element.get_array().value();
+		if (values.size() != 4)
+		{
+			throw std::runtime_error("color/vector must contain 4 numbers");
+		}
+		return {
+			static_cast<float>(values.at(0).get_double().value()),
+			static_cast<float>(values.at(1).get_double().value()),
+			static_cast<float>(values.at(2).get_double().value()),
+			static_cast<float>(values.at(3).get_double().value())};
+	}
+
+	std::vector<std::string> ReadStrings(const Element& element)
+	{
+		std::vector<std::string> result;
+		for (const auto value : element.get_array().value())
+		{
+			result.emplace_back(std::string_view(value.get_string().value()));
+		}
+		return result;
+	}
+
+	BaseComponentData ReadBaseComponent(const Object& source, UnrealComponentType type)
+	{
+		BaseComponentData result;
+		result.Name = ReadString(source, "Name");
+		result.TypeID = type;
+		result.Parent = ReadOptionalString(source, "Parent");
+		result.Tags = ReadStrings(source["Tags"]);
+		result.Transform = ReadMatrix(source["Transform"]);
+		return result;
+	}
+
+	ImportedMaterial ReadMaterial(const Object& source)
+	{
+		ImportedMaterial result;
+		result.Name = ReadString(source, "Name");
+		result.Parent = ReadOptionalString(source, "Parent");
+
+		for (const auto value : source["Parameters"].get_array().value())
+		{
+			const auto sourceParameter = value.get_object().value();
+			ImportedMaterialParameter parameter;
+			parameter.Name = ReadString(sourceParameter, "Name");
+			parameter.Type = static_cast<MaterialType>(sourceParameter["Type"].get_int64().value());
+
+			switch (parameter.Type)
 			{
-				case UnrealComponentType::Custom:
+			case MaterialType::Scalar:
+				parameter.Value = ReadNumber(sourceParameter, "Value");
+				break;
+			case MaterialType::Vector3f:
+				parameter.Value = ReadVector4(sourceParameter["Value"]);
+				break;
+			case MaterialType::Texture:
+			{
+				const auto texture = sourceParameter["Value"].get_object().value();
+				parameter.Value = TextureValue{ReadString(texture, "Name"), ReadString(texture, "Path")};
+				break;
+			}
+			default:
+				// Match the supported material set. Additional exported parameter
+				// types can be implemented by the owning team when their runtime semantics are known.
+				continue;
+			}
+
+			// Bug fix: the first integration inserted a default parameter and then inserted
+			// the populated copy, producing two entries for every supported parameter.
+			result.Parameters.push_back(std::move(parameter));
+		}
+		return result;
+	}
+
+	ImportedMeshComponent ReadMeshComponent(
+		const Object& source,
+		BaseComponentData base)
+	{
+		ImportedMeshComponent result;
+		static_cast<BaseComponentData&>(result) = std::move(base);
+		result.Mesh = ReadString(source, "Mesh");
+
+		// ContentPath is consumed by the adapter/runtime asset resolver. Mesh keeps the
+		// exported display identity separately, so neither source value is lost.
+		result.ContentPath = ReadString(source, "ContentPath");
+		for (const auto material : source["Materials"].get_array().value())
+		{
+			// Bug fix: ReadMaterial returns the one material already populated above.
+			// The first integration appended that same material a second time.
+			result.Materials.push_back(ReadMaterial(material.get_object().value()));
+		}
+		return result;
+	}
+
+	void ReadLight(const Object& source, ImportedLightComponent& result)
+	{
+		// Bug fix: the first integration read element zero into every channel.
+		result.Color = ReadVector4(source["Color"]);
+		result.Intensity = ReadNumber(source, "Intensity");
+	}
+}
+
+UnrealImportResult UnrealSceneImporter::ImportScene(const std::filesystem::path& jsonPath) const
+{
+	UnrealImportResult result;
+	try
+	{
+		const auto json = simdjson::padded_string::load(jsonPath.string()).value();
+		simdjson::dom::parser parser;
+		const auto root = parser.parse(json).get_object().value();
+		UnrealSceneData scene;
+
+		for (const auto actorValue : root["Actors"].get_array().value())
+		{
+			const auto sourceActor = actorValue.get_object().value();
+			UnrealActorData actor;
+			actor.Name = ReadString(sourceActor, "Name");
+			actor.Archetype = ReadString(sourceActor, "Archetype");
+			actor.Tags = ReadStrings(sourceActor["Tags"]);
+			actor.Transform = ReadMatrix(sourceActor["Transform"]);
+
+			for (const auto componentValue : sourceActor["Components"].get_array().value())
+			{
+				const auto source = componentValue.get_object().value();
+				const auto rawType = source["TypeID"].get_int64().value();
+				if (rawType < static_cast<int64_t>(UnrealComponentType::Custom) ||
+					rawType > static_cast<int64_t>(UnrealComponentType::SpringArm))
 				{
-					BaseComponentData componentData = {};
-					componentData.name = component["Name"];
-					componentData.parent = component["Parent"];
-					componentData.typeID = UnrealComponentType::Custom;
-					for (auto tag : component["Tags"])
-					{
-						std::string componentTag(tag.get_c_str());
-						componentData.tags.emplace_back(componentTag);
-					}
-
-					auto matrix = component["Transform"].get_array().value();
-					componentData.transform =
-					{
-						static_cast<float>(matrix.at(5).get_double().value()),
-						static_cast<float>(matrix.at(6).get_double().value()),
-						static_cast<float>(matrix.at(4).get_double().value()),
-						static_cast<float>(matrix.at(3).get_double().value()),
-						static_cast<float>(matrix.at(9).get_double().value()),
-						static_cast<float>(matrix.at(10).get_double().value()),
-						static_cast<float>(matrix.at(8).get_double().value()),
-						static_cast<float>(matrix.at(7).get_double().value()),
-						static_cast<float>(matrix.at(1).get_double().value()),
-						static_cast<float>(matrix.at(3).get_double().value()),
-						static_cast<float>(matrix.at(0).get_double().value()),
-						static_cast<float>(matrix.at(11).get_double().value()),
-						static_cast<float>(matrix.at(12).get_double().value()),
-						static_cast<float>(matrix.at(13).get_double().value()),
-						static_cast<float>(matrix.at(14).get_double().value()),
-						static_cast<float>(matrix.at(15).get_double().value())
-
-					};
+					// Bug fix: the first integration silently discarded future/invalid TypeIDs,
+					// which could make a partially loaded scene appear successful.
+					throw std::runtime_error(actor.Name + ": unknown component TypeID " + std::to_string(rawType));
 				}
+
+				const auto type = static_cast<UnrealComponentType>(rawType);
+				auto base = ReadBaseComponent(source, type);
+				switch (type)
+				{
+				case UnrealComponentType::Custom:
+					actor.Components.push_back(std::move(base));
 					break;
 				case UnrealComponentType::SceneComponent:
-					//If we want
+					// The adapter turns tagged scene components into cameras and the remaining
+					// records into runtime SceneComponents, so they must not be skipped here.
+					actor.Components.push_back(std::move(base));
 					break;
 				case UnrealComponentType::StaticMesh:
-				{
-					StaticMeshComponentData componentData = {};
-					componentData.name = component["Name"];
-					componentData.parent = component["Parent"];
-					componentData.typeID = UnrealComponentType::StaticMesh;
-					for (auto tag : component["Tags"])
-					{
-						std::string componentTag = tag.get_c_str().value();
-						componentData.tags.emplace_back(componentTag);
-					}
-
-					auto matrix = component["Transform"].get_array().value();
-					componentData.transform =
-					{
-						static_cast<float>(matrix.at(5).get_double().value()),
-						static_cast<float>(matrix.at(6).get_double().value()),
-						static_cast<float>(matrix.at(4).get_double().value()),
-						static_cast<float>(matrix.at(3).get_double().value()),
-						static_cast<float>(matrix.at(9).get_double().value()),
-						static_cast<float>(matrix.at(10).get_double().value()),
-						static_cast<float>(matrix.at(8).get_double().value()),
-						static_cast<float>(matrix.at(7).get_double().value()),
-						static_cast<float>(matrix.at(1).get_double().value()),
-						static_cast<float>(matrix.at(3).get_double().value()),
-						static_cast<float>(matrix.at(0).get_double().value()),
-						static_cast<float>(matrix.at(11).get_double().value()),
-						static_cast<float>(matrix.at(12).get_double().value()),
-						static_cast<float>(matrix.at(13).get_double().value()),
-						static_cast<float>(matrix.at(14).get_double().value()),
-						static_cast<float>(matrix.at(15).get_double().value())
-
-					};
-
-					componentData.mesh = component["Mesh"];
-
-					for (auto material : component["Materials"])
-					{
-
-						MaterialData& materialData = componentData.materials.emplace_back();
-						materialData.name = material["Name"];
-						materialData.parent = material["Parent"].has_value() ?  material["Parent"].get_c_str().value() : "";
-
-						for (auto parameter : material["Parameters"].get_array().value())
-						{
-							MaterialParameterData parameterData = materialData.parameters.emplace_back();
-							parameterData.name = parameter["Name"];
-							parameterData.type = static_cast<MaterialType>(parameter["Type"].get_int64().value());
-
-							switch (parameterData.type)
-							{
-								case MaterialType::Scalar:
-								{
-									float scalar = 0;
-
-									scalar = static_cast<float>(parameter["Value"].get_double());
-									parameterData.value = scalar;
-								}
-									break;
-								case MaterialType::Vector3f:
-								{
-									CommonUtilities::Vector4f vector;
-
-									auto value = parameter["Value"].get_array().value();
-
-									vector.x = static_cast<float>(value.at(0).get_double());
-									vector.y = static_cast<float>(value.at(1).get_double());
-									vector.z = static_cast<float>(value.at(2).get_double());
-									vector.w = static_cast<float>(value.at(3).get_double());
-
-									parameterData.value = vector;
-								}
-
-									break;
-								case MaterialType::Texture:
-								{
-									TextureValue textureValue;
-									auto value = parameter["Value"].get_object().value();
-									textureValue.name = value["Name"].get_string().value();
-									textureValue.path = value["Path"].get_string().value();
-
-									parameterData.value = textureValue;
-								}
-									break;
-								default:
-									break;
-							}
-						}
-					}
-				}
-					break;
 				case UnrealComponentType::SkeletalMesh:
-					//If we want
+					// Bug fix: preserve the original TypeID. The adapter selects StaticMeshData
+					// or SkeletalMeshData after parsing instead of treating both as static meshes.
+					actor.Components.push_back(ReadMeshComponent(source, std::move(base)));
 					break;
 				case UnrealComponentType::PointLight:
 				{
-					PointLightComponentData componentData = {};
-					componentData.name = component["Name"];
-					componentData.parent = component["Parent"];
-
-
-					componentData.typeID = UnrealComponentType::SpotLight;
-					for (auto tag : component["Tags"])
-					{
-						std::string componentTag = tag.get_c_str().value();
-						componentData.tags.emplace_back(componentTag);
-					}
-
-					auto matrix = component["Transform"].get_array().value();
-					componentData.transform =
-					{
-						static_cast<float>(matrix.at(5).get_double().value()),
-						static_cast<float>(matrix.at(6).get_double().value()),
-						static_cast<float>(matrix.at(4).get_double().value()),
-						static_cast<float>(matrix.at(3).get_double().value()),
-						static_cast<float>(matrix.at(9).get_double().value()),
-						static_cast<float>(matrix.at(10).get_double().value()),
-						static_cast<float>(matrix.at(8).get_double().value()),
-						static_cast<float>(matrix.at(7).get_double().value()),
-						static_cast<float>(matrix.at(1).get_double().value()),
-						static_cast<float>(matrix.at(3).get_double().value()),
-						static_cast<float>(matrix.at(0).get_double().value()),
-						static_cast<float>(matrix.at(11).get_double().value()),
-						static_cast<float>(matrix.at(12).get_double().value()),
-						static_cast<float>(matrix.at(13).get_double().value()),
-						static_cast<float>(matrix.at(14).get_double().value()),
-						static_cast<float>(matrix.at(15).get_double().value())
-
-					};
-
-					CommonUtilities::Vector4f vector;
-					auto array = component["Color"].get_array().value();
-					vector.x = static_cast<float>(array.at(0).get_double().value());
-					vector.y = static_cast<float>(array.at(0).get_double().value());
-					vector.z = static_cast<float>(array.at(0).get_double().value());
-					vector.w = static_cast<float>(array.at(0).get_double().value());
-
-					componentData.color = vector;
-					componentData.intensity = static_cast<float>(component["Intensity"].get_double());
-
-					componentData.attenuationRadius = static_cast<float>(component["AttenuationRadius"].get_double());
-					componentData.falloffExponent = static_cast<float>(component["FalloffExponent"].get_double());
-				}
-
+					ImportedPointLightComponent light;
+					static_cast<BaseComponentData&>(light) = std::move(base);
+					// Bug fix: keep PointLight as PointLight; the first integration marked it SpotLight.
+					ReadLight(source, light);
+					light.FalloffExponent = ReadNumber(source, "FalloffExponent");
+					light.AttenuationRadius = ReadNumber(source, "AttenuationRadius");
+					actor.Components.push_back(std::move(light));
 					break;
+				}
 				case UnrealComponentType::SpotLight:
 				{
-					SpotLightComponentData componentData = {};
-					componentData.name = component["Name"];
-					componentData.parent = component["Parent"];
-
-
-					componentData.typeID = UnrealComponentType::SpotLight;
-					for (auto tag : component["Tags"])
-					{
-						std::string componentTag = tag.get_c_str().value();
-						componentData.tags.emplace_back(componentTag);
-					}
-
-					auto matrix = component["Transform"].get_array().value();
-					componentData.transform = 
-					{
-						static_cast<float>(matrix.at(5).get_double().value()),
-						static_cast<float>(matrix.at(6).get_double().value()),
-						static_cast<float>(matrix.at(4).get_double().value()),
-						static_cast<float>(matrix.at(3).get_double().value()),
-						static_cast<float>(matrix.at(9).get_double().value()),
-						static_cast<float>(matrix.at(10).get_double().value()),
-						static_cast<float>(matrix.at(8).get_double().value()),
-						static_cast<float>(matrix.at(7).get_double().value()),
-						static_cast<float>(matrix.at(1).get_double().value()),
-						static_cast<float>(matrix.at(3).get_double().value()),
-						static_cast<float>(matrix.at(0).get_double().value()),
-						static_cast<float>(matrix.at(11).get_double().value()),
-						static_cast<float>(matrix.at(12).get_double().value()),
-						static_cast<float>(matrix.at(13).get_double().value()),
-						static_cast<float>(matrix.at(14).get_double().value()),
-						static_cast<float>(matrix.at(15).get_double().value())
-
-					};
-
-					CommonUtilities::Vector4f vector;
-					auto array = component["Color"].get_array().value();
-					vector.x = static_cast<float>(array.at(0).get_double().value());
-					vector.y = static_cast<float>(array.at(0).get_double().value());
-					vector.z = static_cast<float>(array.at(0).get_double().value());
-					vector.w = static_cast<float>(array.at(0).get_double().value());
-
-					componentData.color = vector;
-					componentData.intensity = static_cast<float>(component["Intensity"].get_double());
-
-					componentData.attenuationRadius = static_cast<float>(component["AttenuationRadius"].get_double());
-					componentData.outerConeAngle = static_cast<float>(component["OuterConeAngle"].get_double());
-					componentData.innerConeAngle = static_cast<float>(component["InnerConeAngle"].get_double());
-
-					componentData.falloffExponent = static_cast<float>(component["FalloffExponent"].get_double());
-				}
+					ImportedSpotLightComponent light;
+					static_cast<BaseComponentData&>(light) = std::move(base);
+					ReadLight(source, light);
+					light.FalloffExponent = ReadNumber(source, "FalloffExponent");
+					light.AttenuationRadius = ReadNumber(source, "AttenuationRadius");
+					light.InnerConeAngle = ReadNumber(source, "InnerConeAngle");
+					light.OuterConeAngle = ReadNumber(source, "OuterConeAngle");
+					actor.Components.push_back(std::move(light));
 					break;
+				}
 				case UnrealComponentType::DirectionalLight:
 				{
-					CommonLightComponentData componentData = {};
-					componentData.name = component["Name"];
-					componentData.parent = component["Parent"];
-					componentData.typeID = UnrealComponentType::DirectionalLight;
-					for (auto tag : component["Tags"])
-					{
-						std::string componentTag = tag.get_c_str().value();
-						componentData.tags.emplace_back(componentTag);
-					}
-
-					auto matrix = component["Transform"].get_array().value();
-					componentData.transform =
-					{
-						static_cast<float>(matrix.at(5).get_double().value()),
-						static_cast<float>(matrix.at(6).get_double().value()),
-						static_cast<float>(matrix.at(4).get_double().value()),
-						static_cast<float>(matrix.at(3).get_double().value()),
-						static_cast<float>(matrix.at(9).get_double().value()),
-						static_cast<float>(matrix.at(10).get_double().value()),
-						static_cast<float>(matrix.at(8).get_double().value()),
-						static_cast<float>(matrix.at(7).get_double().value()),
-						static_cast<float>(matrix.at(1).get_double().value()),
-						static_cast<float>(matrix.at(3).get_double().value()),
-						static_cast<float>(matrix.at(0).get_double().value()),
-						static_cast<float>(matrix.at(11).get_double().value()),
-						static_cast<float>(matrix.at(12).get_double().value()),
-						static_cast<float>(matrix.at(13).get_double().value()),
-						static_cast<float>(matrix.at(14).get_double().value()),
-						static_cast<float>(matrix.at(15).get_double().value())
-
-					};
-
-					CommonUtilities::Vector4f vector;
-					auto array = component["Color"].get_array().value();
-					vector.x = static_cast<float>(array.at(0).get_double().value());
-					vector.y = static_cast<float>(array.at(0).get_double().value());
-					vector.z = static_cast<float>(array.at(0).get_double().value());
-					vector.w = static_cast<float>(array.at(0).get_double().value());
-
-					componentData.color = vector;
-					componentData.intensity = static_cast<float>(component["Intensity"].get_double());
+					ImportedLightComponent light;
+					static_cast<BaseComponentData&>(light) = std::move(base);
+					ReadLight(source, light);
+					actor.Components.push_back(std::move(light));
+					break;
 				}
-
-					break;
 				case UnrealComponentType::Box:
-					//If we want
-
+				{
+					ImportedBoxComponent box;
+					// Bug fix: retain the box's own TypeID and all common component metadata.
+					static_cast<BaseComponentData&>(box) = std::move(base);
+					box.BoundsMaxima = ReadVector3(source["Bounds"]);
+					actor.Components.push_back(std::move(box));
 					break;
+				}
 				case UnrealComponentType::Sphere:
-					//If we want
-
+				{
+					ImportedSphereComponent sphere;
+					// Bug fix: retain the sphere's own TypeID and all common component metadata.
+					static_cast<BaseComponentData&>(sphere) = std::move(base);
+					sphere.Radius = ReadNumber(source, "Radius");
+					actor.Components.push_back(std::move(sphere));
 					break;
+				}
 				case UnrealComponentType::Capsule:
-					//If we want
-
+				{
+					ImportedCapsuleComponent capsule;
+					// Bug fix: the first integration kept only radius/height and lost name,
+					// tags, parent and transform.
+					static_cast<BaseComponentData&>(capsule) = std::move(base);
+					capsule.Radius = ReadNumber(source, "Radius");
+					capsule.HalfHeight = ReadNumber(source, "HalfHeight");
+					actor.Components.push_back(std::move(capsule));
 					break;
+				}
 				case UnrealComponentType::SpringArm:
-					//If we want
-
+				{
+					ImportedSpringArmComponent springArm;
+					// Bug fix: retain the spring arm's TypeID and exported settings.
+					static_cast<BaseComponentData&>(springArm) = std::move(base);
+					springArm.SocketOffset = ReadVector3Object(source["SocketOffset"].get_object().value());
+					springArm.ArmLength = ReadNumber(source, "ArmLength");
+					actor.Components.push_back(std::move(springArm));
 					break;
-				default:
-					break;
+				}
+				}
 			}
+			scene.Actors.push_back(std::move(actor));
 		}
-	}
 
-	return unrealData;
+		// UnrealSceneAdapter performs engine-facing conversion. ComponentRegistry then
+		// resolves assets and builds a candidate World before the active World is replaced.
+		result.Data = std::move(scene);
+	}
+	catch (const std::exception& error)
+	{
+		result.Diagnostics.push_back({jsonPath.string(), error.what()});
+	}
+	return result;
 }

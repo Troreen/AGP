@@ -8,10 +8,8 @@
 
 class Mesh;
 
-// Game-local mesh/animation catalog used while constructing this example scene.
-// The hardcoded list in Initialize chooses content for Game; FBX conversion
-// and caching are candidates for a reusable engine asset service. This is not yet
-// a JSON scene loader, streaming system, or thread-safe runtime asset manager.
+// Game-local cache used to resolve mesh references from imported scenes. FBX
+// conversion remains synchronous and runs at the host's safe scene-loading point.
 class MeshLibrary
 {
 public:
@@ -24,6 +22,7 @@ public:
 	// to it; transforms and animation playback belong to individual components.
 	std::shared_ptr<Mesh> GetMesh(std::string_view aName) const;
 	bool LoadFBXMesh(const std::filesystem::path& aPath);
+	std::shared_ptr<Mesh> LoadSceneMesh(std::string_view aName, std::string_view aContentPath);
 	bool LoadFBXAnimation(std::string_view aMeshName, std::string aAnimationName, const std::filesystem::path& aPath);
 
 private:

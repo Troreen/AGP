@@ -38,9 +38,10 @@ Game resolves `Assets` from the executable location; it does not depend on
 its working directory. Run `Bin/Debug/Game.exe` or
 `Bin/Release/Game.exe`. The debug build opens a log console.
 
-The sample installs a C++ scene source in Main.cpp. Game requests the scene
-by name and registers only its gameplay behaviors. Mesh/material loading stays in
-GameScene.cpp; the engine constructs and starts registered components.
+The sample installs its scene source in Main.cpp. Game requests the scene by
+name and registers only its gameplay behaviors. GameScene.cpp imports
+`Content/ExportedScenes/lvl_blockout/Lvl_Blockout_Level.json`, resolves the
+available Content meshes, and hands the result to the engine for construction.
 Start with [the MVP guide](Docs/GameFrameworkMVP.md), then Game.cpp and
 GameComponents.cpp. Real Perforce scene integration requires the team inputs
 listed in [the importer handoff](Docs/ImporterHandoff.md).

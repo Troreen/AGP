@@ -2,11 +2,9 @@
 
 #include <cmath>
 
-#include "Maths.hpp"
 #include "Matrix3x3.hpp"
 #include "Matrix4x4.hpp"
 #include "Ray.hpp"
-#include "Transform.hpp"
 #include "Vector2.hpp"
 #include "Vector3.hpp"
 #include "Vector4.hpp"
@@ -29,10 +27,10 @@ namespace CommonUtilities
         {
             const float width = static_cast<float>(aResolution.x) > 0.0f ? static_cast<float>(aResolution.x) : 1.0f;
             const float height = static_cast<float>(aResolution.y) > 0.0f ? static_cast<float>(aResolution.y) : 1.0f;
-            const float horizontalFieldOfViewRadians = Maths::DegreesToRadians(aHorizontalFieldOfViewDegrees);
+            const float horizontalFieldOfViewRadians = DegreesToRadians(aHorizontalFieldOfViewDegrees);
             const float verticalFieldOfViewRadians = 2.0f * std::atan(
                 std::tan(horizontalFieldOfViewRadians * 0.5f) * (height / width));
-            const float verticalFieldOfViewDegrees = Maths::RadiansToDegrees(verticalFieldOfViewRadians);
+            const float verticalFieldOfViewDegrees = RadiansToDegrees(verticalFieldOfViewRadians);
             const float aspectRatio = width / height;
 
             SetPerspective(verticalFieldOfViewDegrees, aspectRatio, aNearPlane, aFarPlane);
@@ -41,7 +39,7 @@ namespace CommonUtilities
         void SetPerspective(float aFieldOfViewDegrees, float aAspectRatio, float aNearPlane, float aFarPlane)
         {
             myProjectionType = ProjectionType::Perspective;
-            myFieldOfViewRadians = Maths::DegreesToRadians(aFieldOfViewDegrees);
+            myFieldOfViewRadians = DegreesToRadians(aFieldOfViewDegrees);
             myAspectRatio = aAspectRatio;
             myNearPlane = aNearPlane;
             myFarPlane = aFarPlane;
@@ -72,22 +70,37 @@ namespace CommonUtilities
         ProjectionType GetProjectionType() const { return myProjectionType; }
 
         float GetFieldOfView() const { return GetFieldOfViewDegrees(); }
-        float GetFieldOfViewDegrees() const { return Maths::RadiansToDegrees(myFieldOfViewRadians); }
+        float GetFieldOfViewDegrees() const { return RadiansToDegrees(myFieldOfViewRadians); }
         float GetFieldOfViewRadians() const { return myFieldOfViewRadians; }
         float GetAspectRatio() const { return myAspectRatio; }
         float GetNearPlane() const { return myNearPlane; }
         float GetFarPlane() const { return myFarPlane; }
 
-        Transform& GetTransform() { return myTransform; }
-        const Transform& GetTransform() const { return myTransform; }
+        void SetWorldMatrix(const Matrix4f& aWorldMatrix) { myWorldMatrix = aWorldMatrix; }
+        const Matrix4f& GetWorldMatrix() const { return myWorldMatrix; }
+        Vector3<float> GetPosition() const { return {myWorldMatrix(4, 1), myWorldMatrix(4, 2), myWorldMatrix(4, 3)}; }
+        void SetPosition(const Vector3<float>& aPosition)
+        {
+            myWorldMatrix(4, 1) = aPosition.x;
+            myWorldMatrix(4, 2) = aPosition.y;
+            myWorldMatrix(4, 3) = aPosition.z;
+        }
+        void SetRotationDegrees(const Vector3<float>& aRotation)
+        {
+            const auto position = GetPosition();
+            myWorldMatrix = Matrix4f::CreateRotationAroundY(DegreesToRadians(aRotation.x)) *
+                Matrix4f::CreateRotationAroundX(DegreesToRadians(aRotation.y)) *
+                Matrix4f::CreateRotationAroundZ(DegreesToRadians(aRotation.z));
+            SetPosition(position);
+        }
 
-        Vector3<float> GetRight() const { return myTransform.GetRight(); }
-        Vector3<float> GetUp() const { return myTransform.GetUp(); }
-        Vector3<float> GetForward() const { return myTransform.GetForward(); }
+        Vector3<float> GetRight() const { return {myWorldMatrix(1, 1), myWorldMatrix(1, 2), myWorldMatrix(1, 3)}; }
+        Vector3<float> GetUp() const { return {myWorldMatrix(2, 1), myWorldMatrix(2, 2), myWorldMatrix(2, 3)}; }
+        Vector3<float> GetForward() const { return {myWorldMatrix(3, 1), myWorldMatrix(3, 2), myWorldMatrix(3, 3)}; }
 
         Matrix4f GetViewMatrix() const
         {
-            return myTransform.GetWorldMatrix().GetFastInverse();
+            return myWorldMatrix.GetFastInverse();
         }
 
         Matrix4f GetProjectionMatrix() const
@@ -126,9 +139,9 @@ namespace CommonUtilities
             return GetViewMatrix() * GetProjectionMatrix();
         }
 
-        void LookAt(const Vector3<float>& aTarget, const Vector3<float>& aUp = Vector3<float>::UnitY)
+        void LookAt(const Vector3<float>& aTarget)
         {
-            const Vector3<float> position = myTransform.GetPosition();
+            const Vector3<float> position = GetPosition();
             Vector3<float> forward = (aTarget - position).GetNormalized();
             if (forward.LengthSqr() == 0.0f)
             {
@@ -137,12 +150,12 @@ namespace CommonUtilities
 
             const float yaw = std::atan2(forward.x, forward.z);
             const float pitch = -std::asin(forward.y);
-            myTransform.SetYawPitchRollRadians(yaw, pitch, 0.0f);
+            SetRotationDegrees({RadiansToDegrees(yaw), RadiansToDegrees(pitch), 0});
         }
 
         Ray<float> ScreenPointToRay(const Vector2<float>& aNormalizedScreenPos) const
         {
-            const Vector3<float> origin = myTransform.GetPosition();
+            const Vector3<float> origin = GetPosition();
 
             if (myProjectionType == ProjectionType::Orthographic)
             {
@@ -170,8 +183,7 @@ namespace CommonUtilities
 
             localDir = localDir.GetNormalized();
 
-            const Matrix3x3<float> rotation = myTransform.GetRotation().ToMatrix3x3();
-            Vector3<float> worldDir = localDir * rotation;
+            Vector3<float> worldDir = GetRight() * localDir.x + GetUp() * localDir.y + GetForward() * localDir.z;
             worldDir.Normalize();
 
             return Ray<float>(origin, worldDir);
@@ -196,50 +208,13 @@ namespace CommonUtilities
                 ndc.z);
         }
 
-        void SetFollowTarget(Transform* aTarget, const Vector3<float>& anOffset = Vector3<float>::Zero,
-            bool aUseTargetRotation = false, bool aLookAtTarget = true)
-        {
-            myFollowTarget = aTarget;
-            myFollowOffset = anOffset;
-            myFollowUseTargetRotation = aUseTargetRotation;
-            myFollowLookAtTarget = aLookAtTarget;
-        }
-
-        void ClearFollowTarget()
-        {
-            myFollowTarget = nullptr;
-        }
-
-        bool HasFollowTarget() const { return myFollowTarget != nullptr; }
-
-        void UpdateFollow()
-        {
-            if (!myFollowTarget)
-            {
-                return;
-            }
-
-            Vector3<float> offset = myFollowOffset;
-            if (myFollowUseTargetRotation)
-            {
-                const Matrix3x3<float> rotation = myFollowTarget->GetRotation().ToMatrix3x3();
-                offset = offset * rotation;
-            }
-
-            const Vector3<float> targetPos = myFollowTarget->GetPosition();
-            myTransform.SetPosition(targetPos + offset);
-
-            if (myFollowLookAtTarget)
-            {
-                LookAt(targetPos);
-            }
-        }
-
     private:
-        Transform myTransform;
+        static constexpr float DegreesToRadians(float value) { return value * 0.01745329251994329577f; }
+        static constexpr float RadiansToDegrees(float value) { return value * 57.295779513082320876f; }
+        Matrix4f myWorldMatrix;
         ProjectionType myProjectionType = ProjectionType::Perspective;
 
-        float myFieldOfViewRadians = Maths::DegreesToRadians(90.0f);
+        float myFieldOfViewRadians = DegreesToRadians(90.0f);
         float myAspectRatio = 16.0f / 9.0f;
         float myNearPlane = 0.1f;
         float myFarPlane = 1000.0f;
@@ -249,9 +224,5 @@ namespace CommonUtilities
         float myOrthoBottom = -1.0f;
         float myOrthoTop = 1.0f;
 
-        Transform* myFollowTarget = nullptr;
-        Vector3<float> myFollowOffset = Vector3<float>::Zero;
-        bool myFollowUseTargetRotation = false;
-        bool myFollowLookAtTarget = true;
     };
 }

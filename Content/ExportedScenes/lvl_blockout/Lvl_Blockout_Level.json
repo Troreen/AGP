@@ -1,0 +1,1301 @@
+{
+	"Actors": [
+		{
+			"Name": "SM_SkySphere",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				400,
+				0,
+				0,
+				0,
+				0,
+				400,
+				0,
+				0,
+				0,
+				0,
+				400,
+				0,
+				0,
+				900,
+				0,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "SM_SkySphere",
+					"ContentPath": "/Engine/EngineSky/SM_SkySphere.SM_SkySphere",
+					"Materials": [
+						{
+							"Name": "M_SimpleSkyDome",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "DirectionalLight",
+			"Archetype": "DirectionalLight",
+			"Transform": [
+				0.63874133869063543,
+				-0.11617802907643715,
+				-0.76059987365737136,
+				0,
+				-0.76013302160683449,
+				-0.24841988741697341,
+				-0.60040432126909371,
+				0,
+				-0.11919434428930942,
+				0.96166014012001755,
+				-0.2469868077322932,
+				0,
+				0,
+				0,
+				400,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "LightComponent0",
+					"TypeID": 5,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Color": [
+						1,
+						1,
+						1,
+						1
+					],
+					"Intensity": 6
+				}
+			]
+		},
+		{
+			"Name": "RecastNavMesh-Default",
+			"Archetype": "RecastNavMesh",
+			"Transform": [
+				1,
+				0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				0,
+				0,
+				0,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "SceneComp",
+					"TypeID": 0,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					]
+				}
+			]
+		},
+		{
+			"Name": "Landscape",
+			"Archetype": "Landscape",
+			"Transform": [
+				100,
+				0,
+				0,
+				0,
+				0,
+				100,
+				0,
+				0,
+				0,
+				0,
+				100,
+				0,
+				-12400,
+				-12400,
+				0,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "RootComponent0",
+					"TypeID": 0,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					]
+				}
+			]
+		},
+		{
+			"Name": "Plane",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-8.9999999999999964,
+				2.1902335255758731e-07,
+				2.55344434366041e-15,
+				0,
+				-5.2185131789236355e-15,
+				-1.0951169970851993e-07,
+				-8.9999999999999982,
+				0,
+				-2.1902335255758728e-07,
+				-8.9999999999999964,
+				1.0951169970851993e-07,
+				0,
+				-300,
+				1670,
+				387.88999257812247,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Plane",
+					"ContentPath": "/Engine/BasicShapes/Plane.Plane",
+					"Materials": [
+						{
+							"Name": "ReferencePictureRightScale_Mat",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "SM_Prop_SnowPileTest",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-0.25752769643568185,
+				-0.96627091727347958,
+				0,
+				0,
+				0.96627091727347958,
+				-0.25752769643568185,
+				-0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				470,
+				-1210,
+				130,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "SM_Prop_SnowPileTest",
+					"ContentPath": "/Game/Meshes/Props/SM_Prop_SnowPileTest.SM_Prop_SnowPileTest",
+					"Materials": [
+						{
+							"Name": "BasicShapeMaterial",
+							"Parameters": [
+								{
+									"Name": "Color",
+									"Type": 1,
+									"Value": [
+										0.89999997615814209,
+										0.89999997615814209,
+										0.89999997615814209,
+										1
+									]
+								},
+								{
+									"Name": "Roughness",
+									"Type": 0,
+									"Value": 0.64069998264312744
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "SM_Prop_SnowPileTest2",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-0.23199221564972672,
+				0.97215270632702078,
+				0.033147058074293946,
+				0,
+				-0.97262558546900957,
+				-0.23230434722336613,
+				0.0058447200268867631,
+				0,
+				0.013382166080185559,
+				-0.030883747217195619,
+				0.99943339537401221,
+				0,
+				580,
+				-400,
+				130,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "SM_Prop_SnowPileTest",
+					"ContentPath": "/Game/Meshes/Props/SM_Prop_SnowPileTest.SM_Prop_SnowPileTest",
+					"Materials": [
+						{
+							"Name": "BasicShapeMaterial",
+							"Parameters": [
+								{
+									"Name": "Color",
+									"Type": 1,
+									"Value": [
+										0.89999997615814209,
+										0.89999997615814209,
+										0.89999997615814209,
+										1
+									]
+								},
+								{
+									"Name": "Roughness",
+									"Type": 0,
+									"Value": 0.64069998264312744
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "SM_Prop_SnowPileTest3",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				0.33508808438635895,
+				0.94209093778515163,
+				0.013440262102131163,
+				0,
+				-0.94215309690418025,
+				0.3351626670980451,
+				-0.0036781214753708498,
+				0,
+				-0.0079697990026668872,
+				-0.011430289883404414,
+				0.99990291067535075,
+				0,
+				-690,
+				-760,
+				130,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "SM_Prop_SnowPileTest",
+					"ContentPath": "/Game/Meshes/Props/SM_Prop_SnowPileTest.SM_Prop_SnowPileTest",
+					"Materials": [
+						{
+							"Name": "BasicShapeMaterial",
+							"Parameters": [
+								{
+									"Name": "Color",
+									"Type": 1,
+									"Value": [
+										0.89999997615814209,
+										0.89999997615814209,
+										0.89999997615814209,
+										1
+									]
+								},
+								{
+									"Name": "Roughness",
+									"Type": 0,
+									"Value": 0.64069998264312744
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "SM_Prop_SnowPileTest4",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				0.37721263757045809,
+				-0.92490741971192969,
+				0.047506747088798838,
+				0,
+				0.92371130701872428,
+				0.37943585750157494,
+				0.052781164517327644,
+				0,
+				-0.066843454001861202,
+				0.023972797163980875,
+				0.9974754421303994,
+				0,
+				-720,
+				-1620,
+				130,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "SM_Prop_SnowPileTest",
+					"ContentPath": "/Game/Meshes/Props/SM_Prop_SnowPileTest.SM_Prop_SnowPileTest",
+					"Materials": [
+						{
+							"Name": "BasicShapeMaterial",
+							"Parameters": [
+								{
+									"Name": "Color",
+									"Type": 1,
+									"Value": [
+										0.89999997615814209,
+										0.89999997615814209,
+										0.89999997615814209,
+										1
+									]
+								},
+								{
+									"Name": "Roughness",
+									"Type": 0,
+									"Value": 0.64069998264312744
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Cube",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-6.4948283506122291,
+				-0.25923868554593149,
+				7.9493703286637185e-16,
+				0,
+				0.30545376294560317,
+				-7.6526763557778974,
+				-1.1856401614403183,
+				0,
+				0.0061015145802930104,
+				-0.15286410588877508,
+				0.98822838284004566,
+				0,
+				-180,
+				-60,
+				30,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Cube",
+					"ContentPath": "/Engine/BasicShapes/Cube.Cube",
+					"Materials": [
+						{
+							"Name": "BasicShapeMaterial",
+							"Parameters": [
+								{
+									"Name": "Color",
+									"Type": 1,
+									"Value": [
+										0.89999997615814209,
+										0.89999997615814209,
+										0.89999997615814209,
+										1
+									]
+								},
+								{
+									"Name": "Roughness",
+									"Type": 0,
+									"Value": 0.64069998264312744
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Cube2",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				2,
+				0,
+				0,
+				0,
+				0,
+				3,
+				0,
+				0,
+				0,
+				0,
+				18.25,
+				0,
+				250,
+				-60,
+				30,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Cube",
+					"ContentPath": "/Engine/BasicShapes/Cube.Cube",
+					"Materials": [
+						{
+							"Name": "BasicShapeMaterial",
+							"Parameters": [
+								{
+									"Name": "Color",
+									"Type": 1,
+									"Value": [
+										0.89999997615814209,
+										0.89999997615814209,
+										0.89999997615814209,
+										1
+									]
+								},
+								{
+									"Name": "Roughness",
+									"Type": 0,
+									"Value": 0.64069998264312744
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Cube3",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				2,
+				0,
+				0,
+				0,
+				0,
+				3,
+				0,
+				0,
+				0,
+				0,
+				18.25,
+				0,
+				-570,
+				-60,
+				30,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Cube",
+					"ContentPath": "/Engine/BasicShapes/Cube.Cube",
+					"Materials": [
+						{
+							"Name": "BasicShapeMaterial",
+							"Parameters": [
+								{
+									"Name": "Color",
+									"Type": 1,
+									"Value": [
+										0.89999997615814209,
+										0.89999997615814209,
+										0.89999997615814209,
+										1
+									]
+								},
+								{
+									"Name": "Roughness",
+									"Type": 0,
+									"Value": 0.64069998264312744
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "PointLight",
+			"Archetype": "PointLight",
+			"Transform": [
+				1,
+				0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				-10.000000000000014,
+				-1550,
+				50,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "LightComponent0",
+					"TypeID": 3,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Color": [
+						1,
+						1,
+						1,
+						1
+					],
+					"Intensity": 8,
+					"FalloffExponent": 8,
+					"AttenuationRadius": 1000
+				}
+			]
+		},
+		{
+			"Name": "SpotLight",
+			"Archetype": "SpotLight",
+			"Transform": [
+				2.2204460492503131e-16,
+				0,
+				-1,
+				0,
+				-0,
+				1,
+				0,
+				0,
+				1,
+				0,
+				2.2204460492503131e-16,
+				0,
+				-230,
+				-1250,
+				100,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "LightComponent0",
+					"TypeID": 4,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Color": [
+						1,
+						1,
+						1,
+						1
+					],
+					"Intensity": 8,
+					"FalloffExponent": 8,
+					"InnerConeAngle": 0,
+					"OuterConeAngle": 33.864002227783203,
+					"AttenuationRadius": 16384
+				}
+			]
+		},
+		{
+			"Name": "Cube4",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-124.94083567043668,
+				-4.9112050687301201,
+				0.86597795456292204,
+				0,
+				5.1730081165488029,
+				-131.11958418750217,
+				2.7307745279802096,
+				0,
+				0.014958553480097754,
+				0.051636626519859341,
+				2.4510234041605332,
+				0,
+				-180,
+				-700,
+				-200,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Cube",
+					"ContentPath": "/Engine/BasicShapes/Cube.Cube",
+					"Materials": [
+						{
+							"Name": "BasicShapeMaterial",
+							"Parameters": [
+								{
+									"Name": "Color",
+									"Type": 1,
+									"Value": [
+										0.89999997615814209,
+										0.89999997615814209,
+										0.89999997615814209,
+										1
+									]
+								},
+								{
+									"Name": "Roughness",
+									"Type": 0,
+									"Value": 0.64069998264312744
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "BP_TopDownCharacter",
+			"Archetype": "BP_TopDownCharacter_C",
+			"Transform": [
+				1.2167964857923153e-08,
+				1,
+				0,
+				0,
+				-1,
+				1.2167964857923153e-08,
+				0,
+				0,
+				0,
+				-0,
+				1,
+				0,
+				-20,
+				-1140,
+				126,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "CollisionCylinder",
+					"TypeID": 8,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Radius": 42,
+					"HalfHeight": 96
+				},
+				{
+					"Name": "CharacterMesh0",
+					"TypeID": 2,
+					"Parent": "CollisionCylinder",
+					"Tags": [],
+					"Transform": [
+						-2.2204460492503131e-16,
+						-1.0000000000000002,
+						0,
+						0,
+						1.0000000000000002,
+						-2.2204460492503131e-16,
+						-0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						-95,
+						1
+					],
+					"Mesh": "SKM_Manny_Simple",
+					"ContentPath": "/Game/Characters/Mannequins/Meshes/SKM_Manny_Simple.SKM_Manny_Simple",
+					"Materials": [
+						{
+							"Name": "MI_Manny_01_New",
+							"Parent": "M_Mannequin",
+							"Parameters": [
+								{
+									"Name": "Head Cutout",
+									"Type": 0,
+									"Value": 16.40704345703125
+								},
+								{
+									"Name": "MetalPaintRoughness",
+									"Type": 0,
+									"Value": 0.10000000149011612
+								},
+								{
+									"Name": "LogoPosX",
+									"Type": 0,
+									"Value": 0
+								},
+								{
+									"Name": "LogoPosY",
+									"Type": 0,
+									"Value": 0
+								},
+								{
+									"Name": "LogoScale",
+									"Type": 0,
+									"Value": 0.5
+								},
+								{
+									"Name": "EmissivePower",
+									"Type": 0,
+									"Value": 0
+								},
+								{
+									"Name": "Scale",
+									"Type": 0,
+									"Value": 99.141593933105469
+								},
+								{
+									"Name": "MetalPaintMetallic",
+									"Type": 0,
+									"Value": 0
+								},
+								{
+									"Name": "Paint Tint",
+									"Type": 1,
+									"Value": [
+										0.921875,
+										0.921875,
+										0.921875,
+										1
+									]
+								},
+								{
+									"Name": "LogoTint",
+									"Type": 1,
+									"Value": [
+										0,
+										1,
+										1,
+										1
+									]
+								},
+								{
+									"Name": "Blend Offset",
+									"Type": 1,
+									"Value": [
+										0,
+										0,
+										-57.245098114013672,
+										0
+									]
+								},
+								{
+									"Name": "BNormal",
+									"Type": 3,
+									"Value":
+									{
+										"Name": "T_Manny_01_BN",
+										"Path": "/Game/Characters/Mannequins/Textures/Manny/T_Manny_01_BN.T_Manny_01_BN"
+									}
+								},
+								{
+									"Name": "Base Texture",
+									"Type": 3,
+									"Value":
+									{
+										"Name": "T_Manny_01_D",
+										"Path": "/Game/Characters/Mannequins/Textures/Manny/T_Manny_01_D.T_Manny_01_D"
+									}
+								},
+								{
+									"Name": "MRA",
+									"Type": 3,
+									"Value":
+									{
+										"Name": "T_Manny_01_MRA",
+										"Path": "/Game/Characters/Mannequins/Textures/Manny/T_Manny_01_MRA.T_Manny_01_MRA"
+									}
+								},
+								{
+									"Name": "Logo?",
+									"Type": 8,
+									"Value": false
+								}
+							]
+						},
+						{
+							"Name": "MI_Manny_02_New",
+							"Parent": "MI_Manny_01_New",
+							"Parameters": [
+								{
+									"Name": "Head Cutout",
+									"Type": 0,
+									"Value": 16.40704345703125
+								},
+								{
+									"Name": "MetalPaintRoughness",
+									"Type": 0,
+									"Value": 0.10000000149011612
+								},
+								{
+									"Name": "LogoPosX",
+									"Type": 0,
+									"Value": -0.24099999666213989
+								},
+								{
+									"Name": "LogoPosY",
+									"Type": 0,
+									"Value": 0.26133298873901367
+								},
+								{
+									"Name": "LogoScale",
+									"Type": 0,
+									"Value": 0.075000002980232239
+								},
+								{
+									"Name": "EmissivePower",
+									"Type": 0,
+									"Value": 2
+								},
+								{
+									"Name": "Scale",
+									"Type": 0,
+									"Value": 99.141593933105469
+								},
+								{
+									"Name": "MetalPaintMetallic",
+									"Type": 0,
+									"Value": 0
+								},
+								{
+									"Name": "Paint Tint",
+									"Type": 1,
+									"Value": [
+										0.921875,
+										0.921875,
+										0.921875,
+										1
+									]
+								},
+								{
+									"Name": "LogoTint",
+									"Type": 1,
+									"Value": [
+										0,
+										1,
+										1,
+										1
+									]
+								},
+								{
+									"Name": "Blend Offset",
+									"Type": 1,
+									"Value": [
+										0,
+										0,
+										-57.245098114013672,
+										0
+									]
+								},
+								{
+									"Name": "BNormal",
+									"Type": 3,
+									"Value":
+									{
+										"Name": "T_Manny_02_BN",
+										"Path": "/Game/Characters/Mannequins/Textures/Manny/T_Manny_02_BN.T_Manny_02_BN"
+									}
+								},
+								{
+									"Name": "Base Texture",
+									"Type": 3,
+									"Value":
+									{
+										"Name": "T_Manny_02_D",
+										"Path": "/Game/Characters/Mannequins/Textures/Manny/T_Manny_02_D.T_Manny_02_D"
+									}
+								},
+								{
+									"Name": "MRA",
+									"Type": 3,
+									"Value":
+									{
+										"Name": "T_Manny_02_MRA",
+										"Path": "/Game/Characters/Mannequins/Textures/Manny/T_Manny_02_MRA.T_Manny_02_MRA"
+									}
+								},
+								{
+									"Name": "Logo?",
+									"Type": 8,
+									"Value": true
+								}
+							]
+						}
+					]
+				},
+				{
+					"Name": "SpringArm",
+					"TypeID": 9,
+					"Parent": "CollisionCylinder",
+					"Tags": [],
+					"Transform": [
+						0.47391273700423719,
+						0.43426101468090295,
+						-0.7660444431189779,
+						0,
+						-0.67559020761566013,
+						0.73727733681012397,
+						0,
+						0,
+						0.56478720690095452,
+						0.51753212436957319,
+						0.64278760968653925,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"TargetArmLength": 1800,
+					"SocketOffset":
+					{
+						"x": 0,
+						"y": 0,
+						"z": 0
+					},
+					"ArmLength": 1800
+				}
+			]
+		}
+	]
+}

@@ -167,7 +167,6 @@
     <ClInclude Include="Grid2D.hpp" />
     <ClInclude Include="GridRaytrace2D.hpp" />
     <ClInclude Include="InputHandler.h" />
-    <ClInclude Include="InputMapper.h" />
     <ClInclude Include="Intersection.hpp" />
     <ClInclude Include="KDTree2D.hpp" />
     <ClInclude Include="Line.hpp" />
@@ -175,6 +174,7 @@
     <ClInclude Include="LooseQuadTree2D.hpp" />
     <ClInclude Include="Maths.hpp" />
     <ClInclude Include="Matrix.hpp" />
+    <ClInclude Include="NamespaceAlias.hpp" />
     <ClInclude Include="Matrix3x3.hpp" />
     <ClInclude Include="Matrix4x4.hpp" />
     <ClInclude Include="PathfindingTypes.hpp" />
@@ -186,7 +186,6 @@
     <ClInclude Include="Rect2D.hpp" />
     <ClInclude Include="Sphere.hpp" />
     <ClInclude Include="Timer.h" />
-    <ClInclude Include="Transform.hpp" />
     <ClInclude Include="Utility.hpp" />
     <ClInclude Include="Vector.hpp" />
     <ClInclude Include="Vector2.hpp" />
@@ -198,7 +197,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="InputHandler.cpp" />
-    <ClCompile Include="InputMapper.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="XInputHandler.cpp" />
   </ItemGroup>

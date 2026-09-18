@@ -180,6 +180,7 @@
   <ItemGroup>
     <ClInclude Include="AudioManager.h" />
     <ClInclude Include="Components\CameraComponent.h" />
+    <ClInclude Include="Components\DebugCameraController.h" />
     <ClInclude Include="Components\LightComponent.h" />
     <ClInclude Include="Components\MeshComponentBase.h" />
     <ClInclude Include="Components\SceneComponent.h" />
@@ -189,15 +190,14 @@
     <ClInclude Include="Rendering\WorldRenderer.h" />
     <ClInclude Include="Runtime\GameApplication.h" />
     <ClInclude Include="Runtime\GameContext.h" />
-    <ClInclude Include="Runtime\GameInput.h" />
+    <ClInclude Include="Runtime\InputSystem.h" />
     <ClInclude Include="Runtime\IGame.h" />
     <ClInclude Include="Scenes\AssetRefs.h" />
     <ClInclude Include="Scenes\ComponentRegistry.h" />
     <ClInclude Include="Scenes\SceneData.h" />
-    <ClInclude Include="Scenes\SceneReader.h" />
-    <ClInclude Include="ServiceLocator.h" />
     <ClInclude Include="SimdJson\simdjson.h" />
     <ClInclude Include="UnrealSceneImporter\UnrealSceneImporter.h" />
+    <ClInclude Include="UnrealSceneImporter\UnrealSceneAdapter.h" />
     <ClInclude Include="UnrealSceneImporter\UnrealSceneStructs.h" />
     <ClInclude Include="World\Actor.h" />
     <ClInclude Include="World\Component.h" />
@@ -207,6 +207,7 @@
   <ItemGroup>
     <ClCompile Include="AudioManager.cpp" />
     <ClCompile Include="Components\CameraComponent.cpp" />
+    <ClCompile Include="Components\DebugCameraController.cpp" />
     <ClCompile Include="Components\LightComponent.cpp" />
     <ClCompile Include="Components\MeshComponentBase.cpp" />
     <ClCompile Include="Components\SceneComponent.cpp" />
@@ -215,11 +216,12 @@
     <ClCompile Include="Rendering\WorldRenderer.cpp" />
     <ClCompile Include="Runtime\GameApplication.cpp" />
     <ClCompile Include="Runtime\GameContext.cpp" />
-    <ClCompile Include="Scenes\BuiltInComponents.cpp" />
+    <ClCompile Include="Runtime\InputSystem.cpp" />
+    <ClCompile Include="Scenes\AssetRefs.cpp" />
     <ClCompile Include="Scenes\ComponentRegistry.cpp" />
-    <ClCompile Include="ServiceLocator.cpp" />
     <ClCompile Include="SimdJson\simdjson.cpp" />
     <ClCompile Include="UnrealSceneImporter\UnrealSceneImporter.cpp" />
+    <ClCompile Include="UnrealSceneImporter\UnrealSceneAdapter.cpp" />
     <ClCompile Include="World\Actor.cpp" />
     <ClCompile Include="World\Component.cpp" />
     <ClCompile Include="World\Transform.cpp" />

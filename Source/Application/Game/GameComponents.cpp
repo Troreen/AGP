@@ -1,294 +1,153 @@
 #include "GameComponents.h"
-#include "GameOrientation.h"
 #include "GameLog.h"
 #include "GameFramework/World/World.h"
 #include "GameFramework/Components/LightComponent.h"
-#include "GameFramework/Components/CameraComponent.h"
 #include "GameFramework/Components/SkeletalMeshComponent.h"
+#include "Maths.hpp"
+#include <algorithm>
 #include <cmath>
 #include <utility>
 
 namespace
 {
-	using Vector3f = CommonUtilities::Vector3f;
+	using Vector3f = CU::Vector3f;
 
-	void AimActorAlongCameraForward(Actor& anActor, const Transform& aCameraTransform)
+	void AimActorAlongCameraForward(Actor& actor, const Transform& camera)
 	{
-		Vector3f forward = aCameraTransform.GetLocalForward();
-		if (forward.LengthSqr() <= 0.0f)
-		{
-			forward = Vector3f::UnitZ;
-		}
-		else
-		{
-			forward.Normalize();
-		}
-
-		const auto rotation =
-		    GameOrientation::CreateUprightRotation(std::atan2(forward.x, forward.z), -std::asin(std::clamp(forward.y, -1.f, 1.f)));
-		anActor.GetTransform().SetLocalRotation(rotation);
+		const auto forward = CU::NormalizeSafe(camera.GetLocalForward(), Vector3f::UnitZ);
+		const float yaw = CU::RadiansToDegrees(std::atan2(forward.x, forward.z));
+		const float pitch = CU::RadiansToDegrees(-std::asin(CU::Clamp(forward.y, -1.f, 1.f)));
+		actor.GetTransform().SetLocalRotationDegrees(yaw, pitch, 0);
 	}
 
-	void PrintLightTuningValues(const DirectionalLightComponent* aDirectionalLightComponent,
-	                            const std::vector<PointLightComponent*>& somePointLightComponents,
-	                            const SpotLightComponent* aSpotLightComponent)
+	void PrintLightTuningValues(const DirectionalLightComponent* directional, const std::vector<PointLightComponent*>& points,
+	                            const SpotLightComponent* spot)
 	{
-		unsigned activeLightCount = 0;
-		if (aDirectionalLightComponent != nullptr)
+		if (directional)
 		{
-			activeLightCount += aDirectionalLightComponent->IsEnabled() ? 1 : 0;
-			const Vector3f direction = aDirectionalLightComponent->GetWorldDirection();
-			GAMELOG(Log, "Directional light direction: {{ {:.2f}, {:.2f}, {:.2f} }}, intensity: {:.2f}", direction.x, direction.y,
-			        direction.z, aDirectionalLightComponent->GetIntensity());
+			const auto d = directional->GetWorldDirection();
+			GAMELOG(Log, "Directional light direction: {{ {:.2f}, {:.2f}, {:.2f} }}, intensity: {:.2f}", d.x, d.y, d.z, directional->GetIntensity());
 		}
-
-		for (size_t pointIndex = 0; pointIndex < somePointLightComponents.size(); ++pointIndex)
+		for (size_t i = 0; i < points.size(); ++i) if (points[i])
 		{
-			const PointLightComponent* pointLightComponent = somePointLightComponents[pointIndex];
-			if (pointLightComponent == nullptr)
-			{
-				continue;
-			}
-
-			activeLightCount += pointLightComponent->IsEnabled() ? 1 : 0;
-			const Vector3f position = pointLightComponent->GetWorldPosition();
-			GAMELOG(Log, "Point light {} position: {{ {:.2f}, {:.2f}, {:.2f} }}, intensity: {:.2f}, radius: {:.2f}", pointIndex, position.x,
-			        position.y, position.z, pointLightComponent->GetIntensity(), pointLightComponent->GetRadius());
+			const auto p = points[i]->GetWorldPosition();
+			GAMELOG(Log, "Point light {} position: {{ {:.2f}, {:.2f}, {:.2f} }}, intensity: {:.2f}, radius: {:.2f}", i, p.x, p.y, p.z,
+			        points[i]->GetIntensity(), points[i]->GetRadius());
 		}
-
-		if (aSpotLightComponent != nullptr)
+		if (spot)
 		{
-			activeLightCount += aSpotLightComponent->IsEnabled() ? 1 : 0;
-			const Vector3f position = aSpotLightComponent->GetWorldPosition();
-			const Vector3f direction = aSpotLightComponent->GetWorldDirection();
-			GAMELOG(
-			    Log,
-			    "Spot light position: {{ {:.2f}, {:.2f}, {:.2f} }}, direction: {{ {:.2f}, {:.2f}, {:.2f} }}, intensity: {:.2f}, radius: {:.2f}",
-			    position.x, position.y, position.z, direction.x, direction.y, direction.z, aSpotLightComponent->GetIntensity(),
-			    aSpotLightComponent->GetRadius());
+			const auto p = spot->GetWorldPosition(); const auto d = spot->GetWorldDirection();
+			GAMELOG(Log, "Spot light position: {{ {:.2f}, {:.2f}, {:.2f} }}, direction: {{ {:.2f}, {:.2f}, {:.2f} }}", p.x, p.y, p.z, d.x, d.y, d.z);
 		}
-
-		GAMELOG(Log, "Active demo lights: {}", activeLightCount);
 	}
-
 }
 
-// Owner-dependent initialization happens once, after scene validation.
 void CameraControlsComponent::BeginPlay()
 {
-	const auto direction = GetOwner()->GetTransform().GetLocalForward().GetNormalized();
+	const auto direction = CU::NormalizeSafe(GetOwner()->GetTransform().GetLocalForward(), Vector3f::UnitZ);
 	myYaw = std::atan2(direction.x, direction.z);
-	myPitch = -std::asin(std::clamp(direction.y, -1.f, 1.f));
-	GetOwner()->GetTransform().SetLocalRotation(GameOrientation::CreateUprightRotation(myYaw, myPitch));
+	myPitch = -std::asin(CU::Clamp(direction.y, -1.f, 1.f));
+	auto& input = GetInputSystem();
+	auto bindHeld = [this, &input](const InputActionId& action, bool& target)
+	{
+		mySubscriptions.push_back(input.Subscribe(action, [&target](const InputActionEvent& event) { target = event.Phase != InputActionPhase::Ended; }));
+	};
+	bindHeld(InputActions::CameraLookEnable, myLookActive);
+	bindHeld(InputActions::CameraForward, myForward); bindHeld(InputActions::CameraBack, myBack);
+	bindHeld(InputActions::CameraLeft, myLeft); bindHeld(InputActions::CameraRight, myRight);
+	bindHeld(InputActions::CameraUp, myUp); bindHeld(InputActions::CameraDown, myDown);
+	mySubscriptions.push_back(input.Subscribe(InputActions::CameraLookDelta, [this](const InputActionEvent& event)
+	{
+		if (event.Phase != InputActionPhase::Ended) myLookDelta += std::get<CommonUtilities::Vector2f>(event.Value);
+	}));
 }
 
 void CameraControlsComponent::Update(float deltaTime)
 {
-	const auto& input = GetInput();
 	auto& transform = GetOwner()->GetTransform();
-	if (input.MouseLookActive)
+	if (myLookActive)
 	{
-		myYaw += input.MouseDeltaX * .0025f;
-		myPitch = std::clamp(myPitch + input.MouseDeltaY * .0025f, -1.55334303f, 1.55334303f);
-		transform.SetLocalRotation(GameOrientation::CreateUprightRotation(myYaw, myPitch));
+		myYaw += myLookDelta.x * .0025f;
+		myPitch = CU::Clamp(myPitch + myLookDelta.y * .0025f, CU::DegreesToRadians(-89.0f), CU::DegreesToRadians(89.0f));
+		transform.SetLocalRotationDegrees(CU::RadiansToDegrees(myYaw), CU::RadiansToDegrees(myPitch), 0);
 	}
-	const auto forward = transform.GetLocalForward().GetNormalized();
-	const auto right = transform.GetLocalRight().GetNormalized();
+	myLookDelta = {};
 	Vector3f motion{};
-	if (input.IsKeyDown(Keys::W))
-	{
-		motion += forward;
-	}
-	if (input.IsKeyDown(Keys::S))
-	{
-		motion -= forward;
-	}
-	if (input.IsKeyDown(Keys::D))
-	{
-		motion += right;
-	}
-	if (input.IsKeyDown(Keys::A))
-	{
-		motion -= right;
-	}
-	if (input.IsKeyDown(Keys::SPACE))
-	{
-		motion += Vector3f::UnitY;
-	}
-	if (input.IsKeyDown(Keys::CONTROL))
-	{
-		motion -= Vector3f::UnitY;
-	}
-	if (motion.LengthSqr() > 0)
-	{
-		transform.SetLocalPosition(transform.GetLocalPosition() + motion.GetNormalized() * (500.f * deltaTime));
-	}
+	const auto forward = CU::NormalizeSafe(transform.GetLocalForward());
+	const auto right = CU::NormalizeSafe(transform.GetLocalRight());
+	if (myForward) motion += forward; if (myBack) motion -= forward;
+	if (myRight) motion += right; if (myLeft) motion -= right;
+	if (myUp) motion += Vector3f::UnitY; if (myDown) motion -= Vector3f::UnitY;
+	if (motion.LengthSqr() > 0) transform.SetLocalPosition(transform.GetLocalPosition() + CU::NormalizeSafe(motion) * (500.f * deltaTime));
 }
 
-// R toggles once per input press; rotation uses elapsed frame time.
+void SpinComponent::BeginPlay()
+{
+	myToggleSubscription = GetInputSystem().Subscribe(InputActions::ToggleSpin, [this](const InputActionEvent& event)
+	{
+		if (event.Phase == InputActionPhase::Started) mySpinning = !mySpinning;
+	});
+}
+
 void SpinComponent::Update(float deltaTime)
 {
-	if (GetInput().IsKeyPressed(Keys::R))
-	{
-		mySpinning = !mySpinning;
-	}
-	if (!mySpinning)
-	{
-		return;
-	}
+	if (!mySpinning) return;
 	myYaw = std::fmod(myYaw + 25.0f * deltaTime, 360.0f);
 	GetOwner()->GetTransform().SetLocalRotationDegrees(myYaw, 0, 0);
 }
 
-// Query the sibling each frame so destroying it cannot leave a dangling pointer.
-void AnimationControlsComponent::Update(float)
-
+void AnimationControlsComponent::BeginPlay()
 {
-	const GameInput& anInputFrame = GetInput();
-	auto* myAnimatedMeshComponent = GetOwner()->GetComponent<SkeletalMeshComponent>();
-	if (myAnimatedMeshComponent == nullptr)
+	auto bind = [this](const InputActionId& action, const char* animation, bool partial)
 	{
-		return;
-	}
-
-	if (anInputFrame.IsKeyPressed(Keys::NUMPAD0))
-	{
-		myAnimatedMeshComponent->PlayAnimation("Breathing", true);
-	}
-
-	if (anInputFrame.IsKeyPressed(Keys::NUMPAD1))
-	{
-		myAnimatedMeshComponent->PlayAnimation("Walk", true);
-	}
-
-	if (anInputFrame.IsKeyPressed(Keys::NUMPAD2))
-	{
-		myAnimatedMeshComponent->PlayAnimation("Run", true);
-	}
-
-	if (anInputFrame.IsKeyPressed(Keys::NUMPAD3))
-	{
-		if (!myAnimatedMeshComponent->PlayPartialAnimation("Wave", false))
+		mySubscriptions.push_back(GetInputSystem().Subscribe(action, [this, animation, partial](const InputActionEvent& event)
 		{
-			myAnimatedMeshComponent->PlayAnimation("Wave", false);
-		}
-	}
+			if (event.Phase != InputActionPhase::Started) return;
+			if (auto* mesh = GetOwner()->GetComponent<SkeletalMeshComponent>())
+				if (!partial || !mesh->PlayPartialAnimation(animation, false)) mesh->PlayAnimation(animation, !partial);
+		}));
+	};
+	bind(InputActions::PlayBreathing, "Breathing", false); bind(InputActions::PlayWalk, "Walk", false);
+	bind(InputActions::PlayRun, "Run", false); bind(InputActions::PlayWave, "Wave", true);
 }
 
-// Use the final camera pose for Shift+7/8/9 aiming/placement. Without Shift, the
-// same keys toggle the corresponding light group. Only mutate gameplay properties;
-// the host publishes those values after all updates finish.
+void LightControlsComponent::BeginPlay()
+{
+	auto bind = [this](const InputActionId& action, Request request)
+	{
+		mySubscriptions.push_back(GetInputSystem().Subscribe(action, [this, request](const InputActionEvent& event)
+		{
+			if (event.Phase == InputActionPhase::Started) myRequests |= request;
+		}));
+	};
+	bind(InputActions::PrintLights, Print); bind(InputActions::ToggleDirectional, ToggleDir);
+	bind(InputActions::TogglePoint, TogglePoints); bind(InputActions::ToggleSpot, ToggleSpot);
+	bind(InputActions::AimDirectional, AimDir); bind(InputActions::PlacePoint, PlacePoints); bind(InputActions::PlaceSpot, PlaceSpot);
+}
+
 void LightControlsComponent::Update(float)
 {
-	auto* myCameraActor = GetWorld().FindActor(CameraName);
-	auto* directional = GetWorld().FindActor(DirectionalName);
-	auto* myDirectionalLightComponent = directional ? directional->GetComponent<DirectionalLightComponent>() : nullptr;
-	auto* spot = GetWorld().FindActor(SpotName);
-	auto* mySpotLightComponent = spot ? spot->GetComponent<SpotLightComponent>() : nullptr;
-	std::vector<PointLightComponent*> myPointLightComponents;
-	auto* point = GetWorld().FindActor(PointName);
-	if (auto* live = point ? point->GetComponent<PointLightComponent>() : nullptr)
+	const unsigned requests = std::exchange(myRequests, 0u);
+	if (!requests) return;
+	auto* camera = GetWorld().FindActor(CameraName);
+	auto* directionalActor = GetWorld().FindActor(DirectionalName);
+	auto* directional = directionalActor ? directionalActor->GetComponent<DirectionalLightComponent>() : nullptr;
+	auto* pointActor = GetWorld().FindActor(PointName);
+	auto* point = pointActor ? pointActor->GetComponent<PointLightComponent>() : nullptr;
+	auto* spotActor = GetWorld().FindActor(SpotName);
+	auto* spot = spotActor ? spotActor->GetComponent<SpotLightComponent>() : nullptr;
+	std::vector<PointLightComponent*> points; if (point) points.push_back(point);
+	if (requests & Print) PrintLightTuningValues(directional, points, spot);
+	if ((requests & ToggleDir) && directional) directional->SetEnabled(!directional->IsEnabled());
+	if ((requests & TogglePoints) && point) point->SetEnabled(!point->IsEnabled());
+	if ((requests & ToggleSpot) && spot) spot->SetEnabled(!spot->IsEnabled());
+	if (!camera) return;
+	const auto& cameraTransform = camera->GetTransform();
+	if ((requests & AimDir) && directional) AimActorAlongCameraForward(*directional->GetOwner(), cameraTransform);
+	if ((requests & PlacePoints) && point) point->GetOwner()->GetTransform().SetLocalPosition(cameraTransform.GetWorldPosition());
+	if ((requests & PlaceSpot) && spot)
 	{
-		myPointLightComponents.push_back(live);
-	}
-	const GameInput& anInputFrame = GetInput();
-	const bool shiftDown =
-	    anInputFrame.IsKeyDown(Keys::SHIFT) || anInputFrame.IsKeyDown(Keys::LSHIFT) || anInputFrame.IsKeyDown(Keys::RSHIFT);
-
-	if (anInputFrame.IsKeyPressed(Keys::P))
-	{
-		PrintLightTuningValues(myDirectionalLightComponent, myPointLightComponents, mySpotLightComponent);
-	}
-
-	if (shiftDown && myCameraActor != nullptr)
-	{
-		const Transform& cameraTransform = myCameraActor->GetTransform();
-		const Vector3f cameraPosition = cameraTransform.GetLocalPosition();
-
-		if ((anInputFrame.IsKeyPressed(Keys::NUMPAD7) || anInputFrame.KeysPressed[static_cast<size_t>('7')]) &&
-		    myDirectionalLightComponent != nullptr)
-		{
-			if (Actor* lightActor = myDirectionalLightComponent->GetOwner())
-			{
-				AimActorAlongCameraForward(*lightActor, cameraTransform);
-				const Vector3f direction = myDirectionalLightComponent->GetWorldDirection();
-				GAMELOG(Log, "Aimed directional light from camera direction: {{ {:.2f}, {:.2f}, {:.2f} }}", direction.x, direction.y,
-				        direction.z);
-			}
-			return;
-		}
-
-		if (anInputFrame.IsKeyPressed(Keys::NUMPAD8) || anInputFrame.KeysPressed[static_cast<size_t>('8')])
-		{
-			for (PointLightComponent* pointLightComponent : myPointLightComponents)
-			{
-				if (pointLightComponent == nullptr)
-				{
-					continue;
-				}
-
-				if (Actor* lightActor = pointLightComponent->GetOwner())
-				{
-					lightActor->GetTransform().SetLocalPosition(cameraPosition);
-					GAMELOG(Log, "Moved point light to camera position: {{ {:.2f}, {:.2f}, {:.2f} }}", cameraPosition.x, cameraPosition.y,
-					        cameraPosition.z);
-					break;
-				}
-			}
-			return;
-		}
-
-		if ((anInputFrame.IsKeyPressed(Keys::NUMPAD9) || anInputFrame.KeysPressed[static_cast<size_t>('9')]) &&
-		    mySpotLightComponent != nullptr)
-		{
-			if (Actor* lightActor = mySpotLightComponent->GetOwner())
-			{
-				lightActor->GetTransform().SetLocalPosition(cameraPosition);
-				AimActorAlongCameraForward(*lightActor, cameraTransform);
-				const Vector3f direction = mySpotLightComponent->GetWorldDirection();
-				GAMELOG(
-				    Log,
-				    "Moved spot light to camera and aimed forward. Position: {{ {:.2f}, {:.2f}, {:.2f} }}, direction: {{ {:.2f}, {:.2f}, {:.2f} }}",
-				    cameraPosition.x, cameraPosition.y, cameraPosition.z, direction.x, direction.y, direction.z);
-			}
-			return;
-		}
-	}
-
-	if ((anInputFrame.IsKeyPressed(Keys::NUMPAD7) || anInputFrame.KeysPressed[static_cast<size_t>('7')]) &&
-	    myDirectionalLightComponent != nullptr)
-	{
-		myDirectionalLightComponent->SetEnabled(!myDirectionalLightComponent->IsEnabled());
-	}
-
-	if (anInputFrame.IsKeyPressed(Keys::NUMPAD8) || anInputFrame.KeysPressed[static_cast<size_t>('8')])
-	{
-		bool shouldEnable = true;
-		bool foundPointLight = false;
-		for (const PointLightComponent* pointLightComponent : myPointLightComponents)
-		{
-			if (pointLightComponent != nullptr)
-			{
-				shouldEnable = !pointLightComponent->IsEnabled();
-				foundPointLight = true;
-				break;
-			}
-		}
-
-		if (foundPointLight)
-		{
-			for (PointLightComponent* pointLightComponent : myPointLightComponents)
-			{
-				if (pointLightComponent != nullptr)
-				{
-					pointLightComponent->SetEnabled(shouldEnable);
-				}
-			}
-		}
-	}
-
-	if ((anInputFrame.IsKeyPressed(Keys::NUMPAD9) || anInputFrame.KeysPressed[static_cast<size_t>('9')]) && mySpotLightComponent != nullptr)
-	{
-		mySpotLightComponent->SetEnabled(!mySpotLightComponent->IsEnabled());
+		spot->GetOwner()->GetTransform().SetLocalPosition(cameraTransform.GetWorldPosition());
+		AimActorAlongCameraForward(*spot->GetOwner(), cameraTransform);
 	}
 }

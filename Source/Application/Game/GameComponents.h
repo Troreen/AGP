@@ -1,5 +1,6 @@
 #pragma once
 #include "GameFramework/World/Component.h"
+#include "GameFramework/Runtime/InputSystem.h"
 
 #include <vector>
 
@@ -21,6 +22,10 @@ public:
 private:
 	float myYaw = 0;
 	float myPitch = 0;
+	CommonUtilities::Vector2f myLookDelta{};
+	bool myLookActive = false;
+	bool myForward = false, myBack = false, myLeft = false, myRight = false, myUp = false, myDown = false;
+	std::vector<InputSubscription> mySubscriptions;
 };
 
 // Update example: issue playback requests to a sibling SkeletalMeshComponent.
@@ -28,7 +33,9 @@ private:
 class AnimationControlsComponent final : public Component
 {
 public:
-	void Update(float deltaTime) override;
+	void BeginPlay() override;
+private:
+	std::vector<InputSubscription> mySubscriptions;
 };
 
 // Update example: rotate using elapsed frame time.
@@ -37,11 +44,13 @@ public:
 class SpinComponent final : public Component
 {
 public:
+	void BeginPlay() override;
 	void Update(float deltaTime) override;
 
 private:
 	float myYaw = 0;
 	bool mySpinning = true;
+	InputSubscription myToggleSubscription;
 };
 
 // Attached to a scene-controls actor after the camera so Update uses its final pose.
@@ -50,6 +59,11 @@ private:
 class LightControlsComponent final : public Component
 {
 public:
+	void BeginPlay() override;
 	void Update(float deltaTime) override;
 	std::string CameraName, DirectionalName, PointName, SpotName;
+private:
+	enum Request : unsigned { Print = 1, ToggleDir = 2, TogglePoints = 4, ToggleSpot = 8, AimDir = 16, PlacePoints = 32, PlaceSpot = 64 };
+	unsigned myRequests = 0;
+	std::vector<InputSubscription> mySubscriptions;
 };

@@ -29,6 +29,10 @@ public:
 
 	float GetRadius() const;
 	void SetRadius(float aRadius);
+	float GetFalloffExponent() const { return myFalloffExponent; }
+	void SetFalloffExponent(float value) { myFalloffExponent = value; }
+	float GetSourceColorAlpha() const { return mySourceColorAlpha; }
+	void SetSourceColorAlpha(float value) { mySourceColorAlpha = value; }
 
 	float GetInnerCone() const;
 	float GetOuterCone() const;
@@ -45,6 +49,8 @@ private:
 	CU::Vector3f myColor = CU::Vector3f::One;
 	float myIntensity = 1.0f;
 	float myRadius = 1000.0f;
+	float myFalloffExponent = 0.0f;
+	float mySourceColorAlpha = 1.0f;
 	float myInnerCone = 0.349066f;
 	float myOuterCone = 0.610865f;
 };

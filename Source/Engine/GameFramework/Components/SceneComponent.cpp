@@ -1,5 +1,6 @@
 #include "GameFramework/Components/SceneComponent.h"
 #include "GameFramework/World/Actor.h"
+#include "Maths.hpp"
 
 CommonUtilities::Matrix4f SceneComponent::GetWorldMatrix() const
 {
@@ -17,5 +18,5 @@ CommonUtilities::Vector3f SceneComponent::GetWorldDirection() const
 {
 	const auto matrix = GetWorldMatrix();
 	const CommonUtilities::Vector3f forward{matrix(3, 1), matrix(3, 2), matrix(3, 3)};
-	return forward.LengthSqr() > 1e-8f ? forward.GetNormalized() : CommonUtilities::Vector3f::UnitZ;
+	return CU::NormalizeSafe(forward, CU::Vector3f::UnitZ);
 }

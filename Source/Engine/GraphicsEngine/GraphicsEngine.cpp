@@ -1,4 +1,5 @@
 #include "GraphicsEngine.pch.h"
+#include "Maths.hpp"
 #include "GraphicsEngine.h"
 
 #include "ConstantBuffers/AnimationBuffer.h"
@@ -203,7 +204,7 @@ namespace
 
 	std::array<CU::Vector3f, 8> GetFrustumCorners(const CU::Camera3D& aCamera, float aNearPlane, float aFarPlane)
 	{
-		const CU::Vector3f position = aCamera.GetTransform().GetPosition();
+		const CU::Vector3f position = aCamera.GetPosition();
 		const CU::Vector3f forward = aCamera.GetForward().GetNormalized();
 		const CU::Vector3f right = aCamera.GetRight().GetNormalized();
 		const CU::Vector3f up = aCamera.GetUp().GetNormalized();
@@ -595,7 +596,7 @@ void GraphicsEngine::FinalizeRenderSnapshot(RenderSceneSnapshot& snapshot) const
 	snapshot.Stats.ShadowCasters = static_cast<uint32_t>(snapshot.ShadowCasters.size());
 	snapshot.Stats.OpaqueRenderItems = static_cast<uint32_t>(snapshot.OpaqueRenderItems.size());
 	snapshot.Stats.BlendedRenderItems = static_cast<uint32_t>(snapshot.BlendedRenderItems.size());
-	const CU::Vector3f cameraPosition = snapshot.Camera.GetTransform().GetPosition();
+	const CU::Vector3f cameraPosition = snapshot.Camera.GetPosition();
 	auto distance = [&snapshot, cameraPosition](size_t index)
 	{
 		const auto& world = snapshot.ShadowCasters[index].World;
@@ -875,7 +876,7 @@ void GraphicsEngine::PrepareSceneCommands(GraphicsCommandList& inoutCommandList,
 	FrameBuffer fb;
 	fb.View = aSnapshot.Camera.GetViewMatrix();
 	fb.Projection = aSnapshot.Camera.GetProjectionMatrix();
-	const CU::Vector3f cameraPosition = aSnapshot.Camera.GetTransform().GetPosition();
+	const CU::Vector3f cameraPosition = aSnapshot.Camera.GetPosition();
 	fb.CameraPosition = {cameraPosition.x, cameraPosition.y, cameraPosition.z, 1.0f};
 
 	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::FrameBuffer, fb, 0,

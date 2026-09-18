@@ -11,7 +11,7 @@ World& Component::GetWorld() const
 	return *myOwner->GetWorld();
 }
 
-const GameInput& Component::GetInput() const
+InputSystem& Component::GetInputSystem() const
 {
-	return GetWorld().GetInput();
+	return GetWorld().GetInputSystem();
 }

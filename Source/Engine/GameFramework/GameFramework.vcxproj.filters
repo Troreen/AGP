@@ -28,6 +28,9 @@
     <ClInclude Include="Components\CameraComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
+    <ClInclude Include="Components\DebugCameraController.h">
+      <Filter>Components</Filter>
+    </ClInclude>
     <ClInclude Include="Components\LightComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
@@ -53,7 +56,7 @@
     <ClInclude Include="Runtime\GameContext.h">
       <Filter>Runtime</Filter>
     </ClInclude>
-    <ClInclude Include="Runtime\GameInput.h">
+    <ClInclude Include="Runtime\InputSystem.h">
       <Filter>Runtime</Filter>
     </ClInclude>
     <ClInclude Include="Runtime\IGame.h">
@@ -68,14 +71,13 @@
     <ClInclude Include="Scenes\SceneData.h">
       <Filter>Scenes</Filter>
     </ClInclude>
-    <ClInclude Include="Scenes\SceneReader.h">
-      <Filter>Scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="ServiceLocator.h" />
     <ClInclude Include="SimdJson\simdjson.h">
       <Filter>SimdJson</Filter>
     </ClInclude>
     <ClInclude Include="UnrealSceneImporter\UnrealSceneImporter.h">
+      <Filter>UnrealSceneImporter</Filter>
+    </ClInclude>
+    <ClInclude Include="UnrealSceneImporter\UnrealSceneAdapter.h">
       <Filter>UnrealSceneImporter</Filter>
     </ClInclude>
     <ClInclude Include="UnrealSceneImporter\UnrealSceneStructs.h">
@@ -97,6 +99,9 @@
   <ItemGroup>
     <ClCompile Include="AudioManager.cpp" />
     <ClCompile Include="Components\CameraComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\DebugCameraController.cpp">
       <Filter>Components</Filter>
     </ClCompile>
     <ClCompile Include="Components\LightComponent.cpp">
@@ -121,17 +126,22 @@
     <ClCompile Include="Runtime\GameContext.cpp">
       <Filter>Runtime</Filter>
     </ClCompile>
-    <ClCompile Include="Scenes\BuiltInComponents.cpp">
+    <ClCompile Include="Runtime\InputSystem.cpp">
+      <Filter>Runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="Scenes\AssetRefs.cpp">
       <Filter>Scenes</Filter>
     </ClCompile>
     <ClCompile Include="Scenes\ComponentRegistry.cpp">
       <Filter>Scenes</Filter>
     </ClCompile>
-    <ClCompile Include="ServiceLocator.cpp" />
     <ClCompile Include="SimdJson\simdjson.cpp">
       <Filter>SimdJson</Filter>
     </ClCompile>
     <ClCompile Include="UnrealSceneImporter\UnrealSceneImporter.cpp">
+      <Filter>UnrealSceneImporter</Filter>
+    </ClCompile>
+    <ClCompile Include="UnrealSceneImporter\UnrealSceneAdapter.cpp">
       <Filter>UnrealSceneImporter</Filter>
     </ClCompile>
     <ClCompile Include="World\Actor.cpp">

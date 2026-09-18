@@ -3,6 +3,7 @@
 #include <array>
 #include <cmath>
 #include "Camera3D.hpp"
+#include "Maths.hpp"
 #include "Matrix.hpp"
 
 namespace RenderCulling

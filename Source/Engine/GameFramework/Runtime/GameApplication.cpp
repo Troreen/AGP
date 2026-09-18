@@ -8,9 +8,15 @@
 #include "GameFramework/Runtime/IGame.h"
 #include "GameFramework/Scenes/ComponentRegistry.h"
 #include "GameFramework/Rendering/WorldRenderer.h"
+#include "GameFramework/Components/CameraComponent.h"
+#include "GameFramework/Components/DebugCameraController.h"
+#include "Maths.hpp"
 #include "GraphicsEngine/RHI/GraphicsCommandList.h"
 #include "GameFramework/GameFrameworkLog.h"
 #include "InputHandler.h"
+#include "XInputHandler.h"
+#include "EnumGamepadCode.h"
+#include "EnumKeys.h"
 #include "Timer.h"
 #include <algorithm>
 #include <cmath>
@@ -55,7 +61,7 @@ public:
 
 private:
 	void LoadPendingScene();
-	GameInput CaptureInputFrame();
+	InputDeviceFrame CaptureInputFrame();
 	void UpdateRenderPassTitle();
 	void LogRuntimeStats() const;
 	IGame& myGame;
@@ -65,10 +71,13 @@ private:
 	ComponentRegistry myRegistry;
 	HWND myMainWindowHandle = nullptr;
 	CommonUtilities::InputHandler myInputHandler;
+	CommonUtilities::XInputHandler myXInputHandler;
+	std::vector<InputSubscription> myHostInputSubscriptions;
 	GraphicsCommandList myCommandList;
 	GraphicsEngine::RenderSceneSnapshot mySnapshot;
 	bool myHasMainThreadMouseLookAnchor = false;
 	bool myStarted = false;
+	DebugCameraService myDebugCamera;
 };
 
 int GameApplication::Impl::Run()
@@ -100,8 +109,22 @@ int GameApplication::Impl::Run()
 	myContext.myClientSize = graphics.GetClientSize();
 	myInputHandler.SetWindowHandle(myMainWindowHandle);
 	myInputHandler.SetAutoMouseCapture(false);
-	myRegistry.RegisterBuiltIns();
-	myGame.RegisterComponents(myRegistry);
+	InstallDefaultInputBindings(myContext.myInput);
+	myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(InputActions::DebugCamera, [this](const InputActionEvent& event)
+	{
+		if (event.Phase == InputActionPhase::Started) myDebugCamera.Toggle(myContext.GetWorld(), myContext.myClientSize);
+	}));
+	if (myConfig.EnableRenderDiagnostics)
+	{
+		myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(InputActions::CycleRenderPass, [this](const InputActionEvent& event)
+		{
+			if (event.Phase == InputActionPhase::Started) { GraphicsEngine::Get().CycleRenderPass(); UpdateRenderPassTitle(); }
+		}));
+		myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(InputActions::PrintDiagnostics, [this](const InputActionEvent& event)
+		{
+			if (event.Phase == InputActionPhase::Started) LogRuntimeStats();
+		}));
+	}
 	try
 	{
 		myGame.Initialize(myContext);
@@ -150,9 +173,9 @@ int GameApplication::Impl::Run()
 			}
 			timer.Update();
 			myInputHandler.UpdateInput();
-			myContext.myInput = CaptureInputFrame();
+			myContext.myInput.Update(CaptureInputFrame());
 			const float elapsed = timer.GetDeltaTime();
-			const float delta = std::isfinite(elapsed) ? std::clamp(elapsed, 0.f, .25f) : 0.f;
+			const float delta = CU::IsFinite(elapsed) ? CU::Clamp(elapsed, 0.f, .25f) : 0.f;
 
 			myGame.Update(myContext, delta);
 			myContext.GetWorld().Update(delta);
@@ -163,18 +186,6 @@ int GameApplication::Impl::Run()
 			{
 				graphics.ExecuteCommandList(myCommandList);
 				graphics.Present();
-			}
-			if (myConfig.EnableRenderDiagnostics)
-			{
-				if (myContext.GetInput().IsKeyPressed(Keys::F6))
-				{
-					graphics.CycleRenderPass();
-					UpdateRenderPassTitle();
-				}
-				if (myContext.GetInput().IsKeyPressed(Keys::P))
-				{
-					LogRuntimeStats();
-				}
 			}
 		}
 	}
@@ -213,6 +224,7 @@ void GameApplication::Impl::LoadPendingScene()
 		SceneLoadContext context{myContext.myContentRoot, myContext.myClientSize, assets};
 		const auto data = mySource(name, context);
 		world = myRegistry.CreateWorld(data, assets, &myContext.myInput, myContext.myClientSize);
+		myGame.ConfigureWorld(*world);
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -232,9 +244,11 @@ void GameApplication::Impl::LoadPendingScene()
 	myContext.myWorld->Clear();
 	myContext.myWorld = std::move(world);
 	myContext.mySceneName = name;
-	myContext.myInput = {};
+	myContext.myInput.Reset();
 	myHasMainThreadMouseLookAnchor = false;
+	myDebugCamera.Reset();
 	myContext.myAcceptSceneRequests = true;
+	if (!myContext.GetWorld().GetActiveCamera()) myContext.GetWorld().SetActiveCamera(myDebugCamera.Ensure(myContext.GetWorld(), myContext.myClientSize));
 	myContext.GetWorld().BeginPlay();
 	myGame.OnSceneLoaded(myContext, name);
 }
@@ -244,15 +258,15 @@ int GameApplication::Run(IGame& game, const Config& config, SceneSource source)
 	return Impl(game, config, std::move(source)).Run();
 }
 
-GameInput GameApplication::Impl::CaptureInputFrame()
+InputDeviceFrame GameApplication::Impl::CaptureInputFrame()
 {
-	GameInput inputFrame;
+	InputDeviceFrame inputFrame;
 	const bool isFocused = myMainWindowHandle != nullptr && GetForegroundWindow() == myMainWindowHandle;
+	inputFrame.Focused = isFocused;
 
 	for (int keyCode = 0; keyCode < KeyCount; ++keyCode)
 	{
 		inputFrame.KeysDown[static_cast<size_t>(keyCode)] = isFocused && (myInputHandler.IsKeyDown(keyCode) || IsVirtualKeyDown(keyCode));
-		inputFrame.KeysPressed[static_cast<size_t>(keyCode)] = isFocused && myInputHandler.IsKeyPressed(keyCode);
 	}
 
 	const bool rightMouseDown = inputFrame.KeysDown[static_cast<size_t>(Keys::MOUSERBUTTON)];
@@ -263,15 +277,14 @@ GameInput GameApplication::Impl::CaptureInputFrame()
 		{
 			const POINT centerPoint = {(clientRect.right - clientRect.left) / 2, (clientRect.bottom - clientRect.top) / 2};
 
-			inputFrame.MouseLookActive = true;
 			if (myHasMainThreadMouseLookAnchor)
 			{
 				POINT mousePosScreen = {};
 				GetCursorPos(&mousePosScreen);
 				POINT mousePosClient = mousePosScreen;
 				ScreenToClient(myMainWindowHandle, &mousePosClient);
-				inputFrame.MouseDeltaX = static_cast<float>(mousePosClient.x - centerPoint.x);
-				inputFrame.MouseDeltaY = static_cast<float>(mousePosClient.y - centerPoint.y);
+				inputFrame.MouseDelta.x = static_cast<float>(mousePosClient.x - centerPoint.x);
+				inputFrame.MouseDelta.y = static_cast<float>(mousePosClient.y - centerPoint.y);
 			}
 
 			POINT centerPointScreen = centerPoint;
@@ -283,6 +296,16 @@ GameInput GameApplication::Impl::CaptureInputFrame()
 	else
 	{
 		myHasMainThreadMouseLookAnchor = false;
+	}
+	if (myXInputHandler.UpdateInput())
+	{
+		for (unsigned button : {0x0001u, 0x0002u, 0x0004u, 0x0008u, 0x0010u, 0x0020u, 0x0040u, 0x0080u,
+		                        0x0100u, 0x0200u, 0x1000u, 0x2000u, 0x4000u, 0x8000u})
+			inputFrame.GamepadButtonsDown[button] = myXInputHandler.IsButtonDown(button);
+		myXInputHandler.GetAnalogLeftValue(inputFrame.GamepadLeft);
+		myXInputHandler.GetAnalogRightValue(inputFrame.GamepadRight);
+		inputFrame.GamepadLeftTrigger = myXInputHandler.GetTriggerLeftValue();
+		inputFrame.GamepadRightTrigger = myXInputHandler.GetTriggerRightValue();
 	}
 
 	return inputFrame;

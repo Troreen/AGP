@@ -1,6 +1,6 @@
 #pragma once
 #include "GameFramework/World/Actor.h"
-#include "GameFramework/Runtime/GameInput.h"
+#include "GameFramework/Runtime/InputSystem.h"
 
 class CameraComponent;
 class WorldRenderer;
@@ -8,7 +8,7 @@ class WorldRenderer;
 class World
 {
 public:
-	explicit World(const GameInput* input = nullptr) : myInput(input)
+	explicit World(InputSystem* input = nullptr) : myInput(input)
 	{
 	}
 
@@ -18,10 +18,7 @@ public:
 	Actor* SpawnActor(std::string name);
 	Actor* FindActor(const std::string& name) const;
 
-	const GameInput& GetInput() const
-	{
-		return myInput ? *myInput : myEmptyInput;
-	}
+	InputSystem& GetInputSystem() const { return myInput ? *myInput : myEmptyInput; }
 
 	bool SetActiveCamera(CameraComponent* camera);
 	CameraComponent* GetActiveCamera() const;
@@ -35,8 +32,8 @@ private:
 	std::vector<Component*> CollectFrame();
 	void RemoveDestroyed();
 	std::vector<std::unique_ptr<Actor>> myActors;
-	const GameInput* myInput;
-	GameInput myEmptyInput;
+	InputSystem* myInput;
+	mutable InputSystem myEmptyInput;
 	CameraComponent* myCamera = nullptr;
 	bool myUpdating = false;
 	bool myClearing = false;

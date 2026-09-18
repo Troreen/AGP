@@ -4,8 +4,9 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $repository = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..'))
-$sourceRoot = Join-Path $repository 'Source'
+$sourceRoot = Join-Path $repository 'Source\Engine'
 $frameworkRoot = Join-Path $sourceRoot 'GameFramework'
+$utilitiesRoot = Join-Path $repository 'Source\Utilities\CommonUtilities'
 $output = Join-Path $repository "Intermediate\PublicHeaderIsolation\$Configuration"
 New-Item -ItemType Directory -Force -Path $output | Out-Null
 $apiFolders = @('Runtime', 'World', 'Components', 'Scenes') | ForEach-Object { Join-Path $frameworkRoot $_ }
@@ -17,7 +18,7 @@ $items = foreach ($header in $headers) {
     [IO.File]::WriteAllText($source, "#include <$relative>`r`n")
     '<ClCompile Include="' + [Security.SecurityElement]::Escape($source) + '" />'
 }
-$includes = [Security.SecurityElement]::Escape("$sourceRoot;$repository\CommonUtilities\include")
+$includes = [Security.SecurityElement]::Escape("$sourceRoot;$utilitiesRoot")
 $project = @'
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations"><ProjectConfiguration Include="Debug|x64"><Configuration>Debug</Configuration><Platform>x64</Platform></ProjectConfiguration><ProjectConfiguration Include="Release|x64"><Configuration>Release</Configuration><Platform>x64</Platform></ProjectConfiguration></ItemGroup>

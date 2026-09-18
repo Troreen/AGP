@@ -1,14 +1,9 @@
 #pragma once
-#include <filesystem>
 #include "UnrealSceneStructs.h"
+#include <filesystem>
 
 class UnrealSceneImporter
 {
-	public:
-		UnrealSceneImporter() = default;
-		~UnrealSceneImporter() = default;
-
-		UnrealSceneData ImportScene(std::filesystem::path aJSONPath);
-
-	private:
+public:
+	UnrealImportResult ImportScene(const std::filesystem::path& jsonPath) const;
 };

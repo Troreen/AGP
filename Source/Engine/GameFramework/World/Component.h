@@ -1,9 +1,12 @@
 #pragma once
 #include <string>
+#include <vector>
+#include <algorithm>
+#include <utility>
 
 class Actor;
 class World;
-class GameInput;
+class InputSystem;
 
 // Owned by one Actor. Owner and input are available after AddComponent returns.
 class Component
@@ -32,11 +35,18 @@ public:
 	}
 
 	World& GetWorld() const;
-	const GameInput& GetInput() const;
+	InputSystem& GetInputSystem() const;
 
 	const std::string& GetName() const
 	{
 		return myName;
+	}
+	const std::vector<std::string>& GetTags() const { return myTags; }
+	bool HasTag(const std::string& tag) const { return std::find(myTags.begin(), myTags.end(), tag) != myTags.end(); }
+	const std::string& GetSourceParent() const { return mySourceParent; }
+	void SetSourceMetadata(std::vector<std::string> tags, std::string sourceParent)
+	{
+		myTags = std::move(tags); mySourceParent = std::move(sourceParent);
 	}
 
 	bool HasBegunPlay() const
@@ -68,6 +78,8 @@ public:
 private:
 	Actor* myOwner = nullptr;
 	std::string myName;
+	std::vector<std::string> myTags;
+	std::string mySourceParent;
 	bool myEnabled = true;
 	bool myBegun = false;
 	bool myDestroyed = false;

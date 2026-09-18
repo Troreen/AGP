@@ -56,8 +56,8 @@ float LightComponent::GetOuterCone() const
 
 void LightComponent::SetConeAnglesDegrees(float anInnerConeDegrees, float anOuterConeDegrees)
 {
-	const float innerDegrees = std::clamp(anInnerConeDegrees, 0.0f, 89.0f);
-	const float outerDegrees = std::clamp(anOuterConeDegrees, innerDegrees, 89.0f);
+	const float innerDegrees = CU::Clamp(anInnerConeDegrees, 0.0f, 89.0f);
+	const float outerDegrees = CU::Clamp(anOuterConeDegrees, innerDegrees, 89.0f);
 	myInnerCone = CU::Maths::DegreesToRadians(innerDegrees);
 	myOuterCone = CU::Maths::DegreesToRadians(outerDegrees);
 }

@@ -5,6 +5,7 @@
 #include "GraphicsEngine/Objects/Vertex.h"
 #include "PrimitiveMeshBuilder.h"
 #include "Importer.h"
+#include "Maths.hpp"
 
 #include <utility>
 #include <vector>
@@ -38,7 +39,7 @@ namespace
 			return aFallback;
 		}
 
-		return direction.GetNormalized();
+		return CU::NormalizeSafe(direction);
 	}
 
 	Vertex ConvertVertex(const TGA::FBX::Vertex& aSourceVertex, const CommonUtilities::Vector4f& aFallbackColor)
@@ -173,20 +174,10 @@ MeshLibrary::~MeshLibrary()
 	TGA::FBX::Importer::UninitImporter();
 }
 
-// Example content manifest in code. Load meshes before attaching named animation
-// clips to them. In a data-driven game, asset references should come from authored
-// data; keep the reusable importing mechanism separate from this game's catalog.
 void MeshLibrary::Initialize(const std::filesystem::path& aContentRoot)
 {
 	myContentRoot = aContentRoot;
 	RegisterPrimitiveMeshes();
-	LoadFBXMesh("Meshes/Props/SM_Chest.fbx");
-	LoadFBXMesh("Meshes/Props/SM_Color_Checker.fbx");
-	LoadFBXMesh("Meshes/Characters/TGA_Bro/SK_C_TGA_Bro.fbx");
-	LoadFBXAnimation("SK_C_TGA_Bro", "Walk", "Animations/Characters/TGA_Bro/Locomotion/A_C_TGA_Bro_Walk.fbx");
-	LoadFBXAnimation("SK_C_TGA_Bro", "Run", "Animations/Characters/TGA_Bro/Locomotion/A_C_TGA_Bro_Run.fbx");
-	LoadFBXAnimation("SK_C_TGA_Bro", "Wave", "Animations/Characters/TGA_Bro/Idle/A_C_TGA_Bro_Idle_Wave.fbx");
-	LoadFBXAnimation("SK_C_TGA_Bro", "Breathing", "Animations/Characters/TGA_Bro/Idle/A_C_TGA_Bro_Idle_Brething.fbx");
 }
 
 std::shared_ptr<Mesh> MeshLibrary::GetMesh(std::string_view aName) const
@@ -198,6 +189,43 @@ std::shared_ptr<Mesh> MeshLibrary::GetMesh(std::string_view aName) const
 	}
 
 	return foundMesh->second;
+}
+
+std::shared_ptr<Mesh> MeshLibrary::LoadSceneMesh(std::string_view aName, std::string_view aContentPath)
+{
+	if (auto mesh = GetMesh(aName))
+	{
+		return mesh;
+	}
+
+	// Unreal's built-in basic shapes do not exist as FBX files in Content. Reuse
+	// the equivalent engine primitives while preserving the exported asset id.
+	if (aContentPath == "/Engine/BasicShapes/Plane.Plane")
+	{
+		return GetMesh("Floor");
+	}
+	if (aContentPath == "/Engine/BasicShapes/Cube.Cube")
+	{
+		return GetMesh("Cube");
+	}
+
+	constexpr std::string_view gamePrefix = "/Game/";
+	if (!aContentPath.starts_with(gamePrefix))
+	{
+		return nullptr;
+	}
+
+	std::string relativePath(aContentPath.substr(gamePrefix.size()));
+	const size_t objectSeparator = relativePath.rfind('.');
+	if (objectSeparator != std::string::npos)
+	{
+		relativePath.resize(objectSeparator);
+	}
+	if (!LoadFBXMesh(std::filesystem::path(relativePath).replace_extension(".fbx")))
+	{
+		return nullptr;
+	}
+	return GetMesh(aName);
 }
 
 bool MeshLibrary::LoadFBXMesh(const std::filesystem::path& aPath)

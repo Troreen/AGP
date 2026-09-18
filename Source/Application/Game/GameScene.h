@@ -14,6 +14,7 @@ public:
 
 private:
 	std::shared_ptr<MaterialInterface> GetMaterial(const std::filesystem::path& file);
+	void PrepareAssets(SceneData& scene, SceneLoadContext& context);
 	MeshLibrary myMeshLibrary;
 
 	std::filesystem::path myContentRoot;

@@ -5,6 +5,7 @@
 #include <limits>
 #include <type_traits>
 
+#include "NamespaceAlias.hpp"
 #include "Matrix3x3.hpp"
 #include "Matrix4x4.hpp"
 #include "Quaternion.hpp"
@@ -20,6 +21,8 @@ namespace CommonUtilities
 		// The engine-facing helpers in this file assume a left-handed 3D convention with +Z as
 		// forward and +Y as up, matching Camera3D and Transform. Transform matrices are composed
 		// in SRT order: Scale * Rotation * Translation.
+
+
 
 		#pragma region Constants
 		template <typename T>
@@ -1291,4 +1294,22 @@ namespace CommonUtilities
 		}
 #pragma endregion
 	}
+}
+
+// CommonUtilities' public shorthand keeps call sites compact while the Maths
+// namespace continues to organize the implementation.
+namespace CommonUtilities
+{
+	using Maths::Clamp;
+	using Maths::CreateScale;
+	using Maths::CreateTranslation;
+	using Maths::DecomposeSRT;
+	using Maths::DegreesToRadians;
+	using Maths::HalfPi;
+	using Maths::IsFinite;
+	using Maths::NormalizeSafe;
+	using Maths::Pi;
+	using Maths::RadiansToDegrees;
+	using Maths::TwoPi;
+	using Maths::YawPitchRollFromQuaternion;
 }

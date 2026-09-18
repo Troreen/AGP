@@ -1,7 +1,6 @@
 #include "GameFramework/Components/CameraComponent.h"
-#include <DirectXMath.h>
-
 #include "GameFramework/World/Actor.h"
+#include "Maths.hpp"
 #include <cmath>
 #include <stdexcept>
 
@@ -22,8 +21,8 @@ CameraComponent::CameraComponent(float aHorizontalFieldOfViewDegrees, float aNea
 bool CameraComponent::SetPerspective(float aHorizontalFieldOfViewDegrees, float aNearPlane, float aFarPlane,
                                      const CommonUtilities::Vector2u& aResolution)
 {
-	if (!std::isfinite(aHorizontalFieldOfViewDegrees) || aHorizontalFieldOfViewDegrees <= 0 || aHorizontalFieldOfViewDegrees >= 180 ||
-	    !std::isfinite(aNearPlane) || !std::isfinite(aFarPlane) || aNearPlane <= 0 || aFarPlane <= aNearPlane || aResolution.x == 0 ||
+	if (!CU::IsFinite(aHorizontalFieldOfViewDegrees) || aHorizontalFieldOfViewDegrees <= 0 || aHorizontalFieldOfViewDegrees >= 180 ||
+	    !CU::IsFinite(aNearPlane) || !CU::IsFinite(aFarPlane) || aNearPlane <= 0 || aFarPlane <= aNearPlane || aResolution.x == 0 ||
 	    aResolution.y == 0)
 	{
 		return false;
@@ -34,7 +33,7 @@ bool CameraComponent::SetPerspective(float aHorizontalFieldOfViewDegrees, float 
 	{
 		for (int column = 1; column <= 4; ++column)
 		{
-			if (!std::isfinite(projection(row, column)))
+			if (!CU::IsFinite(projection(row, column)))
 			{
 				return false;
 			}
@@ -65,7 +64,7 @@ void CameraComponent::SyncCameraToOwner()
 		right = reference.Cross(forward);
 	}
 	right.Normalize();
-	up = forward.Cross(right).GetNormalized();
+	up = CU::NormalizeSafe(forward.Cross(right), CU::Vector3f::UnitY);
 	CommonUtilities::Matrix4f rigid;
 	for (int i = 1; i <= 3; ++i)
 	{
@@ -74,16 +73,5 @@ void CameraComponent::SyncCameraToOwner()
 		rigid(3, i) = i == 1 ? forward.x : i == 2 ? forward.y : forward.z;
 		rigid(4, i) = matrix(4, i);
 	}
-	DirectX::XMFLOAT4X4 matrixData;
-	for (int row = 0; row < 4; ++row)
-	{
-		for (int column = 0; column < 4; ++column)
-		{
-			matrixData.m[row][column] = rigid(row + 1, column + 1);
-		}
-	}
-	DirectX::XMFLOAT4 rotation;
-	DirectX::XMStoreFloat4(&rotation, DirectX::XMQuaternionRotationMatrix(DirectX::XMLoadFloat4x4(&matrixData)));
-	myCamera.GetTransform().SetPosition({rigid(4, 1), rigid(4, 2), rigid(4, 3)});
-	myCamera.GetTransform().SetRotation({rotation.w, rotation.x, rotation.y, rotation.z});
+	myCamera.SetWorldMatrix(rigid);
 }

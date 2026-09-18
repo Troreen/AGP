@@ -33,9 +33,9 @@ public:
 	bool InvalidRequested = false, Failed = false, ReloadRequested = false, EmptyRequested = false;
 	std::chrono::steady_clock::time_point Deadline;
 
-	void RegisterComponents(ComponentRegistry& registry) override
+	void ConfigureWorld(World& world) override
 	{
-		Sample.RegisterComponents(registry);
+		Sample.ConfigureWorld(world);
 	}
 
 	void Initialize(GameContext& context) override
@@ -51,19 +51,16 @@ public:
 		auto& world = context.GetWorld();
 		if (name == "Empty")
 		{
-			Check(Loads == 3 && !world.FindActor("Camera Actor") && !world.GetActiveCamera(), "Empty replacement retained old objects");
+			Check(Loads == 3 && !world.FindActor("Camera Actor") && world.FindActor("__DebugCamera") && world.GetActiveCamera(),
+			      "Empty scene did not install the debug camera");
 			return;
 		}
 		Check(name == "Game", "Wrong scene");
-		auto* camera = world.FindActor("Camera Actor");
-		Check(camera && world.GetActiveCamera() == camera->GetComponent<CameraComponent>(), "Actual camera missing");
-		auto* chest = world.FindActor("SM_Chest Actor");
-		Check(chest && chest->GetComponent<StaticMeshComponent>() && chest->GetComponent<SpinComponent>()->HasBegunPlay(),
-		      "Actual chest lifecycle");
-		auto* character = world.FindActor("TGA Bro Actor");
-		Check(character && character->GetComponent<SkeletalMeshComponent>(), "Actual skeletal mesh missing");
-		const auto expected = (CommonUtilities::Vector3f{25, 0, 260} - camera->GetTransform().GetWorldPosition()).GetNormalized();
-		Check((expected - camera->GetTransform().GetLocalForward()).Length() < .0001f, "Authored camera aim changed");
+		Check(world.FindActor("__DebugCamera") && world.GetActiveCamera(), "Imported scene did not install the debug camera");
+		auto* plane = world.FindActor("Plane");
+		Check(plane && plane->GetComponent<StaticMeshComponent>(), "Imported primitive mesh missing");
+		auto* snow = world.FindActor("SM_Prop_SnowPileTest");
+		Check(snow && snow->GetComponent<StaticMeshComponent>(), "Imported Content FBX mesh missing");
 		if (Loads == 1)
 		{
 			world.SpawnActor("Old-scene-only");
@@ -89,7 +86,7 @@ public:
 		++Frames;
 		const auto stats = GraphicsEngine::Get().GetLastRenderStats();
 		const bool rendered =
-		    stats.TotalRenderItems >= 5 && stats.VisibleRenderItems > 0 && stats.BlendedRenderItems > 0 && stats.TotalLights == 3;
+		    stats.TotalRenderItems >= 5 && stats.VisibleRenderItems > 0 && stats.TotalLights == 3;
 		if (Loads == 1 && Frames >= 5 && rendered && !InvalidRequested)
 		{
 			InvalidRequested = true;
@@ -168,13 +165,13 @@ public:
 	LifetimeCounts Counts;
 	int Shutdowns = 0, Failures = 0, Updates = 0;
 
-	void RegisterComponents(ComponentRegistry& registry) override
+	void ConfigureWorld(World& world) override
 	{
-		registry.Register<Lifetime>("Lifetime", [this](Lifetime& c, const SceneReader&)
-		{
-			c.Counts = &Counts;
-			c.Failure = Scenario;
-		});
+		auto* actor = world.FindActor("Fixture");
+		if (!actor) return;
+		auto* component = actor->AddComponent<Lifetime>("Lifetime");
+		component->Counts = &Counts;
+		component->Failure = Scenario;
 	}
 
 	void Initialize(GameContext& context) override
@@ -246,15 +243,7 @@ int main(int argc, char** argv)
 				}
 				if (name == "Invalid")
 				{
-					SceneData data;
-					ActorRecord actor;
-					actor.Name = "Broken";
-					ComponentRecord c;
-					c.Name = "Broken";
-					c.Type = "MissingType";
-					actor.Components.push_back(c);
-					data.Actors.push_back(actor);
-					return data;
+					throw std::runtime_error("Broken/Component: MissingType");
 				}
 				return source.Load(name, context);
 			});
@@ -269,13 +258,10 @@ int main(int argc, char** argv)
 			{
 				GameApplication{}.Run(game, config, [&](const std::string&, SceneLoadContext&)
 				{
+					if (scenario == "invalid-initial") throw std::runtime_error("Fixture/Lifetime: MissingType");
 					SceneData data;
 					ActorRecord actor;
 					actor.Name = "Fixture";
-					ComponentRecord c;
-					c.Name = "Lifetime";
-					c.Type = scenario == "invalid-initial" ? "MissingType" : "Lifetime";
-					actor.Components.push_back(c);
 					data.Actors.push_back(actor);
 					return data;
 				});

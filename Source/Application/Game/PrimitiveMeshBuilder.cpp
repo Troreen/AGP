@@ -130,10 +130,10 @@ namespace
 
 		for (int latitude = 0; latitude < aLatitudeSegments; ++latitude)
 		{
-			const float latitude0 = -CommonUtilities::Maths::HalfPi<float>() + CommonUtilities::Maths::Pi<float>() *
+			const float latitude0 = -CU::HalfPi<float>() + CU::Pi<float>() *
 			                                                                       static_cast<float>(latitude) /
 			                                                                       static_cast<float>(aLatitudeSegments);
-			const float latitude1 = -CommonUtilities::Maths::HalfPi<float>() + CommonUtilities::Maths::Pi<float>() *
+			const float latitude1 = -CU::HalfPi<float>() + CU::Pi<float>() *
 			                                                                       static_cast<float>(latitude + 1) /
 			                                                                       static_cast<float>(aLatitudeSegments);
 			const float v0 = 1.0f - static_cast<float>(latitude) / static_cast<float>(aLatitudeSegments);
@@ -142,9 +142,9 @@ namespace
 			for (int longitude = 0; longitude < aLongitudeSegments; ++longitude)
 			{
 				const float longitude0 =
-				    CommonUtilities::Maths::TwoPi<float>() * static_cast<float>(longitude) / static_cast<float>(aLongitudeSegments);
+				    CU::TwoPi<float>() * static_cast<float>(longitude) / static_cast<float>(aLongitudeSegments);
 				const float longitude1 =
-				    CommonUtilities::Maths::TwoPi<float>() * static_cast<float>(longitude + 1) / static_cast<float>(aLongitudeSegments);
+				    CU::TwoPi<float>() * static_cast<float>(longitude + 1) / static_cast<float>(aLongitudeSegments);
 				const float u0 = static_cast<float>(longitude) / static_cast<float>(aLongitudeSegments);
 				const float u1 = static_cast<float>(longitude + 1) / static_cast<float>(aLongitudeSegments);
 				AddReversedQuad(vertices, indices, GetSpherePoint(latitude0, longitude0, aRadius),
@@ -180,7 +180,7 @@ namespace
 			return CommonUtilities::Vector3f::UnitX;
 		}
 
-		return tangent.GetNormalized();
+		return CU::NormalizeSafe(tangent);
 	}
 
 	void FinalizeNormalsAndTangents(std::vector<Vertex>& inoutVertices, const std::vector<unsigned>& aIndices)
@@ -359,15 +359,15 @@ std::shared_ptr<Mesh> PrimitiveMeshBuilder::CreateTorus()
 
 	for (int major = 0; major < majorSegments; ++major)
 	{
-		const float major0 = CommonUtilities::Maths::TwoPi<float>() * static_cast<float>(major) / static_cast<float>(majorSegments);
-		const float major1 = CommonUtilities::Maths::TwoPi<float>() * static_cast<float>(major + 1) / static_cast<float>(majorSegments);
+		const float major0 = CU::TwoPi<float>() * static_cast<float>(major) / static_cast<float>(majorSegments);
+		const float major1 = CU::TwoPi<float>() * static_cast<float>(major + 1) / static_cast<float>(majorSegments);
 		const float u0 = static_cast<float>(major) / static_cast<float>(majorSegments);
 		const float u1 = static_cast<float>(major + 1) / static_cast<float>(majorSegments);
 
 		for (int minor = 0; minor < minorSegments; ++minor)
 		{
-			const float minor0 = CommonUtilities::Maths::TwoPi<float>() * static_cast<float>(minor) / static_cast<float>(minorSegments);
-			const float minor1 = CommonUtilities::Maths::TwoPi<float>() * static_cast<float>(minor + 1) / static_cast<float>(minorSegments);
+			const float minor0 = CU::TwoPi<float>() * static_cast<float>(minor) / static_cast<float>(minorSegments);
+			const float minor1 = CU::TwoPi<float>() * static_cast<float>(minor + 1) / static_cast<float>(minorSegments);
 			const float v0 = static_cast<float>(minor) / static_cast<float>(minorSegments);
 			const float v1 = static_cast<float>(minor + 1) / static_cast<float>(minorSegments);
 			AddReversedQuad(vertices, indices, GetTorusPoint(major0, minor0, majorRadius, minorRadius),

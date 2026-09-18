@@ -1,111 +1,166 @@
-#include <vector>
+#pragma once
+
+#include <Matrix.hpp>
+#include <Vector.hpp>
+
+#include <cstdint>
+#include <optional>
 #include <string>
 #include <variant>
-#include <Vector.hpp>
-#include <array>
-#include <Matrix.hpp>
+#include <vector>
 
-using MaterialParameterColorValue = CommonUtilities::Vector4f;
+// Integration notes:
+// - These are temporary, source-shaped records. UnrealSceneAdapter owns axis mapping,
+//   unit conversion and conversion into the runtime SceneData types.
+// - ImportScene returns diagnostics so a malformed file is not mistaken for an empty scene.
+// - Materials remain ordered children of mesh components; they are not component records.
+// - The component variant is closed so unknown exporter TypeIDs cannot be silently ignored.
 
 enum class UnrealComponentType : int64_t
 {
-    Custom = -1,
-    SceneComponent,
-    StaticMesh,
-    SkeletalMesh,
-    PointLight,
-    SpotLight,
-    DirectionalLight,
-    Box,
-    Sphere,
-    Capsule,
-    SpringArm
-
+	Custom = -1,
+	SceneComponent,
+	StaticMesh,
+	SkeletalMesh,
+	PointLight,
+	SpotLight,
+	DirectionalLight,
+	Box,
+	Sphere,
+	Capsule,
+	SpringArm
 };
 
-enum class MaterialType
+enum class MaterialType : int64_t
 {
-    Scalar,
-    Vector3f,
-    Vector3d,
-    Texture,
-    TextureCollection,
-    Font,
-    RunTimeVirtualTexture,
-    SparseVolumeTexture,
-    StaticSwitch, //Bool
-    ParameterCollection
+	Scalar,
+	Vector3f,
+	Vector3d,
+	Texture,
+	TextureCollection,
+	Font,
+	RunTimeVirtualTexture,
+	SparseVolumeTexture,
+	StaticSwitch,
+	ParameterCollection
+};
+
+struct ImportDiagnostic
+{
+	std::string Context;
+	std::string Message;
 };
 
 struct BaseComponentData
 {
-    std::string name;
-    UnrealComponentType typeID;
-    std::string parent;
-    std::vector<std::string> tags;
-    CommonUtilities::Matrix4f transform;
+	std::string Name;
+	UnrealComponentType TypeID = UnrealComponentType::Custom;
+	std::string Parent;
+	std::vector<std::string> Tags;
+	CommonUtilities::Matrix4f Transform;
 };
-
 
 struct TextureValue
 {
-    std::string name;
-    std::string path;
+	std::string Name;
+	std::string Path;
 };
 
-using MaterialParameterValue = std::variant<float, CommonUtilities::Vector4f, TextureValue>;
+using ImportedMaterialValue = std::variant<float, CommonUtilities::Vector4f, TextureValue>;
 
-struct MaterialParameterData
+struct ImportedMaterialParameter
 {
-    std::string name;
-    MaterialType type;
-    MaterialParameterValue value;
+	std::string Name;
+	MaterialType Type = MaterialType::Scalar;
+	ImportedMaterialValue Value = 0.0f;
 };
 
-struct MaterialData
+struct ImportedMaterial
 {
-    std::string name;
-    std::string parent;
-    std::vector<MaterialParameterData> parameters;
+	std::string Name;
+	std::string Parent;
+	std::vector<ImportedMaterialParameter> Parameters;
 };
 
-struct StaticMeshComponentData : public BaseComponentData
+// One source record serves both static and skeletal mesh TypeIDs; the adapter emits
+// their distinct strongly typed runtime descriptions.
+struct ImportedMeshComponent : public BaseComponentData
 {
-    std::string mesh;
-    std::string contentPath;
-    std::vector<MaterialData> materials;
+	std::string Mesh;
+	std::string ContentPath;
+	std::vector<ImportedMaterial> Materials;
 };
 
-struct CommonLightComponentData : public BaseComponentData
+struct ImportedLightComponent : public BaseComponentData
 {
-    CommonUtilities::Vector4f color;
-    float intensity;
+	CommonUtilities::Vector4f Color;
+	float Intensity = 0.0f;
 };
 
-struct PointLightComponentData : public CommonLightComponentData
+struct ImportedPointLightComponent : public ImportedLightComponent
 {
-    float falloffExponent;
-    float attenuationRadius;
+	float FalloffExponent = 0.0f;
+	float AttenuationRadius = 0.0f;
 };
 
-struct SpotLightComponentData : public PointLightComponentData
+struct ImportedSpotLightComponent : public ImportedPointLightComponent
 {
-    float innerConeAngle;
-    float outerConeAngle;
+	float InnerConeAngle = 0.0f;
+	float OuterConeAngle = 0.0f;
 };
 
-using ImportedComponentData = std::variant<BaseComponentData, MaterialData, StaticMeshComponentData, CommonLightComponentData, PointLightComponentData, SpotLightComponentData>;
+// These source-specific placeholder records were added after the first integration
+// test. They keep the other team's exported values available to the typed adapter.
+struct ImportedBoxComponent : public BaseComponentData
+{
+	CommonUtilities::Vector3f BoundsMaxima;
+};
+
+struct ImportedSphereComponent : public BaseComponentData
+{
+	float Radius = 0.0f;
+};
+
+struct ImportedCapsuleComponent : public ImportedSphereComponent
+{
+	float HalfHeight = 0.0f;
+};
+
+struct ImportedSpringArmComponent : public BaseComponentData
+{
+	CommonUtilities::Vector3f SocketOffset;
+	float ArmLength = 0.0f;
+};
+
+using ImportedComponentData = std::variant<
+	BaseComponentData,
+	ImportedMeshComponent,
+	ImportedLightComponent,
+	ImportedPointLightComponent,
+	ImportedSpotLightComponent,
+	ImportedBoxComponent,
+	ImportedSphereComponent,
+	ImportedCapsuleComponent,
+	ImportedSpringArmComponent>;
 
 struct UnrealActorData
 {
-    std::string name;
-    std::string archetype;
-    std::vector<std::string> tags;
-    CommonUtilities::Matrix4f transform;
-    std::vector<ImportedComponentData> components;
+	std::string Name;
+	std::string Archetype;
+	std::vector<std::string> Tags;
+	CommonUtilities::Matrix4f Transform;
+	std::vector<ImportedComponentData> Components;
 };
 
 struct UnrealSceneData
 {
-    std::vector<UnrealActorData> myActors;
+	std::vector<UnrealActorData> Actors;
+};
+
+struct UnrealImportResult
+{
+	std::optional<UnrealSceneData> Data;
+	std::vector<ImportDiagnostic> Diagnostics;
+
+	explicit operator bool() const { return Data.has_value() && Diagnostics.empty(); }
 };

@@ -16,7 +16,7 @@
     <ClCompile>
       <LanguageStandard>stdcpp20</LanguageStandard><ExceptionHandling>Sync</ExceptionHandling><WarningLevel>Level4</WarningLevel>
       <ShowIncludes>true</ShowIncludes>
-      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\..\Source;$(MSBuildThisFileDirectory)..\..\CommonUtilities\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\..\Source\Engine;$(MSBuildThisFileDirectory)..\..\Source\Utilities\CommonUtilities;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup><ClCompile Include="PublicGameplayConsumer.cpp" /></ItemGroup>

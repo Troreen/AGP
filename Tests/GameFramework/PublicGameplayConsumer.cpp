@@ -16,28 +16,24 @@ public:
 
 class Example final : public IGame
 {
-	void RegisterComponents(ComponentRegistry& registry) override
+	std::vector<InputSubscription> mySubscriptions;
+	void ConfigureWorld(World& world) override
 	{
-		registry.Register<Move>("Move", [](Move& move, const SceneReader& fields)
-		{
-			move.Speed = fields.OptionalFloat("speed", 100);
-		});
+		world.SpawnActor("Configured")->AddComponent<Move>();
 	}
 
 	void Initialize(GameContext& game) override
 	{
+		mySubscriptions.push_back(game.GetInputSystem().Subscribe(InputActions::Quit, [&game](const InputActionEvent& event)
+		{
+			if (event.Phase == InputActionPhase::Started) game.RequestQuit();
+		}));
+		mySubscriptions.push_back(game.GetInputSystem().Subscribe(InputActions::ReloadScene, [&game](const InputActionEvent& event)
+		{
+			if (event.Phase == InputActionPhase::Started) game.ReloadScene();
+		}));
 		game.GetWorld().SpawnActor("Player")->AddComponent<Move>();
 	}
 
-	void Update(GameContext& game, float) override
-	{
-		if (game.GetInput().IsKeyPressed(Keys::ESCAPE))
-		{
-			game.RequestQuit();
-		}
-		if (game.GetInput().IsKeyPressed(Keys::F5))
-		{
-			game.ReloadScene();
-		}
-	}
+	void Update(GameContext&, float) override {}
 };

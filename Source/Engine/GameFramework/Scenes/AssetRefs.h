@@ -6,6 +6,9 @@
 class Mesh;
 class MaterialInterface;
 class MeshComponentBase;
+class Texture;
+struct MaterialInstanceData;
+class IAssetResolver;
 
 struct AssetId
 {
@@ -39,9 +42,19 @@ private:
 	std::shared_ptr<MaterialInterface> myResource;
 	friend class AssetLibrary;
 	friend class MeshComponentBase;
+	friend MaterialAsset CreateMaterialInstance(IAssetResolver&, const MaterialInstanceData&);
 };
 
-class AssetLibrary
+class IAssetResolver
+{
+public:
+	virtual ~IAssetResolver() = default;
+	virtual MeshAsset ResolveMesh(const AssetId& id) = 0;
+	virtual MaterialAsset ResolveParentMaterial(const AssetId& id) = 0;
+	virtual std::shared_ptr<Texture> ResolveTexture(const AssetId& id) = 0;
+};
+
+class AssetLibrary final : public IAssetResolver
 {
 public:
 	void BindMesh(const AssetId& id, std::shared_ptr<Mesh> mesh)
@@ -69,8 +82,18 @@ public:
 		const auto it = myMaterials.find(id.Value);
 		return it == myMaterials.end() ? MaterialAsset{} : it->second;
 	}
+	void BindTexture(const AssetId& id, std::shared_ptr<Texture> texture) { myTextures[id.Value] = std::move(texture); }
+	MeshAsset ResolveMesh(const AssetId& id) override { return FindMesh(id); }
+	MaterialAsset ResolveParentMaterial(const AssetId& id) override { return FindMaterial(id); }
+	std::shared_ptr<Texture> ResolveTexture(const AssetId& id) override
+	{
+		const auto it = myTextures.find(id.Value); return it == myTextures.end() ? nullptr : it->second;
+	}
 
 private:
 	std::unordered_map<std::string, MeshAsset> myMeshes;
 	std::unordered_map<std::string, MaterialAsset> myMaterials;
+	std::unordered_map<std::string, std::shared_ptr<Texture>> myTextures;
 };
+
+MaterialAsset CreateMaterialInstance(IAssetResolver& assets, const MaterialInstanceData& data);

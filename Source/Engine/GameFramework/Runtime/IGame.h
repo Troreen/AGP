@@ -2,6 +2,7 @@
 #include <string>
 class GameContext;
 class ComponentRegistry;
+class World;
 
 // Run calls these on the application thread. Components are updated automatically.
 class IGame
@@ -9,7 +10,7 @@ class IGame
 public:
 	virtual ~IGame() = default;
 
-	virtual void RegisterComponents(ComponentRegistry&)
+	virtual void ConfigureWorld(World&)
 	{
 	}
 

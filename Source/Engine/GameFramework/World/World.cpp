@@ -1,5 +1,6 @@
 #include "GameFramework/World/World.h"
 #include "GameFramework/Components/CameraComponent.h"
+#include "Maths.hpp"
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
@@ -144,7 +145,7 @@ void World::Update(float deltaTime)
 	{
 		throw std::logic_error("World lifecycle cannot run recursively");
 	}
-	deltaTime = std::isfinite(deltaTime) ? std::clamp(deltaTime, 0.f, .25f) : 0.f;
+	deltaTime = CU::IsFinite(deltaTime) ? CU::Clamp(deltaTime, 0.f, .25f) : 0.f;
 	myUpdating = true;
 	try
 	{

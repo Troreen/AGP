@@ -1,6 +1,7 @@
 #include "GameComponents.h"
 #include "GameFramework/World/World.h"
 #include "GameFramework/Components/LightComponent.h"
+#include "EnumKeys.h"
 #include <cmath>
 #include <iostream>
 #include <stdexcept>
@@ -8,7 +9,6 @@
 
 namespace
 {
-	using CommonUtilities::Quaternion;
 	using CommonUtilities::Vector3f;
 	constexpr float DegreesToRadians = 0.017453292519943295f;
 	constexpr float LookSensitivity = 0.0025f;
@@ -37,35 +37,35 @@ namespace
 	}
 
 	// An authored, roll-free orientation independent of the camera-controls composition.
-	Quaternion<float> AuthoredRotation(float yawDegrees, float pitchDegrees)
+	Vector3f AuthoredRotation(float yawDegrees, float pitchDegrees)
 	{
-		const float yaw = yawDegrees * DegreesToRadians * 0.5f;
-		const float pitch = pitchDegrees * DegreesToRadians * 0.5f;
-		return {std::cos(yaw) * std::cos(pitch), std::cos(yaw) * std::sin(pitch), std::sin(yaw) * std::cos(pitch),
-		        -std::sin(yaw) * std::sin(pitch)};
+		return {yawDegrees, pitchDegrees, 0};
 	}
 
 	class CameraFixture
 	{
 	public:
-		GameInput Input;
+		InputSystem Input;
+		InputDeviceFrame Frame;
 		std::unique_ptr<World> Session = std::make_unique<World>(&Input);
 		Actor* Camera = nullptr;
 
-		explicit CameraFixture(const Quaternion<float>& authored = {})
+		explicit CameraFixture(const Vector3f& authored = {})
 		{
+			InstallDefaultInputBindings(Input);
 			Camera = Session->SpawnActor("Controlled camera");
-			Camera->GetTransform().SetLocalRotation(authored);
+			Camera->GetTransform().SetLocalRotationDegrees(authored);
 			Camera->AddComponent<CameraControlsComponent>();
 			Session->BeginPlay();
 		}
 
 		void Look(float yawDeltaDegrees, float pitchDeltaDegrees, bool active = true)
 		{
-			Input = {};
-			Input.MouseLookActive = active;
-			Input.MouseDeltaX = yawDeltaDegrees * DegreesToRadians / LookSensitivity;
-			Input.MouseDeltaY = pitchDeltaDegrees * DegreesToRadians / LookSensitivity;
+			Frame = {};
+			Frame.KeysDown[static_cast<size_t>(Keys::MOUSERBUTTON)] = active;
+			Frame.MouseDelta.x = yawDeltaDegrees * DegreesToRadians / LookSensitivity;
+			Frame.MouseDelta.y = pitchDeltaDegrees * DegreesToRadians / LookSensitivity;
+			Input.Update(Frame);
 			Session->Update(1.0f / 60.0f);
 		}
 
@@ -113,11 +113,13 @@ namespace
 
 	void LightAimShortcuts()
 	{
-		GameInput input;
+		InputSystem input;
+		InstallDefaultInputBindings(input);
+		InputDeviceFrame frame;
 		auto world = std::make_unique<World>(&input);
 		auto* camera = world->SpawnActor("Camera");
 		camera->GetTransform().SetLocalPosition({120, 230, -340});
-		camera->GetTransform().SetLocalRotation(AuthoredRotation(70, -35));
+		camera->GetTransform().SetLocalRotationDegrees(AuthoredRotation(70, -35));
 		camera->AddComponent<CameraControlsComponent>();
 		auto* directional = world->SpawnActor("Directional")->AddComponent<DirectionalLightComponent>();
 		auto* point = world->SpawnActor("Point")->AddComponent<PointLightComponent>();
@@ -128,15 +130,17 @@ namespace
 		controls->PointName = "Point";
 		controls->SpotName = "Spot";
 		world->BeginPlay();
-		input.MouseLookActive = true;
-		input.MouseDeltaX = 10 * DegreesToRadians / LookSensitivity;
-		input.KeysDown[static_cast<size_t>(Keys::SHIFT)] = true;
-		input.KeysPressed[static_cast<size_t>('7')] = true;
+		frame.KeysDown[static_cast<size_t>(Keys::MOUSERBUTTON)] = true;
+		frame.MouseDelta.x = 10 * DegreesToRadians / LookSensitivity;
+		frame.KeysDown[static_cast<size_t>(Keys::SHIFT)] = true;
+		frame.KeysDown[static_cast<size_t>('7')] = true;
+		input.Update(frame);
 		world->Update(1.0f / 60.0f);
 		ExpectVector(directional->GetWorldDirection(), ExpectedForward(80, -35), "Shift+7 uses camera movement from the same Update");
-		input.MouseDeltaX = 0;
-		input.KeysPressed.fill(false);
-		input.KeysPressed[static_cast<size_t>('9')] = true;
+		frame = {};
+		frame.KeysDown[static_cast<size_t>(Keys::SHIFT)] = true;
+		frame.KeysDown[static_cast<size_t>('9')] = true;
+		input.Update(frame);
 		world->Update(1.0f / 60.0f);
 		ExpectVector(spot->GetWorldDirection(), ExpectedForward(80, -35), "Shift+9 camera-aligned spotlight");
 		ExpectVector(spot->GetWorldPosition(), camera->GetTransform().GetWorldPosition(), "Shift+9 spotlight placement");
@@ -144,20 +148,25 @@ namespace
 
 	void FrameTimeSpin()
 	{
-		GameInput input;
+		InputSystem input;
+		InstallDefaultInputBindings(input);
+		InputDeviceFrame frame;
 		auto world = std::make_unique<World>(&input);
 		auto* chest = world->SpawnActor("Chest");
 		chest->AddComponent<SpinComponent>();
 		world->BeginPlay();
 		world->Update(.002f);
 		ExpectVector(chest->GetTransform().GetLocalForward(), ExpectedForward(.05f, 0), "Spin advances on a short frame");
-		input.KeysPressed[static_cast<size_t>(Keys::R)] = true;
+		frame.KeysDown[static_cast<size_t>(Keys::R)] = true;
+		input.Update(frame);
 		world->Update(0);
-		input.KeysPressed.fill(false);
-		input.KeysDown[static_cast<size_t>(Keys::R)] = true;
+		input.Update(frame);
 		world->Update(.2f);
 		ExpectVector(chest->GetTransform().GetLocalForward(), ExpectedForward(.05f, 0), "Pressed R pauses; held R does not toggle again");
-		input.KeysPressed[static_cast<size_t>(Keys::R)] = true;
+		frame = {};
+		input.Update(frame);
+		frame.KeysDown[static_cast<size_t>(Keys::R)] = true;
+		input.Update(frame);
 		world->Update(.1f);
 		ExpectVector(chest->GetTransform().GetLocalForward(), ExpectedForward(2.55f, 0), "Second R press resumes frame-time spin");
 	}
