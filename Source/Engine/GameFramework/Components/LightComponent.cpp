@@ -5,6 +5,11 @@
 
 #include <algorithm>
 
+namespace
+{
+	constexpr float MaximumSpotConeDegrees = 89.0f;
+}
+
 LightComponent::LightComponent(LightType aType) : myType(aType)
 {
 }
@@ -56,8 +61,8 @@ float LightComponent::GetOuterCone() const
 
 void LightComponent::SetConeAnglesDegrees(float anInnerConeDegrees, float anOuterConeDegrees)
 {
-	const float innerDegrees = CU::Clamp(anInnerConeDegrees, 0.0f, 89.0f);
-	const float outerDegrees = CU::Clamp(anOuterConeDegrees, innerDegrees, 89.0f);
+	const float innerDegrees = CU::Clamp(anInnerConeDegrees, 0.0f, MaximumSpotConeDegrees);
+	const float outerDegrees = CU::Clamp(anOuterConeDegrees, innerDegrees, MaximumSpotConeDegrees);
 	myInnerCone = CU::Maths::DegreesToRadians(innerDegrees);
 	myOuterCone = CU::Maths::DegreesToRadians(outerDegrees);
 }

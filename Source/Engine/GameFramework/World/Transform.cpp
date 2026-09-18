@@ -12,12 +12,19 @@ namespace
 	bool Finite(const CU::Matrix4f& value)
 	{
 		for (int row = 1; row <= 4; ++row)
+		{
 			for (int column = 1; column <= 4; ++column)
-				if (!CU::IsFinite(value(row, column))) return false;
+			{
+				if (!CU::IsFinite(value(row, column)))
+				{
+					return false;
+				}
+			}
+		}
 		return true;
 	}
-	// TODO: create a normilsedVector type in CommonUtilities to pass in as parameters in functions that need a normalized vector,
-	// once done: check entire solution for where using NormalisedVector3f type can improve readibility and safety of the code.
+
+	// Transform axes may contain scale, so callers should only receive unit directions.
 	CU::Vector3f Direction(const CU::Vector3f& value)
 	{
 		return CU::NormalizeSafe(value);
@@ -25,19 +32,28 @@ namespace
 
 	CU::Matrix4f MakeMatrix(const TransformData& data)
 	{
-		const auto yaw = CU::Quaternion<float>::CreateFromAxisAngle(CU::Vector3f::UnitY, CU::DegreesToRadians(data.RotationDegrees.x));
-		const auto pitch = CU::Quaternion<float>::CreateFromAxisAngle(CU::Vector3f::UnitX, CU::DegreesToRadians(data.RotationDegrees.y));
-		const auto roll = CU::Quaternion<float>::CreateFromAxisAngle(CU::Vector3f::UnitZ, CU::DegreesToRadians(data.RotationDegrees.z));
-		const auto rotation = (yaw * pitch * roll).GetNormalized().ToMatrix4x4();
-		return CU::CreateScale(data.Scale) * rotation * CU::CreateTranslation(data.Position);
+		const CU::Quaternion<float> yaw =
+			CU::Quaternion<float>::CreateFromAxisAngle(CU::Vector3f::UnitY, CU::DegreesToRadians(data.RotationDegrees.x));
+		const CU::Quaternion<float> pitch =
+			CU::Quaternion<float>::CreateFromAxisAngle(CU::Vector3f::UnitX, CU::DegreesToRadians(data.RotationDegrees.y));
+		const CU::Quaternion<float> roll =
+			CU::Quaternion<float>::CreateFromAxisAngle(CU::Vector3f::UnitZ, CU::DegreesToRadians(data.RotationDegrees.z));
+		const CU::Matrix4f rotationMatrix = (yaw * pitch * roll).GetNormalized().ToMatrix4x4();
+		return CU::CreateScale(data.Scale) * rotationMatrix * CU::CreateTranslation(data.Position);
 	}
 }
 
 bool Transform::SetData(const TransformData& data)
 {
-	if (!Finite(data.Position) || !Finite(data.RotationDegrees) || !Finite(data.Scale)) return false;
-	const auto matrix = MakeMatrix(data);
-	if (!Finite(matrix)) return false;
+	if (!Finite(data.Position) || !Finite(data.RotationDegrees) || !Finite(data.Scale))
+	{
+		return false;
+	}
+	const CU::Matrix4f matrix = MakeMatrix(data);
+	if (!Finite(matrix))
+	{
+		return false;
+	}
 	myData = data;
 	myLocalMatrix = matrix;
 	return true;
@@ -45,7 +61,7 @@ bool Transform::SetData(const TransformData& data)
 
 bool Transform::SetLocalPosition(const CommonUtilities::Vector3f& position)
 {
-	auto data = myData;
+	TransformData data = myData;
 	data.Position = position;
 	return SetData(data);
 }
@@ -57,14 +73,14 @@ bool Transform::SetLocalRotationDegrees(float yaw, float pitch, float roll)
 
 bool Transform::SetLocalRotationDegrees(const CommonUtilities::Vector3f& rotation)
 {
-	auto data = myData;
+	TransformData data = myData;
 	data.RotationDegrees = rotation;
 	return SetData(data);
 }
 
 bool Transform::SetLocalScale(const CommonUtilities::Vector3f& scale)
 {
-	auto data = myData;
+	TransformData data = myData;
 	data.Scale = scale;
 	return SetData(data);
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GameFramework/Scenes/SceneData.h"
 #include <Matrix.hpp>
 #include <Vector.hpp>
 
@@ -10,8 +11,8 @@
 #include <vector>
 
 // Integration notes:
-// - These are temporary, source-shaped records. UnrealSceneAdapter owns axis mapping,
-//   unit conversion and conversion into the runtime SceneData types.
+// - These source-shaped records isolate the Perforce parser from runtime scene types.
+//   UnrealSceneImporter owns validation and conversion into SceneData.
 // - ImportScene returns diagnostics so a malformed file is not mistaken for an empty scene.
 // - Materials remain ordered children of mesh components; they are not component records.
 // - The component variant is closed so unknown exporter TypeIDs cannot be silently ignored.
@@ -159,7 +160,7 @@ struct UnrealSceneData
 
 struct UnrealImportResult
 {
-	std::optional<UnrealSceneData> Data;
+	std::optional<SceneData> Data;
 	std::vector<ImportDiagnostic> Diagnostics;
 
 	explicit operator bool() const { return Data.has_value() && Diagnostics.empty(); }

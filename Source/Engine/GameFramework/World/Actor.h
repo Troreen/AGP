@@ -11,7 +11,7 @@ class World;
 class WorldRenderer;
 
 // The World owns Actors; Actors own Components. Pointers are borrowed, not handles.
-// TODO: this can cause dangling pointers. Consider using handles instead of raw pointers for safety, or at least weak_ptrs for components.
+// Callers must not retain them across actor/component destruction or scene replacement.
 class Actor final
 {
 public:
@@ -36,7 +36,7 @@ public:
 
 	bool IsPendingDestroy() const { return myDestroyed; }
 
-	// TODO: Actor cannot destroy itself, this must be done via World. Move function to cpp and do it via world perhaps
+	// Destruction is deferred so callbacks cannot invalidate World iteration.
 	void Destroy()
 	{
 		myDestroyed = true;
@@ -45,10 +45,10 @@ public:
 	template <class T, class... Args> T* AddComponent(std::string name, Args&&... args)
 	{
 		static_assert(std::is_base_of_v<Component, T>);
-		auto component = std::make_unique<T>(std::forward<Args>(args)...);
-		auto* result = component.get();
+		std::unique_ptr<T> component = std::make_unique<T>(std::forward<Args>(args)...);
+		T* attachedComponent = component.get();
 		Attach(std::move(component), std::move(name));
-		return result;
+		return attachedComponent;
 	}
 
 	template <class T> T* AddComponent()
@@ -60,14 +60,15 @@ public:
 
 	template <class T> T* GetComponent() const
 	{
-		for (const auto& component : myComponents)
+		for (const std::unique_ptr<Component>& component : myComponents)
 		{
-			if (!component->IsPendingDestroy())
+			if (component->IsPendingDestroy())
 			{
-				if (auto* found = dynamic_cast<T*>(component.get()))
-				{
-					return found;
-				}
+				continue;
+			}
+			if (T* foundComponent = dynamic_cast<T*>(component.get()))
+			{
+				return foundComponent;
 			}
 		}
 		return nullptr;

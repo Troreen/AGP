@@ -7,7 +7,8 @@
 class CameraComponent;
 class World;
 
-// TODO!: Debug camera controller is controlling all debug cameras in the scene which is okay since we should not have 2 debug cameras active at the same time but still needs fixing of somesort 
+// The service assumes one debug camera per World; supporting multiple cameras would
+// require tracking the previous active camera separately for each debug camera.
 
 struct DebugCameraPreset
 {

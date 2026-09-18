@@ -123,8 +123,8 @@
 							-0
 						]
 					},
-					"Mesh": "Plane",
-					"ContentPath": "/Engine/BasicShapes/Plane.Plane",
+					"Mesh": "SM_Chest",
+					"ContentPath": "/Game/Meshes/Props/SM_Chest.SM_Chest",
 					"Materials": [
 						{
 							"Name": "BasicShapeMaterial",
@@ -273,8 +273,8 @@
 							-0
 						]
 					},
-					"Mesh": "Cube",
-					"ContentPath": "/Engine/BasicShapes/Cube.Cube",
+					"Mesh": "SM_Chest",
+					"ContentPath": "/Game/Meshes/Props/SM_Chest.SM_Chest",
 					"Materials": [
 						{
 							"Name": "BasicShapeMaterial",
@@ -423,8 +423,8 @@
 							-0
 						]
 					},
-					"Mesh": "Cylinder",
-					"ContentPath": "/Engine/BasicShapes/Cylinder.Cylinder",
+					"Mesh": "SM_Chest",
+					"ContentPath": "/Game/Meshes/Props/SM_Chest.SM_Chest",
 					"Materials": [
 						{
 							"Name": "BasicShapeMaterial",
@@ -573,8 +573,8 @@
 							45
 						]
 					},
-					"Mesh": "Cube",
-					"ContentPath": "/Engine/BasicShapes/Cube.Cube",
+					"Mesh": "SM_Chest",
+					"ContentPath": "/Game/Meshes/Props/SM_Chest.SM_Chest",
 					"Materials": [
 						{
 							"Name": "BasicShapeMaterial",
@@ -858,8 +858,8 @@
 							0
 						]
 					},
-					"Mesh": "Cube",
-					"ContentPath": "/Engine/BasicShapes/Cube.Cube",
+					"Mesh": "SM_Chest",
+					"ContentPath": "/Game/Meshes/Props/SM_Chest.SM_Chest",
 					"Materials": [
 						{
 							"Name": "BasicShapeMaterial",
@@ -1008,8 +1008,8 @@
 							0
 						]
 					},
-					"Mesh": "Cube",
-					"ContentPath": "/Engine/BasicShapes/Cube.Cube",
+					"Mesh": "SM_Chest",
+					"ContentPath": "/Game/Meshes/Props/SM_Chest.SM_Chest",
 					"Materials": [
 						{
 							"Name": "BasicShapeMaterial",
@@ -1158,8 +1158,8 @@
 							44.999999999999979
 						]
 					},
-					"Mesh": "Cube",
-					"ContentPath": "/Engine/BasicShapes/Cube.Cube",
+					"Mesh": "SM_Chest",
+					"ContentPath": "/Game/Meshes/Props/SM_Chest.SM_Chest",
 					"Materials": [
 						{
 							"Name": "BasicShapeMaterial",
@@ -1308,8 +1308,8 @@
 							0
 						]
 					},
-					"Mesh": "Cube",
-					"ContentPath": "/Engine/BasicShapes/Cube.Cube",
+					"Mesh": "SM_Chest",
+					"ContentPath": "/Game/Meshes/Props/SM_Chest.SM_Chest",
 					"Materials": [
 						{
 							"Name": "BasicShapeMaterial",
@@ -2000,8 +2000,8 @@
 							0
 						]
 					},
-					"Mesh": "SM_Chest_Base",
-					"ContentPath": "/TGAUnrealPlugin/SM_Chest_Base.SM_Chest_Base",
+					"Mesh": "SM_Chest",
+					"ContentPath": "/Game/Meshes/Props/SM_Chest.SM_Chest",
 					"Materials": [
 						{
 							"Name": "MI_Chest",
@@ -2163,8 +2163,8 @@
 							0
 						]
 					},
-					"Mesh": "SM_Chest_Lid",
-					"ContentPath": "/TGAUnrealPlugin/SM_Chest_Lid.SM_Chest_Lid",
+					"Mesh": "SM_Chest",
+					"ContentPath": "/Game/Meshes/Props/SM_Chest.SM_Chest",
 					"Materials": [
 						{
 							"Name": "MI_Chest",
@@ -2326,8 +2326,8 @@
 							-0
 						]
 					},
-					"Mesh": "SM_Color_Checker",
-					"ContentPath": "/TGAUnrealPlugin/SM_Color_Checker.SM_Color_Checker",
+					"Mesh": "SM_Chest",
+					"ContentPath": "/Game/Meshes/Props/SM_Chest.SM_Chest",
 					"Materials": [
 						{
 							"Name": "MI_Color_Checker",

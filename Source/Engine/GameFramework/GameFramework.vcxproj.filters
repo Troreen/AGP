@@ -77,7 +77,7 @@
     <ClInclude Include="UnrealSceneImporter\UnrealSceneImporter.h">
       <Filter>UnrealSceneImporter</Filter>
     </ClInclude>
-    <ClInclude Include="UnrealSceneImporter\UnrealSceneAdapter.h">
+    <ClInclude Include="UnrealSceneImporter\PerforceSceneStructs.h">
       <Filter>UnrealSceneImporter</Filter>
     </ClInclude>
     <ClInclude Include="UnrealSceneImporter\UnrealSceneStructs.h">
@@ -139,9 +139,6 @@
       <Filter>SimdJson</Filter>
     </ClCompile>
     <ClCompile Include="UnrealSceneImporter\UnrealSceneImporter.cpp">
-      <Filter>UnrealSceneImporter</Filter>
-    </ClCompile>
-    <ClCompile Include="UnrealSceneImporter\UnrealSceneAdapter.cpp">
       <Filter>UnrealSceneImporter</Filter>
     </ClCompile>
     <ClCompile Include="World\Actor.cpp">

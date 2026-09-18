@@ -35,7 +35,7 @@ void Actor::Attach(std::unique_ptr<Component> component, std::string name)
 
 Component* Actor::FindComponent(const std::string& name) const
 {
-	for (const auto& component : myComponents)
+	for (const std::unique_ptr<Component>& component : myComponents)
 	{
 		if (!component->IsPendingDestroy() && component->GetName() == name)
 		{

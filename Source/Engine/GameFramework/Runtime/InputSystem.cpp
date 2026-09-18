@@ -5,6 +5,11 @@
 #include <stdexcept>
 #include <tuple>
 
+namespace
+{
+	constexpr int VirtualKeyCount = 256;
+}
+
 struct InputSubscription::SharedState
 {
 	struct Listener { size_t Id; std::string Action; InputSystem::Callback Callback; bool Active = true; bool PendingRemove = false; };
@@ -28,12 +33,27 @@ InputSubscription& InputSubscription::operator=(InputSubscription&& other) noexc
 void InputSubscription::Reset()
 {
 	if (myListener != 0)
-		if (auto state = myState.lock())
-			for (auto& listener : state->Listeners) if (listener.Id == myListener)
+	{
+		if (std::shared_ptr<SharedState> state = myState.lock())
+		{
+			for (SharedState::Listener& listener : state->Listeners)
 			{
-				if (state->Dispatching) listener.PendingRemove = true; else listener.Active = false;
+				if (listener.Id != myListener)
+				{
+					continue;
+				}
+				if (state->Dispatching)
+				{
+					listener.PendingRemove = true;
+				}
+				else
+				{
+					listener.Active = false;
+				}
 				break;
 			}
+		}
+	}
 	myListener = 0;
 	myState.reset();
 }
@@ -51,7 +71,10 @@ InputSubscription InputSystem::Subscribe(const InputActionId& action, Callback c
 
 void InputSystem::BindKey(const InputActionId& action, int key, std::vector<int> required, std::vector<int> forbidden)
 {
-	if (key < 0 || key >= 256) throw std::out_of_range("Key binding is outside the virtual-key range");
+	if (key < 0 || key >= VirtualKeyCount)
+	{
+		throw std::out_of_range("Key binding is outside the virtual-key range");
+	}
 	myKeys.push_back({action, key, std::move(required), std::move(forbidden)});
 }
 void InputSystem::BindMouseDelta(const InputActionId& action, float scale) { myMouse.push_back({action, scale}); }
@@ -61,32 +84,53 @@ void InputSystem::BindGamepadTrigger(const InputActionId& action, bool right, fl
 
 void InputSystem::ClearBindings()
 {
-	myKeys.clear(); myMouse.clear(); myGamepadButtons.clear(); myGamepadAxes.clear(); myGamepadTriggers.clear(); Reset();
+	myKeys.clear();
+	myMouse.clear();
+	myGamepadButtons.clear();
+	myGamepadAxes.clear();
+	myGamepadTriggers.clear();
+	Reset();
 }
 
 void InputSystem::Dispatch(const InputActionId& action, InputActionPhase phase, const InputActionValue& value)
 {
+	const auto removeInactiveListeners = [this]
+	{
+		for (InputSubscription::SharedState::Listener& listener : myShared->Listeners)
+		{
+			if (listener.PendingRemove)
+			{
+				listener.Active = false;
+			}
+		}
+		std::erase_if(myShared->Listeners, [](const InputSubscription::SharedState::Listener& listener)
+		{
+			return !listener.Active;
+		});
+	};
+
 	myShared->Dispatching = true;
 	const size_t count = myShared->Listeners.size();
 	const InputActionEvent event{action, phase, value};
 	try
 	{
-		for (size_t i = 0; i < count; ++i)
+		for (size_t listenerIndex = 0; listenerIndex < count; ++listenerIndex)
 		{
-			auto& listener = myShared->Listeners[i];
-			if (listener.Active && listener.Action == action.Name()) listener.Callback(event);
+			InputSubscription::SharedState::Listener& listener = myShared->Listeners[listenerIndex];
+			if (listener.Active && listener.Action == action.Name())
+			{
+				listener.Callback(event);
+			}
 		}
 	}
 	catch (...)
 	{
 		myShared->Dispatching = false;
-		for (auto& listener : myShared->Listeners) if (listener.PendingRemove) listener.Active = false;
-		std::erase_if(myShared->Listeners, [](const auto& listener) { return !listener.Active; });
+		removeInactiveListeners();
 		throw;
 	}
 	myShared->Dispatching = false;
-	for (auto& listener : myShared->Listeners) if (listener.PendingRemove) listener.Active = false;
-	std::erase_if(myShared->Listeners, [](const auto& listener) { return !listener.Active; });
+	removeInactiveListeners();
 }
 
 void InputSystem::Update(const InputDeviceFrame& frame)
@@ -95,41 +139,51 @@ void InputSystem::Update(const InputDeviceFrame& frame)
 	std::unordered_map<std::string, InputActionId> ids;
 	if (frame.Focused)
 	{
-		for (const auto& binding : myKeys)
+		for (const KeyBinding& binding : myKeys)
 		{
-			const auto down = [&frame](int key) { return key >= 0 && key < 256 && frame.KeysDown[size_t(key)]; };
-			bool active = down(binding.Key) && std::all_of(binding.Required.begin(), binding.Required.end(), down) &&
-			                    std::none_of(binding.Forbidden.begin(), binding.Forbidden.end(), down);
+			const auto isKeyDown = [&frame](int key)
+			{
+				return key >= 0 && key < VirtualKeyCount && frame.KeysDown[static_cast<size_t>(key)];
+			};
+			bool active = isKeyDown(binding.Key) && std::all_of(binding.Required.begin(), binding.Required.end(), isKeyDown) &&
+			              std::none_of(binding.Forbidden.begin(), binding.Forbidden.end(), isKeyDown);
 			if (active)
-				for (const auto& moreSpecific : myKeys)
+			{
+				for (const KeyBinding& moreSpecific : myKeys)
+				{
 					if (moreSpecific.Key == binding.Key && moreSpecific.Required.size() > binding.Required.size() &&
-					    std::all_of(moreSpecific.Required.begin(), moreSpecific.Required.end(), down) &&
-					    std::none_of(moreSpecific.Forbidden.begin(), moreSpecific.Forbidden.end(), down) &&
+					    std::all_of(moreSpecific.Required.begin(), moreSpecific.Required.end(), isKeyDown) &&
+					    std::none_of(moreSpecific.Forbidden.begin(), moreSpecific.Forbidden.end(), isKeyDown) &&
 					    std::all_of(binding.Required.begin(), binding.Required.end(), [&](int modifier)
 					    { return std::find(moreSpecific.Required.begin(), moreSpecific.Required.end(), modifier) != moreSpecific.Required.end(); }))
-					{ active = false; break; }
+					{
+						active = false;
+						break;
+					}
+				}
+			}
 			ids.emplace(binding.Action.Name(), binding.Action);
 			if (active) values[binding.Action.Name()] = true;
 		}
-		for (const auto& binding : myMouse)
+		for (const MouseBinding& binding : myMouse)
 		{
 			ids.emplace(binding.Action.Name(), binding.Action);
-			const auto value = frame.MouseDelta * binding.Scale;
-			if (value.LengthSqr() > 0) values[binding.Action.Name()] = value;
+			const CommonUtilities::Vector2f scaledDelta = frame.MouseDelta * binding.Scale;
+			if (scaledDelta.LengthSqr() > 0) values[binding.Action.Name()] = scaledDelta;
 		}
-		for (const auto& binding : myGamepadButtons)
+		for (const GamepadButtonBinding& binding : myGamepadButtons)
 		{
 			ids.emplace(binding.Action.Name(), binding.Action);
 			if (const auto it = frame.GamepadButtonsDown.find(binding.Button); it != frame.GamepadButtonsDown.end() && it->second)
 				values[binding.Action.Name()] = true;
 		}
-		for (const auto& binding : myGamepadAxes)
+		for (const GamepadAxisBinding& binding : myGamepadAxes)
 		{
 			ids.emplace(binding.Action.Name(), binding.Action);
-			const auto value = (binding.Right ? frame.GamepadRight : frame.GamepadLeft) * binding.Scale;
-			if (value.LengthSqr() > 0) values[binding.Action.Name()] = value;
+			const CommonUtilities::Vector2f scaledAxis = (binding.Right ? frame.GamepadRight : frame.GamepadLeft) * binding.Scale;
+			if (scaledAxis.LengthSqr() > 0) values[binding.Action.Name()] = scaledAxis;
 		}
-		for (const auto& binding : myGamepadTriggers)
+		for (const GamepadTriggerBinding& binding : myGamepadTriggers)
 		{
 			ids.emplace(binding.Action.Name(), binding.Action);
 			const float value = (binding.Right ? frame.GamepadRightTrigger : frame.GamepadLeftTrigger) * binding.Scale;
@@ -141,14 +195,14 @@ void InputSystem::Update(const InputDeviceFrame& frame)
 	orderedActions.reserve(myActions.size());
 	for (const auto& [name, state] : myActions) orderedActions.push_back(name);
 	std::sort(orderedActions.begin(), orderedActions.end());
-	for (const auto& name : orderedActions)
+	for (const std::string& name : orderedActions)
 	{
-		auto& state = myActions.at(name);
-		const auto found = values.find(name);
-		const bool active = found != values.end();
-		const InputActionValue value = active ? found->second : state.Value;
-		const auto id = ids.find(name);
-		const InputActionId action = id != ids.end() ? id->second : InputActionId{name};
+		ActionState& state = myActions.at(name);
+		const auto foundValue = values.find(name);
+		const bool active = foundValue != values.end();
+		const InputActionValue value = active ? foundValue->second : state.Value;
+		const auto foundId = ids.find(name);
+		const InputActionId action = foundId != ids.end() ? foundId->second : InputActionId{name};
 		if (active && !state.Active) Dispatch(action, InputActionPhase::Started, value);
 		else if (active) Dispatch(action, InputActionPhase::Ongoing, value);
 		else if (state.Active) Dispatch(action, InputActionPhase::Ended, state.Value);

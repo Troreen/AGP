@@ -5,6 +5,11 @@
 #include <cmath>
 #include <stdexcept>
 
+namespace
+{
+	constexpr float MaxFrameDeltaSeconds = 0.25f;
+}
+
 World::~World()
 {
 	Clear();
@@ -20,10 +25,10 @@ Actor* World::SpawnActor(std::string name)
 	{
 		throw std::invalid_argument("Actor name must be nonempty and unique: " + name);
 	}
-	auto actor = std::unique_ptr<Actor>(new Actor(*this, std::move(name)));
-	auto* result = actor.get();
+	std::unique_ptr<Actor> actor(new Actor(*this, std::move(name)));
+	Actor* spawnedActor = actor.get();
 	myActors.push_back(std::move(actor));
-	return result;
+	return spawnedActor;
 }
 
 Actor* World::FindActor(const std::string& name) const
@@ -122,7 +127,7 @@ void World::BeginPlay()
 	try
 	{
 		// Freeze this list: additions made by BeginPlay wait for the next update.
-		for (auto* component : CollectFrame())
+		for (Component* component : CollectFrame())
 		{
 			if (!component->myBegun && !component->IsPendingDestroy() && !component->GetOwner()->IsPendingDestroy())
 			{
@@ -145,13 +150,13 @@ void World::Update(float deltaTime)
 	{
 		throw std::logic_error("World lifecycle cannot run recursively");
 	}
-	deltaTime = CU::IsFinite(deltaTime) ? CU::Clamp(deltaTime, 0.f, .25f) : 0.f;
+	deltaTime = CU::IsFinite(deltaTime) ? CU::Clamp(deltaTime, 0.0f, MaxFrameDeltaSeconds) : 0.0f;
 	myUpdating = true;
 	try
 	{
 		RemoveDestroyed();
-		const auto frame = CollectFrame();
-		for (auto* component : frame)
+		const std::vector<Component*> frame = CollectFrame();
+		for (Component* component : frame)
 		{
 			if (!component->myBegun && !component->IsPendingDestroy() && !component->GetOwner()->IsPendingDestroy())
 			{
@@ -159,7 +164,7 @@ void World::Update(float deltaTime)
 				component->BeginPlay();
 			}
 		}
-		for (auto* component : frame)
+		for (Component* component : frame)
 		{
 			if (component->IsEnabled() && component->GetOwner()->IsActive())
 			{
@@ -187,7 +192,7 @@ void World::Clear()
 	}
 	myClearing = true;
 	myCamera = nullptr;
-	auto actors = std::move(myActors);
+	std::vector<std::unique_ptr<Actor>> actors = std::move(myActors);
 	actors.clear();
 	myClearing = false;
 }

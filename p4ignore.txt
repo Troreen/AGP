@@ -19,6 +19,7 @@ Temp/
 Makefile
 .vs
 *.sln
+**.props
 **.vcxproj
 **.vcxproj.*
 
@@ -32,3 +33,4 @@ README.md
 /.log
 .clang-format
 .clang-format-ignore
+/Docs

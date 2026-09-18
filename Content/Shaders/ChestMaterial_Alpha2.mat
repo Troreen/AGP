@@ -1,0 +1,14 @@
+{
+  "name": "ChestMaterial_Alpha2",
+  "masterMaterial" : "ChestMaterial_Alpha",
+  
+  "textures" : {
+    "albedo": "../Textures/T_Marble_Tiles_C.dds",
+    "normal": "../Textures/T_Marble_Tiles_N.dds",
+    "material": "../Textures/T_Marble_Tiles_ORM.dds"
+  },
+  
+  "parameters" : {
+    "MB_Tint" : [ 0.5, 1.0, 0.5, 0.75 ]
+  }
+}

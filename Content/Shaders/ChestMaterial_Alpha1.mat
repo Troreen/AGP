@@ -1,0 +1,8 @@
+{
+  "name": "ChestMaterial_Alpha1",
+  "masterMaterial" : "ChestMaterial_Alpha",
+  
+  "parameters" : {
+    "MB_Tint" : [ 1.0, 1.0, 1.0, 0.35 ]
+  }
+}

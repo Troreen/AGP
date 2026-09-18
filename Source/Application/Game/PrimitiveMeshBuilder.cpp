@@ -15,6 +15,7 @@ namespace
 	using Point3 = CommonUtilities::Vector3f;
 	using Color = CommonUtilities::Vector4f;
 	using UV = CommonUtilities::Vector2f;
+	constexpr float GeometryEpsilonSquared = 0.000001f;
 
 	void FinalizeNormalsAndTangents(std::vector<Vertex>& inoutVertices, const std::vector<unsigned>& aIndices);
 
@@ -38,7 +39,7 @@ namespace
 		element.NumVertices = static_cast<unsigned>(aVertices.size());
 		element.NumIndices = static_cast<unsigned>(aIndices.size());
 
-		auto mesh = std::make_shared<Mesh>();
+		std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
 		mesh->Initialize(aName, {element}, std::move(aVertices), std::move(aIndices));
 		return mesh;
 	}
@@ -170,12 +171,12 @@ namespace
 	Point3 GetFallbackTangent(const Point3& aNormal)
 	{
 		Point3 tangent = CommonUtilities::Vector3f::UnitY.Cross(aNormal);
-		if (tangent.LengthSqr() <= 0.000001f)
+		if (tangent.LengthSqr() <= GeometryEpsilonSquared)
 		{
 			tangent = CommonUtilities::Vector3f::UnitX.Cross(aNormal);
 		}
 
-		if (tangent.LengthSqr() <= 0.000001f)
+		if (tangent.LengthSqr() <= GeometryEpsilonSquared)
 		{
 			return CommonUtilities::Vector3f::UnitX;
 		}
@@ -211,7 +212,7 @@ namespace
 			const Point3 edge1 = p1 - p0;
 			const Point3 edge2 = p2 - p0;
 			Point3 faceNormal = edge1.Cross(edge2);
-			if (faceNormal.LengthSqr() <= 0.000001f)
+			if (faceNormal.LengthSqr() <= GeometryEpsilonSquared)
 			{
 				faceNormal = CommonUtilities::Vector3f::UnitZ;
 			}
@@ -225,10 +226,10 @@ namespace
 			const float determinant = deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y;
 
 			Point3 faceTangent = GetFallbackTangent(faceNormal);
-			if (std::abs(determinant) > 0.000001f)
+			if (std::abs(determinant) > GeometryEpsilonSquared)
 			{
 				faceTangent = (edge1 * deltaUV2.y - edge2 * deltaUV1.y) / determinant;
-				if (faceTangent.LengthSqr() <= 0.000001f)
+				if (faceTangent.LengthSqr() <= GeometryEpsilonSquared)
 				{
 					faceTangent = GetFallbackTangent(faceNormal);
 				}
@@ -249,7 +250,7 @@ namespace
 
 		for (Vertex& vertex : inoutVertices)
 		{
-			if (vertex.Normal.LengthSqr() <= 0.000001f)
+			if (vertex.Normal.LengthSqr() <= GeometryEpsilonSquared)
 			{
 				vertex.Normal = CommonUtilities::Vector3f::UnitZ;
 			}
@@ -259,7 +260,7 @@ namespace
 			}
 
 			vertex.Tangent = vertex.Tangent - vertex.Normal * vertex.Normal.Dot(vertex.Tangent);
-			if (vertex.Tangent.LengthSqr() <= 0.000001f)
+			if (vertex.Tangent.LengthSqr() <= GeometryEpsilonSquared)
 			{
 				vertex.Tangent = GetFallbackTangent(vertex.Normal);
 			}

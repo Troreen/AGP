@@ -9,7 +9,7 @@ void WorldRenderer::Build(const World& world, GraphicsEngine& graphics, Graphics
 {
 	const auto start = std::chrono::steady_clock::now();
 	snapshot.Clear();
-	auto* camera = world.GetActiveCamera();
+	CameraComponent* camera = world.GetActiveCamera();
 	if (!camera || !camera->HasBegunPlay() || !camera->IsEnabled() || !camera->GetOwner()->IsActive())
 	{
 		return;
@@ -17,19 +17,19 @@ void WorldRenderer::Build(const World& world, GraphicsEngine& graphics, Graphics
 	camera->SyncCameraToOwner();
 	snapshot.Camera = camera->myCamera;
 	snapshot.HasCamera = true;
-	for (const auto& actor : world.myActors)
+	for (const std::unique_ptr<Actor>& actor : world.myActors)
 	{
 		if (!actor->IsActive())
 		{
 			continue;
 		}
-		for (const auto& component : actor->myComponents)
+		for (const std::unique_ptr<Component>& component : actor->myComponents)
 		{
 			if (!component->HasBegunPlay() || !component->IsEnabled())
 			{
 				continue;
 			}
-			if (const auto* light = dynamic_cast<LightComponent*>(component.get()))
+			if (const LightComponent* light = dynamic_cast<LightComponent*>(component.get()))
 			{
 				GraphicsEngine::LightSnapshot item;
 				item.Type = static_cast<RenderLightType>(light->GetLightType());
@@ -42,16 +42,17 @@ void WorldRenderer::Build(const World& world, GraphicsEngine& graphics, Graphics
 				item.Radius = light->GetRadius();
 				snapshot.RelevantLights.push_back(item);
 			}
-			if (const auto* mesh = dynamic_cast<MeshComponentBase*>(component.get()); mesh && mesh->IsVisible() && mesh->myMesh)
+			const MeshComponentBase* mesh = dynamic_cast<MeshComponentBase*>(component.get());
+			if (mesh && mesh->IsVisible() && mesh->myMesh)
 			{
 				GraphicsEngine::RenderItemSnapshot item;
 				item.Mesh = mesh->myMesh;
 				item.Materials = mesh->myMaterials;
 				item.World = mesh->GetWorldMatrix();
 				item.HasSkinning = mesh->HasSkinning();
-				if (const auto* joints = mesh->GetJointTransforms())
+				if (const std::array<CU::Matrix4f, 128>* jointTransforms = mesh->GetJointTransforms())
 				{
-					item.JointTransforms = *joints;
+					item.JointTransforms = *jointTransforms;
 				}
 				snapshot.ShadowCasters.push_back(std::move(item));
 			}

@@ -4,19 +4,19 @@
 
 CommonUtilities::Matrix4f SceneComponent::GetWorldMatrix() const
 {
-	const auto local = myTransform.GetLocalMatrix();
-	return GetOwner() ? local * GetOwner()->GetTransform().GetWorldMatrix() : local;
+	const CommonUtilities::Matrix4f localMatrix = myTransform.GetLocalMatrix();
+	return GetOwner() ? localMatrix * GetOwner()->GetTransform().GetWorldMatrix() : localMatrix;
 }
 
 CommonUtilities::Vector3f SceneComponent::GetWorldPosition() const
 {
-	const auto matrix = GetWorldMatrix();
-	return {matrix(4, 1), matrix(4, 2), matrix(4, 3)};
+	const CommonUtilities::Matrix4f worldMatrix = GetWorldMatrix();
+	return {worldMatrix(4, 1), worldMatrix(4, 2), worldMatrix(4, 3)};
 }
 
 CommonUtilities::Vector3f SceneComponent::GetWorldDirection() const
 {
-	const auto matrix = GetWorldMatrix();
-	const CommonUtilities::Vector3f forward{matrix(3, 1), matrix(3, 2), matrix(3, 3)};
+	const CommonUtilities::Matrix4f worldMatrix = GetWorldMatrix();
+	const CommonUtilities::Vector3f forward{worldMatrix(3, 1), worldMatrix(3, 2), worldMatrix(3, 3)};
 	return CU::NormalizeSafe(forward, CU::Vector3f::UnitZ);
 }

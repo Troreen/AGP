@@ -19,16 +19,24 @@
 #include "EnumKeys.h"
 #include "Timer.h"
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstring>
 
 namespace
 {
 	constexpr int KeyCount = 256;
+	constexpr SHORT VirtualKeyDownMask = static_cast<SHORT>(0x8000);
+	constexpr float MaxFrameDeltaSeconds = 0.25f;
+	constexpr std::array GamepadButtons{
+		EGamepadCode::DPAD_UP, EGamepadCode::DPAD_DOWN, EGamepadCode::DPAD_LEFT, EGamepadCode::DPAD_RIGHT,
+		EGamepadCode::BUTTON_START, EGamepadCode::BUTTON_BACK, EGamepadCode::THUMB_LEFT, EGamepadCode::THUMB_RIGHT,
+		EGamepadCode::SHOULDER_LEFT, EGamepadCode::SHOULDER_RIGHT, EGamepadCode::BUTTON_A, EGamepadCode::BUTTON_B,
+		EGamepadCode::BUTTON_X, EGamepadCode::BUTTON_Y};
 
 	bool IsVirtualKeyDown(int key)
 	{
-		return (GetAsyncKeyState(key) & 0x8000) != 0;
+		return (GetAsyncKeyState(key) & VirtualKeyDownMask) != 0;
 	}
 
 	LRESULT CALLBACK GameWindowProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
@@ -100,7 +108,7 @@ int GameApplication::Impl::Run()
 		throw std::runtime_error("Could not create game window");
 	}
 	myContext.myContentRoot = std::filesystem::canonical(myConfig.ContentRoot);
-	auto& graphics = GraphicsEngine::Get();
+	GraphicsEngine& graphics = GraphicsEngine::Get();
 	if (!graphics.Initialize(myMainWindowHandle, myContext.myContentRoot / "Shaders") ||
 	    !graphics.CreateCommandList("Game Scene", myCommandList))
 	{
@@ -175,7 +183,7 @@ int GameApplication::Impl::Run()
 			myInputHandler.UpdateInput();
 			myContext.myInput.Update(CaptureInputFrame());
 			const float elapsed = timer.GetDeltaTime();
-			const float delta = CU::IsFinite(elapsed) ? CU::Clamp(elapsed, 0.f, .25f) : 0.f;
+			const float delta = CU::IsFinite(elapsed) ? CU::Clamp(elapsed, 0.0f, MaxFrameDeltaSeconds) : 0.0f;
 
 			myGame.Update(myContext, delta);
 			myContext.GetWorld().Update(delta);
@@ -222,8 +230,8 @@ void GameApplication::Impl::LoadPendingScene()
 		}
 		AssetLibrary assets;
 		SceneLoadContext context{myContext.myContentRoot, myContext.myClientSize, assets};
-		const auto data = mySource(name, context);
-		world = myRegistry.CreateWorld(data, assets, &myContext.myInput, myContext.myClientSize);
+		const SceneData scene = mySource(name, context);
+		world = myRegistry.CreateWorld(scene, assets, &myContext.myInput, myContext.myClientSize);
 		myGame.ConfigureWorld(*world);
 	}
 	catch (const std::bad_alloc&)
@@ -299,9 +307,11 @@ InputDeviceFrame GameApplication::Impl::CaptureInputFrame()
 	}
 	if (myXInputHandler.UpdateInput())
 	{
-		for (unsigned button : {0x0001u, 0x0002u, 0x0004u, 0x0008u, 0x0010u, 0x0020u, 0x0040u, 0x0080u,
-		                        0x0100u, 0x0200u, 0x1000u, 0x2000u, 0x4000u, 0x8000u})
-			inputFrame.GamepadButtonsDown[button] = myXInputHandler.IsButtonDown(button);
+		for (const EGamepadCode button : GamepadButtons)
+		{
+			const unsigned buttonCode = static_cast<unsigned>(button);
+			inputFrame.GamepadButtonsDown[buttonCode] = myXInputHandler.IsButtonDown(buttonCode);
+		}
 		myXInputHandler.GetAnalogLeftValue(inputFrame.GamepadLeft);
 		myXInputHandler.GetAnalogRightValue(inputFrame.GamepadRight);
 		inputFrame.GamepadLeftTrigger = myXInputHandler.GetTriggerLeftValue();

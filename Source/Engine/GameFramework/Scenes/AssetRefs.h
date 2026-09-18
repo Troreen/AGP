@@ -87,7 +87,8 @@ public:
 	MaterialAsset ResolveParentMaterial(const AssetId& id) override { return FindMaterial(id); }
 	std::shared_ptr<Texture> ResolveTexture(const AssetId& id) override
 	{
-		const auto it = myTextures.find(id.Value); return it == myTextures.end() ? nullptr : it->second;
+		const auto textureIt = myTextures.find(id.Value);
+		return textureIt == myTextures.end() ? nullptr : textureIt->second;
 	}
 
 private:

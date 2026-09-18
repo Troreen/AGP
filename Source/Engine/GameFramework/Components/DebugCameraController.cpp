@@ -6,6 +6,12 @@
 #include <algorithm>
 #include <cmath>
 
+namespace
+{
+	constexpr const char* DebugCameraActorName = "__DebugCamera";
+	constexpr float MaximumPitchDegrees = 89.0f;
+}
+
 const DebugCameraPreset& GetDebugCameraPreset()
 {
 	static const DebugCameraPreset preset;
@@ -14,78 +20,120 @@ const DebugCameraPreset& GetDebugCameraPreset()
 
 CameraComponent* DebugCameraService::Ensure(World& world, CommonUtilities::Vector2u clientSize)
 {
-	constexpr const char* actorName = "__DebugCamera";
-	if (auto* existing = world.FindActor(actorName))
-		if (auto* camera = existing->GetComponent<CameraComponent>()) 
-			return camera;
-	auto* actor = world.SpawnActor(actorName); actor->GetTransform().SetData(GetDebugCameraPreset().Transform);
-	auto* camera = actor->AddComponent<CameraComponent>("Camera", GetDebugCameraPreset().FieldOfView, GetDebugCameraPreset().NearPlane,
-	                                                  GetDebugCameraPreset().FarPlane, clientSize);
+	if (Actor* existingActor = world.FindActor(DebugCameraActorName))
+	{
+		if (CameraComponent* existingCamera = existingActor->GetComponent<CameraComponent>())
+		{
+			return existingCamera;
+		}
+	}
+
+	Actor* actor = world.SpawnActor(DebugCameraActorName);
+	const DebugCameraPreset& preset = GetDebugCameraPreset();
+	actor->GetTransform().SetData(preset.Transform);
+	CameraComponent* camera = actor->AddComponent<CameraComponent>(
+		"Camera", preset.FieldOfView, preset.NearPlane, preset.FarPlane, clientSize);
 	actor->AddComponent<DebugCameraController>("Controls");
 	return camera;
 }
 
 void DebugCameraService::Toggle(World& world, CommonUtilities::Vector2u clientSize)
 {
-	auto* active = world.GetActiveCamera();
-	if (active && active->GetOwner()->GetName() == "__DebugCamera")
+	CameraComponent* activeCamera = world.GetActiveCamera();
+	if (activeCamera && activeCamera->GetOwner()->GetName() == DebugCameraActorName)
 	{
-		auto* actor = world.FindActor(myPreviousActor);
-		auto* camera = actor ? dynamic_cast<CameraComponent*>(actor->FindComponent(myPreviousComponent)) : nullptr;
-		if (camera) 
-			world.SetActiveCamera(camera);
+		Actor* previousActor = world.FindActor(myPreviousActor);
+		CameraComponent* previousCamera = previousActor
+			? dynamic_cast<CameraComponent*>(previousActor->FindComponent(myPreviousComponent))
+			: nullptr;
+		if (previousCamera)
+		{
+			world.SetActiveCamera(previousCamera);
+		}
 		return;
 	}
-	if (active) 
-	{ 
-		myPreviousActor = active->GetOwner()->GetName(); myPreviousComponent = active->GetName(); 
+	if (activeCamera)
+	{
+		myPreviousActor = activeCamera->GetOwner()->GetName();
+		myPreviousComponent = activeCamera->GetName();
 	}
 	world.SetActiveCamera(Ensure(world, clientSize));
 }
 
-void DebugCameraService::Reset() 
-{ 
-	myPreviousActor.clear(); 
-	myPreviousComponent.clear(); 
+void DebugCameraService::Reset()
+{
+	myPreviousActor.clear();
+	myPreviousComponent.clear();
 }
 
 void DebugCameraController::BeginPlay()
 {
-	const auto forward = CU::NormalizeSafe(GetOwner()->GetTransform().GetLocalForward(), CU::Vector3f::UnitZ);
+	const CU::Vector3f forward = CU::NormalizeSafe(GetOwner()->GetTransform().GetLocalForward(), CU::Vector3f::UnitZ);
 	myYaw = std::atan2(forward.x, forward.z);
 	myPitch = -std::asin(CU::Clamp(forward.y, -1.f, 1.f));
-	auto& input = GetInputSystem();
+	InputSystem& input = GetInputSystem();
 	auto held = [this, &input](const InputActionId& action, bool& target)
 	{
-		mySubscriptions.push_back(input.Subscribe(action, [&target](const InputActionEvent& event) { target = event.Phase != InputActionPhase::Ended; }));
+		mySubscriptions.push_back(input.Subscribe(action, [&target](const InputActionEvent& event)
+		{
+			target = event.Phase != InputActionPhase::Ended;
+		}));
 	};
-	held(InputActions::CameraLookEnable, myLook); held(InputActions::CameraForward, myForward); held(InputActions::CameraBack, myBack);
-	held(InputActions::CameraLeft, myLeft); held(InputActions::CameraRight, myRight); held(InputActions::CameraUp, myUp); held(InputActions::CameraDown, myDown);
+	held(InputActions::CameraLookEnable, myLook);
+	held(InputActions::CameraForward, myForward);
+	held(InputActions::CameraBack, myBack);
+	held(InputActions::CameraLeft, myLeft);
+	held(InputActions::CameraRight, myRight);
+	held(InputActions::CameraUp, myUp);
+	held(InputActions::CameraDown, myDown);
 	mySubscriptions.push_back(input.Subscribe(InputActions::CameraLookDelta, [this](const InputActionEvent& event)
 	{
-		if (event.Phase != InputActionPhase::Ended) 
+		if (event.Phase != InputActionPhase::Ended)
+		{
 			myLookDelta += std::get<CommonUtilities::Vector2f>(event.Value);
+		}
 	}));
 }
 
 void DebugCameraController::Update(float deltaTime)
 {
-	auto& transform = GetOwner()->GetTransform();
-	const auto& preset = GetDebugCameraPreset();
+	Transform& transform = GetOwner()->GetTransform();
+	const DebugCameraPreset& preset = GetDebugCameraPreset();
 	if (myLook)
 	{
 		myYaw += myLookDelta.x * preset.LookSensitivity;
-		myPitch = CU::Clamp(myPitch + myLookDelta.y * preset.LookSensitivity, CU::DegreesToRadians(-89.0f), CU::DegreesToRadians(89.0f));
+		myPitch = CU::Clamp(myPitch + myLookDelta.y * preset.LookSensitivity,
+		                    CU::DegreesToRadians(-MaximumPitchDegrees), CU::DegreesToRadians(MaximumPitchDegrees));
 		transform.SetLocalRotationDegrees(CU::RadiansToDegrees(myYaw), CU::RadiansToDegrees(myPitch), 0);
 	}
 	myLookDelta = {};
 	CommonUtilities::Vector3f motion{};
 	if (myForward)
-		motion += CU::NormalizeSafe(transform.GetLocalForward()); if (myBack) motion -= CU::NormalizeSafe(transform.GetLocalForward());
+	{
+		motion += CU::NormalizeSafe(transform.GetLocalForward());
+	}
+	if (myBack)
+	{
+		motion -= CU::NormalizeSafe(transform.GetLocalForward());
+	}
 	if (myRight)
-		motion += CU::NormalizeSafe(transform.GetLocalRight()); if (myLeft) motion -= CU::NormalizeSafe(transform.GetLocalRight());
-	if (myUp) 
-		motion += CommonUtilities::Vector3f::UnitY; if (myDown) motion -= CommonUtilities::Vector3f::UnitY;
-	if (motion.LengthSqr() > 0) 
+	{
+		motion += CU::NormalizeSafe(transform.GetLocalRight());
+	}
+	if (myLeft)
+	{
+		motion -= CU::NormalizeSafe(transform.GetLocalRight());
+	}
+	if (myUp)
+	{
+		motion += CommonUtilities::Vector3f::UnitY;
+	}
+	if (myDown)
+	{
+		motion -= CommonUtilities::Vector3f::UnitY;
+	}
+	if (motion.LengthSqr() > 0)
+	{
 		transform.SetLocalPosition(transform.GetLocalPosition() + CU::NormalizeSafe(motion) * preset.MoveSpeed * deltaTime);
+	}
 }

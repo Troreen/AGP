@@ -112,7 +112,7 @@ namespace
 
 	std::shared_ptr<Animation> ConvertAnimation(const TGA::FBX::Animation& aSourceAnimation, std::string aName)
 	{
-		auto animation = std::make_shared<Animation>();
+		std::shared_ptr<Animation> animation = std::make_shared<Animation>();
 		animation->Name = std::move(aName);
 		animation->Duration = static_cast<float>(aSourceAnimation.Duration);
 		animation->FramesPerSecond = aSourceAnimation.FramesPerSecond;
@@ -191,15 +191,12 @@ std::shared_ptr<Mesh> MeshLibrary::GetMesh(std::string_view aName) const
 	return foundMesh->second;
 }
 
-std::shared_ptr<Mesh> MeshLibrary::LoadSceneMesh(std::string_view aName, std::string_view aContentPath)
+std::shared_ptr<Mesh> MeshLibrary::LoadSceneMesh(std::string_view, std::string_view aContentPath)
 {
-	if (auto mesh = GetMesh(aName))
-	{
-		return mesh;
-	}
-
 	// Unreal's built-in basic shapes do not exist as FBX files in Content. Reuse
-	// the equivalent engine primitives while preserving the exported asset id.
+	// the equivalent engine primitives only when the content path explicitly names
+	// one. Looking up the display name first can silently turn a missing asset named
+	// "Cube" into AGP's registered debug cube.
 	if (aContentPath == "/Engine/BasicShapes/Plane.Plane")
 	{
 		return GetMesh("Floor");
@@ -221,11 +218,17 @@ std::shared_ptr<Mesh> MeshLibrary::LoadSceneMesh(std::string_view aName, std::st
 	{
 		relativePath.resize(objectSeparator);
 	}
-	if (!LoadFBXMesh(std::filesystem::path(relativePath).replace_extension(".fbx")))
+	const std::filesystem::path meshPath = std::filesystem::path(relativePath).replace_extension(".fbx");
+	const std::string assetName = meshPath.stem().string();
+	if (std::shared_ptr<Mesh> mesh = GetMesh(assetName))
+	{
+		return mesh;
+	}
+	if (!LoadFBXMesh(meshPath))
 	{
 		return nullptr;
 	}
-	return GetMesh(aName);
+	return GetMesh(assetName);
 }
 
 bool MeshLibrary::LoadFBXMesh(const std::filesystem::path& aPath)
@@ -266,7 +269,7 @@ bool MeshLibrary::LoadFBXMesh(const std::filesystem::path& aPath)
 	}
 
 	const std::string meshName = resolvedPath.stem().string();
-	auto mesh = std::make_shared<Mesh>();
+	std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
 	mesh->Initialize(meshName, std::move(elements), std::move(vertices), std::move(indices));
 	if (!importedMesh.Skeleton.Bones.empty())
 	{

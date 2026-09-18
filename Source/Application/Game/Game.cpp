@@ -9,14 +9,20 @@ Game::~Game() = default;
 
 void Game::Initialize(GameContext& context)
 {
-	auto& input = context.GetInputSystem();
+	InputSystem& input = context.GetInputSystem();
 	myInputSubscriptions.push_back(input.Subscribe(InputActions::Quit, [&context](const InputActionEvent& event)
 	{
-		if (event.Phase == InputActionPhase::Started) context.RequestQuit();
+		if (event.Phase == InputActionPhase::Started)
+		{
+			context.RequestQuit();
+		}
 	}));
 	myInputSubscriptions.push_back(input.Subscribe(InputActions::ReloadScene, [&context](const InputActionEvent& event)
 	{
-		if (event.Phase == InputActionPhase::Started) context.ReloadScene();
+		if (event.Phase == InputActionPhase::Started)
+		{
+			context.ReloadScene();
+		}
 	}));
 	context.LoadScene("Game");
 	GAMELOG(Log, "Game ready: action input enabled; F1 debug camera, F5 reload, Esc quit");
