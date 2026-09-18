@@ -254,6 +254,7 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
     <ClInclude Include="Objects\Buffer.h" />
     <ClInclude Include="Objects\Camera.h" />
     <ClInclude Include="Objects\GBuffer.h" />
+	<ClInclude Include="Objects\Font.h" />
     <ClInclude Include="Objects\Mesh.h" />
     <ClInclude Include="Objects\Sampler.h" />
     <ClInclude Include="Objects\Shader.h" />
@@ -266,6 +267,7 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
     <ClInclude Include="RHI\RenderHardwareInterface.h" />
     <ClInclude Include="RenderCulling.h" />
     <ClInclude Include="RenderItemRouting.h" />
+	<ClInclude Include="TextWidget.h" />
     <ClInclude Include="TemporaryShaders\BRDF_LUT_PS.h" />
     <ClInclude Include="TemporaryShaders\DeferredComposite_PS.h" />
     <ClInclude Include="TemporaryShaders\DeferredDirectional_PS.h" />
@@ -294,6 +296,7 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
     <ClCompile Include="Materials\MaterialInterface.cpp" />
     <ClCompile Include="Materials\MaterialShaderIncludeHandler.cpp" />
     <ClCompile Include="Objects\Buffer.cpp" />
+	<ClCompile Include="TextWidget.cpp" />
     <ClCompile Include="Objects\Camera.cpp" />
     <ClCompile Include="Objects\Mesh.cpp" />
     <ClCompile Include="Objects\Sampler.cpp" />
@@ -372,6 +375,12 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
     <FxCompile Include="Shaders\Internal\ScreenSpaceAO_PS.hlsl">
       <ShaderType>Pixel</ShaderType>
     </FxCompile>
+	<FxCompile Include="Shaders\Internal\TextOverlay_VS.hlsl">
+	  <ShaderType>Vertex</ShaderType>
+	</FxCompile>
+	<FxCompile Include="Shaders\Internal\TextOverlay_PS.hlsl">
+	  <ShaderType>Pixel</ShaderType>
+	</FxCompile>
     <FxCompile Include="Shaders\Material\GBuffer_PS.hlsl">
       <ShaderType>Pixel</ShaderType>
     </FxCompile>

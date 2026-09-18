@@ -4,11 +4,13 @@
 #include "GraphicsEngine/GraphicsEngine.h"
 #include "GraphicsEngine/Materials/Material.h"
 #include "GraphicsEngine/Objects/Texture.h"
+#include "GraphicsEngine/Objects/Font.h"
 
 #include <array>
 #include <algorithm>
 #include <cctype>
 #include <format>
+#include <cmath>
 #include <ranges>
 
 namespace
@@ -66,6 +68,20 @@ namespace
 		const std::filesystem::path path(value);
 		return path.is_absolute() ? path.lexically_normal() : (parent / path).lexically_normal();
 	}
+
+	bool ReadNumber(const simdjson::dom::object& object, std::string_view key, float& value)
+	{
+		double parsed = 0.0;
+		if (object.at_key(key).get(parsed)) return false;
+		value = static_cast<float>(parsed);
+		return std::isfinite(value);
+	}
+
+	bool ReadRectangle(const simdjson::dom::object& object, CommonUtilities::Rectanglef& rectangle)
+	{
+		return ReadNumber(object, "top", rectangle.Top) && ReadNumber(object, "left", rectangle.Left) &&
+		       ReadNumber(object, "bottom", rectangle.Bottom) && ReadNumber(object, "right", rectangle.Right);
+	}
 }
 
 AssetRegistry& AssetRegistry::Get()
@@ -105,9 +121,11 @@ void AssetRegistry::Clear()
 	myMeshes.clear();
 	myMaterials.clear();
 	myTextures.clear();
+	myFonts.clear();
 	myMeshAliases.clear();
 	myMaterialAliases.clear();
 	myTextureAliases.clear();
+	myFontAliases.clear();
 	myMeshLoader = {};
 	myLastError.clear();
 }
@@ -135,7 +153,12 @@ void AssetRegistry::IndexFile(const std::filesystem::path& path)
 	const std::string extension = Lower(path.extension().string());
 	const std::string id = MakeAssetId(path).Value;
 	const std::string alias = Lower(path.stem().string());
-	if (extension == ".fbx")
+	if (Lower(path.filename().string()).ends_with(".font.json"))
+	{
+		myFonts.try_emplace(id, Entry<Font>{path});
+		AddAlias(myFontAliases, Lower(path.stem().stem().string()), id);
+	}
+	else if (extension == ".fbx")
 	{
 		myMeshes.try_emplace(id, Entry<Mesh>{path});
 		AddAlias(myMeshAliases, alias, id);
@@ -223,6 +246,17 @@ void AssetRegistry::RegisterTexture(const AssetId& id, std::shared_ptr<Texture> 
 	AddAlias(myTextureAliases, Lower(std::filesystem::path(key).stem().string()), key);
 }
 
+void AssetRegistry::RegisterFont(const AssetId& id, std::shared_ptr<Font> font)
+{
+	if (!font) return;
+	const std::string key = NormalizeId(id.Value);
+	if (key.empty()) return;
+	auto& entry = myFonts[key];
+	entry.Pinned = std::move(font);
+	entry.Cached = entry.Pinned;
+	AddAlias(myFontAliases, Lower(std::filesystem::path(key).stem().stem().string()), key);
+}
+
 MeshAsset AssetRegistry::ResolveMesh(const AssetId& id)
 {
 	myLastError.clear();
@@ -279,6 +313,99 @@ TextureAsset AssetRegistry::ResolveTexture(const AssetId& id)
 	}
 	if (!result.myResource && myLastError.empty()) SetError(std::format("Texture '{}' could not be loaded.", id.Value));
 	return result;
+}
+
+FontAsset AssetRegistry::ResolveFont(const AssetId& id)
+{
+	myLastError.clear();
+	FontAsset result;
+	Entry<Font>* entry = FindEntry(id, myFonts, myFontAliases, ".font.json");
+	if (!entry) return result;
+	result.myResource = entry->Pinned ? entry->Pinned : entry->Cached.lock();
+	if (!result.myResource && !entry->Path.empty())
+	{
+		result.myResource = LoadFont(entry->Path);
+		entry->Cached = result.myResource;
+	}
+	if (!result.myResource && myLastError.empty()) SetError(std::format("Font '{}' could not be loaded.", id.Value));
+	return result;
+}
+
+std::shared_ptr<Font> AssetRegistry::LoadFont(const std::filesystem::path& path)
+{
+	simdjson::dom::parser parser;
+	simdjson::padded_string json;
+	if (simdjson::padded_string::load(path.string()).get(json))
+	{
+		SetError(std::format("Font metadata '{}' could not be read.", path.string()));
+		return nullptr;
+	}
+	simdjson::dom::object root;
+	if (parser.parse(json).get(root))
+	{
+		SetError(std::format("Font metadata '{}' contains malformed JSON.", path.string()));
+		return nullptr;
+	}
+	auto atlasResult = root.at_key("atlas");
+	auto metricsResult = root.at_key("metrics");
+	auto glyphsResult = root.at_key("glyphs");
+	const std::string atlasFile = ReadString(root, "atlasFile");
+	if (atlasResult.error() || !atlasResult.value().is_object() || metricsResult.error() || !metricsResult.value().is_object() ||
+	    glyphsResult.error() || !glyphsResult.value().is_array() || atlasFile.empty())
+	{
+		SetError(std::format("Font metadata '{}' is missing atlas, metrics, glyphs, or atlasFile.", path.string()));
+		return nullptr;
+	}
+	const auto atlas = atlasResult.value().get_object().value();
+	const auto metrics = metricsResult.value().get_object().value();
+	auto font = std::make_shared<Font>();
+	float width = 0.0f, height = 0.0f;
+	if (!ReadNumber(metrics, "lineHeight", font->myLineHeight) || !ReadNumber(metrics, "ascender", font->myAscender) ||
+	    !ReadNumber(metrics, "descender", font->myDescender) || !ReadNumber(atlas, "distanceRange", font->myDistanceRange) ||
+	    !ReadNumber(atlas, "width", width) || !ReadNumber(atlas, "height", height) || font->myLineHeight <= 0.0f ||
+	    width <= 0.0f || height <= 0.0f)
+	{
+		SetError(std::format("Font metadata '{}' has missing or invalid line/atlas metrics.", path.string()));
+		return nullptr;
+	}
+	font->myAtlasWidth = static_cast<unsigned>(width);
+	font->myAtlasHeight = static_cast<unsigned>(height);
+	const TextureAsset atlasTexture = ResolveTexture(MakeAssetId(ResolveRelative(path.parent_path(), atlasFile)));
+	if (!atlasTexture)
+	{
+		const std::string atlasError = myLastError;
+		SetError(std::format("Font metadata '{}' requires atlas '{}': {}", path.string(), atlasFile, atlasError));
+		return nullptr;
+	}
+	font->myAtlas = atlasTexture.myResource;
+	for (const simdjson::dom::element element : glyphsResult.value().get_array().value())
+	{
+		if (!element.is_object()) continue;
+		const auto glyphObject = element.get_object().value();
+		uint64_t unicode = 0;
+		Font::Glyph glyph;
+		if (glyphObject.at_key("unicode").get(unicode) || !ReadNumber(glyphObject, "advance", glyph.Advance)) continue;
+		glyph.Unicode = static_cast<uint32_t>(unicode);
+		auto planeResult = glyphObject.at_key("planeBounds");
+		auto boundsResult = glyphObject.at_key("atlasBounds");
+		if (!planeResult.error() && planeResult.value().is_object() && !boundsResult.error() && boundsResult.value().is_object())
+		{
+			glyph.HasGeometry = ReadRectangle(planeResult.value().get_object().value(), glyph.PlaneBounds) &&
+			                    ReadRectangle(boundsResult.value().get_object().value(), glyph.AtlasBounds);
+			if (!glyph.HasGeometry)
+			{
+				SetError(std::format("Font metadata '{}' has malformed bounds for codepoint {}.", path.string(), unicode));
+				return nullptr;
+			}
+		}
+		font->myGlyphs[glyph.Unicode] = glyph;
+	}
+	if (font->myGlyphs.empty() || !font->FindGlyph('?'))
+	{
+		SetError(std::format("Font metadata '{}' contains no usable glyphs or '?' fallback.", path.string()));
+		return nullptr;
+	}
+	return font;
 }
 
 std::shared_ptr<Texture> AssetRegistry::LoadTexture(const std::filesystem::path& path)
@@ -405,3 +532,5 @@ template AssetRegistry::Entry<MaterialInterface>* AssetRegistry::FindEntry(
 	const AssetId&, EntryMap<MaterialInterface>&, const AliasMap&, std::string_view);
 template AssetRegistry::Entry<Texture>* AssetRegistry::FindEntry(
 	const AssetId&, EntryMap<Texture>&, const AliasMap&, std::string_view);
+template AssetRegistry::Entry<Font>* AssetRegistry::FindEntry(
+	const AssetId&, EntryMap<Font>&, const AliasMap&, std::string_view);

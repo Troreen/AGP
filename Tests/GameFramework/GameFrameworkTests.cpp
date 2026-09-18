@@ -6,6 +6,9 @@
 #include "GameFramework/AssetHandling/AssetRegistry.h"
 #include "GameFramework/UnrealSceneImporter/UnrealSceneImporter.h"
 #include "GraphicsEngine/Objects/Mesh.h"
+#include "GraphicsEngine/Objects/Font.h"
+#include "GraphicsEngine/TextWidget.h"
+#include "GameFramework/Runtime/GameApplication.h"
 #include <algorithm>
 #include <cmath>
 #include <filesystem>
@@ -13,6 +16,32 @@
 #include <iostream>
 #include <limits>
 #include <type_traits>
+
+struct FontTestAccess
+{
+	static std::shared_ptr<Font> Make()
+	{
+		auto font = std::make_shared<Font>();
+		font->myLineHeight = 1.25f;
+		font->myAscender = 0.0f;
+		font->myAtlasWidth = 100;
+		font->myAtlasHeight = 100;
+		Font::Glyph visible;
+		visible.Advance = 0.5f;
+		visible.HasGeometry = true;
+		visible.PlaneBounds = {0.0f, 0.0f, 1.0f, 0.5f};
+		visible.AtlasBounds = {0.0f, 0.0f, 10.0f, 10.0f};
+		visible.Unicode = 'A';
+		font->myGlyphs['A'] = visible;
+		visible.Unicode = '?';
+		font->myGlyphs['?'] = visible;
+		Font::Glyph space;
+		space.Unicode = ' ';
+		space.Advance = 0.5f;
+		font->myGlyphs[' '] = space;
+		return font;
+	}
+};
 
 void Check(bool value, const char* message)
 {
@@ -490,6 +519,63 @@ void DebugCameraActions()
 	Check(world.GetActiveCamera() && world.GetActiveCamera()->GetOwner()->GetName() == "__DebugCamera", "Destroyed previous camera displaced debug camera");
 }
 
+void TextGeometryAndNotificationTiming()
+{
+	auto font = FontTestAccess::Make();
+	TextWidget text;
+	text.SetFont(font);
+	text.SetPixelHeight(20.0f);
+	text.SetText("A");
+	Check(text.RebuildGeometry() && text.GetVertices().size() == 4 && text.GetIndices().size() == 6,
+	      "One text glyph did not create four vertices and six indices");
+	text.SetText(" A");
+	Check(text.RebuildGeometry() && text.GetGlyphCount() == 1 && text.GetVertices().front().Position.x == 10.0f,
+	      "Space did not advance without geometry");
+	text.SetText("A\nA");
+	Check(text.RebuildGeometry() && text.GetGlyphCount() == 2 && text.GetVertices()[4].Position.y == 25.0f,
+	      "Newline did not move the glyph cursor");
+	text.SetText("\xCE\xA9");
+	Check(text.RebuildGeometry() && text.GetGlyphCount() == 1 && text.GetVertices().size() == 4,
+	      "Missing Unicode glyph did not use the '?' fallback");
+	text.SetText("");
+	Check(text.RebuildGeometry() && text.GetVertices().empty() && text.GetIndices().empty(), "Empty text produced a draw");
+
+	RenderPassNotificationTimer timer;
+	timer.Restart();
+	Check(timer.GetOpacity() == 1.0f, "Notification was not opaque at 0 seconds");
+	timer.Update(1.5f);
+	Check(timer.GetOpacity() == 1.0f, "Notification was not opaque at 1.5 seconds");
+	timer.Update(0.25f);
+	Check(std::abs(timer.GetOpacity() - 0.5f) < 0.0001f, "Notification fade was wrong at 1.75 seconds");
+	timer.Restart();
+	Check(timer.GetRemaining() == 2.0f && timer.GetOpacity() == 1.0f, "Notification reset did not restart its timer");
+	timer.Update(2.0f);
+	Check(!timer.IsVisible() && timer.GetOpacity() == 0.0f, "Notification remained visible at 2 seconds");
+}
+
+void FontAssetDiagnostics()
+{
+	const auto root = std::filesystem::temp_directory_path() / "agp_font_asset_tests";
+	std::filesystem::create_directories(root);
+	{
+		std::ofstream malformed(root / "Malformed.font.json");
+		malformed << R"({"atlasFile":"Missing.dds","atlas":{},"metrics":{},"glyphs":[]})";
+	}
+	AssetRegistry& assets = AssetRegistry::Get();
+	assets.Initialize(root);
+	Check(!assets.ResolveFont(AssetId{"Malformed.font.json"}) && assets.GetLastError().find("metrics") != std::string::npos,
+	      "Font loading accepted missing metrics without useful diagnostics");
+	{
+		std::ofstream missingAtlas(root / "MissingAtlas.font.json");
+		missingAtlas << R"({"atlasFile":"Missing.dds","atlas":{"distanceRange":4,"width":32,"height":32},"metrics":{"lineHeight":1,"ascender":-0.8,"descender":0.2},"glyphs":[{"unicode":63,"advance":0.5}]})";
+	}
+	assets.Initialize(root);
+	Check(!assets.ResolveFont(AssetId{"MissingAtlas.font.json"}) && assets.GetLastError().find("requires atlas") != std::string::npos,
+	      "Font loading accepted a missing atlas without useful diagnostics");
+	assets.Clear();
+	std::filesystem::remove_all(root);
+}
+
 int main()
 {
 	try
@@ -504,6 +590,8 @@ int main()
 		InputSystemSemantics();
 		UnrealImportPipeline();
 		DebugCameraActions();
+		TextGeometryAndNotificationTiming();
+		FontAssetDiagnostics();
 		std::cout << "PASS: MVP ownership, lifecycle, runtime mutations, timing/input, registered scenes/properties and camera cleanup\n";
 	}
 	catch (const std::exception& error)

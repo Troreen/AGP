@@ -131,6 +131,9 @@
     <ClInclude Include="Objects\GBuffer.h">
       <Filter>Objects</Filter>
     </ClInclude>
+	<ClInclude Include="Objects\Font.h">
+	  <Filter>Objects</Filter>
+	</ClInclude>
     <ClInclude Include="Objects\Mesh.h">
       <Filter>Objects</Filter>
     </ClInclude>
@@ -163,6 +166,7 @@
     </ClInclude>
     <ClInclude Include="RenderCulling.h" />
     <ClInclude Include="RenderItemRouting.h" />
+	<ClInclude Include="TextWidget.h" />
     <ClInclude Include="TemporaryShaders\BRDF_LUT_PS.h">
       <Filter>TemporaryShaders</Filter>
     </ClInclude>
@@ -227,6 +231,7 @@
     <ClCompile Include="Objects\Buffer.cpp">
       <Filter>Objects</Filter>
     </ClCompile>
+	<ClCompile Include="TextWidget.cpp" />
     <ClCompile Include="Objects\Camera.cpp">
       <Filter>Objects</Filter>
     </ClCompile>
@@ -325,6 +330,12 @@
     <FxCompile Include="Shaders\Internal\ScreenSpaceAO_PS.hlsl">
       <Filter>Shaders\Internal</Filter>
     </FxCompile>
+	<FxCompile Include="Shaders\Internal\TextOverlay_VS.hlsl">
+	  <Filter>Shaders\Internal</Filter>
+	</FxCompile>
+	<FxCompile Include="Shaders\Internal\TextOverlay_PS.hlsl">
+	  <Filter>Shaders\Internal</Filter>
+	</FxCompile>
     <FxCompile Include="Shaders\Material\GBuffer_PS.hlsl">
       <Filter>Shaders\Material</Filter>
     </FxCompile>

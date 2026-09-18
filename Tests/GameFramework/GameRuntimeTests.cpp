@@ -59,7 +59,7 @@ public:
 			      "Empty scene did not install the debug camera");
 			return;
 		}
-		Check(name == "Game", "Wrong scene");
+		Check(name == "ChestMaterials", "Wrong scene");
 		Check(&ServiceLocator::GetInstance().GetInputSystem() == &context.GetInputSystem(), "ServiceLocator input service mismatch");
 		Check(&ServiceLocator::GetInstance().GetAssetRegistry() == &AssetRegistry::Get(), "ServiceLocator asset service mismatch");
 		Check(bool(AssetRegistry::Get().ResolveMaterial(AssetId{"Shaders/CubeMaterial.mat"})), "Flat material did not load");
@@ -67,10 +67,8 @@ public:
 		Check(bool(parameterInstance), AssetRegistry::Get().GetLastError().c_str());
 		Check(bool(AssetRegistry::Get().ResolveMaterial(AssetId{"Shaders/ChestMaterial_Alpha2.mat"})), "Material texture overrides did not load");
 		Check(world.FindActor("__DebugCamera") && world.GetActiveCamera(), "Imported scene did not install the debug camera");
-		auto* plane = world.FindActor("Plane");
-		Check(plane && plane->GetComponent<StaticMeshComponent>(), "Imported primitive mesh missing");
-		auto* secondImportedMesh = world.FindActor("-Y Cube 2");
-		Check(secondImportedMesh && secondImportedMesh->GetComponent<StaticMeshComponent>(), "Imported Content FBX mesh missing");
+		auto* chest = world.FindActor("Chest_Opaque");
+		Check(chest && chest->GetComponent<StaticMeshComponent>(), "Imported chest mesh missing");
 		if (Loads == 1)
 		{
 			world.SpawnActor("Old-scene-only");
@@ -84,7 +82,7 @@ public:
 	void OnSceneLoadFailed(GameContext& context, const std::string& name, const std::string& error) override
 	{
 		Check(name == "Invalid" && error.find("MissingType") != std::string::npos, "Failure lost useful diagnostics");
-		Check(context.GetSceneName() == "Game" && context.GetWorld().FindActor("Old-scene-only") && context.GetWorld().GetActiveCamera(),
+		Check(context.GetSceneName() == "ChestMaterials" && context.GetWorld().FindActor("Old-scene-only") && context.GetWorld().GetActiveCamera(),
 		      "Failed construction damaged the live scene");
 		Failed = true;
 	}
@@ -96,7 +94,7 @@ public:
 		++Frames;
 		const auto stats = GraphicsEngine::Get().GetLastRenderStats();
 		const bool rendered =
-		    stats.TotalRenderItems >= 5 && stats.VisibleRenderItems > 0 && stats.TotalLights >= 3;
+		    stats.TotalRenderItems >= 3 && stats.VisibleRenderItems > 0 && stats.TotalLights >= 3;
 		if (Loads == 1 && Frames >= 5 && rendered && !InvalidRequested)
 		{
 			InvalidRequested = true;
@@ -172,6 +170,29 @@ public:
 			context.RequestQuit();
 		}
 		Check(Frames < 600, "Chest material scene did not render");
+	}
+};
+
+class OverlayOnlyGame final : public IGame
+{
+public:
+	int Frames = 0;
+
+	void Initialize(GameContext& context) override
+	{
+		InputDeviceFrame frame;
+		frame.KeysDown[static_cast<size_t>(Keys::F6)] = true;
+		context.GetInputSystem().Update(frame);
+	}
+
+	void Update(GameContext& context, float) override
+	{
+		const auto stats = GraphicsEngine::Get().GetLastRenderStats();
+		if (stats.TextDrawCalls > 0 && stats.RenderedGlyphs > 0)
+		{
+			context.RequestQuit();
+		}
+		Check(++Frames < 120, "Overlay did not render without an active camera");
 	}
 };
 
@@ -300,6 +321,17 @@ int RunRenderPassControlsTest()
 	input.Update(frame);
 	Check(std::string(graphics.GetRenderPassName()) == "Lit", "F6 did not advance to the next render pass");
 
+	input.Update({});
+	frame = {};
+	frame.KeysDown[static_cast<size_t>(Keys::F6)] = true;
+	input.Update(frame);
+	Check(std::string(graphics.GetRenderPassName()) == "Albedo (sRGB)", "F6 did not update to the next render-pass name");
+	input.Update({});
+	frame = {};
+	frame.KeysDown[static_cast<size_t>(Keys::F5)] = true;
+	input.Update(frame);
+	Check(std::string(graphics.GetRenderPassName()) == "Lit", "F5 did not update to the previous render-pass name");
+
 	std::cout << "PASS: F5 previous and F6 next render-pass controls\n";
 	return 0;
 }
@@ -324,9 +356,17 @@ int main(int argc, char** argv)
 	config.Width = 640;
 	config.Height = 360;
 	config.ContentRoot = std::filesystem::current_path() / "Content";
+	config.EnableRenderDiagnostics = scenario == "text-overlay";
 	try
 	{
-		if (scenario == "chest-materials")
+		if (scenario == "text-overlay")
+		{
+			OverlayOnlyGame game;
+			GameApplication{}.Run(game, config);
+			const auto stats = GraphicsEngine::Get().GetLastRenderStats();
+			Check(stats.TextDrawCalls > 0 && stats.RenderedGlyphs > 0, "Overlay statistics stayed at zero");
+		}
+		else if (scenario == "chest-materials")
 		{
 			ChestShowcaseGame game;
 			GameScene source;

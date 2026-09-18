@@ -8,6 +8,8 @@ class MaterialInterface;
 class Mesh;
 class MeshComponentBase;
 class Texture;
+class Font;
+class GameApplication;
 struct MaterialInstanceData;
 
 struct AssetId
@@ -48,6 +50,17 @@ private:
 	std::shared_ptr<Texture> myResource;
 	friend class AssetRegistry;
 	friend MaterialAsset CreateMaterialInstance(AssetRegistry&, const MaterialInstanceData&);
+};
+
+class FontAsset
+{
+public:
+	explicit operator bool() const { return bool(myResource); }
+
+private:
+	std::shared_ptr<Font> myResource;
+	friend class AssetRegistry;
+	friend class GameApplication;
 };
 
 MaterialAsset CreateMaterialInstance(AssetRegistry& assets, const MaterialInstanceData& data);

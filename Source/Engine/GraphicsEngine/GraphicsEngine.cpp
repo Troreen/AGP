@@ -59,6 +59,16 @@ namespace
 		constexpr unsigned DeferredLighting = 0;
 	}
 
+	struct TextOverlayBufferData
+	{
+		CU::Vector2f ClientSize;
+		CU::Vector2f PixelOrigin;
+		float Opacity = 1.0f;
+		float DistanceRange = 0.0f;
+		CU::Vector2f AtlasSize;
+	};
+	static_assert(sizeof(TextOverlayBufferData) % 16 == 0);
+
 	double ElapsedMilliseconds(Clock::time_point start)
 	{
 		return std::chrono::duration<double, std::milli>(Clock::now() - start).count();
@@ -437,6 +447,7 @@ void GraphicsEngine::RenderSceneSnapshot::Clear()
 	OpaqueRenderItems.clear();
 	BlendedRenderItems.clear();
 	RelevantLights.clear();
+	ScreenTextItems.clear();
 	Stats = {};
 }
 
@@ -470,7 +481,7 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path&
 		return false;
 	}
 
-	if (!CreateGBufferResources() || !CreateDeferredPipelineStates())
+	if (!CreateGBufferResources() || !CreateDeferredPipelineStates() || !CreateTextPipelineState())
 	{
 		return false;
 	}
@@ -498,6 +509,7 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path&
 	CreateConstantBuffer<LightBuffer>(ConstantBuffer::LightBuffer, "LightBuffer");
 	CreateConstantBuffer(ConstantBuffer::PointShadowBuffer, "PointShadowBuffer", sizeof(PointShadowBufferData));
 	CreateConstantBuffer(ConstantBuffer::RenderPassDebugBuffer, "RenderPassDebugBuffer", sizeof(std::array<uint32_t, 4>));
+	CreateConstantBuffer<TextOverlayBufferData>(ConstantBuffer::TextOverlayBuffer, "TextOverlayBuffer");
 
 	mySamplers.reserve(RenderConfig::SamplerCount);
 	{ // Trilinear Wrap
@@ -651,7 +663,9 @@ void GraphicsEngine::RenderSnapshot(GraphicsCommandList& inoutCommandList, const
 		inoutCommandList.ClearRenderTarget(myBackBuffer);
 		inoutCommandList.ClearDepthStencil(myDepthBuffer);
 		inoutCommandList.SetRenderTarget(&myBackBuffer, &myDepthBuffer);
-		StoreLastRenderStats(aSnapshot.Stats);
+		RenderStats frameStats = aSnapshot.Stats;
+		RenderScreenText(inoutCommandList, aSnapshot, frameStats);
+		StoreLastRenderStats(frameStats);
 		return;
 	}
 
@@ -680,6 +694,7 @@ void GraphicsEngine::RenderSnapshot(GraphicsCommandList& inoutCommandList, const
 	RenderDeferredLighting(inoutCommandList, lightBuffer, gbufferTargets);
 	RenderDebugView(inoutCommandList, lightBuffer, gbufferTargets);
 	RenderTransparentGeometry(inoutCommandList, aSnapshot, lightBuffer);
+	RenderScreenText(inoutCommandList, aSnapshot, frameStats);
 	frameStats.SceneRecordingMilliseconds = ElapsedMilliseconds(sceneStart);
 	StoreLastRenderStats(frameStats);
 }
@@ -1065,6 +1080,53 @@ void GraphicsEngine::RenderTransparentGeometry(GraphicsCommandList& inoutCommand
 	}
 }
 
+void GraphicsEngine::RenderScreenText(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot,
+	                                  RenderStats& frameStats)
+{
+	if (aSnapshot.ScreenTextItems.empty()) return;
+	const CU::Vector2u clientSize = GetClientSize();
+	if (clientSize.x == 0 || clientSize.y == 0) return;
+
+	inoutCommandList.BeginEvent("Screen Text");
+	inoutCommandList.SetRenderTarget(&myBackBuffer, nullptr);
+	inoutCommandList.SetPipelineState(&myTextOverlayPSO);
+	const Sampler* textSampler = mySamplers.size() > 2 ? &mySamplers[2] : nullptr;
+	if (textSampler) inoutCommandList.SetShaderSamplers(&textSampler, 1, 0, PipeLineStage_PixelShader);
+
+	for (const std::shared_ptr<TextWidget>& text : aSnapshot.ScreenTextItems)
+	{
+		if (!text || !text->RebuildGeometry() || text->myIndices.empty() || !text->myFont || !text->myFont->GetAtlas()) continue;
+		if (text->myGpuDirty)
+		{
+			if (!myRHI.CreateVertexBuffer("TextWidget", text->myVertices, text->myVertexBuffer) ||
+			    !myRHI.CreateIndexBuffer("TextWidget", text->myIndices, text->myIndexBuffer))
+			{
+				continue;
+			}
+			text->myGpuDirty = false;
+		}
+
+		TextOverlayBufferData buffer;
+		buffer.ClientSize = {static_cast<float>(clientSize.x), static_cast<float>(clientSize.y)};
+		buffer.PixelOrigin = text->GetPosition();
+		buffer.Opacity = text->GetOpacity();
+		buffer.DistanceRange = text->myFont->GetDistanceRange();
+		buffer.AtlasSize = {static_cast<float>(text->myFont->GetAtlasWidth()), static_cast<float>(text->myFont->GetAtlasHeight())};
+		UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::TextOverlayBuffer, buffer, ConstantBufferSlot::PassSpecific,
+		                           PipeLineStage_VertexShader | PipeLineStage_PixelShader);
+		inoutCommandList.SetVertexBuffer(&text->myVertexBuffer);
+		inoutCommandList.SetIndexBuffer(&text->myIndexBuffer);
+		const Texture* atlas = text->myFont->GetAtlas().get();
+		inoutCommandList.SetShaderResources(&atlas, 1, 0, PipeLineStage_PixelShader);
+		inoutCommandList.DrawIndexed(static_cast<unsigned>(text->myIndices.size()), 0);
+		++frameStats.TextDrawCalls;
+		frameStats.RenderedGlyphs += text->GetGlyphCount();
+	}
+	const Texture* nullAtlas = nullptr;
+	inoutCommandList.SetShaderResources(&nullAtlas, 1, 0, PipeLineStage_PixelShader);
+	inoutCommandList.EndEvent();
+}
+
 void GraphicsEngine::Present() const
 {
 	myRHI.Present();
@@ -1340,6 +1402,28 @@ bool GraphicsEngine::CreateDeferredPipelineStates()
 	       createPipeline("DeferredCompositePSO", "DeferredComposite_PS.hlsl", BlendMode::Opaque, myDeferredCompositePSO) &&
 	       createPipeline("ScreenSpaceAOPSO", "ScreenSpaceAO_PS.hlsl", BlendMode::Opaque, myScreenSpaceAOPSO) &&
 	       createPipeline("RenderPassDebugPSO", "RenderPassDebug_PS.hlsl", BlendMode::Opaque, myRenderPassDebugPSO);
+}
+
+bool GraphicsEngine::CreateTextPipelineState()
+{
+	Shader vertexShader;
+	Shader pixelShader;
+	if (!myRHI.CompileShader(ShaderType::VertexShader, myShaderRoot / "Internal" / "TextOverlay_VS.hlsl", nullptr, true, vertexShader) ||
+	    !myRHI.CompileShader(ShaderType::PixelShader, myShaderRoot / "Internal" / "TextOverlay_PS.hlsl", nullptr, true, pixelShader))
+	{
+		return false;
+	}
+	PipelineStateDescription description;
+	description.Name = "TextOverlayPSO";
+	description.VertexShader.ByteCode = vertexShader.GetDataPtr();
+	description.VertexShader.ByteCodeSize = vertexShader.GetDataSize();
+	description.PixelShader.ByteCode = pixelShader.GetDataPtr();
+	description.PixelShader.ByteCodeSize = pixelShader.GetDataSize();
+	description.InputLayoutElements = Vertex::Description;
+	description.Topology = Topology::TriangleList;
+	description.BlendMode = BlendMode::Alpha;
+	description.RasterizerState.CullMode = RasterizerCullMode::None;
+	return myRHI.CreatePipelineStateObject(description, myTextOverlayPSO);
 }
 
 // --- Image-based lighting resources ---

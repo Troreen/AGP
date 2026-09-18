@@ -13,6 +13,7 @@
 class MaterialInterface;
 class Mesh;
 class Texture;
+class Font;
 
 class AssetRegistry
 {
@@ -30,10 +31,12 @@ public:
 	void RegisterMesh(const AssetId& id, std::shared_ptr<Mesh> mesh);
 	void RegisterMaterial(const AssetId& id, std::shared_ptr<MaterialInterface> material);
 	void RegisterTexture(const AssetId& id, std::shared_ptr<Texture> texture);
+	void RegisterFont(const AssetId& id, std::shared_ptr<Font> font);
 
 	MeshAsset ResolveMesh(const AssetId& id);
 	MaterialAsset ResolveMaterial(const AssetId& id);
 	TextureAsset ResolveTexture(const AssetId& id);
+	FontAsset ResolveFont(const AssetId& id);
 
 	AssetId MakeAssetId(const std::filesystem::path& path) const;
 	static std::string NormalizeId(std::string_view value);
@@ -56,15 +59,18 @@ private:
 	Entry<T>* FindEntry(const AssetId& id, EntryMap<T>& entries, const AliasMap& aliases, std::string_view expectedExtension);
 	std::shared_ptr<MaterialInterface> LoadMaterial(const std::filesystem::path& path);
 	std::shared_ptr<Texture> LoadTexture(const std::filesystem::path& path);
+	std::shared_ptr<Font> LoadFont(const std::filesystem::path& path);
 	void SetError(std::string message);
 
 	std::filesystem::path myContentRoot;
 	EntryMap<Mesh> myMeshes;
 	EntryMap<MaterialInterface> myMaterials;
 	EntryMap<Texture> myTextures;
+	EntryMap<Font> myFonts;
 	AliasMap myMeshAliases;
 	AliasMap myMaterialAliases;
 	AliasMap myTextureAliases;
+	AliasMap myFontAliases;
 	MeshLoader myMeshLoader;
 	std::string myLastError;
 };
