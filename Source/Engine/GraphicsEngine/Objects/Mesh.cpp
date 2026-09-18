@@ -1,6 +1,7 @@
 #include "GraphicsEngine.pch.h"
 #include "Mesh.h"
 #include "Vertex.h"
+#include "ConstantBuffers/AnimationBuffer.h"
 
 #include <algorithm>
 #include <limits>
@@ -8,7 +9,7 @@
 
 bool Skeleton::IsValid() const
 {
-	return !Joints.empty() && Joints.size() <= 128;
+	return !Joints.empty() && Joints.size() <= AnimationBuffer::MaxJointCount;
 }
 
 bool Animation::IsValid() const

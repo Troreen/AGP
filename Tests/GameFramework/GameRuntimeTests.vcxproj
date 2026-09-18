@@ -17,15 +17,19 @@
     <IntDir>$(MSBuildThisFileDirectory)..\..\Intermediate\GameRuntimeTests\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup><SolutionDir>$(MSBuildThisFileDirectory)..\..\</SolutionDir></PropertyGroup>
+	<PropertyGroup>
+		<SoundEngineLibrary Condition="'$(Configuration)'=='Debug'">SoundEngine-FMod-d.lib</SoundEngineLibrary>
+		<SoundEngineLibrary Condition="'$(Configuration)'!='Debug'">SoundEngine-FMod.lib</SoundEngineLibrary>
+	</PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
       <LanguageStandard>stdcpp20</LanguageStandard><ExceptionHandling>Sync</ExceptionHandling>
       <WarningLevel>Level4</WarningLevel><PreprocessorDefinitions>FBXSDK_SHARED;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)Source\Engine;$(SolutionDir)Source;$(SolutionDir)Source\Utilities;$(SolutionDir)Source\Utilities\CommonUtilities;$(SolutionDir)Source\Application\Game;$(SolutionDir)Dependencies\TGAFBXImporter\source;$(SolutionDir)Dependencies\TGAFBXImporter\FBXSDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Source\Engine;$(SolutionDir)Source;$(SolutionDir)Source\Utilities;$(SolutionDir)Source\Utilities\CommonUtilities;$(SolutionDir)Source\Application\Game;$(SolutionDir)Dependencies\FMod\include;$(SolutionDir)Dependencies\TGAFBXImporter\source;$(SolutionDir)Dependencies\TGAFBXImporter\FBXSDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <Link><SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>$(SolutionDir)Lib\$(Configuration);$(SolutionDir)Dependencies\TGAFBXImporter\FBXSDK\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>GraphicsEngine.lib;libfbxsdk.lib;libxml2-md.lib;zlib-md.lib;d3d11.lib;dxguid.lib;dxgi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    <Link><SubSystem>Console</SubSystem><AdditionalOptions>/IGNORE:4099 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalLibraryDirectories>$(SolutionDir)Lib\$(Configuration);$(SolutionDir)Dependencies\TGAFBXImporter\FBXSDK\lib\$(Configuration);$(SolutionDir)Dependencies\FMod\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>GraphicsEngine.lib;$(SoundEngineLibrary);libfbxsdk.lib;libxml2-md.lib;zlib-md.lib;d3d11.lib;dxguid.lib;dxgi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup><ClCompile Include="GameRuntimeTests.cpp" /><ClCompile Include="CameraControlsTests.cpp" />
@@ -54,5 +58,6 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Target Name="CopyFbxRuntime" AfterTargets="Build">
     <Copy SourceFiles="$(SolutionDir)Bin\$(Configuration)\libfbxsdk.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+	<Copy SourceFiles="$(SolutionDir)Dependencies\.dlls\fmod.dll;$(SolutionDir)Dependencies\.dlls\fmodL.dll;$(SolutionDir)Dependencies\.dlls\fmodstudio.dll;$(SolutionDir)Dependencies\.dlls\fmodstudioL.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
   </Target>
 </Project>

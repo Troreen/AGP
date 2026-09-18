@@ -5,6 +5,9 @@ static const uint SHADOW_POISSON_SAMPLE_COUNT = 16;
 static const float SHADOW_MAP_TEXEL_SIZE = 1.0f / 2048.0f;
 static const float SHADOW_POISSON_FILTER_RADIUS = 2.0f * SHADOW_MAP_TEXEL_SIZE;
 static const float SHADOW_POISSON_SAMPLE_WEIGHT = 1.0f / 16.0f;
+static const float SHADOW_UP_VECTOR_PARALLEL_THRESHOLD = 0.95f;
+static const float POINT_SHADOW_NEAR_PLANE = 1.0f;
+static const float MIN_SHADOW_DISTANCE = 0.001f;
 
 float GetShadowDepthBias(Light aLight)
 {
@@ -20,7 +23,7 @@ float GetDirectionalShadowDepthBias(Light aLight, uint aCascadeIndex)
 float3 GetDirectionalShadowRight(Light aLight)
 {
     const float3 lightDirection = normalize(aLight.Direction);
-    const float3 upReference = abs(dot(lightDirection, float3(0.0f, 1.0f, 0.0f))) > 0.95f
+    const float3 upReference = abs(dot(lightDirection, float3(0.0f, 1.0f, 0.0f))) > SHADOW_UP_VECTOR_PARALLEL_THRESHOLD
         ? float3(0.0f, 0.0f, 1.0f)
         : float3(0.0f, 1.0f, 0.0f);
     return normalize(cross(upReference, lightDirection));
@@ -254,11 +257,11 @@ float CalculatePointShadow(Light aLight, float3 aWorldPosition)
     float shadow = 1.0f;
     const float3 toPixel = aWorldPosition - aLight.Position;
     const float distanceToPixel = length(toPixel);
-    if (aLight.NumCascades > 0 && distanceToPixel > 0.001f && distanceToPixel <= aLight.Radius)
+    if (aLight.NumCascades > 0 && distanceToPixel > MIN_SHADOW_DISTANCE && distanceToPixel <= aLight.Radius)
     {
         const float3 absToPixel = abs(toPixel);
         const float z = max(absToPixel.x, max(absToPixel.y, absToPixel.z));
-        const float nearPlane = 1.0f;
+        const float nearPlane = POINT_SHADOW_NEAR_PLANE;
         const float farPlane = aLight.Radius;
         const float range = farPlane / (farPlane - nearPlane);
         const float depth = saturate(((range * z) - (range * nearPlane)) / z - GetShadowDepthBias(aLight));

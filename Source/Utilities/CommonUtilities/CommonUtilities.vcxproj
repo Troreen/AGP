@@ -174,9 +174,9 @@
     <ClInclude Include="LooseQuadTree2D.hpp" />
     <ClInclude Include="Maths.hpp" />
     <ClInclude Include="Matrix.hpp" />
-    <ClInclude Include="NamespaceAlias.hpp" />
     <ClInclude Include="Matrix3x3.hpp" />
     <ClInclude Include="Matrix4x4.hpp" />
+    <ClInclude Include="NamespaceAlias.hpp" />
     <ClInclude Include="PathfindingTypes.hpp" />
     <ClInclude Include="Plane.hpp" />
     <ClInclude Include="PlaneVolume.hpp" />

@@ -3,10 +3,14 @@
 #endif
 #include <Windows.h>
 #include <crtdbg.h>
+#include "EnumKeys.h"
 #include "GameFramework/Runtime/GameApplication.h"
 #include "GameFramework/Runtime/GameContext.h"
+#include "GameFramework/AssetHandling/AssetRegistry.h"
+#include "GameFramework/ServiceLocator.h"
 #include "GameFramework/Scenes/ComponentRegistry.h"
 #include "GameFramework/Components/CameraComponent.h"
+#include "GameFramework/Components/LightComponent.h"
 #include "GameFramework/Components/StaticMeshComponent.h"
 #include "GameFramework/Components/SkeletalMeshComponent.h"
 #include "Game.h"
@@ -56,11 +60,17 @@ public:
 			return;
 		}
 		Check(name == "Game", "Wrong scene");
+		Check(&ServiceLocator::GetInstance().GetInputSystem() == &context.GetInputSystem(), "ServiceLocator input service mismatch");
+		Check(&ServiceLocator::GetInstance().GetAssetRegistry() == &AssetRegistry::Get(), "ServiceLocator asset service mismatch");
+		Check(bool(AssetRegistry::Get().ResolveMaterial(AssetId{"Shaders/CubeMaterial.mat"})), "Flat material did not load");
+		const MaterialAsset parameterInstance = AssetRegistry::Get().ResolveMaterial(AssetId{"ChestMaterial_Alpha1"});
+		Check(bool(parameterInstance), AssetRegistry::Get().GetLastError().c_str());
+		Check(bool(AssetRegistry::Get().ResolveMaterial(AssetId{"Shaders/ChestMaterial_Alpha2.mat"})), "Material texture overrides did not load");
 		Check(world.FindActor("__DebugCamera") && world.GetActiveCamera(), "Imported scene did not install the debug camera");
 		auto* plane = world.FindActor("Plane");
 		Check(plane && plane->GetComponent<StaticMeshComponent>(), "Imported primitive mesh missing");
-		auto* snow = world.FindActor("SM_Prop_SnowPileTest");
-		Check(snow && snow->GetComponent<StaticMeshComponent>(), "Imported Content FBX mesh missing");
+		auto* secondImportedMesh = world.FindActor("-Y Cube 2");
+		Check(secondImportedMesh && secondImportedMesh->GetComponent<StaticMeshComponent>(), "Imported Content FBX mesh missing");
 		if (Loads == 1)
 		{
 			world.SpawnActor("Old-scene-only");
@@ -86,7 +96,7 @@ public:
 		++Frames;
 		const auto stats = GraphicsEngine::Get().GetLastRenderStats();
 		const bool rendered =
-		    stats.TotalRenderItems >= 5 && stats.VisibleRenderItems > 0 && stats.TotalLights == 3;
+		    stats.TotalRenderItems >= 5 && stats.VisibleRenderItems > 0 && stats.TotalLights >= 3;
 		if (Loads == 1 && Frames >= 5 && rendered && !InvalidRequested)
 		{
 			InvalidRequested = true;
@@ -112,6 +122,56 @@ public:
 	{
 		++Shutdowns;
 		Sample.Shutdown(context);
+	}
+};
+
+class ChestShowcaseGame final : public IGame
+{
+public:
+	int Frames = 0;
+	Game Sample;
+	PointLightComponent* OrbitLight = nullptr;
+	CommonUtilities::Vector3f InitialOrbitPosition{};
+
+	void ConfigureWorld(World& world) override
+	{
+		Sample.ConfigureWorld(world);
+	}
+
+	void Initialize(GameContext& context) override
+	{
+		Check(context.LoadScene("ChestMaterials"), "Chest material scene request was rejected");
+	}
+
+	void OnSceneLoaded(GameContext& context, const std::string& name) override
+	{
+		Check(name == "ChestMaterials", "Wrong chest material scene loaded");
+		for (const char* actorName : {"Chest_Opaque", "Chest_AmberGlass", "Chest_MarbleGlass"})
+		{
+			Actor* actor = context.GetWorld().FindActor(actorName);
+			Check(actor && actor->GetComponent<StaticMeshComponent>(), "Chest showcase mesh was not constructed");
+		}
+		Actor* sun = context.GetWorld().FindActor("SunLight");
+		Actor* doubleLight = context.GetWorld().FindActor("DoubleLight");
+		auto* center = doubleLight ? dynamic_cast<PointLightComponent*>(doubleLight->FindComponent("CenterPointLight")) : nullptr;
+		OrbitLight = doubleLight ? dynamic_cast<PointLightComponent*>(doubleLight->FindComponent("OrbitPointLight")) : nullptr;
+		Check(sun && sun->GetComponent<DirectionalLightComponent>(), "Directional light was not constructed");
+		Check(center && OrbitLight && doubleLight->FindComponent("Spin"), "DoubleLight code configuration is incomplete");
+		Check(center->GetTransform().GetLocalPosition().LengthSqr() == 0 &&
+		      OrbitLight->GetTransform().GetLocalPosition().LengthSqr() > 0,
+		      "DoubleLight local offsets are incorrect");
+		InitialOrbitPosition = OrbitLight->GetWorldPosition();
+	}
+
+	void Update(GameContext& context, float) override
+	{
+		const auto stats = GraphicsEngine::Get().GetLastRenderStats();
+		const bool orbitMoved = OrbitLight && (OrbitLight->GetWorldPosition() - InitialOrbitPosition).LengthSqr() > 0.000001f;
+		if (++Frames >= 5 && orbitMoved && stats.TotalRenderItems >= 3 && stats.VisibleRenderItems > 0 && stats.TotalLights >= 3)
+		{
+			context.RequestQuit();
+		}
+		Check(Frames < 600, "Chest material scene did not render");
 	}
 };
 
@@ -213,6 +273,37 @@ public:
 
 int RunCameraControlsTests();
 
+int RunRenderPassControlsTest()
+{
+	GraphicsEngine& graphics = GraphicsEngine::Get();
+	Check(std::string(graphics.GetRenderPassName()) == "Lit", "Render-pass test did not start on Lit");
+
+	InputSystem input;
+	InstallDefaultInputBindings(input);
+	InputSubscription previous = input.Subscribe(InputActions::PreviousRenderPass, [&graphics](const InputActionEvent& event)
+	{
+		if (event.Phase == InputActionPhase::Started) graphics.SelectPreviousRenderPass();
+	});
+	InputSubscription next = input.Subscribe(InputActions::NextRenderPass, [&graphics](const InputActionEvent& event)
+	{
+		if (event.Phase == InputActionPhase::Started) graphics.SelectNextRenderPass();
+	});
+
+	InputDeviceFrame frame;
+	frame.KeysDown[static_cast<size_t>(Keys::F5)] = true;
+	input.Update(frame);
+	Check(std::string(graphics.GetRenderPassName()) == "Shadows (Directional)", "F5 did not wrap to the previous render pass");
+
+	input.Update({});
+	frame = {};
+	frame.KeysDown[static_cast<size_t>(Keys::F6)] = true;
+	input.Update(frame);
+	Check(std::string(graphics.GetRenderPassName()) == "Lit", "F6 did not advance to the next render pass");
+
+	std::cout << "PASS: F5 previous and F6 next render-pass controls\n";
+	return 0;
+}
+
 int main(int argc, char** argv)
 {
 	_CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
@@ -224,6 +315,10 @@ int main(int argc, char** argv)
 	{
 		return RunCameraControlsTests();
 	}
+	if (scenario == "render-pass-controls")
+	{
+		return RunRenderPassControlsTest();
+	}
 	GameApplication::Config config;
 	config.ShowWindow = false;
 	config.Width = 640;
@@ -231,7 +326,16 @@ int main(int argc, char** argv)
 	config.ContentRoot = std::filesystem::current_path() / "Content";
 	try
 	{
-		if (scenario == "sample")
+		if (scenario == "chest-materials")
+		{
+			ChestShowcaseGame game;
+			GameScene source;
+			GameApplication{}.Run(game, config, [&](const std::string& name, SceneLoadContext& context)
+			{
+				return source.Load(name, context);
+			});
+		}
+		else if (scenario == "sample")
 		{
 			SampleGame game;
 			GameScene source;

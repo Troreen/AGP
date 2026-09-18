@@ -1,18 +1,20 @@
 #include "GameScene.h"
 #include "GameLog.h"
+#include "GameFramework/AssetHandling/AssetRegistry.h"
 #include "GameFramework/UnrealSceneImporter/UnrealSceneImporter.h"
-#include "GraphicsEngine/GraphicsEngine.h"
-#include "GraphicsEngine/Materials/Material.h"
-#include "GraphicsEngine/Objects/Mesh.h"
-#include <algorithm>
+
 #include <sstream>
 #include <stdexcept>
 #include <type_traits>
 
 namespace
 {
-	constexpr const char* GameSceneName = "Game";
-	const std::filesystem::path GameSceneFile = "ExportedScenes/TestExportMap_Level.json";
+	std::filesystem::path GetSceneFile(const std::string& name)
+	{
+		if (name == "Game") return "ExportedScenes/TestExportMap_Level.json";
+		if (name == "ChestMaterials") return "ExportedScenes/ChestMaterials_Level.json";
+		return {};
+	}
 
 	std::string FormatDiagnostics(const char* heading, const std::vector<ImportDiagnostic>& diagnostics)
 	{
@@ -28,7 +30,8 @@ namespace
 
 SceneData GameScene::Load(const std::string& name, SceneLoadContext& context)
 {
-	if (name != GameSceneName)
+	const std::filesystem::path sceneFile = GetSceneFile(name);
+	if (sceneFile.empty())
 	{
 		throw std::runtime_error("Unknown Game scene: " + name);
 	}
@@ -36,10 +39,16 @@ SceneData GameScene::Load(const std::string& name, SceneLoadContext& context)
 	{
 		myContentRoot = context.ContentRoot;
 		myMeshLibrary.Initialize(myContentRoot);
+		context.Assets.SetMeshLoader([this](const std::filesystem::path& path)
+		{
+			return myMeshLibrary.LoadMesh(path);
+		});
+		context.Assets.RegisterMesh(AssetId{"/Engine/BasicShapes/Plane.Plane"}, myMeshLibrary.GetMesh("Floor"));
+		context.Assets.RegisterMesh(AssetId{"/Engine/BasicShapes/Cube.Cube"}, myMeshLibrary.GetMesh("Cube"));
 		myInitialized = true;
 	}
 
-	const UnrealImportResult imported = UnrealSceneImporter{}.ImportScene(myContentRoot / GameSceneFile);
+	const UnrealImportResult imported = UnrealSceneImporter{}.ImportScene(myContentRoot / sceneFile);
 	if (!imported)
 	{
 		throw std::runtime_error(FormatDiagnostics("Scene import failed:", imported.Diagnostics));
@@ -47,74 +56,44 @@ SceneData GameScene::Load(const std::string& name, SceneLoadContext& context)
 
 	SceneData scene = std::move(*imported.Data);
 	PrepareAssets(scene, context);
-	GAMELOG(Log, "Loaded scene '{}' from '{}' ({} actors).", name, GameSceneFile.string(), scene.Actors.size());
+	GAMELOG(Log, "Loaded scene '{}' from '{}' ({} actors).", name, sceneFile.string(), scene.Actors.size());
 	return scene;
 }
 
 void GameScene::PrepareAssets(SceneData& scene, SceneLoadContext& context)
 {
-	const std::shared_ptr<MaterialInterface> material = GetMaterial(myContentRoot / "Shaders/CubeMaterial.mat");
-	if (!material)
+	const AssetId fallbackMaterial{"Shaders/CubeMaterial.mat"};
+	if (!context.Assets.ResolveMaterial(fallbackMaterial))
 	{
-		throw std::runtime_error("Could not create the fallback material used by imported scene assets");
+		throw std::runtime_error("Could not create the fallback material used by imported scene assets: " +
+		                         context.Assets.GetLastError());
 	}
-	const AssetId materialId{"ImportedSceneMaterial"};
-	context.Assets.BindMaterial(materialId, material);
 
 	for (ActorRecord& actor : scene.Actors)
 	{
-		std::erase_if(actor.Components, [&](ComponentRecord& componentRecord)
+		for (ComponentRecord& componentRecord : actor.Components)
 		{
-			return std::visit([&](auto& componentData)
+			std::visit([&](auto& componentData)
 			{
 				using ComponentType = std::decay_t<decltype(componentData)>;
-				if constexpr (!std::is_same_v<ComponentType, StaticMeshData> && !std::is_same_v<ComponentType, SkeletalMeshData>)
+				if constexpr (std::is_same_v<ComponentType, StaticMeshData> || std::is_same_v<ComponentType, SkeletalMeshData>)
 				{
-					return false;
-				}
-				else
-				{
-					std::shared_ptr<Mesh> mesh = myMeshLibrary.LoadSceneMesh(componentData.MeshName, componentData.ContentPath);
-					if (!mesh)
-					{
-						GAMELOG(Warning, "Skipping unavailable imported mesh '{}' ({}) on actor '{}'.",
-						        componentData.MeshName, componentData.ContentPath, actor.Name);
-						return true;
-					}
-					context.Assets.BindMesh(componentData.Mesh, mesh);
-					componentData.Materials.assign(mesh->GetNumMaterialSlots(), MaterialInstanceData{});
+					// Preserve local registry-backed parents. Older exports reference Unreal
+					// masters that are not shipped, so only those records use the fallback.
 					for (size_t materialSlot = 0; materialSlot < componentData.Materials.size(); ++materialSlot)
 					{
 						MaterialInstanceData& materialData = componentData.Materials[materialSlot];
+						const AssetId parent = materialData.Parent.Value.empty() ? AssetId{materialData.Name} : materialData.Parent;
+						if (context.Assets.ResolveMaterial(parent))
+						{
+							continue;
+						}
 						materialData.Name = componentData.MeshName + " Material " + std::to_string(materialSlot);
-						materialData.Parent = materialId;
+						materialData.Parent = fallbackMaterial;
+						materialData.Parameters.clear();
 					}
-					return false;
 				}
 			}, componentRecord);
-		});
+		}
 	}
-}
-
-std::shared_ptr<MaterialInterface> GameScene::GetMaterial(const std::filesystem::path& file)
-{
-	const std::string key = file.lexically_normal().string();
-	if (const auto materialIt = myMaterialCache.find(key); materialIt != myMaterialCache.end())
-	{
-		return materialIt->second;
-	}
-	MaterialDescription description;
-	if (!LoadMaterialDescription(file, description))
-	{
-		GAMELOG(Warning, "Could not load material description '{}'.", file.string());
-		return nullptr;
-	}
-	std::shared_ptr<Material> material = std::make_shared<Material>();
-	if (!GraphicsEngine::Get().CreateMaterial(description, *material))
-	{
-		GAMELOG(Warning, "Could not initialize material '{}' from '{}' using shader include '{}'.",
-		        description.Name, file.string(), description.MaterialShaderCode.string());
-		return nullptr;
-	}
-	return myMaterialCache.emplace(key, material).first->second;
 }

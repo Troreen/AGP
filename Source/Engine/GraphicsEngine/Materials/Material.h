@@ -25,8 +25,8 @@ struct MaterialDescription
 bool LoadMaterialDescription(const std::filesystem::path& aPath, MaterialDescription& outDescription);
 
 #pragma warning(push)
-#pragma warning(disable : 4324)
-
+// Material parameter storage is deliberately 16-byte aligned for GPU uploads.
+#pragma warning(disable: 4324)
 class Material : public MaterialInterface
 {
 	friend class GraphicsEngine;
@@ -84,18 +84,18 @@ public:
 
 	unsigned GetTextureSlotByName(const std::string& aName) const override;
 
-	bool SetTexture(const std::string& aName, const std::shared_ptr<TextureAsset>& aTexture) override;
-	bool SetTexture(unsigned aSlot, const std::shared_ptr<TextureAsset>& aTexture) override;
+	bool SetTexture(const std::string& aName, const std::shared_ptr<Texture>& aTexture) override;
+	bool SetTexture(unsigned aSlot, const std::shared_ptr<Texture>& aTexture) override;
 
-    std::shared_ptr<TextureAsset> GetTexture(const std::string& aName) const override;
-	std::shared_ptr<TextureAsset> GetTexture(unsigned aSlot) const override;
+	std::shared_ptr<Texture> GetTexture(const std::string& aName) const override;
+	std::shared_ptr<Texture> GetTexture(unsigned aSlot) const override;
 
 private:
 	alignas(16) uint8_t myData[MATERIAL_BUFFER_SIZE] = {};
 	std::vector<MaterialParameterInfo> myParameters;
 	std::unordered_map<std::string, unsigned> myParameterNameToIndex;
-    
-    std::shared_ptr<TextureAsset> myTextures[MAX_MATERIAL_TEXTURE_COUNT] = {};
+
+	std::shared_ptr<Texture> myTextures[MAX_MATERIAL_TEXTURE_COUNT] = {};
 	std::unordered_map<std::string, unsigned> myTextureSlotNameToIndex;
 
 	MaterialDescription myDescription;
@@ -180,18 +180,19 @@ public:
 		return SetRawParameterValue(*param, &aValue, sizeof(T));
 	}
 
-    bool SetTexture(const std::string& aName, const std::shared_ptr<TextureAsset>& aTexture) override;
-    bool SetTexture(unsigned aSlot, const std::shared_ptr<TextureAsset>& aTexture) override;
+	unsigned GetTextureSlotByName(const std::string& aName) const override;
 
-    std::shared_ptr<TextureAsset> GetTexture(const std::string& aName) const override;
-    std::shared_ptr<TextureAsset> GetTexture(unsigned aSlot) const override;
+	bool SetTexture(const std::string& aName, const std::shared_ptr<Texture>& aTexture) override;
+	bool SetTexture(unsigned aSlot, const std::shared_ptr<Texture>& aTexture) override;
 
+	std::shared_ptr<Texture> GetTexture(const std::string& aName) const override;
+	std::shared_ptr<Texture> GetTexture(unsigned aSlot) const override;
 
 private:
 	bool SetRawParameterValue(const MaterialParameterInfo& aParamInfo, const void* aPtr, size_t aPtrSize);
 
 	alignas(16) mutable uint8_t myData[MATERIAL_BUFFER_SIZE] = {};
-	std::optional<std::shared_ptr<TextureAsset>> myTextures[MAX_MATERIAL_TEXTURE_COUNT] = {};
+	std::optional<std::shared_ptr<Texture>> myTextures[MAX_MATERIAL_TEXTURE_COUNT] = {};
 
 	std::string myName;
 
@@ -201,5 +202,4 @@ private:
 
 	std::vector<bool> myOverridenParameters;
 };
-
 #pragma warning(pop)

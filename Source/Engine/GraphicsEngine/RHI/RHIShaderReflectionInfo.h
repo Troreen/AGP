@@ -2,6 +2,8 @@
 
 #include "RHIStructs.h"
 
+#include <array>
+
 struct RHIShaderReflectionInfo
 {
 	struct FunctionInfo
@@ -40,16 +42,18 @@ struct RHIShaderReflectionInfo
 	{
 		struct MemberInfo
 		{
+			static constexpr size_t MaxDefaultValueSize = 64;
+
 			std::string Name;
 			std::string Type;
-			size_t Size;
-			size_t Offset;
-			uint8_t Default[64]{};
+			size_t Size = 0;
+			size_t Offset = 0;
+			std::array<uint8_t, MaxDefaultValueSize> Default = {};
 		};
 
 		std::string Name;
-		size_t Size;
-		unsigned Slot;
+		size_t Size = 0;
+		unsigned Slot = 0;
 		std::vector<MemberInfo> Members;
 		std::unordered_map<std::string, size_t> MemberNameToIndex;
 	};

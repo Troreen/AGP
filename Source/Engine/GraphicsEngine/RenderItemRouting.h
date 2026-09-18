@@ -37,7 +37,7 @@ namespace RenderItemRouting
 			return std::isfinite(value) ? value : 0.0f;
 		};
 
-		// why stable_sort instead of sort: A stable sort preserves the previous ordering when two objects compare equally.
+		// Preserve submission order when objects compare equally to avoid frame-to-frame flicker.
 		std::stable_sort(opaque.begin(), opaque.end(), [&finiteDistance](size_t a, size_t b)
 		{
 			return finiteDistance(a) < finiteDistance(b);

@@ -21,6 +21,7 @@ public:
 	// Returns a shared asset, not an actor instance. Many mesh components can refer
 	// to it; transforms and animation playback belong to individual components.
 	std::shared_ptr<Mesh> GetMesh(std::string_view aName) const;
+	std::shared_ptr<Mesh> LoadMesh(const std::filesystem::path& aPath);
 	bool LoadFBXMesh(const std::filesystem::path& aPath);
 	std::shared_ptr<Mesh> LoadSceneMesh(std::string_view aName, std::string_view aContentPath);
 	bool LoadFBXAnimation(std::string_view aMeshName, std::string aAnimationName, const std::filesystem::path& aPath);

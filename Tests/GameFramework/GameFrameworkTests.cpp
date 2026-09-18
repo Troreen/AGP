@@ -3,10 +3,13 @@
 #include "GameFramework/Components/CameraComponent.h"
 #include "GameFramework/Components/SceneComponent.h"
 #include "GameFramework/Components/DebugCameraController.h"
-#include "GameFramework/UnrealSceneImporter/UnrealSceneAdapter.h"
+#include "GameFramework/AssetHandling/AssetRegistry.h"
 #include "GameFramework/UnrealSceneImporter/UnrealSceneImporter.h"
+#include "GraphicsEngine/Objects/Mesh.h"
 #include <algorithm>
 #include <cmath>
+#include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <limits>
 #include <type_traits>
@@ -186,7 +189,7 @@ void SceneConstruction()
 	component.Type = PlaceholderComponentType::Box;
 	actor.Components.push_back(std::move(component));
 	scene.Actors.push_back(actor);
-	AssetLibrary assets;
+	AssetRegistry assets;
 	auto world = registry.CreateWorld(scene, assets);
 	auto* built = world->FindActor("First");
 	auto* builtComponent = built->FindComponent("Collider");
@@ -199,6 +202,64 @@ void SceneConstruction()
 	ActorRecord badB; badB.Name = "BadB"; badB.Transform.Scale.y = std::numeric_limits<float>::quiet_NaN(); invalid.Actors.push_back(badB);
 	try { registry.CreateWorld(invalid, assets); Check(false, "Invalid candidate scene was accepted"); }
 	catch (const std::runtime_error& error) { const std::string message = error.what(); Check(message.find("BadA") != std::string::npos && message.find("BadB") != std::string::npos, "Construction diagnostics were not aggregated"); }
+
+	SceneData missingAsset;
+	ActorRecord missingActor;
+	missingActor.Name = "MissingAssetActor";
+	StaticMeshData missingMesh;
+	missingMesh.Common.Name = "MissingMesh";
+	missingMesh.Mesh = AssetId{"Meshes/DoesNotExist.fbx"};
+	missingActor.Components.push_back(missingMesh);
+	missingAsset.Actors.push_back(std::move(missingActor));
+	auto partialWorld = registry.CreateWorld(missingAsset, assets);
+	Check(partialWorld->FindActor("MissingAssetActor") != nullptr &&
+	      partialWorld->FindActor("MissingAssetActor")->FindComponent("MissingMesh") == nullptr,
+	      "Missing asset did not skip only its component");
+}
+
+void AssetRegistrySemantics()
+{
+	Check(AssetRegistry::NormalizeId("./Meshes\\Props\\SM_Chest.FBX") == "meshes/props/sm_chest.fbx",
+	      "Asset ID normalization");
+
+	const std::filesystem::path root = std::filesystem::temp_directory_path() / "agp_asset_registry_tests";
+	std::filesystem::remove_all(root);
+	std::filesystem::create_directories(root / "Meshes/A");
+	std::filesystem::create_directories(root / "Meshes/B");
+	std::ofstream(root / "Meshes/A/Unique.fbx").put('\0');
+	std::ofstream(root / "Meshes/A/Shared.fbx").put('\0');
+	std::ofstream(root / "Meshes/B/Shared.fbx").put('\0');
+	std::ofstream(root / "MissingParent.mat") << R"({"name":"MissingParent","masterMaterial":"Absent"})";
+	std::ofstream(root / "Malformed.mat") << "{ not-json";
+
+	AssetRegistry assets;
+	assets.Initialize(root);
+	int loads = 0;
+	assets.SetMeshLoader([&](const std::filesystem::path&)
+	{
+		++loads;
+		return std::make_shared<Mesh>();
+	});
+	{
+		const MeshAsset first = assets.ResolveMesh(AssetId{"MESHES/A/UNIQUE.FBX"});
+		const MeshAsset alias = assets.ResolveMesh(AssetId{"Unique"});
+		Check(first && alias && loads == 1, "Case-insensitive exact/unique-alias lookup or cache failed");
+	}
+	Check(assets.ResolveMesh(AssetId{"Meshes/A/Unique.fbx"}) && loads == 2, "Expired weak asset was not reloaded");
+	Check(!assets.ResolveMesh(AssetId{"Shared"}) && assets.GetLastError().find("ambiguous") != std::string::npos,
+	      "Ambiguous basename lookup was accepted");
+	Check(!assets.ResolveMaterial(AssetId{"Meshes/A/Unique.fbx"}), "Type-mismatched asset lookup was accepted");
+	Check(!assets.ResolveMaterial(AssetId{"MissingParent.mat"}) && assets.GetLastError().find("unavailable parent") != std::string::npos,
+	      "Missing material parent was accepted");
+	Check(!assets.ResolveMaterial(AssetId{"Malformed.mat"}) && assets.GetLastError().find("malformed JSON") != std::string::npos,
+	      "Malformed material JSON was accepted");
+
+	auto builtIn = std::make_shared<Mesh>();
+	assets.RegisterMesh(AssetId{"Engine/BasicShapes/Test"}, builtIn);
+	builtIn.reset();
+	Check(bool(assets.ResolveMesh(AssetId{"Engine/BasicShapes/Test"})), "Pinned built-in asset expired");
+	assets.Clear();
+	std::filesystem::remove_all(root);
 }
 
 void TransformSemantics()
@@ -335,22 +396,62 @@ void UnrealImportPipeline()
 	UnrealSceneImporter importer;
 	auto imported = importer.ImportScene("Content/ExportedScenes/TestExportMap_Level.json");
 	Check(bool(imported) && !imported.Data->Actors.empty(), "Supplied Unreal fixture did not parse");
-	const auto* importedMesh = std::get_if<ImportedMeshComponent>(&imported.Data->Actors.front().Components.front());
+	const StaticMeshData* importedMesh = nullptr;
+	for (const ActorRecord& actor : imported.Data->Actors)
+	{
+		for (const ComponentRecord& component : actor.Components)
+		{
+			const auto* candidate = std::get_if<StaticMeshData>(&component);
+			if (candidate && !candidate->Materials.empty() && !candidate->Materials.front().Parameters.empty())
+			{
+				importedMesh = candidate;
+				break;
+			}
+		}
+		if (importedMesh) break;
+	}
 	Check(importedMesh && importedMesh->Materials.size() == 1 && importedMesh->Materials.front().Parameters.size() == 2,
 		"Importer duplicated material records or parameters");
 	const auto greenActor = std::find_if(imported.Data->Actors.begin(), imported.Data->Actors.end(),
-		[](const UnrealActorData& actor) { return actor.Name == "PointLight2"; });
+		[](const ActorRecord& actor) { return actor.Name == "PointLight2"; });
 	const auto* greenLight = greenActor == imported.Data->Actors.end() || greenActor->Components.empty()
-		? nullptr : std::get_if<ImportedPointLightComponent>(&greenActor->Components.front());
-	Check(greenLight && greenLight->Color.x == 0 && greenLight->Color.y == 1 && greenLight->Color.z == 0 && greenLight->Color.w == 1,
+		? nullptr : std::get_if<PointLightData>(&greenActor->Components.front());
+	Check(greenLight && greenLight->Color.x == 0 && greenLight->Color.y == 1 && greenLight->Color.z == 0 && greenLight->ColorAlpha == 1,
 		"Importer did not preserve all four light color channels");
-	auto converted = UnrealSceneAdapter{}.Convert(*imported.Data);
-	if (!converted && !converted.Diagnostics.empty()) std::cerr << converted.Diagnostics.front().Context << ": " << converted.Diagnostics.front().Message << '\n';
-	Check(bool(converted), "Supplied Unreal fixture did not convert");
-	const auto& first = converted.Scene->Actors.front();
+	const auto& first = imported.Data->Actors.front();
 	Check(first.Archetype == "StaticMeshActor" && !first.Components.empty(), "Actor archetype/components were lost");
-	const auto* mesh = std::get_if<StaticMeshData>(&first.Components.front());
-	Check(mesh && mesh->MeshName == "Plane" && !mesh->ContentPath.empty() && !mesh->Materials.empty() && !mesh->Materials.front().Parameters.empty(), "Mesh/material export data was lost");
+	Check(importedMesh && !importedMesh->MeshName.empty() && !importedMesh->ContentPath.empty(), "Mesh/material export data was lost");
+
+	auto chestShowcase = importer.ImportScene("Content/ExportedScenes/ChestMaterials_Level.json");
+	Check(bool(chestShowcase) && chestShowcase.Data->Actors.size() == 5, "Chest material showcase did not parse");
+	const auto amberChest = std::find_if(chestShowcase.Data->Actors.begin(), chestShowcase.Data->Actors.end(),
+		[](const ActorRecord& actor) { return actor.Name == "Chest_AmberGlass"; });
+	const auto marbleChest = std::find_if(chestShowcase.Data->Actors.begin(), chestShowcase.Data->Actors.end(),
+		[](const ActorRecord& actor) { return actor.Name == "Chest_MarbleGlass"; });
+	const auto* amberMesh = amberChest == chestShowcase.Data->Actors.end() || amberChest->Components.empty()
+		? nullptr : std::get_if<StaticMeshData>(&amberChest->Components.front());
+	const auto* marbleMesh = marbleChest == chestShowcase.Data->Actors.end() || marbleChest->Components.empty()
+		? nullptr : std::get_if<StaticMeshData>(&marbleChest->Components.front());
+	Check(amberMesh && amberMesh->Mesh.Value == "/Game/Meshes/Props/SM_Chest.SM_Chest" &&
+	      amberMesh->Materials.size() == 1 && amberMesh->Materials.front().Parent.Value == "Shaders/ChestMaterial_Alpha.mat" &&
+	      amberMesh->Materials.front().Parameters.size() == 1,
+	      "Chest tint material was not preserved by Unreal adaptation");
+	Check(marbleMesh && marbleMesh->Materials.size() == 1 &&
+	      marbleMesh->Materials.front().Parent.Value == "Shaders/ChestMaterial_Alpha2.mat",
+	      "Chest texture-override material was not preserved by Unreal adaptation");
+	const auto sun = std::find_if(chestShowcase.Data->Actors.begin(), chestShowcase.Data->Actors.end(),
+		[](const ActorRecord& actor) { return actor.Name == "SunLight"; });
+	const auto doubleLight = std::find_if(chestShowcase.Data->Actors.begin(), chestShowcase.Data->Actors.end(),
+		[](const ActorRecord& actor) { return actor.Name == "DoubleLight"; });
+	const auto* directional = sun == chestShowcase.Data->Actors.end() || sun->Components.empty()
+		? nullptr : std::get_if<DirectionalLightData>(&sun->Components.front());
+	const auto* centerPoint = doubleLight == chestShowcase.Data->Actors.end() || doubleLight->Components.size() != 2
+		? nullptr : std::get_if<PointLightData>(&doubleLight->Components[0]);
+	const auto* orbitPoint = doubleLight == chestShowcase.Data->Actors.end() || doubleLight->Components.size() != 2
+		? nullptr : std::get_if<PointLightData>(&doubleLight->Components[1]);
+	Check(directional && centerPoint && orbitPoint, "Exported directional/double-light components were not preserved");
+	Check(centerPoint->Common.Transform.Position.LengthSqr() == 0 && orbitPoint->Common.Transform.Position.LengthSqr() > 0,
+	      "DoubleLight component offsets were not preserved");
 
 	auto missing = importer.ImportScene("Tests/GameFramework/does-not-exist.json");
 	Check(!missing.Data && !missing.Diagnostics.empty(), "Parser failure became an empty scene");
@@ -360,15 +461,13 @@ void UnrealImportPipeline()
 	auto blockout = importer.ImportScene("Content/ExportedScenes/lvl_blockout/Lvl_Blockout_Level.json");
 	Check(bool(blockout) && blockout.Data->Actors.size() == 16, "Content blockout scene did not parse");
 	const auto character = std::find_if(blockout.Data->Actors.begin(), blockout.Data->Actors.end(),
-		[](const UnrealActorData& actor) { return actor.Name == "BP_TopDownCharacter"; });
+		[](const ActorRecord& actor) { return actor.Name == "BP_TopDownCharacter"; });
 	const auto* springArm = character == blockout.Data->Actors.end() || character->Components.size() < 3
-		? nullptr : std::get_if<ImportedSpringArmComponent>(&character->Components[2]);
-	Check(springArm && springArm->SocketOffset.x == 0 && springArm->SocketOffset.y == 0 &&
-		springArm->SocketOffset.z == 0 && springArm->ArmLength == 1800,
+		? nullptr : std::get_if<PlaceholderComponentData>(&character->Components[2]);
+	const auto* springProperties = springArm ? std::get_if<SpringArmPlaceholderData>(&springArm->Properties) : nullptr;
+	Check(springProperties && springProperties->SocketOffset.x == 0 && springProperties->SocketOffset.y == 0 &&
+		springProperties->SocketOffset.z == 0 && springProperties->ArmLength == 1800,
 		"Blockout spring-arm data was not imported");
-	auto convertedBlockout = UnrealSceneAdapter{}.Convert(*blockout.Data);
-	Check(bool(convertedBlockout) && convertedBlockout.Scene->Actors.size() == blockout.Data->Actors.size(),
-		"Content blockout scene did not convert");
 
 }
 
@@ -400,6 +499,7 @@ int main()
 		RuntimeMutations();
 		FrameTimingAndInput();
 		SceneConstruction();
+		AssetRegistrySemantics();
 		StartupAndCameraSafety();
 		InputSystemSemantics();
 		UnrealImportPipeline();

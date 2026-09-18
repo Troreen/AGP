@@ -5,6 +5,8 @@
 #include <d3d11shader.h>
 #include <Ensure.h>
 
+#include <algorithm>
+
 using namespace Microsoft::WRL;
 
 template <> class std::hash<RHIShaderReflectionInfo::ResourceBinding>
@@ -23,10 +25,12 @@ inline bool operator==(const RHIShaderReflectionInfo::ResourceBinding& a, const 
 
 namespace
 {
+	constexpr size_t EstimatedHLSLTypeNameLength = 32;
+
 	std::string DeriveHLSLType(const D3D11_SHADER_TYPE_DESC& aTypeDesc)
 	{
 		std::string typeString;
-		typeString.reserve(32);
+		typeString.reserve(EstimatedHLSLTypeNameLength);
 		switch (aTypeDesc.Type)
 		{
 		case D3D_SVT_FLOAT:
@@ -125,7 +129,8 @@ namespace
 			memInfo.Size = static_cast<size_t>(aVarTypeDesc.Rows * aVarTypeDesc.Columns) * sizeof(float);
 			if (aVarDesc && aVarDesc->DefaultValue != nullptr)
 			{
-				memcpy_s(memInfo.Default, 64, aVarDesc->DefaultValue, aVarDesc->Size);
+				const size_t defaultValueSize = (std::min)(static_cast<size_t>(aVarDesc->Size), memInfo.Default.size());
+				memcpy_s(memInfo.Default.data(), memInfo.Default.size(), aVarDesc->DefaultValue, defaultValueSize);
 			}
 			memInfo.Offset = inoutOffset;
 			inoutOffset += memInfo.Size;

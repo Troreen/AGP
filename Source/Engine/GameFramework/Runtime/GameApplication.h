@@ -12,7 +12,7 @@ public:
 		std::wstring Title = L"AGP Game";
 		std::filesystem::path ContentRoot;
 		bool ShowWindow = true;
-		bool EnableRenderDiagnostics = false; // F6 selects a render pass; P logs statistics.
+		bool EnableRenderDiagnostics = false; // F5/F6 select render passes; P logs statistics.
 		bool EnableMouseLook = false;
 	};
 

@@ -117,48 +117,49 @@ namespace CommonUtilities
 			return Max(low, Min(aValue, high));
 		}
 
+		// Clamps aValue to the [0, 1] range. This is equivalent to Clamp(aValue, 0, 1).
 		template <typename T>
 		constexpr T Clamp01(const T aValue)
 		{
 			return Clamp(aValue, static_cast<T>(0), static_cast<T>(1));
 		}
 
-		template <typename T>
-		constexpr T Saturate(const T aValue)
-		{
-			return Clamp01(aValue);
-		}
-
+		// Returns the sign of aValue: -1 for negative, 0 for zero, +1 for positive.
 		template <typename T>
 		constexpr int Sign(const T aValue)
 		{
 			return (static_cast<T>(0) < aValue) - (aValue < static_cast<T>(0));
 		}
 
+		// Returns aValue with the sign of aSignSource.  
 		template <typename T>
 		constexpr T CopySign(const T aMagnitude, const T aSignSource)
 		{
 			return aSignSource < static_cast<T>(0) ? -Abs(aMagnitude) : Abs(aMagnitude);
 		}
 
+		// Round down to nearest integer
 		template <typename T>
 		inline int FloorToInt(const T aValue)
 		{
 			return static_cast<int>(std::floor(aValue));
 		}
 
+		// Round up to nearest integer
 		template <typename T>
 		inline int CeilToInt(const T aValue)
 		{
 			return static_cast<int>(std::ceil(aValue));
 		}
 
+		// Round to nearest integer, with halfway cases rounded away from zero
 		template <typename T>
 		inline int RoundToInt(const T aValue)
 		{
 			return static_cast<int>(std::round(aValue));
 		}
 
+		// Returns the fractional part of aValue, or 0 for integral types. 
 		template <typename T>
 		inline T Fraction(const T aValue)
 		{
@@ -206,6 +207,7 @@ namespace CommonUtilities
 			return aMin + Modulo(aValue - aMin, size);
 		}
 
+		// Repeat maps values into [0, aLength). Equal min/max is treated as a fixed value.
 		template <typename T>
 		inline T Repeat(const T aValue, const T aLength)
 		{

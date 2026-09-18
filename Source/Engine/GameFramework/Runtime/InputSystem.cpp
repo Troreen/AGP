@@ -218,7 +218,7 @@ void InputSystem::Reset()
 
 namespace InputActions
 {
-	const InputActionId Quit{"Quit"}, ReloadScene{"ReloadScene"}, SpawnDemo{"SpawnDemo"}, DebugCamera{"DebugCamera"}, CycleRenderPass{"CycleRenderPass"}, PrintDiagnostics{"PrintDiagnostics"};
+	const InputActionId Quit{"Quit"}, ReloadScene{"ReloadScene"}, SpawnDemo{"SpawnDemo"}, AttachDemoChild{"AttachDemoChild"}, DebugCamera{"DebugCamera"}, PreviousRenderPass{"PreviousRenderPass"}, NextRenderPass{"NextRenderPass"}, PrintDiagnostics{"PrintDiagnostics"};
 	const InputActionId CameraLookEnable{"CameraLookEnable"}, CameraLookDelta{"CameraLookDelta"}, CameraForward{"CameraForward"}, CameraBack{"CameraBack"}, CameraLeft{"CameraLeft"}, CameraRight{"CameraRight"}, CameraUp{"CameraUp"}, CameraDown{"CameraDown"};
 	const InputActionId ToggleSpin{"ToggleSpin"}, PlayBreathing{"PlayBreathing"}, PlayWalk{"PlayWalk"}, PlayRun{"PlayRun"}, PlayWave{"PlayWave"};
 	const InputActionId ToggleDirectional{"ToggleDirectional"}, TogglePoint{"TogglePoint"}, ToggleSpot{"ToggleSpot"}, AimDirectional{"AimDirectional"}, PlacePoint{"PlacePoint"}, PlaceSpot{"PlaceSpot"}, PrintLights{"PrintLights"};
@@ -229,10 +229,12 @@ void InstallDefaultInputBindings(InputSystem& input)
 	using K = Keys;
 	const std::vector<int> anyShift{int(K::SHIFT), int(K::LSHIFT), int(K::RSHIFT)};
 	input.BindKey(InputActions::Quit, int(K::ESCAPE));
-	input.BindKey(InputActions::ReloadScene, int(K::F5));
+	input.BindKey(InputActions::ReloadScene, int(K::F4));
 	input.BindKey(InputActions::SpawnDemo, int(K::F7));
+	input.BindKey(InputActions::AttachDemoChild, int(K::F8));
 	input.BindKey(InputActions::DebugCamera, int(K::F1));
-	input.BindKey(InputActions::CycleRenderPass, int(K::F6));
+	input.BindKey(InputActions::PreviousRenderPass, int(K::F5));
+	input.BindKey(InputActions::NextRenderPass, int(K::F6));
 	input.BindKey(InputActions::PrintDiagnostics, int(K::P));
 	input.BindKey(InputActions::CameraLookEnable, int(K::MOUSERBUTTON));
 	input.BindMouseDelta(InputActions::CameraLookDelta);

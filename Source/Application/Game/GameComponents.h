@@ -9,6 +9,7 @@ class DirectionalLightComponent;
 class PointLightComponent;
 class SpotLightComponent;
 class SkeletalMeshComponent;
+class Transform;
 
 // Game behaviors run on the gameplay owner. Service getters are valid after attachment.
 // The upright camera stores the Actor's orientation: yaw follows world up,
@@ -44,10 +45,13 @@ private:
 class SpinComponent final : public Component
 {
 public:
+	void SetTargetComponentName(std::string componentName) { myTargetComponentName = std::move(componentName); }
 	void BeginPlay() override;
 	void Update(float deltaTime) override;
 
 private:
+	Transform* FindTargetTransform() const;
+	std::string myTargetComponentName;
 	float myYaw = 0;
 	bool mySpinning = true;
 	InputSubscription myToggleSubscription;

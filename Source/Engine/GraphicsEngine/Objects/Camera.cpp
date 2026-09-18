@@ -14,16 +14,17 @@ Camera::Camera(float aHorizontalFoV, float aNearPlane, float aFarPlane, Vector2f
 
 	const float hFoVRad = Maths::DegreesToRadians(aHorizontalFoV);
 
-	const float vFoVRad = 2 * std::atan(std::tan(hFoVRad * 0.5f) * (static_cast<float>(aResolution.y) / static_cast<float>(aResolution.x)));
+	const float aspectRatio = static_cast<float>(aResolution.x) / static_cast<float>(aResolution.y);
+	const float vFoVRad = 2.0f * std::atan(std::tan(hFoVRad * 0.5f) / aspectRatio);
 
 	myVerticalFoV = Maths::RadiansToDegrees(vFoVRad);
 
-	const float myXScale = 1 / std::tan(hFoVRad * 0.5f);
-	const float myYScale = 1 / std::tan(vFoVRad * 0.5f);
+	const float xScale = 1.0f / std::tan(hFoVRad * 0.5f);
+	const float yScale = 1.0f / std::tan(vFoVRad * 0.5f);
 	const float zRange = myFarPlane / (myFarPlane - myNearPlane);
 
-	myProjection(1, 1) = myXScale;
-	myProjection(2, 2) = myYScale;
+	myProjection(1, 1) = xScale;
+	myProjection(2, 2) = yScale;
 	myProjection(3, 3) = zRange;
 	myProjection(3, 4) = 1.0f;
 	myProjection(4, 3) = -zRange * myNearPlane;

@@ -18,8 +18,10 @@ C++20 / DirectX 11 graphics programming project for the AGP assignments. The cur
 
 ## Repository Layout
 
-See the [engine map](Docs/Architecture.md) for startup, threading, snapshot
-ownership, the frame sequence, and code formatting conventions.
+Start with the [plain-language engine architecture](Docs/EngineArchitectureBasics.md)
+for gameplay, scenes, assets, and the path to `BeginPlay`. The more detailed
+[engine map](Docs/Architecture.md) covers renderer flow, threading, snapshots, and
+code formatting conventions.
 
 - `AGP.sln` - Visual Studio solution.
 - `Source/Application/Game` - demo application, scene setup, controls, materials, primitive mesh generation.
@@ -89,9 +91,11 @@ The number-row keys `7`, `8`, and `9` also work for the light controls.
 | Control | Action |
 | --- | --- |
 | `R` | Pause/resume chest rotation |
-| `F5` | Reload the current scene |
-| `F6` | Cycle renderer debug views |
+| `F4` | Reload the current scene |
+| `F5` | Select the previous renderer debug view |
+| `F6` | Select the next renderer debug view |
 | `F7` | Spawn/destroy an extra chest |
+| `F8` | Attach a smaller, self-spinning child chest that orbits the extra chest |
 | `Esc` | Quit |
 
 Gameplay now runs synchronously. Renderer comparison switches include

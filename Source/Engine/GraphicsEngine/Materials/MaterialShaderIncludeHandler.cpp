@@ -24,7 +24,7 @@ HRESULT MaterialShaderIncludeHandler::Open(D3D_INCLUDE_TYPE IncludeType, LPCSTR 
 	std::filesystem::path sourcePath;
 
 	// Transform the file name to lowercase for comparison.
-	std::string fileName = sourcePath.filename().string();
+	std::string fileName = std::filesystem::path(pFileName).filename().string();
 	std::ranges::transform(fileName, fileName.begin(), tolower);
 
 	// Our generic include name is material.hlsli

@@ -10,9 +10,6 @@
     <Filter Include="Dependencies\TGAFBXImporter\source">
       <UniqueIdentifier>{098BBF4F-F5C6-C2B9-5ED9-DAB04A346BD4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Materials">
-      <UniqueIdentifier>{67E8C255-D352-77CC-1C91-2872883A5521}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h" />
@@ -44,39 +41,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Game.ico" />
-    <None Include="Materials\AxesMaterial.hlsli">
-      <Filter>Materials</Filter>
-    </None>
-    <None Include="Materials\CharacterMaterial.hlsli">
-      <Filter>Materials</Filter>
-    </None>
-    <None Include="Materials\ChestMaterial.hlsli">
-      <Filter>Materials</Filter>
-    </None>
-    <None Include="Materials\ColorCheckerMaterial.hlsli">
-      <Filter>Materials</Filter>
-    </None>
-    <None Include="Materials\CubeMaterial.hlsli">
-      <Filter>Materials</Filter>
-    </None>
-    <None Include="Materials\FloorMaterial.hlsli">
-      <Filter>Materials</Filter>
-    </None>
-    <None Include="Materials\PyramidMaterial.hlsli">
-      <Filter>Materials</Filter>
-    </None>
-    <None Include="Materials\SphereMaterial.hlsli">
-      <Filter>Materials</Filter>
-    </None>
-    <None Include="Materials\TestMaterial.hlsli">
-      <Filter>Materials</Filter>
-    </None>
-    <None Include="Materials\TexturingExampleMaterial.hlsli">
-      <Filter>Materials</Filter>
-    </None>
-    <None Include="Materials\TorusMaterial.hlsli">
-      <Filter>Materials</Filter>
-    </None>
     <None Include="ModelViewer.ico" />
     <None Include="small.ico" />
   </ItemGroup>

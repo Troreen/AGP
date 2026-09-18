@@ -1,6 +1,17 @@
-{28f9e5ae-083b-41b4-b503-88dd0d4451bd} bank:/Master
-{b0e4c57a-7940-0df6-334a-0223fcb75725} bank:/Master.strings
-{342fb274-1ef7-4334-aa79-ecabd7396f82} bus:/
-{7387e4e5-871b-4d1f-84b4-faeec4d85ee1} bus:/MUSIC
-{e3ce3b43-4d75-48c3-b87e-6d44c1d67214} bus:/SFX
-{f421ce15-a3f8-40a6-b593-6d5008b7fbbd} event:/FMODTest
+{dd09ef04-33ef-4dbc-b9af-55f1ac64674f} bank:/Master
+{4514cfd0-4294-01fe-3fe6-df0f5d9761d7} bank:/Master.strings
+{ad286d84-46bf-4f1b-9d68-05d8eb7f0d48} bus:/
+{e4855dad-b162-49f0-944e-f7aa35e817ba} bus:/MUSIC
+{36f2cfd2-cf22-43c1-b391-1189e5cf5fdf} bus:/SFX
+{377a75c3-cdf9-47ad-b840-bc0bc3b926ad} event:/Blizzard Ambience
+{7902ee3d-ff4a-4cec-8790-ac38226b1659} event:/Castle Ambience 1
+{df7cf05c-0e08-4e4e-b014-6fd15b5fa65c} event:/Castle Ambience 2
+{181f7354-b87d-4bbe-8027-56a93fbdc504} event:/Collect Item
+{0fa5d6cc-0dd1-42e4-a266-536c5f7b9f0b} event:/Crossbow Cock
+{732e38f7-411c-47ad-8453-97d23bb271bd} event:/FMODTest
+{a9b6425d-9556-42a8-97bc-296aeeb2d25f} event:/Heavy Roar
+{4b86d6ba-16b7-4d29-b2f2-f1b4811636ac} event:/Intro Swell
+{3a428b39-fd8c-4541-a4e8-33d80326b938} event:/Potion Drink
+{6f677fe5-1a80-4808-af9e-14cb88aba8eb} event:/Sickle Slash
+{d4124cfd-63af-450e-a691-cd40fdde6788} event:/Slash Hit
+{5df00fd9-ba2b-44d2-b933-9d27cd963cfc} event:/Whirlwind

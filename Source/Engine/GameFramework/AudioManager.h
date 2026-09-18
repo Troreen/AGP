@@ -5,7 +5,18 @@
 
 enum SoundID
 {
-	eMainTheme
+	eMainTheme,
+	eBlizzardAmbience,
+	eCastleAmbienceOne,
+	eCastleAmbienceTwo,
+	eCollectItem,
+	eCrossbowCock,
+	eHeavyRoar,
+	eIntroSwell,
+	ePotion,
+	eSickleSlash,
+	eSlashHit,
+	eWhirlwind
 };
 
 enum BusID

@@ -598,7 +598,8 @@ UnrealSceneData ImportScene(std::filesystem::path aJSONPath)
 				}
 				break;
 				default:
-					break;
+					throw std::runtime_error("Unknown component TypeID: " +
+					                         std::to_string(component["TypeID"].get_int64().value()));
 			}
 		}
 		unrealData.actors.emplace_back(actorData);
@@ -665,6 +666,12 @@ namespace
 			for (size_t parameterIndex = 0; parameterIndex < sourceMaterial->parameters.size(); ++parameterIndex)
 			{
 				const PerforceScene::MaterialParameterData* sourceParameter = &sourceMaterial->parameters[parameterIndex];
+				// The parser leaves an empty in-place record before each completed
+				// parameter. It is bookkeeping, not authored material data.
+				if (sourceParameter->name.empty())
+				{
+					continue;
+				}
 				while (parameterIndex + 1 < sourceMaterial->parameters.size() &&
 				       sourceMaterial->parameters[parameterIndex + 1].name == sourceParameter->name &&
 				       sourceMaterial->parameters[parameterIndex + 1].type == sourceParameter->type)

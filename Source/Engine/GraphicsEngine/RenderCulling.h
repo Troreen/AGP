@@ -8,9 +8,11 @@
 
 namespace RenderCulling
 {
-	inline bool IsFinite(const CU::Vector3f& v)
+	inline constexpr float PlaneNormalEpsilon = 0.000001f;
+
+	inline bool IsFiniteVector(const CU::Vector3f& aVector)
 	{
-		return std::isfinite(v.x) && std::isfinite(v.y) && std::isfinite(v.z);
+		return std::isfinite(aVector.x) && std::isfinite(aVector.y) && std::isfinite(aVector.z);
 	}
 
 	struct BoundingSphere
@@ -38,7 +40,7 @@ namespace RenderCulling
 		FrustumPlane plane;
 		plane.Normal = {aPlane.x, aPlane.y, aPlane.z};
 		const float normalLength = plane.Normal.Length();
-		if (!std::isfinite(normalLength) || !std::isfinite(aPlane.w) || normalLength <= 0.000001f)
+		if (!std::isfinite(normalLength) || !std::isfinite(aPlane.w) || normalLength <= PlaneNormalEpsilon)
 		{
 			return {};
 		}
@@ -88,7 +90,7 @@ namespace RenderCulling
 			return true;
 		}
 
-		if (!aSphere.IsValid || !IsFinite(aSphere.Center) || !std::isfinite(aSphere.Radius) || aSphere.Radius < 0.0f)
+		if (!aSphere.IsValid || !IsFiniteVector(aSphere.Center) || !std::isfinite(aSphere.Radius) || aSphere.Radius < 0.0f)
 		{
 			return true;
 		}
@@ -114,7 +116,10 @@ namespace RenderCulling
 		const float xy = std::abs(axisX.Dot(axisY));
 		const float xz = std::abs(axisX.Dot(axisZ));
 		const float yz = std::abs(axisY.Dot(axisZ));
-		return std::sqrt((std::max)({axisX.LengthSqr() + xy + xz, axisY.LengthSqr() + xy + yz, axisZ.LengthSqr() + xz + yz}));
+		const float xBound = axisX.LengthSqr() + xy + xz;
+		const float yBound = axisY.LengthSqr() + xy + yz;
+		const float zBound = axisZ.LengthSqr() + xz + yz;
+		return std::sqrt((std::max)({xBound, yBound, zBound}));
 	}
 
 	inline BoundingSphere TransformBoundingSphere(const CU::Vector3f& aCenter, float aRadius, bool aIsValid, const CU::Matrix4f& aTransform)
@@ -129,7 +134,7 @@ namespace RenderCulling
 				}
 			}
 		}
-		if (!aIsValid || !IsFinite(aCenter) || !std::isfinite(aRadius) || aRadius < 0.0f || aTransform(1, 4) != 0.0f ||
+		if (!aIsValid || !IsFiniteVector(aCenter) || !std::isfinite(aRadius) || aRadius < 0.0f || aTransform(1, 4) != 0.0f ||
 		    aTransform(2, 4) != 0.0f || aTransform(3, 4) != 0.0f || aTransform(4, 4) != 1.0f)
 		{
 			return {};
@@ -138,7 +143,7 @@ namespace RenderCulling
 		BoundingSphere sphere;
 		sphere.Center = CU::Maths::TransformPoint(aCenter, aTransform);
 		sphere.Radius = aRadius * GetMaxAxisScale(aTransform);
-		sphere.IsValid = IsFinite(sphere.Center) && sphere.Radius >= 0.0f && std::isfinite(sphere.Radius);
+		sphere.IsValid = IsFiniteVector(sphere.Center) && sphere.Radius >= 0.0f && std::isfinite(sphere.Radius);
 		return sphere;
 	}
 

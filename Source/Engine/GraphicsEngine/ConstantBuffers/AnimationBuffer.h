@@ -2,8 +2,11 @@
 #include "Matrix.hpp"
 
 #include <array>
+#include <cstddef>
 
 struct AnimationBuffer
 {
-	std::array<CU::Matrix4f, 128> JointTransforms;
+	static constexpr std::size_t MaxJointCount = 128;
+
+	std::array<CU::Matrix4f, MaxJointCount> JointTransforms;
 };

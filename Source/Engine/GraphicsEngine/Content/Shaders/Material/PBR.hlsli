@@ -1,8 +1,12 @@
 static const float PI = 3.14159265f;
+static const float DISPLAY_GAMMA = 2.2f;
+static const float MIN_PBR_ROUGHNESS = 0.04f;
+static const float DIELECTRIC_SPECULAR = 0.04f;
+static const float PBR_EPSILON = 0.00001f;
 
 float3 LinearToGamma(float3 aColor)
 {
-    return pow(abs(aColor), 1.0f / 2.2f);
+    return pow(abs(aColor), 1.0f / DISPLAY_GAMMA);
 }
 
 float3 Diffuse_BRDF(float3 aDiffuseColor)
@@ -18,7 +22,7 @@ float NormalDistributionFunction_GGX(float aRoughness, float3 aNormal, float3 aH
     const float NdotH2 = NdotH * NdotH;
     float denominator = NdotH2 * (alpha2 - 1.0f) + 1.0f;
     denominator = PI * denominator * denominator;
-    return alpha2 / max(denominator, 0.00001f);
+    return alpha2 / max(denominator, PBR_EPSILON);
 }
 
 float3 Fresnel_SphericalGaussianSchlick(float3 aSpecularColor, float3 aViewDir, float3 aHalfVector)
@@ -31,7 +35,7 @@ float3 Fresnel_SphericalGaussianSchlick(float3 aSpecularColor, float3 aViewDir, 
 float GeometricAttenuation_Schlick_GGX_G1(float aRoughness, float aNdotX)
 {
     const float k = ((aRoughness + 1.0f) * (aRoughness + 1.0f)) / 8.0f;
-    return aNdotX / max(aNdotX * (1.0f - k) + k, 0.00001f);
+    return aNdotX / max(aNdotX * (1.0f - k) + k, PBR_EPSILON);
 }
 
 float GeometricAttenuation_Schlick_GGX(float aRoughness, float3 aNormal, float3 aLightDir, float3 aViewDir)
@@ -56,7 +60,7 @@ float3 Specular_BRDF(
 
     const float NdotL = saturate(dot(aNormal, aLightDir));
     const float NdotV = saturate(dot(aNormal, aViewDir));
-    const float denominator = max(4.0f * NdotL * NdotV, 0.00001f);
+    const float denominator = max(4.0f * NdotL * NdotV, PBR_EPSILON);
 
     return (D * F * G) / denominator;
 }
@@ -73,7 +77,7 @@ float3 CalculateDirectPBL(
 {
     const float NdotL = saturate(dot(aNormal, aLightDir));
     float3 halfVector = aLightDir + aViewDir;
-    halfVector = dot(halfVector, halfVector) > 0.00001f ? normalize(halfVector) : aNormal;
+    halfVector = dot(halfVector, halfVector) > PBR_EPSILON ? normalize(halfVector) : aNormal;
     const float3 diffuse = Diffuse_BRDF(aDiffuseColor);
     const float3 specular = Specular_BRDF(aRoughness, aNormal, halfVector, aViewDir, aLightDir, aSpecularColor);
     return (diffuse + specular) * aLightColor * aIlluminance * NdotL;

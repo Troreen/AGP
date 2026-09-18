@@ -66,4 +66,17 @@ project "GameFramework"
 	filter { "system:windows", "not configurations:Retail" }
 		buildoptions { "/Gm-", "/Gy", "/Gw" }
 
+	-- The vendored simdjson amalgamation emits these warnings both while it is
+	-- compiled and from its inline implementation included by our two adapters.
+	-- Keep the generated third-party source untouched and scope suppression to
+	-- the translation units that compile it.
+	filter "files:SimdJson/simdjson.cpp"
+		disablewarnings { "4100", "4244", "4505" }
+
+	filter "files:AssetHandling/AssetRegistry.cpp"
+		disablewarnings { "4100", "4244" }
+
+	filter "files:UnrealSceneImporter/UnrealSceneImporter.cpp"
+		disablewarnings { "4100", "4244" }
+
 	filter {}

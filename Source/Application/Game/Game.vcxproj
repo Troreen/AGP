@@ -104,16 +104,6 @@
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
-    <CustomBuildStep>
-      <Command>set "CONTENTROOT=$(SolutionDir)Content"
-set "SHADERSRC=$(ProjectDir)Materials"
-set "SHADERDEST=%CONTENTROOT%\Shaders"
-if not exist "%CONTENTROOT%" mkdir "%CONTENTROOT%"
-if not exist "%SHADERDEST%" mkdir "%SHADERDEST%"
-xcopy /E /I /R /Y "%SHADERSRC%" "%SHADERDEST%"</Command>
-      <Message>Copying materials to content dir</Message>
-      <Outputs>*.hlsl*</Outputs>
-    </CustomBuildStep>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;FBXSDK_SHARED;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.;..\..\Engine;..\..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\TGAFBXImporter\FBXSDK\include;..\..\..\Dependencies\TGAFBXImporter\source;..\..\Engine\GraphicsEngine\Shaders\Material;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -123,6 +113,7 @@ xcopy /E /I /R /Y "%SHADERSRC%" "%SHADERDEST%"</Command>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>libfbxsdk.lib;libxml2-md.lib;zlib-md.lib;d3d11.lib;dxguid.lib;dxgi.lib;d3dcompiler.lib;CommonUtilities-d.lib;SoundEngine-FMod-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\..\Lib\$(Configuration);..\..\..\Dependencies\FMod\lib;..\..\..\Dependencies\TGAFBXImporter\FBXSDK\lib;..\..\..\Dependencies\TGAFBXImporter\FBXSDK\lib\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/IGNORE:4099 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <ProjectReference>
     </ProjectReference>
@@ -161,6 +152,7 @@ xcopy /E /I /R /Y "%SHADERSRC%" "%SHADERDEST%"</Command>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>libfbxsdk.lib;libxml2-md.lib;zlib-md.lib;d3d11.lib;dxguid.lib;dxgi.lib;d3dcompiler.lib;CommonUtilities.lib;SoundEngine-FMod.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\..\Lib\$(Configuration);..\..\..\Dependencies\FMod\lib;..\..\..\Dependencies\TGAFBXImporter\FBXSDK\lib;..\..\..\Dependencies\TGAFBXImporter\FBXSDK\lib\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/IGNORE:4099 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <ProjectReference>
     </ProjectReference>
@@ -199,6 +191,7 @@ xcopy /E /I /R /Y "%SHADERSRC%" "%SHADERDEST%"</Command>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>libfbxsdk.lib;libxml2-md.lib;zlib-md.lib;d3d11.lib;dxguid.lib;dxgi.lib;d3dcompiler.lib;CommonUtilities.lib;SoundEngine-FMod.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\..\Lib\$(Configuration);..\..\..\Dependencies\FMod\lib;..\..\..\Dependencies\TGAFBXImporter\FBXSDK\lib;..\..\..\Dependencies\TGAFBXImporter\FBXSDK\lib\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/IGNORE:4099 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <ProjectReference>
     </ProjectReference>
@@ -230,17 +223,6 @@ xcopy /E /I /R /Y "%SHADERSRC%" "%SHADERDEST%"</Command>
   </ItemGroup>
   <ItemGroup>
     <None Include="Game.ico" />
-    <None Include="Materials\AxesMaterial.hlsli" />
-    <None Include="Materials\CharacterMaterial.hlsli" />
-    <None Include="Materials\ChestMaterial.hlsli" />
-    <None Include="Materials\ColorCheckerMaterial.hlsli" />
-    <None Include="Materials\CubeMaterial.hlsli" />
-    <None Include="Materials\FloorMaterial.hlsli" />
-    <None Include="Materials\PyramidMaterial.hlsli" />
-    <None Include="Materials\SphereMaterial.hlsli" />
-    <None Include="Materials\TestMaterial.hlsli" />
-    <None Include="Materials\TexturingExampleMaterial.hlsli" />
-    <None Include="Materials\TorusMaterial.hlsli" />
     <None Include="ModelViewer.ico" />
     <None Include="small.ico" />
   </ItemGroup>

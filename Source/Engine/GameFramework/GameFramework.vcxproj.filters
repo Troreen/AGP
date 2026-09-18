@@ -1,6 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="AssetHandling">
+      <UniqueIdentifier>{4A86DE7F-B646-5AB6-7F81-A333EB009F92}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Components">
       <UniqueIdentifier>{6B7DD516-5735-1764-C03C-F0BFAC13B254}</UniqueIdentifier>
     </Filter>
@@ -24,6 +27,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AssetHandling\AssetRegistry.h">
+      <Filter>AssetHandling</Filter>
+    </ClInclude>
     <ClInclude Include="AudioManager.h" />
     <ClInclude Include="Components\CameraComponent.h">
       <Filter>Components</Filter>
@@ -56,10 +62,10 @@
     <ClInclude Include="Runtime\GameContext.h">
       <Filter>Runtime</Filter>
     </ClInclude>
-    <ClInclude Include="Runtime\InputSystem.h">
+    <ClInclude Include="Runtime\IGame.h">
       <Filter>Runtime</Filter>
     </ClInclude>
-    <ClInclude Include="Runtime\IGame.h">
+    <ClInclude Include="Runtime\InputSystem.h">
       <Filter>Runtime</Filter>
     </ClInclude>
     <ClInclude Include="Scenes\AssetRefs.h">
@@ -71,13 +77,14 @@
     <ClInclude Include="Scenes\SceneData.h">
       <Filter>Scenes</Filter>
     </ClInclude>
+    <ClInclude Include="ServiceLocator.h" />
     <ClInclude Include="SimdJson\simdjson.h">
       <Filter>SimdJson</Filter>
     </ClInclude>
-    <ClInclude Include="UnrealSceneImporter\UnrealSceneImporter.h">
+    <ClInclude Include="UnrealSceneImporter\PerforceSceneStructs.h">
       <Filter>UnrealSceneImporter</Filter>
     </ClInclude>
-    <ClInclude Include="UnrealSceneImporter\PerforceSceneStructs.h">
+    <ClInclude Include="UnrealSceneImporter\UnrealSceneImporter.h">
       <Filter>UnrealSceneImporter</Filter>
     </ClInclude>
     <ClInclude Include="UnrealSceneImporter\UnrealSceneStructs.h">
@@ -97,6 +104,9 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AssetHandling\AssetRegistry.cpp">
+      <Filter>AssetHandling</Filter>
+    </ClCompile>
     <ClCompile Include="AudioManager.cpp" />
     <ClCompile Include="Components\CameraComponent.cpp">
       <Filter>Components</Filter>
@@ -135,6 +145,7 @@
     <ClCompile Include="Scenes\ComponentRegistry.cpp">
       <Filter>Scenes</Filter>
     </ClCompile>
+    <ClCompile Include="ServiceLocator.cpp" />
     <ClCompile Include="SimdJson\simdjson.cpp">
       <Filter>SimdJson</Filter>
     </ClCompile>

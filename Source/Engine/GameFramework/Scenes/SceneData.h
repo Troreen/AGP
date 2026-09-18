@@ -10,6 +10,8 @@
 #include <variant>
 #include <vector>
 
+class AssetRegistry;
+
 struct ComponentData
 {
 	std::string Name;
@@ -84,7 +86,7 @@ struct SceneLoadContext
 {
 	const std::filesystem::path& ContentRoot;
 	CommonUtilities::Vector2u ClientSize;
-	AssetLibrary& Assets;
+	AssetRegistry& Assets;
 };
 
 using SceneSource = std::function<SceneData(const std::string& name, SceneLoadContext& context)>;

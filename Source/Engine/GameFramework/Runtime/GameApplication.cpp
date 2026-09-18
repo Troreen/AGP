@@ -10,6 +10,9 @@
 #include "GameFramework/Rendering/WorldRenderer.h"
 #include "GameFramework/Components/CameraComponent.h"
 #include "GameFramework/Components/DebugCameraController.h"
+#include "GameFramework/AssetHandling/AssetRegistry.h"
+#include "GameFramework/AudioManager.h"
+#include "GameFramework/ServiceLocator.h"
 #include "Maths.hpp"
 #include "GraphicsEngine/RHI/GraphicsCommandList.h"
 #include "GameFramework/GameFrameworkLog.h"
@@ -69,6 +72,7 @@ public:
 
 private:
 	void LoadPendingScene();
+	void ShutdownServices();
 	InputDeviceFrame CaptureInputFrame();
 	void UpdateRenderPassTitle();
 	void LogRuntimeStats() const;
@@ -115,26 +119,41 @@ int GameApplication::Impl::Run()
 		throw std::runtime_error("Could not initialize game graphics");
 	}
 	myContext.myClientSize = graphics.GetClientSize();
-	myInputHandler.SetWindowHandle(myMainWindowHandle);
-	myInputHandler.SetAutoMouseCapture(false);
-	InstallDefaultInputBindings(myContext.myInput);
-	myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(InputActions::DebugCamera, [this](const InputActionEvent& event)
-	{
-		if (event.Phase == InputActionPhase::Started) myDebugCamera.Toggle(myContext.GetWorld(), myContext.myClientSize);
-	}));
-	if (myConfig.EnableRenderDiagnostics)
-	{
-		myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(InputActions::CycleRenderPass, [this](const InputActionEvent& event)
-		{
-			if (event.Phase == InputActionPhase::Started) { GraphicsEngine::Get().CycleRenderPass(); UpdateRenderPassTitle(); }
-		}));
-		myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(InputActions::PrintDiagnostics, [this](const InputActionEvent& event)
-		{
-			if (event.Phase == InputActionPhase::Started) LogRuntimeStats();
-		}));
-	}
 	try
 	{
+		AssetRegistry& assets = AssetRegistry::Get();
+		assets.Initialize(myContext.myContentRoot);
+		if (!assets.IsInitialized())
+		{
+			throw std::runtime_error(assets.GetLastError());
+		}
+		AudioManager* audio = AudioManager::GetInstance();
+		audio->Init();
+		ServiceLocator::GetInstance().ProvideInput(myContext.myInput);
+		ServiceLocator::GetInstance().ProvideAudio(*audio);
+		ServiceLocator::GetInstance().ProvideAssets(assets);
+		myInputHandler.SetWindowHandle(myMainWindowHandle);
+		myInputHandler.SetAutoMouseCapture(false);
+		InstallDefaultInputBindings(myContext.myInput);
+		myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(InputActions::DebugCamera, [this](const InputActionEvent& event)
+		{
+			if (event.Phase == InputActionPhase::Started) myDebugCamera.Toggle(myContext.GetWorld(), myContext.myClientSize);
+		}));
+		if (myConfig.EnableRenderDiagnostics)
+		{
+			myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(InputActions::PreviousRenderPass, [this](const InputActionEvent& event)
+			{
+				if (event.Phase == InputActionPhase::Started) { GraphicsEngine::Get().SelectPreviousRenderPass(); UpdateRenderPassTitle(); }
+			}));
+			myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(InputActions::NextRenderPass, [this](const InputActionEvent& event)
+			{
+				if (event.Phase == InputActionPhase::Started) { GraphicsEngine::Get().SelectNextRenderPass(); UpdateRenderPassTitle(); }
+			}));
+			myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(InputActions::PrintDiagnostics, [this](const InputActionEvent& event)
+			{
+				if (event.Phase == InputActionPhase::Started) LogRuntimeStats();
+			}));
+		}
 		myGame.Initialize(myContext);
 		if (myContext.myPendingScene)
 		{
@@ -187,6 +206,7 @@ int GameApplication::Impl::Run()
 
 			myGame.Update(myContext, delta);
 			myContext.GetWorld().Update(delta);
+			ServiceLocator::GetInstance().GetAudioManager().Update(delta);
 			WorldRenderer::Build(myContext.GetWorld(), graphics, mySnapshot);
 			myCommandList.ResetCommandList();
 			graphics.RenderSnapshot(myCommandList, mySnapshot);
@@ -209,12 +229,21 @@ int GameApplication::Impl::Run()
 			LOG(LogGameFramework, Error, "Shutdown failed during exception cleanup");
 		}
 		myContext.GetWorld().Clear();
+		ShutdownServices();
 		throw;
 	}
 	myContext.myAcceptSceneRequests = false;
 	myGame.Shutdown(myContext);
 	myContext.GetWorld().Clear();
+	ShutdownServices();
 	return 0;
+}
+
+void GameApplication::Impl::ShutdownServices()
+{
+	ServiceLocator::GetInstance().Clear();
+	AudioManager::Shutdown();
+	AssetRegistry::Get().Clear();
 }
 
 void GameApplication::Impl::LoadPendingScene()
@@ -228,7 +257,7 @@ void GameApplication::Impl::LoadPendingScene()
 		{
 			throw std::runtime_error("No scene source installed");
 		}
-		AssetLibrary assets;
+		AssetRegistry& assets = AssetRegistry::Get();
 		SceneLoadContext context{myContext.myContentRoot, myContext.myClientSize, assets};
 		const SceneData scene = mySource(name, context);
 		world = myRegistry.CreateWorld(scene, assets, &myContext.myInput, myContext.myClientSize);
@@ -325,7 +354,7 @@ void GameApplication::Impl::UpdateRenderPassTitle()
 {
 	const char* passName = GraphicsEngine::Get().GetRenderPassName();
 	const std::wstring widePassName(passName, passName + std::strlen(passName));
-	const std::wstring title = myConfig.Title + L"  |  Render Pass: " + widePassName + L"  (F6 cycles)";
+	const std::wstring title = myConfig.Title + L"  |  Render Pass: " + widePassName + L"  (F5 previous, F6 next)";
 	SetWindowTextW(myMainWindowHandle, title.c_str());
 }
 

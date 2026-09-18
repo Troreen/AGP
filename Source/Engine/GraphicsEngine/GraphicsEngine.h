@@ -11,6 +11,7 @@
 
 #include "RHI/RenderHardwareInterface.h"
 #include "RHI/GraphicsCommandList.h"
+#include "ConstantBuffers/AnimationBuffer.h"
 #include "ConstantBuffers/FrameBuffer.h"
 #include "ConstantBuffers/LightBuffer.h"
 #include "Objects/Buffer.h"
@@ -74,7 +75,7 @@ public:
 		std::shared_ptr<Mesh> Mesh;
 		std::vector<std::shared_ptr<MaterialInterface>> Materials;
 		CU::Matrix4f World;
-		std::array<CU::Matrix4f, 128> JointTransforms = {};
+		std::array<CU::Matrix4f, AnimationBuffer::MaxJointCount> JointTransforms = {};
 		CU::Vector3f BoundsCenter = CU::Vector3f::Zero;
 		float BoundsRadius = 0.0f;
 		bool HasSkinning = false;
@@ -145,7 +146,8 @@ public:
 
 	void Present() const;
 	// --- Diagnostics ---
-	void CycleRenderPass();
+	void SelectPreviousRenderPass();
+	void SelectNextRenderPass();
 	const char* GetRenderPassName() const;
 
 	// --- Resource and command creation ---

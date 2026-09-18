@@ -20,6 +20,14 @@ DECLARE_LOG_CATEGORY_WITH_NAME(RhiLog, RHI, Verbose);
 
 DEFINE_LOG_CATEGORY(RhiLog);
 
+namespace
+{
+	constexpr UINT SwapChainBufferCount = 2;
+	constexpr UINT CubeFaceCount = 6;
+	constexpr size_t ConstantBufferRegisterSize = 16;
+	constexpr size_t MaxConstantBufferSize = D3D11_REQ_CONSTANT_BUFFER_ELEMENT_COUNT * ConstantBufferRegisterSize;
+}
+
 RenderHardwareInterface::RenderHardwareInterface() = default;
 
 RenderHardwareInterface::~RenderHardwareInterface() = default;
@@ -147,7 +155,7 @@ bool RenderHardwareInterface::Initialize(HWND aWindowHandle, bool aEnableDebug, 
 	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-	swapChainDesc.BufferCount = 2;
+	swapChainDesc.BufferCount = SwapChainBufferCount;
 	swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
 	swapChainDesc.SampleDesc.Count = 1;
 	swapChainDesc.Windowed = true;
@@ -310,9 +318,10 @@ bool RenderHardwareInterface::CreateIndexBuffer(std::string_view aName, const st
 
 bool RenderHardwareInterface::CreateConstantBuffer(std::string_view aName, size_t aSize, Buffer& outBuffer) const
 {
-	if (aSize > 65536)
+	if (aSize == 0 || aSize > MaxConstantBufferSize || aSize % ConstantBufferRegisterSize != 0)
 	{
-		LOG(RhiLog, Error, "Failed to create constant buffer {}! Size is greater than 64kB!", aName);
+		LOG(RhiLog, Error, "Failed to create constant buffer {}! Size must be a non-zero multiple of 16 bytes and no greater than 64kB.",
+		    aName);
 		return false;
 	}
 
@@ -353,7 +362,7 @@ bool RenderHardwareInterface::CreateDepthStencil(std::string_view aName, unsigne
 	depthDesc.CPUAccessFlags = 0;
 	depthDesc.MiscFlags = aCubeMap ? D3D11_RESOURCE_MISC_TEXTURECUBE : 0;
 	depthDesc.MipLevels = 1;
-	depthDesc.ArraySize = aCubeMap ? 6 : 1;
+	depthDesc.ArraySize = aCubeMap ? CubeFaceCount : 1;
 	depthDesc.SampleDesc.Count = 1;
 	depthDesc.SampleDesc.Quality = 0;
 
@@ -377,7 +386,7 @@ bool RenderHardwareInterface::CreateDepthStencil(std::string_view aName, unsigne
 		dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
 		dsvDesc.Texture2DArray.MipSlice = 0;
 		dsvDesc.Texture2DArray.FirstArraySlice = 0;
-		dsvDesc.Texture2DArray.ArraySize = 6;
+		dsvDesc.Texture2DArray.ArraySize = CubeFaceCount;
 	}
 	else
 	{
@@ -750,7 +759,7 @@ bool RenderHardwareInterface::CreateColorTexture(std::string_view aName, const s
 
 	D3D11_SUBRESOURCE_DATA textureData = {};
 	textureData.pSysMem = aColor.data();
-	textureData.SysMemPitch = 4;
+	textureData.SysMemPitch = static_cast<UINT>(aColor.size());
 
 	ComPtr<ID3D11Texture2D> texture;
 	HRESULT result = myDevice->CreateTexture2D(&textureDesc, &textureData, &texture);
@@ -837,7 +846,7 @@ bool RenderHardwareInterface::CompileShader(ShaderType aShaderType, const std::f
 		return false;
 	}
 
-	std::string shaderTarget(6, ' ');
+	std::string shaderTarget;
 	switch (aShaderType)
 	{
 	case ShaderType::VertexShader:

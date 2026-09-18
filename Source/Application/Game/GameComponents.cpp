@@ -1,5 +1,6 @@
 #include "GameComponents.h"
 #include "GameLog.h"
+#include "GameFramework/Components/SceneComponent.h"
 #include "GameFramework/World/World.h"
 #include "GameFramework/Components/LightComponent.h"
 #include "GameFramework/Components/SkeletalMeshComponent.h"
@@ -109,6 +110,10 @@ void CameraControlsComponent::Update(float deltaTime)
 
 void SpinComponent::BeginPlay()
 {
+	if (Transform* transform = FindTargetTransform())
+	{
+		myYaw = transform->GetLocalRotationDegrees().x;
+	}
 	myToggleSubscription = GetInputSystem().Subscribe(InputActions::ToggleSpin, [this](const InputActionEvent& event)
 	{
 		if (event.Phase == InputActionPhase::Started) mySpinning = !mySpinning;
@@ -119,7 +124,20 @@ void SpinComponent::Update(float deltaTime)
 {
 	if (!mySpinning) return;
 	myYaw = std::fmod(myYaw + SpinDegreesPerSecond * deltaTime, FullRotationDegrees);
-	GetOwner()->GetTransform().SetLocalRotationDegrees(myYaw, 0, 0);
+	if (Transform* transform = FindTargetTransform())
+	{
+		transform->SetLocalRotationDegrees(myYaw, 0, 0);
+	}
+}
+
+Transform* SpinComponent::FindTargetTransform() const
+{
+	if (myTargetComponentName.empty())
+	{
+		return &GetOwner()->GetTransform();
+	}
+	SceneComponent* target = dynamic_cast<SceneComponent*>(GetOwner()->FindComponent(myTargetComponentName));
+	return target ? &target->GetTransform() : nullptr;
 }
 
 void AnimationControlsComponent::BeginPlay()

@@ -4,6 +4,7 @@ static const uint LIGHT_TYPE_DIRECTIONAL = 0;
 static const uint LIGHT_TYPE_POINT = 1;
 static const uint LIGHT_TYPE_SPOT = 2;
 static const uint MAX_LIGHTS = 8;
+static const float MIN_LIGHT_DISTANCE = 0.01f;
 
 struct Light
 {
@@ -37,6 +38,20 @@ cbuffer LightBuffer : register(b4)
 
 #include "ShadowSampling.hlsli"
 
+bool HasDirectionalLight()
+{
+    const uint numLights = min(LB_NumActiveLights, MAX_LIGHTS);
+    for (uint lightIndex = 0; lightIndex < numLights; ++lightIndex)
+    {
+        if (LB_Lights[lightIndex].Type == LIGHT_TYPE_DIRECTIONAL)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 float3 CalculateDirectionalLight(
     Light aLight,
     float3 aDiffuseColor,
@@ -67,7 +82,7 @@ float3 CalculatePointLight(
     float3 aViewDir)
 {
     const float3 toLight = aLight.Position - aWorldPosition;
-    const float distanceToLight = max(length(toLight), 0.01f);
+    const float distanceToLight = max(length(toLight), MIN_LIGHT_DISTANCE);
     const float3 lightDirection = toLight / distanceToLight;
 
     float rangeAttenuation = saturate(1.0f - (distanceToLight * distanceToLight) / (aLight.Radius * aLight.Radius));
@@ -95,7 +110,7 @@ float3 CalculateSpotLight(
     float3 aViewDir)
 {
     const float3 toLight = aLight.Position - aWorldPosition;
-    const float distanceToLight = max(length(toLight), 0.01f);
+    const float distanceToLight = max(length(toLight), MIN_LIGHT_DISTANCE);
     const float3 lightDirection = toLight / distanceToLight;
 
     float rangeAttenuation = saturate(1.0f - (distanceToLight * distanceToLight) / (aLight.Radius * aLight.Radius));

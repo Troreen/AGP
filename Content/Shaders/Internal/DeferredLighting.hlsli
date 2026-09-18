@@ -22,7 +22,7 @@ bool GetDeferredSurface(FullTextureVertex aPixel, out float3 outDiffuse, out flo
 	// Initialize all out parameters before the no-geometry early exit.
 	outDiffuse = 0.0f;
 	outSpecular = 0.0f;
-	outRoughness = 0.04f;
+	outRoughness = MIN_PBR_ROUGHNESS;
 	outAO = 1.0f;
 	outNormal = float3(0.0f, 1.0f, 0.0f);
 	outPosition = 0.0f;
@@ -33,13 +33,13 @@ bool GetDeferredSurface(FullTextureVertex aPixel, out float3 outDiffuse, out flo
     const float3 material = GBufferSurface.Sample(TrilinearClamp, aPixel.UV).rgb;
     const float metalness = saturate(material.b);
     outAO = saturate(material.r) * saturate(ScreenSpaceAO.Sample(TrilinearClamp, aPixel.UV).r);
-    outRoughness = clamp(material.g, 0.04f, 1.0f);
+    outRoughness = clamp(material.g, MIN_PBR_ROUGHNESS, 1.0f);
     
     outNormal = normalize(GBufferNormal.Sample(TrilinearClamp, aPixel.UV).xyz);
     outPosition = GBufferWorldPosition.Sample(TrilinearClamp, aPixel.UV).xyz;
     const float3 albedoColor = saturate(albedo.rgb);
     outDiffuse = albedoColor * (1.0f - metalness);
-    outSpecular = lerp((float3)0.04f, albedoColor, metalness);
+    outSpecular = lerp((float3)DIELECTRIC_SPECULAR, albedoColor, metalness);
     outViewDir = normalize(FB_CameraPosition - outPosition);
     return hasGeometry;
 }

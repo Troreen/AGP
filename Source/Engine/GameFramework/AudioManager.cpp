@@ -151,7 +151,29 @@ void AudioManager::ResetSounds()
 void AudioManager::RegisterAllEvents()
 {
 	SoundEngine::RegisterEvent("event:/FMODTest", SoundID::eMainTheme);
+	SoundEngine::RegisterEvent("event:/Blizzard Ambience", SoundID::eBlizzardAmbience);
+	SoundEngine::RegisterEvent("event:/Castle Ambience 1", SoundID::eCastleAmbienceOne);
+	SoundEngine::RegisterEvent("event:/Castle Ambience 2", SoundID::eCastleAmbienceTwo);
+	SoundEngine::RegisterEvent("event:/Collect Item", SoundID::eCollectItem);
+	SoundEngine::RegisterEvent("event:/Crossbow Cock", SoundID::eCrossbowCock);
+	SoundEngine::RegisterEvent("event:/Heavy Roar", SoundID::eHeavyRoar);
+	SoundEngine::RegisterEvent("event:/Intro Swell", SoundID::eIntroSwell);
+	SoundEngine::RegisterEvent("event:/Potion Drink", SoundID::ePotion);
+	SoundEngine::RegisterEvent("event:/Sickle Slash", SoundID::eSickleSlash);
+	SoundEngine::RegisterEvent("event:/Slash Hit", SoundID::eSlashHit);
+	SoundEngine::RegisterEvent("event:/Whirlwind", SoundID::eWhirlwind);
 	myMusicList.insert({ SoundID::eMainTheme, SoundEngine::CreateEventInstance(SoundID::eMainTheme) });
+	myMusicList.insert({ SoundID::eBlizzardAmbience, SoundEngine::CreateEventInstance(SoundID::eBlizzardAmbience) });
+	myMusicList.insert({ SoundID::eCastleAmbienceOne, SoundEngine::CreateEventInstance(SoundID::eCastleAmbienceOne) });
+	myMusicList.insert({ SoundID::eCastleAmbienceTwo, SoundEngine::CreateEventInstance(SoundID::eCastleAmbienceTwo) });
+	myMusicList.insert({ SoundID::eCollectItem, SoundEngine::CreateEventInstance(SoundID::eCollectItem) });
+	myMusicList.insert({ SoundID::eCrossbowCock, SoundEngine::CreateEventInstance(SoundID::eCrossbowCock) });
+	myMusicList.insert({ SoundID::eHeavyRoar, SoundEngine::CreateEventInstance(SoundID::eHeavyRoar) });
+	myMusicList.insert({ SoundID::eIntroSwell, SoundEngine::CreateEventInstance(SoundID::eIntroSwell) });
+	myMusicList.insert({ SoundID::ePotion, SoundEngine::CreateEventInstance(SoundID::ePotion) });
+	myMusicList.insert({ SoundID::eSickleSlash, SoundEngine::CreateEventInstance(SoundID::eSickleSlash) });
+	myMusicList.insert({ SoundID::eSlashHit, SoundEngine::CreateEventInstance(SoundID::eSlashHit) });
+	myMusicList.insert({ SoundID::eWhirlwind, SoundEngine::CreateEventInstance(SoundID::eWhirlwind) });
 }
 
 AudioManager::AudioManager()
@@ -171,6 +193,10 @@ AudioManager* AudioManager::GetInstance()
 
 void AudioManager::Shutdown()
 {
+	if (myInstance == nullptr)
+	{
+		return;
+	}
 	myInstance->myMusicList.clear();
 	myInstance->myBusses.clear();
 	SoundEngine::Release();

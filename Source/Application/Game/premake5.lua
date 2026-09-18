@@ -38,8 +38,8 @@ project "Game"
 		path.join(dirs.dependencies, "TGAFBXImporter", "source", "TgaFbxStructs.cpp"),
 	}
 
-	-- These files implement the legacy standalone model viewer. The current
-	-- executable enters through Main.cpp and the reusable GameFramework runtime.
+	-- The executable enters through Main.cpp and the reusable GameFramework runtime.
+	-- Keep historical standalone viewer sources out even if they appear in an import.
 	removefiles {
 		"Application.cpp",
 		"Application.h",
@@ -86,17 +86,6 @@ project "Game"
         	CustomBuildAfterTargets = "Build"
 		}
 		
-    	buildoutputs { "*.hlsl*" }
-        buildmessage "Copying materials to content dir"
-        buildcommands {
-            'set "CONTENTROOT=$(SolutionDir)Content"',
-			'set "SHADERSRC=$(ProjectDir)Materials"',
-			'set "SHADERDEST=%CONTENTROOT%\\Shaders"',
-			'if not exist "%CONTENTROOT%" mkdir "%CONTENTROOT%"',
-			'if not exist "%SHADERDEST%" mkdir "%SHADERDEST%"',
-			'xcopy /E /I /R /Y "%SHADERSRC%" "%SHADERDEST%"'
-        }
-
     filter "not configurations:Debug"
         intrinsics "On"
 		runtime "Release"
@@ -106,8 +95,11 @@ project "Game"
 
 	filter "system:windows"
 		staticruntime "off"
-		symbols "On"		
+		symbols "On"
 		systemversion "latest"
+		-- The distributed SoundEngine-FMod libraries reference PDBs that are not
+		-- shipped. Suppress only that third-party linker diagnostic.
+		linkoptions { "/IGNORE:4099" }
 		
 		defines {
 			"_LIB"

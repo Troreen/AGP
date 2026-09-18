@@ -98,7 +98,7 @@ private:
 
 namespace InputActions
 {
-	extern const InputActionId Quit, ReloadScene, SpawnDemo, DebugCamera, CycleRenderPass, PrintDiagnostics;
+	extern const InputActionId Quit, ReloadScene, SpawnDemo, AttachDemoChild, DebugCamera, PreviousRenderPass, NextRenderPass, PrintDiagnostics;
 	extern const InputActionId CameraLookEnable, CameraLookDelta, CameraForward, CameraBack, CameraLeft, CameraRight, CameraUp, CameraDown;
 	extern const InputActionId ToggleSpin, PlayBreathing, PlayWalk, PlayRun, PlayWave;
 	extern const InputActionId ToggleDirectional, TogglePoint, ToggleSpot, AimDirectional, PlacePoint, PlaceSpot, PrintLights;

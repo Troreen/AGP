@@ -1,3 +1,5 @@
+static const uint MAX_JOINT_COUNT = 128;
+
 struct VStoPS
 {
     float4 Position : SV_Position;
@@ -28,5 +30,5 @@ cbuffer ObjectBuffer : register(b1)
 
 cbuffer AnimationBuffer : register(b2)
 {
-    row_major float4x4 AB_JointTransforms[128];
+    row_major float4x4 AB_JointTransforms[MAX_JOINT_COUNT];
 }

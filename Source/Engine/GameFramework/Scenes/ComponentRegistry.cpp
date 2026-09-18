@@ -1,4 +1,6 @@
 #include "GameFramework/Scenes/ComponentRegistry.h"
+#include "GameFramework/AssetHandling/AssetRegistry.h"
+#include "GameFramework/GameFrameworkLog.h"
 #include "GameFramework/Components/CameraComponent.h"
 #include "GameFramework/Components/LightComponent.h"
 #include "GameFramework/Components/SkeletalMeshComponent.h"
@@ -35,13 +37,14 @@ namespace
 		}
 	}
 
-	void ApplyMesh(MeshComponentBase& component, const StaticMeshData& data, IAssetResolver& assets)
+	bool ApplyMesh(MeshComponentBase& component, const StaticMeshData& data, AssetRegistry& assets)
 	{
 		component.SetSourceAssetIdentity(data.MeshName, data.ContentPath);
 		const MeshAsset mesh = assets.ResolveMesh(data.Mesh);
 		if (!mesh)
 		{
-			throw std::runtime_error("Mesh asset is unavailable: " + data.Mesh.Value);
+			GFLOG(Warning, "Skipping mesh component '{}': {}", data.Common.Name, assets.GetLastError());
+			return false;
 		}
 		component.SetMesh(mesh);
 		component.SetVisible(data.Visible);
@@ -52,17 +55,23 @@ namespace
 		for (size_t materialSlot = 0; materialSlot < data.Materials.size(); ++materialSlot)
 		{
 			const MaterialAsset material = CreateMaterialInstance(assets, data.Materials[materialSlot]);
-			if (!material || !component.SetMaterial(static_cast<unsigned>(materialSlot), material))
+			if (!material)
 			{
 				const MaterialInstanceData& materialData = data.Materials[materialSlot];
 				const std::string parentName = materialData.Parent.Value.empty() ? materialData.Name : materialData.Parent.Value;
-				throw std::runtime_error("Could not initialize material '" + materialData.Name + "' from parent '" + parentName +
-				                         "' at slot " + std::to_string(materialSlot));
+				GFLOG(Warning, "Skipping mesh component '{}': material '{}' from parent '{}' is unavailable at slot {}.",
+				      data.Common.Name, materialData.Name, parentName, materialSlot);
+				return false;
+			}
+			if (!component.SetMaterial(static_cast<unsigned>(materialSlot), material))
+			{
+				throw std::runtime_error("Material slot is invalid: " + std::to_string(materialSlot));
 			}
 		}
+		return true;
 	}
 
-	Component* CreateComponent(Actor& actor, const ComponentRecord& record, IAssetResolver& assets,
+	Component* CreateComponent(Actor& actor, const ComponentRecord& record, AssetRegistry& assets,
 	                           CommonUtilities::Vector2u clientSize)
 	{
 		const ComponentData& common = Common(record);
@@ -81,13 +90,21 @@ namespace
 			else if constexpr (std::is_same_v<ComponentType, StaticMeshData>)
 			{
 				StaticMeshComponent* meshComponent = actor.AddComponent<StaticMeshComponent>(common.Name);
-				ApplyMesh(*meshComponent, componentData, assets);
+				if (!ApplyMesh(*meshComponent, componentData, assets))
+				{
+					meshComponent->Destroy();
+					return nullptr;
+				}
 				return meshComponent;
 			}
 			else if constexpr (std::is_same_v<ComponentType, SkeletalMeshData>)
 			{
 				SkeletalMeshComponent* meshComponent = actor.AddComponent<SkeletalMeshComponent>(common.Name);
-				ApplyMesh(*meshComponent, componentData, assets);
+				if (!ApplyMesh(*meshComponent, componentData, assets))
+				{
+					meshComponent->Destroy();
+					return nullptr;
+				}
 				if (!componentData.PartialRoot.empty() &&
 				    !meshComponent->ConfigurePartialLayerFromJointName(componentData.PartialRoot))
 				{
@@ -137,7 +154,7 @@ namespace
 	}
 }
 
-std::unique_ptr<World> ComponentRegistry::CreateWorld(const SceneData& scene, IAssetResolver& assets, InputSystem* input,
+std::unique_ptr<World> ComponentRegistry::CreateWorld(const SceneData& scene, AssetRegistry& assets, InputSystem* input,
 	CommonUtilities::Vector2u size) const
 {
 	std::unique_ptr<World> world = std::make_unique<World>(input);
@@ -168,6 +185,10 @@ std::unique_ptr<World> ComponentRegistry::CreateWorld(const SceneData& scene, IA
 			try
 			{
 				Component* created = CreateComponent(*actor, record, assets, size);
+				if (created == nullptr)
+				{
+					continue;
+				}
 				ApplyMetadata(*created, common);
 				const bool componentActiveTag = std::find(common.Tags.begin(), common.Tags.end(), "ActiveCamera") != common.Tags.end();
 				const bool actorActiveTag = std::find(actorData.Tags.begin(), actorData.Tags.end(), "ActiveCamera") != actorData.Tags.end();

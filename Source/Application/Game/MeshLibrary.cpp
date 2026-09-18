@@ -191,6 +191,19 @@ std::shared_ptr<Mesh> MeshLibrary::GetMesh(std::string_view aName) const
 	return foundMesh->second;
 }
 
+std::shared_ptr<Mesh> MeshLibrary::LoadMesh(const std::filesystem::path& aPath)
+{
+	const std::filesystem::path resolvedPath = ResolvePath(aPath);
+	if (resolvedPath.empty() || !LoadFBXMesh(resolvedPath))
+	{
+		return nullptr;
+	}
+	const std::string name = resolvedPath.stem().string();
+	const std::shared_ptr<Mesh> mesh = GetMesh(name);
+	myMeshes.erase(name);
+	return mesh;
+}
+
 std::shared_ptr<Mesh> MeshLibrary::LoadSceneMesh(std::string_view, std::string_view aContentPath)
 {
 	// Unreal's built-in basic shapes do not exist as FBX files in Content. Reuse

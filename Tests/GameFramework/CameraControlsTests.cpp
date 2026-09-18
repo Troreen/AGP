@@ -13,6 +13,14 @@ namespace
 	constexpr float DegreesToRadians = 0.017453292519943295f;
 	constexpr float LookSensitivity = 0.0025f;
 
+	void Expect(bool condition, const std::string& message)
+	{
+		if (!condition)
+		{
+			throw std::runtime_error(message);
+		}
+	}
+
 	void ExpectVector(const Vector3f& actual, const Vector3f& expected, const std::string& message)
 	{
 		if ((actual - expected).Length() > 0.0001f || !std::isfinite(actual.LengthSqr()))
@@ -122,7 +130,7 @@ namespace
 		camera->GetTransform().SetLocalRotationDegrees(AuthoredRotation(70, -35));
 		camera->AddComponent<CameraControlsComponent>();
 		auto* directional = world->SpawnActor("Directional")->AddComponent<DirectionalLightComponent>();
-		auto* point = world->SpawnActor("Point")->AddComponent<PointLightComponent>();
+		world->SpawnActor("Point")->AddComponent<PointLightComponent>();
 		auto* spot = world->SpawnActor("Spot")->AddComponent<SpotLightComponent>();
 		auto* controls = world->SpawnActor("Controls")->AddComponent<LightControlsComponent>();
 		controls->CameraName = "Camera";
@@ -154,21 +162,31 @@ namespace
 		auto world = std::make_unique<World>(&input);
 		auto* chest = world->SpawnActor("Chest");
 		chest->AddComponent<SpinComponent>();
+		auto* child = chest->AddComponent<SceneComponent>("Child");
+		child->GetTransform().SetLocalPosition({10.0f, 0.0f, 0.0f});
+		auto* childSpin = chest->AddComponent<SpinComponent>("ChildSpin");
+		childSpin->SetTargetComponentName("Child");
+		const CommonUtilities::Vector3f initialChildWorldPosition = child->GetWorldPosition();
 		world->BeginPlay();
 		world->Update(.002f);
 		ExpectVector(chest->GetTransform().GetLocalForward(), ExpectedForward(.05f, 0), "Spin advances on a short frame");
+		ExpectVector(child->GetTransform().GetLocalForward(), ExpectedForward(.05f, 0), "Child advances its own local spin");
+		Expect((child->GetWorldPosition() - initialChildWorldPosition).LengthSqr() > 0.0f,
+		       "Parent spin did not move the offset child around its orbit");
 		frame.KeysDown[static_cast<size_t>(Keys::R)] = true;
 		input.Update(frame);
 		world->Update(0);
 		input.Update(frame);
 		world->Update(.2f);
 		ExpectVector(chest->GetTransform().GetLocalForward(), ExpectedForward(.05f, 0), "Pressed R pauses; held R does not toggle again");
+		ExpectVector(child->GetTransform().GetLocalForward(), ExpectedForward(.05f, 0), "Pressed R pauses the child spin too");
 		frame = {};
 		input.Update(frame);
 		frame.KeysDown[static_cast<size_t>(Keys::R)] = true;
 		input.Update(frame);
 		world->Update(.1f);
 		ExpectVector(chest->GetTransform().GetLocalForward(), ExpectedForward(2.55f, 0), "Second R press resumes frame-time spin");
+		ExpectVector(child->GetTransform().GetLocalForward(), ExpectedForward(2.55f, 0), "Second R press resumes child spin");
 	}
 }
 
