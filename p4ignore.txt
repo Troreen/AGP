@@ -34,3 +34,4 @@ README.md
 .clang-format
 .clang-format-ignore
 /Docs
+.pch
