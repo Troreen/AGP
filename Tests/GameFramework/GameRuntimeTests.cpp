@@ -3,7 +3,7 @@
 #endif
 #include <Windows.h>
 #include <crtdbg.h>
-#include "EnumKeys.h"
+#include "EnumKeyCode.h"
 #include "GameFramework/Runtime/GameApplication.h"
 #include "GameFramework/Runtime/GameContext.h"
 #include "GameFramework/AssetHandling/AssetRegistry.h"
@@ -181,7 +181,7 @@ public:
 	void Initialize(GameContext& context) override
 	{
 		InputDeviceFrame frame;
-		frame.KeysDown[static_cast<size_t>(Keys::F6)] = true;
+		frame.KeysDown[static_cast<size_t>(EKeyCode::F6)] = true;
 		context.GetInputSystem().Update(frame);
 	}
 
@@ -311,24 +311,24 @@ int RunRenderPassControlsTest()
 	});
 
 	InputDeviceFrame frame;
-	frame.KeysDown[static_cast<size_t>(Keys::F5)] = true;
+	frame.KeysDown[static_cast<size_t>(EKeyCode::F5)] = true;
 	input.Update(frame);
 	Check(std::string(graphics.GetRenderPassName()) == "Shadows (Directional)", "F5 did not wrap to the previous render pass");
 
 	input.Update({});
 	frame = {};
-	frame.KeysDown[static_cast<size_t>(Keys::F6)] = true;
+	frame.KeysDown[static_cast<size_t>(EKeyCode::F6)] = true;
 	input.Update(frame);
 	Check(std::string(graphics.GetRenderPassName()) == "Lit", "F6 did not advance to the next render pass");
 
 	input.Update({});
 	frame = {};
-	frame.KeysDown[static_cast<size_t>(Keys::F6)] = true;
+	frame.KeysDown[static_cast<size_t>(EKeyCode::F6)] = true;
 	input.Update(frame);
 	Check(std::string(graphics.GetRenderPassName()) == "Albedo (sRGB)", "F6 did not update to the next render-pass name");
 	input.Update({});
 	frame = {};
-	frame.KeysDown[static_cast<size_t>(Keys::F5)] = true;
+	frame.KeysDown[static_cast<size_t>(EKeyCode::F5)] = true;
 	input.Update(frame);
 	Check(std::string(graphics.GetRenderPassName()) == "Lit", "F5 did not update to the previous render-pass name");
 

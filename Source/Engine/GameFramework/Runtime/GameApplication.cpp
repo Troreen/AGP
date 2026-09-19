@@ -20,7 +20,7 @@
 #include "InputHandler.h"
 #include "XInputHandler.h"
 #include "EnumGamepadCode.h"
-#include "EnumKeys.h"
+#include "EnumKeyCode.h"
 #include "Timer.h"
 #include <algorithm>
 #include <array>
@@ -337,7 +337,7 @@ InputDeviceFrame GameApplication::Impl::CaptureInputFrame()
 		inputFrame.KeysDown[static_cast<size_t>(keyCode)] = isFocused && (myInputHandler.IsKeyDown(keyCode) || IsVirtualKeyDown(keyCode));
 	}
 
-	const bool rightMouseDown = inputFrame.KeysDown[static_cast<size_t>(Keys::MOUSERBUTTON)];
+	const bool rightMouseDown = inputFrame.KeysDown[static_cast<size_t>(EKeyCode::MOUSERBUTTON)];
 	if (myConfig.EnableMouseLook && isFocused && rightMouseDown)
 	{
 		RECT clientRect = {};

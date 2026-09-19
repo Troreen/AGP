@@ -1,5 +1,5 @@
 #include "GameFramework/Runtime/InputSystem.h"
-#include "EnumKeys.h"
+#include "EnumKeyCode.h"
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
@@ -226,7 +226,7 @@ namespace InputActions
 
 void InstallDefaultInputBindings(InputSystem& input)
 {
-	using K = Keys;
+	using K = EKeyCode;
 	const std::vector<int> anyShift{int(K::SHIFT), int(K::LSHIFT), int(K::RSHIFT)};
 	input.BindKey(InputActions::Quit, int(K::ESCAPE));
 	input.BindKey(InputActions::ReloadScene, int(K::F4));

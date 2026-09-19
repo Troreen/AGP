@@ -1,5 +1,5 @@
 #include "GameFramework/Scenes/ComponentRegistry.h"
-#include "EnumKeys.h"
+#include "EnumKeyCode.h"
 #include "GameFramework/Components/CameraComponent.h"
 #include "GameFramework/Components/SceneComponent.h"
 #include "GameFramework/Components/DebugCameraController.h"
@@ -178,11 +178,11 @@ void FrameTimingAndInput()
 	Counts count;
 	InputSystem input;
 	const InputActionId testAction{"TestAction"};
-	input.BindKey(testAction, int(Keys::R));
+	input.BindKey(testAction, int(EKeyCode::R));
 	bool actionReceived = false;
 	auto subscription = input.Subscribe(testAction, [&](const InputActionEvent& event) { actionReceived = event.Phase == InputActionPhase::Started; });
 	InputDeviceFrame frame;
-	frame.KeysDown[static_cast<size_t>(Keys::R)] = true;
+	frame.KeysDown[static_cast<size_t>(EKeyCode::R)] = true;
 	input.Update(frame);
 	World world(&input);
 	auto* probe = world.SpawnActor("A")->AddComponent<Probe>("P", count);
@@ -355,33 +355,33 @@ void InputSystemSemantics()
 {
 	InputSystem input;
 	const InputActionId action{"Action"};
-	input.BindKey(action, int(Keys::R));
+	input.BindKey(action, int(EKeyCode::R));
 	std::vector<InputActionPhase> phases;
 	auto subscription = input.Subscribe(action, [&](const InputActionEvent& event) { phases.push_back(event.Phase); });
 	InputDeviceFrame frame;
-	frame.KeysDown[size_t(Keys::R)] = true;
+	frame.KeysDown[size_t(EKeyCode::R)] = true;
 	input.Update(frame);
 	input.Update(frame);
-	frame.KeysDown[size_t(Keys::R)] = false;
+	frame.KeysDown[size_t(EKeyCode::R)] = false;
 	input.Update(frame);
 	Check(phases == std::vector{InputActionPhase::Started, InputActionPhase::Ongoing, InputActionPhase::Ended}, "Input phases");
 
 	const InputActionId chord{"Chord"}, plain{"Plain"};
-	input.BindKey(chord, int('7'), {int(Keys::SHIFT)});
-	input.BindKey(plain, int('7'), {}, {int(Keys::SHIFT), int(Keys::LSHIFT), int(Keys::RSHIFT)});
+	input.BindKey(chord, int('7'), {int(EKeyCode::SHIFT)});
+	input.BindKey(plain, int('7'), {}, {int(EKeyCode::SHIFT), int(EKeyCode::LSHIFT), int(EKeyCode::RSHIFT)});
 	bool chordSeen = false, plainSeen = false;
 	auto chordSub = input.Subscribe(chord, [&](const InputActionEvent& event) { if (event.Phase == InputActionPhase::Started) chordSeen = true; });
 	auto plainSub = input.Subscribe(plain, [&](const InputActionEvent& event) { if (event.Phase == InputActionPhase::Started) plainSeen = true; });
-	frame = {}; frame.KeysDown[size_t('7')] = true; frame.KeysDown[size_t(Keys::SHIFT)] = true; input.Update(frame);
+	frame = {}; frame.KeysDown[size_t('7')] = true; frame.KeysDown[size_t(EKeyCode::SHIFT)] = true; input.Update(frame);
 	Check(chordSeen && !plainSeen, "Modifier chord also dispatched plain action");
 
 	const InputActionId removal{"Removal"};
-	input.BindKey(removal, int(Keys::F1));
+	input.BindKey(removal, int(EKeyCode::F1));
 	int callbacks = 0;
 	InputSubscription later;
 	auto first = input.Subscribe(removal, [&](const InputActionEvent&) { ++callbacks; later.Reset(); });
 	later = input.Subscribe(removal, [&](const InputActionEvent&) { ++callbacks; });
-	frame = {}; frame.KeysDown[size_t(Keys::F1)] = true; input.Update(frame);
+	frame = {}; frame.KeysDown[size_t(EKeyCode::F1)] = true; input.Update(frame);
 	Check(callbacks == 2, "Listener removal changed active dispatch");
 	input.Update(frame);
 	Check(callbacks == 3, "Removed listener remained subscribed");
@@ -399,22 +399,22 @@ void InputSystemSemantics()
 
 	InputSystem detailed;
 	const InputActionId multi{"Multi"}, mouse{"Mouse"}, order{"Order"}, exception{"Exception"};
-	detailed.BindKey(multi, int(Keys::A)); detailed.BindKey(multi, int(Keys::D)); detailed.BindMouseDelta(mouse, 2.f);
+	detailed.BindKey(multi, int(EKeyCode::A)); detailed.BindKey(multi, int(EKeyCode::D)); detailed.BindMouseDelta(mouse, 2.f);
 	int multiEnded = 0; auto multiSub = detailed.Subscribe(multi, [&](const InputActionEvent& event) { if (event.Phase == InputActionPhase::Ended) ++multiEnded; });
 	std::vector<int> listenerOrder;
 	auto order1 = detailed.Subscribe(order, [&](const InputActionEvent&) { listenerOrder.push_back(1); });
-	auto order2 = detailed.Subscribe(order, [&](const InputActionEvent&) { listenerOrder.push_back(2); }); detailed.BindKey(order, int(Keys::W));
+	auto order2 = detailed.Subscribe(order, [&](const InputActionEvent&) { listenerOrder.push_back(2); }); detailed.BindKey(order, int(EKeyCode::W));
 	CommonUtilities::Vector2f mouseValue; auto mouseSub = detailed.Subscribe(mouse, [&](const InputActionEvent& event) { mouseValue = std::get<CommonUtilities::Vector2f>(event.Value); });
-	frame = {}; frame.KeysDown[size_t(Keys::A)] = true; frame.KeysDown[size_t(Keys::W)] = true; frame.MouseDelta = {2, -3}; detailed.Update(frame);
+	frame = {}; frame.KeysDown[size_t(EKeyCode::A)] = true; frame.KeysDown[size_t(EKeyCode::W)] = true; frame.MouseDelta = {2, -3}; detailed.Update(frame);
 	Check(listenerOrder == std::vector{1,2} && mouseValue.x == 4 && mouseValue.y == -6, "Input ordering or mouse motion");
-	frame.KeysDown[size_t(Keys::D)] = true; detailed.Update(frame); frame.KeysDown[size_t(Keys::A)] = false; detailed.Update(frame);
+	frame.KeysDown[size_t(EKeyCode::D)] = true; detailed.Update(frame); frame.KeysDown[size_t(EKeyCode::A)] = false; detailed.Update(frame);
 	Check(multiEnded == 0, "Multi-binding action ended while another binding remained active");
 	frame.Focused = false; detailed.Update(frame); Check(multiEnded == 1, "Focus loss did not end active action");
 
-	detailed.BindKey(exception, int(Keys::F2)); InputSubscription throwing;
+	detailed.BindKey(exception, int(EKeyCode::F2)); InputSubscription throwing;
 	throwing = detailed.Subscribe(exception, [&](const InputActionEvent&) { throwing.Reset(); throw std::runtime_error("callback"); });
-	frame = {}; frame.KeysDown[size_t(Keys::F2)] = true; try { detailed.Update(frame); } catch (const std::runtime_error&) {}
-	frame.KeysDown[size_t(Keys::F2)] = false; detailed.Update(frame);
+	frame = {}; frame.KeysDown[size_t(EKeyCode::F2)] = true; try { detailed.Update(frame); } catch (const std::runtime_error&) {}
+	frame.KeysDown[size_t(EKeyCode::F2)] = false; detailed.Update(frame);
 	InputSubscription survivor;
 	{ InputSystem temporary; survivor = temporary.Subscribe(action, [](const InputActionEvent&) {}); }
 	survivor.Reset();
@@ -509,13 +509,13 @@ void DebugCameraActions()
 	{
 		if (event.Phase == InputActionPhase::Started) service.Toggle(world, {640,360});
 	});
-	InputDeviceFrame frame; frame.KeysDown[size_t(Keys::F1)] = true; input.Update(frame);
+	InputDeviceFrame frame; frame.KeysDown[size_t(EKeyCode::F1)] = true; input.Update(frame);
 	Check(world.GetActiveCamera() != original && world.FindActor("__DebugCamera"), "F1 did not lazily spawn/activate debug camera");
-	frame.KeysDown[size_t(Keys::F1)] = false; input.Update(frame); frame.KeysDown[size_t(Keys::F1)] = true; input.Update(frame);
+	frame.KeysDown[size_t(EKeyCode::F1)] = false; input.Update(frame); frame.KeysDown[size_t(EKeyCode::F1)] = true; input.Update(frame);
 	Check(world.GetActiveCamera() == original, "F1 did not restore prior camera");
-	frame.KeysDown[size_t(Keys::F1)] = false; input.Update(frame); frame.KeysDown[size_t(Keys::F1)] = true; input.Update(frame);
+	frame.KeysDown[size_t(EKeyCode::F1)] = false; input.Update(frame); frame.KeysDown[size_t(EKeyCode::F1)] = true; input.Update(frame);
 	originalActor->Destroy(); world.Update(0);
-	frame.KeysDown[size_t(Keys::F1)] = false; input.Update(frame); frame.KeysDown[size_t(Keys::F1)] = true; input.Update(frame);
+	frame.KeysDown[size_t(EKeyCode::F1)] = false; input.Update(frame); frame.KeysDown[size_t(EKeyCode::F1)] = true; input.Update(frame);
 	Check(world.GetActiveCamera() && world.GetActiveCamera()->GetOwner()->GetName() == "__DebugCamera", "Destroyed previous camera displaced debug camera");
 }
 

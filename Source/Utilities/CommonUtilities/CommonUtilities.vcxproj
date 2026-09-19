@@ -161,7 +161,6 @@
     <ClInclude Include="Dijkstra.hpp" />
     <ClInclude Include="EnumGamepadCode.h" />
     <ClInclude Include="EnumKeyCode.h" />
-    <ClInclude Include="EnumKeys.h" />
     <ClInclude Include="EnumLockMode.h" />
     <ClInclude Include="EnumPointerCode.h" />
     <ClInclude Include="Grid2D.hpp" />
