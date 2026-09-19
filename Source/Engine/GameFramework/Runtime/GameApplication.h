@@ -1,6 +1,26 @@
 #pragma once
 #include "GameFramework/Scenes/SceneData.h"
+#include <algorithm>
+#include <memory>
 class IGame;
+class Font;
+class FontAsset;
+
+class RenderPassNotificationTimer
+{
+public:
+	void Restart() { myRemaining = Duration; }
+	void Update(float delta) { myRemaining = (std::max)(0.0f, myRemaining - (std::max)(0.0f, delta)); }
+	bool IsVisible() const { return myRemaining > 0.0f; }
+	float GetOpacity() const { return myRemaining >= FadeDuration ? 1.0f : myRemaining / FadeDuration; }
+	float GetRemaining() const { return myRemaining; }
+
+	static constexpr float Duration = 2.0f;
+	static constexpr float FadeDuration = 0.5f;
+
+private:
+	float myRemaining = 0.0f;
+};
 
 class GameApplication
 {
@@ -20,5 +40,6 @@ public:
 	int Run(IGame& game, const Config& config, SceneSource source = {});
 
 private:
+	static std::shared_ptr<Font> GetFontResource(const FontAsset& asset);
 	class Impl;
 };

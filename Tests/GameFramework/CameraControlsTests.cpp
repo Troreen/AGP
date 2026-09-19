@@ -1,7 +1,7 @@
 #include "GameComponents.h"
 #include "GameFramework/World/World.h"
 #include "GameFramework/Components/LightComponent.h"
-#include "EnumKeys.h"
+#include "EnumKeyCode.h"
 #include <cmath>
 #include <iostream>
 #include <stdexcept>
@@ -70,7 +70,7 @@ namespace
 		void Look(float yawDeltaDegrees, float pitchDeltaDegrees, bool active = true)
 		{
 			Frame = {};
-			Frame.KeysDown[static_cast<size_t>(Keys::MOUSERBUTTON)] = active;
+			Frame.KeysDown[static_cast<size_t>(EKeyCode::MOUSERBUTTON)] = active;
 			Frame.MouseDelta.x = yawDeltaDegrees * DegreesToRadians / LookSensitivity;
 			Frame.MouseDelta.y = pitchDeltaDegrees * DegreesToRadians / LookSensitivity;
 			Input.Update(Frame);
@@ -138,15 +138,15 @@ namespace
 		controls->PointName = "Point";
 		controls->SpotName = "Spot";
 		world->BeginPlay();
-		frame.KeysDown[static_cast<size_t>(Keys::MOUSERBUTTON)] = true;
+		frame.KeysDown[static_cast<size_t>(EKeyCode::MOUSERBUTTON)] = true;
 		frame.MouseDelta.x = 10 * DegreesToRadians / LookSensitivity;
-		frame.KeysDown[static_cast<size_t>(Keys::SHIFT)] = true;
+		frame.KeysDown[static_cast<size_t>(EKeyCode::SHIFT)] = true;
 		frame.KeysDown[static_cast<size_t>('7')] = true;
 		input.Update(frame);
 		world->Update(1.0f / 60.0f);
 		ExpectVector(directional->GetWorldDirection(), ExpectedForward(80, -35), "Shift+7 uses camera movement from the same Update");
 		frame = {};
-		frame.KeysDown[static_cast<size_t>(Keys::SHIFT)] = true;
+		frame.KeysDown[static_cast<size_t>(EKeyCode::SHIFT)] = true;
 		frame.KeysDown[static_cast<size_t>('9')] = true;
 		input.Update(frame);
 		world->Update(1.0f / 60.0f);
@@ -173,7 +173,7 @@ namespace
 		ExpectVector(child->GetTransform().GetLocalForward(), ExpectedForward(.05f, 0), "Child advances its own local spin");
 		Expect((child->GetWorldPosition() - initialChildWorldPosition).LengthSqr() > 0.0f,
 		       "Parent spin did not move the offset child around its orbit");
-		frame.KeysDown[static_cast<size_t>(Keys::R)] = true;
+		frame.KeysDown[static_cast<size_t>(EKeyCode::R)] = true;
 		input.Update(frame);
 		world->Update(0);
 		input.Update(frame);
@@ -182,7 +182,7 @@ namespace
 		ExpectVector(child->GetTransform().GetLocalForward(), ExpectedForward(.05f, 0), "Pressed R pauses the child spin too");
 		frame = {};
 		input.Update(frame);
-		frame.KeysDown[static_cast<size_t>(Keys::R)] = true;
+		frame.KeysDown[static_cast<size_t>(EKeyCode::R)] = true;
 		input.Update(frame);
 		world->Update(.1f);
 		ExpectVector(chest->GetTransform().GetLocalForward(), ExpectedForward(2.55f, 0), "Second R press resumes frame-time spin");

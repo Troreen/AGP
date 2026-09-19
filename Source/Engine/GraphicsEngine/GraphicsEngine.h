@@ -27,6 +27,7 @@
 #include "RHI/PipelineStateObject.h"
 #include "Materials/MaterialInterface.h"
 #include "Materials/Material.h"
+#include "TextWidget.h"
 
 enum class RenderLightType : uint32_t
 {
@@ -62,6 +63,7 @@ enum class ConstantBuffer : uint8_t
 	LightBuffer,
 	PointShadowBuffer,
 	RenderPassDebugBuffer,
+	TextOverlayBuffer,
 	MAX
 };
 
@@ -110,6 +112,8 @@ public:
 		uint32_t CulledShadowCasters = 0;
 		uint32_t ShadowCommandListsRecorded = 0;
 		uint32_t ShadowCommandListsExecuted = 0;
+		uint32_t TextDrawCalls = 0;
+		uint32_t RenderedGlyphs = 0;
 		double SnapshotMilliseconds = 0.0;
 		double ResourcePreparationMilliseconds = 0.0;
 		double ShadowRecordingMilliseconds = 0.0;
@@ -126,6 +130,7 @@ public:
 		std::vector<size_t> OpaqueRenderItems;
 		std::vector<size_t> BlendedRenderItems;
 		std::vector<LightSnapshot> RelevantLights;
+		std::vector<std::shared_ptr<TextWidget>> ScreenTextItems;
 		RenderStats Stats;
 
 		void Clear();
@@ -200,6 +205,7 @@ private:
 	bool CreatePBLResources();
 	bool CreateGBufferResources();
 	bool CreateDeferredPipelineStates();
+	bool CreateTextPipelineState();
 	bool CreateBRDFLUT();
 	void BindPBLResources(GraphicsCommandList& inoutCommandList) const;
 	bool CreateShadowResources();
@@ -224,6 +230,7 @@ private:
 	void RenderDebugView(GraphicsCommandList& inoutCommandList, const LightBuffer& lightBuffer, const GBufferBindings& gbufferTargets);
 	void RenderTransparentGeometry(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot,
 	                               const LightBuffer& lightBuffer);
+	void RenderScreenText(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot, RenderStats& frameStats);
 
 	void PrepareSnapshotRenderResources(const RenderSceneSnapshot& aSnapshot) const;
 	bool PrepareRenderItemResources(const RenderItemSnapshot& aRenderItem) const;
@@ -268,6 +275,7 @@ private:
 	PipelineStateObject myDeferredCompositePSO;
 	PipelineStateObject myScreenSpaceAOPSO;
 	PipelineStateObject myRenderPassDebugPSO;
+	PipelineStateObject myTextOverlayPSO;
 
 	std::filesystem::path myShaderRoot;
 	std::unordered_map<MaterialDomain, std::filesystem::path> myMaterialDomainShaders;

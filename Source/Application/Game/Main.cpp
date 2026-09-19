@@ -1,4 +1,4 @@
-#define WIN32_LEAN_AND_MEAN
+﻿#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <cstdio>
 #include <stdexcept>
@@ -11,13 +11,13 @@
 int APIENTRY wWinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ int)
 {
 #ifdef _DEBUG
-	AllocConsole();
+    AllocConsole();
 	FILE* output = nullptr;
 	freopen_s(&output, "CONOUT$", "w", stdout);
 	freopen_s(&output, "CONOUT$", "w", stderr);
 	SetConsoleOutputCP(CP_UTF8);
 #endif
-	try
+try
 	{
 		wchar_t executablePath[MAX_PATH] = {};
 		const DWORD length = GetModuleFileNameW(nullptr, executablePath, MAX_PATH);
@@ -39,13 +39,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ int)
 		});
 	}
 	catch (const std::exception& error)
-	{
+    {
 		std::string message = error.what();
 		if (!str::is_valid_utf8(message))
-		{
-			message = str::acp_to_utf8(message);
-		}
+        {
+	        message = str::acp_to_utf8(message);
+        }
 		GAMELOG(Error, "Game stopped: {}", message);
 		return 1;
-	}
+    }
 }
