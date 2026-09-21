@@ -11,5 +11,5 @@ struct FullTextureVertex
 float4 main(FullTextureVertex aPixel) : SV_TARGET
 {
     const float4 lighting = DeferredLighting.Sample(TrilinearWrap, aPixel.UV);
-    return float4(pow(abs(lighting.rgb), 1.0f / 2.2f), lighting.a);
+    return lighting;
 }

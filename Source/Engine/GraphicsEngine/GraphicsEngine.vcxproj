@@ -255,6 +255,8 @@
     <None Include="Shaders\Internal\ScreenSpaceAO_PS.hlsl" />
     <None Include="Shaders\Internal\TextOverlay_PS.hlsl" />
     <None Include="Shaders\Internal\TextOverlay_VS.hlsl" />
+    <None Include="Shaders\Internal\Tonemap.hlsli" />
+    <None Include="Shaders\Internal\Tonemap_PS.hlsl" />
     <None Include="Shaders\Material\Common.hlsli" />
     <None Include="Shaders\Material\GBuffer_PS.hlsl" />
     <None Include="Shaders\Material\GlobalLightingTextures.hlsli" />

@@ -42,6 +42,7 @@ public:
 	~RenderHardwareInterface();
 
 	bool Initialize(HWND aWindowHandle, bool aEnableDebug, Texture& outBackBuffer, Texture& outDepthStencil);
+	bool Resize(unsigned aWidth, unsigned aHeight, Texture& outBackBuffer, Texture& outDepthStencil);
 
 	CommonUtilities::Vector2u GetClientSize() const;
 

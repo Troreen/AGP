@@ -195,6 +195,12 @@
     <None Include="Shaders\Internal\TextOverlay_VS.hlsl">
       <Filter>Shaders\Internal</Filter>
     </None>
+    <None Include="Shaders\Internal\Tonemap.hlsli">
+      <Filter>Shaders\Internal</Filter>
+    </None>
+    <None Include="Shaders\Internal\Tonemap_PS.hlsl">
+      <Filter>Shaders\Internal</Filter>
+    </None>
     <None Include="Shaders\Material\Common.hlsli">
       <Filter>Shaders\Material</Filter>
     </None>

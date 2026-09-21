@@ -37,5 +37,5 @@ float4 main(VStoPS aPixel) : SV_TARGET
     const float3 directLighting = CalculateLighting(diffuseColor, specularColor, roughness, normal, parameters.WorldPosition.xyz, viewDir);
     const float3 finalColor = ambient + directLighting;
 
-    return float4(LinearToGamma(finalColor), parameters.PixelColor.a);
+    return float4(finalColor, parameters.PixelColor.a);
 }

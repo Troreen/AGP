@@ -145,7 +145,7 @@ void Game::Initialize(GameContext& context)
 			AttachRuntimeChild(context.GetWorld());
 		}
 	}));
-	context.LoadScene("Lvl_Blockout_Level");
+	context.LoadScene("ChestMaterials"); // TODO: make this a enum or smn wtf
 	AudioManager& audio = ServiceLocator::GetInstance().GetAudioManager();
 	audio.SetBusVolume(BusID::eMusic, BackgroundMusicVolume);
 	audio.PlayMusic(SoundID::eMainTheme, true);

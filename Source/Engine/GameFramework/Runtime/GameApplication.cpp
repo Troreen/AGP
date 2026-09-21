@@ -151,6 +151,20 @@ int GameApplication::Impl::Run()
 		myInputHandler.SetWindowHandle(myMainWindowHandle);
 		myInputHandler.SetAutoMouseCapture(false);
 		InstallDefaultInputBindings(myContext.myInput);
+		myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(InputActions::ToggleTonemapping, [](const InputActionEvent& event)
+		{
+			if (event.Phase == InputActionPhase::Started) GraphicsEngine::Get().ToggleTonemapping();
+		}));
+		for (const auto [action, tonemapper] : {
+			std::pair{&InputActions::SelectACES, Tonemapper::ACES},
+			std::pair{&InputActions::SelectLottes, Tonemapper::Lottes},
+			std::pair{&InputActions::SelectUnrealTonemapper, Tonemapper::UnrealEngine}})
+		{
+			myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(*action, [tonemapper](const InputActionEvent& event)
+			{
+				if (event.Phase == InputActionPhase::Started) GraphicsEngine::Get().SetTonemapper(tonemapper);
+			}));
+		}
 		myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(InputActions::DebugCamera, [this](const InputActionEvent& event)
 		{
 			if (event.Phase == InputActionPhase::Started) myDebugCamera.Toggle(myContext.GetWorld(), myContext.myClientSize);
@@ -213,6 +227,14 @@ int GameApplication::Impl::Run()
 				LoadPendingScene();
 				// Loading time does not become a large movement delta.
 				timer.Update();
+			}
+			const CU::Vector2u clientSize = graphics.GetClientSize();
+			if (clientSize.x == 0 || clientSize.y == 0) continue;
+			if (clientSize.x != myContext.myClientSize.x || clientSize.y != myContext.myClientSize.y)
+			{
+				myCommandList.ResetCommandList();
+				if (!graphics.Resize(clientSize.x, clientSize.y)) throw std::runtime_error("Failed to resize rendering targets");
+				myContext.myClientSize = clientSize;
 			}
 			timer.Update();
 			myInputHandler.UpdateInput();

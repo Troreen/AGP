@@ -509,6 +509,7 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path&
 	CreateConstantBuffer<LightBuffer>(ConstantBuffer::LightBuffer, "LightBuffer");
 	CreateConstantBuffer(ConstantBuffer::PointShadowBuffer, "PointShadowBuffer", sizeof(PointShadowBufferData));
 	CreateConstantBuffer(ConstantBuffer::RenderPassDebugBuffer, "RenderPassDebugBuffer", sizeof(std::array<uint32_t, 4>));
+	CreateConstantBuffer(ConstantBuffer::TonemapBuffer, "TonemapBuffer", sizeof(std::array<uint32_t, 4>));
 	CreateConstantBuffer<TextOverlayBufferData>(ConstantBuffer::TextOverlayBuffer, "TextOverlayBuffer");
 
 	mySamplers.reserve(RenderConfig::SamplerCount);
@@ -694,6 +695,7 @@ void GraphicsEngine::RenderSnapshot(GraphicsCommandList& inoutCommandList, const
 	RenderDeferredLighting(inoutCommandList, lightBuffer, gbufferTargets);
 	RenderDebugView(inoutCommandList, lightBuffer, gbufferTargets);
 	RenderTransparentGeometry(inoutCommandList, aSnapshot, lightBuffer);
+	RenderTonemapping(inoutCommandList);
 	RenderScreenText(inoutCommandList, aSnapshot, frameStats);
 	frameStats.SceneRecordingMilliseconds = ElapsedMilliseconds(sceneStart);
 	StoreLastRenderStats(frameStats);
@@ -913,9 +915,9 @@ void GraphicsEngine::PrepareSceneCommands(GraphicsCommandList& inoutCommandList,
 {
 	inoutCommandList.ClearOverridePipelineState();
 
-	inoutCommandList.ClearRenderTarget(myBackBuffer);
+	inoutCommandList.ClearRenderTarget(myHDRBuffer);
 	inoutCommandList.ClearDepthStencil(myDepthBuffer);
-	inoutCommandList.SetRenderTarget(&myBackBuffer, &myDepthBuffer);
+	inoutCommandList.SetRenderTarget(&myHDRBuffer, &myDepthBuffer);
 
 	inoutCommandList.SetShaderSamplers(mySamplerBindings.data(), mySamplerBindings.size(), 0,
 	                                   PipeLineStage_VertexShader | PipeLineStage_PixelShader);
@@ -988,7 +990,7 @@ void GraphicsEngine::RenderDeferredLighting(GraphicsCommandList& inoutCommandLis
 	// --- Deferred Lighting ---
 	// Reads GBuffer, SSAO, and completed shadow maps.
 	// Deferred lights are fullscreen additive passes. Accumulation stays linear until
-	// the final composite pass, matching the Forward shader's gamma conversion.
+	// the final tonemapping pass.
 	inoutCommandList.BeginEvent("Deferred Lighting");
 	inoutCommandList.ClearRenderTarget(myDeferredLightingTexture);
 	inoutCommandList.SetRenderTarget(&myDeferredLightingTexture, nullptr);
@@ -1025,7 +1027,7 @@ void GraphicsEngine::RenderDeferredLighting(GraphicsCommandList& inoutCommandLis
 	                                    PipeLineStage_PixelShader);
 	const Texture* nullScreenSpaceAOResource = nullptr;
 	inoutCommandList.SetShaderResources(&nullScreenSpaceAOResource, 1, TextureSlot::ScreenSpaceAO, PipeLineStage_PixelShader);
-	inoutCommandList.SetRenderTarget(&myBackBuffer, nullptr);
+	inoutCommandList.SetRenderTarget(&myHDRBuffer, nullptr);
 	const Texture* deferredLightingResource = &myDeferredLightingTexture;
 	inoutCommandList.SetShaderResources(&deferredLightingResource, 1, TextureSlot::DeferredLighting, PipeLineStage_PixelShader);
 	inoutCommandList.SetPipelineState(&myDeferredCompositePSO);
@@ -1041,11 +1043,11 @@ void GraphicsEngine::RenderDebugView(GraphicsCommandList& inoutCommandList, cons
                                      const GBufferBindings& gbufferTargets)
 {
 	// --- Render Pass Debug ---
-	// Replaces the composite with the selected diagnostic view.
+	// Replaces the lit HDR image with the selected diagnostic view.
 	if (myRenderPass != RenderPass::Lit)
 	{
 		inoutCommandList.BeginEvent("Render Pass Debug");
-		inoutCommandList.SetRenderTarget(&myBackBuffer, nullptr);
+		inoutCommandList.SetRenderTarget(&myHDRBuffer, nullptr);
 		inoutCommandList.SetShaderResources(gbufferTargets.data(), gbufferTargets.size(), TextureSlot::GBufferStart,
 		                                    PipeLineStage_PixelShader);
 		const Texture* screenSpaceAO = &myScreenSpaceAOTexture;
@@ -1071,7 +1073,7 @@ void GraphicsEngine::RenderTransparentGeometry(GraphicsCommandList& inoutCommand
 {
 	// --- Forward transparency ---
 	// Blended elements remain Forward rendered and use the depth written in GBuffer.
-	inoutCommandList.SetRenderTarget(&myBackBuffer, &myDepthBuffer);
+	inoutCommandList.SetRenderTarget(&myHDRBuffer, &myDepthBuffer);
 	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::LightBuffer, lightBuffer, ConstantBufferSlot::Light,
 	                           PipeLineStage_PixelShader);
 	for (size_t itemIndex : aSnapshot.BlendedRenderItems)
@@ -1127,9 +1129,31 @@ void GraphicsEngine::RenderScreenText(GraphicsCommandList& inoutCommandList, con
 	inoutCommandList.EndEvent();
 }
 
+void GraphicsEngine::RenderTonemapping(GraphicsCommandList& inoutCommandList)
+{
+	inoutCommandList.BeginEvent("Tonemapping");
+	inoutCommandList.SetRenderTarget(&myBackBuffer, nullptr);
+	const std::array<uint32_t, 4> settings = {static_cast<uint32_t>(myTonemapper), myTonemappingEnabled ? 1u : 0u, 0u, 0u};
+	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::TonemapBuffer, settings, ConstantBufferSlot::PassSpecific,
+	                           PipeLineStage_PixelShader);
+	const Texture* hdrResource = &myHDRBuffer;
+	inoutCommandList.SetShaderResources(&hdrResource, 1, 0, PipeLineStage_PixelShader);
+	inoutCommandList.SetPipelineState(&myTonemapPSO);
+	inoutCommandList.Draw(RenderConfig::FullscreenVertexCount);
+	const Texture* nullResource = nullptr;
+	inoutCommandList.SetShaderResources(&nullResource, 1, 0, PipeLineStage_PixelShader);
+	inoutCommandList.EndEvent();
+}
+
 void GraphicsEngine::Present() const
 {
 	myRHI.Present();
+}
+
+bool GraphicsEngine::Resize(unsigned aWidth, unsigned aHeight)
+{
+	for (GraphicsCommandList& list : myShadowCommandLists) list.ResetCommandList();
+	return myRHI.Resize(aWidth, aHeight, myBackBuffer, myDepthBuffer) && CreateGBufferResources();
 }
 
 // --- Diagnostics ---
@@ -1363,6 +1387,8 @@ bool GraphicsEngine::CreateGBufferResources()
 	                                       static_cast<unsigned>(DXGI_FORMAT_R16G16B16A16_SNORM), myTangentNormalDebugTexture) &&
 	       myRHI.CreateRenderTargetTexture("Deferred_Lighting", clientSize.x, clientSize.y,
 	                                       static_cast<unsigned>(DXGI_FORMAT_R32G32B32A32_FLOAT), myDeferredLightingTexture) &&
+	       myRHI.CreateRenderTargetTexture("HDRBuffer", clientSize.x, clientSize.y,
+	                                       static_cast<unsigned>(DXGI_FORMAT_R16G16B16A16_FLOAT), myHDRBuffer) &&
 	       myRHI.CreateRenderTargetTexture("ScreenSpace_AO", clientSize.x, clientSize.y, static_cast<unsigned>(DXGI_FORMAT_R32_FLOAT),
 	                                       myScreenSpaceAOTexture);
 }
@@ -1400,6 +1426,7 @@ bool GraphicsEngine::CreateDeferredPipelineStates()
 	       createPipeline("DeferredPointPSO", "DeferredPoint_PS.hlsl", BlendMode::Additive, myDeferredPointPSO) &&
 	       createPipeline("DeferredSpotPSO", "DeferredSpot_PS.hlsl", BlendMode::Additive, myDeferredSpotPSO) &&
 	       createPipeline("DeferredCompositePSO", "DeferredComposite_PS.hlsl", BlendMode::Opaque, myDeferredCompositePSO) &&
+	       createPipeline("TonemapPSO", "Tonemap_PS.hlsl", BlendMode::Opaque, myTonemapPSO) &&
 	       createPipeline("ScreenSpaceAOPSO", "ScreenSpaceAO_PS.hlsl", BlendMode::Opaque, myScreenSpaceAOPSO) &&
 	       createPipeline("RenderPassDebugPSO", "RenderPassDebug_PS.hlsl", BlendMode::Opaque, myRenderPassDebugPSO);
 }

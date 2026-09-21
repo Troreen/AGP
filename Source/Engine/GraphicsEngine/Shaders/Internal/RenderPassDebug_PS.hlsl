@@ -74,7 +74,7 @@ float4 main(FullTextureVertex aPixel) : SV_TARGET
     // are exposed to users in every build configuration.
     if (DebugRenderPass == RENDER_PASS_ALBEDO)
     {
-        result = LinearToGamma(saturate(albedo.rgb));
+        result = saturate(albedo.rgb);
     }
     else if (DebugRenderPass == RENDER_PASS_ROUGHNESS)
     {
@@ -105,7 +105,7 @@ float4 main(FullTextureVertex aPixel) : SV_TARGET
         const float3 normal = normalize(GBufferNormal.Sample(TrilinearClamp, aPixel.UV).xyz);
         const float3 position = GBufferWorldPosition.Sample(TrilinearClamp, aPixel.UV).xyz;
         const float3 viewDirection = normalize(FB_CameraPosition - position);
-        result = LinearToGamma(CalculateLightOnly(normal, position, viewDirection));
+        result = CalculateLightOnly(normal, position, viewDirection);
     }
 
     return float4(result, 1.0f);

@@ -222,6 +222,7 @@ namespace InputActions
 	const InputActionId CameraLookEnable{"CameraLookEnable"}, CameraLookDelta{"CameraLookDelta"}, CameraForward{"CameraForward"}, CameraBack{"CameraBack"}, CameraLeft{"CameraLeft"}, CameraRight{"CameraRight"}, CameraUp{"CameraUp"}, CameraDown{"CameraDown"};
 	const InputActionId ToggleSpin{"ToggleSpin"}, PlayBreathing{"PlayBreathing"}, PlayWalk{"PlayWalk"}, PlayRun{"PlayRun"}, PlayWave{"PlayWave"};
 	const InputActionId ToggleDirectional{"ToggleDirectional"}, TogglePoint{"TogglePoint"}, ToggleSpot{"ToggleSpot"}, AimDirectional{"AimDirectional"}, PlacePoint{"PlacePoint"}, PlaceSpot{"PlaceSpot"}, PrintLights{"PrintLights"};
+	const InputActionId ToggleTonemapping{"ToggleTonemapping"}, SelectACES{"SelectACES"}, SelectLottes{"SelectLottes"}, SelectUnrealTonemapper{"SelectUnrealTonemapper"};
 }
 
 void InstallDefaultInputBindings(InputSystem& input)
@@ -244,13 +245,19 @@ void InstallDefaultInputBindings(InputSystem& input)
 	input.BindKey(InputActions::ToggleSpin, int(K::R));
 	input.BindKey(InputActions::PlayBreathing, int(K::NUMPAD0)); input.BindKey(InputActions::PlayWalk, int(K::NUMPAD1));
 	input.BindKey(InputActions::PlayRun, int(K::NUMPAD2)); input.BindKey(InputActions::PlayWave, int(K::NUMPAD3));
+	input.BindKey(InputActions::ToggleTonemapping, int(K::NUMPAD4));
+	input.BindKey(InputActions::SelectACES, int(K::NUMPAD5));
+	input.BindKey(InputActions::SelectLottes, int(K::NUMPAD6));
+	input.BindKey(InputActions::SelectUnrealTonemapper, int(K::NUMPAD7));
 	input.BindKey(InputActions::PrintLights, int(K::P));
 	for (const auto [plain, modified, key, number] : {
 		std::tuple{&InputActions::ToggleDirectional, &InputActions::AimDirectional, int(K::NUMPAD7), int('7')},
 		std::tuple{&InputActions::TogglePoint, &InputActions::PlacePoint, int(K::NUMPAD8), int('8')},
 		std::tuple{&InputActions::ToggleSpot, &InputActions::PlaceSpot, int(K::NUMPAD9), int('9')}})
 	{
-		input.BindKey(*plain, key, {}, anyShift); input.BindKey(*plain, number, {}, anyShift);
-		for (int modifier : anyShift) { input.BindKey(*modified, key, {modifier}); input.BindKey(*modified, number, {modifier}); }
+		// Numpad 7 selects the Unreal tonemapper; the regular 7 key keeps the light shortcut.
+		if (key != int(K::NUMPAD7)) input.BindKey(*plain, key, {}, anyShift);
+		input.BindKey(*plain, number, {}, anyShift);
+		for (int modifier : anyShift) { if (key != int(K::NUMPAD7)) input.BindKey(*modified, key, {modifier}); input.BindKey(*modified, number, {modifier}); }
 	}
 }

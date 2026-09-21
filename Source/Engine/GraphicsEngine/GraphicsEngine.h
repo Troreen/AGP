@@ -51,6 +51,13 @@ enum class RenderPass : uint8_t
 	Count
 };
 
+enum class Tonemapper : uint32_t
+{
+	ACES = 0,
+	Lottes = 1,
+	UnrealEngine = 2
+};
+
 struct RHIShaderReflectionInfo;
 struct MaterialDescription;
 
@@ -62,7 +69,8 @@ enum class ConstantBuffer : uint8_t
 	MaterialBuffer,
 	LightBuffer,
 	PointShadowBuffer,
-	RenderPassDebugBuffer,
+		RenderPassDebugBuffer,
+		TonemapBuffer,
 	TextOverlayBuffer,
 	MAX
 };
@@ -150,6 +158,9 @@ public:
 	}
 
 	void Present() const;
+	bool Resize(unsigned aWidth, unsigned aHeight);
+	void ToggleTonemapping() { myTonemappingEnabled = !myTonemappingEnabled; }
+	void SetTonemapper(Tonemapper aTonemapper) { myTonemapper = aTonemapper; }
 	// --- Diagnostics ---
 	void SelectPreviousRenderPass();
 	void SelectNextRenderPass();
@@ -224,13 +235,14 @@ private:
 	void PrepareSceneCommands(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot);
 	void RenderGBuffer(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot, const GBufferBindings& gbufferTargets);
 	void RenderAmbientOcclusion(GraphicsCommandList& inoutCommandList, const GBufferBindings& gbufferTargets);
-	// Includes the linear-light composite to the back buffer, within the Deferred Lighting GPU event.
+	// Includes the linear-light composite to the HDR buffer, within the Deferred Lighting GPU event.
 	void RenderDeferredLighting(GraphicsCommandList& inoutCommandList, const LightBuffer& lightBuffer,
 	                            const GBufferBindings& gbufferTargets);
 	void RenderDebugView(GraphicsCommandList& inoutCommandList, const LightBuffer& lightBuffer, const GBufferBindings& gbufferTargets);
 	void RenderTransparentGeometry(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot,
 	                               const LightBuffer& lightBuffer);
 	void RenderScreenText(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot, RenderStats& frameStats);
+	void RenderTonemapping(GraphicsCommandList& inoutCommandList);
 
 	void PrepareSnapshotRenderResources(const RenderSceneSnapshot& aSnapshot) const;
 	bool PrepareRenderItemResources(const RenderItemSnapshot& aRenderItem) const;
@@ -258,6 +270,7 @@ private:
 	// Kept outside the production GBuffer; populated only for the tangent-normal debug view.
 	Texture myTangentNormalDebugTexture;
 	Texture myDeferredLightingTexture;
+	Texture myHDRBuffer;
 	Texture myScreenSpaceAOTexture;
 
 	std::unordered_map<ConstantBuffer, Buffer> myConstantBuffers;
@@ -273,6 +286,7 @@ private:
 	PipelineStateObject myDeferredPointPSO;
 	PipelineStateObject myDeferredSpotPSO;
 	PipelineStateObject myDeferredCompositePSO;
+	PipelineStateObject myTonemapPSO;
 	PipelineStateObject myScreenSpaceAOPSO;
 	PipelineStateObject myRenderPassDebugPSO;
 	PipelineStateObject myTextOverlayPSO;
@@ -304,4 +318,6 @@ private:
 	float mySpotShadowBiasOffset = 0.0f;
 	float myPointShadowBiasOffset = 0.0f;
 	RenderPass myRenderPass = RenderPass::Lit;
+	Tonemapper myTonemapper = Tonemapper::ACES;
+	bool myTonemappingEnabled = true;
 };

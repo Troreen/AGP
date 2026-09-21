@@ -246,6 +246,33 @@ CommonUtilities::Vector2u RenderHardwareInterface::GetClientSize() const
 	return {width, height};
 }
 
+bool RenderHardwareInterface::Resize(unsigned aWidth, unsigned aHeight, Texture& outBackBuffer, Texture& outDepthStencil)
+{
+	if (aWidth == 0 || aHeight == 0) return false;
+	myContext->ClearState();
+	myContext->Flush();
+	outBackBuffer.myRTV.Reset();
+	outDepthStencil.myDSV.Reset();
+	outDepthStencil.mySRV.Reset();
+	outDepthStencil.myResource.Reset();
+	HRESULT result = mySwapChain->ResizeBuffers(SwapChainBufferCount, aWidth, aHeight, DXGI_FORMAT_R8G8B8A8_UNORM,
+	                                           DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING);
+	if (FAILED(result))
+	{
+		LOG(RhiLog, Error, "Failed to resize swap chain to {}x{}", aWidth, aHeight);
+		return false;
+	}
+	ComPtr<ID3D11Texture2D> backBuffer;
+	result = mySwapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer));
+	if (FAILED(result) || FAILED(myDevice->CreateRenderTargetView(backBuffer.Get(), nullptr, &outBackBuffer.myRTV)))
+	{
+		LOG(RhiLog, Error, "Failed to recreate back buffer after resize");
+		return false;
+	}
+	outBackBuffer.myViewport = {0, 0, static_cast<float>(aWidth), static_cast<float>(aHeight), 0, 1};
+	return CreateDepthStencil("DepthStencil", aWidth, aHeight, outDepthStencil);
+}
+
 bool RenderHardwareInterface::CreateVertexBuffer(std::string_view aName, const std::vector<Vertex>& aVertexList, Buffer& outBuffer) const
 {
 	if (aVertexList.empty())

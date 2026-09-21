@@ -19,5 +19,5 @@ float4 main(VStoPS aPixel) : SV_TARGET
 	parameters.Binormal = aPixel.Binormal;
 	Material_Pixel(parameters);
 
-	return float4(LinearToGamma(parameters.PixelColor.rgb), parameters.PixelColor.a);
+	return parameters.PixelColor;
 }

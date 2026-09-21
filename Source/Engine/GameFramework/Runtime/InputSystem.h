@@ -102,6 +102,7 @@ namespace InputActions
 	extern const InputActionId CameraLookEnable, CameraLookDelta, CameraForward, CameraBack, CameraLeft, CameraRight, CameraUp, CameraDown;
 	extern const InputActionId ToggleSpin, PlayBreathing, PlayWalk, PlayRun, PlayWave;
 	extern const InputActionId ToggleDirectional, TogglePoint, ToggleSpot, AimDirectional, PlacePoint, PlaceSpot, PrintLights;
+	extern const InputActionId ToggleTonemapping, SelectACES, SelectLottes, SelectUnrealTonemapper;
 }
 
 void InstallDefaultInputBindings(InputSystem& input);
