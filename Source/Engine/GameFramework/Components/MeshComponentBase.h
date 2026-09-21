@@ -23,12 +23,12 @@ class MeshComponentBase : public SceneComponent
 {
 public:
 	MeshComponentBase() = default;
-	explicit MeshComponentBase(MeshAsset aMesh);
+	explicit MeshComponentBase(MeshHandle aMesh);
 	~MeshComponentBase() override = default;
 
 	// An empty binding clears the mesh. This never loads resources.
-	void SetMesh(MeshAsset aMesh);
-	MeshAsset GetMesh() const;
+	void SetMesh(MeshHandle aMesh);
+	MeshHandle GetMesh() const;
 	bool HasMesh() const;
 	void SetSourceAssetIdentity(std::string meshName, std::string contentPath)
 	{
@@ -38,8 +38,8 @@ public:
 	const std::string& GetSourceContentPath() const { return mySourceContentPath; }
 
 	// Invalid slots or empty materials leave the existing binding unchanged.
-	bool SetMaterial(unsigned aMaterialIndex, MaterialAsset aMaterial);
-	MaterialAsset GetMaterial(unsigned index) const;
+	bool SetMaterial(unsigned aMaterialIndex, MaterialHandle aMaterial);
+	MaterialHandle GetMaterial(unsigned index) const;
 
 	unsigned GetMaterialCount() const
 	{
@@ -57,7 +57,9 @@ private:
 	virtual bool HasSkinning() const;
 	virtual const std::array<CU::Matrix4f, 128>* GetJointTransforms() const;
 	std::shared_ptr<Mesh> myMesh;
+	MeshHandle myMeshHandle;
 	std::vector<std::shared_ptr<MaterialInterface>> myMaterials;
+	std::vector<MaterialHandle> myMaterialHandles;
 	std::string mySourceMeshName;
 	std::string mySourceContentPath;
 	bool myVisible = true;

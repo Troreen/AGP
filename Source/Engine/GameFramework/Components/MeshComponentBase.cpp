@@ -4,29 +4,30 @@
 
 #include <utility>
 
-MeshComponentBase::MeshComponentBase(MeshAsset aMesh)
+MeshComponentBase::MeshComponentBase(MeshHandle aMesh)
 {
 	SetMesh(std::move(aMesh));
 }
 
-void MeshComponentBase::SetMesh(MeshAsset aMesh)
+void MeshComponentBase::SetMesh(MeshHandle aMesh)
 {
-	myMesh = std::move(aMesh.myResource);
+	myMesh = aMesh.myResource;
+	myMeshHandle = std::move(aMesh);
 
 	myMaterials.clear();
+	myMaterialHandles.clear();
 	if (myMesh != nullptr)
 	{
 		myMaterials.resize(myMesh->GetNumMaterialSlots());
+		myMaterialHandles.resize(myMesh->GetNumMaterialSlots());
 	}
 
 	OnMeshChanged();
 }
 
-MeshAsset MeshComponentBase::GetMesh() const
+MeshHandle MeshComponentBase::GetMesh() const
 {
-	MeshAsset result;
-	result.myResource = myMesh;
-	return result;
+	return myMeshHandle;
 }
 
 bool MeshComponentBase::HasMesh() const
@@ -34,24 +35,20 @@ bool MeshComponentBase::HasMesh() const
 	return myMesh != nullptr;
 }
 
-bool MeshComponentBase::SetMaterial(unsigned aMaterialIndex, MaterialAsset aMaterial)
+bool MeshComponentBase::SetMaterial(unsigned aMaterialIndex, MaterialHandle aMaterial)
 {
 	if (aMaterialIndex >= myMaterials.size() || !aMaterial)
 	{
 		return false;
 	}
-	myMaterials[aMaterialIndex] = std::move(aMaterial.myResource);
+	myMaterials[aMaterialIndex] = aMaterial.myResource;
+	myMaterialHandles[aMaterialIndex] = std::move(aMaterial);
 	return true;
 }
 
-MaterialAsset MeshComponentBase::GetMaterial(unsigned index) const
+MaterialHandle MeshComponentBase::GetMaterial(unsigned index) const
 {
-	MaterialAsset result;
-	if (index < myMaterials.size())
-	{
-		result.myResource = myMaterials[index];
-	}
-	return result;
+	return index < myMaterialHandles.size() ? myMaterialHandles[index] : MaterialHandle{};
 }
 
 void MeshComponentBase::SetVisible(bool aVisible)

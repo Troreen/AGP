@@ -9,7 +9,7 @@ SkeletalMeshComponent::SkeletalMeshComponent()
 	OnMeshChanged();
 }
 
-SkeletalMeshComponent::SkeletalMeshComponent(MeshAsset aMesh) : MeshComponentBase(std::move(aMesh))
+SkeletalMeshComponent::SkeletalMeshComponent(MeshHandle aMesh) : MeshComponentBase(std::move(aMesh))
 {
 	OnMeshChanged();
 }

@@ -1,10 +1,17 @@
 {
-  "name": "ChestMaterial_Alpha",
-  "domain": "Surface",
-  "shadingModel": "Lit",
-  "blendMode": "Alpha",
-  "materialShaderCode": "ChestMaterial.hlsli",
-  "albedoTexture": "../Textures/T_Chest_C.dds",
-  "normalTexture": "../Textures/T_Chest_N.dds",
-  "materialTexture": "../Textures/T_Chest_M.dds"
+  "name": "ChestMaterial",
+  
+  "general" : {
+    "domain": "Surface",
+    "shadingModel": "Lit",
+    "blendMode": "Alpha"
+  },
+  
+  "textures" : {
+    "albedo": "../Textures/T_Chest_C.dds",
+    "normal": "../Textures/T_Chest_N.dds",
+    "material": "../Textures/T_Chest_M.dds"
+  },
+  
+  "shaderCode": "ChestMaterial.hlsli"
 }

@@ -1,4 +1,6 @@
 /Content
+/Source/Engine/GraphicsEngine/TemporaryShaders/
+/Source/Engine/GraphicsEngine/Intermediate/
 
 # Ignore the local directory in TGE root
 /Local

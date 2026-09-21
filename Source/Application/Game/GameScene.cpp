@@ -1,6 +1,7 @@
 #include "GameScene.h"
 #include "GameLog.h"
 #include "GameFramework/AssetHandling/AssetRegistry.h"
+#include "GameFramework/AssetHandling/MaterialAsset.h"
 #include "GameFramework/UnrealSceneImporter/UnrealSceneImporter.h"
 
 #include <sstream>
@@ -13,6 +14,7 @@ namespace
 	{
 		if (name == "Game") return "ExportedScenes/TestExportMap_Level.json";
 		if (name == "ChestMaterials") return "ExportedScenes/ChestMaterials_Level.json";
+		if (name == "Lvl_Blockout_Level") return "ExportedScenes/Lvl_Blockout_Level.json";
 		return {};
 	}
 
@@ -62,7 +64,7 @@ SceneData GameScene::Load(const std::string& name, SceneLoadContext& context)
 
 void GameScene::PrepareAssets(SceneData& scene, SceneLoadContext& context)
 {
-	const AssetId fallbackMaterial{"Shaders/CubeMaterial.mat"};
+	const AssetId fallbackMaterial{"Shaders/CubeMaterial.mat"}; // TODO: change this into purple black missing texture material 
 	if (!context.Assets.ResolveMaterial(fallbackMaterial))
 	{
 		throw std::runtime_error("Could not create the fallback material used by imported scene assets: " +
@@ -78,17 +80,20 @@ void GameScene::PrepareAssets(SceneData& scene, SceneLoadContext& context)
 				using ComponentType = std::decay_t<decltype(componentData)>;
 				if constexpr (std::is_same_v<ComponentType, StaticMeshData> || std::is_same_v<ComponentType, SkeletalMeshData>)
 				{
-					// Preserve local registry-backed parents. Older exports reference Unreal
-					// masters that are not shipped, so only those records use the fallback.
+					// The imported name selects an authored .mat; Unreal Parent is metadata.
 					for (size_t materialSlot = 0; materialSlot < componentData.Materials.size(); ++materialSlot)
 					{
 						MaterialInstanceData& materialData = componentData.Materials[materialSlot];
-						const AssetId parent = materialData.Parent.Value.empty() ? AssetId{materialData.Name} : materialData.Parent;
-						if (context.Assets.ResolveMaterial(parent))
+						if (context.Assets.GetAsset<MaterialAsset>(materialData.Name))
 						{
+							materialData.Parent = AssetId{materialData.Name};
 							continue;
 						}
-						materialData.Name = componentData.MeshName + " Material " + std::to_string(materialSlot);
+						if (context.Assets.GetLastErrorCode() != AssetRegistry::AssetError::NotFound)
+						{
+							throw std::runtime_error("Could not load authored material '" + materialData.Name + "': " + context.Assets.GetLastError());
+						}
+						GAMELOG(Warning, "No authored .mat for imported material '{}'; using fallback.", materialData.Name);
 						materialData.Parent = fallbackMaterial;
 						materialData.Parameters.clear();
 					}

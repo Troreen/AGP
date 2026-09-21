@@ -9,7 +9,7 @@ set "APP_CONFIG=Debug"
 set "OUTDIR=HandIn"
 set "SOLUTION_OUT=%OUTDIR%\AGP_Solution"
 set "APP_OUT=%OUTDIR%\AGP_App"
-set "APP_RUNTIME_DIR=%APP_OUT%\Source\Application\Game"
+set "APP_RUNTIME_DIR=%APP_OUT%"
 
 pushd "%~dp0"
 
@@ -63,12 +63,6 @@ if errorlevel 8 goto :CopyFail
 echo.
 echo Creating app-only hand-in folder...
 robocopy "Bin\%APP_CONFIG%" "%APP_RUNTIME_DIR%" /E /XF ".gitignore" ".gitattributes" "*.idb" "*.ilk" "*.ipch" "*.obj" "*.res" "*.exp" "*.log" "*.pdb" "*.tmp"
-if errorlevel 8 goto :CopyFail
-
-robocopy "Assets" "%APP_OUT%\Assets" /E /XF ".gitignore" ".gitattributes" "*.tmp"
-if errorlevel 8 goto :CopyFail
-
-robocopy "Source\Application\Game\Materials" "%APP_OUT%\Source\Application\Game\Materials" /E /XF ".gitignore" ".gitattributes" "*.tmp"
 if errorlevel 8 goto :CopyFail
 
 call :WriteLauncher
@@ -133,7 +127,7 @@ exit /B 0
 :WriteLauncher
 (
     echo @echo off
-    echo pushd "%%~dp0Source\Application\Game"
+    echo pushd "%%~dp0"
     echo start "" "%APP_NAME%"
     echo popd
 ) > "%APP_OUT%\RunGame.bat"

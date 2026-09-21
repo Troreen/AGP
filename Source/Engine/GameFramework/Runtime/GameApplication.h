@@ -4,7 +4,7 @@
 #include <memory>
 class IGame;
 class Font;
-class FontAsset;
+class FontHandle;
 
 class RenderPassNotificationTimer
 {
@@ -40,6 +40,6 @@ public:
 	int Run(IGame& game, const Config& config, SceneSource source = {});
 
 private:
-	static std::shared_ptr<Font> GetFontResource(const FontAsset& asset);
+	static std::shared_ptr<Font> GetFontResource(const FontHandle& asset);
 	class Impl;
 };

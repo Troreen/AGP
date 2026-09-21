@@ -40,7 +40,7 @@ namespace
 	bool ApplyMesh(MeshComponentBase& component, const StaticMeshData& data, AssetRegistry& assets)
 	{
 		component.SetSourceAssetIdentity(data.MeshName, data.ContentPath);
-		const MeshAsset mesh = assets.ResolveMesh(data.Mesh);
+		const MeshHandle mesh = assets.ResolveMesh(data.Mesh);
 		if (!mesh)
 		{
 			GFLOG(Warning, "Skipping mesh component '{}': {}", data.Common.Name, assets.GetLastError());
@@ -54,7 +54,7 @@ namespace
 		}
 		for (size_t materialSlot = 0; materialSlot < data.Materials.size(); ++materialSlot)
 		{
-			const MaterialAsset material = CreateMaterialInstance(assets, data.Materials[materialSlot]);
+			const MaterialHandle material = CreateMaterialInstance(assets, data.Materials[materialSlot]);
 			if (!material)
 			{
 				const MaterialInstanceData& materialData = data.Materials[materialSlot];

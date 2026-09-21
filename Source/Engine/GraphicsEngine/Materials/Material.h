@@ -175,7 +175,7 @@ public:
 			return false;
 		}
 
-		ensure(MaterialHelpers::MaterialParameterTraits<T>::IsA(*param));
+		if (!MaterialHelpers::MaterialParameterTraits<T>::IsA(*param)) return false;
 
 		return SetRawParameterValue(*param, &aValue, sizeof(T));
 	}

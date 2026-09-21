@@ -27,6 +27,21 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AssetHandling\Asset.h">
+      <Filter>AssetHandling</Filter>
+    </ClInclude>
+    <ClInclude Include="AssetHandling\MaterialAsset.h">
+      <Filter>AssetHandling</Filter>
+    </ClInclude>
+    <ClInclude Include="AssetHandling\MeshAsset.h">
+      <Filter>AssetHandling</Filter>
+    </ClInclude>
+    <ClInclude Include="AssetHandling\FontAsset.h">
+      <Filter>AssetHandling</Filter>
+    </ClInclude>
+    <ClInclude Include="AssetHandling\TextureAsset.h">
+      <Filter>AssetHandling</Filter>
+    </ClInclude>
     <ClInclude Include="AssetHandling\AssetRegistry.h">
       <Filter>AssetHandling</Filter>
     </ClInclude>
@@ -104,6 +119,21 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AssetHandling\Asset.cpp">
+      <Filter>AssetHandling</Filter>
+    </ClCompile>
+    <ClCompile Include="AssetHandling\MaterialAsset.cpp">
+      <Filter>AssetHandling</Filter>
+    </ClCompile>
+    <ClCompile Include="AssetHandling\MeshAsset.cpp">
+      <Filter>AssetHandling</Filter>
+    </ClCompile>
+    <ClCompile Include="AssetHandling\FontAsset.cpp">
+      <Filter>AssetHandling</Filter>
+    </ClCompile>
+    <ClCompile Include="AssetHandling\TextureAsset.cpp">
+      <Filter>AssetHandling</Filter>
+    </ClCompile>
     <ClCompile Include="AssetHandling\AssetRegistry.cpp">
       <Filter>AssetHandling</Filter>
     </ClCompile>

@@ -1,10 +1,17 @@
 {
   "name": "ColorCheckerMaterial",
-  "domain": "Surface",
-  "shadingModel": "Lit",
-  "blendMode": "Opaque",
-  "materialShaderCode": "ColorCheckerMaterial.hlsli",
-  "albedoTexture": "../Textures/T_Color_Checker_C.dds",
-  "normalTexture": "../Textures/T_Color_Checker_N.dds",
-  "materialTexture": "../Textures/T_Color_Checker_M.dds"
+  
+  "general" : {
+    "domain": "Surface",
+    "shadingModel": "Lit",
+    "blendMode": "Opaque"
+  },
+  
+  "textures" : {
+    "albedo": "../Textures/T_Color_Checker_C.dds",
+    "normal": "../Textures/T_Color_Checker_N.dds",
+    "material": "../Textures/T_Color_Checker_M.dds"
+  },
+  
+  "shaderCode": "ColorCheckerMaterial.hlsli"
 }

@@ -30,18 +30,12 @@
 namespace
 {
 	constexpr int KeyCount = 256;
-	constexpr SHORT VirtualKeyDownMask = static_cast<SHORT>(0x8000);
 	constexpr float MaxFrameDeltaSeconds = 0.25f;
 	constexpr std::array GamepadButtons{
 		EGamepadCode::DPAD_UP, EGamepadCode::DPAD_DOWN, EGamepadCode::DPAD_LEFT, EGamepadCode::DPAD_RIGHT,
 		EGamepadCode::BUTTON_START, EGamepadCode::BUTTON_BACK, EGamepadCode::THUMB_LEFT, EGamepadCode::THUMB_RIGHT,
 		EGamepadCode::SHOULDER_LEFT, EGamepadCode::SHOULDER_RIGHT, EGamepadCode::BUTTON_A, EGamepadCode::BUTTON_B,
 		EGamepadCode::BUTTON_X, EGamepadCode::BUTTON_Y};
-
-	bool IsVirtualKeyDown(int key)
-	{
-		return (GetAsyncKeyState(key) & VirtualKeyDownMask) != 0;
-	}
 
 	LRESULT CALLBACK GameWindowProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 	{
@@ -90,6 +84,7 @@ private:
 	GraphicsCommandList myCommandList;
 	GraphicsEngine::RenderSceneSnapshot mySnapshot;
 	std::shared_ptr<TextWidget> myRenderPassNotificationWidget;
+	FontHandle myRenderFont;
 	RenderPassNotificationTimer myRenderPassNotification;
 	bool myHasMainThreadMouseLookAnchor = false;
 	bool myStarted = false;
@@ -133,9 +128,10 @@ int GameApplication::Impl::Run()
 		}
 		if (myConfig.EnableRenderDiagnostics)
 		{
-			const FontAsset font = assets.ResolveFont(AssetId{"Fonts/CascadiaCode.font.json"});
+			const FontHandle font = assets.ResolveFont(AssetId{"Fonts/CascadiaCode.font.json"});
 			if (font)
 			{
+				myRenderFont = font;
 				myRenderPassNotificationWidget = std::make_shared<TextWidget>();
 				myRenderPassNotificationWidget->SetFont(GameApplication::GetFontResource(font));
 				myRenderPassNotificationWidget->SetPosition({16.0f, 16.0f});
@@ -321,7 +317,7 @@ int GameApplication::Run(IGame& game, const Config& config, SceneSource source)
 	return Impl(game, config, std::move(source)).Run();
 }
 
-std::shared_ptr<Font> GameApplication::GetFontResource(const FontAsset& asset)
+std::shared_ptr<Font> GameApplication::GetFontResource(const FontHandle& asset)
 {
 	return asset.myResource;
 }
@@ -334,7 +330,7 @@ InputDeviceFrame GameApplication::Impl::CaptureInputFrame()
 
 	for (int keyCode = 0; keyCode < KeyCount; ++keyCode)
 	{
-		inputFrame.KeysDown[static_cast<size_t>(keyCode)] = isFocused && (myInputHandler.IsKeyDown(keyCode) || IsVirtualKeyDown(keyCode));
+		inputFrame.KeysDown[static_cast<size_t>(keyCode)] = isFocused && (myInputHandler.IsKeyDown(keyCode));
 	}
 
 	const bool rightMouseDown = inputFrame.KeysDown[static_cast<size_t>(EKeyCode::MOUSERBUTTON)];

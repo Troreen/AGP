@@ -178,7 +178,12 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AssetHandling\Asset.h" />
     <ClInclude Include="AssetHandling\AssetRegistry.h" />
+    <ClInclude Include="AssetHandling\MaterialAsset.h" />
+    <ClInclude Include="AssetHandling\MeshAsset.h" />
+    <ClInclude Include="AssetHandling\FontAsset.h" />
+    <ClInclude Include="AssetHandling\TextureAsset.h" />
     <ClInclude Include="AudioManager.h" />
     <ClInclude Include="Components\CameraComponent.h" />
     <ClInclude Include="Components\DebugCameraController.h" />
@@ -207,6 +212,11 @@
     <ClInclude Include="World\World.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AssetHandling\Asset.cpp" />
+    <ClCompile Include="AssetHandling\MaterialAsset.cpp" />
+    <ClCompile Include="AssetHandling\MeshAsset.cpp" />
+    <ClCompile Include="AssetHandling\FontAsset.cpp" />
+    <ClCompile Include="AssetHandling\TextureAsset.cpp" />
     <ClCompile Include="AssetHandling\AssetRegistry.cpp">
       <DisableSpecificWarnings>4100;4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>

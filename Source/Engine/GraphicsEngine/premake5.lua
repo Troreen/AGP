@@ -8,8 +8,7 @@ project "GraphicsEngine"
 	
     vsprops {
         DisableFastUpToDateCheck = "true",
-        ParallelCompilation = "true",
-        CustomBuildAfterTargets = "Build"
+        ParallelCompilation = "true"
     }
     
 	pchheader "GraphicsEngine.pch.h"
@@ -32,16 +31,17 @@ project "GraphicsEngine"
 		"**.h",
 		"**.cpp",
 		"**.hpp",
-		"**.hlsl",
-		"**.hlsli",
+		"Shaders/**.hlsl",
+		"Shaders/**.hlsli",
 	}
+
+	removefiles { "Content/**", "TemporaryShaders/**", "Intermediate/**" }
 
 	libdirs {
         dirs.lib .. "$(Configuration)",
         dirs.dependencies .. "**" .. "lib",
     }
     
-    buildoutputs { "*.hlsl*" }
     multiprocessorcompile "On"
     conformancemode "On"
 
@@ -50,28 +50,12 @@ project "GraphicsEngine"
 		symbols "on"
 		libdirs { dirs.dependencies .. "**" .. "lib\\%{cfg.buildcfg}" }
 
-        buildmessage "Copying Shaders to Content Dir"
-        buildcommands {
-            'set "CONTENTROOT=$(SolutionDir)Content"',
-            'set "SHADERSRC=$(ProjectDir)Shaders"',
-            'set "SHADERDEST=%CONTENTROOT%\\Shaders"',
-            'if not exist "%CONTENTROOT%" mkdir "%CONTENTROOT%"',
-            'if not exist "%SHADERDEST%" mkdir "%SHADERDEST%"',
-            'xcopy /E /I /R /Y "%SHADERSRC%" "%SHADERDEST%"'
-        }
-
     filter "not configurations:Debug"
         intrinsics "On"
 		runtime "Release"
 		optimize "Speed"
 		libdirs { dirs.dependencies .. "**" .. "lib\\release" }
         
-        buildmessage "Copying Shaders to $(SolutionDir)Bin\\$(Configuration)\\Shaders..."
-        buildcommands {
-            'IF EXIST "$(ProjectDir)Shaders"  (',
-            'xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\\$(Configuration)\\Shaders")'
-        }
-
 	filter "system:windows"
 		staticruntime "off"
 		symbols "On"		
@@ -88,26 +72,9 @@ project "GraphicsEngine"
 
     filter {}
 
-    shadermodel "5.0"
-    shaderentry "main"
-    shaderobjectfileoutput ""
-
-    filter "configurations:Debug"
-        shaderheaderfileoutput "$(IntDir)PrecompiledShaders\\%%(Filename).h"
-        shadervariablename "INTERNAL_%%(Filename)_ByteCode"
-
-    filter "not configurations:Debug"
-        shaderheaderfileoutput "$(ProjectDir)TemporaryShaders\\%%(Filename).h"
-        shadervariablename "TEMP_%%(Filename)_ByteCode"
-
-    filter "files:**_VS.hlsl"
-        shadertype "Vertex"
-
-    filter "files:**_PS.hlsl"
-        shadertype "Pixel"
-
-    filter "files:**_GS.hlsl"
-        shadertype "Geometry"
+    -- GraphicsEngine compiles HLSL at runtime from deployed Content/Shaders.
+    filter "files:Shaders/**.hlsl"
+        buildaction "None"
 
 	filter "files:**/DDSTextureLoader11.cpp"
 		enablepch "Off"

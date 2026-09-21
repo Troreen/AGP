@@ -1,12 +1,12 @@
 #include "GameFramework/AssetHandling/AssetRegistry.h"
 
 #include "GameFramework/SimdJson/simdjson.h"
-#include "GraphicsEngine/GraphicsEngine.h"
-#include "GraphicsEngine/Materials/Material.h"
-#include "GraphicsEngine/Objects/Texture.h"
 #include "GraphicsEngine/Objects/Font.h"
+#include "GameFramework/AssetHandling/MaterialAsset.h"
+#include "GameFramework/AssetHandling/TextureAsset.h"
+#include "GameFramework/AssetHandling/MeshAsset.h"
+#include "GameFramework/AssetHandling/FontAsset.h"
 
-#include <array>
 #include <algorithm>
 #include <cctype>
 #include <format>
@@ -44,24 +44,6 @@ namespace
 		return std::string(value.value().get_string().value());
 	}
 
-	MaterialDomain ParseDomain(std::string value)
-	{
-		return Lower(std::move(value)) == "surface" ? MaterialDomain::Surface : MaterialDomain::None;
-	}
-
-	ShadingModel ParseShadingModel(std::string value)
-	{
-		value = Lower(std::move(value));
-		if (value == "lit") return ShadingModel::Lit;
-		if (value == "unlit") return ShadingModel::Unlit;
-		return ShadingModel::None;
-	}
-
-	BlendMode ParseBlendMode(std::string value)
-	{
-		return Lower(std::move(value)) == "alpha" ? BlendMode::Alpha : BlendMode::Opaque;
-	}
-
 	std::filesystem::path ResolveRelative(const std::filesystem::path& parent, const std::string& value)
 	{
 		if (value.empty()) return {};
@@ -88,6 +70,14 @@ AssetRegistry& AssetRegistry::Get()
 {
 	static AssetRegistry registry;
 	return registry;
+}
+
+AssetRegistry::AssetRegistry()
+{
+	RegisterAssetType<MeshAsset>({".fbx"});
+	RegisterAssetType<MaterialAsset>({".mat"});
+	RegisterAssetType<TextureAsset>({".dds", ".png", ".jpg", ".jpeg"});
+	RegisterAssetType<FontAsset>({".font.json"});
 }
 
 void AssetRegistry::Initialize(const std::filesystem::path& contentRoot)
@@ -118,16 +108,11 @@ void AssetRegistry::Initialize(const std::filesystem::path& contentRoot)
 void AssetRegistry::Clear()
 {
 	myContentRoot.clear();
-	myMeshes.clear();
-	myMaterials.clear();
-	myTextures.clear();
-	myFonts.clear();
-	myMeshAliases.clear();
-	myMaterialAliases.clear();
-	myTextureAliases.clear();
-	myFontAliases.clear();
+	myAssets.clear();
+	myAssetAliases.clear();
 	myMeshLoader = {};
 	myLastError.clear();
+	myLastErrorCode = AssetError::None;
 }
 
 std::string AssetRegistry::NormalizeId(std::string_view value)
@@ -150,188 +135,168 @@ AssetId AssetRegistry::MakeAssetId(const std::filesystem::path& path) const
 
 void AssetRegistry::IndexFile(const std::filesystem::path& path)
 {
-	const std::string extension = Lower(path.extension().string());
+	const std::string extension = RegisteredExtension(path);
+	if (extension.empty()) return;
 	const std::string id = MakeAssetId(path).Value;
-	const std::string alias = Lower(path.stem().string());
-	if (Lower(path.filename().string()).ends_with(".font.json"))
-	{
-		myFonts.try_emplace(id, Entry<Font>{path});
-		AddAlias(myFontAliases, Lower(path.stem().stem().string()), id);
-	}
-	else if (extension == ".fbx")
-	{
-		myMeshes.try_emplace(id, Entry<Mesh>{path});
-		AddAlias(myMeshAliases, alias, id);
-	}
-	else if (extension == ".mat")
-	{
-		myMaterials.try_emplace(id, Entry<MaterialInterface>{path});
-		AddAlias(myMaterialAliases, alias, id);
-	}
-	else if (extension == ".dds" || extension == ".png" || extension == ".jpg" || extension == ".jpeg")
-	{
-		myTextures.try_emplace(id, Entry<Texture>{path});
-		AddAlias(myTextureAliases, alias, id);
-	}
+	const std::string fileName = Lower(path.filename().string());
+	const std::string alias = fileName.substr(0, fileName.size() - extension.size());
+	myAssets.try_emplace(id, AssetInfo{path});
+	AddAlias(myAssetAliases, alias, id);
 }
 
-template<class T>
-AssetRegistry::Entry<T>* AssetRegistry::FindEntry(
-	const AssetId& id, EntryMap<T>& entries, const AliasMap& aliases, std::string_view expectedExtension)
+std::string AssetRegistry::RegisteredExtension(const std::filesystem::path& path) const
 {
-	std::string key = NormalizeId(id.Value);
-	if (auto found = entries.find(key); found != entries.end())
-	{
-		return &found->second;
-	}
+	const std::string fileName = Lower(path.filename().string());
+	std::string longest;
+	for (const auto& [extension, loaders] : myFileExtToAssetType)
+		if (fileName.ends_with(extension) && extension.size() > longest.size()) longest = extension;
+	return longest;
+}
 
-	if (key.starts_with("game/"))
+AssetRegistry::AssetInfo* AssetRegistry::FindAssetInfo(std::string_view name, const std::vector<std::string>& extensions,
+                                                       const std::function<bool(const Asset&)>& matchesType)
+{
+	std::string key = NormalizeId(name);
+	if (auto found = myAssets.find(key); found != myAssets.end()) return &found->second;
+	const bool unrealPath = key.starts_with("game/");
+	if (unrealPath)
 	{
 		key.erase(0, 5);
 		const size_t slash = key.find_last_of('/');
 		const size_t objectSeparator = key.find('.', slash == std::string::npos ? 0 : slash);
 		if (objectSeparator != std::string::npos) key.resize(objectSeparator);
-		key += expectedExtension;
-		if (auto found = entries.find(key); found != entries.end())
-		{
-			return &found->second;
-		}
 	}
-
+	std::vector<std::string> matches;
+	for (const auto& [id, info] : myAssets)
+	{
+		const std::string extension = RegisteredExtension(id);
+		if ((!extension.empty() && std::ranges::find(extensions, extension) != extensions.end() ||
+		     info.Pinned && matchesType(*info.Pinned)) &&
+		    id.substr(0, id.size() - extension.size()) == key) matches.push_back(id);
+	}
+	if (matches.size() == 1) return &myAssets.at(matches.front());
+	if (matches.size() > 1)
+	{
+		myLastErrorCode = AssetError::Ambiguous;
+		myLastError = std::format("Asset path '{}' has multiple file types; include an extension.", name);
+		return nullptr;
+	}
+	if (!unrealPath && key.find('/') != std::string::npos)
+	{
+		myLastErrorCode = AssetError::NotFound;
+		myLastError = std::format("Asset path '{}' was not indexed.", name);
+		return nullptr;
+	}
 	const std::string alias = Lower(std::filesystem::path(key).stem().string());
-	const auto aliasIt = aliases.find(alias);
-	if (aliasIt == aliases.end())
+	const auto foundAlias = myAssetAliases.find(alias);
+	if (foundAlias == myAssetAliases.end())
 	{
-		SetError(std::format("Asset '{}' was not indexed.", id.Value));
+		myLastErrorCode = AssetError::NotFound;
+		myLastError = std::format("Asset '{}' was not indexed.", name);
 		return nullptr;
 	}
-	if (aliasIt->second.size() != 1)
+	matches.clear();
+	for (const std::string& id : foundAlias->second)
 	{
-		SetError(std::format("Asset name '{}' is ambiguous; use a Content-relative path.", id.Value));
+		const auto& info = myAssets.at(id);
+		if (info.Pinned ? matchesType(*info.Pinned) :
+		    std::ranges::find(extensions, RegisteredExtension(id)) != extensions.end()) matches.push_back(id);
+	}
+	if (matches.empty())
+	{
+		myLastErrorCode = AssetError::NotFound;
+		myLastError = std::format("Asset '{}' of the requested type was not indexed.", name);
 		return nullptr;
 	}
-	return &entries.at(aliasIt->second.front());
+	if (matches.size() != 1)
+	{
+		myLastErrorCode = AssetError::Ambiguous;
+		myLastError = std::format("Asset name '{}' is ambiguous; use a Content-relative path.", name);
+		return nullptr;
+	}
+	return &myAssets.at(matches.front());
+}
+
+void AssetRegistry::PinAsset(const AssetId& id, std::shared_ptr<Asset> asset)
+{
+	if (!asset) return;
+	const std::string key = NormalizeId(id.Value);
+	if (key.empty()) return;
+	auto& info = myAssets[key];
+	info.Pinned = std::move(asset);
+	info.Cached = info.Pinned;
+	const std::string extension = RegisteredExtension(key);
+	info.Pinned->myName = extension.empty() ? Lower(std::filesystem::path(key).stem().string()) :
+	                       Lower(std::filesystem::path(key).filename().string().substr(0,
+	                           std::filesystem::path(key).filename().string().size() - extension.size()));
+	AddAlias(myAssetAliases, info.Pinned->myName, key);
 }
 
 void AssetRegistry::RegisterMesh(const AssetId& id, std::shared_ptr<Mesh> mesh)
 {
-	if (!mesh) return;
-	const std::string key = NormalizeId(id.Value);
-	if (key.empty()) return;
-	auto& entry = myMeshes[key];
-	entry.Pinned = std::move(mesh);
-	entry.Cached = entry.Pinned;
-	AddAlias(myMeshAliases, Lower(std::filesystem::path(key).stem().string()), key);
+	if (mesh) PinAsset(id, std::make_shared<MeshAsset>(std::move(mesh)));
 }
 
 void AssetRegistry::RegisterMaterial(const AssetId& id, std::shared_ptr<MaterialInterface> material)
 {
-	if (!material) return;
-	const std::string key = NormalizeId(id.Value);
-	if (key.empty()) return;
-	auto& entry = myMaterials[key];
-	entry.Pinned = std::move(material);
-	entry.Cached = entry.Pinned;
-	AddAlias(myMaterialAliases, Lower(std::filesystem::path(key).stem().string()), key);
+	if (material) PinAsset(id, std::make_shared<MaterialAsset>(std::move(material)));
 }
 
 void AssetRegistry::RegisterTexture(const AssetId& id, std::shared_ptr<Texture> texture)
 {
-	if (!texture) return;
-	const std::string key = NormalizeId(id.Value);
-	if (key.empty()) return;
-	auto& entry = myTextures[key];
-	entry.Pinned = std::move(texture);
-	entry.Cached = entry.Pinned;
-	AddAlias(myTextureAliases, Lower(std::filesystem::path(key).stem().string()), key);
+	if (texture) PinAsset(id, std::make_shared<TextureAsset>(std::move(texture)));
 }
 
 void AssetRegistry::RegisterFont(const AssetId& id, std::shared_ptr<Font> font)
 {
-	if (!font) return;
-	const std::string key = NormalizeId(id.Value);
-	if (key.empty()) return;
-	auto& entry = myFonts[key];
-	entry.Pinned = std::move(font);
-	entry.Cached = entry.Pinned;
-	AddAlias(myFontAliases, Lower(std::filesystem::path(key).stem().stem().string()), key);
+	if (font) PinAsset(id, std::make_shared<FontAsset>(std::move(font)));
 }
 
-MeshAsset AssetRegistry::ResolveMesh(const AssetId& id)
+std::shared_ptr<Mesh> AssetRegistry::LoadMesh(const std::filesystem::path& path)
 {
-	myLastError.clear();
-	MeshAsset result;
-	Entry<Mesh>* entry = FindEntry(id, myMeshes, myMeshAliases, ".fbx");
-	if (!entry) return result;
-	result.myResource = entry->Pinned ? entry->Pinned : entry->Cached.lock();
-	if (!result.myResource && entry->Path.empty())
+	if (!myMeshLoader)
 	{
-		SetError(std::format("Mesh '{}' has no source file.", id.Value));
+		SetError(std::format("No mesh loader is registered for '{}'.", path.string()));
 		return {};
 	}
-	if (!result.myResource && !myMeshLoader)
-	{
-		SetError(std::format("No mesh loader is registered for '{}'.", id.Value));
-		return {};
-	}
-	if (!result.myResource)
-	{
-		result.myResource = myMeshLoader(entry->Path);
-		entry->Cached = result.myResource;
-	}
-	if (!result.myResource) SetError(std::format("Mesh '{}' could not be loaded from '{}'.", id.Value, entry->Path.string()));
-	return result;
+	auto mesh = myMeshLoader(path);
+	if (!mesh) SetError(std::format("Mesh could not be loaded from '{}'.", path.string()));
+	return mesh;
 }
 
-MaterialAsset AssetRegistry::ResolveMaterial(const AssetId& id)
+MeshHandle AssetRegistry::ResolveMesh(const AssetId& id)
 {
-	myLastError.clear();
-	MaterialAsset result;
-	Entry<MaterialInterface>* entry = FindEntry(id, myMaterials, myMaterialAliases, ".mat");
-	if (!entry) return result;
-	result.myResource = entry->Pinned ? entry->Pinned : entry->Cached.lock();
-	if (!result.myResource && !entry->Path.empty())
-	{
-		result.myResource = LoadMaterial(entry->Path);
-		entry->Cached = result.myResource;
-	}
-	if (!result.myResource && myLastError.empty()) SetError(std::format("Material '{}' could not be loaded.", id.Value));
+	MeshHandle result;
+	result.myAsset = GetAsset<MeshAsset>(id.Value);
+	if (const auto asset = std::static_pointer_cast<MeshAsset>(result.myAsset)) result.myResource = asset->GetMesh();
 	return result;
 }
 
-TextureAsset AssetRegistry::ResolveTexture(const AssetId& id)
+MaterialHandle AssetRegistry::ResolveMaterial(const AssetId& id)
 {
-	myLastError.clear();
-	TextureAsset result;
-	Entry<Texture>* entry = FindEntry(id, myTextures, myTextureAliases, ".dds");
-	if (!entry) return result;
-	result.myResource = entry->Pinned ? entry->Pinned : entry->Cached.lock();
-	if (!result.myResource && !entry->Path.empty())
-	{
-		result.myResource = LoadTexture(entry->Path);
-		entry->Cached = result.myResource;
-	}
-	if (!result.myResource && myLastError.empty()) SetError(std::format("Texture '{}' could not be loaded.", id.Value));
+	MaterialHandle result;
+	result.myAsset = GetAsset<MaterialAsset>(id.Value);
+	if (const auto asset = std::static_pointer_cast<MaterialAsset>(result.myAsset)) result.myResource = asset->GetMaterial();
 	return result;
 }
 
-FontAsset AssetRegistry::ResolveFont(const AssetId& id)
+TextureHandle AssetRegistry::ResolveTexture(const AssetId& id)
 {
-	myLastError.clear();
-	FontAsset result;
-	Entry<Font>* entry = FindEntry(id, myFonts, myFontAliases, ".font.json");
-	if (!entry) return result;
-	result.myResource = entry->Pinned ? entry->Pinned : entry->Cached.lock();
-	if (!result.myResource && !entry->Path.empty())
-	{
-		result.myResource = LoadFont(entry->Path);
-		entry->Cached = result.myResource;
-	}
-	if (!result.myResource && myLastError.empty()) SetError(std::format("Font '{}' could not be loaded.", id.Value));
+	TextureHandle result;
+	result.myAsset = GetAsset<TextureAsset>(id.Value);
+	if (const auto asset = std::static_pointer_cast<TextureAsset>(result.myAsset)) result.myResource = asset->GetTextureShared();
 	return result;
 }
 
-std::shared_ptr<Font> AssetRegistry::LoadFont(const std::filesystem::path& path)
+FontHandle AssetRegistry::ResolveFont(const AssetId& id)
+{
+	FontHandle result;
+	result.myAsset = GetAsset<FontAsset>(id.Value);
+	if (const auto asset = std::static_pointer_cast<FontAsset>(result.myAsset)) result.myResource = asset->GetFont();
+	return result;
+}
+
+std::shared_ptr<Font> AssetRegistry::LoadFont(const std::filesystem::path& path, std::shared_ptr<TextureAsset>& atlasAsset)
 {
 	simdjson::dom::parser parser;
 	simdjson::padded_string json;
@@ -370,14 +335,14 @@ std::shared_ptr<Font> AssetRegistry::LoadFont(const std::filesystem::path& path)
 	}
 	font->myAtlasWidth = static_cast<unsigned>(width);
 	font->myAtlasHeight = static_cast<unsigned>(height);
-	const TextureAsset atlasTexture = ResolveTexture(MakeAssetId(ResolveRelative(path.parent_path(), atlasFile)));
-	if (!atlasTexture)
+	atlasAsset = GetAsset<TextureAsset>(MakeAssetId(ResolveRelative(path.parent_path(), atlasFile)).Value);
+	if (!atlasAsset)
 	{
 		const std::string atlasError = myLastError;
 		SetError(std::format("Font metadata '{}' requires atlas '{}': {}", path.string(), atlasFile, atlasError));
 		return nullptr;
 	}
-	font->myAtlas = atlasTexture.myResource;
+	font->myAtlas = atlasAsset->GetTextureShared();
 	for (const simdjson::dom::element element : glyphsResult.value().get_array().value())
 	{
 		if (!element.is_object()) continue;
@@ -408,129 +373,8 @@ std::shared_ptr<Font> AssetRegistry::LoadFont(const std::filesystem::path& path)
 	return font;
 }
 
-std::shared_ptr<Texture> AssetRegistry::LoadTexture(const std::filesystem::path& path)
-{
-	std::shared_ptr<Texture> texture = std::make_shared<Texture>();
-	if (!GraphicsEngine::Get().LoadTexture(path, *texture))
-	{
-		SetError(std::format("Texture '{}' failed renderer initialization.", path.string()));
-		return nullptr;
-	}
-	return texture;
-}
-
-std::shared_ptr<MaterialInterface> AssetRegistry::LoadMaterial(const std::filesystem::path& path)
-{
-	simdjson::dom::parser parser;
-	simdjson::padded_string json;
-	if (simdjson::padded_string::load(path.string()).get(json))
-	{
-		SetError(std::format("Material '{}' could not be read.", path.string()));
-		return nullptr;
-	}
-	simdjson::dom::object root;
-	if (parser.parse(json).get(root))
-	{
-		SetError(std::format("Material '{}' contains malformed JSON.", path.string()));
-		return nullptr;
-	}
-
-	const std::string name = ReadString(root, "name", path.stem().string());
-	const std::string master = ReadString(root, "masterMaterial");
-	if (!master.empty())
-	{
-		const MaterialAsset parent = ResolveMaterial(AssetId{master});
-		if (!parent)
-		{
-			SetError(std::format("Material '{}' requires unavailable parent '{}'.", name, master));
-			return nullptr;
-		}
-		std::shared_ptr<MaterialInstance> instance = MaterialInstance::Create(name, parent.myResource);
-		if (!instance) return nullptr;
-
-		auto texturesResult = root.at_key("textures");
-		if (!texturesResult.error() && texturesResult.value().is_object())
-		{
-			const auto textures = texturesResult.value().get_object().value();
-			const std::array<std::pair<std::string_view, unsigned>, 3> slots{{
-				{"albedo", MaterialInterface::ALBEDO_TEXTURE_SLOT},
-				{"normal", MaterialInterface::NORMAL_TEXTURE_SLOT},
-				{"material", MaterialInterface::MATERIAL_TEXTURE_SLOT}}};
-			for (const auto& [key, slot] : slots)
-			{
-				const std::string textureName = ReadString(textures, key);
-				if (textureName.empty()) continue;
-				const TextureAsset texture = ResolveTexture(MakeAssetId(ResolveRelative(path.parent_path(), textureName)));
-				if (!texture || !instance->SetTexture(slot, texture.myResource))
-				{
-					SetError(std::format("Material '{}' could not resolve texture '{}'.", name, textureName));
-					return nullptr;
-				}
-			}
-		}
-
-		auto parametersResult = root.at_key("parameters");
-		if (!parametersResult.error() && parametersResult.value().is_object())
-		{
-			for (const auto [key, value] : parametersResult.value().get_object().value())
-			{
-				const std::string parameterName(key);
-				bool applied = false;
-				if (value.is_double()) applied = instance->SetValue(parameterName, static_cast<float>(value.get_double().value()));
-				else if (value.is_int64()) applied = instance->SetValue(parameterName, static_cast<int>(value.get_int64().value()));
-				else if (value.is_uint64()) applied = instance->SetValue(parameterName, static_cast<unsigned>(value.get_uint64().value()));
-				else if (value.is_bool()) applied = instance->SetValue(parameterName, value.get_bool().value());
-				else if (value.is_array())
-				{
-					auto array = value.get_array().value();
-					if (array.size() == 2) applied = instance->SetValue(parameterName, CU::Vector2f{
-						static_cast<float>(array.at(0).get_double().value()), static_cast<float>(array.at(1).get_double().value())});
-					else if (array.size() == 3) applied = instance->SetValue(parameterName, CU::Vector3f{
-						static_cast<float>(array.at(0).get_double().value()), static_cast<float>(array.at(1).get_double().value()),
-						static_cast<float>(array.at(2).get_double().value())});
-					else if (array.size() == 4) applied = instance->SetValue(parameterName, CU::Vector4f{
-						static_cast<float>(array.at(0).get_double().value()), static_cast<float>(array.at(1).get_double().value()),
-						static_cast<float>(array.at(2).get_double().value()), static_cast<float>(array.at(3).get_double().value())});
-				}
-				if (!applied)
-				{
-					SetError(std::format("Material '{}' has an invalid or incompatible parameter '{}'.", name, parameterName));
-					return nullptr;
-				}
-			}
-		}
-		return instance;
-	}
-
-	MaterialDescription description;
-	description.Name = name;
-	description.Domain = ParseDomain(ReadString(root, "domain", "Surface"));
-	description.ShadingModel = ParseShadingModel(ReadString(root, "shadingModel", "Unlit"));
-	description.BlendMode = ParseBlendMode(ReadString(root, "blendMode", "Opaque"));
-	description.MaterialShaderCode = ResolveRelative(path.parent_path(), ReadString(root, "materialShaderCode"));
-	description.AlbedoTexture = ResolveRelative(path.parent_path(), ReadString(root, "albedoTexture"));
-	description.NormalTexture = ResolveRelative(path.parent_path(), ReadString(root, "normalTexture"));
-	description.MaterialTexture = ResolveRelative(path.parent_path(), ReadString(root, "materialTexture"));
-
-	std::shared_ptr<Material> material = std::make_shared<Material>();
-	if (!GraphicsEngine::Get().CreateMaterial(description, *material))
-	{
-		SetError(std::format("Material '{}' failed renderer initialization.", path.string()));
-		return nullptr;
-	}
-	return material;
-}
-
 void AssetRegistry::SetError(std::string message)
 {
 	myLastError = std::move(message);
+	myLastErrorCode = AssetError::LoadFailed;
 }
-
-template AssetRegistry::Entry<Mesh>* AssetRegistry::FindEntry(
-	const AssetId&, EntryMap<Mesh>&, const AliasMap&, std::string_view);
-template AssetRegistry::Entry<MaterialInterface>* AssetRegistry::FindEntry(
-	const AssetId&, EntryMap<MaterialInterface>&, const AliasMap&, std::string_view);
-template AssetRegistry::Entry<Texture>* AssetRegistry::FindEntry(
-	const AssetId&, EntryMap<Texture>&, const AliasMap&, std::string_view);
-template AssetRegistry::Entry<Font>* AssetRegistry::FindEntry(
-	const AssetId&, EntryMap<Font>&, const AliasMap&, std::string_view);

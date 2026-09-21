@@ -27,7 +27,7 @@ try
 		}
 
 		GameApplication::Config config;
-	config.ContentRoot = std::filesystem::path(executablePath).parent_path() / ".." / ".." / "Content";
+		config.ContentRoot = std::filesystem::path(executablePath).parent_path() / "Content";
 		config.EnableRenderDiagnostics = true;
 		config.EnableMouseLook = true;
 

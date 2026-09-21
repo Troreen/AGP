@@ -1,9 +1,16 @@
 {
   "name": "TorusMaterial",
-  "domain": "Surface",
-  "shadingModel": "Lit",
-  "blendMode": "Opaque",
-  "materialShaderCode": "TorusMaterial.hlsli",
-  "albedoTexture": "../Textures/T_Default_C.dds",
-  "normalTexture": "../Textures/T_Default_N.dds"
+  
+  "general" : {
+    "domain": "Surface",
+    "shadingModel": "Lit",
+    "blendMode": "Opaque"
+  },
+  
+  "textures" : {
+    "albedo": "../Textures/T_Default_C.dds",
+    "normal": "../Textures/T_Default_N.dds"
+  },
+  
+  "shaderCode": "TorusMaterial.hlsli"
 }

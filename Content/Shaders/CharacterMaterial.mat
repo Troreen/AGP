@@ -1,10 +1,17 @@
 {
   "name": "CharacterMaterial",
-  "domain": "Surface",
-  "shadingModel": "Lit",
-  "blendMode": "Opaque",
-  "materialShaderCode": "CharacterMaterial.hlsli",
-  "albedoTexture": "../Textures/T_TGA_Bro_C.dds",
-  "normalTexture": "../Textures/T_TGA_Bro_N.dds",
-  "materialTexture": "../Textures/T_TGA_Bro_M.dds"
+
+  "general" : {
+    "domain": "Surface",
+    "shadingModel": "Lit",
+    "blendMode": "Opaque"
+  },
+
+  "textures" : {
+    "albedo": "../Textures/T_TGA_Bro_C.dds",
+    "normal": "../Textures/T_TGA_Bro_N.dds",
+    "material": "../Textures/T_TGA_Bro_M.dds"
+  },
+  
+  "shaderCode": "CharacterMaterial.hlsli"
 }

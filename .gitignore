@@ -27,7 +27,7 @@ x86/
 *.dll
 
 # Generated/copied shader artifacts
-/Assets/Shaders/
-/Source/Graphics/GraphicsEngine/TemporaryShaders/
+/Source/Engine/GraphicsEngine/TemporaryShaders/
+/Source/Engine/GraphicsEngine/Intermediate/
 
 p4ignore.txt

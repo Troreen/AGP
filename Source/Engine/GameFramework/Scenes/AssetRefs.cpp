@@ -5,10 +5,10 @@
 #include "GraphicsEngine/Materials/Material.h"
 #include <type_traits>
 
-MaterialAsset CreateMaterialInstance(AssetRegistry& assets, const MaterialInstanceData& data)
+MaterialHandle CreateMaterialInstance(AssetRegistry& assets, const MaterialInstanceData& data)
 {
 	const AssetId parentId = data.Parent.Value.empty() ? AssetId{data.Name} : data.Parent;
-	const MaterialAsset parentMaterial = assets.ResolveMaterial(parentId);
+	const MaterialHandle parentMaterial = assets.ResolveMaterial(parentId);
 	if (!parentMaterial)
 	{
 		GFLOG(Warning, "Could not initialize material instance '{}': parent material '{}' is unavailable ({}).",
@@ -22,6 +22,8 @@ MaterialAsset CreateMaterialInstance(AssetRegistry& assets, const MaterialInstan
 		GFLOG(Warning, "Could not initialize material instance '{}' from parent '{}'.", data.Name, parentId.Value);
 		return {};
 	}
+	MaterialHandle material;
+	material.myAsset = parentMaterial.myAsset;
 
 	for (const MaterialParameterData& parameter : data.Parameters)
 	{
@@ -34,8 +36,10 @@ MaterialAsset CreateMaterialInstance(AssetRegistry& assets, const MaterialInstan
 			}
 			else
 			{
-				const TextureAsset texture = assets.ResolveTexture(parameterValue);
-				return texture && materialInstance->SetTexture(parameter.Name, texture.myResource);
+				const TextureHandle texture = assets.ResolveTexture(parameterValue);
+				if (!texture || !materialInstance->SetTexture(parameter.Name, texture.myResource)) return false;
+				if (texture.myAsset) material.myTextureAssets.push_back(texture.myAsset);
+				return true;
 			}
 		}, parameter.Value);
 
@@ -46,7 +50,6 @@ MaterialAsset CreateMaterialInstance(AssetRegistry& assets, const MaterialInstan
 		}
 	}
 
-	MaterialAsset material;
 	material.myResource = std::move(materialInstance);
 	return material;
 }

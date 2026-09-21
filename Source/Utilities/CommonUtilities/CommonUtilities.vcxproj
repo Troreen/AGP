@@ -183,6 +183,7 @@
     <ClInclude Include="Quaternion.hpp" />
     <ClInclude Include="Ray.hpp" />
     <ClInclude Include="Rect2D.hpp" />
+    <ClInclude Include="Rectangle.h" />
     <ClInclude Include="Sphere.hpp" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Utility.hpp" />

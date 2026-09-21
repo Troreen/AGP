@@ -4,32 +4,8 @@
     <Filter Include="ConstantBuffers">
       <UniqueIdentifier>{3CBE0720-A849-75E4-B15A-F8D81D65D1E4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Content">
-      <UniqueIdentifier>{60013234-CCE0-B0CF-D5F8-3BA641571731}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Content\Shaders">
-      <UniqueIdentifier>{398631C0-A511-9F84-AE22-22791A2DFB84}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Content\Shaders\Internal">
-      <UniqueIdentifier>{859CC1E0-71C1-1061-9A0C-F6F086900F7F}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Content\Shaders\Material">
-      <UniqueIdentifier>{F7C413A9-E3E9-6229-0C35-48B9F8B86147}</UniqueIdentifier>
-    </Filter>
     <Filter Include="InterOp">
       <UniqueIdentifier>{E6D11E00-52B1-9D9B-5BC9-2872C72704FD}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Intermediate">
-      <UniqueIdentifier>{80238354-6C86-12F9-150C-4BAF014EDE7B}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Intermediate\GraphicsEngine">
-      <UniqueIdentifier>{D66E1141-427C-3F27-CB62-3B12376F0BDE}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Intermediate\GraphicsEngine\Debug">
-      <UniqueIdentifier>{CCC1C45B-3830-1ADB-8119-D5DAEDC60F77}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Intermediate\GraphicsEngine\Debug\PrecompiledShaders">
-      <UniqueIdentifier>{F9CFF7EB-E50E-A267-8E91-7E997AAF57D2}</UniqueIdentifier>
     </Filter>
     <Filter Include="Materials">
       <UniqueIdentifier>{67E8C255-D352-77CC-1C91-2872883A5521}</UniqueIdentifier>
@@ -48,9 +24,6 @@
     </Filter>
     <Filter Include="Shaders\Material">
       <UniqueIdentifier>{6DD8FDB3-59D1-1C06-8203-028B6E5BFC11}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="TemporaryShaders">
-      <UniqueIdentifier>{D21D7CBC-BE16-9B0E-E748-8093D3A07A1A}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -71,45 +44,6 @@
     <ClInclude Include="InterOp\DDSTextureLoader11.h">
       <Filter>InterOp</Filter>
     </ClInclude>
-    <ClInclude Include="Intermediate\GraphicsEngine\Debug\PrecompiledShaders\BRDF_LUT_PS.h">
-      <Filter>Intermediate\GraphicsEngine\Debug\PrecompiledShaders</Filter>
-    </ClInclude>
-    <ClInclude Include="Intermediate\GraphicsEngine\Debug\PrecompiledShaders\DeferredComposite_PS.h">
-      <Filter>Intermediate\GraphicsEngine\Debug\PrecompiledShaders</Filter>
-    </ClInclude>
-    <ClInclude Include="Intermediate\GraphicsEngine\Debug\PrecompiledShaders\DeferredDirectional_PS.h">
-      <Filter>Intermediate\GraphicsEngine\Debug\PrecompiledShaders</Filter>
-    </ClInclude>
-    <ClInclude Include="Intermediate\GraphicsEngine\Debug\PrecompiledShaders\DeferredPoint_PS.h">
-      <Filter>Intermediate\GraphicsEngine\Debug\PrecompiledShaders</Filter>
-    </ClInclude>
-    <ClInclude Include="Intermediate\GraphicsEngine\Debug\PrecompiledShaders\DeferredSpot_PS.h">
-      <Filter>Intermediate\GraphicsEngine\Debug\PrecompiledShaders</Filter>
-    </ClInclude>
-    <ClInclude Include="Intermediate\GraphicsEngine\Debug\PrecompiledShaders\FullTexture_VS.h">
-      <Filter>Intermediate\GraphicsEngine\Debug\PrecompiledShaders</Filter>
-    </ClInclude>
-    <ClInclude Include="Intermediate\GraphicsEngine\Debug\PrecompiledShaders\GBuffer_PS.h">
-      <Filter>Intermediate\GraphicsEngine\Debug\PrecompiledShaders</Filter>
-    </ClInclude>
-    <ClInclude Include="Intermediate\GraphicsEngine\Debug\PrecompiledShaders\Lit_PS.h">
-      <Filter>Intermediate\GraphicsEngine\Debug\PrecompiledShaders</Filter>
-    </ClInclude>
-    <ClInclude Include="Intermediate\GraphicsEngine\Debug\PrecompiledShaders\PointShadow_GS.h">
-      <Filter>Intermediate\GraphicsEngine\Debug\PrecompiledShaders</Filter>
-    </ClInclude>
-    <ClInclude Include="Intermediate\GraphicsEngine\Debug\PrecompiledShaders\RenderPassDebug_PS.h">
-      <Filter>Intermediate\GraphicsEngine\Debug\PrecompiledShaders</Filter>
-    </ClInclude>
-    <ClInclude Include="Intermediate\GraphicsEngine\Debug\PrecompiledShaders\ScreenSpaceAO_PS.h">
-      <Filter>Intermediate\GraphicsEngine\Debug\PrecompiledShaders</Filter>
-    </ClInclude>
-    <ClInclude Include="Intermediate\GraphicsEngine\Debug\PrecompiledShaders\Surface_VS.h">
-      <Filter>Intermediate\GraphicsEngine\Debug\PrecompiledShaders</Filter>
-    </ClInclude>
-    <ClInclude Include="Intermediate\GraphicsEngine\Debug\PrecompiledShaders\Unlit_PS.h">
-      <Filter>Intermediate\GraphicsEngine\Debug\PrecompiledShaders</Filter>
-    </ClInclude>
     <ClInclude Include="Materials\Material.h">
       <Filter>Materials</Filter>
     </ClInclude>
@@ -128,12 +62,12 @@
     <ClInclude Include="Objects\Camera.h">
       <Filter>Objects</Filter>
     </ClInclude>
+    <ClInclude Include="Objects\Font.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
     <ClInclude Include="Objects\GBuffer.h">
       <Filter>Objects</Filter>
     </ClInclude>
-	<ClInclude Include="Objects\Font.h">
-	  <Filter>Objects</Filter>
-	</ClInclude>
     <ClInclude Include="Objects\Mesh.h">
       <Filter>Objects</Filter>
     </ClInclude>
@@ -166,46 +100,7 @@
     </ClInclude>
     <ClInclude Include="RenderCulling.h" />
     <ClInclude Include="RenderItemRouting.h" />
-	<ClInclude Include="TextWidget.h" />
-    <ClInclude Include="TemporaryShaders\BRDF_LUT_PS.h">
-      <Filter>TemporaryShaders</Filter>
-    </ClInclude>
-    <ClInclude Include="TemporaryShaders\DeferredComposite_PS.h">
-      <Filter>TemporaryShaders</Filter>
-    </ClInclude>
-    <ClInclude Include="TemporaryShaders\DeferredDirectional_PS.h">
-      <Filter>TemporaryShaders</Filter>
-    </ClInclude>
-    <ClInclude Include="TemporaryShaders\DeferredPoint_PS.h">
-      <Filter>TemporaryShaders</Filter>
-    </ClInclude>
-    <ClInclude Include="TemporaryShaders\DeferredSpot_PS.h">
-      <Filter>TemporaryShaders</Filter>
-    </ClInclude>
-    <ClInclude Include="TemporaryShaders\FullTexture_VS.h">
-      <Filter>TemporaryShaders</Filter>
-    </ClInclude>
-    <ClInclude Include="TemporaryShaders\GBuffer_PS.h">
-      <Filter>TemporaryShaders</Filter>
-    </ClInclude>
-    <ClInclude Include="TemporaryShaders\Lit_PS.h">
-      <Filter>TemporaryShaders</Filter>
-    </ClInclude>
-    <ClInclude Include="TemporaryShaders\PointShadow_GS.h">
-      <Filter>TemporaryShaders</Filter>
-    </ClInclude>
-    <ClInclude Include="TemporaryShaders\RenderPassDebug_PS.h">
-      <Filter>TemporaryShaders</Filter>
-    </ClInclude>
-    <ClInclude Include="TemporaryShaders\ScreenSpaceAO_PS.h">
-      <Filter>TemporaryShaders</Filter>
-    </ClInclude>
-    <ClInclude Include="TemporaryShaders\Surface_VS.h">
-      <Filter>TemporaryShaders</Filter>
-    </ClInclude>
-    <ClInclude Include="TemporaryShaders\Unlit_PS.h">
-      <Filter>TemporaryShaders</Filter>
-    </ClInclude>
+    <ClInclude Include="TextWidget.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ConstantBuffers\FrameBuffer.cpp">
@@ -231,7 +126,6 @@
     <ClCompile Include="Objects\Buffer.cpp">
       <Filter>Objects</Filter>
     </ClCompile>
-	<ClCompile Include="TextWidget.cpp" />
     <ClCompile Include="Objects\Camera.cpp">
       <Filter>Objects</Filter>
     </ClCompile>
@@ -262,137 +156,58 @@
     <ClCompile Include="RHI\RenderHardwareInterface.cpp">
       <Filter>RHI</Filter>
     </ClCompile>
+    <ClCompile Include="TextWidget.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Content\Shaders\Internal\BRDF_LUT_PS.hlsl">
-      <Filter>Content\Shaders\Internal</Filter>
-    </FxCompile>
-    <FxCompile Include="Content\Shaders\Internal\DeferredComposite_PS.hlsl">
-      <Filter>Content\Shaders\Internal</Filter>
-    </FxCompile>
-    <FxCompile Include="Content\Shaders\Internal\DeferredDirectional_PS.hlsl">
-      <Filter>Content\Shaders\Internal</Filter>
-    </FxCompile>
-    <FxCompile Include="Content\Shaders\Internal\DeferredPoint_PS.hlsl">
-      <Filter>Content\Shaders\Internal</Filter>
-    </FxCompile>
-    <FxCompile Include="Content\Shaders\Internal\DeferredSpot_PS.hlsl">
-      <Filter>Content\Shaders\Internal</Filter>
-    </FxCompile>
-    <FxCompile Include="Content\Shaders\Internal\FullTexture_VS.hlsl">
-      <Filter>Content\Shaders\Internal</Filter>
-    </FxCompile>
-    <FxCompile Include="Content\Shaders\Internal\PointShadow_GS.hlsl">
-      <Filter>Content\Shaders\Internal</Filter>
-    </FxCompile>
-    <FxCompile Include="Content\Shaders\Internal\RenderPassDebug_PS.hlsl">
-      <Filter>Content\Shaders\Internal</Filter>
-    </FxCompile>
-    <FxCompile Include="Content\Shaders\Internal\ScreenSpaceAO_PS.hlsl">
-      <Filter>Content\Shaders\Internal</Filter>
-    </FxCompile>
-    <FxCompile Include="Content\Shaders\Material\GBuffer_PS.hlsl">
-      <Filter>Content\Shaders\Material</Filter>
-    </FxCompile>
-    <FxCompile Include="Content\Shaders\Material\Lit_PS.hlsl">
-      <Filter>Content\Shaders\Material</Filter>
-    </FxCompile>
-    <FxCompile Include="Content\Shaders\Material\Surface_VS.hlsl">
-      <Filter>Content\Shaders\Material</Filter>
-    </FxCompile>
-    <FxCompile Include="Content\Shaders\Material\Unlit_PS.hlsl">
-      <Filter>Content\Shaders\Material</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\Internal\BRDF_LUT_PS.hlsl">
+    <None Include="Shaders\Internal\BRDF_LUT_PS.hlsl">
       <Filter>Shaders\Internal</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\Internal\DeferredComposite_PS.hlsl">
+    </None>
+    <None Include="Shaders\Internal\DeferredComposite_PS.hlsl">
       <Filter>Shaders\Internal</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\Internal\DeferredDirectional_PS.hlsl">
+    </None>
+    <None Include="Shaders\Internal\DeferredDirectional_PS.hlsl">
       <Filter>Shaders\Internal</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\Internal\DeferredPoint_PS.hlsl">
-      <Filter>Shaders\Internal</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\Internal\DeferredSpot_PS.hlsl">
-      <Filter>Shaders\Internal</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\Internal\FullTexture_VS.hlsl">
-      <Filter>Shaders\Internal</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\Internal\PointShadow_GS.hlsl">
-      <Filter>Shaders\Internal</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\Internal\RenderPassDebug_PS.hlsl">
-      <Filter>Shaders\Internal</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\Internal\ScreenSpaceAO_PS.hlsl">
-      <Filter>Shaders\Internal</Filter>
-    </FxCompile>
-	<FxCompile Include="Shaders\Internal\TextOverlay_VS.hlsl">
-	  <Filter>Shaders\Internal</Filter>
-	</FxCompile>
-	<FxCompile Include="Shaders\Internal\TextOverlay_PS.hlsl">
-	  <Filter>Shaders\Internal</Filter>
-	</FxCompile>
-    <FxCompile Include="Shaders\Material\GBuffer_PS.hlsl">
-      <Filter>Shaders\Material</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\Material\Lit_PS.hlsl">
-      <Filter>Shaders\Material</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\Material\Surface_VS.hlsl">
-      <Filter>Shaders\Material</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\Material\Unlit_PS.hlsl">
-      <Filter>Shaders\Material</Filter>
-    </FxCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Content\Shaders\Internal\DeferredLighting.hlsli">
-      <Filter>Content\Shaders\Internal</Filter>
-    </None>
-    <None Include="Content\Shaders\Material\Common.hlsli">
-      <Filter>Content\Shaders\Material</Filter>
-    </None>
-    <None Include="Content\Shaders\Material\GlobalLightingTextures.hlsli">
-      <Filter>Content\Shaders\Material</Filter>
-    </None>
-    <None Include="Content\Shaders\Material\Lighting.hlsli">
-      <Filter>Content\Shaders\Material</Filter>
-    </None>
-    <None Include="Content\Shaders\Material\Material.hlsli">
-      <Filter>Content\Shaders\Material</Filter>
-    </None>
-    <None Include="Content\Shaders\Material\MaterialParameters.hlsli">
-      <Filter>Content\Shaders\Material</Filter>
-    </None>
-    <None Include="Content\Shaders\Material\MaterialTextures.hlsli">
-      <Filter>Content\Shaders\Material</Filter>
-    </None>
-    <None Include="Content\Shaders\Material\PBR.hlsli">
-      <Filter>Content\Shaders\Material</Filter>
-    </None>
-    <None Include="Content\Shaders\Material\PoissonDisks.hlsli">
-      <Filter>Content\Shaders\Material</Filter>
-    </None>
-    <None Include="Content\Shaders\Material\Samplers.hlsli">
-      <Filter>Content\Shaders\Material</Filter>
-    </None>
-    <None Include="Content\Shaders\Material\ShadowSampling.hlsli">
-      <Filter>Content\Shaders\Material</Filter>
     </None>
     <None Include="Shaders\Internal\DeferredLighting.hlsli">
       <Filter>Shaders\Internal</Filter>
     </None>
+    <None Include="Shaders\Internal\DeferredPoint_PS.hlsl">
+      <Filter>Shaders\Internal</Filter>
+    </None>
+    <None Include="Shaders\Internal\DeferredSpot_PS.hlsl">
+      <Filter>Shaders\Internal</Filter>
+    </None>
+    <None Include="Shaders\Internal\FullTexture_VS.hlsl">
+      <Filter>Shaders\Internal</Filter>
+    </None>
+    <None Include="Shaders\Internal\PointShadow_GS.hlsl">
+      <Filter>Shaders\Internal</Filter>
+    </None>
+    <None Include="Shaders\Internal\RenderPassDebug_PS.hlsl">
+      <Filter>Shaders\Internal</Filter>
+    </None>
+    <None Include="Shaders\Internal\ScreenSpaceAO_PS.hlsl">
+      <Filter>Shaders\Internal</Filter>
+    </None>
+    <None Include="Shaders\Internal\TextOverlay_PS.hlsl">
+      <Filter>Shaders\Internal</Filter>
+    </None>
+    <None Include="Shaders\Internal\TextOverlay_VS.hlsl">
+      <Filter>Shaders\Internal</Filter>
+    </None>
     <None Include="Shaders\Material\Common.hlsli">
+      <Filter>Shaders\Material</Filter>
+    </None>
+    <None Include="Shaders\Material\GBuffer_PS.hlsl">
       <Filter>Shaders\Material</Filter>
     </None>
     <None Include="Shaders\Material\GlobalLightingTextures.hlsli">
       <Filter>Shaders\Material</Filter>
     </None>
     <None Include="Shaders\Material\Lighting.hlsli">
+      <Filter>Shaders\Material</Filter>
+    </None>
+    <None Include="Shaders\Material\Lit_PS.hlsl">
       <Filter>Shaders\Material</Filter>
     </None>
     <None Include="Shaders\Material\Material.hlsli">
@@ -414,6 +229,12 @@
       <Filter>Shaders\Material</Filter>
     </None>
     <None Include="Shaders\Material\ShadowSampling.hlsli">
+      <Filter>Shaders\Material</Filter>
+    </None>
+    <None Include="Shaders\Material\Surface_VS.hlsl">
+      <Filter>Shaders\Material</Filter>
+    </None>
+    <None Include="Shaders\Material\Unlit_PS.hlsl">
       <Filter>Shaders\Material</Filter>
     </None>
   </ItemGroup>

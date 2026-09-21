@@ -22,17 +22,14 @@
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Globals">
-    <CustomBuildAfterTargets>Build</CustomBuildAfterTargets>
     <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
     <ParallelCompilation>true</ParallelCompilation>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Globals">
-    <CustomBuildAfterTargets>Build</CustomBuildAfterTargets>
     <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
     <ParallelCompilation>true</ParallelCompilation>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Retail|x64'" Label="Globals">
-    <CustomBuildAfterTargets>Build</CustomBuildAfterTargets>
     <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
     <ParallelCompilation>true</ParallelCompilation>
   </PropertyGroup>
@@ -104,22 +101,7 @@
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
-    <CustomBuildStep>
-      <Command>set "CONTENTROOT=$(SolutionDir)Content"
-set "SHADERSRC=$(ProjectDir)Shaders"
-set "SHADERDEST=%CONTENTROOT%\Shaders"
-if not exist "%CONTENTROOT%" mkdir "%CONTENTROOT%"
-if not exist "%SHADERDEST%" mkdir "%SHADERDEST%"
-xcopy /E /I /R /Y "%SHADERSRC%" "%SHADERDEST%"</Command>
-      <Message>Copying Shaders to Content Dir</Message>
-      <Outputs>*.hlsl*</Outputs>
-    </CustomBuildStep>
     <FxCompile>
-      <ShaderModel>5.0</ShaderModel>
-      <EntryPointName>main</EntryPointName>
-      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
-      <HeaderFileOutput>$(IntDir)PrecompiledShaders\%(Filename).h</HeaderFileOutput>
-      <ObjectFileOutput></ObjectFileOutput>
       <TreatWarningAsError>true</TreatWarningAsError>
     </FxCompile>
     <Link>
@@ -153,18 +135,7 @@ xcopy /E /I /R /Y "%SHADERSRC%" "%SHADERDEST%"</Command>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
-    <CustomBuildStep>
-      <Command>IF EXIST "$(ProjectDir)Shaders"  (
-xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Shaders")</Command>
-      <Message>Copying Shaders to $(SolutionDir)Bin\$(Configuration)\Shaders...</Message>
-      <Outputs>*.hlsl*</Outputs>
-    </CustomBuildStep>
     <FxCompile>
-      <ShaderModel>5.0</ShaderModel>
-      <EntryPointName>main</EntryPointName>
-      <VariableName>TEMP_%(Filename)_ByteCode</VariableName>
-      <HeaderFileOutput>$(ProjectDir)TemporaryShaders\%(Filename).h</HeaderFileOutput>
-      <ObjectFileOutput></ObjectFileOutput>
       <TreatWarningAsError>true</TreatWarningAsError>
     </FxCompile>
     <Link>
@@ -200,18 +171,7 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
-    <CustomBuildStep>
-      <Command>IF EXIST "$(ProjectDir)Shaders"  (
-xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Shaders")</Command>
-      <Message>Copying Shaders to $(SolutionDir)Bin\$(Configuration)\Shaders...</Message>
-      <Outputs>*.hlsl*</Outputs>
-    </CustomBuildStep>
     <FxCompile>
-      <ShaderModel>5.0</ShaderModel>
-      <EntryPointName>main</EntryPointName>
-      <VariableName>TEMP_%(Filename)_ByteCode</VariableName>
-      <HeaderFileOutput>$(ProjectDir)TemporaryShaders\%(Filename).h</HeaderFileOutput>
-      <ObjectFileOutput></ObjectFileOutput>
       <TreatWarningAsError>true</TreatWarningAsError>
     </FxCompile>
     <Link>
@@ -234,27 +194,14 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
     <ClInclude Include="GraphicsEngine.h" />
     <ClInclude Include="GraphicsEngine.pch.h" />
     <ClInclude Include="InterOp\DDSTextureLoader11.h" />
-    <ClInclude Include="Intermediate\GraphicsEngine\Debug\PrecompiledShaders\BRDF_LUT_PS.h" />
-    <ClInclude Include="Intermediate\GraphicsEngine\Debug\PrecompiledShaders\DeferredComposite_PS.h" />
-    <ClInclude Include="Intermediate\GraphicsEngine\Debug\PrecompiledShaders\DeferredDirectional_PS.h" />
-    <ClInclude Include="Intermediate\GraphicsEngine\Debug\PrecompiledShaders\DeferredPoint_PS.h" />
-    <ClInclude Include="Intermediate\GraphicsEngine\Debug\PrecompiledShaders\DeferredSpot_PS.h" />
-    <ClInclude Include="Intermediate\GraphicsEngine\Debug\PrecompiledShaders\FullTexture_VS.h" />
-    <ClInclude Include="Intermediate\GraphicsEngine\Debug\PrecompiledShaders\GBuffer_PS.h" />
-    <ClInclude Include="Intermediate\GraphicsEngine\Debug\PrecompiledShaders\Lit_PS.h" />
-    <ClInclude Include="Intermediate\GraphicsEngine\Debug\PrecompiledShaders\PointShadow_GS.h" />
-    <ClInclude Include="Intermediate\GraphicsEngine\Debug\PrecompiledShaders\RenderPassDebug_PS.h" />
-    <ClInclude Include="Intermediate\GraphicsEngine\Debug\PrecompiledShaders\ScreenSpaceAO_PS.h" />
-    <ClInclude Include="Intermediate\GraphicsEngine\Debug\PrecompiledShaders\Surface_VS.h" />
-    <ClInclude Include="Intermediate\GraphicsEngine\Debug\PrecompiledShaders\Unlit_PS.h" />
     <ClInclude Include="Materials\Material.h" />
     <ClInclude Include="Materials\MaterialHelpers.h" />
     <ClInclude Include="Materials\MaterialInterface.h" />
     <ClInclude Include="Materials\MaterialShaderIncludeHandler.h" />
     <ClInclude Include="Objects\Buffer.h" />
     <ClInclude Include="Objects\Camera.h" />
+    <ClInclude Include="Objects\Font.h" />
     <ClInclude Include="Objects\GBuffer.h" />
-	<ClInclude Include="Objects\Font.h" />
     <ClInclude Include="Objects\Mesh.h" />
     <ClInclude Include="Objects\Sampler.h" />
     <ClInclude Include="Objects\Shader.h" />
@@ -267,20 +214,7 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
     <ClInclude Include="RHI\RenderHardwareInterface.h" />
     <ClInclude Include="RenderCulling.h" />
     <ClInclude Include="RenderItemRouting.h" />
-	<ClInclude Include="TextWidget.h" />
-    <ClInclude Include="TemporaryShaders\BRDF_LUT_PS.h" />
-    <ClInclude Include="TemporaryShaders\DeferredComposite_PS.h" />
-    <ClInclude Include="TemporaryShaders\DeferredDirectional_PS.h" />
-    <ClInclude Include="TemporaryShaders\DeferredPoint_PS.h" />
-    <ClInclude Include="TemporaryShaders\DeferredSpot_PS.h" />
-    <ClInclude Include="TemporaryShaders\FullTexture_VS.h" />
-    <ClInclude Include="TemporaryShaders\GBuffer_PS.h" />
-    <ClInclude Include="TemporaryShaders\Lit_PS.h" />
-    <ClInclude Include="TemporaryShaders\PointShadow_GS.h" />
-    <ClInclude Include="TemporaryShaders\RenderPassDebug_PS.h" />
-    <ClInclude Include="TemporaryShaders\ScreenSpaceAO_PS.h" />
-    <ClInclude Include="TemporaryShaders\Surface_VS.h" />
-    <ClInclude Include="TemporaryShaders\Unlit_PS.h" />
+    <ClInclude Include="TextWidget.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ConstantBuffers\FrameBuffer.cpp" />
@@ -296,7 +230,6 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
     <ClCompile Include="Materials\MaterialInterface.cpp" />
     <ClCompile Include="Materials\MaterialShaderIncludeHandler.cpp" />
     <ClCompile Include="Objects\Buffer.cpp" />
-	<ClCompile Include="TextWidget.cpp" />
     <ClCompile Include="Objects\Camera.cpp" />
     <ClCompile Include="Objects\Mesh.cpp" />
     <ClCompile Include="Objects\Sampler.cpp" />
@@ -307,109 +240,26 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
     <ClCompile Include="RHI\PipelineStateObject.cpp" />
     <ClCompile Include="RHI\RHIShaderReflectionInfo.cpp" />
     <ClCompile Include="RHI\RenderHardwareInterface.cpp" />
+    <ClCompile Include="TextWidget.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Content\Shaders\Internal\BRDF_LUT_PS.hlsl">
-      <ShaderType>Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Content\Shaders\Internal\DeferredComposite_PS.hlsl">
-      <ShaderType>Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Content\Shaders\Internal\DeferredDirectional_PS.hlsl">
-      <ShaderType>Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Content\Shaders\Internal\DeferredPoint_PS.hlsl">
-      <ShaderType>Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Content\Shaders\Internal\DeferredSpot_PS.hlsl">
-      <ShaderType>Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Content\Shaders\Internal\FullTexture_VS.hlsl">
-      <ShaderType>Vertex</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Content\Shaders\Internal\PointShadow_GS.hlsl">
-      <ShaderType>Geometry</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Content\Shaders\Internal\RenderPassDebug_PS.hlsl">
-      <ShaderType>Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Content\Shaders\Internal\ScreenSpaceAO_PS.hlsl">
-      <ShaderType>Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Content\Shaders\Material\GBuffer_PS.hlsl">
-      <ShaderType>Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Content\Shaders\Material\Lit_PS.hlsl">
-      <ShaderType>Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Content\Shaders\Material\Surface_VS.hlsl">
-      <ShaderType>Vertex</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Content\Shaders\Material\Unlit_PS.hlsl">
-      <ShaderType>Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Shaders\Internal\BRDF_LUT_PS.hlsl">
-      <ShaderType>Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Shaders\Internal\DeferredComposite_PS.hlsl">
-      <ShaderType>Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Shaders\Internal\DeferredDirectional_PS.hlsl">
-      <ShaderType>Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Shaders\Internal\DeferredPoint_PS.hlsl">
-      <ShaderType>Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Shaders\Internal\DeferredSpot_PS.hlsl">
-      <ShaderType>Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Shaders\Internal\FullTexture_VS.hlsl">
-      <ShaderType>Vertex</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Shaders\Internal\PointShadow_GS.hlsl">
-      <ShaderType>Geometry</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Shaders\Internal\RenderPassDebug_PS.hlsl">
-      <ShaderType>Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Shaders\Internal\ScreenSpaceAO_PS.hlsl">
-      <ShaderType>Pixel</ShaderType>
-    </FxCompile>
-	<FxCompile Include="Shaders\Internal\TextOverlay_VS.hlsl">
-	  <ShaderType>Vertex</ShaderType>
-	</FxCompile>
-	<FxCompile Include="Shaders\Internal\TextOverlay_PS.hlsl">
-	  <ShaderType>Pixel</ShaderType>
-	</FxCompile>
-    <FxCompile Include="Shaders\Material\GBuffer_PS.hlsl">
-      <ShaderType>Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Shaders\Material\Lit_PS.hlsl">
-      <ShaderType>Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Shaders\Material\Surface_VS.hlsl">
-      <ShaderType>Vertex</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Shaders\Material\Unlit_PS.hlsl">
-      <ShaderType>Pixel</ShaderType>
-    </FxCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Content\Shaders\Internal\DeferredLighting.hlsli" />
-    <None Include="Content\Shaders\Material\Common.hlsli" />
-    <None Include="Content\Shaders\Material\GlobalLightingTextures.hlsli" />
-    <None Include="Content\Shaders\Material\Lighting.hlsli" />
-    <None Include="Content\Shaders\Material\Material.hlsli" />
-    <None Include="Content\Shaders\Material\MaterialParameters.hlsli" />
-    <None Include="Content\Shaders\Material\MaterialTextures.hlsli" />
-    <None Include="Content\Shaders\Material\PBR.hlsli" />
-    <None Include="Content\Shaders\Material\PoissonDisks.hlsli" />
-    <None Include="Content\Shaders\Material\Samplers.hlsli" />
-    <None Include="Content\Shaders\Material\ShadowSampling.hlsli" />
+    <None Include="Shaders\Internal\BRDF_LUT_PS.hlsl" />
+    <None Include="Shaders\Internal\DeferredComposite_PS.hlsl" />
+    <None Include="Shaders\Internal\DeferredDirectional_PS.hlsl" />
     <None Include="Shaders\Internal\DeferredLighting.hlsli" />
+    <None Include="Shaders\Internal\DeferredPoint_PS.hlsl" />
+    <None Include="Shaders\Internal\DeferredSpot_PS.hlsl" />
+    <None Include="Shaders\Internal\FullTexture_VS.hlsl" />
+    <None Include="Shaders\Internal\PointShadow_GS.hlsl" />
+    <None Include="Shaders\Internal\RenderPassDebug_PS.hlsl" />
+    <None Include="Shaders\Internal\ScreenSpaceAO_PS.hlsl" />
+    <None Include="Shaders\Internal\TextOverlay_PS.hlsl" />
+    <None Include="Shaders\Internal\TextOverlay_VS.hlsl" />
     <None Include="Shaders\Material\Common.hlsli" />
+    <None Include="Shaders\Material\GBuffer_PS.hlsl" />
     <None Include="Shaders\Material\GlobalLightingTextures.hlsli" />
     <None Include="Shaders\Material\Lighting.hlsli" />
+    <None Include="Shaders\Material\Lit_PS.hlsl" />
     <None Include="Shaders\Material\Material.hlsli" />
     <None Include="Shaders\Material\MaterialParameters.hlsli" />
     <None Include="Shaders\Material\MaterialTextures.hlsli" />
@@ -417,6 +267,8 @@ xcopy /E /I /R /Y "$(ProjectDir)Shaders" "$(SolutionDir)Bin\$(Configuration)\Sha
     <None Include="Shaders\Material\PoissonDisks.hlsli" />
     <None Include="Shaders\Material\Samplers.hlsli" />
     <None Include="Shaders\Material\ShadowSampling.hlsli" />
+    <None Include="Shaders\Material\Surface_VS.hlsl" />
+    <None Include="Shaders\Material\Unlit_PS.hlsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

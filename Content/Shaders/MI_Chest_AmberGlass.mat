@@ -1,0 +1,7 @@
+{
+  "name": "MI_Chest_AmberGlass",
+  "masterMaterial": "ChestMaterial_Alpha",
+  "parameters": {
+    "MB_Tint": [1.0, 0.55, 0.15, 0.65]
+  }
+}

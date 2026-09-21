@@ -32,7 +32,7 @@ namespace
 		destination.SetSourceAssetIdentity(source.GetSourceMeshName(), source.GetSourceContentPath());
 		for (unsigned materialIndex = 0; materialIndex < source.GetMaterialCount(); ++materialIndex)
 		{
-			const MaterialAsset material = source.GetMaterial(materialIndex);
+			const MaterialHandle material = source.GetMaterial(materialIndex);
 			if (material)
 			{
 				destination.SetMaterial(materialIndex, material);
@@ -145,7 +145,7 @@ void Game::Initialize(GameContext& context)
 			AttachRuntimeChild(context.GetWorld());
 		}
 	}));
-	context.LoadScene("ChestMaterials");
+	context.LoadScene("Lvl_Blockout_Level");
 	AudioManager& audio = ServiceLocator::GetInstance().GetAudioManager();
 	audio.SetBusVolume(BusID::eMusic, BackgroundMusicVolume);
 	audio.PlayMusic(SoundID::eMainTheme, true);

@@ -16,7 +16,7 @@ class SkeletalMeshComponent final : public MeshComponentBase
 {
 public:
 	SkeletalMeshComponent();
-	explicit SkeletalMeshComponent(MeshAsset aMesh);
+	explicit SkeletalMeshComponent(MeshHandle aMesh);
 
 	void Update(float aDeltaTime) override;
 
