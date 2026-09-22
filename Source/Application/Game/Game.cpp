@@ -29,7 +29,6 @@ namespace
 			return false;
 		}
 
-		destination.SetSourceAssetIdentity(source.GetSourceMeshName(), source.GetSourceContentPath());
 		for (unsigned materialIndex = 0; materialIndex < source.GetMaterialCount(); ++materialIndex)
 		{
 			const MaterialHandle material = source.GetMaterial(materialIndex);
@@ -116,6 +115,7 @@ Game::~Game() = default;
 
 void Game::Initialize(GameContext& context)
 {
+	// TODO!: input handling having to be done like this doesnt feel right
 	InputSystem& input = context.GetInputSystem();
 	myInputSubscriptions.push_back(input.Subscribe(InputActions::Quit, [&context](const InputActionEvent& event)
 	{
@@ -145,7 +145,7 @@ void Game::Initialize(GameContext& context)
 			AttachRuntimeChild(context.GetWorld());
 		}
 	}));
-	context.LoadScene("ChestMaterials"); // TODO: make this a enum or smn wtf
+	context.LoadScene("ChestMaterials"); // TODO: make this an enum or smn wtf
 	AudioManager& audio = ServiceLocator::GetInstance().GetAudioManager();
 	audio.SetBusVolume(BusID::eMusic, BackgroundMusicVolume);
 	audio.PlayMusic(SoundID::eMainTheme, true);

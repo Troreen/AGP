@@ -10,9 +10,10 @@
 
 namespace
 {
+	// TODO!: THIS NEEDS TO BE BETTER HOLY JESUSS! MAKE IT AN ENUM OR SMN, THIS IS TERRIBLE
 	std::filesystem::path GetSceneFile(const std::string& name)
 	{
-		if (name == "Game") return "ExportedScenes/TestExportMap_Level.json";
+		if (name == "TestExport") return "ExportedScenes/TestExportMap_Level.json";
 		if (name == "ChestMaterials") return "ExportedScenes/ChestMaterials_Level.json";
 		if (name == "Lvl_Blockout_Level") return "ExportedScenes/Lvl_Blockout_Level.json";
 		return {};
@@ -80,13 +81,10 @@ void GameScene::PrepareAssets(SceneData& scene, SceneLoadContext& context)
 				using ComponentType = std::decay_t<decltype(componentData)>;
 				if constexpr (std::is_same_v<ComponentType, StaticMeshData> || std::is_same_v<ComponentType, SkeletalMeshData>)
 				{
-					// The imported name selects an authored .mat; Unreal Parent is metadata.
-					for (size_t materialSlot = 0; materialSlot < componentData.Materials.size(); ++materialSlot)
+					for (MaterialInstanceData& materialData : componentData.Materials)
 					{
-						MaterialInstanceData& materialData = componentData.Materials[materialSlot];
-						if (context.Assets.GetAsset<MaterialAsset>(materialData.Name))
+						if (context.Assets.GetAsset<MaterialAsset>(materialData.Parent.Value))
 						{
-							materialData.Parent = AssetId{materialData.Name};
 							continue;
 						}
 						if (context.Assets.GetLastErrorCode() != AssetRegistry::AssetError::NotFound)

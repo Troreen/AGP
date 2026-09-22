@@ -63,7 +63,7 @@ public:
 		Check(&ServiceLocator::GetInstance().GetInputSystem() == &context.GetInputSystem(), "ServiceLocator input service mismatch");
 		Check(&ServiceLocator::GetInstance().GetAssetRegistry() == &AssetRegistry::Get(), "ServiceLocator asset service mismatch");
 		Check(bool(AssetRegistry::Get().ResolveMaterial(AssetId{"Shaders/CubeMaterial.mat"})), "Flat material did not load");
-		const MaterialAsset parameterInstance = AssetRegistry::Get().ResolveMaterial(AssetId{"ChestMaterial_Alpha1"});
+		const auto parameterInstance = AssetRegistry::Get().ResolveMaterial(AssetId{"ChestMaterial_Alpha1"});
 		Check(bool(parameterInstance), AssetRegistry::Get().GetLastError().c_str());
 		Check(bool(AssetRegistry::Get().ResolveMaterial(AssetId{"Shaders/ChestMaterial_Alpha2.mat"})), "Material texture overrides did not load");
 		Check(world.FindActor("__DebugCamera") && world.GetActiveCamera(), "Imported scene did not install the debug camera");

@@ -203,9 +203,8 @@
     <ClInclude Include="Scenes\SceneData.h" />
     <ClInclude Include="ServiceLocator.h" />
     <ClInclude Include="SimdJson\simdjson.h" />
-    <ClInclude Include="UnrealSceneImporter\PerforceSceneStructs.h" />
+    <ClInclude Include="UnrealSceneImporter\UnrealSceneParserStructs.h" />
     <ClInclude Include="UnrealSceneImporter\UnrealSceneImporter.h" />
-    <ClInclude Include="UnrealSceneImporter\UnrealSceneStructs.h" />
     <ClInclude Include="World\Actor.h" />
     <ClInclude Include="World\Component.h" />
     <ClInclude Include="World\Transform.h" />

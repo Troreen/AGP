@@ -96,13 +96,10 @@
     <ClInclude Include="SimdJson\simdjson.h">
       <Filter>SimdJson</Filter>
     </ClInclude>
-    <ClInclude Include="UnrealSceneImporter\PerforceSceneStructs.h">
+    <ClInclude Include="UnrealSceneImporter\UnrealSceneParserStructs.h">
       <Filter>UnrealSceneImporter</Filter>
     </ClInclude>
     <ClInclude Include="UnrealSceneImporter\UnrealSceneImporter.h">
-      <Filter>UnrealSceneImporter</Filter>
-    </ClInclude>
-    <ClInclude Include="UnrealSceneImporter\UnrealSceneStructs.h">
       <Filter>UnrealSceneImporter</Filter>
     </ClInclude>
     <ClInclude Include="World\Actor.h">

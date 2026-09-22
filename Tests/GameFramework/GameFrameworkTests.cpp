@@ -15,6 +15,7 @@
 #include <fstream>
 #include <iostream>
 #include <limits>
+#include <string_view>
 #include <type_traits>
 
 struct FontTestAccess
@@ -270,8 +271,8 @@ void AssetRegistrySemantics()
 		return std::make_shared<Mesh>();
 	});
 	{
-		const MeshAsset first = assets.ResolveMesh(AssetId{"MESHES/A/UNIQUE.FBX"});
-		const MeshAsset alias = assets.ResolveMesh(AssetId{"Unique"});
+		const auto first = assets.ResolveMesh(AssetId{"MESHES/A/UNIQUE.FBX"});
+		const auto alias = assets.ResolveMesh(AssetId{"Unique"});
 		Check(first && alias && loads == 1, "Case-insensitive exact/unique-alias lookup or cache failed");
 	}
 	Check(assets.ResolveMesh(AssetId{"Meshes/A/Unique.fbx"}) && loads == 2, "Expired weak asset was not reloaded");
@@ -576,10 +577,16 @@ void FontAssetDiagnostics()
 	std::filesystem::remove_all(root);
 }
 
-int main()
+int main(int argc, char** argv)
 {
 	try
 	{
+		if (argc > 1 && std::string_view(argv[1]) == "--import-only")
+		{
+			UnrealImportPipeline();
+			std::cout << "PASS: Unreal import pipeline\n";
+			return 0;
+		}
 		OwnershipAndLifecycle();
 		TransformSemantics();
 		RuntimeMutations();

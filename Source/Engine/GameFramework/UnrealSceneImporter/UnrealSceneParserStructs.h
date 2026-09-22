@@ -1,13 +1,43 @@
 #pragma once
 
-#include "UnrealSceneStructs.h"
+#include <Matrix.hpp>
+#include <Vector.hpp>
 
-// Compatibility DTOs for the Perforce importer. The parser owns this source-shaped
-// representation; UnrealSceneImporter.cpp translates it to the framework records.
-namespace PerforceScene
+#include <cstdint>
+#include <string>
+#include <variant>
+#include <vector>
+
+namespace UnrealScene
 {
-	using ::MaterialType;
-	using ::UnrealComponentType;
+	enum class UnrealComponentType : int64_t
+	{
+		Custom = -1,
+		SceneComponent,
+		StaticMesh,
+		SkeletalMesh,
+		PointLight,
+		SpotLight,
+		DirectionalLight,
+		Box,
+		Sphere,
+		Capsule,
+		SpringArm
+	};
+
+	enum class MaterialType : int64_t
+	{
+		Scalar,
+		Vector3f,
+		Vector3d,
+		Texture,
+		TextureCollection,
+		Font,
+		RunTimeVirtualTexture,
+		SparseVolumeTexture,
+		StaticSwitch,
+		ParameterCollection
+	};
 
 	struct TextureValue
 	{
