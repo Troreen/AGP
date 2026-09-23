@@ -10,8 +10,3 @@ World& Component::GetWorld() const
 	}
 	return *myOwner->GetWorld();
 }
-
-InputSystem& Component::GetInputSystem() const
-{
-	return GetWorld().GetInputSystem();
-}

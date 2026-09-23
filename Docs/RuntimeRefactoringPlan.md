@@ -1,5 +1,7 @@
 # Runtime readability refactoring plan
 
+> Historical snapshot: input architecture descriptions below are superseded by [Input restoration](../InputRestorationPlan.md).
+
 Status: final, revised after three independent plan audits covering readability, simplicity, behavior/architecture and scope. Planning only; no implementation changes.
 
 Baseline inspected: `4c19440adc9db4c8f46439787ca69f5ca17c932f` (2026-09-23). Line references describe that baseline and will move during implementation. In code references, `Runtime/`, `Scenes/`, `World/` and `Rendering/` are relative to `Source/Engine/GameFramework`; `GameFramework/` and `GraphicsEngine/` are relative to `Source/Engine`. Bare Runtime filenames refer to `Source/Engine/GameFramework/Runtime`; `Tests/`, `Docs/`, `Source/` and command paths are repository-relative. The working tree was clean before this document was added.

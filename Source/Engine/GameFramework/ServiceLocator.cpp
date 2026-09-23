@@ -1,5 +1,5 @@
-#include "GameFramework/ServiceLocator.h"
-
+#include "ServiceLocator.h"
+#include <InputMapper.h>
 #include <stdexcept>
 
 ServiceLocator& ServiceLocator::GetInstance()
@@ -8,27 +8,44 @@ ServiceLocator& ServiceLocator::GetInstance()
 	return instance;
 }
 
-InputSystem& ServiceLocator::GetInputSystem() const
+CommonUtilities::InputMapper* ServiceLocator::GetInputMapper()
 {
-	if (!myInput) throw std::logic_error("InputSystem service is unavailable");
-	return *myInput;
+	return myOwnedInputMapper;
+}
+
+CommonUtilities::InputMapper* ServiceLocator::SetInputMapper(CommonUtilities::InputMapper* anInputMapper)
+{
+	if (myOwnedInputMapper != anInputMapper)
+	{
+		delete myOwnedInputMapper;
+		myOwnedInputMapper = anInputMapper;
+	}
+	return anInputMapper;
+}
+
+void ServiceLocator::KillServices()
+{
+	delete myOwnedInputMapper;
+	myOwnedInputMapper = nullptr;
+	myAudioManager = nullptr;
+	myAssetRegistry = nullptr;
+}
+
+ServiceLocator::ServiceLocator() : myOwnedInputMapper(nullptr) {}
+
+ServiceLocator::~ServiceLocator()
+{
+	KillServices();
 }
 
 AudioManager& ServiceLocator::GetAudioManager() const
 {
-	if (!myAudio) throw std::logic_error("AudioManager service is unavailable");
-	return *myAudio;
+	if (!myAudioManager) throw std::logic_error("AudioManager service is unavailable");
+	return *myAudioManager;
 }
 
 AssetRegistry& ServiceLocator::GetAssetRegistry() const
 {
-	if (!myAssets) throw std::logic_error("AssetRegistry service is unavailable");
-	return *myAssets;
-}
-
-void ServiceLocator::Clear()
-{
-	myInput = nullptr;
-	myAudio = nullptr;
-	myAssets = nullptr;
+	if (!myAssetRegistry) throw std::logic_error("AssetRegistry service is unavailable");
+	return *myAssetRegistry;
 }

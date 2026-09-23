@@ -1,8 +1,8 @@
+#include "InputFixture.h"
 #include "CameraControlsComponent.h"
-#include "LightControlsComponent.h"
 #include "SpinComponent.h"
 #include "GameFramework/World/World.h"
-#include "GameFramework/Components/LightComponent.h"
+#include "GameFramework/Components/SceneComponent.h"
 #include "EnumKeyCode.h"
 #include <cmath>
 #include <iostream>
@@ -25,7 +25,7 @@ namespace
 
 	void ExpectVector(const Vector3f& actual, const Vector3f& expected, const std::string& message)
 	{
-		if ((actual - expected).Length() > 0.0001f || !std::isfinite(actual.LengthSqr()))
+		if ((actual - expected).Length() > 0.004f || !std::isfinite(actual.LengthSqr()))
 		{
 			throw std::runtime_error(message + ": actual (" + std::to_string(actual.x) + ", " + std::to_string(actual.y) + ", " +
 			                         std::to_string(actual.z) + "), expected (" + std::to_string(expected.x) + ", " +
@@ -55,14 +55,12 @@ namespace
 	class CameraFixture
 	{
 	public:
-		InputSystem Input;
-		InputDeviceFrame Frame;
-		std::unique_ptr<World> Session = std::make_unique<World>(&Input);
+		InputFixture Native;
+		std::unique_ptr<World> Session = std::make_unique<World>();
 		Actor* Camera = nullptr;
 
 		explicit CameraFixture(const Vector3f& authored = {})
 		{
-			InstallDefaultInputBindings(Input);
 			Camera = Session->SpawnActor("Controlled camera");
 			Camera->GetTransform().SetLocalRotationDegrees(authored);
 			Camera->AddComponent<CameraControlsComponent>();
@@ -71,11 +69,9 @@ namespace
 
 		void Look(float yawDeltaDegrees, float pitchDeltaDegrees, bool active = true)
 		{
-			Frame = {};
-			Frame.KeysDown[static_cast<size_t>(EKeyCode::MOUSERBUTTON)] = active;
-			Frame.MouseDelta.x = yawDeltaDegrees * DegreesToRadians / LookSensitivity;
-			Frame.MouseDelta.y = pitchDeltaDegrees * DegreesToRadians / LookSensitivity;
-			Input.Update(Frame);
+			Native.Key(EKeyCode::MOUSERBUTTON, active);
+			Native.Move(static_cast<int>(std::lround(yawDeltaDegrees * DegreesToRadians / LookSensitivity)), static_cast<int>(std::lround(pitchDeltaDegrees * DegreesToRadians / LookSensitivity)));
+			Native.Input.Update();
 			Session->Update(1.0f / 60.0f);
 		}
 
@@ -121,47 +117,11 @@ namespace
 		authored.ExpectLocal(40, -25, "Authored aim without input");
 	}
 
-	void LightAimShortcuts()
-	{
-		InputSystem input;
-		InstallDefaultInputBindings(input);
-		InputDeviceFrame frame;
-		auto world = std::make_unique<World>(&input);
-		auto* camera = world->SpawnActor("Camera");
-		camera->GetTransform().SetLocalPosition({120, 230, -340});
-		camera->GetTransform().SetLocalRotationDegrees(AuthoredRotation(70, -35));
-		camera->AddComponent<CameraControlsComponent>();
-		auto* directional = world->SpawnActor("Directional")->AddComponent<DirectionalLightComponent>();
-		world->SpawnActor("Point")->AddComponent<PointLightComponent>();
-		auto* spot = world->SpawnActor("Spot")->AddComponent<SpotLightComponent>();
-		auto* controls = world->SpawnActor("Controls")->AddComponent<LightControlsComponent>();
-		controls->CameraName = "Camera";
-		controls->DirectionalName = "Directional";
-		controls->PointName = "Point";
-		controls->SpotName = "Spot";
-		world->BeginPlay();
-		frame.KeysDown[static_cast<size_t>(EKeyCode::MOUSERBUTTON)] = true;
-		frame.MouseDelta.x = 10 * DegreesToRadians / LookSensitivity;
-		frame.KeysDown[static_cast<size_t>(EKeyCode::SHIFT)] = true;
-		frame.KeysDown[static_cast<size_t>('7')] = true;
-		input.Update(frame);
-		world->Update(1.0f / 60.0f);
-		ExpectVector(directional->GetWorldDirection(), ExpectedForward(80, -35), "Shift+7 uses camera movement from the same Update");
-		frame = {};
-		frame.KeysDown[static_cast<size_t>(EKeyCode::SHIFT)] = true;
-		frame.KeysDown[static_cast<size_t>('9')] = true;
-		input.Update(frame);
-		world->Update(1.0f / 60.0f);
-		ExpectVector(spot->GetWorldDirection(), ExpectedForward(80, -35), "Shift+9 camera-aligned spotlight");
-		ExpectVector(spot->GetWorldPosition(), camera->GetTransform().GetWorldPosition(), "Shift+9 spotlight placement");
-	}
-
 	void FrameTimeSpin()
 	{
-		InputSystem input;
-		InstallDefaultInputBindings(input);
-		InputDeviceFrame frame;
-		auto world = std::make_unique<World>(&input);
+		InputFixture native;
+		auto& input = native.Input;
+		auto world = std::make_unique<World>();
 		auto* chest = world->SpawnActor("Chest");
 		chest->AddComponent<SpinComponent>();
 		auto* child = chest->AddComponent<SceneComponent>("Child");
@@ -175,20 +135,12 @@ namespace
 		ExpectVector(child->GetTransform().GetLocalForward(), ExpectedForward(.05f, 0), "Child advances its own local spin");
 		Expect((child->GetWorldPosition() - initialChildWorldPosition).LengthSqr() > 0.0f,
 		       "Parent spin did not move the offset child around its orbit");
-		frame.KeysDown[static_cast<size_t>(EKeyCode::R)] = true;
-		input.Update(frame);
-		world->Update(0);
-		input.Update(frame);
-		world->Update(.2f);
-		ExpectVector(chest->GetTransform().GetLocalForward(), ExpectedForward(.05f, 0), "Pressed R pauses; held R does not toggle again");
-		ExpectVector(child->GetTransform().GetLocalForward(), ExpectedForward(.05f, 0), "Pressed R pauses the child spin too");
-		frame = {};
-		input.Update(frame);
-		frame.KeysDown[static_cast<size_t>(EKeyCode::R)] = true;
-		input.Update(frame);
+		native.Key(EKeyCode::R, true);
+		input.Update();
 		world->Update(.1f);
-		ExpectVector(chest->GetTransform().GetLocalForward(), ExpectedForward(2.55f, 0), "Second R press resumes frame-time spin");
-		ExpectVector(child->GetTransform().GetLocalForward(), ExpectedForward(2.55f, 0), "Second R press resumes child spin");
+		ExpectVector(chest->GetTransform().GetLocalForward(), ExpectedForward(2.55f, 0), "R does not pause automatic spin");
+		ExpectVector(child->GetTransform().GetLocalForward(), ExpectedForward(2.55f, 0), "Child spin continues without input controls");
+
 	}
 }
 
@@ -199,9 +151,8 @@ int RunCameraControlsTests()
 		CardinalYawPitch();
 		MixedInputAndClamp();
 		StartupAim();
-		LightAimShortcuts();
 		FrameTimeSpin();
-		std::cout << "PASS: camera controls, same-frame light aiming and single-update chest spin\n";
+		std::cout << "PASS: camera controls and automatic frame-time chest spin\n";
 		return 0;
 	}
 	catch (const std::exception& error)

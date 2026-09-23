@@ -1,27 +1,42 @@
 #pragma once
 
-class AssetRegistry;
-class AudioManager;
-class InputSystem;
+namespace CommonUtilities
+{
+	class InputMapper;
+}
 
-// Transitional access point for engine-wide services. Services are owned by the
-// application/runtime; the locator only exposes their current non-owning references.
+class AudioManager;
+class AssetRegistry;
+
 class ServiceLocator
 {
-public:
-	static ServiceLocator& GetInstance();
+	public:
+		ServiceLocator(const ServiceLocator&) = delete;
+		ServiceLocator& operator=(const ServiceLocator&) = delete;
 
-	void ProvideInput(InputSystem& input) { myInput = &input; }
-	void ProvideAudio(AudioManager& audio) { myAudio = &audio; }
-	void ProvideAssets(AssetRegistry& assets) { myAssets = &assets; }
+		ServiceLocator(ServiceLocator&&) = delete;
+		ServiceLocator& operator=(ServiceLocator&&) = delete;
 
-	InputSystem& GetInputSystem() const;
-	AudioManager& GetAudioManager() const;
-	AssetRegistry& GetAssetRegistry() const;
-	void Clear();
+		static ServiceLocator& GetInstance();
 
-private:
-	InputSystem* myInput = nullptr;
-	AudioManager* myAudio = nullptr;
-	AssetRegistry* myAssets = nullptr;
+		CommonUtilities::InputMapper* GetInputMapper();
+		// Transfers ownership; replace only after all old listeners have been removed.
+		CommonUtilities::InputMapper* SetInputMapper(CommonUtilities::InputMapper* anInputMapper);
+
+		// Audio owns its singleton lifetime; AssetRegistry has static lifetime.
+		// These setters borrow services. KillServices only clears their pointers.
+		void SetAudioManager(AudioManager* audio) { myAudioManager = audio; }
+		void SetAssetRegistry(AssetRegistry* assets) { myAssetRegistry = assets; }
+		AudioManager& GetAudioManager() const;
+		AssetRegistry& GetAssetRegistry() const;
+
+		void KillServices();
+
+	private:
+		ServiceLocator();
+		~ServiceLocator();
+
+		CommonUtilities::InputMapper* myOwnedInputMapper;
+		AudioManager* myAudioManager = nullptr;
+		AssetRegistry* myAssetRegistry = nullptr;
 };

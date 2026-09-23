@@ -6,6 +6,7 @@
 #include "GameFramework/ServiceLocator.h"
 #include "GameFramework/World/World.h"
 #include "GameLog.h"
+#include <utility>
 
 
 #include "../../Engine/GameFramework/Components/SkeletalMeshComponent.h"
@@ -120,50 +121,55 @@ Game::~Game() = default;
 
 void Game::Initialize(GameContext& context)
 {
-	// TODO!: input handling having to be done like this doesnt feel right
-	InputSystem& input = context.GetInputSystem();
-	myInputSubscriptions.push_back(input.Subscribe(InputActions::Quit, [&context](const InputActionEvent& event)
+	auto& input = *ServiceLocator::GetInstance().GetInputMapper();
+	input.BindActionToInputCode("ReloadScene", EKeyCode::F4);
+	input.BindActionToInputCode("SpawnDemo", EKeyCode::F7);
+	input.BindActionToInputCode("AttachDemoChild", EKeyCode::F8);
+
+
+	myInputListenerIDs.push_back(input.AddEventListener("ReloadScene", [&context](const CommonUtilities::InputEvent& event)
 	{
-		if (event.Phase == InputActionPhase::Started)
-		{
-			context.RequestQuit();
-		}
-	}));
-	myInputSubscriptions.push_back(input.Subscribe(InputActions::ReloadScene, [&context](const InputActionEvent& event)
-	{
-		if (event.Phase == InputActionPhase::Started)
+		if (event.inputData.isPressed)
 		{
 			context.ReloadScene();
 		}
 	}));
-	myInputSubscriptions.push_back(input.Subscribe(InputActions::SpawnDemo, [&context](const InputActionEvent& event)
+	myInputListenerIDs.push_back(input.AddEventListener("SpawnDemo", [this](const CommonUtilities::InputEvent& event)
 	{
-		if (event.Phase == InputActionPhase::Started)
+		if (event.inputData.isPressed)
 		{
-			ToggleRuntimeChest(context.GetWorld());
+			myToggleChestRequested = true;
 		}
 	}));
-	myInputSubscriptions.push_back(input.Subscribe(InputActions::AttachDemoChild, [&context](const InputActionEvent& event)
+	myInputListenerIDs.push_back(input.AddEventListener("AttachDemoChild", [this](const CommonUtilities::InputEvent& event)
 	{
-		if (event.Phase == InputActionPhase::Started)
+		if (event.inputData.isPressed)
 		{
-			AttachRuntimeChild(context.GetWorld());
+			myAttachChildRequested = true;
 		}
 	}));
 	context.LoadScene(SceneType::Blockout);
 	AudioManager& audio = ServiceLocator::GetInstance().GetAudioManager();
 	audio.SetBusVolume(BusID::eMusic, BackgroundMusicVolume);
 	audio.PlayMusic(SoundID::eMainTheme, true); // TODO: make man breathe more often this is not enough wtf smh b-word
-	GAMELOG(Log, "Game ready: F7 toggles a spinning chest, F8 attaches its child, R toggles spinning");
+	GAMELOG(Log, "Game ready: F7 toggles a spinning chest, F8 attaches its child");
 }
 
-void Game::Update(GameContext&, float) {}
+void Game::Update(GameContext& context, float)
+{
+	// Actor/component lifecycle work happens after InputMapper finishes dispatching.
+	if (std::exchange(myToggleChestRequested, false)) ToggleRuntimeChest(context.GetWorld());
+	if (std::exchange(myAttachChildRequested, false)) AttachRuntimeChild(context.GetWorld());
+}
 
 void Game::Shutdown(GameContext& context)
 {
-	ServiceLocator::GetInstance().GetAudioManager().StopMusic(SoundID::eMainTheme, false);
-	myInputSubscriptions.clear();
+	if (auto* input = ServiceLocator::GetInstance().GetInputMapper())
+		for (unsigned id : myInputListenerIDs) input->RemoveEventListener(id);
+	myInputListenerIDs.clear();
+	myToggleChestRequested = myAttachChildRequested = false;
 	context.GetWorld().SetActiveCamera(nullptr);
+	ServiceLocator::GetInstance().GetAudioManager().StopMusic(SoundID::eMainTheme, false);
 }
 
 void Game::ConfigureWorld(World& world)

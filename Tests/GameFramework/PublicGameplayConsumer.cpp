@@ -1,3 +1,5 @@
+#include <InputMapper.h>
+#include <GameFramework/ServiceLocator.h>
 #include <GameFramework/Runtime/IGame.h>
 #include <GameFramework/Runtime/GameContext.h>
 #include <GameFramework/Scenes/ComponentRegistry.h>
@@ -16,7 +18,7 @@ public:
 
 class Example final : public IGame
 {
-	std::vector<InputSubscription> mySubscriptions;
+	std::vector<unsigned> myListeners;
 	void ConfigureWorld(World& world) override
 	{
 		world.SpawnActor("Configured")->AddComponent<Move>();
@@ -24,16 +26,20 @@ class Example final : public IGame
 
 	void Initialize(GameContext& game) override
 	{
-		mySubscriptions.push_back(game.GetInputSystem().Subscribe(InputActions::Quit, [&game](const InputActionEvent& event)
+		auto& input = *ServiceLocator::GetInstance().GetInputMapper();
+		input.BindActionToInputCode("ReloadScene", EKeyCode::F4);
+
+		myListeners.push_back(input.AddEventListener("ReloadScene", [&game](const CommonUtilities::InputEvent& event)
 		{
-			if (event.Phase == InputActionPhase::Started) game.RequestQuit();
-		}));
-		mySubscriptions.push_back(game.GetInputSystem().Subscribe(InputActions::ReloadScene, [&game](const InputActionEvent& event)
-		{
-			if (event.Phase == InputActionPhase::Started) game.ReloadScene();
+			if (event.inputData.isPressed) game.ReloadScene();
 		}));
 		game.GetWorld().SpawnActor("Player")->AddComponent<Move>();
 	}
 
+	void Shutdown(GameContext&) override
+	{
+		for (unsigned id : myListeners) ServiceLocator::GetInstance().GetInputMapper()->RemoveEventListener(id);
+		myListeners.clear();
+	}
 	void Update(GameContext&, float) override {}
 };

@@ -63,40 +63,16 @@ Mouse look keeps the camera upright relative to world up: yaw follows
 world up, while pitch rotates around the camera's turned local right axis and
 is limited to ±89°. Actor hierarchies are deferred in the MVP.
 
-### Animation
-
-| Control | Action |
-| --- | --- |
-| `Numpad 0` | Play Breathing animation |
-| `Numpad 1` | Play Walk animation |
-| `Numpad 2` | Play Run animation |
-| `Numpad 3` | Play Wave animation, using the partial upper-body layer when available |
-
-### Light Toggles And Placement
-
-The number-row keys `7`, `8`, and `9` also work for the light controls.
-
-| Control | Action |
-| --- | --- |
-| `7` / `Numpad 7` | Toggle directional light |
-| `8` / `Numpad 8` | Toggle point lights |
-| `9` / `Numpad 9` | Toggle spot light |
-| `Shift + 7` / `Shift + Numpad 7` | Aim the directional light along the current camera direction |
-| `Shift + 8` / `Shift + Numpad 8` | Move the first point light to the current camera position |
-| `Shift + 9` / `Shift + Numpad 9` | Move the spot light to the camera and aim it along the current camera direction |
-| `P` | Log current light placement, active light count, and renderer statistics |
-
 ### Scene and diagnostics
 
 | Control | Action |
 | --- | --- |
-| `R` | Pause/resume chest rotation |
+| `F1` | Toggle debug camera |
 | `F4` | Reload the current scene |
 | `F5` | Select the previous renderer debug view |
 | `F6` | Select the next renderer debug view |
 | `F7` | Spawn/destroy an extra chest |
 | `F8` | Attach a smaller, self-spinning child chest that orbits the extra chest |
-| `Esc` | Quit |
 
 Gameplay now runs synchronously. Renderer comparison switches include
 `AGP_DISABLE_PARALLEL_SHADOWS` and the switches documented in

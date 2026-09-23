@@ -5,7 +5,7 @@
 #include <optional>
 #include "GameFramework/Scenes/SceneData.h"
 
-// Owns session input and world state. Game callbacks run on the application thread.
+// Owns session world state. Game callbacks run on the application thread.
 class GameContext
 {
 public:
@@ -18,10 +18,6 @@ public:
 		return *myWorld;
 	}
 
-	InputSystem& GetInputSystem()
-	{
-		return myInput;
-	}
 
 	// True accepts a request into one last-write-wins slot; it does not load the scene.
 	// Requests are applied after Initialize or at a frame boundary, never during Update.
@@ -53,8 +49,6 @@ public:
 	}
 
 private:
-	// The world borrows input, so input must outlive world destruction.
-	InputSystem myInput;
 	std::unique_ptr<World> myWorld;
 	std::optional<SceneType> myPendingScene;
 	SceneType myCurrentSceneType;

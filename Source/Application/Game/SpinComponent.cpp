@@ -24,24 +24,10 @@ void SpinComponent::BeginPlay()
 		myYaw = targetTransform->GetLocalRotationDegrees().x;
 	}
 
-	myToggleSubscription = GetInputSystem().Subscribe(
-		InputActions::ToggleSpin,
-		[this](const InputActionEvent& event)
-		{
-			if (event.Phase == InputActionPhase::Started)
-			{
-				mySpinning = !mySpinning;
-			}
-		});
 }
 
 void SpinComponent::Update(float deltaTime)
 {
-	if (!mySpinning)
-	{
-		return;
-	}
-
 	myYaw += SpinDegreesPerSecond * deltaTime;
 	myYaw = std::fmod(myYaw, FullRotationDegrees);
 

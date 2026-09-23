@@ -1,5 +1,7 @@
 # Architecture Audit — `text-rendering-current`
 
+> Historical snapshot: input architecture descriptions below are superseded by [Input restoration](../InputRestorationPlan.md).
+
 No source files were modified during this audit. The working tree, current build manifests, generated Visual Studio projects, relevant history, and a Debug x64 validation build were inspected. The build completed successfully, but exposed a duplicate-shader compilation collision described below.
 
 The pre-existing changes in `GameApplication.cpp`, `InputSystem.cpp`, `CommonUtilities.vcxproj`, and the tests were preserved.

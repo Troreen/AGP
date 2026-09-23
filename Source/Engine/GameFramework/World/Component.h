@@ -6,9 +6,8 @@
 
 class Actor;
 class World;
-class InputSystem;
 
-// Owned by one Actor. Owner and input are available after AddComponent returns.
+// Owned by one Actor. Owner is available after AddComponent returns.
 class Component
 {
 public:
@@ -35,7 +34,6 @@ public:
 	}
 
 	World& GetWorld() const;
-	InputSystem& GetInputSystem() const;
 
 	const std::string& GetName() const
 	{

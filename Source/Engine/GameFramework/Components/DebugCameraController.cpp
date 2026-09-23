@@ -1,3 +1,4 @@
+#include "GameFramework/ServiceLocator.h"
 #include "GameFramework/Components/DebugCameraController.h"
 #include "GameFramework/World/Actor.h"
 #include "GameFramework/World/World.h"
@@ -71,32 +72,46 @@ void DebugCameraController::BeginPlay()
 	const CU::Vector3f forward = CU::NormalizeSafe(GetOwner()->GetTransform().GetLocalForward(), CU::Vector3f::UnitZ);
 	myYaw = std::atan2(forward.x, forward.z);
 	myPitch = -std::asin(CU::Clamp(forward.y, -1.f, 1.f));
-	InputSystem& input = GetInputSystem();
-	auto held = [this, &input](const InputActionId& action, bool& target)
+	CommonUtilities::InputMapper& input = *ServiceLocator::GetInstance().GetInputMapper();
+	input.BindActionToInputCode("CameraLookEnable", EKeyCode::MOUSERBUTTON);
+	input.BindActionToInputCode("CameraForward", EKeyCode::W);
+	input.BindActionToInputCode("CameraBack", EKeyCode::S);
+	input.BindActionToInputCode("CameraLeft", EKeyCode::A);
+	input.BindActionToInputCode("CameraRight", EKeyCode::D);
+	input.BindActionToInputCode("CameraUp", EKeyCode::SPACE);
+	input.BindActionToInputCode("CameraDown", EKeyCode::CONTROL);
+	input.BindActionToInputCode("CameraLookDelta", EPointerCode::MOUSE_DELTA);
+
+	auto held = [this, &input](std::string_view action, bool& target)
 	{
-		mySubscriptions.push_back(input.Subscribe(action, [&target](const InputActionEvent& event)
+		myListenerIDs.push_back(input.AddEventListener(action, [&target](const CommonUtilities::InputEvent& event)
 		{
-			target = event.Phase != InputActionPhase::Ended;
+			target = event.inputData.isHeld;
 		}));
 	};
-	held(InputActions::CameraLookEnable, myLook);
-	held(InputActions::CameraForward, myForward);
-	held(InputActions::CameraBack, myBack);
-	held(InputActions::CameraLeft, myLeft);
-	held(InputActions::CameraRight, myRight);
-	held(InputActions::CameraUp, myUp);
-	held(InputActions::CameraDown, myDown);
-	mySubscriptions.push_back(input.Subscribe(InputActions::CameraLookDelta, [this](const InputActionEvent& event)
+	held("CameraLookEnable", myLook);
+	held("CameraForward", myForward);
+	held("CameraBack", myBack);
+	held("CameraLeft", myLeft);
+	held("CameraRight", myRight);
+	held("CameraUp", myUp);
+	held("CameraDown", myDown);
+	myListenerIDs.push_back(input.AddEventListener("CameraLookDelta", [this](const CommonUtilities::InputEvent& event)
 	{
-		if (event.Phase != InputActionPhase::Ended)
+		if (event.isAxis2D)
 		{
-			myLookDelta += std::get<CommonUtilities::Vector2f>(event.Value);
+			myLookDelta += CommonUtilities::Vector2f{event.inputData.valueA, event.inputData.valueB};
 		}
 	}));
 }
 
 void DebugCameraController::Update(float deltaTime)
 {
+	if (!GetWorld().GetActiveCamera() || GetWorld().GetActiveCamera()->GetOwner() != GetOwner())
+	{
+		myLookDelta = {};
+		return;
+	}
 	Transform& transform = GetOwner()->GetTransform();
 	const DebugCameraPreset& preset = GetDebugCameraPreset();
 	if (myLook)
@@ -136,4 +151,12 @@ void DebugCameraController::Update(float deltaTime)
 	{
 		transform.SetLocalPosition(transform.GetLocalPosition() + CU::NormalizeSafe(motion) * preset.MoveSpeed * deltaTime);
 	}
+}
+
+void DebugCameraController::EndPlay() noexcept
+{
+	auto* input = ServiceLocator::GetInstance().GetInputMapper();
+	if (!input) return;
+	for (unsigned id : myListenerIDs) input->RemoveEventListener(id);
+	myListenerIDs.clear();
 }

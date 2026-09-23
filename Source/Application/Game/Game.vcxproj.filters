@@ -12,12 +12,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AnimationControlsComponent.h" />
     <ClInclude Include="CameraControlsComponent.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameLog.h" />
     <ClInclude Include="GameScene.h" />
-    <ClInclude Include="LightControlsComponent.h" />
     <ClInclude Include="MeshLibrary.h" />
     <ClInclude Include="PrimitiveMeshBuilder.h" />
     <ClInclude Include="resource.h" />
@@ -34,11 +32,9 @@
     <ClCompile Include="..\..\..\Dependencies\TGAFBXImporter\source\TgaFbxStructs.cpp">
       <Filter>Dependencies\TGAFBXImporter\source</Filter>
     </ClCompile>
-    <ClCompile Include="AnimationControlsComponent.cpp" />
     <ClCompile Include="CameraControlsComponent.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameScene.cpp" />
-    <ClCompile Include="LightControlsComponent.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MeshLibrary.cpp" />
     <ClCompile Include="PrimitiveMeshBuilder.cpp" />

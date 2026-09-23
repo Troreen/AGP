@@ -1,6 +1,5 @@
 #pragma once
 #include "GameFramework/World/Component.h"
-#include "GameFramework/Runtime/InputSystem.h"
 
 #include <string>
 
@@ -18,6 +17,4 @@ private:
 	Transform* FindTargetTransform() const;
 	std::string myTargetComponentName;
 	float myYaw = 0;
-	bool mySpinning = true;
-	InputSubscription myToggleSubscription;
 };

@@ -18,27 +18,32 @@
 #include "GraphicsEngine/TextWidget.h"
 #include "GameFramework/GameFrameworkLog.h"
 #include "InputHandler.h"
+#include "InputMapper.h"
 #include "XInputHandler.h"
-#include "EnumGamepadCode.h"
 #include "EnumKeyCode.h"
 #include "Timer.h"
 #include <algorithm>
-#include <array>
 #include <cmath>
 #include <cstring>
+#include <utility>
 
 namespace
 {
-	constexpr int KeyCount = 256;
 	constexpr float MaxFrameDeltaSeconds = 0.25f;
-	constexpr std::array GamepadButtons{
-		EGamepadCode::DPAD_UP, EGamepadCode::DPAD_DOWN, EGamepadCode::DPAD_LEFT, EGamepadCode::DPAD_RIGHT,
-		EGamepadCode::BUTTON_START, EGamepadCode::BUTTON_BACK, EGamepadCode::THUMB_LEFT, EGamepadCode::THUMB_RIGHT,
-		EGamepadCode::SHOULDER_LEFT, EGamepadCode::SHOULDER_RIGHT, EGamepadCode::BUTTON_A, EGamepadCode::BUTTON_B,
-		EGamepadCode::BUTTON_X, EGamepadCode::BUTTON_Y};
 
 	LRESULT CALLBACK GameWindowProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 	{
+		if (message == WM_NCCREATE)
+		{
+			const auto* create = reinterpret_cast<const CREATESTRUCTW*>(lParam);
+			SetWindowLongPtrW(window, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(create->lpCreateParams));
+		}
+		auto* input = reinterpret_cast<CommonUtilities::InputHandler*>(GetWindowLongPtrW(window, GWLP_USERDATA));
+		if (input)
+		{
+			// Includes sent messages such as WM_KILLFOCUS, not just queued input.
+			input->UpdateEvents(message, wParam, lParam);
+		}
 		if (message == WM_CLOSE || message == WM_DESTROY)
 		{
 			PostQuitMessage(0);
@@ -78,12 +83,9 @@ private:
 	void RenderFrame(GraphicsEngine& graphics);
 	void LoadPendingScene();
 	void ShutdownServices();
-	InputDeviceFrame CaptureInputFrame();
-	// Uses the focus/button sample already populated by CaptureInputFrame.
-	void CaptureMouseLookDeltaAndRecenterCursor(InputDeviceFrame& frame);
+	void RecenterMouseLook();
 	void UpdateRenderPassTitle();
 	void ShowRenderPassNotification();
-	void LogRuntimeStats() const;
 	IGame& myGame;
 	Config myConfig;
 	SceneSource mySceneSource;
@@ -92,46 +94,52 @@ private:
 	HWND myMainWindowHandle = nullptr;
 	CommonUtilities::InputHandler myInputHandler;
 	CommonUtilities::XInputHandler myXInputHandler;
-	std::vector<InputSubscription> myHostInputSubscriptions;
+	std::vector<unsigned> myHostInputListenerIDs;
 	GraphicsCommandList myCommandList;
 	GraphicsEngine::RenderSceneSnapshot mySnapshot;
 	std::shared_ptr<TextWidget> myRenderPassNotificationWidget;
 	FontHandle myRenderFont;
 	RenderPassNotificationTimer myRenderPassNotification;
-	bool myHasMouseLookAnchor = false;
+	bool myToggleDebugCameraRequested = false;
 	bool myInitialWorldStarted = false;
 	DebugCameraService myDebugCamera;
 };
 
 int GameApplication::Impl::Run()
 {
-	GraphicsEngine& graphics = InitializeWindowAndGraphics();
+	bool gameStarted = false;
+	bool shutdownAttempted = false;
 	try
 	{
+		GraphicsEngine& graphics = InitializeWindowAndGraphics();
 		InitializeServices();
 		InitializeInputAndHostControls();
+		gameStarted = true;
 		StartGameSession();
 		RunMainLoop(graphics);
+		myContext.myAcceptSceneRequests = false;
+		shutdownAttempted = true;
+		myGame.Shutdown(myContext);
 	}
 	catch (...)
 	{
 		myContext.myAcceptSceneRequests = false;
-		// Only Shutdown failures are caught here; later cleanup failures still escape.
-		try
+		if (gameStarted && !shutdownAttempted)
 		{
-			myGame.Shutdown(myContext);
-		}
-		catch (...)
-		{
-			LOG(LogGameFramework, Error, "Shutdown failed during exception cleanup");
+			try 
+			{ 
+				myGame.Shutdown(myContext); 
+			}
+			catch (...) 
+			{ 
+				LOG(LogGameFramework, Error, "Shutdown failed during exception cleanup"); 
+			}
 		}
 		myContext.GetWorld().Clear();
 		ShutdownServices();
 		throw;
 	}
-	// Normal Shutdown stays outside the catch: a failure skips explicit cleanup.
-	myContext.myAcceptSceneRequests = false;
-	myGame.Shutdown(myContext);
+	// All component and game listeners are removed before deleting the mapper.
 	myContext.GetWorld().Clear();
 	ShutdownServices();
 	return 0;
@@ -152,7 +160,7 @@ GraphicsEngine& GameApplication::Impl::InitializeWindowAndGraphics()
 		throw std::runtime_error("Could not register game window");
 	}
 	myMainWindowHandle = CreateWindowW(className, myConfig.Title.c_str(), WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, myConfig.Width,
-	                                   myConfig.Height, nullptr, nullptr, windowClass.hInstance, nullptr);
+	                                   myConfig.Height, nullptr, nullptr, windowClass.hInstance, &myInputHandler);
 	if (!myMainWindowHandle)
 	{
 		throw std::runtime_error("Could not create game window");
@@ -179,7 +187,7 @@ void GameApplication::Impl::InitializeServices()
 		throw std::runtime_error(assets.GetLastError());
 	}
 
-	// Optional diagnostics overlay; a missing font does not prevent startup.
+	// missing font does not prevent startup.
 	if (myConfig.EnableRenderDiagnostics)
 	{
 		const FontHandle font = assets.ResolveFont(AssetId{"Fonts/CascadiaCode.font.json"});
@@ -201,72 +209,51 @@ void GameApplication::Impl::InitializeServices()
 	AudioManager* audio = AudioManager::GetInstance();
 	audio->Init();
 
-	ServiceLocator::GetInstance().ProvideInput(myContext.myInput);
-	ServiceLocator::GetInstance().ProvideAudio(*audio);
-	ServiceLocator::GetInstance().ProvideAssets(assets);
+	ServiceLocator::GetInstance().SetInputMapper(new CommonUtilities::InputMapper());
+	ServiceLocator::GetInstance().SetAudioManager(audio);
+	ServiceLocator::GetInstance().SetAssetRegistry(&assets);
 }
 
 void GameApplication::Impl::InitializeInputAndHostControls()
 {
 	myInputHandler.SetWindowHandle(myMainWindowHandle);
 	myInputHandler.SetAutoMouseCapture(false);
-	InstallDefaultInputBindings(myContext.myInput);
-	myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(InputActions::ToggleTonemapping, [](const InputActionEvent& event)
-	{
-		if (event.Phase == InputActionPhase::Started)
-		{
-			GraphicsEngine::Get().ToggleTonemapping();
-		}
-	}));
+	myInputHandler.SetMouseDeltaEnabled(myConfig.EnableMouseLook);
+	auto& input = *ServiceLocator::GetInstance().GetInputMapper();
+	input.Init(&myInputHandler, &myXInputHandler);
+	input.BindActionToInputCode("DebugCamera", EKeyCode::F1);
+	input.BindActionToInputCode("PreviousRenderPass", EKeyCode::F5);
+	input.BindActionToInputCode("NextRenderPass", EKeyCode::F6);
 
-	for (const auto [action, tonemapper] : {
-		std::pair{&InputActions::SelectACES, Tonemapper::ACES},
-		std::pair{&InputActions::SelectLottes, Tonemapper::Lottes},
-		std::pair{&InputActions::SelectUnrealTonemapper, Tonemapper::UnrealEngine}})
+	myHostInputListenerIDs.push_back(input.AddEventListener("DebugCamera", [this](const CommonUtilities::InputEvent& event)
 	{
-		myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(*action, [tonemapper](const InputActionEvent& event)
+		if (event.inputData.isPressed)
 		{
-			if (event.Phase == InputActionPhase::Started)
-			{
-				GraphicsEngine::Get().SetTonemapper(tonemapper);
-			}
-		}));
-	}
-	myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(InputActions::DebugCamera, [this](const InputActionEvent& event)
-	{
-		if (event.Phase == InputActionPhase::Started)
-		{
-			myDebugCamera.Toggle(myContext.GetWorld(), myContext.myClientSize);
+			myToggleDebugCameraRequested = true;
 		}
 	}));
 
 	if (myConfig.EnableRenderDiagnostics)
 	{
-		myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(InputActions::PreviousRenderPass, [this](const InputActionEvent& event)
+		myHostInputListenerIDs.push_back(input.AddEventListener("PreviousRenderPass", [this](const CommonUtilities::InputEvent& event)
 		{
-			if (event.Phase == InputActionPhase::Started)
+			if (event.inputData.isPressed)
 			{
 				GraphicsEngine::Get().SelectPreviousRenderPass();
 				UpdateRenderPassTitle();
 				ShowRenderPassNotification();
 			}
 		}));
-		myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(InputActions::NextRenderPass, [this](const InputActionEvent& event)
+		myHostInputListenerIDs.push_back(input.AddEventListener("NextRenderPass", [this](const CommonUtilities::InputEvent& event)
 		{
-			if (event.Phase == InputActionPhase::Started)
+			if (event.inputData.isPressed)
 			{
 				GraphicsEngine::Get().SelectNextRenderPass();
 				UpdateRenderPassTitle();
 				ShowRenderPassNotification();
 			}
 		}));
-		myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(InputActions::PrintDiagnostics, [this](const InputActionEvent& event)
-		{
-			if (event.Phase == InputActionPhase::Started)
-			{
-				LogRuntimeStats();
-			}
-		}));
+
 	}
 }
 
@@ -317,7 +304,6 @@ void GameApplication::Impl::RunMainLoop(GraphicsEngine& graphics)
 		}
 
 		timer.Update();
-		myInputHandler.UpdateInput();
 		const float elapsed = timer.GetDeltaTime();
 		float delta = 0.0f;
 		if (CU::IsFinite(elapsed))
@@ -325,7 +311,12 @@ void GameApplication::Impl::RunMainLoop(GraphicsEngine& graphics)
 			delta = CU::Clamp(elapsed, 0.0f, MaxFrameDeltaSeconds);
 		}
 		myRenderPassNotification.Update(delta);
-		myContext.myInput.Update(CaptureInputFrame());
+		ServiceLocator::GetInstance().GetInputMapper()->Update();
+		RecenterMouseLook();
+		if (std::exchange(myToggleDebugCameraRequested, false))
+		{
+			myDebugCamera.Toggle(myContext.GetWorld(), myContext.myClientSize);
+		}
 
 		myGame.Update(myContext, delta);
 		myContext.GetWorld().Update(delta);
@@ -343,7 +334,6 @@ void GameApplication::Impl::PumpWindowMessages()
 		{
 			myContext.RequestQuit();
 		}
-		myInputHandler.UpdateEvents(message.message, message.wParam, message.lParam);
 		TranslateMessage(&message);
 		DispatchMessageW(&message);
 	}
@@ -387,7 +377,11 @@ void GameApplication::Impl::RenderFrame(GraphicsEngine& graphics)
 
 void GameApplication::Impl::ShutdownServices()
 {
-	ServiceLocator::GetInstance().Clear();
+	if (auto* input = ServiceLocator::GetInstance().GetInputMapper())
+		for (unsigned id : myHostInputListenerIDs) input->RemoveEventListener(id);
+	myHostInputListenerIDs.clear();
+	myInputHandler.ReleaseMouse();
+	ServiceLocator::GetInstance().KillServices();
 	AudioManager::Shutdown();
 	AssetRegistry::Get().Clear();
 }
@@ -407,7 +401,7 @@ void GameApplication::Impl::LoadPendingScene()
 		AssetRegistry& assets = AssetRegistry::Get();
 		SceneLoadContext loadContext{myContext.myContentRoot, myContext.myClientSize, assets};
 		const SceneData scene = mySceneSource(*myContext.myPendingScene, loadContext);
-		candidateWorld = myRegistry.CreateWorld(scene, assets, &myContext.myInput, myContext.myClientSize);
+		candidateWorld = myRegistry.CreateWorld(scene, assets, myContext.myClientSize);
 		myGame.ConfigureWorld(*candidateWorld);
 	}
 	catch (const std::bad_alloc&)
@@ -432,8 +426,7 @@ void GameApplication::Impl::LoadPendingScene()
 	myContext.myWorld = std::move(candidateWorld);
 	// Construction callbacks may have overwritten the pending slot.
 	myContext.myCurrentSceneType = *myContext.myPendingScene;
-	myContext.myInput.Reset();
-	myHasMouseLookAnchor = false;
+	myToggleDebugCameraRequested = false;
 	myDebugCamera.Reset();
 	myContext.myAcceptSceneRequests = true;
 	if (!myContext.GetWorld().GetActiveCamera())
@@ -456,63 +449,14 @@ std::shared_ptr<Font> GameApplication::GetFontResource(const FontHandle& asset)
 	return asset.myResource;
 }
 
-InputDeviceFrame GameApplication::Impl::CaptureInputFrame()
+void GameApplication::Impl::RecenterMouseLook()
 {
-	InputDeviceFrame inputFrame;
-	const bool isFocused = myMainWindowHandle != nullptr && GetForegroundWindow() == myMainWindowHandle;
-	inputFrame.Focused = isFocused;
-
-	for (int keyCode = 0; keyCode < KeyCount; ++keyCode)
+	// CenterMouse adjusts InputHandler's position baseline before warping the
+	// cursor, so the warp never becomes a second source of action input.
+	if (myConfig.EnableMouseLook && GetForegroundWindow() == myMainWindowHandle &&
+		myInputHandler.IsKeyDown(int(EKeyCode::MOUSERBUTTON)))
 	{
-		inputFrame.KeysDown[static_cast<size_t>(keyCode)] = isFocused && (myInputHandler.IsKeyDown(keyCode));
-	}
-
-	CaptureMouseLookDeltaAndRecenterCursor(inputFrame);
-	if (myXInputHandler.UpdateInput())
-	{
-		for (const EGamepadCode button : GamepadButtons)
-		{
-			const unsigned buttonCode = static_cast<unsigned>(button);
-			inputFrame.GamepadButtonsDown[buttonCode] = myXInputHandler.IsButtonDown(buttonCode);
-		}
-		myXInputHandler.GetAnalogLeftValue(inputFrame.GamepadLeft);
-		myXInputHandler.GetAnalogRightValue(inputFrame.GamepadRight);
-		inputFrame.GamepadLeftTrigger = myXInputHandler.GetTriggerLeftValue();
-		inputFrame.GamepadRightTrigger = myXInputHandler.GetTriggerRightValue();
-	}
-
-	return inputFrame;
-}
-
-void GameApplication::Impl::CaptureMouseLookDeltaAndRecenterCursor(InputDeviceFrame& frame)
-{
-	const bool rightMouseDown = frame.KeysDown[static_cast<size_t>(EKeyCode::MOUSERBUTTON)];
-	if (myConfig.EnableMouseLook && frame.Focused && rightMouseDown)
-	{
-		RECT clientRect = {};
-		if (GetClientRect(myMainWindowHandle, &clientRect) != 0)
-		{
-			const POINT centerPoint = {(clientRect.right - clientRect.left) / 2, (clientRect.bottom - clientRect.top) / 2};
-
-			if (myHasMouseLookAnchor)
-			{
-				POINT mousePosScreen = {};
-				GetCursorPos(&mousePosScreen);
-				POINT mousePosClient = mousePosScreen;
-				ScreenToClient(myMainWindowHandle, &mousePosClient);
-				frame.MouseDelta.x = static_cast<float>(mousePosClient.x - centerPoint.x);
-				frame.MouseDelta.y = static_cast<float>(mousePosClient.y - centerPoint.y);
-			}
-
-			POINT centerPointScreen = centerPoint;
-			ClientToScreen(myMainWindowHandle, &centerPointScreen);
-			SetCursorPos(centerPointScreen.x, centerPointScreen.y);
-			myHasMouseLookAnchor = true;
-		}
-	}
-	else
-	{
-		myHasMouseLookAnchor = false;
+		myInputHandler.CenterMouse();
 	}
 }
 
@@ -521,7 +465,6 @@ void GameApplication::Impl::UpdateRenderPassTitle()
 	const char* passName = GraphicsEngine::Get().GetRenderPassName();
 	const std::wstring widePassName(passName, passName + std::strlen(passName));
 	const std::wstring title = myConfig.Title + L"  |  Render Pass: " + widePassName + L"  (F5 previous, F6 next)";
-	SetWindowTextW(myMainWindowHandle, title.c_str());
 }
 
 void GameApplication::Impl::ShowRenderPassNotification()
@@ -533,24 +476,4 @@ void GameApplication::Impl::ShowRenderPassNotification()
 	myRenderPassNotificationWidget->SetText(std::string("Render Pass: ") + GraphicsEngine::Get().GetRenderPassName());
 	myRenderPassNotificationWidget->SetOpacity(1.0f);
 	myRenderPassNotification.Restart();
-}
-
-void GameApplication::Impl::LogRuntimeStats() const
-{
-	const GraphicsEngine::RenderStats renderStats = GraphicsEngine::Get().GetLastRenderStats();
-
-	LOG(LogGameFramework, Log,
-	    "Deferred lists: opaque {}, blended {}. CPU ms: snapshot {:.3f}, prepare {:.3f}, shadows {:.3f} (wait {:.3f}), scene {:.3f}",
-	    renderStats.OpaqueRenderItems, renderStats.BlendedRenderItems, renderStats.SnapshotMilliseconds,
-	    renderStats.ResourcePreparationMilliseconds, renderStats.ShadowRecordingMilliseconds, renderStats.ShadowWaitMilliseconds,
-	    renderStats.SceneRecordingMilliseconds);
-
-	LOG(LogGameFramework, Log,
-	    "Render stats: meshes visible {}/{}, shadow casters {}, lights relevant {}/{}, shadow passes D/S/P = {}/{}/{}",
-	    renderStats.VisibleRenderItems, renderStats.TotalRenderItems, renderStats.ShadowCasters, renderStats.RelevantLights,
-	    renderStats.TotalLights, renderStats.DirectionalShadowPasses, renderStats.SpotShadowPasses, renderStats.PointShadowPasses);
-	LOG(LogGameFramework, Log, "Shadow culling/threading: caster draws {}, culled per pass {}, command lists recorded/executed {}/{}",
-	    renderStats.ShadowCasterDraws, renderStats.CulledShadowCasters, renderStats.ShadowCommandListsRecorded,
-	    renderStats.ShadowCommandListsExecuted);
-	LOG(LogGameFramework, Log, "Overlay stats: text draws {}, glyphs {}", renderStats.TextDrawCalls, renderStats.RenderedGlyphs);
 }

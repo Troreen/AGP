@@ -1,8 +1,11 @@
+#include "GameFramework/ServiceLocator.h"
 #include "CameraControlsComponent.h"
 
 #include "GameFramework/Components/SceneComponent.h"
 #include "GameFramework/World/Actor.h"
 #include "Maths.hpp"
+#include "GameFramework/World/World.h"
+#include "GameFramework/Components/CameraComponent.h"
 
 #include <cmath>
 #include <utility>
@@ -25,32 +28,46 @@ void CameraControlsComponent::BeginPlay()
 	myYaw = std::atan2(direction.x, direction.z);
 	myPitch = -std::asin(CU::Clamp(direction.y, -1.0f, 1.0f));
 
-	InputSystem& input = GetInputSystem();
-	BindHeldInput(input, InputActions::CameraLookEnable, myLookActive);
-	BindHeldInput(input, InputActions::CameraForward, myMoveForward);
-	BindHeldInput(input, InputActions::CameraBack, myMoveBack);
-	BindHeldInput(input, InputActions::CameraLeft, myMoveLeft);
-	BindHeldInput(input, InputActions::CameraRight, myMoveRight);
-	BindHeldInput(input, InputActions::CameraUp, myMoveUp);
-	BindHeldInput(input, InputActions::CameraDown, myMoveDown);
+	CommonUtilities::InputMapper& input = *ServiceLocator::GetInstance().GetInputMapper();
+	input.BindActionToInputCode("CameraLookEnable", EKeyCode::MOUSERBUTTON);
+	input.BindActionToInputCode("CameraForward", EKeyCode::W);
+	input.BindActionToInputCode("CameraBack", EKeyCode::S);
+	input.BindActionToInputCode("CameraLeft", EKeyCode::A);
+	input.BindActionToInputCode("CameraRight", EKeyCode::D);
+	input.BindActionToInputCode("CameraUp", EKeyCode::SPACE);
+	input.BindActionToInputCode("CameraDown", EKeyCode::CONTROL);
+	input.BindActionToInputCode("CameraLookDelta", EPointerCode::MOUSE_DELTA);
 
-	InputSubscription lookDeltaSubscription = input.Subscribe(
-		InputActions::CameraLookDelta,
-		[this](const InputActionEvent& event)
+	BindHeldInput(input, "CameraLookEnable", myLookActive);
+	BindHeldInput(input, "CameraForward", myMoveForward);
+	BindHeldInput(input, "CameraBack", myMoveBack);
+	BindHeldInput(input, "CameraLeft", myMoveLeft);
+	BindHeldInput(input, "CameraRight", myMoveRight);
+	BindHeldInput(input, "CameraUp", myMoveUp);
+	BindHeldInput(input, "CameraDown", myMoveDown);
+
+	unsigned lookDeltaListenerID = input.AddEventListener(
+		"CameraLookDelta",
+		[this](const CommonUtilities::InputEvent& event)
 		{
-			if (event.Phase == InputActionPhase::Ended)
+			if (event.inputData.isReleased)
 			{
 				return;
 			}
 
-			myLookDelta += std::get<Vector2f>(event.Value);
+			myLookDelta += CommonUtilities::Vector2f{event.inputData.valueA, event.inputData.valueB};
 		});
 
-	mySubscriptions.push_back(std::move(lookDeltaSubscription));
+	myListenerIDs.push_back(lookDeltaListenerID);
 }
 
 void CameraControlsComponent::Update(float deltaTime)
 {
+	if (GetWorld().GetActiveCamera() && GetWorld().GetActiveCamera()->GetOwner() != GetOwner())
+	{
+		myLookDelta = {};
+		return;
+	}
 	Transform& transform = GetOwner()->GetTransform();
 
 	if (myLookActive)
@@ -90,14 +107,22 @@ void CameraControlsComponent::Update(float deltaTime)
 	transform.SetLocalPosition(currentPosition + movementThisFrame);
 }
 
-void CameraControlsComponent::BindHeldInput(InputSystem& aInput, const InputActionId& aAction, bool& aState)
+void CameraControlsComponent::BindHeldInput(CommonUtilities::InputMapper& aInput, std::string_view aAction, bool& aState)
 {
-	InputSubscription subscription = aInput.Subscribe(
+	unsigned listenerID = aInput.AddEventListener(
 		aAction,
-		[&aState](const InputActionEvent& event)
+		[&aState](const CommonUtilities::InputEvent& event)
 		{
-			aState = event.Phase != InputActionPhase::Ended;
+			aState = event.inputData.isHeld;
 		});
 
-	mySubscriptions.push_back(std::move(subscription));
+	myListenerIDs.push_back(listenerID);
+}
+
+void CameraControlsComponent::EndPlay() noexcept
+{
+	auto* input = ServiceLocator::GetInstance().GetInputMapper();
+	if (!input) return;
+	for (unsigned id : myListenerIDs) input->RemoveEventListener(id);
+	myListenerIDs.clear();
 }

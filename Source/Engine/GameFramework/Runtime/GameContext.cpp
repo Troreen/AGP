@@ -1,6 +1,6 @@
 #include "GameFramework/Runtime/GameContext.h"
 
-GameContext::GameContext() : myWorld(std::make_unique<World>(&myInput))
+GameContext::GameContext() : myWorld(std::make_unique<World>())
 {
 }
 

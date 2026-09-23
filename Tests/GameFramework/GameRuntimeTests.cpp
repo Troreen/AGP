@@ -1,3 +1,4 @@
+#include "InputFixture.h"
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
@@ -45,6 +46,7 @@ public:
 	{
 		Deadline = std::chrono::steady_clock::now() + std::chrono::seconds(120);
 		Sample.Initialize(context);
+		context.LoadScene(SceneType::TGAUnrealTest);
 	}
 
 	void OnSceneLoaded(GameContext& context, const std::string& name) override
@@ -52,14 +54,14 @@ public:
 		++Loads;
 		Frames = 0;
 		auto& world = context.GetWorld();
-		if (name == "Empty")
+		if (name == "TestExportMap")
 		{
 			Check(Loads == 3 && !world.FindActor("Camera Actor") && world.FindActor("__DebugCamera") && world.GetActiveCamera(),
 			      "Empty scene did not install the debug camera");
 			return;
 		}
 		Check(name == "ChestMaterials", "Wrong scene");
-		Check(&ServiceLocator::GetInstance().GetInputSystem() == &context.GetInputSystem(), "ServiceLocator input service mismatch");
+		Check(ServiceLocator::GetInstance().GetInputMapper() && ServiceLocator::GetInstance().GetInputMapper()->GetInputHandler(), "ServiceLocator input service mismatch");
 		Check(&ServiceLocator::GetInstance().GetAssetRegistry() == &AssetRegistry::Get(), "ServiceLocator asset service mismatch");
 		Check(bool(AssetRegistry::Get().ResolveMaterial(AssetId{"Shaders/CubeMaterial.mat"})), "Flat material did not load");
 		const auto parameterInstance = AssetRegistry::Get().ResolveMaterial(AssetId{"ChestMaterial_Alpha1"});
@@ -80,8 +82,8 @@ public:
 
 	void OnSceneLoadFailed(GameContext& context, const std::string& name, const std::string& error) override
 	{
-		Check(name == "Invalid" && error.find("MissingType") != std::string::npos, "Failure lost useful diagnostics");
-		Check(context.GetSceneName() == "ChestMaterials" && context.GetWorld().FindActor("Old-scene-only") && context.GetWorld().GetActiveCamera(),
+		Check(name == "Lvl_Blockout_Level" && error.find("MissingType") != std::string::npos, "Failure lost useful diagnostics");
+		Check(context.GetSceneType() == SceneType::TGAUnrealTest && context.GetWorld().FindActor("Old-scene-only") && context.GetWorld().GetActiveCamera(),
 		      "Failed construction damaged the live scene");
 		Failed = true;
 	}
@@ -97,7 +99,7 @@ public:
 		if (Loads == 1 && Frames >= 5 && rendered && !InvalidRequested)
 		{
 			InvalidRequested = true;
-			context.LoadScene("Invalid");
+			context.LoadScene(SceneType::Blockout);
 		}
 		if (Failed && !ReloadRequested)
 		{
@@ -107,7 +109,7 @@ public:
 		if (Loads == 2 && Frames >= 5 && rendered && !EmptyRequested)
 		{
 			EmptyRequested = true;
-			context.LoadScene("Empty");
+			context.LoadScene(SceneType::Chests);
 		}
 		if (Loads == 3 && Frames >= 2 && stats.TotalRenderItems == 0 && stats.TotalLights == 0)
 		{
@@ -137,7 +139,7 @@ public:
 
 	void Initialize(GameContext& context) override
 	{
-		Check(context.LoadScene("ChestMaterials"), "Chest material scene request was rejected");
+		Check(context.LoadScene(SceneType::TGAUnrealTest), "Chest material scene request was rejected");
 	}
 
 	void OnSceneLoaded(GameContext& context, const std::string& name) override
@@ -177,11 +179,10 @@ class OverlayOnlyGame final : public IGame
 public:
 	int Frames = 0;
 
-	void Initialize(GameContext& context) override
+	void Initialize(GameContext&) override
 	{
-		InputDeviceFrame frame;
-		frame.KeysDown[static_cast<size_t>(EKeyCode::F6)] = true;
-		context.GetInputSystem().Update(frame);
+		auto* input = ServiceLocator::GetInstance().GetInputMapper();
+		input->GetInputHandler()->UpdateEvents(WM_KEYDOWN, VK_F6, 0);
 	}
 
 	void Update(GameContext& context, float) override
@@ -260,7 +261,7 @@ public:
 		{
 			throw std::runtime_error("Expected Initialize failure");
 		}
-		context.LoadScene("Fixture");
+		context.LoadScene(SceneType::Chests);
 	}
 
 	void OnSceneLoadFailed(GameContext&, const std::string&, const std::string&) override
@@ -283,7 +284,7 @@ public:
 	void Shutdown(GameContext& context) override
 	{
 		++Shutdowns;
-		Check(!context.LoadScene("During shutdown"), "Shutdown accepted a scene request");
+		Check(!context.LoadScene(SceneType::None), "Shutdown accepted a scene request");
 		if (Scenario == "shutdown-failure")
 		{
 			throw std::runtime_error("Expected Shutdown failure");
@@ -298,38 +299,21 @@ int RunRenderPassControlsTest()
 	GraphicsEngine& graphics = GraphicsEngine::Get();
 	Check(std::string(graphics.GetRenderPassName()) == "Lit", "Render-pass test did not start on Lit");
 
-	InputSystem input;
-	InstallDefaultInputBindings(input);
-	InputSubscription previous = input.Subscribe(InputActions::PreviousRenderPass, [&graphics](const InputActionEvent& event)
-	{
-		if (event.Phase == InputActionPhase::Started) graphics.SelectPreviousRenderPass();
-	});
-	InputSubscription next = input.Subscribe(InputActions::NextRenderPass, [&graphics](const InputActionEvent& event)
-	{
-		if (event.Phase == InputActionPhase::Started) graphics.SelectNextRenderPass();
-	});
-
-	InputDeviceFrame frame;
-	frame.KeysDown[static_cast<size_t>(EKeyCode::F5)] = true;
-	input.Update(frame);
-	Check(std::string(graphics.GetRenderPassName()) == "Shadows (Directional)", "F5 did not wrap to the previous render pass");
-
-	input.Update({});
-	frame = {};
-	frame.KeysDown[static_cast<size_t>(EKeyCode::F6)] = true;
-	input.Update(frame);
-	Check(std::string(graphics.GetRenderPassName()) == "Lit", "F6 did not advance to the next render pass");
-
-	input.Update({});
-	frame = {};
-	frame.KeysDown[static_cast<size_t>(EKeyCode::F6)] = true;
-	input.Update(frame);
-	Check(std::string(graphics.GetRenderPassName()) == "Albedo (sRGB)", "F6 did not update to the next render-pass name");
-	input.Update({});
-	frame = {};
-	frame.KeysDown[static_cast<size_t>(EKeyCode::F5)] = true;
-	input.Update(frame);
-	Check(std::string(graphics.GetRenderPassName()) == "Lit", "F5 did not update to the previous render-pass name");
+	InputFixture fixture;
+    auto& input = fixture.Input;
+    input.BindActionToInputCode("PreviousRenderPass", EKeyCode::F5);
+    input.BindActionToInputCode("NextRenderPass", EKeyCode::F6);
+    const unsigned previous = input.AddEventListener("PreviousRenderPass", [&graphics](const CommonUtilities::InputEvent& event) { if (event.inputData.isPressed) graphics.SelectPreviousRenderPass(); });
+    const unsigned next = input.AddEventListener("NextRenderPass", [&graphics](const CommonUtilities::InputEvent& event) { if (event.inputData.isPressed) graphics.SelectNextRenderPass(); });
+    fixture.Key(EKeyCode::F5, true); input.Update();
+    Check(std::string(graphics.GetRenderPassName()) == "Shadows (Directional)", "F5 wrap failed");
+    fixture.Key(EKeyCode::F5, false); fixture.Key(EKeyCode::F6, true); input.Update();
+    Check(std::string(graphics.GetRenderPassName()) == "Lit", "F6 advance failed");
+    fixture.Key(EKeyCode::F6, false); input.Update(); fixture.Key(EKeyCode::F6, true); input.Update();
+    Check(std::string(graphics.GetRenderPassName()) == "Albedo (sRGB)", "F6 next failed");
+    fixture.Key(EKeyCode::F6, false); fixture.Key(EKeyCode::F5, true); input.Update();
+    Check(std::string(graphics.GetRenderPassName()) == "Lit", "F5 previous failed");
+    input.RemoveEventListener(previous); input.RemoveEventListener(next);
 
 	std::cout << "PASS: F5 previous and F6 next render-pass controls\n";
 	return 0;
@@ -369,26 +353,26 @@ int main(int argc, char** argv)
 		{
 			ChestShowcaseGame game;
 			GameScene source;
-			GameApplication{}.Run(game, config, [&](const std::string& name, SceneLoadContext& context)
+			GameApplication{}.Run(game, config, [&](const SceneType& scene, SceneLoadContext& context)
 			{
-				return source.Load(name, context);
+				return source.Load(scene, context);
 			});
 		}
 		else if (scenario == "sample")
 		{
 			SampleGame game;
 			GameScene source;
-			GameApplication{}.Run(game, config, [&](const std::string& name, SceneLoadContext& context)
+			GameApplication{}.Run(game, config, [&](const SceneType& scene, SceneLoadContext& context)
 			{
-				if (name == "Empty")
+				if (scene == SceneType::Chests)
 				{
 					return SceneData{};
 				}
-				if (name == "Invalid")
+				if (scene == SceneType::Blockout)
 				{
 					throw std::runtime_error("Broken/Component: MissingType");
 				}
-				return source.Load(name, context);
+				return source.Load(scene, context);
 			});
 			Check(game.Loads == 3 && game.Failed && game.Shutdowns == 1, "Actual sample lifecycle incomplete");
 		}
@@ -399,7 +383,7 @@ int main(int argc, char** argv)
 			bool caught = false;
 			try
 			{
-				GameApplication{}.Run(game, config, [&](const std::string&, SceneLoadContext&)
+				GameApplication{}.Run(game, config, [&](const SceneType&, SceneLoadContext&)
 				{
 					if (scenario == "invalid-initial") throw std::runtime_error("Fixture/Lifetime: MissingType");
 					SceneData data;
@@ -420,6 +404,11 @@ int main(int argc, char** argv)
 			      "Failure leaked or repeated component lifecycle");
 			Check(game.Failures == (scenario == "invalid-initial" ? 1 : 0), "Wrong scene failure callback count");
 		}
+		Check(ServiceLocator::GetInstance().GetInputMapper() == nullptr, "Shutdown left stale input service");
+        bool audioCleared = false, assetsCleared = false;
+        try { ServiceLocator::GetInstance().GetAudioManager(); } catch (const std::logic_error&) { audioCleared = true; }
+        try { ServiceLocator::GetInstance().GetAssetRegistry(); } catch (const std::logic_error&) { assetsCleared = true; }
+        Check(audioCleared && assetsCleared, "Shutdown left stale borrowed services");
 		const auto diagnostics = GraphicsEngine::Get().CollectDeviceDiagnostics();
 		for (const auto& error : diagnostics.Errors)
 		{

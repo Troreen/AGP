@@ -1,6 +1,7 @@
 #pragma once
 #include "GameFramework/World/Component.h"
-#include "GameFramework/Runtime/InputSystem.h"
+#include "InputMapper.h"
+#include "Vector2.hpp"
 
 #include <vector>
 
@@ -9,10 +10,11 @@ class CameraControlsComponent final : public Component
 {
 public:
 	void BeginPlay() override;
+	void EndPlay() noexcept override;
 	void Update(float deltaTime) override;
 
 private:
-	void BindHeldInput(InputSystem& aInput, const InputActionId& aAction, bool& aState);
+	void BindHeldInput(CommonUtilities::InputMapper& aInput, std::string_view aAction, bool& aState);
 
 	float myYaw = 0;
 	float myPitch = 0;
@@ -24,5 +26,5 @@ private:
 	bool myMoveRight = false;
 	bool myMoveUp = false;
 	bool myMoveDown = false;
-	std::vector<InputSubscription> mySubscriptions;
+	std::vector<unsigned> myListenerIDs;
 };

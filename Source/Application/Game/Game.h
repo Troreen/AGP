@@ -1,6 +1,6 @@
 #pragma once
 #include "GameFramework/Runtime/IGame.h"
-#include "GameFramework/Runtime/InputSystem.h"
+#include "InputMapper.h"
 #include <vector>
 
 // The game entry object. For another project, replace this class and its content
@@ -16,5 +16,7 @@ public:
 	void Update(GameContext& context, float deltaTime) override;
 	void Shutdown(GameContext& context) override;
 private:
-	std::vector<InputSubscription> myInputSubscriptions;
+	std::vector<unsigned> myInputListenerIDs;
+	bool myToggleChestRequested = false;
+	bool myAttachChildRequested = false;
 };

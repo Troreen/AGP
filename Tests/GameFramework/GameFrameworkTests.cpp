@@ -1,3 +1,4 @@
+#include "InputFixture.h"
 #include "GameFramework/Scenes/ComponentRegistry.h"
 #include "EnumKeyCode.h"
 #include "GameFramework/Components/CameraComponent.h"
@@ -177,19 +178,17 @@ void RuntimeMutations()
 void FrameTimingAndInput()
 {
 	Counts count;
-	InputSystem input;
-	const InputActionId testAction{"TestAction"};
-	input.BindKey(testAction, int(EKeyCode::R));
+	InputFixture fixture;
+	auto& input = fixture.Input;
+	input.BindActionToInputCode("TestAction", EKeyCode::R);
 	bool actionReceived = false;
-	auto subscription = input.Subscribe(testAction, [&](const InputActionEvent& event) { actionReceived = event.Phase == InputActionPhase::Started; });
-	InputDeviceFrame frame;
-	frame.KeysDown[static_cast<size_t>(EKeyCode::R)] = true;
-	input.Update(frame);
-	World world(&input);
+	const unsigned listener = input.AddEventListener("TestAction", [&](const CommonUtilities::InputEvent& event) { actionReceived = event.inputData.isPressed; });
+	fixture.Key(EKeyCode::R, true); input.Update();
+	World world;
 	auto* probe = world.SpawnActor("A")->AddComponent<Probe>("P", count);
 	probe->OnUpdate = [&]
 	{
-		Check(&probe->GetInputSystem() == &input && actionReceived, "Frame input unavailable");
+		Check(ServiceLocator::GetInstance().GetInputMapper() == &input && actionReceived, "Frame input unavailable");
 	};
 	world.Update(.001f);
 	Check(count.Begins == 1 && count.Updates == 1 && count.Delta == .001f, "Short frame did not update once");
@@ -201,6 +200,7 @@ void FrameTimingAndInput()
 		Check(count.Delta == 0, "Invalid delta must become zero");
 	}
 	Check(count.Updates == 6, "Expected exactly one Update per call");
+	input.RemoveEventListener(listener);
 }
 
 void SceneConstruction()
@@ -352,73 +352,69 @@ void StartupAndCameraSafety()
 	Check(!world.GetActiveCamera(), "Destroyed camera Actor remains selected");
 }
 
-void InputSystemSemantics()
+void InputMapperSemantics()
 {
-	InputSystem input;
-	const InputActionId action{"Action"};
-	input.BindKey(action, int(EKeyCode::R));
-	std::vector<InputActionPhase> phases;
-	auto subscription = input.Subscribe(action, [&](const InputActionEvent& event) { phases.push_back(event.Phase); });
-	InputDeviceFrame frame;
-	frame.KeysDown[size_t(EKeyCode::R)] = true;
-	input.Update(frame);
-	input.Update(frame);
-	frame.KeysDown[size_t(EKeyCode::R)] = false;
-	input.Update(frame);
-	Check(phases == std::vector{InputActionPhase::Started, InputActionPhase::Ongoing, InputActionPhase::Ended}, "Input phases");
-
-	const InputActionId chord{"Chord"}, plain{"Plain"};
-	input.BindKey(chord, int('7'), {int(EKeyCode::SHIFT)});
-	input.BindKey(plain, int('7'), {}, {int(EKeyCode::SHIFT), int(EKeyCode::LSHIFT), int(EKeyCode::RSHIFT)});
-	bool chordSeen = false, plainSeen = false;
-	auto chordSub = input.Subscribe(chord, [&](const InputActionEvent& event) { if (event.Phase == InputActionPhase::Started) chordSeen = true; });
-	auto plainSub = input.Subscribe(plain, [&](const InputActionEvent& event) { if (event.Phase == InputActionPhase::Started) plainSeen = true; });
-	frame = {}; frame.KeysDown[size_t('7')] = true; frame.KeysDown[size_t(EKeyCode::SHIFT)] = true; input.Update(frame);
-	Check(chordSeen && !plainSeen, "Modifier chord also dispatched plain action");
-
-	const InputActionId removal{"Removal"};
-	input.BindKey(removal, int(EKeyCode::F1));
-	int callbacks = 0;
-	InputSubscription later;
-	auto first = input.Subscribe(removal, [&](const InputActionEvent&) { ++callbacks; later.Reset(); });
-	later = input.Subscribe(removal, [&](const InputActionEvent&) { ++callbacks; });
-	frame = {}; frame.KeysDown[size_t(EKeyCode::F1)] = true; input.Update(frame);
-	Check(callbacks == 2, "Listener removal changed active dispatch");
-	input.Update(frame);
-	Check(callbacks == 3, "Removed listener remained subscribed");
-
-	const InputActionId pad{"Pad"};
-	input.BindGamepadAxis2D(pad, false);
-	bool padSeen = false;
-	auto padSub = input.Subscribe(pad, [&](const InputActionEvent& event)
-	{
-		if (event.Phase == InputActionPhase::Started) padSeen = std::get<CommonUtilities::Vector2f>(event.Value).x == .5f;
-	});
-	frame = {}; frame.GamepadLeft = {.5f, 0}; input.Update(frame);
-	Check(padSeen, "Synthetic gamepad axis unavailable");
-	frame.Focused = false; input.Update(frame);
-
-	InputSystem detailed;
-	const InputActionId multi{"Multi"}, mouse{"Mouse"}, order{"Order"}, exception{"Exception"};
-	detailed.BindKey(multi, int(EKeyCode::A)); detailed.BindKey(multi, int(EKeyCode::D)); detailed.BindMouseDelta(mouse, 2.f);
-	int multiEnded = 0; auto multiSub = detailed.Subscribe(multi, [&](const InputActionEvent& event) { if (event.Phase == InputActionPhase::Ended) ++multiEnded; });
-	std::vector<int> listenerOrder;
-	auto order1 = detailed.Subscribe(order, [&](const InputActionEvent&) { listenerOrder.push_back(1); });
-	auto order2 = detailed.Subscribe(order, [&](const InputActionEvent&) { listenerOrder.push_back(2); }); detailed.BindKey(order, int(EKeyCode::W));
-	CommonUtilities::Vector2f mouseValue; auto mouseSub = detailed.Subscribe(mouse, [&](const InputActionEvent& event) { mouseValue = std::get<CommonUtilities::Vector2f>(event.Value); });
-	frame = {}; frame.KeysDown[size_t(EKeyCode::A)] = true; frame.KeysDown[size_t(EKeyCode::W)] = true; frame.MouseDelta = {2, -3}; detailed.Update(frame);
-	Check(listenerOrder == std::vector{1,2} && mouseValue.x == 4 && mouseValue.y == -6, "Input ordering or mouse motion");
-	frame.KeysDown[size_t(EKeyCode::D)] = true; detailed.Update(frame); frame.KeysDown[size_t(EKeyCode::A)] = false; detailed.Update(frame);
-	Check(multiEnded == 0, "Multi-binding action ended while another binding remained active");
-	frame.Focused = false; detailed.Update(frame); Check(multiEnded == 1, "Focus loss did not end active action");
-
-	detailed.BindKey(exception, int(EKeyCode::F2)); InputSubscription throwing;
-	throwing = detailed.Subscribe(exception, [&](const InputActionEvent&) { throwing.Reset(); throw std::runtime_error("callback"); });
-	frame = {}; frame.KeysDown[size_t(EKeyCode::F2)] = true; try { detailed.Update(frame); } catch (const std::runtime_error&) {}
-	frame.KeysDown[size_t(EKeyCode::F2)] = false; detailed.Update(frame);
-	InputSubscription survivor;
-	{ InputSystem temporary; survivor = temporary.Subscribe(action, [](const InputActionEvent&) {}); }
-	survivor.Reset();
+    InputFixture fixture;
+    auto& input = fixture.Input;
+    input.BindActionToInputCode("Action", EKeyCode::R);
+    std::vector<CommonUtilities::InputData> events;
+    const unsigned listener = input.AddEventListener("Action", [&](const CommonUtilities::InputEvent& event) { events.push_back(event.inputData); });
+    fixture.Key(EKeyCode::R, true); input.Update(); input.Update();
+    fixture.Key(EKeyCode::R, false); input.Update(); input.Update();
+    Check(events.size() == 3 && events[0].isPressed && events[0].isHeld && events[1].isHeld && !events[1].isPressed && events[2].isReleased, "Mapper press/hold/release or duplicate device update");
+    fixture.Key(EKeyCode::R, true); input.Update();
+    fixture.Handler.UpdateEvents(WM_KILLFOCUS, 0, 0); input.Update();
+    Check(events.size() == 5 && events.back().isReleased, "Focus loss did not release held controls");
+    input.RemoveEventListener(listener);
+    fixture.Key(EKeyCode::R, true); input.Update();
+    Check(events.size() == 5, "Removed mapper listener still receives events");
+    input.BindActionToInputCode("Pointer", EPointerCode::MOUSE_DELTA);
+    CommonUtilities::Vector2f delta{};
+    const unsigned pointer = input.AddEventListener("Pointer", [&](const CommonUtilities::InputEvent& event) { delta = {event.inputData.valueA, event.inputData.valueB}; });
+    fixture.Move(12, -7); input.Update();
+    Check(delta.x == 12 && delta.y == -7, "Native mouse delta did not reach mapper");
+    fixture.Handler.SetMouseDeltaEnabled(false);
+    delta = {}; fixture.Move(20, 20); input.Update();
+    Check(delta.LengthSqr() == 0, "Disabled mouse look still emitted motion");
+    fixture.Handler.SetMouseDeltaEnabled(true);
+    fixture.Move(3, 4); input.Update();
+    Check(delta.x == 3 && delta.y == 4, "Re-enabled mouse look retained stale motion");
+    input.RemoveEventListener(pointer);
+    class Listener final : public Component
+    {
+    public:
+        int& Calls; unsigned Id = 0;
+        explicit Listener(int& calls) : Calls(calls) {}
+        void BeginPlay() override { Id = ServiceLocator::GetInstance().GetInputMapper()->AddEventListener("Action", [this](const CommonUtilities::InputEvent&) { ++Calls; }); }
+        void EndPlay() noexcept override { ServiceLocator::GetInstance().GetInputMapper()->RemoveEventListener(Id); }
+    };
+    int calls = 0;
+    World world;
+    for (int reload = 0; reload < 3; ++reload)
+    {
+        world.SpawnActor("Listener")->AddComponent<Listener>("Input", calls);
+        world.BeginPlay(); input.Update();
+        Check(calls == reload + 1, "Reload accumulated listeners");
+        world.Clear(); input.Update();
+        Check(calls == reload + 1, "Destroyed component left a dangling listener");
+    }
+    AssetRegistry borrowed;
+    ServiceLocator::GetInstance().SetAssetRegistry(&borrowed);
+    ServiceLocator::GetInstance().KillServices();
+    Check(ServiceLocator::GetInstance().GetInputMapper() == nullptr, "Owned input survived KillServices");
+    borrowed.Clear();
+    auto* replacement = new CommonUtilities::InputMapper;
+    replacement->Init(&fixture.Handler);
+    ServiceLocator::GetInstance().SetInputMapper(replacement);
+    ServiceLocator::GetInstance().SetInputMapper(replacement);
+    Check(ServiceLocator::GetInstance().GetInputMapper() == replacement, "Same-pointer registration lost owned mapper");
+    replacement->Update();
+    auto* newer = new CommonUtilities::InputMapper;
+    newer->Init(&fixture.Handler);
+    ServiceLocator::GetInstance().SetInputMapper(newer);
+    newer->Update();
+    ServiceLocator::GetInstance().KillServices();
+    ServiceLocator::GetInstance().KillServices();
 }
 
 void UnrealImportPipeline()
@@ -503,21 +499,22 @@ void UnrealImportPipeline()
 
 void DebugCameraActions()
 {
-	InputSystem input; InstallDefaultInputBindings(input); World world(&input); DebugCameraService service;
+	InputFixture fixture; auto& input = fixture.Input; input.BindActionToInputCode("DebugCamera", EKeyCode::F1); World world; DebugCameraService service;
 	auto* originalActor = world.SpawnActor("Authored Camera"); auto* original = originalActor->AddComponent<CameraComponent>("View");
 	world.SetActiveCamera(original); world.BeginPlay();
-	auto subscription = input.Subscribe(InputActions::DebugCamera, [&](const InputActionEvent& event)
+	const unsigned listener = input.AddEventListener("DebugCamera", [&](const CommonUtilities::InputEvent& event)
 	{
-		if (event.Phase == InputActionPhase::Started) service.Toggle(world, {640,360});
+		if (event.inputData.isPressed) service.Toggle(world, {640,360});
 	});
-	InputDeviceFrame frame; frame.KeysDown[size_t(EKeyCode::F1)] = true; input.Update(frame);
+	fixture.Key(EKeyCode::F1, true); input.Update();
 	Check(world.GetActiveCamera() != original && world.FindActor("__DebugCamera"), "F1 did not lazily spawn/activate debug camera");
-	frame.KeysDown[size_t(EKeyCode::F1)] = false; input.Update(frame); frame.KeysDown[size_t(EKeyCode::F1)] = true; input.Update(frame);
+	fixture.Key(EKeyCode::F1, false); input.Update(); fixture.Key(EKeyCode::F1, true); input.Update();
 	Check(world.GetActiveCamera() == original, "F1 did not restore prior camera");
-	frame.KeysDown[size_t(EKeyCode::F1)] = false; input.Update(frame); frame.KeysDown[size_t(EKeyCode::F1)] = true; input.Update(frame);
+	fixture.Key(EKeyCode::F1, false); input.Update(); fixture.Key(EKeyCode::F1, true); input.Update();
 	originalActor->Destroy(); world.Update(0);
-	frame.KeysDown[size_t(EKeyCode::F1)] = false; input.Update(frame); frame.KeysDown[size_t(EKeyCode::F1)] = true; input.Update(frame);
+	fixture.Key(EKeyCode::F1, false); input.Update(); fixture.Key(EKeyCode::F1, true); input.Update();
 	Check(world.GetActiveCamera() && world.GetActiveCamera()->GetOwner()->GetName() == "__DebugCamera", "Destroyed previous camera displaced debug camera");
+	input.RemoveEventListener(listener);
 }
 
 void TextGeometryAndNotificationTiming()
@@ -581,6 +578,12 @@ int main(int argc, char** argv)
 {
 	try
 	{
+		if (argc > 1 && std::string_view(argv[1]) == "--input-only")
+		{
+			FrameTimingAndInput(); InputMapperSemantics(); DebugCameraActions();
+			std::cout << "PASS: native mapper input, focus loss, listener/world lifecycle and service ownership\n";
+			return 0;
+		}
 		if (argc > 1 && std::string_view(argv[1]) == "--import-only")
 		{
 			UnrealImportPipeline();
@@ -594,7 +597,7 @@ int main(int argc, char** argv)
 		SceneConstruction();
 		AssetRegistrySemantics();
 		StartupAndCameraSafety();
-		InputSystemSemantics();
+		InputMapperSemantics();
 		UnrealImportPipeline();
 		DebugCameraActions();
 		TextGeometryAndNotificationTiming();

@@ -14,11 +14,20 @@ namespace CommonUtilities
 	{
 		switch (aMessage)
 		{
+			case WM_KILLFOCUS:
+				// Let the mapper emit releases on its next (single) frame update.
+				myTentativeState.reset();
+				myTentativeMouseDelta = {};
+				ReleaseMouse();
+				return true;
+
 			case WM_KEYDOWN:
+			case WM_SYSKEYDOWN:
 				myTentativeState.set(wParam);
 				return true;
 
 			case WM_KEYUP:
+			case WM_SYSKEYUP:
 				myTentativeState.reset(wParam);
 				return true;
 
@@ -28,6 +37,7 @@ namespace CommonUtilities
 
 			case WM_RBUTTONDOWN:
 				myTentativeState.set(static_cast<unsigned>(EKeyCode::MOUSERBUTTON));
+				myTentativeMouseDelta = {};
 				return true;
 
 			case WM_MBUTTONDOWN:
@@ -50,8 +60,8 @@ namespace CommonUtilities
 			{
 				const Vector2<int> newPosition
 				{
-					static_cast<int>(lParam & 0xffff),
-					static_cast<int>((lParam >> 16) & 0xffff)
+					static_cast<short>(lParam & 0xffff),
+					static_cast<short>((lParam >> 16) & 0xffff)
 				};
 
 				myTentativeMouseDelta += newPosition - myTentativeMousePosition;
@@ -69,7 +79,7 @@ namespace CommonUtilities
 		myCurrentState = myTentativeState;
 		myCurrentMousePosition = myTentativeMousePosition;
 
-		myCurrentMouseDelta = myTentativeMouseDelta;
+		myCurrentMouseDelta = myMouseDeltaEnabled ? myTentativeMouseDelta : Vector2<int>{};
 		myTentativeMouseDelta.x = 0;
 		myTentativeMouseDelta.y = 0;
 	}

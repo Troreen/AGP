@@ -5,26 +5,16 @@ GameFramework/Unreal scene integration.
 
 ## Input system
 
-The event-based input system is named `InputSystem`.
+Orhan's `CommonUtilities::InputMapper` is the sole mapping system, restored from commit `6d730498ba9b41e3f7ef3bf6dc173cebb6d510c7`.
 
-- `GameInput` and `InputMapper` were removed.
-- `InputHandler` and `XInputHandler` still read keyboard, mouse and controller
-  hardware. They are private backends and are sampled once per frame.
-- Gameplay listens to named actions such as `CameraForward`, `ReloadScene` and
-  `ToggleSpin` instead of checking keys directly.
-- An action sends `Started`, `Ongoing` and `Ended` events.
-- Action values can be a button, one-dimensional value or two-dimensional value.
-- Listeners keep an `InputSubscription`. Destroying it safely unsubscribes the listener.
-- Input events are dispatched before `Game::Update` and `World::Update`.
-- Several keys can bind to one action. Modifier combinations take priority over
-  their plain-key binding.
-- Losing window focus ends active actions and clears movement values.
-- Mouse and gamepad APIs are supported. There are no default gamepad bindings yet.
-- All current keyboard and mouse bindings are together in
-  `InstallDefaultInputBindings` in `Runtime/InputSystem.cpp`.
+- Win32 messages reach InputHandler through the window procedure. InputMapper advances the handlers once per frame and dispatches listeners directly.
+- Game, runtime and components bind their own named actions. Callbacks inspect `InputEvent.inputData.isPressed`, `isHeld`, `isReleased`, and axis values.
+- Components remove their unsigned listener IDs in EndPlay; Game does so in Shutdown. Listener mutation and scene changes happen outside mapper dispatch.
+- ServiceLocator owns InputMapper and borrows AudioManager and AssetRegistry. The runtime owns the mapper's device handlers.
+- Only camera movement/mouse look and F1/F4/F5/F6/F7/F8 bindings remain. Animation, lights, tonemapping, spin toggles, diagnostics printing and Escape input bindings have been removed.
+- Focus loss releases held keys on the next mapper update. No default gamepad bindings are installed.
 
-Components use callbacks for button edges and store state for continuous movement.
-Time-based movement still happens in the component's `Update` function.
+Time-based movement still happens in component Update. See [restoration details and limitations](../InputRestorationPlan.md).
 
 ## Debug camera
 
@@ -129,7 +119,7 @@ compiled by the GameFramework project.
 
 ## Removed legacy paths
 
-- Service-locator access was removed.
+- ServiceLocator is restored as the central engine-service access point.
 - Polling input accessors were removed.
 - The old `ModelViewer` path was removed after its controls were migrated.
 - The duplicated free-fly camera controllers were replaced by the GameFramework
@@ -138,7 +128,7 @@ compiled by the GameFramework project.
 
 ## Verification
 
-Tests now cover transform validation, action phases and subscriptions, camera
+Tests now cover transform validation, mapper events and explicit listener cleanup, camera
 controls, scene replacement, importer failures, typed scene conversion, material
 ordering, metadata ownership and debug-camera behavior. Public-header tests also
 check that gameplay-facing transform APIs do not expose quaternion types.

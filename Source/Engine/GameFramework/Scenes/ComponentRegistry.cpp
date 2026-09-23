@@ -154,10 +154,10 @@ namespace
 	}
 }
 
-std::unique_ptr<World> ComponentRegistry::CreateWorld(const SceneData& scene, AssetRegistry& assets, InputSystem* input,
+std::unique_ptr<World> ComponentRegistry::CreateWorld(const SceneData& scene, AssetRegistry& assets,
 	CommonUtilities::Vector2u size) const
 {
-	std::unique_ptr<World> world = std::make_unique<World>(input);
+	std::unique_ptr<World> world = std::make_unique<World>();
 	CameraComponent* taggedCamera = nullptr;
 	std::vector<std::string> diagnostics;
 	for (const auto& actorData : scene.Actors)
