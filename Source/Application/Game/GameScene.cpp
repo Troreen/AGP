@@ -10,15 +10,6 @@
 
 namespace
 {
-	// TODO!: THIS NEEDS TO BE BETTER HOLY JESUSS! MAKE IT AN ENUM OR SMN, THIS IS TERRIBLE
-	std::filesystem::path GetSceneFile(const std::string& name)
-	{
-		if (name == "TestExport") return "ExportedScenes/TestExportMap_Level.json";
-		if (name == "ChestMaterials") return "ExportedScenes/ChestMaterials_Level.json";
-		if (name == "Lvl_Blockout_Level") return "ExportedScenes/Lvl_Blockout_Level.json";
-		return {};
-	}
-
 	std::string FormatDiagnostics(const char* heading, const std::vector<ImportDiagnostic>& diagnostics)
 	{
 		std::ostringstream message;
@@ -31,12 +22,12 @@ namespace
 	}
 }
 
-SceneData GameScene::Load(const std::string& name, SceneLoadContext& context)
+SceneData GameScene::Load(const SceneType& aScene, SceneLoadContext& context)
 {
-	const std::filesystem::path sceneFile = GetSceneFile(name);
+	const std::filesystem::path sceneFile = GetSceneFile(aScene);
 	if (sceneFile.empty())
 	{
-		throw std::runtime_error("Unknown Game scene: " + name);
+		throw std::runtime_error("Unknown Game scene: " + GetSceneName(aScene));
 	}
 	if (!myInitialized)
 	{
@@ -51,7 +42,7 @@ SceneData GameScene::Load(const std::string& name, SceneLoadContext& context)
 		myInitialized = true;
 	}
 
-	const UnrealImportResult imported = UnrealSceneImporter{}.ImportScene(myContentRoot / sceneFile);
+	UnrealImportResult imported = UnrealSceneImporter{}.ImportScene(myContentRoot / sceneFile);
 	if (!imported)
 	{
 		throw std::runtime_error(FormatDiagnostics("Scene import failed:", imported.Diagnostics));
@@ -59,7 +50,7 @@ SceneData GameScene::Load(const std::string& name, SceneLoadContext& context)
 
 	SceneData scene = std::move(*imported.Data);
 	PrepareAssets(scene, context);
-	GAMELOG(Log, "Loaded scene '{}' from '{}' ({} actors).", name, sceneFile.string(), scene.Actors.size());
+	GAMELOG(Log, "Loaded scene '{}' from '{}' ({} actors).", GetSceneName(aScene), sceneFile.string(), scene.Actors.size());
 	return scene;
 }
 

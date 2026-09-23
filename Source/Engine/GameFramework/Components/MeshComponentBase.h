@@ -28,6 +28,7 @@ public:
 
 	// An empty binding clears the mesh. This never loads resources.
 	void SetMesh(MeshHandle aMesh);
+	void SetMesh_DO_NOT_USE(std::shared_ptr<Mesh> aMesh); //-------------------Evil SetMesh. Remove When no longer in use
 	MeshHandle GetMesh() const;
 	bool HasMesh() const;
 	void SetSourceAssetIdentity(std::string meshName, std::string contentPath)

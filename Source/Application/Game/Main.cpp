@@ -1,4 +1,4 @@
-﻿#define WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <cstdio>
 #include <stdexcept>
@@ -33,9 +33,9 @@ try
 
 		Game game;
 		GameScene scene;
-		return GameApplication{}.Run(game, config, [&scene](const std::string& name, SceneLoadContext& context)
+		return GameApplication{}.Run(game, config, [&scene](const SceneType& aScene, SceneLoadContext& context)
 		{
-			return scene.Load(name, context);
+			return scene.Load(aScene, context);
 		});
 	}
 	catch (const std::exception& error)

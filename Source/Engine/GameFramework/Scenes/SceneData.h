@@ -10,6 +10,54 @@
 #include <variant>
 #include <vector>
 
+enum class SceneType
+{
+	Blockout,
+	Chests,
+	TGAUnrealTest,
+	None
+};
+namespace
+{
+std::filesystem::path GetSceneFile(const SceneType& aScene)
+{
+	switch (aScene)
+	{
+		case SceneType::Blockout:
+			return "ExportedScenes/lvl_blockout/Lvl_Blockout_Level.json";
+			break;
+		case SceneType::Chests:
+			return "ExportedScenes/TestExportMap_Level.json";
+			break;
+		case SceneType::TGAUnrealTest:
+			return "ExportedScenes/ChestMaterials_Level.json";
+			break;
+		default:
+			return {};
+			break;
+	}
+}
+
+std::string GetSceneName(const SceneType& aScene)
+{
+	switch (aScene)
+	{
+		case SceneType::Blockout:
+			return "Lvl_Blockout_Level";
+			break;
+		case SceneType::Chests:
+			return "TestExportMap";
+			break;
+		case SceneType::TGAUnrealTest:
+			return"ChestMaterials";
+			break;
+		default:
+			return {};
+			break;
+	}
+}
+}
+
 class AssetRegistry;
 
 struct ComponentData
@@ -89,4 +137,4 @@ struct SceneLoadContext
 	AssetRegistry& Assets;
 };
 
-using SceneSource = std::function<SceneData(const std::string& name, SceneLoadContext& context)>;
+using SceneSource = std::function<SceneData(const SceneType& type, SceneLoadContext& context)>;

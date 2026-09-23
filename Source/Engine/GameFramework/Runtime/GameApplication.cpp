@@ -292,8 +292,7 @@ void GameApplication::Impl::ShutdownServices()
 
 void GameApplication::Impl::LoadPendingScene()
 {
-	const std::string name = std::move(*myContext.myPendingScene);
-	myContext.myPendingScene.reset();
+	const std::string& name = GetSceneName(*myContext.myPendingScene);
 	std::unique_ptr<World> world;
 	try
 	{
@@ -303,7 +302,7 @@ void GameApplication::Impl::LoadPendingScene()
 		}
 		AssetRegistry& assets = AssetRegistry::Get();
 		SceneLoadContext context{myContext.myContentRoot, myContext.myClientSize, assets};
-		const SceneData scene = mySource(name, context);
+		const SceneData scene = mySource(*myContext.myPendingScene, context);
 		world = myRegistry.CreateWorld(scene, assets, &myContext.myInput, myContext.myClientSize);
 		myGame.ConfigureWorld(*world);
 	}
@@ -324,14 +323,16 @@ void GameApplication::Impl::LoadPendingScene()
 	myContext.myAcceptSceneRequests = false;
 	myContext.myWorld->Clear();
 	myContext.myWorld = std::move(world);
-	myContext.mySceneName = name;
+	myContext.mySceneName = *myContext.myPendingScene;
 	myContext.myInput.Reset();
 	myHasMainThreadMouseLookAnchor = false;
 	myDebugCamera.Reset();
 	myContext.myAcceptSceneRequests = true;
-	if (!myContext.GetWorld().GetActiveCamera()) myContext.GetWorld().SetActiveCamera(myDebugCamera.Ensure(myContext.GetWorld(), myContext.myClientSize));
+	if (!myContext.GetWorld().GetActiveCamera())
+		myContext.GetWorld().SetActiveCamera(myDebugCamera.Ensure(myContext.GetWorld(), myContext.myClientSize));
 	myContext.GetWorld().BeginPlay();
 	myGame.OnSceneLoaded(myContext, name);
+	myContext.myPendingScene.reset();
 }
 
 int GameApplication::Run(IGame& game, const Config& config, SceneSource source)

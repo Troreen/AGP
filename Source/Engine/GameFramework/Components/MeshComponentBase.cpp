@@ -25,6 +25,19 @@ void MeshComponentBase::SetMesh(MeshHandle aMesh)
 	OnMeshChanged();
 }
 
+void MeshComponentBase::SetMesh_DO_NOT_USE(std::shared_ptr<Mesh> aMesh)
+{
+	myMesh = aMesh;
+
+	myMaterials.clear();
+	myMaterialHandles.clear();
+	if (myMesh != nullptr)
+	{
+		myMaterials.resize(myMesh->GetNumMaterialSlots());
+		myMaterialHandles.resize(myMesh->GetNumMaterialSlots());
+	}
+}
+
 MeshHandle MeshComponentBase::GetMesh() const
 {
 	return myMeshHandle;

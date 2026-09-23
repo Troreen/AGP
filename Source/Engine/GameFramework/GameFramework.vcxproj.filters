@@ -27,7 +27,14 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ActionNode.h" />
     <ClInclude Include="AssetHandling\Asset.h">
+      <Filter>AssetHandling</Filter>
+    </ClInclude>
+    <ClInclude Include="AssetHandling\AssetRegistry.h">
+      <Filter>AssetHandling</Filter>
+    </ClInclude>
+    <ClInclude Include="AssetHandling\FontAsset.h">
       <Filter>AssetHandling</Filter>
     </ClInclude>
     <ClInclude Include="AssetHandling\MaterialAsset.h">
@@ -36,16 +43,11 @@
     <ClInclude Include="AssetHandling\MeshAsset.h">
       <Filter>AssetHandling</Filter>
     </ClInclude>
-    <ClInclude Include="AssetHandling\FontAsset.h">
-      <Filter>AssetHandling</Filter>
-    </ClInclude>
     <ClInclude Include="AssetHandling\TextureAsset.h">
       <Filter>AssetHandling</Filter>
     </ClInclude>
-    <ClInclude Include="AssetHandling\AssetRegistry.h">
-      <Filter>AssetHandling</Filter>
-    </ClInclude>
     <ClInclude Include="AudioManager.h" />
+    <ClInclude Include="BTNode.h" />
     <ClInclude Include="Components\CameraComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
@@ -67,7 +69,9 @@
     <ClInclude Include="Components\StaticMeshComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
+    <ClInclude Include="FallbackNode.h" />
     <ClInclude Include="GameFrameworkLog.h" />
+    <ClInclude Include="LeafNode.h" />
     <ClInclude Include="Rendering\WorldRenderer.h">
       <Filter>Rendering</Filter>
     </ClInclude>
@@ -92,14 +96,15 @@
     <ClInclude Include="Scenes\SceneData.h">
       <Filter>Scenes</Filter>
     </ClInclude>
+    <ClInclude Include="SequenceNode.h" />
     <ClInclude Include="ServiceLocator.h" />
     <ClInclude Include="SimdJson\simdjson.h">
       <Filter>SimdJson</Filter>
     </ClInclude>
-    <ClInclude Include="UnrealSceneImporter\UnrealSceneParserStructs.h">
+    <ClInclude Include="UnrealSceneImporter\UnrealSceneImporter.h">
       <Filter>UnrealSceneImporter</Filter>
     </ClInclude>
-    <ClInclude Include="UnrealSceneImporter\UnrealSceneImporter.h">
+    <ClInclude Include="UnrealSceneImporter\UnrealSceneStructs.h">
       <Filter>UnrealSceneImporter</Filter>
     </ClInclude>
     <ClInclude Include="World\Actor.h">
@@ -119,19 +124,19 @@
     <ClCompile Include="AssetHandling\Asset.cpp">
       <Filter>AssetHandling</Filter>
     </ClCompile>
+    <ClCompile Include="AssetHandling\AssetRegistry.cpp">
+      <Filter>AssetHandling</Filter>
+    </ClCompile>
+    <ClCompile Include="AssetHandling\FontAsset.cpp">
+      <Filter>AssetHandling</Filter>
+    </ClCompile>
     <ClCompile Include="AssetHandling\MaterialAsset.cpp">
       <Filter>AssetHandling</Filter>
     </ClCompile>
     <ClCompile Include="AssetHandling\MeshAsset.cpp">
       <Filter>AssetHandling</Filter>
     </ClCompile>
-    <ClCompile Include="AssetHandling\FontAsset.cpp">
-      <Filter>AssetHandling</Filter>
-    </ClCompile>
     <ClCompile Include="AssetHandling\TextureAsset.cpp">
-      <Filter>AssetHandling</Filter>
-    </ClCompile>
-    <ClCompile Include="AssetHandling\AssetRegistry.cpp">
       <Filter>AssetHandling</Filter>
     </ClCompile>
     <ClCompile Include="AudioManager.cpp" />
@@ -153,6 +158,7 @@
     <ClCompile Include="Components\SkeletalMeshComponent.cpp">
       <Filter>Components</Filter>
     </ClCompile>
+    <ClCompile Include="FallbackNode.cpp" />
     <ClCompile Include="GameFrameworkLog.cpp" />
     <ClCompile Include="Rendering\WorldRenderer.cpp">
       <Filter>Rendering</Filter>
@@ -172,6 +178,7 @@
     <ClCompile Include="Scenes\ComponentRegistry.cpp">
       <Filter>Scenes</Filter>
     </ClCompile>
+    <ClCompile Include="SequenceNode.cpp" />
     <ClCompile Include="ServiceLocator.cpp" />
     <ClCompile Include="SimdJson\simdjson.cpp">
       <Filter>SimdJson</Filter>

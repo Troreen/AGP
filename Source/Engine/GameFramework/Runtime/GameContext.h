@@ -3,6 +3,7 @@
 #include "Vector2.hpp"
 #include <filesystem>
 #include <optional>
+#include "GameFramework/Scenes/SceneData.h"
 
 // Session state passed to game callbacks. Everything runs on the application thread.
 class GameContext
@@ -23,10 +24,10 @@ public:
 	}
 
 	// Requests are applied at the next frame boundary, never in the middle of Update.
-	bool LoadScene(std::string name);
+	bool LoadScene(const SceneType& aScene);
 	bool ReloadScene();
 
-	const std::string& GetSceneName() const
+	const SceneType& GetSceneType() const
 	{
 		return mySceneName;
 	}
@@ -49,8 +50,8 @@ public:
 private:
 	InputSystem myInput;
 	std::unique_ptr<World> myWorld;
-	std::optional<std::string> myPendingScene;
-	std::string mySceneName;
+	std::optional<SceneType> myPendingScene;
+	SceneType mySceneName;
 	std::filesystem::path myContentRoot;
 	CommonUtilities::Vector2u myClientSize;
 	bool myQuitRequested = false;

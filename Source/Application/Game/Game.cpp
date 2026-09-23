@@ -7,6 +7,11 @@
 #include "GameFramework/World/World.h"
 #include "GameLog.h"
 
+
+#include "../../Engine/GameFramework/Components/SkeletalMeshComponent.h"
+#include "../../Engine/GraphicsEngine/Objects/Mesh.h"
+#include <MeshLibrary.h>
+
 DEFINE_LOG_CATEGORY(LogGame);
 
 namespace
@@ -145,10 +150,10 @@ void Game::Initialize(GameContext& context)
 			AttachRuntimeChild(context.GetWorld());
 		}
 	}));
-	context.LoadScene("ChestMaterials"); // TODO: make this an enum or smn wtf
+	context.LoadScene(SceneType::Blockout); // TODO: make this an enum or smn wtf
 	AudioManager& audio = ServiceLocator::GetInstance().GetAudioManager();
 	audio.SetBusVolume(BusID::eMusic, BackgroundMusicVolume);
-	audio.PlayMusic(SoundID::eMainTheme, true);
+	audio.PlayMusic(SoundID::eMainTheme, true); // TODO: make man breathe more often this is not enough wtf smh b-word
 	GAMELOG(Log, "Game ready: F7 toggles a spinning chest, F8 attaches its child, R toggles spinning");
 }
 
@@ -163,6 +168,28 @@ void Game::Shutdown(GameContext& context)
 
 void Game::ConfigureWorld(World& world)
 {
+
+	{
+		Actor* bro = world.SpawnActor("TGE_BRO");
+		bro->GetTransform().SetLocalRotationDegrees({ 180, 0, 0 });
+		bro->GetTransform().SetWorldPosition({ 0, 200, 0 });
+			
+		SkeletalMeshComponent* component = bro->AddComponent<SkeletalMeshComponent>();
+
+		MeshLibrary meshLib;
+
+		std::filesystem::path path = std::filesystem::current_path();
+		path = path / "..\\..\\..\\";
+
+		meshLib.LoadFBXMesh(path / "Content\\Meshes\\Characters\\TGA_Bro\\SK_C_TGA_Bro.fbx");
+		meshLib.LoadFBXAnimation("SK_C_TGA_Bro","Idle",path / "Content\\Animations\\Characters\\TGA_Bro\\Idle\\A_C_TGA_Bro_Idle_Brething.fbx");
+
+		std::shared_ptr<Mesh> mesh = meshLib.GetMesh("SK_C_TGA_Bro");
+
+		component->SetMesh_DO_NOT_USE(mesh);
+		component->PlayAnimation("Idle", true);
+	}
+
 	// Code-configured behavior example: exported scene data supplies the Actor
 	// and its two PointLightComponents, while game code attaches reusable logic.
 	// The offset SceneComponent inherits this Actor rotation and orbits the center.

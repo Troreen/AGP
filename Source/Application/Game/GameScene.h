@@ -9,7 +9,7 @@
 class GameScene final
 {
 public:
-	SceneData Load(const std::string& name, SceneLoadContext& context);
+	SceneData Load(const SceneType& name, SceneLoadContext& context);
 
 private:
 	void PrepareAssets(SceneData& scene, SceneLoadContext& context);

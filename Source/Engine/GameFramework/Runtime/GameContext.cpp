@@ -4,13 +4,13 @@ GameContext::GameContext() : myWorld(std::make_unique<World>(&myInput))
 {
 }
 
-bool GameContext::LoadScene(std::string name)
+bool GameContext::LoadScene(const SceneType& aScene)
 {
-	if (!myAcceptSceneRequests || name.empty())
+	if (!myAcceptSceneRequests || aScene == SceneType::None)
 	{
 		return false;
 	}
-	myPendingScene = std::move(name);
+	myPendingScene = aScene;
 	return true;
 }
 

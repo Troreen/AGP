@@ -178,13 +178,15 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ActionNode.h" />
     <ClInclude Include="AssetHandling\Asset.h" />
     <ClInclude Include="AssetHandling\AssetRegistry.h" />
+    <ClInclude Include="AssetHandling\FontAsset.h" />
     <ClInclude Include="AssetHandling\MaterialAsset.h" />
     <ClInclude Include="AssetHandling\MeshAsset.h" />
-    <ClInclude Include="AssetHandling\FontAsset.h" />
     <ClInclude Include="AssetHandling\TextureAsset.h" />
     <ClInclude Include="AudioManager.h" />
+    <ClInclude Include="BTNode.h" />
     <ClInclude Include="Components\CameraComponent.h" />
     <ClInclude Include="Components\DebugCameraController.h" />
     <ClInclude Include="Components\LightComponent.h" />
@@ -192,7 +194,9 @@
     <ClInclude Include="Components\SceneComponent.h" />
     <ClInclude Include="Components\SkeletalMeshComponent.h" />
     <ClInclude Include="Components\StaticMeshComponent.h" />
+    <ClInclude Include="FallbackNode.h" />
     <ClInclude Include="GameFrameworkLog.h" />
+    <ClInclude Include="LeafNode.h" />
     <ClInclude Include="Rendering\WorldRenderer.h" />
     <ClInclude Include="Runtime\GameApplication.h" />
     <ClInclude Include="Runtime\GameContext.h" />
@@ -201,10 +205,11 @@
     <ClInclude Include="Scenes\AssetRefs.h" />
     <ClInclude Include="Scenes\ComponentRegistry.h" />
     <ClInclude Include="Scenes\SceneData.h" />
+    <ClInclude Include="SequenceNode.h" />
     <ClInclude Include="ServiceLocator.h" />
     <ClInclude Include="SimdJson\simdjson.h" />
-    <ClInclude Include="UnrealSceneImporter\UnrealSceneParserStructs.h" />
     <ClInclude Include="UnrealSceneImporter\UnrealSceneImporter.h" />
+    <ClInclude Include="UnrealSceneImporter\UnrealSceneStructs.h" />
     <ClInclude Include="World\Actor.h" />
     <ClInclude Include="World\Component.h" />
     <ClInclude Include="World\Transform.h" />
@@ -212,13 +217,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssetHandling\Asset.cpp" />
-    <ClCompile Include="AssetHandling\MaterialAsset.cpp" />
-    <ClCompile Include="AssetHandling\MeshAsset.cpp" />
-    <ClCompile Include="AssetHandling\FontAsset.cpp" />
-    <ClCompile Include="AssetHandling\TextureAsset.cpp" />
     <ClCompile Include="AssetHandling\AssetRegistry.cpp">
       <DisableSpecificWarnings>4100;4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
+    <ClCompile Include="AssetHandling\FontAsset.cpp" />
+    <ClCompile Include="AssetHandling\MaterialAsset.cpp" />
+    <ClCompile Include="AssetHandling\MeshAsset.cpp" />
+    <ClCompile Include="AssetHandling\TextureAsset.cpp" />
     <ClCompile Include="AudioManager.cpp" />
     <ClCompile Include="Components\CameraComponent.cpp" />
     <ClCompile Include="Components\DebugCameraController.cpp" />
@@ -226,6 +231,7 @@
     <ClCompile Include="Components\MeshComponentBase.cpp" />
     <ClCompile Include="Components\SceneComponent.cpp" />
     <ClCompile Include="Components\SkeletalMeshComponent.cpp" />
+    <ClCompile Include="FallbackNode.cpp" />
     <ClCompile Include="GameFrameworkLog.cpp" />
     <ClCompile Include="Rendering\WorldRenderer.cpp" />
     <ClCompile Include="Runtime\GameApplication.cpp" />
@@ -233,6 +239,7 @@
     <ClCompile Include="Runtime\InputSystem.cpp" />
     <ClCompile Include="Scenes\AssetRefs.cpp" />
     <ClCompile Include="Scenes\ComponentRegistry.cpp" />
+    <ClCompile Include="SequenceNode.cpp" />
     <ClCompile Include="ServiceLocator.cpp" />
     <ClCompile Include="SimdJson\simdjson.cpp">
       <DisableSpecificWarnings>4100;4244;4505;%(DisableSpecificWarnings)</DisableSpecificWarnings>
