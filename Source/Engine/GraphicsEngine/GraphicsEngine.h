@@ -282,6 +282,7 @@ private:
 	PipelineStateObject myShadowOverridePSO;
 	PipelineStateObject myLocalShadowOverridePSO;
 	PipelineStateObject myPointShadowOverridePSO;
+	PipelineStateObject myDeferredAmbientPSO;
 	PipelineStateObject myDeferredDirectionalPSO;
 	PipelineStateObject myDeferredPointPSO;
 	PipelineStateObject myDeferredSpotPSO;

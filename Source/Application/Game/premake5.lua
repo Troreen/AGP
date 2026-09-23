@@ -128,4 +128,7 @@ project "Game"
 		buildoptions { "/Gy" }
 		buildoptions { "/Gw" }
 
+	filter { "files:SimdJson/simdjson.cpp or SimdJson/simdjson.h" }
+		disablewarnings { "4100", "4244", "4505", "26437", "26495", "26817" }
+		
     filter {}

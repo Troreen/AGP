@@ -21,7 +21,7 @@ const std::shared_ptr<Mesh>& MeshAsset::GetMesh() const
 	return myMesh;
 }
 
-bool MeshAsset::Load(const std::filesystem::path& aPath, AssetRegistry& aRegistry)
+bool MeshAsset::Load(const std::filesystem::path& aPath, [[maybe_unused]] AssetRegistry& aRegistry)
 {
 	TGA::FBX::Mesh importedMesh;
 	if (!TGA::FBX::Importer::LoadMeshW(aPath.wstring(), importedMesh))

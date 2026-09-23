@@ -22,6 +22,7 @@
 #include "XInputHandler.h"
 #include "EnumKeyCode.h"
 #include "Timer.h"
+#include <Application/Game/AnimationManager.h>
 #include <algorithm>
 #include <cmath>
 #include <cstring>
@@ -108,6 +109,7 @@ private:
 	bool myInitialWorldStarted = false;
 
 	DebugCameraService myDebugCamera;
+	AnimationManager myAnimationManager;
 };
 
 int GameApplication::Impl::Run()
@@ -216,6 +218,8 @@ void GameApplication::Impl::InitializeServices()
 	audio->Init();
 
 	services.SetInputMapper(new CommonUtilities::InputMapper());
+
+	ServiceLocator::GetInstance().ProvideAnimation(myAnimationManager);
 }
 
 void GameApplication::Impl::InitializeInputAndHostControls()

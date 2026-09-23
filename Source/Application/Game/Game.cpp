@@ -7,6 +7,7 @@
 #include "GameFramework/World/World.h"
 #include "GameLog.h"
 #include <utility>
+#include "AnimatorComponent.h"
 
 
 #include "../../Engine/GameFramework/Components/SkeletalMeshComponent.h"
@@ -176,11 +177,18 @@ void Game::ConfigureWorld(World& world)
 {
 
 	{
+		Actor* big = world.SpawnActor("TGE_BIG");
+		big->GetTransform().SetLocalRotationDegrees({ 180, 0, 0 });
+		big->GetTransform().SetWorldPosition({ 0, 200, 0 });
+		big->GetTransform().SetLocalScale({ 10, 10, 10 });
+
 		Actor* bro = world.SpawnActor("TGE_BRO");
 		bro->GetTransform().SetLocalRotationDegrees({ 180, 0, 0 });
-		bro->GetTransform().SetWorldPosition({ 0, 200, 0 });
+		bro->GetTransform().SetWorldPosition({ 0, 900, -450 });
 			
 		SkeletalMeshComponent* component = bro->AddComponent<SkeletalMeshComponent>();
+		SkeletalMeshComponent* bigcomponent = big->AddComponent<SkeletalMeshComponent>();
+		//AnimatorComponent* animator = bro->AddComponent<AnimatorComponent>();
 
 		MeshLibrary meshLib;
 
@@ -196,6 +204,8 @@ void Game::ConfigureWorld(World& world)
 		
 		component->SetMesh(meshAsset);
 		component->PlayAnimation("Idle", true);
+		bigcomponent->SetMesh(meshAsset);
+		bigcomponent->PlayAnimation("Idle", true);
 	}
 
 	// Code-configured behavior example:

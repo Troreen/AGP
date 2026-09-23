@@ -96,8 +96,10 @@ void GameScene::PrepareAssets(SceneData& aSceneData, SceneLoadContext& aSceneLoa
 
 void GameScene::PrepareMaterial(MaterialInstanceData& aMaterialData, const std::string& aFallbackMaterial, AssetRegistry& aAssetRegistry)
 {
-	if (aAssetRegistry.GetAsset<MaterialAsset>(aMaterialData.Name))
+	std::shared_ptr<MaterialAsset> material = aAssetRegistry.GetAsset<MaterialAsset>(aMaterialData.Name);
+	if (material)
 	{
+		aMaterialData.Asset = material;
 		return;
 	}
 

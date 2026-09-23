@@ -45,6 +45,12 @@ AssetRegistry* ServiceLocator::SetAssetRegistry(AssetRegistry* anAssetRegistry)
 	return anAssetRegistry;
 }
 
+AnimationManager& ServiceLocator::GetAnimationManager() const
+{
+	if (!myAnimations) throw std::logic_error("AnimationManager service is unavailable");
+	return *myAnimations;
+}
+
 void ServiceLocator::KillServices()
 {
 	delete myOwnedInputMapper;
@@ -53,6 +59,7 @@ void ServiceLocator::KillServices()
 	myOwnedAudioManager = nullptr;
 	delete myOwnedAssetRegistry;
 	myOwnedAssetRegistry = nullptr;
+	myAnimations = nullptr;
 }
 
 ServiceLocator::ServiceLocator()
@@ -76,4 +83,6 @@ AssetRegistry& ServiceLocator::GetAssetRegistry() const
 {
 	if (!myOwnedAssetRegistry) throw std::logic_error("AssetRegistry service is unavailable");
 	return *myOwnedAssetRegistry;
+
+
 }

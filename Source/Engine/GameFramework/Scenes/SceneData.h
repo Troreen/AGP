@@ -1,5 +1,6 @@
 #pragma once
 #include "GameFramework/World/Transform.h"
+#include "GameFramework/AssetHandling/MaterialAsset.h"
 #include "Vector2.hpp"
 #include "Vector4.hpp"
 #include <cstdint>
@@ -78,6 +79,7 @@ struct MaterialParameterData
 struct MaterialInstanceData
 {
 	std::string Name;
+	std::shared_ptr<MaterialAsset> Asset;
 	std::vector<MaterialParameterData> Parameters;
 };
 struct StaticMeshData

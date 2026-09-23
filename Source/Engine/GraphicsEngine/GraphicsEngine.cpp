@@ -998,6 +998,10 @@ void GraphicsEngine::RenderDeferredLighting(GraphicsCommandList& inoutCommandLis
 	                                    PipeLineStage_PixelShader);
 	const Texture* screenSpaceAOResource = &myScreenSpaceAOTexture;
 	inoutCommandList.SetShaderResources(&screenSpaceAOResource, 1, TextureSlot::ScreenSpaceAO, PipeLineStage_PixelShader);
+
+	inoutCommandList.SetPipelineState(&myDeferredAmbientPSO);
+	inoutCommandList.Draw(RenderConfig::FullscreenVertexCount);
+
 	for (unsigned lightIndex = 0; lightIndex < lightBuffer.NumActiveLights; ++lightIndex)
 	{
 		LightBuffer singleLightBuffer;
@@ -1422,13 +1426,14 @@ bool GraphicsEngine::CreateDeferredPipelineStates()
 		return myRHI.CreatePipelineStateObject(description, outPSO);
 	};
 
-	return createPipeline("DeferredDirectionalPSO", "DeferredDirectional_PS.hlsl", BlendMode::Additive, myDeferredDirectionalPSO) &&
-	       createPipeline("DeferredPointPSO", "DeferredPoint_PS.hlsl", BlendMode::Additive, myDeferredPointPSO) &&
-	       createPipeline("DeferredSpotPSO", "DeferredSpot_PS.hlsl", BlendMode::Additive, myDeferredSpotPSO) &&
-	       createPipeline("DeferredCompositePSO", "DeferredComposite_PS.hlsl", BlendMode::Opaque, myDeferredCompositePSO) &&
-	       createPipeline("TonemapPSO", "Tonemap_PS.hlsl", BlendMode::Opaque, myTonemapPSO) &&
-	       createPipeline("ScreenSpaceAOPSO", "ScreenSpaceAO_PS.hlsl", BlendMode::Opaque, myScreenSpaceAOPSO) &&
-	       createPipeline("RenderPassDebugPSO", "RenderPassDebug_PS.hlsl", BlendMode::Opaque, myRenderPassDebugPSO);
+	return	createPipeline("DeferredAmbientPSO", "DeferredAmbient_PS.hlsl", BlendMode::Additive, myDeferredAmbientPSO) &&
+			createPipeline("DeferredDirectionalPSO", "DeferredDirectional_PS.hlsl", BlendMode::Additive, myDeferredDirectionalPSO) &&
+			createPipeline("DeferredPointPSO", "DeferredPoint_PS.hlsl", BlendMode::Additive, myDeferredPointPSO) &&
+			createPipeline("DeferredSpotPSO", "DeferredSpot_PS.hlsl", BlendMode::Additive, myDeferredSpotPSO) &&
+			createPipeline("DeferredCompositePSO", "DeferredComposite_PS.hlsl", BlendMode::Opaque, myDeferredCompositePSO) &&
+			createPipeline("TonemapPSO", "Tonemap_PS.hlsl", BlendMode::Opaque, myTonemapPSO) &&
+			createPipeline("ScreenSpaceAOPSO", "ScreenSpaceAO_PS.hlsl", BlendMode::Opaque, myScreenSpaceAOPSO) &&
+			createPipeline("RenderPassDebugPSO", "RenderPassDebug_PS.hlsl", BlendMode::Opaque, myRenderPassDebugPSO);
 }
 
 bool GraphicsEngine::CreateTextPipelineState()

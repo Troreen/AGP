@@ -7,6 +7,7 @@ namespace CommonUtilities
 
 class AudioManager;
 class AssetRegistry;
+class AnimationManager;
 
 class ServiceLocator
 {
@@ -30,11 +31,17 @@ class ServiceLocator
 
 		void KillServices();
 
+	void ProvideAnimation(AnimationManager& animations) { myAnimations = &animations; }
+	AnimationManager& GetAnimationManager() const;
+
 	private:
 		ServiceLocator();
 		~ServiceLocator();
 
+
 		CommonUtilities::InputMapper* myOwnedInputMapper;
 		AudioManager* myOwnedAudioManager;
 		AssetRegistry* myOwnedAssetRegistry;
+
+	AnimationManager* myAnimations = nullptr;
 };

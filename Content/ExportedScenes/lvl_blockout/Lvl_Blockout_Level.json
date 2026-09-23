@@ -1504,63 +1504,6 @@
 			]
 		},
 		{
-			"Name": "SM_Test_Ground_8u_AppliedScale9",
-			"Archetype": "StaticMeshActor",
-			"Transform": [
-				1.25,
-				0,
-				0,
-				0,
-				0,
-				1.825194778648509e-08,
-				-1.5,
-				0,
-				-0,
-				1,
-				1.216796519099006e-08,
-				0,
-				800,
-				-1200,
-				600,
-				1
-			],
-			"Tags": [],
-			"Components": [
-				{
-					"Name": "StaticMeshComponent0",
-					"TypeID": 1,
-					"Parent": "",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Mesh": "SM_Test_Ground_8u_AppliedScale",
-					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
-					"Materials": [
-						{
-							"Name": "M_Blue",
-							"Parameters": []
-						}
-					]
-				}
-			]
-		},
-		{
 			"Name": "SM_Test_Ground_8u_AppliedScale10",
 			"Archetype": "StaticMeshActor",
 			"Transform": [
@@ -1578,63 +1521,6 @@
 				0,
 				0,
 				-1200,
-				400,
-				1
-			],
-			"Tags": [],
-			"Components": [
-				{
-					"Name": "StaticMeshComponent0",
-					"TypeID": 1,
-					"Parent": "",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Mesh": "SM_Test_Ground_8u_AppliedScale",
-					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
-					"Materials": [
-						{
-							"Name": "M_Blue",
-							"Parameters": []
-						}
-					]
-				}
-			]
-		},
-		{
-			"Name": "SM_Test_Ground_8u_AppliedScale11",
-			"Archetype": "StaticMeshActor",
-			"Transform": [
-				1.2167967411436109e-08,
-				-1,
-				5.5511151231257827e-17,
-				0,
-				1.7453294420821663e-08,
-				1.1102230246251565e-16,
-				-0.99999999999999989,
-				0,
-				0.99999999999999978,
-				1.2167967411436109e-08,
-				1.7453294365310512e-08,
-				0,
-				-500,
-				-800,
 				400,
 				1
 			],
@@ -3123,7 +3009,7 @@
 				1,
 				1.7453292366909068e-08,
 				0,
-				1700,
+				1600,
 				-1200,
 				400,
 				1
@@ -3180,7 +3066,7 @@
 				1,
 				1.7453292366909068e-08,
 				0,
-				2500,
+				2400,
 				-1200,
 				400,
 				1
@@ -3229,12 +3115,12 @@
 				0,
 				0,
 				0,
-				-0,
+				0,
 				1,
 				0,
 				0,
 				0,
-				-0,
+				0,
 				1,
 				0,
 				0,
@@ -3276,6 +3162,690 @@
 						},
 						{
 							"Name": "WorldGridMaterial",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "DoorFrame",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-2.2204460492503131e-16,
+				0,
+				-1.0000000000000002,
+				0,
+				-0,
+				1,
+				0,
+				0,
+				1.0000000000000002,
+				0,
+				-2.2204460492503131e-16,
+				0,
+				-400,
+				500,
+				500.04154287109122,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "DoorFrame",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/DoorFrame.DoorFrame",
+					"Materials": [
+						{
+							"Name": "WorldGridMaterial",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "DoorFrame2",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				1.2167965746101572e-08,
+				1,
+				0,
+				0,
+				-1,
+				1.2167965746101572e-08,
+				0,
+				0,
+				0,
+				-0,
+				1,
+				0,
+				1900,
+				900,
+				100.041543,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "DoorFrame",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/DoorFrame.DoorFrame",
+					"Materials": [
+						{
+							"Name": "WorldGridMaterial",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "DoorFrame3",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-4.4408920985006262e-16,
+				4.963083675318166e-24,
+				-1.0000000000000002,
+				0,
+				-2.4335928950132564e-08,
+				-1,
+				0,
+				0,
+				-0.99999999999999989,
+				2.4335928950132567e-08,
+				1.1102230246251565e-16,
+				0,
+				2700,
+				500,
+				500.04154299999999,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "DoorFrame",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/DoorFrame.DoorFrame",
+					"Materials": [
+						{
+							"Name": "WorldGridMaterial",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "DoorFrame4",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-4.4408920985006262e-16,
+				2.2204460492503131e-16,
+				-1.0000000000000004,
+				0,
+				-1.0000000000000004,
+				5.2853292853427547e-09,
+				0,
+				0,
+				5.2853297294319646e-09,
+				1.0000000000000004,
+				-2.2204460492503131e-16,
+				0,
+				900,
+				-1100,
+				500.04154299999999,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "DoorFrame",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/DoorFrame.DoorFrame",
+					"Materials": [
+						{
+							"Name": "WorldGridMaterial",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "DoorFrameXForwardZup",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				1.2167964857923153e-08,
+				-1,
+				0,
+				0,
+				1,
+				1.2167964857923153e-08,
+				-0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				800,
+				1700,
+				100,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "DoorFrameXForwardZup",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/DoorFrameXForwardZup.DoorFrameXForwardZup",
+					"Materials": [
+						{
+							"Name": "WorldGridMaterial",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "DoorFrameXForwardZup2",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-0.99999999999999911,
+				-2.9621258901609127e-08,
+				0,
+				0,
+				2.9621258901609127e-08,
+				-0.99999999999999911,
+				-0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				600,
+				-300,
+				100,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "DoorFrameXForwardZup",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/DoorFrameXForwardZup.DoorFrameXForwardZup",
+					"Materials": [
+						{
+							"Name": "WorldGridMaterial",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "DoorFrameXForwardZup3",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-4.4408920985006262e-16,
+				-2.2204460492503131e-16,
+				1.0000000000000004,
+				0,
+				1.0000000000000004,
+				1.2167967300413807e-08,
+				0,
+				0,
+				-1.2167967744503017e-08,
+				1.0000000000000004,
+				-2.2204460492503131e-16,
+				0,
+				-100,
+				-1100,
+				700,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "DoorFrameXForwardZup",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/DoorFrameXForwardZup.DoorFrameXForwardZup",
+					"Materials": [
+						{
+							"Name": "WorldGridMaterial",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "DoorFrame5",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				1.2167965746101572e-08,
+				1,
+				0,
+				0,
+				-1,
+				1.2167965746101572e-08,
+				0,
+				0,
+				0,
+				-0,
+				1,
+				0,
+				900,
+				400,
+				100,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "DoorFrame",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/DoorFrame.DoorFrame",
+					"Materials": [
+						{
+							"Name": "WorldGridMaterial",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "DoorFrame6",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				1,
+				-5.2853302742683601e-09,
+				0,
+				0,
+				5.2853302742683601e-09,
+				1,
+				-0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				1600,
+				400,
+				100,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "DoorFrame",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/DoorFrame.DoorFrame",
+					"Materials": [
+						{
+							"Name": "WorldGridMaterial",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "DoorFrame7",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-0.99999999999999911,
+				1.2246467991473525e-16,
+				-1.2167958233190333e-08,
+				0,
+				1.2246468140488038e-16,
+				1,
+				-1.2246467991473525e-16,
+				0,
+				1.2167958233190333e-08,
+				-1.2246468140488038e-16,
+				-0.99999999999999911,
+				0,
+				2000,
+				400,
+				500,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "DoorFrame",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/DoorFrame.DoorFrame",
+					"Materials": [
+						{
+							"Name": "WorldGridMaterial",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "SM_Test_Ground_8u_AppliedScale29",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				1,
+				0,
+				0,
+				0,
+				0,
+				1.7453292366909068e-08,
+				-1,
+				0,
+				-0,
+				1,
+				1.7453292366909068e-08,
+				0,
+				800,
+				-1200,
+				400,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "SM_Test_Ground_8u_AppliedScale",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
+					"Materials": [
+						{
+							"Name": "M_Blue",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "SM_Test_Ground_8u_AppliedScale11",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				1.2167967411436109e-08,
+				-1,
+				5.5511151231257827e-17,
+				0,
+				1.7453294420821663e-08,
+				1.1102230246251565e-16,
+				-0.99999999999999989,
+				0,
+				0.99999999999999978,
+				1.2167967411436109e-08,
+				1.7453294365310512e-08,
+				0,
+				-500,
+				-800,
+				400,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "SM_Test_Ground_8u_AppliedScale",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
+					"Materials": [
+						{
+							"Name": "M_Blue",
 							"Parameters": []
 						}
 					]
