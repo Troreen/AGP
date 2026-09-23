@@ -47,11 +47,12 @@ namespace
 	}
 }
 
-// Platform and graphics details stay here. The gameplay path is the loop in Run.
+// Per-Run owner of platform state and the moved scene source. The game and any
+// references captured by the source remain caller-owned. RunMainLoop shows frame order.
 class GameApplication::Impl
 {
 public:
-	Impl(IGame& game, const Config& config, SceneSource source) : myGame(game), myConfig(config), mySource(std::move(source))
+	Impl(IGame& game, const Config& config, SceneSource source) : myGame(game), myConfig(config), mySceneSource(std::move(source))
 	{
 	}
 
@@ -66,15 +67,26 @@ public:
 	int Run();
 
 private:
+	GraphicsEngine& InitializeWindowAndGraphics();
+	void InitializeServices();
+	void InitializeInputAndHostControls();
+	void StartGameSession();
+	void RunMainLoop(GraphicsEngine& graphics);
+	void PumpWindowMessages();
+	// False skips a zero-sized frame; true permits rendering, with or without a resize.
+	bool PrepareRenderTargetSize(GraphicsEngine& graphics);
+	void RenderFrame(GraphicsEngine& graphics);
 	void LoadPendingScene();
 	void ShutdownServices();
 	InputDeviceFrame CaptureInputFrame();
+	// Uses the focus/button sample already populated by CaptureInputFrame.
+	void CaptureMouseLookDeltaAndRecenterCursor(InputDeviceFrame& frame);
 	void UpdateRenderPassTitle();
 	void ShowRenderPassNotification();
 	void LogRuntimeStats() const;
 	IGame& myGame;
 	Config myConfig;
-	SceneSource mySource;
+	SceneSource mySceneSource;
 	GameContext myContext;
 	ComponentRegistry myRegistry;
 	HWND myMainWindowHandle = nullptr;
@@ -86,12 +98,46 @@ private:
 	std::shared_ptr<TextWidget> myRenderPassNotificationWidget;
 	FontHandle myRenderFont;
 	RenderPassNotificationTimer myRenderPassNotification;
-	bool myHasMainThreadMouseLookAnchor = false;
-	bool myStarted = false;
+	bool myHasMouseLookAnchor = false;
+	bool myInitialWorldStarted = false;
 	DebugCameraService myDebugCamera;
 };
 
 int GameApplication::Impl::Run()
+{
+	GraphicsEngine& graphics = InitializeWindowAndGraphics();
+	try
+	{
+		InitializeServices();
+		InitializeInputAndHostControls();
+		StartGameSession();
+		RunMainLoop(graphics);
+	}
+	catch (...)
+	{
+		myContext.myAcceptSceneRequests = false;
+		// Only Shutdown failures are caught here; later cleanup failures still escape.
+		try
+		{
+			myGame.Shutdown(myContext);
+		}
+		catch (...)
+		{
+			LOG(LogGameFramework, Error, "Shutdown failed during exception cleanup");
+		}
+		myContext.GetWorld().Clear();
+		ShutdownServices();
+		throw;
+	}
+	// Normal Shutdown stays outside the catch: a failure skips explicit cleanup.
+	myContext.myAcceptSceneRequests = false;
+	myGame.Shutdown(myContext);
+	myContext.GetWorld().Clear();
+	ShutdownServices();
+	return 0;
+}
+
+GraphicsEngine& GameApplication::Impl::InitializeWindowAndGraphics()
 {
 	const wchar_t* className = L"AGPGameWindow";
 	WNDCLASSW windowClass = {};
@@ -112,199 +158,231 @@ int GameApplication::Impl::Run()
 		throw std::runtime_error("Could not create game window");
 	}
 	myContext.myContentRoot = std::filesystem::canonical(myConfig.ContentRoot);
-	
+
 	GraphicsEngine& graphics = GraphicsEngine::Get();
 	if (!graphics.Initialize(myMainWindowHandle, myContext.myContentRoot / "Shaders") ||
 	    !graphics.CreateCommandList("Game Scene", myCommandList))
 	{
 		throw std::runtime_error("Could not initialize game graphics");
 	}
-	
+
 	myContext.myClientSize = graphics.GetClientSize();
-	try
+	return graphics;
+}
+
+void GameApplication::Impl::InitializeServices()
+{
+	AssetRegistry& assets = AssetRegistry::Get();
+	assets.Initialize(myContext.myContentRoot);
+	if (!assets.IsInitialized())
 	{
-		AssetRegistry& assets = AssetRegistry::Get();
-		assets.Initialize(myContext.myContentRoot);
-		if (!assets.IsInitialized())
-		{
-			throw std::runtime_error(assets.GetLastError());
-		}
-		if (myConfig.EnableRenderDiagnostics)
-		{
-			const FontHandle font = assets.ResolveFont(AssetId{"Fonts/CascadiaCode.font.json"});
-			if (font)
-			{
-				myRenderFont = font;
-				myRenderPassNotificationWidget = std::make_shared<TextWidget>();
-				myRenderPassNotificationWidget->SetFont(GameApplication::GetFontResource(font));
-				myRenderPassNotificationWidget->SetPosition({16.0f, 16.0f});
-				myRenderPassNotificationWidget->SetPixelHeight(24.0f);
-				myRenderPassNotificationWidget->SetColor(CU::Vector4f::One);
-			}
-			else
-			{
-				LOG(LogGameFramework, Error, "Render-pass overlay disabled: {}", assets.GetLastError());
-			}
-		}
-		AudioManager* audio = AudioManager::GetInstance();
-		audio->Init();
+		throw std::runtime_error(assets.GetLastError());
+	}
 
-		ServiceLocator::GetInstance().ProvideInput(myContext.myInput);
-		ServiceLocator::GetInstance().ProvideAudio(*audio);
-		ServiceLocator::GetInstance().ProvideAssets(assets);
-
-		myInputHandler.SetWindowHandle(myMainWindowHandle);
-		myInputHandler.SetAutoMouseCapture(false);
-		InstallDefaultInputBindings(myContext.myInput);
-		myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(InputActions::ToggleTonemapping, [](const InputActionEvent& event)
+	// Optional diagnostics overlay; a missing font does not prevent startup.
+	if (myConfig.EnableRenderDiagnostics)
+	{
+		const FontHandle font = assets.ResolveFont(AssetId{"Fonts/CascadiaCode.font.json"});
+		if (font)
 		{
-			if (event.Phase == InputActionPhase::Started) GraphicsEngine::Get().ToggleTonemapping();
-		}));
-
-		for (const auto [action, tonemapper] : {
-			std::pair{&InputActions::SelectACES, Tonemapper::ACES},
-			std::pair{&InputActions::SelectLottes, Tonemapper::Lottes},
-			std::pair{&InputActions::SelectUnrealTonemapper, Tonemapper::UnrealEngine}})
-		{
-			myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(*action, [tonemapper](const InputActionEvent& event)
-			{
-				if (event.Phase == InputActionPhase::Started) 
-				{
-					GraphicsEngine::Get().SetTonemapper(tonemapper);
-				}
-			}));
-		}
-		myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(InputActions::DebugCamera, [this](const InputActionEvent& event)
-		{
-			if (event.Phase == InputActionPhase::Started) 
-			{
-				myDebugCamera.Toggle(myContext.GetWorld(), myContext.myClientSize);
-			}
-		}));
-		
-		if (myConfig.EnableRenderDiagnostics)
-		{
-			myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(InputActions::PreviousRenderPass, [this](const InputActionEvent& event)
-			{
-				if (event.Phase == InputActionPhase::Started) 
-				{ 
-					GraphicsEngine::Get().SelectPreviousRenderPass(); UpdateRenderPassTitle(); ShowRenderPassNotification(); 
-				}
-			}));
-			myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(InputActions::NextRenderPass, [this](const InputActionEvent& event)
-			{
-				if (event.Phase == InputActionPhase::Started) 
-				{ 
-					GraphicsEngine::Get().SelectNextRenderPass(); UpdateRenderPassTitle(); ShowRenderPassNotification(); 
-				}
-			}));
-			myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(InputActions::PrintDiagnostics, [this](const InputActionEvent& event)
-			{
-				if (event.Phase == InputActionPhase::Started) 
-				{
-					LogRuntimeStats();
-				}
-			}));
-		}
-		myGame.Initialize(myContext);
-		if (myContext.myPendingScene)
-		{
-			LoadPendingScene();
+			myRenderFont = font;
+			myRenderPassNotificationWidget = std::make_shared<TextWidget>();
+			myRenderPassNotificationWidget->SetFont(GameApplication::GetFontResource(font));
+			myRenderPassNotificationWidget->SetPosition({16.0f, 16.0f});
+			myRenderPassNotificationWidget->SetPixelHeight(24.0f);
+			myRenderPassNotificationWidget->SetColor(CU::Vector4f::One);
 		}
 		else
 		{
-			myContext.GetWorld().BeginPlay();
+			LOG(LogGameFramework, Error, "Render-pass overlay disabled: {}", assets.GetLastError());
 		}
-		myStarted = true;
-		if (myConfig.ShowWindow)
-		{
-			ShowWindow(myMainWindowHandle, SW_SHOW);
-			SetForegroundWindow(myMainWindowHandle);
-		}
-		if (myConfig.EnableRenderDiagnostics)
-		{
-			UpdateRenderPassTitle();
-		}
-		CommonUtilities::Timer timer;
-		timer.Update();
-		while (!myContext.myQuitRequested)
-		{
-			MSG message = {};
-			while (PeekMessageW(&message, nullptr, 0, 0, PM_REMOVE))
-			{
-				if (message.message == WM_QUIT)
-				{
-					myContext.RequestQuit();
-				}
-				myInputHandler.UpdateEvents(message.message, message.wParam, message.lParam);
-				TranslateMessage(&message);
-				DispatchMessageW(&message);
-			}
-			if (myContext.myQuitRequested)
-			{
-				break;
-			}
-			if (myContext.myPendingScene)
-			{
-				LoadPendingScene();
-				// Loading time does not become a large movement delta.
-				timer.Update();
-			}
-		
-			const CU::Vector2u clientSize = graphics.GetClientSize();
-			if (clientSize.x == 0 || clientSize.y == 0) continue;
-			if (clientSize.x != myContext.myClientSize.x || clientSize.y != myContext.myClientSize.y)
-			{
-				myCommandList.ResetCommandList();
-				if (!graphics.Resize(clientSize.x, clientSize.y)) throw std::runtime_error("Failed to resize rendering targets");
-				myContext.myClientSize = clientSize;
-			}
-		
-			timer.Update();
-			myInputHandler.UpdateInput();
-			const float elapsed = timer.GetDeltaTime();
-			const float delta = CU::IsFinite(elapsed) ? CU::Clamp(elapsed, 0.0f, MaxFrameDeltaSeconds) : 0.0f;
-			myRenderPassNotification.Update(delta);
-			myContext.myInput.Update(CaptureInputFrame());
+	}
 
-			myGame.Update(myContext, delta);
-			myContext.GetWorld().Update(delta);
-			ServiceLocator::GetInstance().GetAudioManager().Update(delta);
-			WorldRenderer::Build(myContext.GetWorld(), graphics, mySnapshot);
-			if (myRenderPassNotificationWidget && myRenderPassNotification.IsVisible())
-			{
-				myRenderPassNotificationWidget->SetOpacity(myRenderPassNotification.GetOpacity());
-				mySnapshot.ScreenTextItems.push_back(myRenderPassNotificationWidget);
-			}
-			myCommandList.ResetCommandList();
-			graphics.RenderSnapshot(myCommandList, mySnapshot);
-			if (myCommandList.FinishCommandList())
-			{
-				graphics.ExecuteCommandList(myCommandList);
-				graphics.Present();
-			}
-		}
-	}
-	catch (...)
+	AudioManager* audio = AudioManager::GetInstance();
+	audio->Init();
+
+	ServiceLocator::GetInstance().ProvideInput(myContext.myInput);
+	ServiceLocator::GetInstance().ProvideAudio(*audio);
+	ServiceLocator::GetInstance().ProvideAssets(assets);
+}
+
+void GameApplication::Impl::InitializeInputAndHostControls()
+{
+	myInputHandler.SetWindowHandle(myMainWindowHandle);
+	myInputHandler.SetAutoMouseCapture(false);
+	InstallDefaultInputBindings(myContext.myInput);
+	myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(InputActions::ToggleTonemapping, [](const InputActionEvent& event)
 	{
-		myContext.myAcceptSceneRequests = false;
-		try
+		if (event.Phase == InputActionPhase::Started)
 		{
-			myGame.Shutdown(myContext);
+			GraphicsEngine::Get().ToggleTonemapping();
 		}
-		catch (...)
+	}));
+
+	for (const auto [action, tonemapper] : {
+		std::pair{&InputActions::SelectACES, Tonemapper::ACES},
+		std::pair{&InputActions::SelectLottes, Tonemapper::Lottes},
+		std::pair{&InputActions::SelectUnrealTonemapper, Tonemapper::UnrealEngine}})
+	{
+		myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(*action, [tonemapper](const InputActionEvent& event)
 		{
-			LOG(LogGameFramework, Error, "Shutdown failed during exception cleanup");
-		}
-		myContext.GetWorld().Clear();
-		ShutdownServices();
-		throw;
+			if (event.Phase == InputActionPhase::Started)
+			{
+				GraphicsEngine::Get().SetTonemapper(tonemapper);
+			}
+		}));
 	}
-	myContext.myAcceptSceneRequests = false;
-	myGame.Shutdown(myContext);
-	myContext.GetWorld().Clear();
-	ShutdownServices();
-	return 0;
+	myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(InputActions::DebugCamera, [this](const InputActionEvent& event)
+	{
+		if (event.Phase == InputActionPhase::Started)
+		{
+			myDebugCamera.Toggle(myContext.GetWorld(), myContext.myClientSize);
+		}
+	}));
+
+	if (myConfig.EnableRenderDiagnostics)
+	{
+		myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(InputActions::PreviousRenderPass, [this](const InputActionEvent& event)
+		{
+			if (event.Phase == InputActionPhase::Started)
+			{
+				GraphicsEngine::Get().SelectPreviousRenderPass();
+				UpdateRenderPassTitle();
+				ShowRenderPassNotification();
+			}
+		}));
+		myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(InputActions::NextRenderPass, [this](const InputActionEvent& event)
+		{
+			if (event.Phase == InputActionPhase::Started)
+			{
+				GraphicsEngine::Get().SelectNextRenderPass();
+				UpdateRenderPassTitle();
+				ShowRenderPassNotification();
+			}
+		}));
+		myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(InputActions::PrintDiagnostics, [this](const InputActionEvent& event)
+		{
+			if (event.Phase == InputActionPhase::Started)
+			{
+				LogRuntimeStats();
+			}
+		}));
+	}
+}
+
+void GameApplication::Impl::StartGameSession()
+{
+	myGame.Initialize(myContext);
+	if (myContext.myPendingScene)
+	{
+		LoadPendingScene();
+	}
+	else
+	{
+		myContext.GetWorld().BeginPlay();
+	}
+	myInitialWorldStarted = true;
+	if (myConfig.ShowWindow)
+	{
+		ShowWindow(myMainWindowHandle, SW_SHOW);
+		SetForegroundWindow(myMainWindowHandle);
+	}
+	if (myConfig.EnableRenderDiagnostics)
+	{
+		UpdateRenderPassTitle();
+	}
+}
+
+void GameApplication::Impl::RunMainLoop(GraphicsEngine& graphics)
+{
+	CommonUtilities::Timer timer;
+	timer.Update();
+	while (!myContext.myQuitRequested)
+	{
+		PumpWindowMessages();
+		if (myContext.myQuitRequested)
+		{
+			break;
+		}
+		if (myContext.myPendingScene)
+		{
+			LoadPendingScene();
+			// Loading time does not become a large movement delta.
+			timer.Update();
+		}
+
+		if (!PrepareRenderTargetSize(graphics))
+		{
+			continue;
+		}
+
+		timer.Update();
+		myInputHandler.UpdateInput();
+		const float elapsed = timer.GetDeltaTime();
+		float delta = 0.0f;
+		if (CU::IsFinite(elapsed))
+		{
+			delta = CU::Clamp(elapsed, 0.0f, MaxFrameDeltaSeconds);
+		}
+		myRenderPassNotification.Update(delta);
+		myContext.myInput.Update(CaptureInputFrame());
+
+		myGame.Update(myContext, delta);
+		myContext.GetWorld().Update(delta);
+		ServiceLocator::GetInstance().GetAudioManager().Update(delta);
+		RenderFrame(graphics);
+	}
+}
+
+void GameApplication::Impl::PumpWindowMessages()
+{
+	MSG message = {};
+	while (PeekMessageW(&message, nullptr, 0, 0, PM_REMOVE))
+	{
+		if (message.message == WM_QUIT)
+		{
+			myContext.RequestQuit();
+		}
+		myInputHandler.UpdateEvents(message.message, message.wParam, message.lParam);
+		TranslateMessage(&message);
+		DispatchMessageW(&message);
+	}
+}
+
+bool GameApplication::Impl::PrepareRenderTargetSize(GraphicsEngine& graphics)
+{
+	const CU::Vector2u clientSize = graphics.GetClientSize();
+	if (clientSize.x == 0 || clientSize.y == 0)
+	{
+		return false;
+	}
+	if (clientSize.x != myContext.myClientSize.x || clientSize.y != myContext.myClientSize.y)
+	{
+		myCommandList.ResetCommandList();
+		if (!graphics.Resize(clientSize.x, clientSize.y))
+		{
+			throw std::runtime_error("Failed to resize rendering targets");
+		}
+		myContext.myClientSize = clientSize;
+	}
+	return true;
+}
+
+void GameApplication::Impl::RenderFrame(GraphicsEngine& graphics)
+{
+	WorldRenderer::Build(myContext.GetWorld(), graphics, mySnapshot);
+	if (myRenderPassNotificationWidget && myRenderPassNotification.IsVisible())
+	{
+		myRenderPassNotificationWidget->SetOpacity(myRenderPassNotification.GetOpacity());
+		mySnapshot.ScreenTextItems.push_back(myRenderPassNotificationWidget);
+	}
+	myCommandList.ResetCommandList();
+	graphics.RenderSnapshot(myCommandList, mySnapshot);
+	if (myCommandList.FinishCommandList())
+	{
+		graphics.ExecuteCommandList(myCommandList);
+		graphics.Present();
+	}
 }
 
 void GameApplication::Impl::ShutdownServices()
@@ -316,19 +394,21 @@ void GameApplication::Impl::ShutdownServices()
 
 void GameApplication::Impl::LoadPendingScene()
 {
-	const std::string& name = GetSceneName(*myContext.myPendingScene);
-	std::unique_ptr<World> world;
+	const std::string sceneName = GetSceneName(*myContext.myPendingScene);
+	std::unique_ptr<World> candidateWorld;
+
+	// Only candidate construction/configuration is recoverable; the live world stays in place.
 	try
 	{
-		if (!mySource)
+		if (!mySceneSource)
 		{
 			throw std::runtime_error("No scene source installed");
 		}
 		AssetRegistry& assets = AssetRegistry::Get();
-		SceneLoadContext context{myContext.myContentRoot, myContext.myClientSize, assets};
-		const SceneData scene = mySource(*myContext.myPendingScene, context);
-		world = myRegistry.CreateWorld(scene, assets, &myContext.myInput, myContext.myClientSize);
-		myGame.ConfigureWorld(*world);
+		SceneLoadContext loadContext{myContext.myContentRoot, myContext.myClientSize, assets};
+		const SceneData scene = mySceneSource(*myContext.myPendingScene, loadContext);
+		candidateWorld = myRegistry.CreateWorld(scene, assets, &myContext.myInput, myContext.myClientSize);
+		myGame.ConfigureWorld(*candidateWorld);
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -336,26 +416,33 @@ void GameApplication::Impl::LoadPendingScene()
 	}
 	catch (const std::exception& error)
 	{
-		LOG(LogGameFramework, Error, "Scene '{}': {}", name, error.what());
-		myGame.OnSceneLoadFailed(myContext, name, error.what());
-		if (!myStarted)
+		LOG(LogGameFramework, Error, "Scene '{}': {}", sceneName, error.what());
+		myGame.OnSceneLoadFailed(myContext, sceneName, error.what());
+		// Initial startup must succeed; later failures retain the live world and request.
+		if (!myInitialWorldStarted)
 		{
 			throw;
 		}
-		return; // Failed construction leaves the current scene intact.
+		return; // The retained request is retried at a later frame boundary.
 	}
+
+	// Replacement and activation failures escape to Run's exception cleanup.
 	myContext.myAcceptSceneRequests = false;
 	myContext.myWorld->Clear();
-	myContext.myWorld = std::move(world);
-	myContext.mySceneName = *myContext.myPendingScene;
+	myContext.myWorld = std::move(candidateWorld);
+	// Construction callbacks may have overwritten the pending slot.
+	myContext.myCurrentSceneType = *myContext.myPendingScene;
 	myContext.myInput.Reset();
-	myHasMainThreadMouseLookAnchor = false;
+	myHasMouseLookAnchor = false;
 	myDebugCamera.Reset();
 	myContext.myAcceptSceneRequests = true;
 	if (!myContext.GetWorld().GetActiveCamera())
+	{
 		myContext.GetWorld().SetActiveCamera(myDebugCamera.Ensure(myContext.GetWorld(), myContext.myClientSize));
+	}
 	myContext.GetWorld().BeginPlay();
-	myGame.OnSceneLoaded(myContext, name);
+	myGame.OnSceneLoaded(myContext, sceneName);
+	// This also discards requests made by BeginPlay or OnSceneLoaded above.
 	myContext.myPendingScene.reset();
 }
 
@@ -380,34 +467,7 @@ InputDeviceFrame GameApplication::Impl::CaptureInputFrame()
 		inputFrame.KeysDown[static_cast<size_t>(keyCode)] = isFocused && (myInputHandler.IsKeyDown(keyCode));
 	}
 
-	const bool rightMouseDown = inputFrame.KeysDown[static_cast<size_t>(EKeyCode::MOUSERBUTTON)];
-	if (myConfig.EnableMouseLook && isFocused && rightMouseDown)
-	{
-		RECT clientRect = {};
-		if (GetClientRect(myMainWindowHandle, &clientRect) != 0)
-		{
-			const POINT centerPoint = {(clientRect.right - clientRect.left) / 2, (clientRect.bottom - clientRect.top) / 2};
-
-			if (myHasMainThreadMouseLookAnchor)
-			{
-				POINT mousePosScreen = {};
-				GetCursorPos(&mousePosScreen);
-				POINT mousePosClient = mousePosScreen;
-				ScreenToClient(myMainWindowHandle, &mousePosClient);
-				inputFrame.MouseDelta.x = static_cast<float>(mousePosClient.x - centerPoint.x);
-				inputFrame.MouseDelta.y = static_cast<float>(mousePosClient.y - centerPoint.y);
-			}
-
-			POINT centerPointScreen = centerPoint;
-			ClientToScreen(myMainWindowHandle, &centerPointScreen);
-			SetCursorPos(centerPointScreen.x, centerPointScreen.y);
-			myHasMainThreadMouseLookAnchor = true;
-		}
-	}
-	else
-	{
-		myHasMainThreadMouseLookAnchor = false;
-	}
+	CaptureMouseLookDeltaAndRecenterCursor(inputFrame);
 	if (myXInputHandler.UpdateInput())
 	{
 		for (const EGamepadCode button : GamepadButtons)
@@ -424,6 +484,38 @@ InputDeviceFrame GameApplication::Impl::CaptureInputFrame()
 	return inputFrame;
 }
 
+void GameApplication::Impl::CaptureMouseLookDeltaAndRecenterCursor(InputDeviceFrame& frame)
+{
+	const bool rightMouseDown = frame.KeysDown[static_cast<size_t>(EKeyCode::MOUSERBUTTON)];
+	if (myConfig.EnableMouseLook && frame.Focused && rightMouseDown)
+	{
+		RECT clientRect = {};
+		if (GetClientRect(myMainWindowHandle, &clientRect) != 0)
+		{
+			const POINT centerPoint = {(clientRect.right - clientRect.left) / 2, (clientRect.bottom - clientRect.top) / 2};
+
+			if (myHasMouseLookAnchor)
+			{
+				POINT mousePosScreen = {};
+				GetCursorPos(&mousePosScreen);
+				POINT mousePosClient = mousePosScreen;
+				ScreenToClient(myMainWindowHandle, &mousePosClient);
+				frame.MouseDelta.x = static_cast<float>(mousePosClient.x - centerPoint.x);
+				frame.MouseDelta.y = static_cast<float>(mousePosClient.y - centerPoint.y);
+			}
+
+			POINT centerPointScreen = centerPoint;
+			ClientToScreen(myMainWindowHandle, &centerPointScreen);
+			SetCursorPos(centerPointScreen.x, centerPointScreen.y);
+			myHasMouseLookAnchor = true;
+		}
+	}
+	else
+	{
+		myHasMouseLookAnchor = false;
+	}
+}
+
 void GameApplication::Impl::UpdateRenderPassTitle()
 {
 	const char* passName = GraphicsEngine::Get().GetRenderPassName();
@@ -434,7 +526,10 @@ void GameApplication::Impl::UpdateRenderPassTitle()
 
 void GameApplication::Impl::ShowRenderPassNotification()
 {
-	if (!myRenderPassNotificationWidget) return;
+	if (!myRenderPassNotificationWidget)
+	{
+		return;
+	}
 	myRenderPassNotificationWidget->SetText(std::string("Render Pass: ") + GraphicsEngine::Get().GetRenderPassName());
 	myRenderPassNotificationWidget->SetOpacity(1.0f);
 	myRenderPassNotification.Restart();

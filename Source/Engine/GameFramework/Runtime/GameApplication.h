@@ -10,7 +10,12 @@ class RenderPassNotificationTimer
 {
 public:
 	void Restart() { myRemaining = Duration; }
-	void Update(float delta) { myRemaining = (std::max)(0.0f, myRemaining - (std::max)(0.0f, delta)); }
+	void Update(float delta)
+	{
+		const float nonnegativeDelta = (std::max)(0.0f, delta);
+		const float remainingTime = myRemaining - nonnegativeDelta;
+		myRemaining = (std::max)(0.0f, remainingTime);
+	}
 	bool IsVisible() const { return myRemaining > 0.0f; }
 	float GetOpacity() const { return myRemaining >= FadeDuration ? 1.0f : myRemaining / FadeDuration; }
 	float GetRemaining() const { return myRemaining; }

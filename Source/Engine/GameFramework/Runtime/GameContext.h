@@ -5,7 +5,7 @@
 #include <optional>
 #include "GameFramework/Scenes/SceneData.h"
 
-// Session state passed to game callbacks. Everything runs on the application thread.
+// Owns session input and world state. Game callbacks run on the application thread.
 class GameContext
 {
 public:
@@ -23,13 +23,18 @@ public:
 		return myInput;
 	}
 
-	// Requests are applied at the next frame boundary, never in the middle of Update.
+	// True accepts a request into one last-write-wins slot; it does not load the scene.
+	// Requests are applied after Initialize or at a frame boundary, never during Update.
+	// Failed construction retains the slot for retry. Successful scene activation clears
+	// it, including requests made by that scene's BeginPlay or OnSceneLoaded callbacks.
 	bool LoadScene(const SceneType& aScene);
+	// Requires a current scene type assigned by a successful scene replacement.
 	bool ReloadScene();
 
+	// Valid after a scene replacement has assigned the current type.
 	const SceneType& GetSceneType() const
 	{
-		return mySceneName;
+		return myCurrentSceneType;
 	}
 
 	const std::filesystem::path& GetContentRoot() const
@@ -48,10 +53,11 @@ public:
 	}
 
 private:
+	// The world borrows input, so input must outlive world destruction.
 	InputSystem myInput;
 	std::unique_ptr<World> myWorld;
 	std::optional<SceneType> myPendingScene;
-	SceneType mySceneName;
+	SceneType myCurrentSceneType;
 	std::filesystem::path myContentRoot;
 	CommonUtilities::Vector2u myClientSize;
 	bool myQuitRequested = false;

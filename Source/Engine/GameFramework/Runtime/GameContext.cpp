@@ -16,5 +16,5 @@ bool GameContext::LoadScene(const SceneType& aScene)
 
 bool GameContext::ReloadScene()
 {
-	return LoadScene(mySceneName);
+	return LoadScene(myCurrentSceneType);
 }
