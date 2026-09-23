@@ -18,8 +18,10 @@ C++20 / DirectX 11 graphics programming project for the AGP assignments. The cur
 
 ## Repository Layout
 
-Start with the [plain-language engine architecture](Docs/EngineArchitectureBasics.md)
-for gameplay, scenes, assets, and the path to `BeginPlay`. The more detailed
+Start with the [game loop and gameplay guide](Docs/GameLoopOnboarding.md)
+for frame order and examples of adding game behavior. The
+[plain-language engine architecture](Docs/EngineArchitectureBasics.md)
+covers gameplay, scenes, assets, and the path to `BeginPlay`. The more detailed
 [engine map](Docs/Architecture.md) covers renderer flow, threading, snapshots, and
 code formatting conventions.
 
@@ -36,17 +38,19 @@ code formatting conventions.
 
 Open `AGP.sln` in Visual Studio and build the `Debug | x64` configuration.
 
-Game resolves `Assets` from the executable location; it does not depend on
+Game resolves `Content` from the executable location; it does not depend on
 its working directory. Run `Bin/Debug/Game.exe` or
 `Bin/Release/Game.exe`. The debug build opens a log console.
 
-The sample installs its scene source in Main.cpp. Game requests the scene by
-name and registers only its gameplay behaviors. GameScene.cpp imports
-`Content/ExportedScenes/lvl_blockout/Lvl_Blockout_Level.json`, resolves the
-available Content meshes, and hands the result to the engine for construction.
+`Main.cpp` constructs the concrete `Game` and `GameApplication`, then calls
+`application.Run(game)`. Game selects the initial scene and registers its gameplay
+controls. `GameApplication` owns the window, frame loop, current World, and scene
+requests. It selects an exported scene file, asks `UnrealSceneImporter` for
+`SceneData`, then passes that data to `BuildWorldFromSceneData`.
 Start with [the MVP guide](Docs/GameFrameworkMVP.md), then Game.cpp and
 the component files in `Source/Application/Game`. Real Perforce scene integration requires the team inputs
 listed in [the importer handoff](Docs/ImporterHandoff.md).
+
 ## Controls
 
 ### Camera
@@ -67,6 +71,7 @@ is limited to ±89°. Actor hierarchies are deferred in the MVP.
 
 | Control | Action |
 | --- | --- |
+| `Escape` | Quit the game |
 | `F1` | Toggle debug camera |
 | `F4` | Reload the current scene |
 | `F5` | Select the previous renderer debug view |

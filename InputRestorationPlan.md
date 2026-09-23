@@ -28,10 +28,10 @@ Before source edits: AGP solution built successfully. Framework tests built but 
 After migration:
 
 - `AGP.sln` final Debug build passed (engine libraries and Game).
-- GameFrameworkTests, GameRuntimeTests, and PublicGameplayConsumer Debug builds passed; runtime test scene calls were migrated to the existing SceneType API.
+- GameFrameworkTests, GameApplicationTests, and PublicGameplayConsumer Debug builds passed; runtime test scene calls were migrated to the existing SceneType API.
 - Public header isolation passed for all 17 gameplay headers.
 - `GameFrameworkTests.exe --input-only` passed: native press/hold/release, mouse deltas/config gate, focus loss, explicit removal, repeated world cleanup, debug camera, mapper replacement, borrowed assets and idempotent service cleanup.
-- `GameRuntimeTests.exe camera-controls` and `render-pass-controls` passed: camera yaw/pitch/clamping, light Shift/alternate-key behavior, frame-time spinning and listener destruction, F5/F6.
+- `GameApplicationTests.exe camera-controls` and `render-pass-controls` passed: camera yaw/pitch/clamping, light Shift/alternate-key behavior, frame-time spinning and listener destruction, F5/F6.
 - Graphics scenarios `sample`, `chest-materials`, `text-overlay`, `invalid-initial`, `initialize-failure`, `begin-failure`, `component-failure`, `update-failure`, and `shutdown-failure` passed with clean D3D debug queues. The sample covers rejected candidates, successful reload and an empty world. Shutdown checks assert mapper null and audio/assets unavailable.
 - Both InputMapper files compare byte-for-byte equal to the historical Git blobs. Source and test searches contain no replacement input API identifiers; only InputMapper calls device UpdateInput in production.
 - Independent review checked service ownership, dispatch mutation, focus delivery and mouse configuration; its findings were fixed.
@@ -44,4 +44,4 @@ Interactive verification was attempted with the computer-use skill but stopped b
 
 Removed animation/light input components, tonemapper controls, R spin toggling, P diagnostics, and Escape quitting. Camera controls and F1/F4/F5/F6/F7/F8 remain; close the window to quit. Earlier light/spin-toggle validation above describes the initial migration, before this simplification.
 
-Follow-up validation: Debug AGP solution, GameRuntimeTests and PublicGameplayConsumer builds passed. Camera/automatic-spin and F5/F6 regression tests passed.
+Follow-up validation: Debug AGP solution, GameApplicationTests and PublicGameplayConsumer builds passed. Camera/automatic-spin and F5/F6 regression tests passed.

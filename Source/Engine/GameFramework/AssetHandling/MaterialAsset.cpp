@@ -137,6 +137,16 @@ bool MaterialAsset::CreateMaterial(const std::filesystem::path& aPath, const sim
         description.MaterialShaderCode = !JSON_EXISTS(shaderCode) ? "" : ResolveRelativePath(basePath, shaderCode);
     }
 
+    for (const std::filesystem::path& texturePath :
+         {description.AlbedoTexture, description.NormalTexture, description.MaterialTexture})
+    {
+        if (!texturePath.empty() && !std::filesystem::exists(texturePath))
+        {
+            LOG(MaterialAssetLog, Warning, "Material '{}' is missing texture '{}'.", description.Name, texturePath.string());
+            return false;
+        }
+    }
+
     std::unique_ptr<Material> material = std::make_unique<Material>();
     if (!GraphicsEngine::Get().CreateMaterial(description, *material))
     {

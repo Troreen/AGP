@@ -1,4 +1,6 @@
 #include "GameFramework/Rendering/WorldRenderer.h"
+#include "GameFramework/AssetHandling/MaterialAsset.h"
+#include "GameFramework/AssetHandling/MeshAsset.h"
 #include "GameFramework/World/World.h"
 #include "GameFramework/Components/CameraComponent.h"
 #include "GameFramework/Components/LightComponent.h"
@@ -10,6 +12,7 @@ void WorldRenderer::Build(const World& world, GraphicsEngine& graphics, Graphics
 	const auto start = std::chrono::steady_clock::now();
 	snapshot.Clear();
 	CameraComponent* camera = world.GetActiveCamera();
+
 	if (!camera || !camera->HasBegunPlay() || !camera->IsEnabled() || !camera->GetOwner()->IsActive())
 	{
 		return;
@@ -17,6 +20,7 @@ void WorldRenderer::Build(const World& world, GraphicsEngine& graphics, Graphics
 	camera->SyncCameraToOwner();
 	snapshot.Camera = camera->myCamera;
 	snapshot.HasCamera = true;
+	
 	for (const std::unique_ptr<Actor>& actor : world.myActors)
 	{
 		if (!actor->IsActive())
@@ -29,6 +33,7 @@ void WorldRenderer::Build(const World& world, GraphicsEngine& graphics, Graphics
 			{
 				continue;
 			}
+
 			if (const LightComponent* light = dynamic_cast<LightComponent*>(component.get()))
 			{
 				GraphicsEngine::LightSnapshot item;
@@ -42,6 +47,7 @@ void WorldRenderer::Build(const World& world, GraphicsEngine& graphics, Graphics
 				item.Radius = light->GetRadius();
 				snapshot.RelevantLights.push_back(item);
 			}
+			
 			const MeshComponentBase* mesh = dynamic_cast<MeshComponentBase*>(component.get());
 			if (mesh && mesh->IsVisible() && mesh->myMesh)
 			{
@@ -54,8 +60,10 @@ void WorldRenderer::Build(const World& world, GraphicsEngine& graphics, Graphics
 						item.Materials.emplace_back(mesh->myMaterials[i]->GetMaterial());
 					}
 				}
+				
 				item.World = mesh->GetWorldMatrix();
 				item.HasSkinning = mesh->HasSkinning();
+
 				if (const std::array<CU::Matrix4f, 128>* jointTransforms = mesh->GetJointTransforms())
 				{
 					item.JointTransforms = *jointTransforms;

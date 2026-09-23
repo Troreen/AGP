@@ -1,5 +1,7 @@
 #include "GameFramework/Components/MeshComponentBase.h"
 
+#include "GameFramework/AssetHandling/MaterialAsset.h"
+#include "GameFramework/AssetHandling/MeshAsset.h"
 #include "GraphicsEngine/Objects/Mesh.h"
 
 #include <utility>
@@ -63,7 +65,7 @@ bool MeshComponentBase::HasSkinning() const
 	return false;
 }
 
-const std::array<CU::Matrix4f, 128>* MeshComponentBase::GetJointTransforms() const
+const std::array<CommonUtilities::Matrix4f, 128>* MeshComponentBase::GetJointTransforms() const
 {
 	return nullptr;
 }

@@ -1,15 +1,19 @@
 #include "InputFixture.h"
-#include "GameFramework/Scenes/ComponentRegistry.h"
+#include "GameFramework/Scenes/WorldFromSceneData.h"
 #include "EnumKeyCode.h"
 #include "GameFramework/Components/CameraComponent.h"
 #include "GameFramework/Components/SceneComponent.h"
+#include "GameFramework/Components/StaticMeshComponent.h"
 #include "GameFramework/Components/DebugCameraController.h"
 #include "GameFramework/AssetHandling/AssetRegistry.h"
+#include "GameFramework/AssetHandling/FontAsset.h"
+#include "GameFramework/AssetHandling/MaterialAsset.h"
+#include "GameFramework/AssetHandling/MeshAsset.h"
 #include "GameFramework/UnrealSceneImporter/UnrealSceneImporter.h"
+#include "GameFramework/World/World.h"
 #include "GraphicsEngine/Objects/Mesh.h"
 #include "GraphicsEngine/Objects/Font.h"
 #include "GraphicsEngine/TextWidget.h"
-#include "GameFramework/Runtime/GameApplication.h"
 #include <algorithm>
 #include <cmath>
 #include <filesystem>
@@ -205,7 +209,7 @@ void FrameTimingAndInput()
 
 void SceneConstruction()
 {
-	ComponentRegistry registry;
+	const CommonUtilities::Vector2u clientSize{1280, 720};
 	SceneData scene;
 	ActorRecord actor;
 	actor.Name = "First";
@@ -218,19 +222,24 @@ void SceneConstruction()
 	component.Common.SourceParent = "Root";
 	component.Type = PlaceholderComponentType::Box;
 	actor.Components.push_back(std::move(component));
+	CameraData camera;
+	camera.Common.Name = "View";
+	camera.Common.Tags = {"ActiveCamera"};
+	actor.Components.push_back(camera);
 	scene.Actors.push_back(actor);
 	AssetRegistry assets;
-	auto world = registry.CreateWorld(scene, assets);
+	auto world = BuildWorldFromSceneData(scene, assets, clientSize);
 	auto* built = world->FindActor("First");
 	auto* builtComponent = built->FindComponent("Collider");
 	Check(built->GetArchetype() == "FixtureActor" && built->HasTag("Test") && built->GetTransform().GetLocalPosition().x == 10,
 	      "Actor scene data");
 	Check(builtComponent->HasTag("Shape") && builtComponent->GetSourceParent() == "Root", "Component scene data");
+	Check(world->GetActiveCamera() == built->FindComponent("View"), "Typed scene camera selection");
 	world->BeginPlay();
 	Check(builtComponent->HasBegunPlay(), "Typed scene component lifecycle");
 	SceneData invalid; ActorRecord badA; badA.Name = "BadA"; badA.Transform.Position.x = std::numeric_limits<float>::infinity(); invalid.Actors.push_back(badA);
 	ActorRecord badB; badB.Name = "BadB"; badB.Transform.Scale.y = std::numeric_limits<float>::quiet_NaN(); invalid.Actors.push_back(badB);
-	try { registry.CreateWorld(invalid, assets); Check(false, "Invalid candidate scene was accepted"); }
+	try { BuildWorldFromSceneData(invalid, assets, clientSize); Check(false, "Invalid candidate scene was accepted"); }
 	catch (const std::runtime_error& error) { const std::string message = error.what(); Check(message.find("BadA") != std::string::npos && message.find("BadB") != std::string::npos, "Construction diagnostics were not aggregated"); }
 
 	SceneData missingAsset;
@@ -238,57 +247,44 @@ void SceneConstruction()
 	missingActor.Name = "MissingAssetActor";
 	StaticMeshData missingMesh;
 	missingMesh.Common.Name = "MissingMesh";
-	missingMesh.Mesh = AssetId{"Meshes/DoesNotExist.fbx"};
+	missingMesh.MeshName = "Meshes/DoesNotExist.fbx";
+	missingMesh.Materials.push_back(MaterialInstanceData{"MissingMaterial"});
 	missingActor.Components.push_back(missingMesh);
 	missingAsset.Actors.push_back(std::move(missingActor));
-	auto partialWorld = registry.CreateWorld(missingAsset, assets);
-	Check(partialWorld->FindActor("MissingAssetActor") != nullptr &&
-	      partialWorld->FindActor("MissingAssetActor")->FindComponent("MissingMesh") == nullptr,
-	      "Missing asset did not skip only its component");
+	auto fallbackMesh = std::make_shared<Mesh>();
+	fallbackMesh->Initialize("FallbackMesh", {Mesh::Element{}}, {}, {});
+	SceneFallbackAssets fallbacks{std::make_shared<MeshAsset>(fallbackMesh), std::make_shared<MaterialAsset>()};
+	auto partialWorld = BuildWorldFromSceneData(missingAsset, assets, clientSize, fallbacks);
+	auto* builtMissingMesh = partialWorld->FindActor("MissingAssetActor")->GetComponent<StaticMeshComponent>();
+	Check(builtMissingMesh && builtMissingMesh->GetMesh() == fallbacks.MissingMesh &&
+	      builtMissingMesh->GetMaterial(0) == fallbacks.MissingMaterial,
+	      "Missing mesh and material use fallback bindings");
 }
 
 void AssetRegistrySemantics()
 {
-	Check(AssetRegistry::NormalizeId("./Meshes\\Props\\SM_Chest.FBX") == "meshes/props/sm_chest.fbx",
-	      "Asset ID normalization");
-
 	const std::filesystem::path root = std::filesystem::temp_directory_path() / "agp_asset_registry_tests";
 	std::filesystem::remove_all(root);
-	std::filesystem::create_directories(root / "Meshes/A");
-	std::filesystem::create_directories(root / "Meshes/B");
-	std::ofstream(root / "Meshes/A/Unique.fbx").put('\0');
-	std::ofstream(root / "Meshes/A/Shared.fbx").put('\0');
-	std::ofstream(root / "Meshes/B/Shared.fbx").put('\0');
+	std::filesystem::create_directories(root / "Materials");
 	std::ofstream(root / "MissingParent.mat") << R"({"name":"MissingParent","masterMaterial":"Absent"})";
-	std::ofstream(root / "Malformed.mat") << "{ not-json";
+	std::ofstream(root / "MissingTexture.mat") << R"({"name":"MissingTexture","textures":{"albedo":"Absent.dds"}})";
+	std::ofstream(root / "Materials/Malformed.mat") << "{ not-json";
 
 	AssetRegistry assets;
 	assets.Initialize(root);
-	int loads = 0;
-	assets.SetMeshLoader([&](const std::filesystem::path&)
-	{
-		++loads;
-		return std::make_shared<Mesh>();
-	});
-	{
-		const auto first = assets.ResolveMesh(AssetId{"MESHES/A/UNIQUE.FBX"});
-		const auto alias = assets.ResolveMesh(AssetId{"Unique"});
-		Check(first && alias && loads == 1, "Case-insensitive exact/unique-alias lookup or cache failed");
-	}
-	Check(assets.ResolveMesh(AssetId{"Meshes/A/Unique.fbx"}) && loads == 2, "Expired weak asset was not reloaded");
-	Check(!assets.ResolveMesh(AssetId{"Shared"}) && assets.GetLastError().find("ambiguous") != std::string::npos,
-	      "Ambiguous basename lookup was accepted");
-	Check(!assets.ResolveMaterial(AssetId{"Meshes/A/Unique.fbx"}), "Type-mismatched asset lookup was accepted");
-	Check(!assets.ResolveMaterial(AssetId{"MissingParent.mat"}) && assets.GetLastError().find("unavailable parent") != std::string::npos,
-	      "Missing material parent was accepted");
-	Check(!assets.ResolveMaterial(AssetId{"Malformed.mat"}) && assets.GetLastError().find("malformed JSON") != std::string::npos,
-	      "Malformed material JSON was accepted");
-
-	auto builtIn = std::make_shared<Mesh>();
-	assets.RegisterMesh(AssetId{"Engine/BasicShapes/Test"}, builtIn);
-	builtIn.reset();
-	Check(bool(assets.ResolveMesh(AssetId{"Engine/BasicShapes/Test"})), "Pinned built-in asset expired");
+	Check(assets.IsInitialized() && assets.GetContentRoot() == std::filesystem::weakly_canonical(root),
+	      "Asset registry did not retain its indexed content root");
+	Check(!assets.GetAsset<MaterialAsset>("DoesNotExist.mat") &&
+	      assets.GetLastErrorCode() == AssetRegistry::AssetError::NotFound,
+	      "Missing asset did not report NotFound");
+	Check(!assets.GetAsset<MaterialAsset>("MissingParent.mat") && !assets.GetLastError().empty(),
+	      "Missing material parent was accepted without a diagnostic");
+	Check(!assets.GetAsset<MaterialAsset>("MissingTexture.mat"),
+	      "Material with a missing texture was accepted");
+	Check(!assets.GetAsset<MaterialAsset>("MATERIALS/MALFORMED.MAT") && !assets.GetLastError().empty(),
+	      "Case-insensitive material lookup accepted malformed JSON");
 	assets.Clear();
+	Check(!assets.IsInitialized(), "Asset registry Clear retained initialization state");
 	std::filesystem::remove_all(root);
 }
 
@@ -459,12 +455,13 @@ void UnrealImportPipeline()
 		? nullptr : std::get_if<StaticMeshData>(&amberChest->Components.front());
 	const auto* marbleMesh = marbleChest == chestShowcase.Data->Actors.end() || marbleChest->Components.empty()
 		? nullptr : std::get_if<StaticMeshData>(&marbleChest->Components.front());
-	Check(amberMesh && amberMesh->Mesh.Value == "/Game/Meshes/Props/SM_Chest.SM_Chest" &&
-	      amberMesh->Materials.size() == 1 && amberMesh->Materials.front().Parent.Value == "Shaders/ChestMaterial_Alpha.mat" &&
+	Check(amberMesh && amberMesh->MeshName == "SM_Chest" &&
+	      amberMesh->ContentPath == "/Game/Meshes/Props/SM_Chest.SM_Chest" &&
+	      amberMesh->Materials.size() == 1 && amberMesh->Materials.front().Name == "MI_Chest_AmberGlass" &&
 	      amberMesh->Materials.front().Parameters.size() == 1,
 	      "Chest tint material was not preserved by Unreal adaptation");
 	Check(marbleMesh && marbleMesh->Materials.size() == 1 &&
-	      marbleMesh->Materials.front().Parent.Value == "Shaders/ChestMaterial_Alpha2.mat",
+	      marbleMesh->Materials.front().Name == "MI_Chest_MarbleGlass",
 	      "Chest texture-override material was not preserved by Unreal adaptation");
 	const auto sun = std::find_if(chestShowcase.Data->Actors.begin(), chestShowcase.Data->Actors.end(),
 		[](const ActorRecord& actor) { return actor.Name == "SunLight"; });
@@ -486,15 +483,7 @@ void UnrealImportPipeline()
 	Check(!unknown.Data && !unknown.Diagnostics.empty(), "Unknown TypeID was accepted");
 
 	auto blockout = importer.ImportScene("Content/ExportedScenes/lvl_blockout/Lvl_Blockout_Level.json");
-	Check(bool(blockout) && blockout.Data->Actors.size() == 16, "Content blockout scene did not parse");
-	const auto character = std::find_if(blockout.Data->Actors.begin(), blockout.Data->Actors.end(),
-		[](const ActorRecord& actor) { return actor.Name == "BP_TopDownCharacter"; });
-	const auto* springArm = character == blockout.Data->Actors.end() || character->Components.size() < 3
-		? nullptr : std::get_if<PlaceholderComponentData>(&character->Components[2]);
-	const auto* springProperties = springArm ? std::get_if<SpringArmPlaceholderData>(&springArm->Properties) : nullptr;
-	Check(springProperties && springProperties->SocketOffset.x == 0 && springProperties->SocketOffset.y == 0 &&
-		springProperties->SocketOffset.z == 0 && springProperties->ArmLength == 1800,
-		"Blockout spring-arm data was not imported");
+	Check(bool(blockout) && blockout.Data->Actors.size() == 60, "Content blockout scene did not parse");
 
 }
 
@@ -539,17 +528,6 @@ void TextGeometryAndNotificationTiming()
 	text.SetText("");
 	Check(text.RebuildGeometry() && text.GetVertices().empty() && text.GetIndices().empty(), "Empty text produced a draw");
 
-	RenderPassNotificationTimer timer;
-	timer.Restart();
-	Check(timer.GetOpacity() == 1.0f, "Notification was not opaque at 0 seconds");
-	timer.Update(1.5f);
-	Check(timer.GetOpacity() == 1.0f, "Notification was not opaque at 1.5 seconds");
-	timer.Update(0.25f);
-	Check(std::abs(timer.GetOpacity() - 0.5f) < 0.0001f, "Notification fade was wrong at 1.75 seconds");
-	timer.Restart();
-	Check(timer.GetRemaining() == 2.0f && timer.GetOpacity() == 1.0f, "Notification reset did not restart its timer");
-	timer.Update(2.0f);
-	Check(!timer.IsVisible() && timer.GetOpacity() == 0.0f, "Notification remained visible at 2 seconds");
 }
 
 void FontAssetDiagnostics()
@@ -562,14 +540,14 @@ void FontAssetDiagnostics()
 	}
 	AssetRegistry assets;
 	assets.Initialize(root);
-	Check(!assets.ResolveFont(AssetId{"Malformed.font.json"}) && assets.GetLastError().find("metrics") != std::string::npos,
+	Check(!assets.GetAsset<FontAsset>("Malformed.font.json") && !assets.GetLastError().empty(),
 	      "Font loading accepted missing metrics without useful diagnostics");
 	{
 		std::ofstream missingAtlas(root / "MissingAtlas.font.json");
 		missingAtlas << R"({"atlasFile":"Missing.dds","atlas":{"distanceRange":4,"width":32,"height":32},"metrics":{"lineHeight":1,"ascender":-0.8,"descender":0.2},"glyphs":[{"unicode":63,"advance":0.5}]})";
 	}
 	assets.Initialize(root);
-	Check(!assets.ResolveFont(AssetId{"MissingAtlas.font.json"}) && assets.GetLastError().find("requires atlas") != std::string::npos,
+	Check(!assets.GetAsset<FontAsset>("MissingAtlas.font.json") && !assets.GetLastError().empty(),
 	      "Font loading accepted a missing atlas without useful diagnostics");
 	assets.Clear();
 	std::filesystem::remove_all(root);

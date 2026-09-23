@@ -14,7 +14,7 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <PropertyGroup>
     <OutDir>$(MSBuildThisFileDirectory)..\..\Bin\Tests\$(Configuration)\</OutDir>
-    <IntDir>$(MSBuildThisFileDirectory)..\..\Intermediate\GameRuntimeTests\$(Configuration)\</IntDir>
+    <IntDir>$(MSBuildThisFileDirectory)..\..\Intermediate\GameApplicationTests\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup><SolutionDir>$(MSBuildThisFileDirectory)..\..\</SolutionDir></PropertyGroup>
 	<PropertyGroup>
@@ -32,10 +32,10 @@
       <AdditionalDependencies>GraphicsEngine.lib;$(SoundEngineLibrary);libfbxsdk.lib;libxml2-md.lib;zlib-md.lib;d3d11.lib;dxguid.lib;dxgi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup><ClCompile Include="GameRuntimeTests.cpp" /><ClCompile Include="CameraControlsTests.cpp" />
+  <ItemGroup><ClCompile Include="GameApplicationTests.cpp" /><ClCompile Include="CameraControlsTests.cpp" />
 <ClCompile Include="..\..\Source\Application\Game\Game.cpp" />
+<ClCompile Include="..\..\Source\Application\Game\GameApplication.cpp" />
 <ClCompile Include="..\..\Source\Application\Game\SpinComponent.cpp" />
-<ClCompile Include="..\..\Source\Application\Game\GameScene.cpp" />
 <ClCompile Include="..\..\Source\Application\Game\MeshLibrary.cpp" />
 <ClCompile Include="..\..\Source\Application\Game\PrimitiveMeshBuilder.cpp" />
 <ClCompile Include="..\..\Dependencies\TGAFBXImporter\source\Importer.cpp" />

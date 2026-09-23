@@ -1,38 +1,30 @@
 # InputMapper and ServiceLocator in plain language
 
-This document explains what the two systems do, who owns them, and how input reaches the game.
+This document explains what the two systems do, who owns them, and how input
+reaches Game and Components.
 
-## The short version
+## Ownership
 
-`ServiceLocator` is the engine's shared service cabinet. The runtime puts three services into it during startup:
+`ServiceLocator` is the engine's shared service owner and access point. During
+startup, GameApplication gives it three heap-allocated services:
 
-- `InputMapper`, which turns keyboard, mouse and controller input into named actions.
+- `InputMapper`, which turns device input into named actions.
 - `AudioManager`, which controls sound and music.
-- `AssetRegistry`, which finds and loads engine assets.
+- `AssetRegistry`, which finds and loads Content assets.
 
-ServiceLocator owns all three objects. When the game closes, ServiceLocator deletes all three. There is no second owner and no separate singleton instance for audio or assets.
+ServiceLocator owns those objects after they are installed. `KillServices`
+deletes InputMapper, AudioManager, and AssetRegistry and clears their pointers.
+There is no second owner for these services.
 
-`InputMapper` is the middleman between Windows input and game code. Windows reports physical input such as “W is down” or “the mouse moved.” InputMapper translates that into a useful name such as `CameraForward` or `CameraLookDelta`, then tells every listener interested in that name.
-
-## Startup
-
-The runtime performs startup in this order:
-
-1. It creates an `AssetRegistry` and gives ownership to ServiceLocator.
-2. It initializes the asset registry with the game's Content folder.
-3. It creates an `AudioManager`, gives ownership to ServiceLocator, and initializes audio.
-4. It creates an `InputMapper` and gives ownership to ServiceLocator.
-5. It connects InputMapper to the runtime-owned `InputHandler` and `XInputHandler`.
-6. It installs the game's global key and mouse bindings once.
-7. The game and components register listeners for the named actions they use.
-
-The ownership relationship looks like this:
+GameApplication is the run coordinator. It creates the services, updates input and
+audio, and chooses when shutdown occurs, but it does not own their storage after
+registration.
 
 ```text
-GameApplication runtime
+GameApplication
 ├── owns InputHandler
 ├── owns XInputHandler
-└── uses ServiceLocator
+└── coordinates ServiceLocator
     ├── owns InputMapper
     ├── owns AudioManager
     └── owns AssetRegistry
@@ -40,77 +32,100 @@ GameApplication runtime
 InputMapper borrows InputHandler and XInputHandler.
 ```
 
-The two input handlers are not services. They are low-level device objects that belong to the runtime and live longer than InputMapper.
+The platform handlers therefore remain alive until after ServiceLocator deletes
+InputMapper.
 
-## What happens each frame
+## Startup
 
-Windows messages are first recorded by `InputHandler`. Once per rendered frame, the runtime calls `InputMapper::Update()`.
+GameApplication starts the services in this order:
+
+1. Create AssetRegistry, give it to ServiceLocator, and initialize it with the
+   executable-relative Content folder.
+2. Create AudioManager, give it to ServiceLocator, and initialize audio.
+3. Create InputMapper and give it to ServiceLocator.
+4. Connect InputMapper to the runtime-owned InputHandler and XInputHandler.
+5. Install runtime-wide bindings and listeners.
+6. Call `Game::Initialize`, which installs game-owned bindings and listeners.
+7. Build the initial World; its Components register their listeners in BeginPlay.
+
+## One input frame
+
+Windows messages first update InputHandler. GameApplication then updates InputMapper
+once per frame.
 
 ```text
 Windows message
-    ↓
-InputHandler records the new device state
-    ↓
-InputMapper updates once for the frame
-    ↓
-InputMapper translates device input to named actions
-    ↓
-Registered game and component callbacks run
-    ↓
-Game and World update
+-> InputHandler records device state
+-> InputMapper translates it to named actions
+-> registered callbacks run
+-> Game and World perform queued work
 ```
 
-For example, the runtime binds W to `CameraForward`. DebugCameraController listens for `CameraForward`. While W is held, its listener records that forward movement is active. The controller then moves the camera during its normal component update using frame time.
+For example, W maps to `CameraForward`. DebugCameraController listens for that
+action, records movement state in its callback, and moves during its Component
+update using frame time.
 
-## Where bindings belong
+Callbacks should record a small request rather than replacing scenes, destroying
+objects, changing bindings, or adding/removing listeners during dispatch. Game or
+World update performs the larger operation afterward.
 
-Bindings are global configuration, so the runtime installs them once in `GameApplication::InitializeInputAndHostControls`.
+## Who owns each binding
 
-Components do not assign keys. A component only listens for action names. This matters because changing a binding in one component would otherwise change it for every other listener in the engine.
+Bindings belong with the system that defines the action.
 
-The current debug-camera actions are:
+GameApplication installs these runtime controls:
 
-| Physical input | Named action |
-| --- | --- |
-| Right mouse button | `CameraLookEnable` |
-| Mouse movement | `CameraLookDelta` |
-| W / S | `CameraForward` / `CameraBack` |
-| A / D | `CameraLeft` / `CameraRight` |
-| Space / Control | `CameraUp` / `CameraDown` |
-| F1 | `DebugCamera` |
+| Physical input | Named action | Result |
+| --- | --- | --- |
+| Escape | `Quit` | Set GameApplication's private quit flag |
+| F1 | `DebugCamera` | Toggle the runtime debug camera |
+| F5 / F6 | `PreviousRenderPass` / `NextRenderPass` | Change renderer diagnostic view |
+| Right mouse button | `CameraLookEnable` | Enable mouse look |
+| Mouse movement | `CameraLookDelta` | Update camera look |
+| W / S | `CameraForward` / `CameraBack` | Move the debug camera |
+| A / D | `CameraLeft` / `CameraRight` | Move the debug camera |
+| Space / Control | `CameraUp` / `CameraDown` | Move the debug camera vertically |
 
-Game-level controls such as scene reload and the demo chest are also bound once during their owning startup code.
+Game installs F4 scene reload and the F7/F8 demo chest controls because those are
+project behavior. Components listen to action names; they do not assign global
+keys.
 
-## Listeners and cleanup
+Escape is deliberately handled by GameApplication. The Escape callback and
+`WM_QUIT` set the same internal state. After `InputMapper::Update`, GameApplication
+checks that state and leaves the loop before updating Game, World, audio, or the
+renderer. Game and Components have no quit API.
 
-`InputMapper::AddEventListener` returns an unsigned listener ID. The object that adds a listener stores that ID. Before the object goes away, it removes the listener with `RemoveEventListener`.
+## Listener cleanup
 
-In practice:
+`InputMapper::AddEventListener` returns an unsigned listener ID. The registering
+object stores that ID and removes it before the callback target is destroyed.
 
 - Game removes its listeners in `Game::Shutdown`.
-- DebugCameraController removes its listeners in `EndPlay`.
-- GameApplication removes its host listeners during service shutdown.
+- Components such as DebugCameraController remove theirs in `EndPlay`.
+- GameApplication removes its Escape and diagnostic listeners during runtime cleanup.
 
-World objects are cleared before ServiceLocator deletes InputMapper. That gives every component a chance to remove its listener while the mapper still exists.
-
-Callbacks should not destroy actors, replace scenes, change bindings, or add/remove listeners while InputMapper is dispatching. A callback should record a small request or update input state, and the normal game or world update should perform the larger change afterward.
+Scene replacement clears the old World while InputMapper still exists, so
+Component EndPlay callbacks can unregister safely.
 
 ## Shutdown
 
-Shutdown runs in the reverse direction from startup:
+Shutdown follows the borrowing relationships:
 
 1. Game shuts down and removes its listeners.
-2. World is cleared, causing components to run `EndPlay` and remove their listeners.
-3. GameApplication removes its own input listeners.
-4. ServiceLocator deletes InputMapper, AudioManager and AssetRegistry.
+2. GameApplication clears the World, which runs Component EndPlay.
+3. GameApplication removes its own listeners and releases mouse capture.
+4. It clears render references that can retain assets.
+5. ServiceLocator deletes InputMapper, AudioManager, and AssetRegistry.
+6. GameApplication destroys the window and its remaining state.
 
-AudioManager's destructor releases the sound engine. AssetRegistry's normal destruction releases its stored assets. After `KillServices`, the locator contains no service pointers.
+The same order is attempted after exceptions. Cleanup continues through later
+phases even if an earlier phase reports an error.
 
 ## Rules to remember
 
-- Give ServiceLocator heap-allocated services because it takes ownership and deletes them.
-- Do not manually delete a service after passing it to ServiceLocator.
-- Do not keep using a service pointer after replacing that service or calling `KillServices`.
-- Install global input bindings during startup, not inside components.
-- Remove every input listener before its callback target is destroyed.
-- Keep InputHandler and XInputHandler alive for as long as InputMapper uses them.
+- Give ServiceLocator heap-allocated services because it takes ownership.
+- Do not delete a service after giving it to ServiceLocator.
+- Do not keep a service pointer after replacement or `KillServices`.
+- Install each global binding once in the runtime or Game that owns the action.
+- Remove every listener before its callback target is destroyed.
+- Keep InputHandler and XInputHandler alive while InputMapper borrows them.

@@ -38,7 +38,7 @@ project "Game"
 		path.join(dirs.dependencies, "TGAFBXImporter", "source", "TgaFbxStructs.cpp"),
 	}
 
-	-- The executable enters through Main.cpp and the reusable GameFramework runtime.
+	-- The executable enters through Main.cpp and its concrete GameApplication.
 	-- Keep historical standalone viewer sources out even if they appear in an import.
 	removefiles {
 		"Application.cpp",

@@ -1,112 +1,175 @@
 # Engine map
 
-For the game-facing API and single-update flow, start with [GameFrameworkMVP.md](GameFrameworkMVP.md).
-
-Start with `GraphicsEngine::RenderSnapshot()` for the frame sequence and
-`GameApplication::Run()` for the application loop. Paths below are relative to the
+For the gameplay-facing overview, start with
+[GameFrameworkMVP.md](GameFrameworkMVP.md). Paths below are relative to the
 repository root.
+
+## Program ownership
+
+Windows enters `wWinMain` in `Source/Application/Game/Main.cpp`. Main resolves
+the executable-relative Content folder, constructs one concrete `Game` and one
+`GameApplication`, and calls `application.Run(game)`.
+
+`GameApplication` is the application coordinator. It owns the window, platform input
+handlers, frame loop, current World, pending/current scene IDs, and per-run render
+state. It borrows Game for the duration of `Run`. Game owns project behavior and
+chooses the initial scene; it does not own the loop or World.
+
+The remaining ownership is direct:
+
+```text
+wWinMain
+├── Game
+└── GameApplication
+    ├── window and platform input handlers
+    ├── current World
+    │   └── Actors
+    │       └── Components
+    └── per-run render and scene-request state
+
+ServiceLocator
+├── InputMapper
+├── AudioManager
+└── AssetRegistry
+
+GraphicsEngine::Get()
+└── process-wide renderer singleton
+```
+
+GameApplication creates and coordinates the three services, but ServiceLocator owns
+them and deletes them through `KillServices`. InputMapper borrows the runtime's
+`InputHandler` and `XInputHandler`, so the runtime keeps those handlers alive
+until service shutdown. GameApplication drives GraphicsEngine but does not own its
+singleton storage.
 
 ## Startup and shutdown
 
-`Source/Application/Game/Main.cpp` enters `GuardedMain()`, creates the
-game and passes it to the reusable host. `GameApplication` initialization creates
-the window and graphics engine, registers built-in/game components, calls Initialize for bootstrap composition or a scene-name request, and creates the
-scene command list. Graphics initialization creates frame targets, pipeline
-states, samplers, constant buffers, shadow maps, and environment resources.
-Constant-buffer registration closes before rendering starts.
+Startup follows one concrete path:
 
-`Run()` owns one synchronous gameplay/render loop. It calls Game::Update,
-World::Update, WorldRenderer::Build, and then the existing renderer. All gameplay
-callbacks run on the application thread. Scene requests are processed between frames.
+1. GameApplication creates the Win32 window and initializes GraphicsEngine.
+2. It creates AssetRegistry, AudioManager, and InputMapper and gives their
+   ownership to ServiceLocator.
+3. It connects platform input and installs runtime controls. Escape belongs to
+   GameApplication and requests loop exit.
+4. It calls `Game::Initialize(GameApplication&)`. Game initializes its owned
+   MeshLibrary from AssetRegistry's Content root, registers F4/F7/F8 behavior,
+   starts music, and requests the initial scene.
+5. GameApplication loads that scene synchronously, asks Game to configure the
+   candidate World, commits it, ensures a camera exists, and calls `BeginPlay`.
+6. It shows the window and enters the frame loop.
 
-## Thread and snapshot ownership
+On shutdown, Game removes its listeners, the World is cleared while services are
+still available, runtime listeners and render references are cleared, and
+ServiceLocator deletes its services. The window and remaining runtime state are
+destroyed afterward. This order lets Component `EndPlay` callbacks unregister
+from InputMapper safely.
 
-The application thread handles window/input, gameplay, snapshot extraction and GPU
-playback. The renderer can still record shadow passes on its own workers and joins
-them before playback. The MVP has no gameplay worker, mailbox or snapshot queue.
-
-WorldRenderer copies camera/light properties, mesh/material bindings, Actor transforms
-and skeletal joint poses. GraphicsEngine then performs its existing culling and pass
-sequence. A missing camera produces an empty frame. Scene construction and graphics
-resource loading happen synchronously before rendering resumes.
+Cleanup also runs after startup or frame failures. Game shutdown is attempted at
+most once after Game initialization has begun, and the original failure remains
+the one reported to Main.
 
 ## Frame sequence
+
+All gameplay runs on the application thread. Scene requests are processed only
+at frame boundaries.
+
+```text
+window messages / WM_QUIT
+-> process one pending scene request
+-> resize or skip a minimized frame
+-> update timer and clamp delta time
+-> InputMapper::Update
+-> stop immediately if Escape requested quit
+-> apply runtime camera input
+-> Game::Update(World&, deltaTime)
+-> World::Update(deltaTime)
+-> AudioManager::Update(deltaTime)
+-> WorldRenderer::Build
+-> GraphicsEngine render / execute / present
+```
+
+Escape and `WM_QUIT` set the same private runtime quit state. Game and Components
+do not receive a quit API. Input callbacks record scene or gameplay requests;
+the larger operation happens after input dispatch.
+
+The renderer can record shadow passes on worker threads and joins them before
+playback. Gameplay has no worker, mailbox, or snapshot queue.
+
+## Scene flow
+
+Game can call `RequestSceneLoad(SceneId)` or `ReloadCurrentScene()` through the
+GameApplication reference received during initialization. The pending request is
+last-write-wins until the next scene boundary. At that boundary the runtime
+captures and clears one request before loading it.
+
+```text
+SceneId
+-> GameApplication selects the scene file
+-> UnrealSceneImporter
+-> SceneData
+-> BuildWorldFromSceneData
+-> candidate World
+-> Game::ConfigureWorld
+-> commit World / ensure camera / BeginPlay
+```
+
+Scene ID-to-file mapping and the fallback asset choice live in GameApplication.
+The importer converts the export format into `SceneData`. `BuildWorldFromSceneData`
+maps those records to live Actors and Components and binds fallback assets when needed.
+
+A later pre-commit load failure leaves the current World running and does not
+retry until Game makes another request. An initial load failure is fatal because
+there is no playable World. A failure after commit is also fatal; the runtime
+does not keep a rollback copy.
+
+## Rendering sequence
+
+WorldRenderer copies camera/light properties, mesh/material bindings, Actor
+transforms, and skeletal joint poses into a render snapshot. A missing camera
+produces an empty frame. GraphicsEngine then performs its existing frame work:
 
 | Phase | Inputs and output |
 | --- | --- |
 | Resource preparation | Creates missing mesh buffers and refreshes material data before concurrent reads. |
 | `BuildShadowJobs()` | Selects casters and shadow maps; fills the light buffer with matching shadow assignments. |
-| `RecordAndExecuteShadows()` | Records one command list per shadow job and plays them back in job order. On failure, joins all launched workers and records all jobs serially into the scene list. |
-| `PrepareSceneCommands()` | Clears frame targets, restores scene state, and binds camera constants, samplers, environment and shadow resources. |
-| `RenderGBuffer()` | Opaque geometry writes surface data and depth; tangent normals have a separate target used only for that debug view. |
-| `RenderAmbientOcclusion()` | Reads GBuffer world positions and normals; writes screen-space AO. |
-| `RenderDeferredLighting()` | Reads GBuffer, AO and shadows; accumulates linear light, then composites to the back buffer within the same GPU event. |
-| `RenderDebugView()` | Optionally replaces the composite with the selected diagnostic view. |
-| `RenderTransparentGeometry()` | Draws blended elements back-to-front using the opaque depth buffer and full light buffer. |
+| `RecordAndExecuteShadows()` | Records shadow command lists and plays them back in order; worker failure falls back to serial recording. |
+| `PrepareSceneCommands()` | Clears targets and binds camera constants, samplers, environment, and shadow resources. |
+| `RenderGBuffer()` | Opaque geometry writes surface data and depth. |
+| `RenderAmbientOcclusion()` | Reads GBuffer positions and normals and writes screen-space AO. |
+| `RenderDeferredLighting()` | Reads GBuffer, AO, and shadows, then composites linear lighting to the back buffer. |
+| `RenderDebugView()` | Optionally replaces the composite with a selected diagnostic view. |
+| `RenderTransparentGeometry()` | Draws blended elements back-to-front with the opaque depth buffer and light data. |
 
-The host finishes and executes the scene command list, then presents. Pass
-helpers rely on this order and the shared scene bindings; they are not independent
-rendering entry points. Resource unbinding beside each pass prevents read/write
-binding conflicts. CPU statistics retain separate preparation, shadow and scene
-recording intervals; they do not measure GPU execution time.
+Pass helpers rely on this order and shared bindings. Resource unbinding beside
+each pass prevents read/write conflicts. CPU statistics measure preparation,
+shadow recording, and scene recording rather than GPU execution time.
 
 ## Subsystem locations
 
 | Location | Responsibility |
 | --- | --- |
-| `Source/Application/Game` | IGame implementation, scene setup, controls, mesh library, game materials |
-| `Source/Engine/GameFramework/Runtime` | Main loop, context, input and game callbacks |
-| `Source/Engine/GameFramework/World` | World, Actor, Component and Transform ownership and lifecycle |
-| `Source/Engine/GameFramework/Components` | Scene offsets, cameras, lights and meshes |
-| `Source/Engine/GameFramework/Scenes` | Scene descriptions, assets, properties and component construction |
-| `Source/Engine/GameFramework/Rendering` | Adapter to the existing renderer |
-| `Source/Engine/GraphicsEngine/GraphicsEngine.cpp` | Frame orchestration, shadow calculations, resource and material creation |
-| `Source/Engine/GraphicsEngine/RHI` | DirectX 11 device/context operations and command lists |
-| `Source/Engine/GraphicsEngine/Objects` | Mesh, texture, buffer and other graphics wrappers |
-| `Source/Engine/GraphicsEngine/Materials` | Material descriptions, parameters, shader compilation support |
-| `Source/Engine/GraphicsEngine/ConstantBuffers` | CPU structures uploaded to shaders |
-| `Source/Engine/GraphicsEngine/Shaders` | Internal passes and material shader code |
-| `Source/Utilities` | Scheduling, startup options, camera controls and logging |
-| `CommonUtilities/include` | Shared math, input and timer utilities |
-| `Tests/EngineOptimisations` | CPU regression coverage for culling, routing and scheduling |
+| `Source/Application/Game` | Main, concrete Game, GameApplication, scene selection/preparation, controls, and game materials |
+| `Source/Engine/GameFramework/World` | World, Actor, Component, and Transform ownership and lifecycle |
+| `Source/Engine/GameFramework/Components` | Cameras, lights, meshes, and scene-local transforms |
+| `Source/Engine/GameFramework/Scenes` | SceneData and conversion into a live World |
+| `Source/Engine/GameFramework/UnrealSceneImporter` | Unreal export parsing and data conversion |
+| `Source/Engine/GameFramework/AssetHandling` | Shared asset registry and asset types |
+| `Source/Engine/GameFramework/Rendering` | World-to-render-snapshot adapter |
+| `Source/Engine/GraphicsEngine` | Frame orchestration, resources, materials, RHI, and shaders |
+| `Source/Utilities` | Startup helpers, logging, and utility glue |
+| `CommonUtilities/include` | Shared math, input, timer, and utility types |
 
-See [EngineOptimisations.md](EngineOptimisations.md) for switches, build/test
-commands, scheduling details and the remaining visual acceptance checks.
+See [EngineOptimisations.md](EngineOptimisations.md) for renderer switches,
+build commands, scheduling details, and visual acceptance checks.
 
 ## Readability conventions
 
-Use `// --- Phase name ---` for major responsibilities in large files and match
-GPU event names where available. Describe pass dependencies, ownership and
-unusual ordering beside the relevant implementation. Small files need no banners.
-Extract cohesive phases while keeping synchronization and fallback contracts
-visible together. Avoid helpers whose only purpose is to shorten a few lines.
+Use `// --- Phase name ---` only for major responsibilities in large files. Keep
+ownership and unusual ordering beside the implementation that depends on them.
+Prefer a direct call and a clear type name over a forwarding wrapper.
 
-The root `.clang-format` uses Allman braces, four-column tab indentation and a
+The root `.clang-format` uses Allman braces, four-column tab indentation, and a
 140-column limit. `.editorconfig` supplies matching settings for owned C++ files.
-Authored source and tests follow these readability rules:
-
-- Always brace control-flow bodies, including single-statement branches and loops.
-- Expand function and lambda bodies; keep separate operations on separate lines.
-- Use `struct` only for data. Types with constructors, operators or other member
-  functions are `class`, with explicit access sections. Preserve public aggregate
-  data where callers rely on aggregate initialization.
-- Name each lambda capture. Use `[]` when nothing is captured, `[this]` for member
-  access, and explicit value/reference captures for local dependencies. Capture
-  asynchronous loop indices by value and keep referenced data alive until work joins.
-
-Use clang-format 22 (the readability pass used 22.1.3) on edited C++ files, for example:
-
-```powershell
-clang-format -i Source/Engine/GraphicsEngine/GraphicsEngine.cpp Source/Engine/GraphicsEngine/GraphicsEngine.h
-```
-
-The formatter inserts braces and expands short bodies. Explicit captures and the
-class/struct distinction still require code review. With 22.1.3, dry-run can report
-blank-line replacements on already formatted CRLF files when SeparateDefinitionBlocks
-is enabled; compare formatter output with the file before treating that as drift.
-
-Keep unrelated formatting separate from behavior changes. Vendor libraries,
-CommonUtilities, the imported DDS loader, generated resources/shaders and runtime
-asset copies are excluded by `.clang-format-ignore`. The authored C++ source and
-tests have received the full readability pass; authored HLSL control-flow bodies
-also use braces. Runtime shader copies are refreshed by the existing build.
+Always brace control-flow bodies, use explicit lambda captures, and use `struct`
+for data rather than types with behavior. Keep unrelated formatting separate from
+behavior changes.

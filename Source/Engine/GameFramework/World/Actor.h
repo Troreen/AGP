@@ -23,6 +23,11 @@ public:
 	const std::string& GetArchetype() const { return myArchetype; }
 	const std::vector<std::string>& GetTags() const { return myTags; }
 	bool HasTag(const std::string& tag) const { return std::find(myTags.begin(), myTags.end(), tag) != myTags.end(); }
+	void SetSourceMetadata(std::string archetype, std::vector<std::string> tags)
+	{
+		myArchetype = std::move(archetype);
+		myTags = std::move(tags);
+	}
 
 	World* GetWorld() const	{ return myWorld; }
 
@@ -88,5 +93,4 @@ private:
 	bool myDestroyed = false;
 	friend class World;
 	friend class WorldRenderer;
-	friend class ComponentRegistry;
 };

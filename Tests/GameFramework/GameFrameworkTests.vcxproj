@@ -24,11 +24,17 @@
     <ClCompile>
       <LanguageStandard>stdcpp20</LanguageStandard><ExceptionHandling>Sync</ExceptionHandling>
       <WarningLevel>Level4</WarningLevel>
-      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\..\Source\Engine;$(MSBuildThisFileDirectory)..\..\Source;$(MSBuildThisFileDirectory)..\..\Source\Utilities\CommonUtilities;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>FBXSDK_SHARED;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\..\Source\Engine;$(MSBuildThisFileDirectory)..\..\Source;$(MSBuildThisFileDirectory)..\..\Source\Utilities;$(MSBuildThisFileDirectory)..\..\Source\Utilities\CommonUtilities;$(MSBuildThisFileDirectory)..\..\Dependencies\TGAFBXImporter\source;$(MSBuildThisFileDirectory)..\..\Dependencies\TGAFBXImporter\FBXSDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <Link><SubSystem>Console</SubSystem><AdditionalLibraryDirectories>$(MSBuildThisFileDirectory)..\..\Lib\$(Configuration);$(MSBuildThisFileDirectory)..\..\Dependencies\FMod\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories><AdditionalDependencies>GraphicsEngine.lib;$(SoundEngineLibrary);d3d11.lib;dxguid.lib;dxgi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies></Link>
+    <Link><SubSystem>Console</SubSystem><AdditionalLibraryDirectories>$(MSBuildThisFileDirectory)..\..\Lib\$(Configuration);$(MSBuildThisFileDirectory)..\..\Dependencies\FMod\lib;$(MSBuildThisFileDirectory)..\..\Dependencies\TGAFBXImporter\FBXSDK\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories><AdditionalDependencies>GraphicsEngine.lib;$(SoundEngineLibrary);libfbxsdk.lib;libxml2-md.lib;zlib-md.lib;d3d11.lib;dxguid.lib;dxgi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies></Link>
   </ItemDefinitionGroup>
-  <ItemGroup><ClCompile Include="GameFrameworkTests.cpp" /></ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="GameFrameworkTests.cpp" />
+    <ClCompile Include="..\..\Dependencies\TGAFBXImporter\source\Importer.cpp" />
+    <ClCompile Include="..\..\Dependencies\TGAFBXImporter\source\Internals.cpp" />
+    <ClCompile Include="..\..\Dependencies\TGAFBXImporter\source\TgaFbxStructs.cpp" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Source\Engine\GraphicsEngine\GraphicsEngine.vcxproj">
       <Project>{ac8e76be-985c-6ac4-81f0-daea6d5d4629}</Project>

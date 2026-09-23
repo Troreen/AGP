@@ -10,9 +10,6 @@
     <Filter Include="Rendering">
       <UniqueIdentifier>{E3AE1F7C-4F19-D4F2-9857-85980401B247}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Runtime">
-      <UniqueIdentifier>{4995DAC4-B574-5960-BE8C-E4362AEBBFC1}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Scenes">
       <UniqueIdentifier>{86EEB3D0-7290-DEA6-5B4B-F2FA478C65F7}</UniqueIdentifier>
     </Filter>
@@ -75,16 +72,7 @@
     <ClInclude Include="Rendering\WorldRenderer.h">
       <Filter>Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Runtime\GameApplication.h">
-      <Filter>Runtime</Filter>
-    </ClInclude>
-    <ClInclude Include="Runtime\GameContext.h">
-      <Filter>Runtime</Filter>
-    </ClInclude>
-    <ClInclude Include="Runtime\IGame.h">
-      <Filter>Runtime</Filter>
-    </ClInclude>
-    <ClInclude Include="Scenes\ComponentRegistry.h">
+    <ClInclude Include="Scenes\WorldFromSceneData.h">
       <Filter>Scenes</Filter>
     </ClInclude>
     <ClInclude Include="Scenes\SceneData.h">
@@ -157,13 +145,7 @@
     <ClCompile Include="Rendering\WorldRenderer.cpp">
       <Filter>Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="Runtime\GameApplication.cpp">
-      <Filter>Runtime</Filter>
-    </ClCompile>
-    <ClCompile Include="Runtime\GameContext.cpp">
-      <Filter>Runtime</Filter>
-    </ClCompile>
-    <ClCompile Include="Scenes\ComponentRegistry.cpp">
+    <ClCompile Include="Scenes\WorldFromSceneData.cpp">
       <Filter>Scenes</Filter>
     </ClCompile>
     <ClCompile Include="SequenceNode.cpp" />

@@ -1,64 +1,11 @@
 #pragma once
 #include "GameFramework/World/Transform.h"
-#include "GameFramework/AssetHandling/MaterialAsset.h"
 #include "Vector2.hpp"
 #include "Vector4.hpp"
 #include <cstdint>
-#include <filesystem>
-#include <functional>
 #include <string>
 #include <variant>
 #include <vector>
-
-enum class SceneType
-{
-	Blockout,
-	Chests,
-	TGAUnrealTest,
-	None
-};
-namespace
-{
-std::filesystem::path GetSceneFile(const SceneType& aScene)
-{
-	switch (aScene)
-	{
-		case SceneType::Blockout:
-			return "ExportedScenes/lvl_blockout/Lvl_Blockout_Level.json";
-			break;
-		case SceneType::Chests:
-			return "ExportedScenes/TestExportMap_Level.json";
-			break;
-		case SceneType::TGAUnrealTest:
-			return "ExportedScenes/ChestMaterials_Level.json";
-			break;
-		default:
-			return {};
-			break;
-	}
-}
-
-std::string GetSceneName(const SceneType& aScene)
-{
-	switch (aScene)
-	{
-		case SceneType::Blockout:
-			return "Lvl_Blockout_Level";
-			break;
-		case SceneType::Chests:
-			return "TestExportMap";
-			break;
-		case SceneType::TGAUnrealTest:
-			return"ChestMaterials";
-			break;
-		default:
-			return {};
-			break;
-	}
-}
-}
-
-class AssetRegistry;
 
 struct ComponentData
 {
@@ -79,7 +26,6 @@ struct MaterialParameterData
 struct MaterialInstanceData
 {
 	std::string Name;
-	std::shared_ptr<MaterialAsset> Asset;
 	std::vector<MaterialParameterData> Parameters;
 };
 struct StaticMeshData
@@ -138,12 +84,3 @@ struct ActorRecord
 };
 
 struct SceneData { std::vector<ActorRecord> Actors; };
-
-struct SceneLoadContext
-{
-	const std::filesystem::path& ContentRoot;
-	CommonUtilities::Vector2u ClientSize;
-	AssetRegistry& Assets;
-};
-
-using SceneSource = std::function<SceneData(const SceneType& type, SceneLoadContext& context)>;

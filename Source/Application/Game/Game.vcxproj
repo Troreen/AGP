@@ -247,7 +247,7 @@ if errorlevel 1 exit /b 1</Command>
   <ItemGroup>
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameLog.h" />
-    <ClInclude Include="GameScene.h" />
+    <ClInclude Include="GameApplication.h" />
     <ClInclude Include="MeshLibrary.h" />
     <ClInclude Include="PrimitiveMeshBuilder.h" />
     <ClInclude Include="SpinComponent.h" />
@@ -259,7 +259,7 @@ if errorlevel 1 exit /b 1</Command>
     <ClCompile Include="..\..\..\Dependencies\TGAFBXImporter\source\Internals.cpp" />
     <ClCompile Include="..\..\..\Dependencies\TGAFBXImporter\source\TgaFbxStructs.cpp" />
     <ClCompile Include="Game.cpp" />
-    <ClCompile Include="GameScene.cpp" />
+    <ClCompile Include="GameApplication.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MeshLibrary.cpp" />
     <ClCompile Include="PrimitiveMeshBuilder.cpp" />

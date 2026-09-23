@@ -9,7 +9,7 @@ $frameworkRoot = Join-Path $sourceRoot 'GameFramework'
 $utilitiesRoot = Join-Path $repository 'Source\Utilities\CommonUtilities'
 $output = Join-Path $repository "Intermediate\PublicHeaderIsolation\$Configuration"
 New-Item -ItemType Directory -Force -Path $output | Out-Null
-$apiFolders = @('Runtime', 'World', 'Components', 'Scenes') | ForEach-Object { Join-Path $frameworkRoot $_ }
+$apiFolders = @('World', 'Components', 'Scenes') | ForEach-Object { Join-Path $frameworkRoot $_ }
 $headers = @(Get-ChildItem -LiteralPath $apiFolders -Recurse -Filter '*.h' | Sort-Object FullName)
 if ($headers.Count -eq 0) { throw 'No public headers found.' }
 $items = foreach ($header in $headers) {

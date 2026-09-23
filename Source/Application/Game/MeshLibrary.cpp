@@ -164,11 +164,7 @@ namespace
 		return animation;
 	}
 
-	void AppendElement(
-		const TGA::FBX::Mesh::Element& aSourceElement,
-		std::vector<Mesh::Element>& outElements,
-		std::vector<Vertex>& outVertices,
-		std::vector<unsigned>& outIndices)
+	void AppendElement( const TGA::FBX::Mesh::Element& aSourceElement, std::vector<Mesh::Element>& outElements, std::vector<Vertex>& outVertices, std::vector<unsigned>& outIndices)
 	{
 		if (aSourceElement.Vertices.empty() || aSourceElement.Indices.empty())
 		{

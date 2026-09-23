@@ -2,10 +2,10 @@
 #include <Windows.h>
 #include <cstdio>
 #include <stdexcept>
+#include <utility>
 #include "Game.h"
-#include "GameScene.h"
+#include "GameApplication.h"
 #include "GameLog.h"
-#include "GameFramework/Runtime/GameApplication.h"
 #include "StringHelpers.h"
 
 int APIENTRY wWinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ int)
@@ -32,11 +32,8 @@ try
 		config.EnableMouseLook = true;
 
 		Game game;
-		GameScene scene;
-		return GameApplication{}.Run(game, config, [&scene](const SceneType& aScene, SceneLoadContext& context)
-		{
-			return scene.Load(aScene, context);
-		});
+		GameApplication application(std::move(config));
+		return application.Run(game);
 	}
 	catch (const std::exception& error)
     {

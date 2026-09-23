@@ -1,5 +1,6 @@
 #include "GameFramework/Components/SkeletalMeshComponent.h"
 
+#include "GameFramework/AssetHandling/MeshAsset.h"
 #include "GraphicsEngine/Objects/Mesh.h"
 
 #include <utility>
@@ -34,7 +35,7 @@ bool SkeletalMeshComponent::HasSkinning() const
 	return myMesh != nullptr && myMesh->GetMesh()->HasSkeleton() && myBaseLayer.Active;
 }
 
-const std::array<CU::Matrix4f, 128>* SkeletalMeshComponent::GetJointTransforms() const
+const std::array<CommonUtilities::Matrix4f, 128>* SkeletalMeshComponent::GetJointTransforms() const
 {
 	return &myJointTransforms;
 }
@@ -132,9 +133,9 @@ void SkeletalMeshComponent::OnMeshChanged()
 
 void SkeletalMeshComponent::ResetJointTransforms()
 {
-	for (CU::Matrix4f& transform : myJointTransforms)
+	for (CommonUtilities::Matrix4f& transform : myJointTransforms)
 	{
-		transform = CU::Matrix4f();
+		transform = CommonUtilities::Matrix4f();
 	}
 }
 
@@ -183,10 +184,10 @@ void SkeletalMeshComponent::RebuildJointTransforms()
 		return;
 	}
 
-	UpdateJointPose(0, CU::Matrix4f());
+	UpdateJointPose(0, CommonUtilities::Matrix4f());
 }
 
-void SkeletalMeshComponent::UpdateJointPose(size_t aJointIndex, const CU::Matrix4f& aParentJointTransform)
+void SkeletalMeshComponent::UpdateJointPose(std::size_t aJointIndex, const CommonUtilities::Matrix4f& aParentJointTransform)
 {
 	const Skeleton* skeleton = myMesh != nullptr ? myMesh->GetMesh()->GetSkeleton() : nullptr;
 	if (skeleton == nullptr || aJointIndex >= skeleton->Joints.size() || aJointIndex >= myJointTransforms.size())
@@ -195,7 +196,7 @@ void SkeletalMeshComponent::UpdateJointPose(size_t aJointIndex, const CU::Matrix
 	}
 
 	const Skeleton::Joint& joint = skeleton->Joints[aJointIndex];
-	const CU::Matrix4f jointTransform = GetLocalTransformForJoint(aJointIndex) * aParentJointTransform;
+	const CommonUtilities::Matrix4f jointTransform = GetLocalTransformForJoint(aJointIndex) * aParentJointTransform;
 	myJointTransforms[aJointIndex] = joint.BindPoseInverse * jointTransform;
 
 	for (const int childIndex : joint.Children)
@@ -207,9 +208,9 @@ void SkeletalMeshComponent::UpdateJointPose(size_t aJointIndex, const CU::Matrix
 	}
 }
 
-const CU::Matrix4f& SkeletalMeshComponent::GetLocalTransformForJoint(size_t aJointIndex) const
+const CommonUtilities::Matrix4f& SkeletalMeshComponent::GetLocalTransformForJoint(std::size_t aJointIndex) const
 {
-	static const CU::Matrix4f identity;
+	static const CommonUtilities::Matrix4f identity;
 
 	const Skeleton* skeleton = myMesh != nullptr ? myMesh->GetMesh()->GetSkeleton() : nullptr;
 	if (skeleton == nullptr || aJointIndex >= skeleton->Joints.size())
@@ -251,7 +252,7 @@ const CU::Matrix4f& SkeletalMeshComponent::GetLocalTransformForJoint(size_t aJoi
 	return identity;
 }
 
-void SkeletalMeshComponent::MarkJointAndChildren(size_t aJointIndex)
+void SkeletalMeshComponent::MarkJointAndChildren(std::size_t aJointIndex)
 {
 	const Skeleton* skeleton = myMesh != nullptr ? myMesh->GetMesh()->GetSkeleton() : nullptr;
 	if (skeleton == nullptr || aJointIndex >= skeleton->Joints.size() || aJointIndex >= myPartialLayerMask.size())

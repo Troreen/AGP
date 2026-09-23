@@ -1,8 +1,10 @@
 # GameFramework architecture refactoring plan
 
-Status: planning only. This document describes a target architecture and an ordered migration. It does not implement the refactor.
+Status: implemented and verified in the current source in Debug and Release; this document remains the design rationale and ordered migration record.
 
 The governing question is: **what is the smallest, clearest architecture that correctly supports the game AGP is actually building?** AGP runs one concrete game. This plan therefore removes extension points whose only purpose is supporting interchangeable games or hypothetical engine consumers. It retains boundaries that carry real behavior: scene import data, live World construction, World/Actor/Component ownership, rendering, input, audio, assets, and platform runtime work.
+
+This is a responsibility plan, not a mechanical file map. The implementation may place a helper or split a file differently when the resulting code is simpler and the ownership/dependency direction remains clear. **When choosing between preserving an old abstraction and updating its callers, prefer updating the callers if the resulting architecture is simpler.**
 
 The plan is based on repository state `f9874ed`. The worktree was clean during investigation. No implementation build or runtime test is claimed as passing for this plan; the verification baseline is described in section 11.
 
@@ -130,20 +132,20 @@ Current transitions contain four hard-to-reason-about policies:
 
 The nullable SceneSource and empty-world startup path are used by the text-overlay test, while the shipped Game always supplies a source and requests an initial scene. `OnSceneLoaded` and `OnSceneLoadFailed` are used by test fixtures but not the concrete Game. `PublicGameplayConsumer` validates a generic reusable engine contract that the project explicitly does not need.
 
-Tests should preserve required behavior, not force production interfaces to remain generic.
+Tests should preserve required game/runtime behavior, not force production interfaces to remain generic. Remove or rewrite tests whose only purpose is preserving the old generic-runtime shape. Do not create an elaborate test-only interface, context, callback system, scripted harness, or substitute Game merely to keep those testing patterns. Prefer tests that exercise the concrete Game and GameApplication. Add a tiny test-target-only control only when a behavior cannot otherwise be made deterministic and the control is materially smaller than the abstraction it replaces.
 
 ## 3. Proposed target architecture
 
 ```text
 wWinMain
   ├── constructs concrete Game
-  ├── constructs concrete GameRuntime(config)
-  └── GameRuntime::Run(game)
+  ├── constructs concrete GameApplication(config)
+  └── GameApplication::Run(game)
       ├── owns main loop and platform window/input adapters
       ├── owns current World and scene-request state
-      ├── calls free LoadGameSceneData
+      ├── calls free LoadAndPrepareGameSceneData
       │   └── Unreal import -> SceneData
-      ├── calls free BuildWorld(SceneData, assets, clientSize)
+      ├── calls free BuildWorldFromSceneData(SceneData, assets, clientSize)
       ├── calls concrete Game lifecycle methods
       ├── coordinates ServiceLocator
       │   ├── owns InputMapper
@@ -153,9 +155,9 @@ wWinMain
       └── drives process-singleton GraphicsEngine
 ```
 
-Put the concrete `GameRuntime` in `Source/Application/Game`. That location is a deliberate dependency decision: runtime can call the one concrete `Game` without making the engine library depend upward on application code and without replacing `IGame` with callbacks, templates, or another interface.
+Put the concrete `GameApplication` in `Source/Application/Game`. That location is a deliberate dependency decision: runtime can call the one concrete `Game` without making the engine library depend upward on application code and without replacing `IGame` with callbacks, templates, or another interface.
 
-The prompt's `Main -> Game -> GameRuntime` sketch is exploratory, not a requirement to add a forwarding method. The clearest actual call is `runtime.Run(game)`: Main shows both concrete objects, and the type named Runtime visibly owns the run. A one-line `Game::Run` that merely constructs or forwards to GameRuntime would hide the true owner and add no responsibility.
+The prompt's `Main -> Game -> GameApplication` sketch is exploratory, not a requirement to add a forwarding method. The clearest actual call is `application.Run(game)`: Main shows both concrete objects, and `GameApplication` visibly owns the run. A one-line `Game::Run` that merely constructs or forwards to GameApplication would hide the true owner and add no responsibility.
 
 The intended concrete interaction is:
 
@@ -163,41 +165,43 @@ The intended concrete interaction is:
 class Game
 {
 public:
-    void Initialize(GameRuntime& runtime);
+    void Initialize(GameApplication& anApplication);
     void ConfigureWorld(World& world);
     void Update(World& world, float deltaTime);
     void Shutdown();
 };
 
-SceneData LoadGameSceneData(SceneId scene, const std::filesystem::path& contentRoot,
-                            AssetRegistry& assets);
+SceneData LoadAndPrepareGameSceneData(SceneId scene, const std::filesystem::path& contentRoot,
+                                      AssetRegistry& assets);
 ```
 
 Only `Initialize` receives runtime control because the actual Game F4 input callback captures Runtime to request reload and Game chooses the initial scene. Components do not receive a scene-control API. Update and configuration receive the narrower World reference they actually use. Shutdown receives no World: initialization or the initial scene can fail before a live World exists, and clearing the active camera is redundant because Runtime clears the World immediately afterward.
 
-`LoadGameSceneData` is a game-local free function implemented in `GameSceneLoading.cpp`. It needs no Game state, so making it a Game method or granting Runtime friendship would only obscure that fact.
+`LoadAndPrepareGameSceneData` is a game-local free function implemented in `GameSceneLoading.cpp`. Its name makes both operations visible: it imports the selected scene and applies the game's material-fallback preparation. It needs no Game state, so making it a Game method or granting Runtime friendship would only obscure that fact.
 
-`GameRuntime` should be non-copyable and non-movable while running because the HWND stores a pointer to its `InputHandler`. It owns runtime state directly. Do not replace `Impl` with a differently named PImpl or generic “state” object solely to hide includes. The class is application-private, so concrete platform dependencies are acceptable.
+`GameApplication` should be non-copyable and non-movable while running because the HWND stores a pointer to its `InputHandler`. It owns runtime state directly. Do not replace `Impl` with a differently named PImpl or generic “state” object solely to hide includes. The class is application-private, so concrete platform dependencies are acceptable.
 
-Header direction stays simple: Main includes `Game.h` and `GameRuntime.h`, constructs `GameRuntime::Config`, then calls `runtime.Run(game)`. `GameRuntime.h` forward-declares `Game`; `Game.h` forward-declares `GameRuntime` and `World`; implementation files include both definitions. GameFramework never includes an application header.
+Header direction stays simple: Main includes `Game.h` and `GameApplication.h`, constructs `GameApplication::Config`, then calls `application.Run(game)`. `GameApplication.h` forward-declares `Game`; `Game.h` forward-declares `GameApplication` and `World`; implementation files include both definitions. GameFramework never includes an application header.
 
 ## 4. Class and file disposition
 
+The paths below communicate ownership and dependency direction. They are proposed placements, not a requirement to preserve every filename or helper boundary. During implementation, prefer fewer, clearer units when an obvious simplification appears; do not move code across the Engine/Application boundary or blur ownership merely to reduce file count.
+
 | Current class/file | Disposition | Reason / target |
 | --- | --- | --- |
-| `Application/Game/Main.cpp` | Retain and reduce | Resolve config, construct `Game` and `GameRuntime`, call `runtime.Run(game)`, return 0 on success, and keep top-level exception logging. Remove GameScene and forwarding lambda. |
+| `Application/Game/Main.cpp` | Retain and reduce | Resolve config, construct `Game` and `GameApplication`, call `application.Run(game)`, return 0 on success, and keep top-level exception logging. Remove GameScene and forwarding lambda. |
 | `Application/Game/Game.h/.cpp` | Retain concrete | Remove `IGame` inheritance/overrides. Keep concrete initialize/update/configure/shutdown behavior. `Initialize` receives Runtime, update/configure receive World, and shutdown receives no World. Do not add a forwarding `Run`. |
-| `Application/Game/GameScene.h/.cpp` | Delete wrapper | Move the real responsibility into game-local `GameSceneLoading.h/.cpp` as free `LoadGameSceneData`. This keeps Game.cpp readable without creating another class or friendship. |
+| `Application/Game/GameScene.h/.cpp` | Delete wrapper | Move the real responsibility into game-local `GameSceneLoading.h/.cpp` as free `LoadAndPrepareGameSceneData`. This keeps Game.cpp readable without creating another class or friendship. |
 | `Application/Game/MeshLibrary.*` | Retain | The code-configured skeletal demo still uses it (`Game.cpp:183-198`). Remove only incidental ownership by GameScene. Confirm no required constructor side effect before deleting that member. |
 | `Runtime/IGame.h` | Delete | Only one production Game exists. Do not replace it with another interface or callback table. |
-| `Runtime/GameContext.h/.cpp` | Delete | Fold World and runtime state into GameRuntime; expose only direct operations needed by concrete Game. |
-| `Runtime/GameApplication.h/.cpp` | Replace/move | Create application-owned `GameRuntime.h/.cpp`; merge outer shell, Impl, and Context state. |
+| `Runtime/GameContext.h/.cpp` | Delete | Fold World and runtime state into GameApplication; expose only direct operations needed by concrete Game. |
+| `Runtime/GameApplication.h/.cpp` | Replace/move | Create application-owned `GameApplication.h/.cpp`; merge outer shell, Impl, and Context state. |
 | `RenderPassNotificationTimer` | Reduce to cpp-local detail | It does not belong in a public runtime header. Preserve its overlay behavior and remove the implementation-detail unit test. |
 | `GameApplication::GetFontResource` | Delete | Call public `FontAsset::GetFont()` directly; no AssetHandling implementation change. |
 | `Scenes/SceneData.h` records | Retain | `SceneData` is a meaningful importer-to-builder DTO and keeps source schema separate from live objects. |
 | `SceneType`, `GetSceneFile`, `GetSceneName` in `SceneData.h:12-58` | Move/rename | These are game content choices. Define game-local `SceneId` plus one mapping table/switch in scene-loading code. |
 | `SceneLoadContext`, `SceneSource` in `SceneData.h:140-147` | Delete | Pass the few concrete values directly. Remove the callback/lambda layer. |
-| `Scenes/ComponentRegistry.*` | Rename/reduce | Replace the stateless class with free `BuildWorld(const SceneData&, AssetRegistry&, Vector2u)` in `SceneWorldBuilder.*`. Keep the closed visitor; do not add a factory map. |
+| `Scenes/ComponentRegistry.*` | Rename/reduce | Replace the stateless class with free `BuildWorldFromSceneData(const SceneData&, AssetRegistry&, Vector2u)` in `WorldFromSceneData.*`. Keep the closed visitor; do not add a factory map. |
 | `UnrealSceneImporter` | Retain unchanged | Import/conversion is real. Changing its class form adds churn without clarifying the runtime. |
 | `World`, `Actor`, `Component`, `Transform`, `SceneComponent` | Retain | They express real ownership, lifecycle, and spatial responsibilities. |
 | `WorldRenderer` | Retain unchanged | It is the real World-to-render-snapshot boundary; its current `Build` name is sufficient. |
@@ -205,25 +209,40 @@ Header direction stays simple: Main includes `Game.h` and `GameRuntime.h`, const
 | `GraphicsEngine` | Retain singleton | Runtime coordinates active use but does not own singleton storage. Do not wrap it in ServiceLocator during this refactor. |
 | `AssetHandling/*` | No implementation edits | Thomas owns this folder. Adapt only external call sites if his independent API changes require it. |
 | `PublicGameplayConsumer.cpp/.vcxproj` | Delete | The generic external-game contract no longer exists. Keep the separate public-header isolation script for actual remaining GameFramework headers. |
-| Checked-in `.vcxproj`, filters, Premake | Update atomically with moves | GameFramework explicitly lists old Runtime files; Game must list new GameRuntime/scene-loading files. Premake globs alone do not update checked-in projects. |
+| Checked-in `.vcxproj`, filters, Premake | Update atomically with moves | GameFramework explicitly lists old Runtime files; Game must list new GameApplication/scene-loading files. Premake globs alone do not update checked-in projects. |
+
+### Naming pass
+
+Names should state purpose and ownership at the call site. Long, precise names are acceptable; hidden responsibility and context-dependent names are not. Apply this as a focused pass over code touched by the refactor, without renaming stable unrelated APIs.
+
+Use these semantic names unless the implementation reveals a clearer equivalent:
+
+- `LoadAndPrepareGameSceneData`, not `LoadGameSceneData`, because the function both imports and applies game-specific fallback preparation.
+- `BuildWorldFromSceneData`, not `BuildWorld`, because the source and conversion responsibility should be obvious without opening the function.
+- `ProcessPendingSceneLoad`, not `LoadPendingScene`, because it consumes a request, handles failure policy, and may commit a new World.
+- `RequestSceneLoad`, `myPendingSceneId`, and `myCurrentSceneId`, so requests and identities cannot be confused with SceneData or live World objects.
+- `InitializeInputAndApplicationControls` and `RemoveApplicationInputListeners`, so Escape, debug-camera, and render-pass bindings are visibly owned by GameApplication rather than by the game or an unspecified “host.”
+- If test-only types are materially necessary, prefix them with `GameApplication` and name their precise role, such as `GameApplicationFailurePoint`; avoid generic names such as `Options`, `Context`, `Hook`, or `Callback`.
+
+Names such as `GameApplication`, `WorldFromSceneData.*`, `ReloadCurrentScene`, and `WorldRenderer::Build` already communicate their scope sufficiently and should not be churned merely for consistency.
 
 ## 5. Intended ownership and lifetime of major systems
 
 | Object/system | Owner | Lifetime and borrowing rule |
 | --- | --- | --- |
-| `Game` | Automatic local in `wWinMain` | Borrowed by `GameRuntime::Run`; outlives all input callbacks registered by Game. |
-| `GameRuntime` | Automatic local in `wWinMain` | Owns one complete run: initialization, loop, optional live World, and shutdown. Non-movable while HWND exists. |
-| Current `World` | `GameRuntime` via nullable `unique_ptr` | Absent until initial scene commit; replaced only at a scene boundary. Owns Actors; Actors own Components. Cleared before services are deleted. |
+| `Game` | Automatic local in `wWinMain` | Borrowed by `GameApplication::Run`; outlives all input callbacks registered by Game. |
+| `GameApplication` | Automatic local in `wWinMain` | Owns one complete run: initialization, loop, optional live World, and shutdown. Non-movable while HWND exists. |
+| Current `World` | `GameApplication` via nullable `unique_ptr` | Absent until initial scene commit; replaced only at a scene boundary. Owns Actors; Actors own Components. Cleared before services are deleted. |
 | Candidate `World` | Scene transition local | Exists only during pre-commit build/configuration. Destruction before BeginPlay requires no EndPlay. |
-| HWND | `GameRuntime` | Created before graphics/services; destroyed after normal/exception cleanup while InputHandler is still alive. |
-| `InputHandler`, `XInputHandler` | `GameRuntime` | Borrowed by ServiceLocator-owned InputMapper. Must outlive mapper shutdown. |
+| HWND | `GameApplication` | Created before graphics/services; destroyed after normal/exception cleanup while InputHandler is still alive. |
+| `InputHandler`, `XInputHandler` | `GameApplication` | Borrowed by ServiceLocator-owned InputMapper. Must outlive mapper shutdown. |
 | `InputMapper` | `ServiceLocator` | Created for a run. Game/components/runtime remove listeners before deletion. |
 | `AudioManager` | `ServiceLocator` | Created for a run; updated after World; destructor releases SoundEngine. |
-| `AssetRegistry` | `ServiceLocator` | Created for a run; borrowed by game scene loading and BuildWorld. No new owner wrapper. |
-| `GraphicsEngine` | Process singleton | Initialized/driven by GameRuntime; storage persists to static teardown. No ownership claim by runtime. |
-| `WorldRenderer` | Stateless namespace/class boundary | Called by GameRuntime to build snapshots; owns no World or GraphicsEngine. |
-| `SceneData` | Value local during load | Returned by import/game preparation, consumed by BuildWorld, then discarded. |
-| Render command/snapshot/overlay/debug camera host state | `GameRuntime` | Per-run state. It must not create a second owner for assets or World. |
+| `AssetRegistry` | `ServiceLocator` | Created for a run; borrowed by game scene loading and `BuildWorldFromSceneData`. No new owner wrapper. |
+| `GraphicsEngine` | Process singleton | Initialized/driven by GameApplication; storage persists to static teardown. No ownership claim by runtime. |
+| `WorldRenderer` | Stateless namespace/class boundary | Called by GameApplication to build snapshots; owns no World or GraphicsEngine. |
+| `SceneData` | Value local during load | Returned by import/game preparation, consumed by `BuildWorldFromSceneData`, then discarded. |
+| Render command/snapshot/overlay/debug camera host state | `GameApplication` | Per-run state. It must not create a second owner for assets or World. |
 
 Service shutdown order remains explicit and readable:
 
@@ -242,14 +261,14 @@ The explicit render-reference reset ensures the snapshot, notification widget, a
 
 ### Startup
 
-1. `wWinMain` resolves Content root and fills `GameRuntime::Config`.
-2. `wWinMain` constructs concrete Game and GameRuntime, then calls `runtime.Run(game)`.
-3. GameRuntime borrows Game for the duration of `Run`, creates the window, and initializes GraphicsEngine.
-4. GameRuntime installs AssetRegistry, AudioManager, and InputMapper in ServiceLocator.
-5. GameRuntime connects platform input and installs host controls.
-6. GameRuntime marks Game initialization as begun, then calls `Game::Initialize(runtime)`.
+1. `wWinMain` resolves Content root and fills `GameApplication::Config`.
+2. `wWinMain` constructs concrete Game and GameApplication, then calls `application.Run(game)`.
+3. GameApplication borrows Game for the duration of `Run`, creates the window, and initializes GraphicsEngine.
+4. GameApplication installs AssetRegistry, AudioManager, and InputMapper in ServiceLocator.
+5. GameApplication connects platform input and installs application controls, including an Escape listener that requests loop exit.
+6. GameApplication marks Game initialization as begun, then calls `Game::Initialize(application)`.
 7. Game binds game controls, starts music, and queues the required initial `SceneId`.
-8. GameRuntime consumes and loads that initial request synchronously.
+8. GameApplication consumes and loads that initial request synchronously.
 9. The candidate World is imported, built, game-configured, committed, given a fallback debug camera if needed, and begun.
 10. Only then is the window shown and the frame loop entered.
 
@@ -265,7 +284,8 @@ messages / quit
 -> resize or skip minimized frame
 -> timer and clamped delta
 -> InputMapper::Update
--> mouse recenter / host debug-camera request
+-> process Escape quit; leave loop before gameplay/render if requested
+-> mouse recenter / Runtime debug-camera request
 -> Game::Update(World&, delta)
 -> World::Update(delta)
 -> AudioManager::Update(delta)
@@ -277,17 +297,17 @@ Game may request a future scene during input/gameplay. Runtime never clears or r
 
 Game's complete runtime-control surface is deliberately small:
 
-- `RequestScene(SceneId)`: store one last-write-wins request for the next scene boundary; reject `None`/invalid ids and requests after loop shutdown begins.
+- `RequestSceneLoad(SceneId)`: store one last-write-wins request for the next scene boundary; reject `None`/invalid ids and requests after loop shutdown begins.
 - `ReloadCurrentScene()`: request the current committed scene and return false if no scene has committed yet.
 
-Only Game receives `RequestScene` and `ReloadCurrentScene`. It does not need a public `RequestQuit`; Win32 messages own normal quit, and the compile-time test options enforce bounded test runs internally. Components continue to interact with their World and services; they do not receive a scene-transition API. Game input callbacks that capture `GameRuntime&` are registered after Runtime construction, removed by `Game::Shutdown()`, and cannot outlive `GameRuntime::Run`.
+Only Game receives `RequestSceneLoad` and `ReloadCurrentScene`. GameApplication owns quit control: it binds Escape as an application input action, registers the corresponding application listener, and sets its internal quit flag when Escape is pressed. After `InputMapper::Update`, GameApplication observes that flag and leaves the loop before Game update, World update, audio update, or rendering. `WM_QUIT` sets the same flag before the frame starts. Game receives no quit method, and components receive neither quit nor scene-transition control. Game input callbacks that capture `GameApplication&` are registered after application construction, removed by `Game::Shutdown()`, and cannot outlive `GameApplication::Run`.
 
 ### Scene transition
 
 At the single-threaded frame boundary, consume the current request:
 
 ```cpp
-const std::optional<SceneId> requested = std::exchange(myPendingScene, std::nullopt);
+const std::optional<SceneId> requested = std::exchange(myPendingSceneId, std::nullopt);
 if (!requested)
 {
     return;
@@ -295,12 +315,12 @@ if (!requested)
 const SceneId scene = *requested;
 ```
 
-Use the captured concrete `scene` for file selection, logging, candidate construction, and `myCurrentScene`. Any later request writes into the now-empty pending slot and remains queued for the next boundary. Multiple requests before the next boundary remain last-write-wins. There is no synchronization claim: window messages, input, gameplay, and scene loading all run on the application thread.
+Use the captured concrete `scene` for file selection, logging, candidate construction, and `myCurrentSceneId`. Any later request writes into the now-empty pending slot and remains queued for the next boundary. Multiple requests before the next boundary remain last-write-wins. There is no synchronization claim: window messages, input, gameplay, and scene loading all run on the application thread.
 
 Pre-commit:
 
-1. `LoadGameSceneData(scene, contentRoot, services.GetAssetRegistry())` imports and applies game-specific asset fallback policy.
-2. `BuildWorld(sceneData, assets, clientSize)` creates a candidate World.
+1. `LoadAndPrepareGameSceneData(scene, contentRoot, services.GetAssetRegistry())` imports and applies game-specific asset fallback policy.
+2. `BuildWorldFromSceneData(sceneData, assets, clientSize)` creates a candidate World.
 3. `Game::ConfigureWorld(candidate)` adds game-only behavior.
 
 If pre-commit fails:
@@ -312,7 +332,7 @@ If pre-commit fails:
 Commit and activation:
 
 1. Clear the old World while services still exist.
-2. Move in the candidate and set current scene from the captured concrete `scene`.
+2. Move in the candidate and set `myCurrentSceneId` from the captured concrete `scene`.
 3. Reset/ensure the debug camera.
 4. Call `World::BeginPlay`.
 
@@ -320,13 +340,13 @@ A failure after commit is fatal because the old World is gone. Do not add rollba
 
 ### Shutdown and exceptions
 
-On normal exit, stop accepting loop work and call `Game::Shutdown()` once. Whether shutdown succeeds or throws, Runtime then clears the World if present, removes host listeners, releases the mouse, clears snapshot/widget/font references, and calls `ServiceLocator::KillServices`. A normal `Game::Shutdown()` exception becomes the primary failure, is rethrown after resource cleanup, and reaches Main.
+On normal exit, stop accepting loop work and call `Game::Shutdown()` once. Whether shutdown succeeds or throws, Runtime then clears the World if present, removes Game and Runtime input listeners (including Escape), releases the mouse, clears snapshot/widget/font references, and calls `ServiceLocator::KillServices`. A normal `Game::Shutdown()` exception becomes the primary failure, is rethrown after resource cleanup, and reaches Main.
 
 If startup or the loop already has a primary exception after Game initialization began, Runtime attempts `Game::Shutdown()` once. A secondary shutdown or cleanup exception is logged while the original exception remains the one rethrown. Early platform/graphics/service failures before Game initialization begins skip Game shutdown but still clean all partial Runtime/service state. Cleanup code must tolerate `myWorld == nullptr`, because Initialize or the initial pre-commit load can fail before the first World commits.
 
 Implement cleanup as explicit best-effort phases rather than one chain that aborts on the first cleanup exception. Each remaining phase is still attempted. The first failure becomes the primary exception when no earlier failure exists; later cleanup failures are logged, so World, listeners, render references, services, and window all receive their cleanup opportunity.
 
-Keep top-level logging in Main. Use `void GameRuntime::Run(Game&)` with exceptions as the failure channel; Main returns 0 after success and 1 after catching an exception. The current `Run` always returns 0, so an `int` return adds no information (`GameApplication.cpp:150`).
+Keep top-level logging in Main. Use `void GameApplication::Run(Game&)` with exceptions as the failure channel; Main returns 0 after success and 1 after catching an exception. The current `Run` always returns 0, so an `int` return adds no information (`GameApplication.cpp:150`).
 
 ## 7. Scene-loading simplification
 
@@ -334,11 +354,11 @@ The target scene path is:
 
 ```text
 captured SceneId
--> free LoadGameSceneData in GameSceneLoading.cpp
+-> free LoadAndPrepareGameSceneData in GameSceneLoading.cpp
 -> UnrealSceneImporter::ImportScene
 -> prepare game-specific material fallback through AssetRegistry
 -> SceneData value
--> free BuildWorld
+-> free BuildWorldFromSceneData
 -> candidate World
 -> Game::ConfigureWorld
 -> commit / camera / BeginPlay
@@ -346,10 +366,10 @@ captured SceneId
 
 Keep these boundaries:
 
-- **Game scene selection and fallback policy** are game-specific and live in the free `LoadGameSceneData` function in `Source/Application/Game/GameSceneLoading.cpp`.
+- **Game scene selection and fallback policy** are game-specific and live in the free `LoadAndPrepareGameSceneData` function in `Source/Application/Game/GameSceneLoading.cpp`.
 - **Unreal parsing/conversion** remains an importer responsibility.
 - **SceneData** remains a plain value representation between import and live objects.
-- **BuildWorld** remains the closed mapping from SceneData records to Actor/Component instances.
+- **BuildWorldFromSceneData** remains the closed mapping from SceneData records to Actor/Component instances.
 - **World** owns live lifecycle after construction.
 
 Remove these layers:
@@ -361,20 +381,20 @@ Remove these layers:
 - no `ComponentRegistry` object when a free build function expresses the work;
 - no registration/factory framework for the fixed component set.
 
-`BuildWorld` may need narrow access to authored Actor metadata currently granted through `friend class ComponentRegistry`. Rename that friendship to the builder only if necessary. Prefer legitimate narrow setters for authored active/tags/archetype data when they improve the object API; do not create a builder interface or generic mutation channel.
+`BuildWorldFromSceneData` may need narrow access to authored Actor metadata currently granted through `friend class ComponentRegistry`. Rename that friendship to the builder only if necessary. Prefer legitimate narrow setters for authored active/tags/archetype data when they improve the object API; do not create a builder interface or generic mutation channel.
 
 ## 8. Explicit decisions for the named abstractions
 
 | Abstraction | Decision | Why |
 | --- | --- | --- |
 | `IGame` | Remove | One concrete Game; virtual hooks exist for reuse/tests, not runtime behavior. |
-| `GameContext` | Remove | It duplicates GameRuntime state and forwards operations. World ownership becomes visible on GameRuntime. |
-| `GameApplication` | Replace with `GameRuntime` | The name “runtime” describes the loop/world owner directly. |
-| `GameApplication::Impl` | Merge into GameRuntime | One lifetime should have one visible owner; no ABI/PImpl requirement. |
+| `GameContext` | Remove | It duplicates GameApplication state and forwards operations. World ownership becomes visible on GameApplication. |
+| Legacy engine-owned `GameApplication` facade | Move and simplify as the application-owned `GameApplication` | The concrete class directly owns the loop and World instead of hiding them in an engine-side facade. |
+| `GameApplication::Impl` | Merge into GameApplication | One lifetime should have one visible owner; no ABI/PImpl requirement. |
 | `SceneSource` | Remove | One lambda forwards one concrete load operation. |
-| `SceneLoadContext` | Remove | Pass content root and AssetRegistry explicitly where required; client size belongs at BuildWorld. |
+| `SceneLoadContext` | Remove | Pass content root and AssetRegistry explicitly where required; client size belongs at `BuildWorldFromSceneData`. |
 | `GameScene` | Remove as a class | Retain its real load/preparation responsibility as a game-local free function in `GameSceneLoading.*`. |
-| `ComponentRegistry` | Replace with free `BuildWorld` | It is a stateless closed-set builder, not a registry. |
+| `ComponentRegistry` | Replace with free `BuildWorldFromSceneData` | It is a stateless closed-set builder, not a registry. |
 | `SceneData` | Retain | It is a real data boundary and supports candidate construction. |
 | `UnrealSceneImporter` | Retain unchanged | Source-format conversion is real. Changing its class form adds churn without helping the runtime architecture. |
 | `World/Actor/Component` | Retain | They encode clear ownership and lifecycle. |
@@ -388,9 +408,9 @@ Do not edit `Source/Engine/GameFramework/AssetHandling` as part of this refactor
 
 The preferred target requires no new AssetHandling abstraction. Keep its use localized to three places:
 
-1. GameRuntime creates and initializes AssetRegistry through ServiceLocator.
-2. `LoadGameSceneData` resolves authored/fallback materials and reads useful error information.
-3. `BuildWorld` resolves mesh/material assets while constructing components.
+1. GameApplication creates and initializes AssetRegistry through ServiceLocator.
+2. `LoadAndPrepareGameSceneData` resolves authored/fallback materials and reads useful error information.
+3. `BuildWorldFromSceneData` resolves mesh/material assets while constructing components.
 
 Expected boundary, subject to Thomas's independent implementation:
 
@@ -411,7 +431,7 @@ Each stage should be reviewable and buildable on its own. Do not have parallel w
 
 Files: external AssetHandling callers and tests only when they demonstrably drift from the API present in the implementation checkout; build notes.
 
-- Run clean Game, GameFrameworkTests, and GameRuntimeTests builds in a normal allowed environment.
+- Run clean Game, GameFrameworkTests, and GameApplicationTests builds in a normal allowed environment.
 - Record pre-existing build/runtime failures before changing architecture.
 - Resolve external test/caller drift such as stale `StaticMeshData::Mesh`/material `.Parent` references against the actual expected API.
 - Do not edit `AssetHandling`, mandate an unrelated rebase, or wait for Thomas unless the actual checkout lacks a usable boundary.
@@ -420,21 +440,21 @@ Verification: a recorded clean baseline, or a short explicit blocker list that s
 
 ### Stage 1 — Move the runtime mechanically into the application
 
-Files: `Runtime/GameApplication.*` -> `Application/Game/GameRuntime.*`, Main include/call site, Game/GameFramework project and filter files, Premake, GameRuntimeTests project, timer test.
+Files: `Runtime/GameApplication.*` -> `Application/Game/GameApplication.*`, Main include/call site, Game/GameFramework project and filter files, Premake, GameApplicationTests project, timer test.
 
 - Move and rename the runtime owner into the Game application, flattening the outer shell and `Impl` only where that can remain behavior-preserving.
 - Temporarily retain `IGame`, `GameContext`, `SceneSource`, and the existing GameScene lambda contract. This stage changes dependency location and visible ownership, not gameplay behavior.
-- Preserve window/input borrows, exact frame order, scene behavior, cleanup policy, ServiceLocator ownership, and GraphicsEngine singleton behavior.
+- Preserve window/input borrows, exact frame order, scene behavior, cleanup policy, ServiceLocator ownership, and GraphicsEngine singleton behavior. Keep platform/debug/render-pass input under clearly named application-control functions rather than moving it into Game.
 - Make the overlay timer cpp-local and remove its implementation-detail unit test at `GameFrameworkTests.cpp:542-552` in this same stage. Remove the font forwarding helper.
-- Update `GameRuntimeTests.vcxproj`, which directly compiles application sources rather than linking the WindowedApp: add `GameRuntime.cpp`, keep references only to GameFramework/Graphics/CommonUtilities/Logger and external libraries, and do not add a Game executable project reference.
+- Update `GameApplicationTests.vcxproj`, which directly compiles application sources rather than linking the WindowedApp: add `GameApplication.cpp`, keep references only to GameFramework/Graphics/CommonUtilities/Logger and external libraries, and do not add a Game executable project reference.
 
 Verification: existing runtime scenarios behave identically; hidden/visible startup, minimized skip/resize, input once per frame, overlay, debug camera, audio, D3D diagnostics, and exception cleanup still pass.
 
 ### Stage 2 — Replace ComponentRegistry with the concrete builder
 
-Files: `Scenes/ComponentRegistry.*` -> `Scenes/SceneWorldBuilder.*`, Actor access, framework tests, project/filter files.
+Files: `Scenes/ComponentRegistry.*` -> `Scenes/WorldFromSceneData.*`, Actor access, framework tests, project/filter files.
 
-- Introduce free `BuildWorld` with the existing closed visitor.
+- Introduce free `BuildWorldFromSceneData` with the existing closed visitor.
 - Preserve candidate construction, diagnostics, active-camera validation, and missing-asset behavior.
 - Remove the runtime's registry member.
 
@@ -442,22 +462,23 @@ Verification: every SceneData variant builds the same component; malformed actor
 
 ### Stage 3 — Atomically make the runtime concrete and simplify scene loading
 
-Files: `Game.h/.cpp`, `GameRuntime.*`, `SceneData.h`, remove `IGame.h` and `GameContext.*`, remove `GameScene.*`, add `GameSceneLoading.h/.cpp`, Main, runtime tests, PublicGameplayConsumer target/files, project/filter/Premake entries.
+Files: `Game.h/.cpp`, `GameApplication.*`, `SceneData.h`, remove `IGame.h` and `GameContext.*`, remove `GameScene.*`, add `GameSceneLoading.h/.cpp`, Main, runtime tests, PublicGameplayConsumer target/files, project/filter/Premake entries.
 
-- Change Main to construct `Game` and `GameRuntime::Config`, construct GameRuntime, and call `runtime.Run(game)`.
+- Change Main to construct `Game` and `GameApplication::Config`, construct GameApplication, and call `application.Run(game)`.
 - Remove Game inheritance/virtual dispatch, `IGame`, `GameContext`, SceneSource, SceneLoadContext, the Main lambda, and the stateful GameScene wrapper together. Do not introduce a transitional interface, callback, or engine-to-application include.
-- Add free game-local `LoadGameSceneData`; move SceneId/path/display mapping into application code; keep SceneData, importer, and BuildWorld boundaries.
-- Fold World, optional current/pending SceneId, client size, content root, and quit state directly into GameRuntime.
-- Add only `RequestScene` and `ReloadCurrentScene` to the Game-facing Runtime API. Actual Game input callbacks capture Runtime and remove those captures during `Game::Shutdown()`; components receive neither operation.
+- Add free game-local `LoadAndPrepareGameSceneData`; move SceneId/path/display mapping into application code; keep SceneData, importer, and `BuildWorldFromSceneData` boundaries.
+- Fold World, optional current/pending SceneId, client size, content root, and quit state directly into GameApplication.
+- Add only `RequestSceneLoad` and `ReloadCurrentScene` to the Game-facing Runtime API. Actual Game input callbacks capture Runtime and remove those captures during `Game::Shutdown()`; components receive neither operation.
+- Bind Escape and register its listener in `InitializeInputAndApplicationControls`; pressing it sets GameApplication's internal quit flag. `WM_QUIT` sets the same flag. Do not expose quit through Game, GameContext, or a public callback merely to make Escape work.
 - Apply the final transition policy here, once: consume one captured concrete id at the single-threaded boundary, preserve a newer pending request, do not auto-retry a failed later candidate, and make initial pre-commit/post-commit failures fatal.
 - Make `Game::Shutdown()` independent of World. Unify normal/exception cleanup so a shutdown throw still clears World/render references/services and is rethrown, while a secondary cleanup throw preserves the earlier primary failure.
-- Clear World, then host listeners/mouse, then snapshot/widget/font references, then call existing `ServiceLocator::KillServices` before Runtime/window destruction.
+- Clear World, then Game and Runtime listeners/mouse, then snapshot/widget/font references, then call existing `ServiceLocator::KillServices` before Runtime/window destruction.
 - Delete `PublicGameplayConsumer.cpp` and `PublicGameplayConsumer.vcxproj` (and any solution entry dedicated to that hypothetical consumer). Update `RunPublicHeaderIsolation.ps1` to remove the deleted `Runtime` folder from its folder list; it continues to compile the GameFramework headers that actually remain.
 - Confirm that removing GameScene's MeshLibrary member removes no required initialization side effect; retain MeshLibrary for the concrete skeletal demo.
 
-`GameRuntimeTests.vcxproj` continues to compile the application implementation directly. Replace `GameScene.cpp` with `GameRuntime.cpp` and `GameSceneLoading.cpp`; keep direct Game/Spin/MeshLibrary/PrimitiveMeshBuilder sources and lower-library references. Define `AGP_RUNTIME_TESTS` only for this target. Under that macro, compile one small concrete `RuntimeTestOptions` structure with exactly: an initial SceneId, a maximum frame count, at most one requested transition plus its phase, and a small failure-point enum. It may select representative initialize/load/configure/BeginPlay-update/shutdown failures, but it must not contain callbacks, scripts, a fake Game, or a generic framework. No test API is present in production builds.
+`GameApplicationTests.vcxproj` may continue compiling the needed application implementation directly if that remains the simplest test target. Replace obsolete source entries after moves and keep only the lower-library references the concrete code needs. Prefer tests that run the actual GameApplication with real Game behavior, real scene requests, and staged Content. Delete or simplify fixtures that exist only to implement the former `IGame`/`GameContext`/`SceneSource` contract.
 
-Verification: entry/lifecycle order; initial scene and one later transition; reload; later failure preserves old World, reports once, and leaves no implicit retry; request queued during activation survives; listener removal; BeginPlay/EndPlay counts; representative initialize, activation/update, and shutdown failures; deterministic quit at max frames; actual Blockout/chest imports and material fallback; no AssetHandling edits.
+Verification: entry/lifecycle order; initial scene and one later transition; reload; Escape and window close both exit through GameApplication's quit state; later failure preserves old World, reports once, and leaves no implicit retry; request queued during activation survives; listener removal; BeginPlay/EndPlay counts; representative initialize, activation/update, and shutdown failures where focused injection is materially justified; actual Blockout/chest imports and material fallback; no AssetHandling edits.
 
 ### Stage 4 — Documentation and final project cleanup
 
@@ -480,7 +501,8 @@ Before implementation, establish a clean baseline with an allowed normal build e
 | Risk | Required verification |
 | --- | --- |
 | Moving runtime to Application accidentally creates Engine -> Application dependency | Inspect project references/includes: Game depends on GameFramework; GameFramework must not include Game headers. |
-| A new callback/interface is introduced to recover test injection | Architecture review: GameRuntime calls concrete Game; test-only faults remain compiled only in the test target. |
+| A generic or elaborate test harness recreates removed abstractions | Architecture review: GameApplication calls concrete Game; obsolete generic-runtime fixtures are removed or simplified; any test-only control is tiny, event-specific, materially necessary, and compiled only in the test target. |
+| Escape/quit ownership leaks back into Game or a generic Context | Verify Escape is bound and handled by GameApplication, `WM_QUIT` reaches the same internal flag, Game exposes no quit API, and Runtime removes its listener during cleanup. |
 | Input mapper outlives borrowed platform handlers | Verify Runtime is non-movable; mapper is deleted before InputHandler/XInputHandler; run focus loss, mouse look, camera, F4/F7/F8, F5/F6. |
 | World clears after services and EndPlay touches dead input/assets | Assert shutdown order; test components unregister listeners during EndPlay; inspect locator is empty afterward. |
 | Scene identity changes during load | Queue another request during an attempt; assert committed current id is the captured id and newer request runs next. |
@@ -498,7 +520,7 @@ Intended build/test matrix after each relevant stage:
 
 - Debug and Release Game builds;
 - GameFrameworkTests after builder/import changes;
-- GameRuntimeTests scenarios covering sample/chest content, text overlay, camera/render-pass controls, invalid initial load, and representative initialize, activation/update, and shutdown failures through the one bounded test-options structure;
+- GameApplicationTests scenarios covering sample/chest content, text overlay, Escape quit, camera/render-pass controls, invalid initial load, and representative lifecycle failures, using actual Game/runtime behavior wherever possible and only minimal event-specific test controls where materially needed;
 - actual staged Content run for imported scenes and material fallback;
 - public/header smoke for the APIs that remain intentionally supported;
 - D3D diagnostic queue inspection where available.
@@ -507,16 +529,17 @@ Intended build/test matrix after each relevant stage:
 
 ### Entry and ownership
 
-- [ ] Starting at Main, a reader reaches concrete Game and concrete GameRuntime without an interface or forwarding lambda.
-- [ ] GameRuntime visibly owns the loop, current World, pending/current scene state, window, and per-run platform/render state.
+- [ ] Starting at Main, a reader reaches concrete Game and concrete GameApplication without an interface or forwarding lambda.
+- [ ] GameApplication visibly owns the loop, current World, pending/current scene state, window, and per-run platform/render state.
 - [ ] ServiceLocator visibly owns InputMapper, AudioManager, and AssetRegistry.
-- [ ] GraphicsEngine is clearly documented as a process singleton coordinated, not owned, by GameRuntime.
+- [ ] GraphicsEngine is clearly documented as a process singleton coordinated, not owned, by GameApplication.
 - [ ] World -> Actor -> Component remains the sole live gameplay ownership chain.
 
 ### Runtime flow
 
 - [ ] Startup order is readable in one function or one short sequence of meaningfully named phase methods.
 - [ ] Frame order is readable without jumping through Context or callback wrappers.
+- [ ] Escape and `WM_QUIT` both set GameApplication's internal quit state; Game and Components expose no quit API.
 - [ ] Shutdown order shows Game, World, listener, service, and window cleanup directly.
 - [ ] Exception cleanup attempts Game shutdown at most once and preserves the original failure.
 
@@ -528,7 +551,7 @@ Intended build/test matrix after each relevant stage:
 - [ ] Recoverable candidate failure reports once and never auto-retries.
 - [ ] Initial pre-commit and post-commit failures are explicitly fatal.
 - [ ] SceneId/file mapping is game-local.
-- [ ] The path is direct: game-local load -> importer -> SceneData -> BuildWorld -> candidate -> commit.
+- [ ] The path is direct: game-local load/prepare -> importer -> SceneData -> `BuildWorldFromSceneData` -> candidate -> commit.
 - [ ] No `SceneSource`, `SceneLoadContext`, stateful GameScene, or fake registry remains.
 
 ### Abstractions
@@ -543,7 +566,9 @@ Intended build/test matrix after each relevant stage:
 
 - [ ] Game methods receive Runtime, World, or no argument according to actual need.
 - [ ] No uninitialized current-scene or impossible nullable service/source state remains in the valid run path.
-- [ ] Tests cover actual runtime behavior and bounded failure injection without recreating IGame.
+- [ ] Tests favor the actual Game/runtime path; obsolete generic-runtime tests are removed or simplified instead of being preserved through a replacement interface, Context, callback system, or scripted harness.
+- [ ] Any test-only control is tiny, materially necessary, named for the concrete runtime event it controls, and absent from production builds.
+- [ ] Touched functions, classes, fields, and files have purpose-revealing names; longer explicit names are preferred over hidden or ambiguous responsibility, without unrelated rename churn.
 - [ ] PublicGameplayConsumer source/project are deleted; public-header isolation covers only supported GameFramework headers.
 - [ ] Project files, filters, Premake, and authoritative docs match the final file layout.
 
@@ -551,9 +576,9 @@ Intended build/test matrix after each relevant stage:
 
 The completed draft was independently audited from four perspectives and revised before delivery:
 
-- **Simplicity / unnecessary abstraction:** removed the proposed one-line `Game::Run`, chose direct `runtime.Run(game)`, made scene loading a free game-local function, and excluded optional importer/ServiceLocator cleanup.
+- **Simplicity / unnecessary abstraction:** removed the proposed one-line `Game::Run`, chose direct `application.Run(game)`, made scene loading a free game-local function, and excluded optional importer/ServiceLocator cleanup.
 - **Readability / newcomer tracing:** specified the two-operation Game-facing scene API, the lifetime of Runtime-capturing input callbacks, nullable pre-initial-World state, concrete SceneId consumption, and deletion of PublicGameplayConsumer.
 - **Ownership / lifecycle correctness:** removed World from Game shutdown, made World cleanup a Runtime responsibility, added render-reference release before AssetRegistry deletion, and specified best-effort cleanup with primary-exception preservation.
-- **Implementation feasibility / scope:** moved the runtime mechanically before the atomic contract removal, documented direct-compilation of app sources in GameRuntimeTests, bounded test-only controls, header/project direction, timer-test removal, and the baseline handling of external AssetHandling API drift.
+- **Implementation feasibility / scope:** moved the runtime mechanically before the atomic contract removal, made exact helper/file placement advisory, preferred concrete behavior tests over preservation of generic fixtures, bounded any materially necessary test controls, clarified naming, preserved header/project direction, and documented timer-test removal plus baseline handling of external AssetHandling API drift.
 
-The refactor is complete only when a new programmer can answer, from Main and GameRuntime alone, where the program starts, who owns the loop and World, how a scene is loaded, how Game participates, where input/audio/assets come from, and who shuts every major system down.
+The refactor is complete only when a new programmer can answer, from Main and GameApplication alone, where the program starts, who owns the loop and World, how a scene is loaded, how Game participates, where input/audio/assets come from, and who shuts every major system down.

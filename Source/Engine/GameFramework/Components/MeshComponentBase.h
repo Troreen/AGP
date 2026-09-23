@@ -1,15 +1,14 @@
 #pragma once
 
 #include "GameFramework/Components/SceneComponent.h"
-#include "../AssetHandling/MaterialAsset.h"
-#include "../AssetHandling/MeshAsset.h"
+#include "Matrix4x4.hpp"
 
 #include <array>
 #include <memory>
-#include <string>
 #include <vector>
 
-class Mesh;
+class MaterialAsset;
+class MeshAsset;
 class SkeletalMeshComponent;
 
 class WorldRenderer;
@@ -51,7 +50,7 @@ protected:
 
 private:
 	virtual bool HasSkinning() const;
-	virtual const std::array<CU::Matrix4f, 128>* GetJointTransforms() const;
+	virtual const std::array<CommonUtilities::Matrix4f, 128>* GetJointTransforms() const;
 
 	std::shared_ptr<MeshAsset> myMesh;
 	std::vector<std::shared_ptr<MaterialAsset>> myMaterials;

@@ -114,8 +114,10 @@ compiled by the GameFramework project.
 - Scene and asset construction errors reject the candidate World.
 - A failed scene load leaves the current World running.
 - A successful load replaces the World only after construction succeeds.
-- The `ActiveCamera` tag selects an imported camera. Without one, the debug-camera
-  fallback is activated.
+- Tag the scene component for the intended camera with `ActiveCamera` in the
+  exported scene. The importer turns that component into `CameraData`, which
+  selects the camera in the built World. Without one, the debug-camera fallback
+  is activated.
 
 ## Removed legacy paths
 

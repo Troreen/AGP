@@ -198,10 +198,7 @@
     <ClInclude Include="GameFrameworkLog.h" />
     <ClInclude Include="LeafNode.h" />
     <ClInclude Include="Rendering\WorldRenderer.h" />
-    <ClInclude Include="Runtime\GameApplication.h" />
-    <ClInclude Include="Runtime\GameContext.h" />
-    <ClInclude Include="Runtime\IGame.h" />
-    <ClInclude Include="Scenes\ComponentRegistry.h" />
+    <ClInclude Include="Scenes\WorldFromSceneData.h" />
     <ClInclude Include="Scenes\SceneData.h" />
     <ClInclude Include="SequenceNode.h" />
     <ClInclude Include="ServiceLocator.h" />
@@ -232,9 +229,7 @@
     <ClCompile Include="FallbackNode.cpp" />
     <ClCompile Include="GameFrameworkLog.cpp" />
     <ClCompile Include="Rendering\WorldRenderer.cpp" />
-    <ClCompile Include="Runtime\GameApplication.cpp" />
-    <ClCompile Include="Runtime\GameContext.cpp" />
-    <ClCompile Include="Scenes\ComponentRegistry.cpp" />
+    <ClCompile Include="Scenes\WorldFromSceneData.cpp" />
     <ClCompile Include="SequenceNode.cpp" />
     <ClCompile Include="ServiceLocator.cpp" />
     <ClCompile Include="SimdJson\simdjson.cpp">
