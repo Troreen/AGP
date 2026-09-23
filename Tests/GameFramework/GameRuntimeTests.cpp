@@ -62,11 +62,11 @@ public:
 		}
 		Check(name == "ChestMaterials", "Wrong scene");
 		Check(ServiceLocator::GetInstance().GetInputMapper() && ServiceLocator::GetInstance().GetInputMapper()->GetInputHandler(), "ServiceLocator input service mismatch");
-		Check(&ServiceLocator::GetInstance().GetAssetRegistry() == &AssetRegistry::Get(), "ServiceLocator asset service mismatch");
-		Check(bool(AssetRegistry::Get().ResolveMaterial(AssetId{"Shaders/CubeMaterial.mat"})), "Flat material did not load");
-		const auto parameterInstance = AssetRegistry::Get().ResolveMaterial(AssetId{"ChestMaterial_Alpha1"});
-		Check(bool(parameterInstance), AssetRegistry::Get().GetLastError().c_str());
-		Check(bool(AssetRegistry::Get().ResolveMaterial(AssetId{"Shaders/ChestMaterial_Alpha2.mat"})), "Material texture overrides did not load");
+		AssetRegistry& assets = ServiceLocator::GetInstance().GetAssetRegistry();
+		Check(bool(assets.ResolveMaterial(AssetId{"Shaders/CubeMaterial.mat"})), "Flat material did not load");
+		const auto parameterInstance = assets.ResolveMaterial(AssetId{"ChestMaterial_Alpha1"});
+		Check(bool(parameterInstance), assets.GetLastError().c_str());
+		Check(bool(assets.ResolveMaterial(AssetId{"Shaders/ChestMaterial_Alpha2.mat"})), "Material texture overrides did not load");
 		Check(world.FindActor("__DebugCamera") && world.GetActiveCamera(), "Imported scene did not install the debug camera");
 		auto* chest = world.FindActor("Chest_Opaque");
 		Check(chest && chest->GetComponent<StaticMeshComponent>(), "Imported chest mesh missing");
@@ -408,7 +408,7 @@ int main(int argc, char** argv)
         bool audioCleared = false, assetsCleared = false;
         try { ServiceLocator::GetInstance().GetAudioManager(); } catch (const std::logic_error&) { audioCleared = true; }
         try { ServiceLocator::GetInstance().GetAssetRegistry(); } catch (const std::logic_error&) { assetsCleared = true; }
-        Check(audioCleared && assetsCleared, "Shutdown left stale borrowed services");
+		Check(audioCleared && assetsCleared, "Shutdown left stale owned services");
 		const auto diagnostics = GraphicsEngine::Get().CollectDeviceDiagnostics();
 		for (const auto& error : diagnostics.Errors)
 		{

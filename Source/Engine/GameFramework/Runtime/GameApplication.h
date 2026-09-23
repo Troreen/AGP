@@ -1,10 +1,12 @@
 #pragma once
+#include "GameFramework/AssetHandling/FontAsset.h"
 #include "GameFramework/Scenes/SceneData.h"
+
 #include <algorithm>
 #include <memory>
+
 class IGame;
 class Font;
-class FontHandle;
 
 class RenderPassNotificationTimer
 {
@@ -45,6 +47,6 @@ public:
 	int Run(IGame& game, const Config& config, SceneSource source = {});
 
 private:
-	static std::shared_ptr<Font> GetFontResource(const FontHandle& asset);
+	static std::shared_ptr<Font> GetFontResource(const std::shared_ptr<FontAsset>& asset);
 	class Impl;
 };

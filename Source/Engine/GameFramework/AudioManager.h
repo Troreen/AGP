@@ -29,7 +29,7 @@ class AudioManager
 {
 public:
 	AudioManager();
-	~AudioManager() = default;
+	~AudioManager();
 	AudioManager(const AudioManager&) = delete;
 	AudioManager& operator=(const AudioManager&) = delete;
 
@@ -58,13 +58,8 @@ public:
 
 	void ResetSounds();
 
-	static AudioManager* GetInstance();
-	static void Shutdown();
-
 private:
 	void RegisterAllEvents();
-
-	static inline AudioManager* myInstance = nullptr;
 
 	std::unordered_map<SoundID, SoundEventInstanceHandle> myMusicList;
 	std::unordered_map<BusID, std::string> myBusses;
@@ -78,6 +73,7 @@ private:
 	static inline float myBusVolume[2];
 	float myEventVolume;
 	SoundID myFadeID;
+	bool myInitialized = false;
 
 	CommonUtilities::Vector3f myListenerPosition;
 };

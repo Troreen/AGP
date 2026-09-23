@@ -84,9 +84,6 @@
     <ClInclude Include="Runtime\IGame.h">
       <Filter>Runtime</Filter>
     </ClInclude>
-    <ClInclude Include="Scenes\AssetRefs.h">
-      <Filter>Scenes</Filter>
-    </ClInclude>
     <ClInclude Include="Scenes\ComponentRegistry.h">
       <Filter>Scenes</Filter>
     </ClInclude>
@@ -165,9 +162,6 @@
     </ClCompile>
     <ClCompile Include="Runtime\GameContext.cpp">
       <Filter>Runtime</Filter>
-    </ClCompile>
-    <ClCompile Include="Scenes\AssetRefs.cpp">
-      <Filter>Scenes</Filter>
     </ClCompile>
     <ClCompile Include="Scenes\ComponentRegistry.cpp">
       <Filter>Scenes</Filter>

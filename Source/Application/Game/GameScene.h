@@ -13,7 +13,7 @@ public:
 
 private:
 	void PrepareAssets(SceneData& aSceneData, SceneLoadContext& aSceneLoadContext);
-	void PrepareMaterial(MaterialInstanceData& aMaterialData, const AssetId& aFallbackMaterial, AssetRegistry& aAssetRegistry);
+	void PrepareMaterial(MaterialInstanceData& aMaterialData, const std::string& aFallbackMaterial, AssetRegistry& aAssetRegistry);
 	MeshLibrary myMeshLibrary;
 	std::filesystem::path myContentRoot;
 	bool myIsInitialized = false;

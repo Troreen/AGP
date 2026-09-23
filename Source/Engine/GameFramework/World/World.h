@@ -6,6 +6,9 @@ class WorldRenderer;
 
 class World
 {
+	friend class Actor;
+	friend class WorldRenderer;
+
 public:
 	World() = default;
 
@@ -31,6 +34,4 @@ private:
 	CameraComponent* myCamera = nullptr;
 	bool myUpdating = false;
 	bool myClearing = false;
-	friend class Actor;
-	friend class WorldRenderer;
 };

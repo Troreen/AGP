@@ -1,6 +1,7 @@
 #include "InputFixture.h"
-#include "CameraControlsComponent.h"
 #include "SpinComponent.h"
+#include "GameFramework/Components/CameraComponent.h"
+#include "GameFramework/Components/DebugCameraController.h"
 #include "GameFramework/World/World.h"
 #include "GameFramework/Components/SceneComponent.h"
 #include "EnumKeyCode.h"
@@ -61,9 +62,19 @@ namespace
 
 		explicit CameraFixture(const Vector3f& authored = {})
 		{
+			Native.Input.BindActionToInputCode("CameraLookEnable", EKeyCode::MOUSERBUTTON);
+			Native.Input.BindActionToInputCode("CameraForward", EKeyCode::W);
+			Native.Input.BindActionToInputCode("CameraBack", EKeyCode::S);
+			Native.Input.BindActionToInputCode("CameraLeft", EKeyCode::A);
+			Native.Input.BindActionToInputCode("CameraRight", EKeyCode::D);
+			Native.Input.BindActionToInputCode("CameraUp", EKeyCode::SPACE);
+			Native.Input.BindActionToInputCode("CameraDown", EKeyCode::CONTROL);
+			Native.Input.BindActionToInputCode("CameraLookDelta", EPointerCode::MOUSE_DELTA);
 			Camera = Session->SpawnActor("Controlled camera");
 			Camera->GetTransform().SetLocalRotationDegrees(authored);
-			Camera->AddComponent<CameraControlsComponent>();
+			auto* cameraComponent = Camera->AddComponent<CameraComponent>();
+			Camera->AddComponent<DebugCameraController>();
+			Session->SetActiveCamera(cameraComponent);
 			Session->BeginPlay();
 		}
 
@@ -152,7 +163,7 @@ int RunCameraControlsTests()
 		MixedInputAndClamp();
 		StartupAim();
 		FrameTimeSpin();
-		std::cout << "PASS: camera controls and automatic frame-time chest spin\n";
+		std::cout << "PASS: debug-camera controls and automatic frame-time chest spin\n";
 		return 0;
 	}
 	catch (const std::exception& error)

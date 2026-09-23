@@ -84,24 +84,29 @@ private:
 	void LoadPendingScene();
 	void ShutdownServices();
 	void RecenterMouseLook();
-	void UpdateRenderPassTitle();
 	void ShowRenderPassNotification();
+
 	IGame& myGame;
 	Config myConfig;
 	SceneSource mySceneSource;
 	GameContext myContext;
 	ComponentRegistry myRegistry;
+
 	HWND myMainWindowHandle = nullptr;
+
 	CommonUtilities::InputHandler myInputHandler;
 	CommonUtilities::XInputHandler myXInputHandler;
 	std::vector<unsigned> myHostInputListenerIDs;
+
 	GraphicsCommandList myCommandList;
 	GraphicsEngine::RenderSceneSnapshot mySnapshot;
 	std::shared_ptr<TextWidget> myRenderPassNotificationWidget;
-	FontHandle myRenderFont;
+	std::shared_ptr<FontAsset> myRenderFont;
 	RenderPassNotificationTimer myRenderPassNotification;
+
 	bool myToggleDebugCameraRequested = false;
 	bool myInitialWorldStarted = false;
+
 	DebugCameraService myDebugCamera;
 };
 
@@ -180,7 +185,8 @@ GraphicsEngine& GameApplication::Impl::InitializeWindowAndGraphics()
 
 void GameApplication::Impl::InitializeServices()
 {
-	AssetRegistry& assets = AssetRegistry::Get();
+	ServiceLocator& services = ServiceLocator::GetInstance();
+	AssetRegistry& assets = *services.SetAssetRegistry(new AssetRegistry());
 	assets.Initialize(myContext.myContentRoot);
 	if (!assets.IsInitialized())
 	{
@@ -190,7 +196,7 @@ void GameApplication::Impl::InitializeServices()
 	// missing font does not prevent startup.
 	if (myConfig.EnableRenderDiagnostics)
 	{
-		const FontHandle font = assets.ResolveFont(AssetId{"Fonts/CascadiaCode.font.json"});
+		const std::shared_ptr<FontAsset> font = assets.GetAsset<FontAsset>("Fonts/CascadiaCode.font.json");
 		if (font)
 		{
 			myRenderFont = font;
@@ -206,12 +212,10 @@ void GameApplication::Impl::InitializeServices()
 		}
 	}
 
-	AudioManager* audio = AudioManager::GetInstance();
+	AudioManager* audio = services.SetAudioManager(new AudioManager());
 	audio->Init();
 
-	ServiceLocator::GetInstance().SetInputMapper(new CommonUtilities::InputMapper());
-	ServiceLocator::GetInstance().SetAudioManager(audio);
-	ServiceLocator::GetInstance().SetAssetRegistry(&assets);
+	services.SetInputMapper(new CommonUtilities::InputMapper());
 }
 
 void GameApplication::Impl::InitializeInputAndHostControls()
@@ -224,6 +228,14 @@ void GameApplication::Impl::InitializeInputAndHostControls()
 	input.BindActionToInputCode("DebugCamera", EKeyCode::F1);
 	input.BindActionToInputCode("PreviousRenderPass", EKeyCode::F5);
 	input.BindActionToInputCode("NextRenderPass", EKeyCode::F6);
+	input.BindActionToInputCode("CameraLookEnable", EKeyCode::MOUSERBUTTON);
+	input.BindActionToInputCode("CameraForward", EKeyCode::W);
+	input.BindActionToInputCode("CameraBack", EKeyCode::S);
+	input.BindActionToInputCode("CameraLeft", EKeyCode::A);
+	input.BindActionToInputCode("CameraRight", EKeyCode::D);
+	input.BindActionToInputCode("CameraUp", EKeyCode::SPACE);
+	input.BindActionToInputCode("CameraDown", EKeyCode::CONTROL);
+	input.BindActionToInputCode("CameraLookDelta", EPointerCode::MOUSE_DELTA);
 
 	myHostInputListenerIDs.push_back(input.AddEventListener("DebugCamera", [this](const CommonUtilities::InputEvent& event)
 	{
@@ -240,7 +252,6 @@ void GameApplication::Impl::InitializeInputAndHostControls()
 			if (event.inputData.isPressed)
 			{
 				GraphicsEngine::Get().SelectPreviousRenderPass();
-				UpdateRenderPassTitle();
 				ShowRenderPassNotification();
 			}
 		}));
@@ -249,7 +260,6 @@ void GameApplication::Impl::InitializeInputAndHostControls()
 			if (event.inputData.isPressed)
 			{
 				GraphicsEngine::Get().SelectNextRenderPass();
-				UpdateRenderPassTitle();
 				ShowRenderPassNotification();
 			}
 		}));
@@ -273,10 +283,6 @@ void GameApplication::Impl::StartGameSession()
 	{
 		ShowWindow(myMainWindowHandle, SW_SHOW);
 		SetForegroundWindow(myMainWindowHandle);
-	}
-	if (myConfig.EnableRenderDiagnostics)
-	{
-		UpdateRenderPassTitle();
 	}
 }
 
@@ -382,8 +388,6 @@ void GameApplication::Impl::ShutdownServices()
 	myHostInputListenerIDs.clear();
 	myInputHandler.ReleaseMouse();
 	ServiceLocator::GetInstance().KillServices();
-	AudioManager::Shutdown();
-	AssetRegistry::Get().Clear();
 }
 
 void GameApplication::Impl::LoadPendingScene()
@@ -398,7 +402,7 @@ void GameApplication::Impl::LoadPendingScene()
 		{
 			throw std::runtime_error("No scene source installed");
 		}
-		AssetRegistry& assets = AssetRegistry::Get();
+		AssetRegistry& assets = ServiceLocator::GetInstance().GetAssetRegistry();
 		SceneLoadContext loadContext{myContext.myContentRoot, myContext.myClientSize, assets};
 		const SceneData scene = mySceneSource(*myContext.myPendingScene, loadContext);
 		candidateWorld = myRegistry.CreateWorld(scene, assets, myContext.myClientSize);
@@ -444,9 +448,9 @@ int GameApplication::Run(IGame& game, const Config& config, SceneSource source)
 	return Impl(game, config, std::move(source)).Run();
 }
 
-std::shared_ptr<Font> GameApplication::GetFontResource(const FontHandle& asset)
+std::shared_ptr<Font> GameApplication::GetFontResource(const std::shared_ptr<FontAsset>& asset)
 {
-	return asset.myResource;
+	return asset->GetFont();
 }
 
 void GameApplication::Impl::RecenterMouseLook()
@@ -458,13 +462,6 @@ void GameApplication::Impl::RecenterMouseLook()
 	{
 		myInputHandler.CenterMouse();
 	}
-}
-
-void GameApplication::Impl::UpdateRenderPassTitle()
-{
-	const char* passName = GraphicsEngine::Get().GetRenderPassName();
-	const std::wstring widePassName(passName, passName + std::strlen(passName));
-	const std::wstring title = myConfig.Title + L"  |  Render Pass: " + widePassName + L"  (F5 previous, F6 next)";
 }
 
 void GameApplication::Impl::ShowRenderPassNotification()

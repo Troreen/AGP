@@ -1,14 +1,15 @@
-#include "GameFramework/Scenes/ComponentRegistry.h"
 #include "GameFramework/AssetHandling/AssetRegistry.h"
-#include "GameFramework/GameFrameworkLog.h"
 #include "GameFramework/Components/CameraComponent.h"
 #include "GameFramework/Components/LightComponent.h"
 #include "GameFramework/Components/SkeletalMeshComponent.h"
 #include "GameFramework/Components/StaticMeshComponent.h"
-#include <stdexcept>
-#include <type_traits>
+#include "GameFramework/GameFrameworkLog.h"
+#include "GameFramework/Scenes/ComponentRegistry.h"
+
 #include <algorithm>
 #include <sstream>
+#include <stdexcept>
+#include <type_traits>
 
 namespace
 {
@@ -39,8 +40,7 @@ namespace
 
 	bool ApplyMesh(MeshComponentBase& component, const StaticMeshData& data, AssetRegistry& assets)
 	{
-		component.SetSourceAssetIdentity(data.MeshName, data.ContentPath);
-		const MeshHandle mesh = assets.ResolveMesh(data.Mesh);
+		const std::shared_ptr<MeshAsset> mesh = assets.GetAsset<MeshAsset>(data.MeshName);
 		if (!mesh)
 		{
 			GFLOG(Warning, "Skipping mesh component '{}': {}", data.Common.Name, assets.GetLastError());
@@ -48,21 +48,24 @@ namespace
 		}
 		component.SetMesh(mesh);
 		component.SetVisible(data.Visible);
+
 		if (data.Materials.size() != component.GetMaterialCount())
 		{
 			throw std::runtime_error("Material list must match mesh slots");
 		}
+
 		for (size_t materialSlot = 0; materialSlot < data.Materials.size(); ++materialSlot)
 		{
-			const MaterialHandle material = CreateMaterialInstance(assets, data.Materials[materialSlot]);
+			const MaterialInstanceData& materialData = data.Materials[materialSlot];
+			const std::shared_ptr<MaterialAsset> material = assets.GetAsset<MaterialAsset>(materialData.Name);
+
 			if (!material)
 			{
-				const MaterialInstanceData& materialData = data.Materials[materialSlot];
-				const std::string parentName = materialData.Parent.Value.empty() ? materialData.Name : materialData.Parent.Value;
-				GFLOG(Warning, "Skipping mesh component '{}': material '{}' from parent '{}' is unavailable at slot {}.",
-				      data.Common.Name, materialData.Name, parentName, materialSlot);
+				GFLOG(Warning, "Skipping mesh component '{}': material '{}' is unavailable at slot {}.",
+				      data.Common.Name, materialData.Name, materialSlot);
 				return false;
 			}
+
 			if (!component.SetMaterial(static_cast<unsigned>(materialSlot), material))
 			{
 				throw std::runtime_error("Material slot is invalid: " + std::to_string(materialSlot));
@@ -160,7 +163,8 @@ std::unique_ptr<World> ComponentRegistry::CreateWorld(const SceneData& scene, As
 	std::unique_ptr<World> world = std::make_unique<World>();
 	CameraComponent* taggedCamera = nullptr;
 	std::vector<std::string> diagnostics;
-	for (const auto& actorData : scene.Actors)
+
+	for (const ActorRecord& actorData : scene.Actors)
 	{
 		Actor* actor = nullptr;
 		try
@@ -179,7 +183,8 @@ std::unique_ptr<World> ComponentRegistry::CreateWorld(const SceneData& scene, As
 		{
 			diagnostics.push_back(actorData.Name + ": Invalid Actor transform");
 		}
-		for (const auto& record : actorData.Components)
+
+		for (const ComponentRecord& record : actorData.Components)
 		{
 			const ComponentData& common = Common(record);
 			try
@@ -189,10 +194,13 @@ std::unique_ptr<World> ComponentRegistry::CreateWorld(const SceneData& scene, As
 				{
 					continue;
 				}
+
 				ApplyMetadata(*created, common);
+
 				const bool componentActiveTag = std::find(common.Tags.begin(), common.Tags.end(), "ActiveCamera") != common.Tags.end();
 				const bool actorActiveTag = std::find(actorData.Tags.begin(), actorData.Tags.end(), "ActiveCamera") != actorData.Tags.end();
 				CameraComponent* camera = dynamic_cast<CameraComponent*>(created);
+
 				if (componentActiveTag && !camera)
 				{
 					throw std::runtime_error("ActiveCamera component tag requires a camera");

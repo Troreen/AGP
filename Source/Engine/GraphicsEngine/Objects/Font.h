@@ -11,6 +11,9 @@ class AssetRegistry;
 
 class Font
 {
+	friend class FontAsset;
+	friend struct FontTestAccess;
+
 public:
 	struct Glyph
 	{
@@ -44,7 +47,4 @@ private:
 	unsigned myAtlasHeight = 0;
 	std::unordered_map<uint32_t, Glyph> myGlyphs;
 	std::shared_ptr<Texture> myAtlas;
-
-	friend class AssetRegistry;
-	friend struct FontTestAccess;
 };

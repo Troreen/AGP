@@ -44,7 +44,8 @@ public:
 	const std::string& GetSourceParent() const { return mySourceParent; }
 	void SetSourceMetadata(std::vector<std::string> tags, std::string sourceParent)
 	{
-		myTags = std::move(tags); mySourceParent = std::move(sourceParent);
+		myTags = std::move(tags);
+		mySourceParent = std::move(sourceParent);
 	}
 
 	bool HasBegunPlay() const

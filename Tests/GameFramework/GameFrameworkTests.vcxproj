@@ -16,13 +16,17 @@
     <OutDir>$(MSBuildThisFileDirectory)..\..\Bin\Tests\$(Configuration)\</OutDir>
     <IntDir>$(MSBuildThisFileDirectory)..\..\Intermediate\GameFrameworkTests\$(Configuration)\</IntDir>
   </PropertyGroup>
+	<PropertyGroup>
+		<SoundEngineLibrary Condition="'$(Configuration)'=='Debug'">SoundEngine-FMod-d.lib</SoundEngineLibrary>
+		<SoundEngineLibrary Condition="'$(Configuration)'!='Debug'">SoundEngine-FMod.lib</SoundEngineLibrary>
+	</PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
       <LanguageStandard>stdcpp20</LanguageStandard><ExceptionHandling>Sync</ExceptionHandling>
       <WarningLevel>Level4</WarningLevel>
       <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\..\Source\Engine;$(MSBuildThisFileDirectory)..\..\Source;$(MSBuildThisFileDirectory)..\..\Source\Utilities\CommonUtilities;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <Link><SubSystem>Console</SubSystem><AdditionalLibraryDirectories>$(MSBuildThisFileDirectory)..\..\Lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories><AdditionalDependencies>GraphicsEngine.lib;d3d11.lib;dxguid.lib;dxgi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies></Link>
+    <Link><SubSystem>Console</SubSystem><AdditionalLibraryDirectories>$(MSBuildThisFileDirectory)..\..\Lib\$(Configuration);$(MSBuildThisFileDirectory)..\..\Dependencies\FMod\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories><AdditionalDependencies>GraphicsEngine.lib;$(SoundEngineLibrary);d3d11.lib;dxguid.lib;dxgi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies></Link>
   </ItemDefinitionGroup>
   <ItemGroup><ClCompile Include="GameFrameworkTests.cpp" /></ItemGroup>
   <ItemGroup>

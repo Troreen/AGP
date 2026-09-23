@@ -28,7 +28,7 @@ void GameScene::InitializeScene(SceneLoadContext& aSceneLoadContext)
 
     myMeshLibrary.Initialize(myContentRoot);
 
-    aSceneLoadContext.Assets.SetMeshLoader(
+    /*aSceneLoadContext.Assets.SetMeshLoader(
         [this](const std::filesystem::path& path)
         {
             return myMeshLibrary.LoadMesh(path);
@@ -40,7 +40,7 @@ void GameScene::InitializeScene(SceneLoadContext& aSceneLoadContext)
 
     aSceneLoadContext.Assets.RegisterMesh(
         AssetId{"/Engine/BasicShapes/Cube.Cube"},
-        myMeshLibrary.GetMesh("Cube"));
+        myMeshLibrary.GetMesh("Cube"));*/
 
     myIsInitialized = true;
 }
@@ -73,11 +73,7 @@ SceneData GameScene::Load(SceneType aSceneType , SceneLoadContext& aSceneLoadCon
 
 void GameScene::PrepareAssets(SceneData& aSceneData, SceneLoadContext& aSceneLoadContext)
 {
-	const AssetId fallbackMaterial{"Shaders/CubeMaterial.mat"}; // TODO: change this into purple black missing texture material 
-	if (!aSceneLoadContext.Assets.ResolveMaterial(fallbackMaterial))
-	{
-		throw std::runtime_error("Could not create the fallback material used by imported scene assets: " + aSceneLoadContext.Assets.GetLastError());
-	}
+	const std::string fallbackMaterial{"Shaders/_DefaultMaterial.mat"}; // TODO: change this into purple black missing texture material
 
 	for (ActorRecord& actor : aSceneData.Actors)
 	{
@@ -98,9 +94,9 @@ void GameScene::PrepareAssets(SceneData& aSceneData, SceneLoadContext& aSceneLoa
 	}
 }
 
-void GameScene::PrepareMaterial(MaterialInstanceData& aMaterialData, const AssetId& aFallbackMaterial, AssetRegistry& aAssetRegistry)
+void GameScene::PrepareMaterial(MaterialInstanceData& aMaterialData, const std::string& aFallbackMaterial, AssetRegistry& aAssetRegistry)
 {
-	if (aAssetRegistry.GetAsset<MaterialAsset>(aMaterialData.Parent.Value))
+	if (aAssetRegistry.GetAsset<MaterialAsset>(aMaterialData.Name))
 	{
 		return;
 	}
@@ -116,6 +112,6 @@ void GameScene::PrepareMaterial(MaterialInstanceData& aMaterialData, const Asset
 
     GAMELOG(Warning, "No authored .mat for imported material '{}'; using fallback.", aMaterialData.Name);
 
-    aMaterialData.Parent = aFallbackMaterial;
+    aMaterialData.Name = aFallbackMaterial;
     aMaterialData.Parameters.clear();
 }

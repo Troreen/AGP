@@ -10,7 +10,7 @@ Orhan's `CommonUtilities::InputMapper` is the sole mapping system, restored from
 - Win32 messages reach InputHandler through the window procedure. InputMapper advances the handlers once per frame and dispatches listeners directly.
 - Game, runtime and components bind their own named actions. Callbacks inspect `InputEvent.inputData.isPressed`, `isHeld`, `isReleased`, and axis values.
 - Components remove their unsigned listener IDs in EndPlay; Game does so in Shutdown. Listener mutation and scene changes happen outside mapper dispatch.
-- ServiceLocator owns InputMapper and borrows AudioManager and AssetRegistry. The runtime owns the mapper's device handlers.
+- ServiceLocator owns InputMapper, AudioManager and AssetRegistry. The runtime owns the mapper's device handlers.
 - Only camera movement/mouse look and F1/F4/F5/F6/F7/F8 bindings remain. Animation, lights, tonemapping, spin toggles, diagnostics printing and Escape input bindings have been removed.
 - Focus loss releases held keys on the next mapper update. No default gamepad bindings are installed.
 

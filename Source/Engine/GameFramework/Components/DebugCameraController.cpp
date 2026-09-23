@@ -30,11 +30,15 @@ CameraComponent* DebugCameraService::Ensure(World& world, CommonUtilities::Vecto
 	}
 
 	Actor* actor = world.SpawnActor(DebugCameraActorName);
+
 	const DebugCameraPreset& preset = GetDebugCameraPreset();
 	actor->GetTransform().SetData(preset.Transform);
+
 	CameraComponent* camera = actor->AddComponent<CameraComponent>(
 		"Camera", preset.FieldOfView, preset.NearPlane, preset.FarPlane, clientSize);
+
 	actor->AddComponent<DebugCameraController>("Controls");
+
 	return camera;
 }
 
@@ -73,14 +77,6 @@ void DebugCameraController::BeginPlay()
 	myYaw = std::atan2(forward.x, forward.z);
 	myPitch = -std::asin(CU::Clamp(forward.y, -1.f, 1.f));
 	CommonUtilities::InputMapper& input = *ServiceLocator::GetInstance().GetInputMapper();
-	input.BindActionToInputCode("CameraLookEnable", EKeyCode::MOUSERBUTTON);
-	input.BindActionToInputCode("CameraForward", EKeyCode::W);
-	input.BindActionToInputCode("CameraBack", EKeyCode::S);
-	input.BindActionToInputCode("CameraLeft", EKeyCode::A);
-	input.BindActionToInputCode("CameraRight", EKeyCode::D);
-	input.BindActionToInputCode("CameraUp", EKeyCode::SPACE);
-	input.BindActionToInputCode("CameraDown", EKeyCode::CONTROL);
-	input.BindActionToInputCode("CameraLookDelta", EPointerCode::MOUSE_DELTA);
 
 	auto held = [this, &input](std::string_view action, bool& target)
 	{
@@ -96,6 +92,7 @@ void DebugCameraController::BeginPlay()
 	held("CameraRight", myRight);
 	held("CameraUp", myUp);
 	held("CameraDown", myDown);
+
 	myListenerIDs.push_back(input.AddEventListener("CameraLookDelta", [this](const CommonUtilities::InputEvent& event)
 	{
 		if (event.isAxis2D)

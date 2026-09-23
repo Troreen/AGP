@@ -398,11 +398,12 @@ void InputMapperSemantics()
         world.Clear(); input.Update();
         Check(calls == reload + 1, "Destroyed component left a dangling listener");
     }
-    AssetRegistry borrowed;
-    ServiceLocator::GetInstance().SetAssetRegistry(&borrowed);
-    ServiceLocator::GetInstance().KillServices();
-    Check(ServiceLocator::GetInstance().GetInputMapper() == nullptr, "Owned input survived KillServices");
-    borrowed.Clear();
+    ServiceLocator::GetInstance().SetAssetRegistry(new AssetRegistry);
+	ServiceLocator::GetInstance().KillServices();
+	Check(ServiceLocator::GetInstance().GetInputMapper() == nullptr, "Owned input survived KillServices");
+	bool assetsCleared = false;
+	try { ServiceLocator::GetInstance().GetAssetRegistry(); } catch (const std::logic_error&) { assetsCleared = true; }
+	Check(assetsCleared, "Owned assets survived KillServices");
     auto* replacement = new CommonUtilities::InputMapper;
     replacement->Init(&fixture.Handler);
     ServiceLocator::GetInstance().SetInputMapper(replacement);
@@ -559,7 +560,7 @@ void FontAssetDiagnostics()
 		std::ofstream malformed(root / "Malformed.font.json");
 		malformed << R"({"atlasFile":"Missing.dds","atlas":{},"metrics":{},"glyphs":[]})";
 	}
-	AssetRegistry& assets = AssetRegistry::Get();
+	AssetRegistry assets;
 	assets.Initialize(root);
 	Check(!assets.ResolveFont(AssetId{"Malformed.font.json"}) && assets.GetLastError().find("metrics") != std::string::npos,
 	      "Font loading accepted missing metrics without useful diagnostics");

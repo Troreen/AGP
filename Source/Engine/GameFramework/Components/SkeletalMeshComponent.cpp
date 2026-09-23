@@ -9,7 +9,7 @@ SkeletalMeshComponent::SkeletalMeshComponent()
 	OnMeshChanged();
 }
 
-SkeletalMeshComponent::SkeletalMeshComponent(MeshHandle aMesh) : MeshComponentBase(std::move(aMesh))
+SkeletalMeshComponent::SkeletalMeshComponent(const std::shared_ptr<MeshAsset>& aMesh) : MeshComponentBase(aMesh)
 {
 	OnMeshChanged();
 }
@@ -31,7 +31,7 @@ void SkeletalMeshComponent::Update(float aDeltaTime)
 
 bool SkeletalMeshComponent::HasSkinning() const
 {
-	return myMesh != nullptr && myMesh->HasSkeleton() && myBaseLayer.Active;
+	return myMesh != nullptr && myMesh->GetMesh()->HasSkeleton() && myBaseLayer.Active;
 }
 
 const std::array<CU::Matrix4f, 128>* SkeletalMeshComponent::GetJointTransforms() const
@@ -46,7 +46,7 @@ bool SkeletalMeshComponent::PlayAnimation(std::string_view anAnimationName, bool
 		return false;
 	}
 
-	std::shared_ptr<Animation> animation = myMesh->GetAnimation(anAnimationName);
+	std::shared_ptr<Animation> animation = myMesh->GetMesh()->GetAnimation(anAnimationName);
 	if (animation == nullptr)
 	{
 		return false;
@@ -75,7 +75,7 @@ bool SkeletalMeshComponent::PlayPartialAnimation(std::string_view anAnimationNam
 		return false;
 	}
 
-	std::shared_ptr<Animation> animation = myMesh->GetAnimation(anAnimationName);
+	std::shared_ptr<Animation> animation = myMesh->GetMesh()->GetAnimation(anAnimationName);
 	if (animation == nullptr)
 	{
 		return false;
@@ -106,7 +106,7 @@ bool SkeletalMeshComponent::ConfigurePartialLayerFromJointName(std::string_view 
 		return false;
 	}
 
-	const Skeleton* skeleton = myMesh->GetSkeleton();
+	const Skeleton* skeleton = myMesh->GetMesh()->GetSkeleton();
 	if (skeleton == nullptr)
 	{
 		return false;
@@ -188,7 +188,7 @@ void SkeletalMeshComponent::RebuildJointTransforms()
 
 void SkeletalMeshComponent::UpdateJointPose(size_t aJointIndex, const CU::Matrix4f& aParentJointTransform)
 {
-	const Skeleton* skeleton = myMesh != nullptr ? myMesh->GetSkeleton() : nullptr;
+	const Skeleton* skeleton = myMesh != nullptr ? myMesh->GetMesh()->GetSkeleton() : nullptr;
 	if (skeleton == nullptr || aJointIndex >= skeleton->Joints.size() || aJointIndex >= myJointTransforms.size())
 	{
 		return;
@@ -211,7 +211,7 @@ const CU::Matrix4f& SkeletalMeshComponent::GetLocalTransformForJoint(size_t aJoi
 {
 	static const CU::Matrix4f identity;
 
-	const Skeleton* skeleton = myMesh != nullptr ? myMesh->GetSkeleton() : nullptr;
+	const Skeleton* skeleton = myMesh != nullptr ? myMesh->GetMesh()->GetSkeleton() : nullptr;
 	if (skeleton == nullptr || aJointIndex >= skeleton->Joints.size())
 	{
 		return identity;
@@ -253,7 +253,7 @@ const CU::Matrix4f& SkeletalMeshComponent::GetLocalTransformForJoint(size_t aJoi
 
 void SkeletalMeshComponent::MarkJointAndChildren(size_t aJointIndex)
 {
-	const Skeleton* skeleton = myMesh != nullptr ? myMesh->GetSkeleton() : nullptr;
+	const Skeleton* skeleton = myMesh != nullptr ? myMesh->GetMesh()->GetSkeleton() : nullptr;
 	if (skeleton == nullptr || aJointIndex >= skeleton->Joints.size() || aJointIndex >= myPartialLayerMask.size())
 	{
 		return;

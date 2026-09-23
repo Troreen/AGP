@@ -16,7 +16,7 @@ class SkeletalMeshComponent final : public MeshComponentBase
 {
 public:
 	SkeletalMeshComponent();
-	explicit SkeletalMeshComponent(MeshHandle aMesh);
+	explicit SkeletalMeshComponent(const std::shared_ptr<MeshAsset>& aMesh);
 
 	void Update(float aDeltaTime) override;
 

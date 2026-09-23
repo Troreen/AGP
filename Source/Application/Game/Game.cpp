@@ -37,7 +37,7 @@ namespace
 
 		for (unsigned materialIndex = 0; materialIndex < source.GetMaterialCount(); ++materialIndex)
 		{
-			const MaterialHandle material = source.GetMaterial(materialIndex);
+			const std::shared_ptr<MaterialAsset> material = source.GetMaterial(materialIndex);
 			if (material)
 			{
 				destination.SetMaterial(materialIndex, material);
@@ -192,7 +192,9 @@ void Game::ConfigureWorld(World& world)
 
 		std::shared_ptr<Mesh> mesh = meshLib.GetMesh("SK_C_TGA_Bro");
 
-		component->SetMesh_DO_NOT_USE(mesh);
+		std::shared_ptr<MeshAsset> meshAsset = std::make_shared<MeshAsset>(mesh);
+		
+		component->SetMesh(meshAsset);
 		component->PlayAnimation("Idle", true);
 	}
 

@@ -381,12 +381,10 @@ namespace
 						mesh.Common = common;
 						mesh.MeshName = imported.mesh;
 						mesh.ContentPath = imported.contentPath;
-						mesh.Mesh = AssetId{imported.contentPath};
 						for (const UnrealScene::MaterialData& sourceMaterial : imported.materials)
 						{
 							MaterialInstanceData material;
 							material.Name = sourceMaterial.name;
-							material.Parent = AssetId{sourceMaterial.parent.empty() ? sourceMaterial.name : sourceMaterial.parent};
 							for (const UnrealScene::MaterialParameterData& sourceParameter : sourceMaterial.parameters)
 							{
 								MaterialParameterData parameter;
@@ -403,7 +401,7 @@ namespace
 								else if (const UnrealScene::TextureValue* texture =
 								             std::get_if<UnrealScene::TextureValue>(&sourceParameter.value))
 								{
-									parameter.Value = AssetId{texture->path};
+									parameter.Value = texture->path;
 								}
 								material.Parameters.push_back(std::move(parameter));
 							}

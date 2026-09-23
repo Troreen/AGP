@@ -20,13 +20,11 @@ class ServiceLocator
 		static ServiceLocator& GetInstance();
 
 		CommonUtilities::InputMapper* GetInputMapper();
-		// Transfers ownership; replace only after all old listeners have been removed.
+		// Every setter transfers ownership. Replacing a service deletes the old one.
+		// Replace the mapper only after all old listeners have been removed.
 		CommonUtilities::InputMapper* SetInputMapper(CommonUtilities::InputMapper* anInputMapper);
-
-		// Audio owns its singleton lifetime; AssetRegistry has static lifetime.
-		// These setters borrow services. KillServices only clears their pointers.
-		void SetAudioManager(AudioManager* audio) { myAudioManager = audio; }
-		void SetAssetRegistry(AssetRegistry* assets) { myAssetRegistry = assets; }
+		AudioManager* SetAudioManager(AudioManager* anAudioManager);
+		AssetRegistry* SetAssetRegistry(AssetRegistry* anAssetRegistry);
 		AudioManager& GetAudioManager() const;
 		AssetRegistry& GetAssetRegistry() const;
 
@@ -37,6 +35,6 @@ class ServiceLocator
 		~ServiceLocator();
 
 		CommonUtilities::InputMapper* myOwnedInputMapper;
-		AudioManager* myAudioManager = nullptr;
-		AssetRegistry* myAssetRegistry = nullptr;
+		AudioManager* myOwnedAudioManager;
+		AssetRegistry* myOwnedAssetRegistry;
 };

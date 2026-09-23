@@ -46,15 +46,21 @@ void WorldRenderer::Build(const World& world, GraphicsEngine& graphics, Graphics
 			if (mesh && mesh->IsVisible() && mesh->myMesh)
 			{
 				GraphicsEngine::RenderItemSnapshot item;
-				item.Mesh = mesh->myMesh;
-				item.Materials = mesh->myMaterials;
+				item.Mesh = mesh->myMesh->GetMesh();
+				for (size_t i = 0; i < mesh->myMaterials.size(); ++i)
+				{
+					if (mesh->myMaterials[i] != nullptr)
+					{
+						item.Materials.emplace_back(mesh->myMaterials[i]->GetMaterial());
+					}
+				}
 				item.World = mesh->GetWorldMatrix();
 				item.HasSkinning = mesh->HasSkinning();
 				if (const std::array<CU::Matrix4f, 128>* jointTransforms = mesh->GetJointTransforms())
 				{
 					item.JointTransforms = *jointTransforms;
 				}
-				snapshot.ShadowCasters.push_back(std::move(item));
+				snapshot.ShadowCasters.emplace_back(std::move(item));
 			}
 		}
 	}

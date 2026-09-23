@@ -252,13 +252,13 @@ namespace TGA
 			std::vector<std::string> EventNames;
 
 			// How long this animation is in frames.
-			unsigned int Length;
+			unsigned int Length = 0;
 
 			// The duration of this animation.
-			double Duration;
+			double Duration = 0;
 
 			// The FPS of this animation.
-			float FramesPerSecond;
+			float FramesPerSecond = 0;
 
 			std::string Name;
 		};

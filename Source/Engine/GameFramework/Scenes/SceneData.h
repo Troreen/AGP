@@ -1,5 +1,4 @@
 #pragma once
-#include "GameFramework/Scenes/AssetRefs.h"
 #include "GameFramework/World/Transform.h"
 #include "Vector2.hpp"
 #include "Vector4.hpp"
@@ -74,12 +73,11 @@ struct CameraData { ComponentData Common; float FieldOfView = 90, NearPlane = 1,
 struct MaterialParameterData
 {
 	std::string Name;
-	std::variant<float, CommonUtilities::Vector4f, AssetId> Value;
+	std::variant<float, CommonUtilities::Vector4f, std::string> Value;
 };
 struct MaterialInstanceData
 {
 	std::string Name;
-	AssetId Parent;
 	std::vector<MaterialParameterData> Parameters;
 };
 struct StaticMeshData
@@ -87,7 +85,6 @@ struct StaticMeshData
 	ComponentData Common;
 	std::string MeshName;
 	std::string ContentPath;
-	AssetId Mesh;
 	std::vector<MaterialInstanceData> Materials;
 	bool Visible = true;
 };

@@ -6,14 +6,14 @@ Implemented from `6d730498ba9b41e3f7ef3bf6dc173cebb6d510c7`. The previous bridge
 
 The historical InputMapper header and implementation are restored byte-for-byte. Each input user calls `BindActionToInputCode` and `AddEventListener` directly. Components keep unsigned listener IDs and remove them in `EndPlay`; Game removes its IDs in `Shutdown`. Runtime actor changes occur after dispatch. World and GameContext no longer own or forward input services.
 
-ServiceLocator retains the historical explicit singleton design. `SetInputMapper` transfers ownership (and deletes a replaced mapper); `KillServices` deletes the mapper and clears all service pointers. Register/replace the mapper only when no old listeners remain. The mapper borrows the runtime's InputHandler and XInputHandler. AudioManager and AssetRegistry are borrowed: AudioManager shuts down through its own API, and AssetRegistry has static lifetime.
+ServiceLocator retains the historical explicit singleton design. All three registered services are owned in the same way: each setter transfers ownership, replacing a service deletes the old instance, and `KillServices` deletes InputMapper, AudioManager and AssetRegistry. Register or replace the mapper only when no old listeners remain. The mapper still borrows the runtime's InputHandler and XInputHandler because those platform-facing objects live directly in the runtime.
 
 The runtime clears the world before deleting services, including initialization/update/shutdown failure paths. It calls mapper Update exactly once per rendered frame. Mouse centering only resets the handler's position baseline; it does not generate a separate action stream. Focus-loss messages clear tentative held keys so the mapper emits releases on its next update.
 
 ## Historical mapper constraints
 
 - One binding per action per device category; another key replaces the existing key. There are no alternate-key controls in the current game.
-- Current bindings are limited to camera movement/mouse look and F1/F4/F5/F6/F7/F8. Other input bindings and the animation/light input components were removed in the follow-up cleanup. Spin remains automatic.
+- Current bindings are limited to debug-camera movement/mouse look and F1/F4/F5/F6/F7/F8. The runtime installs the camera bindings once; DebugCameraController only listens to the named actions. The duplicate CameraControlsComponent and the animation/light input components were removed. Spin remains automatic.
 - Listener dispatch order is unspecified. Do not add/remove listeners, mutate bindings, destroy listeners' owners, or recursively update the mapper during a callback. Copy data needed later; InputEvent borrows stack InputData.
 - ClearBindingsFromAction removes only the first matching device category. The runtime does not rely on it.
 - Gamepad analog previous-state flags are shared per physical axis; disconnect does not emit releases. No default gamepad mappings are installed, and controller behavior has not been validated on hardware.
