@@ -18,7 +18,7 @@ Read these files in order:
 4. `Source/Engine/GameFramework/Scenes/ComponentRegistry.cpp`: descriptions become owned runtime objects.
 5. `Source/Engine/GameFramework/World/World.h`, `Actor.h`, `Component.h`: ownership and the small API.
 6. `Source/Engine/GameFramework/World/World.cpp` and `Actor.cpp`: startup, Update and destruction.
-7. `Source/Application/Game/GameComponents.cpp`: camera, spin, animation and light behavior.
+7. `Source/Application/Game/*ControlsComponent.cpp` and `SpinComponent.cpp`: camera, spin, animation and light behavior.
 8. `Source/Engine/GameFramework/Runtime/GameApplication.cpp`: the actual main loop and scene replacement.
 9. `Source/Engine/GameFramework/Rendering/WorldRenderer.cpp`: values copied to the existing renderer.
 

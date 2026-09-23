@@ -553,6 +553,7 @@ namespace CommonUtilities
 			return (aA - aB).LengthSqr();
 		}
 
+		// Normalizes a vector2, returning aFallback if the input is near-zero to avoid division spikes.
 		template <typename T>
 		inline Vector2<T> NormalizeSafe(const Vector2<T>& aVector, const Vector2<T>& aFallback = Vector2<T>::Zero, const T anEpsilon = Epsilon<T>())
 		{
@@ -560,6 +561,7 @@ namespace CommonUtilities
 			return lengthSqr <= anEpsilon * anEpsilon ? aFallback : aVector / static_cast<T>(std::sqrt(lengthSqr));
 		}
 
+		// Normalizes a vector3, returning a fallback if the input is near-zero. This avoids NaN results from dividing by zero.
 		template <typename T>
 		inline Vector3<T> NormalizeSafe(const Vector3<T>& aVector, const Vector3<T>& aFallback = Vector3<T>::Zero, const T anEpsilon = Epsilon<T>())
 		{
@@ -567,6 +569,7 @@ namespace CommonUtilities
 			return lengthSqr <= anEpsilon * anEpsilon ? aFallback : aVector / static_cast<T>(std::sqrt(lengthSqr));
 		}
 
+		// Normalizes a vector4, returning a fallback if the input is near-zero. This avoids NaN results from dividing by zero.
 		template <typename T>
 		inline Vector4<T> NormalizeSafe(const Vector4<T>& aVector, const Vector4<T>& aFallback = Vector4<T>::Zero, const T anEpsilon = Epsilon<T>())
 		{

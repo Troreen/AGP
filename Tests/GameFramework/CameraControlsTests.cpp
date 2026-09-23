@@ -1,4 +1,6 @@
-#include "GameComponents.h"
+#include "CameraControlsComponent.h"
+#include "LightControlsComponent.h"
+#include "SpinComponent.h"
 #include "GameFramework/World/World.h"
 #include "GameFramework/Components/LightComponent.h"
 #include "EnumKeyCode.h"

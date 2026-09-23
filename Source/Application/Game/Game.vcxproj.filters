@@ -12,14 +12,16 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AnimationControlsComponent.h" />
+    <ClInclude Include="CameraControlsComponent.h" />
     <ClInclude Include="Game.h" />
-    <ClInclude Include="GameComponents.h" />
     <ClInclude Include="GameLog.h" />
-    <ClInclude Include="GameOrientation.h" />
     <ClInclude Include="GameScene.h" />
+    <ClInclude Include="LightControlsComponent.h" />
     <ClInclude Include="MeshLibrary.h" />
     <ClInclude Include="PrimitiveMeshBuilder.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="SpinComponent.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
@@ -32,12 +34,15 @@
     <ClCompile Include="..\..\..\Dependencies\TGAFBXImporter\source\TgaFbxStructs.cpp">
       <Filter>Dependencies\TGAFBXImporter\source</Filter>
     </ClCompile>
+    <ClCompile Include="AnimationControlsComponent.cpp" />
+    <ClCompile Include="CameraControlsComponent.cpp" />
     <ClCompile Include="Game.cpp" />
-    <ClCompile Include="GameComponents.cpp" />
     <ClCompile Include="GameScene.cpp" />
+    <ClCompile Include="LightControlsComponent.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MeshLibrary.cpp" />
     <ClCompile Include="PrimitiveMeshBuilder.cpp" />
+    <ClCompile Include="SpinComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Game.ico" />

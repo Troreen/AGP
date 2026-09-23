@@ -34,7 +34,10 @@
   </ItemDefinitionGroup>
   <ItemGroup><ClCompile Include="GameRuntimeTests.cpp" /><ClCompile Include="CameraControlsTests.cpp" />
 <ClCompile Include="..\..\Source\Application\Game\Game.cpp" />
-<ClCompile Include="..\..\Source\Application\Game\GameComponents.cpp" />
+<ClCompile Include="..\..\Source\Application\Game\AnimationControlsComponent.cpp" />
+<ClCompile Include="..\..\Source\Application\Game\CameraControlsComponent.cpp" />
+<ClCompile Include="..\..\Source\Application\Game\LightControlsComponent.cpp" />
+<ClCompile Include="..\..\Source\Application\Game\SpinComponent.cpp" />
 <ClCompile Include="..\..\Source\Application\Game\GameScene.cpp" />
 <ClCompile Include="..\..\Source\Application\Game\MeshLibrary.cpp" />
 <ClCompile Include="..\..\Source\Application\Game\PrimitiveMeshBuilder.cpp" />

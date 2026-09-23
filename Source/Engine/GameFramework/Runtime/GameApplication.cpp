@@ -100,6 +100,7 @@ int GameApplication::Impl::Run()
 	windowClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
 	windowClass.hInstance = GetModuleHandleW(nullptr);
 	windowClass.lpszClassName = className;
+
 	if (!RegisterClassW(&windowClass) && GetLastError() != ERROR_CLASS_ALREADY_EXISTS)
 	{
 		throw std::runtime_error("Could not register game window");
@@ -111,12 +112,14 @@ int GameApplication::Impl::Run()
 		throw std::runtime_error("Could not create game window");
 	}
 	myContext.myContentRoot = std::filesystem::canonical(myConfig.ContentRoot);
+	
 	GraphicsEngine& graphics = GraphicsEngine::Get();
 	if (!graphics.Initialize(myMainWindowHandle, myContext.myContentRoot / "Shaders") ||
 	    !graphics.CreateCommandList("Game Scene", myCommandList))
 	{
 		throw std::runtime_error("Could not initialize game graphics");
 	}
+	
 	myContext.myClientSize = graphics.GetClientSize();
 	try
 	{
@@ -145,9 +148,11 @@ int GameApplication::Impl::Run()
 		}
 		AudioManager* audio = AudioManager::GetInstance();
 		audio->Init();
+
 		ServiceLocator::GetInstance().ProvideInput(myContext.myInput);
 		ServiceLocator::GetInstance().ProvideAudio(*audio);
 		ServiceLocator::GetInstance().ProvideAssets(assets);
+
 		myInputHandler.SetWindowHandle(myMainWindowHandle);
 		myInputHandler.SetAutoMouseCapture(false);
 		InstallDefaultInputBindings(myContext.myInput);
@@ -155,6 +160,7 @@ int GameApplication::Impl::Run()
 		{
 			if (event.Phase == InputActionPhase::Started) GraphicsEngine::Get().ToggleTonemapping();
 		}));
+
 		for (const auto [action, tonemapper] : {
 			std::pair{&InputActions::SelectACES, Tonemapper::ACES},
 			std::pair{&InputActions::SelectLottes, Tonemapper::Lottes},
@@ -162,26 +168,42 @@ int GameApplication::Impl::Run()
 		{
 			myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(*action, [tonemapper](const InputActionEvent& event)
 			{
-				if (event.Phase == InputActionPhase::Started) GraphicsEngine::Get().SetTonemapper(tonemapper);
+				if (event.Phase == InputActionPhase::Started) 
+				{
+					GraphicsEngine::Get().SetTonemapper(tonemapper);
+				}
 			}));
 		}
 		myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(InputActions::DebugCamera, [this](const InputActionEvent& event)
 		{
-			if (event.Phase == InputActionPhase::Started) myDebugCamera.Toggle(myContext.GetWorld(), myContext.myClientSize);
+			if (event.Phase == InputActionPhase::Started) 
+			{
+				myDebugCamera.Toggle(myContext.GetWorld(), myContext.myClientSize);
+			}
 		}));
+		
 		if (myConfig.EnableRenderDiagnostics)
 		{
 			myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(InputActions::PreviousRenderPass, [this](const InputActionEvent& event)
 			{
-				if (event.Phase == InputActionPhase::Started) { GraphicsEngine::Get().SelectPreviousRenderPass(); UpdateRenderPassTitle(); ShowRenderPassNotification(); }
+				if (event.Phase == InputActionPhase::Started) 
+				{ 
+					GraphicsEngine::Get().SelectPreviousRenderPass(); UpdateRenderPassTitle(); ShowRenderPassNotification(); 
+				}
 			}));
 			myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(InputActions::NextRenderPass, [this](const InputActionEvent& event)
 			{
-				if (event.Phase == InputActionPhase::Started) { GraphicsEngine::Get().SelectNextRenderPass(); UpdateRenderPassTitle(); ShowRenderPassNotification(); }
+				if (event.Phase == InputActionPhase::Started) 
+				{ 
+					GraphicsEngine::Get().SelectNextRenderPass(); UpdateRenderPassTitle(); ShowRenderPassNotification(); 
+				}
 			}));
 			myHostInputSubscriptions.push_back(myContext.myInput.Subscribe(InputActions::PrintDiagnostics, [this](const InputActionEvent& event)
 			{
-				if (event.Phase == InputActionPhase::Started) LogRuntimeStats();
+				if (event.Phase == InputActionPhase::Started) 
+				{
+					LogRuntimeStats();
+				}
 			}));
 		}
 		myGame.Initialize(myContext);
@@ -228,6 +250,7 @@ int GameApplication::Impl::Run()
 				// Loading time does not become a large movement delta.
 				timer.Update();
 			}
+		
 			const CU::Vector2u clientSize = graphics.GetClientSize();
 			if (clientSize.x == 0 || clientSize.y == 0) continue;
 			if (clientSize.x != myContext.myClientSize.x || clientSize.y != myContext.myClientSize.y)
@@ -236,6 +259,7 @@ int GameApplication::Impl::Run()
 				if (!graphics.Resize(clientSize.x, clientSize.y)) throw std::runtime_error("Failed to resize rendering targets");
 				myContext.myClientSize = clientSize;
 			}
+		
 			timer.Update();
 			myInputHandler.UpdateInput();
 			const float elapsed = timer.GetDeltaTime();

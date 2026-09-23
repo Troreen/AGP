@@ -4,16 +4,17 @@
 #include "GameFramework/Scenes/SceneData.h"
 #include <filesystem>
 
-// Game-owned scene authoring and synchronous asset-loader registration. Worlds
-// are owned by the host; this helper can safely survive scene reloads.
+// Loads exported game scenes and prepares their assets for runtime use.
 class GameScene final
 {
 public:
-	SceneData Load(const SceneType& name, SceneLoadContext& context);
+	void InitializeScene(SceneLoadContext& aSceneLoadContext);
+	SceneData Load(SceneType aSceneType, SceneLoadContext& aSceneLoadContext);
 
 private:
-	void PrepareAssets(SceneData& scene, SceneLoadContext& context);
+	void PrepareAssets(SceneData& aSceneData, SceneLoadContext& aSceneLoadContext);
+	void PrepareMaterial(MaterialInstanceData& aMaterialData, const AssetId& aFallbackMaterial, AssetRegistry& aAssetRegistry);
 	MeshLibrary myMeshLibrary;
 	std::filesystem::path myContentRoot;
-	bool myInitialized = false;
+	bool myIsInitialized = false;
 };

@@ -45,7 +45,7 @@ name and registers only its gameplay behaviors. GameScene.cpp imports
 `Content/ExportedScenes/lvl_blockout/Lvl_Blockout_Level.json`, resolves the
 available Content meshes, and hands the result to the engine for construction.
 Start with [the MVP guide](Docs/GameFrameworkMVP.md), then Game.cpp and
-GameComponents.cpp. Real Perforce scene integration requires the team inputs
+the component files in `Source/Application/Game`. Real Perforce scene integration requires the team inputs
 listed in [the importer handoff](Docs/ImporterHandoff.md).
 ## Controls
 

@@ -1,5 +1,5 @@
 #include "Game.h"
-#include "GameComponents.h"
+#include "SpinComponent.h"
 #include "GameFramework/AudioManager.h"
 #include "GameFramework/Components/StaticMeshComponent.h"
 #include "GameFramework/Runtime/GameContext.h"
@@ -150,7 +150,7 @@ void Game::Initialize(GameContext& context)
 			AttachRuntimeChild(context.GetWorld());
 		}
 	}));
-	context.LoadScene(SceneType::Blockout); // TODO: make this an enum or smn wtf
+	context.LoadScene(SceneType::Blockout);
 	AudioManager& audio = ServiceLocator::GetInstance().GetAudioManager();
 	audio.SetBusVolume(BusID::eMusic, BackgroundMusicVolume);
 	audio.PlayMusic(SoundID::eMainTheme, true); // TODO: make man breathe more often this is not enough wtf smh b-word
@@ -190,9 +190,7 @@ void Game::ConfigureWorld(World& world)
 		component->PlayAnimation("Idle", true);
 	}
 
-	// Code-configured behavior example: exported scene data supplies the Actor
-	// and its two PointLightComponents, while game code attaches reusable logic.
-	// The offset SceneComponent inherits this Actor rotation and orbits the center.
+	// Code-configured behavior example:
 	if (Actor* doubleLight = world.FindActor("DoubleLight"))
 	{
 		doubleLight->AddComponent<SpinComponent>("Spin");

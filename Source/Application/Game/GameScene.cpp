@@ -22,50 +22,66 @@ namespace
 	}
 }
 
-SceneData GameScene::Load(const SceneType& aScene, SceneLoadContext& context)
+void GameScene::InitializeScene(SceneLoadContext& aSceneLoadContext)
 {
-	const std::filesystem::path sceneFile = GetSceneFile(aScene);
-	if (sceneFile.empty())
-	{
-		throw std::runtime_error("Unknown Game scene: " + GetSceneName(aScene));
-	}
-	if (!myInitialized)
-	{
-		myContentRoot = context.ContentRoot;
-		myMeshLibrary.Initialize(myContentRoot);
-		context.Assets.SetMeshLoader([this](const std::filesystem::path& path)
-		{
-			return myMeshLibrary.LoadMesh(path);
-		});
-		context.Assets.RegisterMesh(AssetId{"/Engine/BasicShapes/Plane.Plane"}, myMeshLibrary.GetMesh("Floor"));
-		context.Assets.RegisterMesh(AssetId{"/Engine/BasicShapes/Cube.Cube"}, myMeshLibrary.GetMesh("Cube"));
-		myInitialized = true;
-	}
+	myContentRoot = aSceneLoadContext.ContentRoot;
 
-	UnrealImportResult imported = UnrealSceneImporter{}.ImportScene(myContentRoot / sceneFile);
-	if (!imported)
-	{
-		throw std::runtime_error(FormatDiagnostics("Scene import failed:", imported.Diagnostics));
-	}
+    myMeshLibrary.Initialize(myContentRoot);
 
-	SceneData scene = std::move(*imported.Data);
-	PrepareAssets(scene, context);
-	GAMELOG(Log, "Loaded scene '{}' from '{}' ({} actors).", GetSceneName(aScene), sceneFile.string(), scene.Actors.size());
-	return scene;
+    aSceneLoadContext.Assets.SetMeshLoader(
+        [this](const std::filesystem::path& path)
+        {
+            return myMeshLibrary.LoadMesh(path);
+        });
+
+    aSceneLoadContext.Assets.RegisterMesh(
+        AssetId{"/Engine/BasicShapes/Plane.Plane"},
+        myMeshLibrary.GetMesh("Floor"));
+
+    aSceneLoadContext.Assets.RegisterMesh(
+        AssetId{"/Engine/BasicShapes/Cube.Cube"},
+        myMeshLibrary.GetMesh("Cube"));
+
+    myIsInitialized = true;
 }
 
-void GameScene::PrepareAssets(SceneData& scene, SceneLoadContext& context)
+SceneData GameScene::Load(SceneType aSceneType , SceneLoadContext& aSceneLoadContext)
 {
-	const AssetId fallbackMaterial{"Shaders/CubeMaterial.mat"}; // TODO: change this into purple black missing texture material 
-	if (!context.Assets.ResolveMaterial(fallbackMaterial))
+	
+	const std::filesystem::path sceneFile = GetSceneFile(aSceneType);
+	if (sceneFile.empty())
 	{
-		throw std::runtime_error("Could not create the fallback material used by imported scene assets: " +
-		                         context.Assets.GetLastError());
+		throw std::runtime_error("Unknown Game scene: " + GetSceneName(aSceneType));
 	}
 
-	for (ActorRecord& actor : scene.Actors)
+	if (!myIsInitialized)
 	{
-		for (ComponentRecord& componentRecord : actor.Components)
+		InitializeScene(aSceneLoadContext);
+	}
+	
+	UnrealImportResult importResult = UnrealSceneImporter{}.ImportScene(myContentRoot / sceneFile);
+	if (!importResult)
+	{
+		throw std::runtime_error(FormatDiagnostics("Scene import failed:", importResult.Diagnostics));
+	}
+
+	SceneData sceneData = std::move(*importResult.Data);
+	PrepareAssets(sceneData, aSceneLoadContext);
+	GAMELOG(Log, "Loaded scene '{}' from '{}' ({} actors).", GetSceneName(aSceneType), sceneFile.string(), sceneData.Actors.size());
+	return sceneData;
+}
+
+void GameScene::PrepareAssets(SceneData& aSceneData, SceneLoadContext& aSceneLoadContext)
+{
+	const AssetId fallbackMaterial{"Shaders/CubeMaterial.mat"}; // TODO: change this into purple black missing texture material 
+	if (!aSceneLoadContext.Assets.ResolveMaterial(fallbackMaterial))
+	{
+		throw std::runtime_error("Could not create the fallback material used by imported scene assets: " + aSceneLoadContext.Assets.GetLastError());
+	}
+
+	for (ActorRecord& actor : aSceneData.Actors)
+	{
+		for (ComponentRecord& component : actor.Components)
 		{
 			std::visit([&](auto& componentData)
 			{
@@ -74,20 +90,32 @@ void GameScene::PrepareAssets(SceneData& scene, SceneLoadContext& context)
 				{
 					for (MaterialInstanceData& materialData : componentData.Materials)
 					{
-						if (context.Assets.GetAsset<MaterialAsset>(materialData.Parent.Value))
-						{
-							continue;
-						}
-						if (context.Assets.GetLastErrorCode() != AssetRegistry::AssetError::NotFound)
-						{
-							throw std::runtime_error("Could not load authored material '" + materialData.Name + "': " + context.Assets.GetLastError());
-						}
-						GAMELOG(Warning, "No authored .mat for imported material '{}'; using fallback.", materialData.Name);
-						materialData.Parent = fallbackMaterial;
-						materialData.Parameters.clear();
+						PrepareMaterial(materialData, fallbackMaterial, aSceneLoadContext.Assets);
 					}
 				}
-			}, componentRecord);
+			}, component);
 		}
 	}
+}
+
+void GameScene::PrepareMaterial(MaterialInstanceData& aMaterialData, const AssetId& aFallbackMaterial, AssetRegistry& aAssetRegistry)
+{
+	if (aAssetRegistry.GetAsset<MaterialAsset>(aMaterialData.Parent.Value))
+	{
+		return;
+	}
+
+	if (aAssetRegistry.GetLastErrorCode() != AssetRegistry::AssetError::NotFound)
+    {
+        throw std::runtime_error(
+            "Could not load authored material '" +
+            aMaterialData.Name +
+            "': " +
+            aAssetRegistry.GetLastError());
+    }
+
+    GAMELOG(Warning, "No authored .mat for imported material '{}'; using fallback.", aMaterialData.Name);
+
+    aMaterialData.Parent = aFallbackMaterial;
+    aMaterialData.Parameters.clear();
 }

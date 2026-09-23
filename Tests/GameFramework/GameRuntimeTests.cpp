@@ -15,7 +15,6 @@
 #include "GameFramework/Components/SkeletalMeshComponent.h"
 #include "Game.h"
 #include "GameScene.h"
-#include "GameComponents.h"
 #include "GraphicsEngine/GraphicsEngine.h"
 #include <chrono>
 #include <iostream>

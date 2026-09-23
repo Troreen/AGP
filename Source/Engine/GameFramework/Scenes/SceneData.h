@@ -115,8 +115,18 @@ struct PlaceholderComponentData
 	PlaceholderProperties Properties;
 };
 
-using ComponentRecord = std::variant<SceneComponentData, CameraData, StaticMeshData, SkeletalMeshData, DirectionalLightData,
-	PointLightData, SpotLightData, PlaceholderComponentData>;
+using ComponentRecord = 
+	std::variant
+	<
+		SceneComponentData, 
+		CameraData, 
+		StaticMeshData, 
+		SkeletalMeshData, 
+		DirectionalLightData,
+		PointLightData, 
+		SpotLightData, 
+		PlaceholderComponentData
+	>;
 
 struct ActorRecord
 {
