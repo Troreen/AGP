@@ -91,7 +91,7 @@ The input callback records intent; the Component owns the combat rule and advanc
 
 ## Use the system: enemies, loot, and map changes
 
-In `Game::ConfigureWorld`, find an imported enemy Actor by its authored name and attach the Components it needs. For example, a dungeon boss can receive `HealthComponent`, `EnemyAIComponent`, and `LootDropComponent`. Those are gameplay classes the team would add; the World does not provide combat or loot rules yet.
+In `Game::ConfigureWorld`, find an imported enemy Actor by its authored name and attach the Components it needs. For example, an enemy can receive `HealthComponent`, `EnemyAIComponent`, and `LootDropComponent`. Those are gameplay classes we would add; the World does not provide combat or loot rules yet.
 
 When an enemy dies, mark it with `actor->Destroy()`. Destruction is deferred until the World removes pending objects. If it should drop loot, spawn a new Actor with a unique name and attach its mesh and pickup Components. A Component added during the current World update begins play on the next update.
 
