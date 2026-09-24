@@ -285,9 +285,9 @@ bool MeshLibrary::LoadFBXMesh(const std::filesystem::path& aPath)
 	}
 
 	TGA::FBX::Mesh importedMesh;
-	if (!TGA::FBX::Importer::LoadMeshW(resolvedPath.wstring(), importedMesh))
+	if (!TGA::FBX::Importer::LoadMesh(resolvedPath.wstring(), importedMesh))
 	{
-		GAMELOG(Warning, "Could not load FBX mesh '{}': {}", resolvedPath.string(), TGA::FBX::Importer::GetLastError());
+		GAMELOG(Warning, "Could not load FBX mesh '{}': {}", resolvedPath.string(), TGA::FBX::Importer::GetLastSDKError());
 		return false;
 	}
 
@@ -344,9 +344,9 @@ bool MeshLibrary::LoadFBXAnimation(std::string_view aMeshName, std::string aAnim
 	}
 
 	TGA::FBX::Animation importedAnimation;
-	if (!TGA::FBX::Importer::LoadAnimationW(resolvedPath.wstring(), importedAnimation))
+	if (!TGA::FBX::Importer::LoadAnimation(resolvedPath.wstring(), importedAnimation))
 	{
-		GAMELOG(Warning, "Could not load animation '{}': {}", resolvedPath.string(), TGA::FBX::Importer::GetLastError());
+		GAMELOG(Warning, "Could not load animation '{}': {}", resolvedPath.string(), TGA::FBX::Importer::GetLastSDKError());
 		return false;
 	}
 

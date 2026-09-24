@@ -13,4 +13,6 @@ NodeStatus FallbackNode::Tick()
 
 		return status;
 	}
+
+	return NodeStatus::Success;
 }

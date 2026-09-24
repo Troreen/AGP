@@ -24,9 +24,9 @@ const std::shared_ptr<Mesh>& MeshAsset::GetMesh() const
 bool MeshAsset::Load(const std::filesystem::path& aPath, [[maybe_unused]] AssetRegistry& aRegistry)
 {
 	TGA::FBX::Mesh importedMesh;
-	if (!TGA::FBX::Importer::LoadMeshW(aPath.wstring(), importedMesh))
+	if (!TGA::FBX::Importer::LoadMesh(aPath.wstring(), importedMesh))
 	{
-		LOG(MeshAssetLog, Warning, "Could not load FBX mesh '{}': {}", aPath.string(), TGA::FBX::Importer::GetLastError());
+		LOG(MeshAssetLog, Warning, "Could not load FBX mesh '{}': {}", aPath.string(), TGA::FBX::Importer::GetLastSDKError());
 		return false;
 	}
 

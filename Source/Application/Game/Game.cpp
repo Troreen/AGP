@@ -39,7 +39,7 @@ void Game::Initialize(GameApplication& anApplication)
 	anApplication.RequestSceneLoad(SceneId::Blockout);
 	AudioManager& audio = ServiceLocator::GetInstance().GetAudioManager();
 	audio.SetBusVolume(BusID::eMusic, BackgroundMusicVolume);
-	audio.PlayMusic(SoundID::eMainTheme, true); // TODO: make man breathe more often this is not enough wtf smh b-word
+	audio.PlayMusic(SoundID::eMainTheme, true); // Todo: Get Viggo Mortensen's Signature
 	GAMELOG(Log, "Game ready: F4 reloads the current scene, ESC quits the game.");
 }
 
@@ -58,7 +58,6 @@ void Game::Shutdown()
 	}
 
 	myInputListenerIDs.clear();
-	ServiceLocator::GetInstance().GetAudioManager().StopMusic(SoundID::eMainTheme, false);
 }
 
 void Game::ConfigureWorld(World& aWorld)

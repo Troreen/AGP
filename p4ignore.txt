@@ -35,5 +35,5 @@ README.md
 /.log
 .clang-format
 .clang-format-ignore
-/Docs
+
 .pch

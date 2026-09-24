@@ -33,9 +33,6 @@ project "Game"
 		"**.rc",
 		"**.hlsl",
 		"**.hlsli",
-		path.join(dirs.dependencies, "TGAFBXImporter", "source", "Importer.cpp"),
-		path.join(dirs.dependencies, "TGAFBXImporter", "source", "Internals.cpp"),
-		path.join(dirs.dependencies, "TGAFBXImporter", "source", "TgaFbxStructs.cpp"),
 	}
 
 	-- The executable enters through Main.cpp and its concrete GameApplication.
@@ -60,18 +57,16 @@ project "Game"
 		"GraphicsEngine",
 		"CommonUtilities",
 		"Logger",
-		"libfbxsdk.lib",
-		"libxml2-md.lib",
-		"zlib-md.lib",
 		"d3d11.lib",
 		"dxguid.lib",
 		"dxgi.lib",
 		"d3dcompiler.lib",
+		"TGAFbx.lib"
 	}
     
     multiprocessorcompile "On"
     conformancemode "On"
-	defines { "_WINDOWS", "FBXSDK_SHARED" }
+	defines { "_WINDOWS" }
 
 	prebuildcommands { 'xcopy /s /y "$(SolutionDir)Dependencies\\.dlls\\*.dll" "$(OutDir)"' }
 	-- Fix the old shader copy bug: Debug wrote into the separate repository Content

@@ -1,47 +1,46 @@
-//#include "AnimationState.h"
-//#include "AnimationTree.h"
+#include "AnimationState.h"
+#include "AnimationTree.h"
 //#include <tge/model/ModelFactory.h>
 //
-//AnimationState::AnimationState()
-//{
-//}
-//
-//AnimationState::AnimationState(const std::string& aName, bool aOverwriteGlobal) : myName(aName), myOverwriteGlobal(aOverwriteGlobal)
-//{
-//	myAnimationTree = nullptr;
-//}
-//
-//AnimationState::~AnimationState()
-//{
-//	myAnimationTree = nullptr;
-//}
-//
-//
-//void AnimationState::SetAnimation(const std::string& aFilePath, bool aIsLooping, bool aIsFullBody)
-//{
-//	myFilePath = aFilePath;
-//	myIsLooping = aIsLooping;
-//
-//	if (aIsFullBody)
-//	{
-//		myLayer = eAnimationLayer::FullBody;
-//	}
-//	else
-//	{
-//		myLayer = eAnimationLayer::UpperBody;
-//	}
-//}
+AnimationState::AnimationState()
+{}
+
+AnimationState::AnimationState(const std::string_view& aName, bool aOverwriteGlobal) : myName(aName), myOverwriteGlobal(aOverwriteGlobal)
+{
+	myAnimationTree = nullptr;
+}
+
+AnimationState::~AnimationState()
+{
+	myAnimationTree = nullptr;
+}
+
+
+void AnimationState::SetAnimation(const std::string_view& aFilePath, bool aIsLooping, bool aIsFullBody)
+{
+	myFilePath = aFilePath;
+	myIsLooping = aIsLooping;
+
+	if (aIsFullBody)
+	{
+		//myLayer = eAnimationLayer::FullBody;
+	}
+	else
+	{
+		//myLayer = eAnimationLayer::UpperBody;
+	}
+}
 //
 //void AnimationState::InitState(AnimationTree* anAnimationTree)
 //{
 //	myAnimationTree = anAnimationTree;
 //}
-//
-//void AnimationState::AddTransition(const Transition aTransition)
-//{
-//	myTransitions.emplace_back(aTransition);
-//}
-//
+
+void AnimationState::AddTransition(const Transition aTransition)
+{
+	myTransitions.emplace_back(aTransition);
+}
+
 //void AnimationState::OnEnter()
 //{
 //	myOnEnter.Invoke();
@@ -87,28 +86,28 @@
 //	return myOnExit;
 //}
 //
-//AnimationState& AnimationState::operator=(const AnimationState& other)
-//{
-//	if (this == &other)
-//	{
-//		return *this;
-//	}
-//
-//	myName = other.myName;
-//	myAnimationTree = other.myAnimationTree;
-//
-//	myTransitions.clear();
-//	for (size_t i = 0; i < other.myTransitions.size(); i++)
-//	{
-//		myTransitions.emplace_back(other.myTransitions[i]);
-//	}
-//	
-//	myFilePath = other.myFilePath;
-//	myIsLooping = other.myIsLooping;
-//	myLayer = other.myLayer;
-//
-//	return *this;
-//}
+AnimationState& AnimationState::operator=(const AnimationState& other)
+{
+	if (this == &other)
+	{
+		return *this;
+	}
+
+	myName = other.myName;
+	myAnimationTree = other.myAnimationTree;
+
+	myTransitions.clear();
+	for (size_t i = 0; i < other.myTransitions.size(); i++)
+	{
+		myTransitions.emplace_back(other.myTransitions[i]);
+	}
+
+	myFilePath = other.myFilePath;
+	myIsLooping = other.myIsLooping;
+	//myLayer = other.myLayer;
+
+	return *this;
+}
 //
 //const std::string AnimationState::GetAnimationPath() const
 //{

@@ -80,22 +80,27 @@ UnrealSceneData ImportScene(std::filesystem::path aJSONPath)
 
 		{
 			const auto& matrix = actor["Transform"].get_array().value();
-			actorData.transform = {static_cast<float>(matrix.at(5).get_double().value()),
-				                   static_cast<float>(matrix.at(6).get_double().value()),
-				                   static_cast<float>(matrix.at(4).get_double().value()),
-				                   static_cast<float>(matrix.at(3).get_double().value()),
-				                   static_cast<float>(matrix.at(9).get_double().value()),
-				                   static_cast<float>(matrix.at(10).get_double().value()),
-				                   static_cast<float>(matrix.at(8).get_double().value()),
-				                   static_cast<float>(matrix.at(7).get_double().value()),
-				                   static_cast<float>(matrix.at(1).get_double().value()),
-				                   static_cast<float>(matrix.at(2).get_double().value()),
-				                   static_cast<float>(matrix.at(0).get_double().value()),
-				                   static_cast<float>(matrix.at(11).get_double().value()),
-				                   static_cast<float>(matrix.at(13).get_double().value()),
-				                   static_cast<float>(matrix.at(14).get_double().value()),
-				                   static_cast<float>(matrix.at(12).get_double().value()),
-				                   static_cast<float>(matrix.at(15).get_double().value())
+			actorData.transform =
+			{
+				-static_cast<float>(matrix.at(1).get_double().value()),
+				-static_cast<float>(matrix.at(2).get_double().value()),
+				-static_cast<float>(matrix.at(0).get_double().value()),
+			    static_cast<float>(matrix.at(11).get_double().value()),
+
+                 static_cast<float>(matrix.at(9).get_double().value()),
+				 static_cast<float>(matrix.at(10).get_double().value()),
+				 static_cast<float>(matrix.at(8).get_double().value()),
+				 static_cast<float>(matrix.at(7).get_double().value()),
+
+				 static_cast<float>(matrix.at(5).get_double().value()),
+				 static_cast<float>(matrix.at(6).get_double().value()),
+				 static_cast<float>(matrix.at(4).get_double().value()),
+				 static_cast<float>(matrix.at(3).get_double().value()),
+
+				 static_cast<float>(matrix.at(13).get_double().value()),
+				 static_cast<float>(matrix.at(14).get_double().value()),
+				 static_cast<float>(matrix.at(12).get_double().value()),
+				 static_cast<float>(matrix.at(15).get_double().value())
 
 			};
 		}
