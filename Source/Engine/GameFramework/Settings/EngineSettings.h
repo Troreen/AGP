@@ -75,6 +75,7 @@ public:
 	const ApplicationSettings& GetDefaultApplicationSettings() const { return myDefaultApplication; }
 	const SoundSettings& GetDefaultSoundSettings() const { return myDefaultSound; }
 	const InputSettings& GetDefaultInputSettings() const { return myDefaultInput; }
+	const std::filesystem::path& GetExecutableDirectory() const { return myExecutableDirectory; }
 	std::filesystem::path GetContentRoot() const;
 	std::vector<WindowResolution> GetAvailableWindowedResolutions() const;
 

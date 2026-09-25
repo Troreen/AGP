@@ -74,19 +74,20 @@ project "Game"
 	postbuildcommands {
 		'if not exist "$(SolutionDir)Content" (echo ERROR: Content stream is missing & exit /b 1)',
 		'if not exist "$(SolutionDir)Source\\Engine\\GraphicsEngine\\Shaders" (echo ERROR: Engine shaders are missing & exit /b 1)',
+		'if not exist "$(SolutionDir)Dependencies\\FMod\\Desktop\\Master.bank" (echo ERROR: FMOD Master.bank is missing & exit /b 1)',
+		'if not exist "$(SolutionDir)Dependencies\\FMod\\Desktop\\Master.strings.bank" (echo ERROR: FMOD Master.strings.bank is missing & exit /b 1)',
 		'if exist "$(OutDir)Content" attrib -R "$(OutDir)Content\\*" /S /D >nul',
 		'robocopy "$(SolutionDir)Content" "$(OutDir)Content" /MIR /COPY:DT /DCOPY:DT /R:1 /W:1 /NFL /NDL /NJH /NJS',
 		'if errorlevel 8 exit /b 1',
-		'robocopy "$(SolutionDir)Source\\Engine\\GraphicsEngine\\Shaders\\Internal" "$(OutDir)Content\\Shaders\\Internal" /MIR /IS /IT /COPY:DT /DCOPY:DT /R:1 /W:1 /NFL /NDL /NJH /NJS',
+		'robocopy "$(SolutionDir)Source\\Engine\\GraphicsEngine\\Shaders\\Internal" "$(OutDir)Content\\Shaders\\Internal" /E /IS /IT /COPY:DT /DCOPY:DT /R:1 /W:1 /NFL /NDL /NJH /NJS',
 		'if errorlevel 8 exit /b 1',
-		'robocopy "$(SolutionDir)Source\\Engine\\GraphicsEngine\\Shaders\\Material" "$(OutDir)Content\\Shaders\\Material" /MIR /IS /IT /COPY:DT /DCOPY:DT /R:1 /W:1 /NFL /NDL /NJH /NJS',
+		'robocopy "$(SolutionDir)Source\\Engine\\GraphicsEngine\\Shaders\\Material" "$(OutDir)Content\\Shaders\\Material" /E /IS /IT /COPY:DT /DCOPY:DT /R:1 /W:1 /NFL /NDL /NJH /NJS',
 		'if errorlevel 8 exit /b 1',
-		'robocopy "$(SolutionDir)Source\\Engine\\GraphicsEngine\\Shaders\\Internal" "$(OutDir)Content\\Shaders\\Internal" /MIR /L /COPY:DT /DCOPY:DT /R:1 /W:1 /NFL /NDL /NJH /NJS',
-		'if errorlevel 1 exit /b 1',
-		'robocopy "$(SolutionDir)Source\\Engine\\GraphicsEngine\\Shaders\\Material" "$(OutDir)Content\\Shaders\\Material" /MIR /L /COPY:DT /DCOPY:DT /R:1 /W:1 /NFL /NDL /NJH /NJS',
-		'if errorlevel 1 exit /b 1',
+		'robocopy "$(SolutionDir)Dependencies\\FMod\\Desktop" "$(OutDir)Audio" *.bank /MIR /COPY:DT /DCOPY:DT /R:1 /W:1 /NFL /NDL /NJH /NJS',
+		'if errorlevel 8 exit /b 1',
 		'if not exist "$(SolutionDir)Bin\\Settings\\ApplicationSettings.json" (echo ERROR: Application settings are missing & exit /b 1)',
-		'if not exist "$(SolutionDir)Bin\\Settings\\InputBindings.json" (echo ERROR: Input bindings are missing & exit /b 1)'
+		'if not exist "$(SolutionDir)Bin\\Settings\\InputBindings.json" (echo ERROR: Input bindings are missing & exit /b 1)',
+		'exit /b 0'
 	}
 
 	filter "configurations:Debug"

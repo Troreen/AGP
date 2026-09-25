@@ -43,7 +43,8 @@ with C++ workload and a Windows SDK, then build `Debug | x64`.
 
 Game resolves `Content` from the executable location; it does not depend on
 its working directory. Run `Bin/Debug/Game.exe` or
-`Bin/Release/Game.exe`. The debug build opens a log console.
+`Bin/Release/Game.exe`. The build copies FMOD sound banks into `Audio` beside
+`Game.exe`, and the game loads them from there. The debug build opens a log console.
 
 `Main.cpp` constructs the concrete `Game` and `GameApplication`, then calls
 `application.Run(game)`. Game selects the initial scene and registers its gameplay

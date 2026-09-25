@@ -1,8 +1,11 @@
 #include "AudioManager.h"
+#include "ServiceLocator.h"
+#include "Settings/EngineSettings.h"
 
 void AudioManager::Init()
 {
-	std::string bankRootPath = "../../../Dependencies/FMod/Desktop/";
+	const std::filesystem::path bankDirectory = ServiceLocator::GetInstance().GetEngineSettings().GetExecutableDirectory() / "Audio";
+	const std::string bankRootPath = bankDirectory.string() + "\\";
 	SoundEngine::Init(bankRootPath);
 
 	SoundEngine::LoadBank("Master.strings.bank", 0);

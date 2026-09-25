@@ -8,7 +8,6 @@ Status: in progress. This document records work to make a fresh GitHub checkout 
 - `Source/Application/Game/premake5.lua` copies five DLLs from `Dependencies/.dlls` before building Game. Those exact files are now tracked in Git; their original sources and redistribution rights still need review. The single tracked `Bin/Debug/libfbxsdk.dll` is not a complete dependency source.
 - The workspace selects the `v145` C++ toolset in `premake5.lua`. A new development machine needs Visual Studio 2026 C++ build tools and a Windows SDK. See [Microsoft's MSVC toolset documentation](https://learn.microsoft.com/en-us/cpp/overview/what-s-new-for-msvc?view=msvc-170).
 - Git currently tracks a snapshot of `Content`, while the team updates Content through a separate Perforce stream. A GitHub clone does not automatically receive later Perforce updates.
-- `AudioManager.cpp` resolves `Dependencies/FMod/Desktop` relative to the process working directory. The app-only package made by `AGPCleaner.bat` does not include those banks.
 - `AGPCleaner.bat` packages Debug by default. Debug Visual C++ runtime DLLs are [not generally redistributable](https://learn.microsoft.com/en-us/cpp/windows/preparing-a-test-machine-to-run-a-debug-executable?view=msvc-170).
 - `README.md` still describes the removed `Assets` runtime layout rather than executable-relative `Content`.
 
@@ -29,8 +28,8 @@ Status: in progress. This document records work to make a fresh GitHub checkout 
 
 ### Portable Release runtime
 
-- [ ] Resolve audio bank paths relative to the executable or configured runtime root, independent of the working directory.
-- [ ] Deploy the FMOD banks with the executable, alongside the existing `Bin/Release/Content` output.
+- [x] Resolve audio bank paths relative to the executable or configured runtime root, independent of the working directory.
+- [x] Deploy the FMOD banks with the executable, alongside the existing `Bin/Release/Content` output.
 - [ ] Make the app-only package use Release and include `Game.exe`, `Content`, audio banks, and the required Release FMOD/FBX DLLs. Verify that no path inside the package points back to the source checkout.
 - [ ] Document or install the x64 Visual C++ Redistributable version required by the build. See [Microsoft's supported redistributable guidance](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170). Keep Debug builds for development and testing.
 - [ ] Update `README.md` with separate instructions for building from source and running a Release package.
