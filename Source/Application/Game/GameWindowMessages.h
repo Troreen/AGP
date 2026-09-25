@@ -10,6 +10,7 @@
 
 namespace GameWindowMessages
 {
+	bool IsDebugUiVisible();
 	LRESULT CALLBACK WindowProc(HWND aWindow, UINT aMessage, WPARAM aWParam, LPARAM anLParam);
 	void Pump(bool& aQuitRequested);
 }

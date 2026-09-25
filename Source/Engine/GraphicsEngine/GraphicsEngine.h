@@ -171,6 +171,10 @@ public:
 	}
 
 	void Present() const;
+	bool InitializeDebugUi(HWND aWindowHandle);
+	void BeginDebugUiFrame() const;
+	void RenderDebugUi() const;
+	void ShutdownDebugUi();
 	bool Resize(unsigned aWidth, unsigned aHeight);
 
 	// --- Resource and command creation ---
@@ -266,6 +270,7 @@ private:
 
 	// --- Frame targets and state ---
 	RenderHardwareInterface myRHI;
+	bool myDebugUiInitialized = false;
 
 	Texture myBackBuffer;
 	Texture myDepthBuffer;

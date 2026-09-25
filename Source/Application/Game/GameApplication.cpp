@@ -22,6 +22,7 @@
 #include "PrimitiveMeshBuilder.h"
 #include "StringHelpers.h"
 #include "Timer.h"
+#include "imgui.h"
 
 #include <algorithm>
 #include <exception>
@@ -291,7 +292,8 @@ GraphicsEngine& GameApplication::InitializeWindowAndGraphics()
 	// Initialize graphics engine
 	GraphicsEngine& graphics = GraphicsEngine::Get();
 	if (!graphics.Initialize(myMainWindowHandle, myContentRoot / "Shaders") || 
-		!graphics.CreateCommandList("Game Scene", myCommandList))
+		!graphics.CreateCommandList("Game Scene", myCommandList) ||
+		!graphics.InitializeDebugUi(myMainWindowHandle))
 	{
 		throw std::runtime_error("Could not initialize graphics engine: ");
 	}
@@ -465,6 +467,8 @@ void GameApplication::RunMainLoop(Game& aGame, GraphicsEngine& aGraphics)
 			break;
 		}
 
+		aGraphics.BeginDebugUiFrame();
+
 		// Handle debug camera toggle
 		if (std::exchange(myToggleDebugCameraRequested, false))
 		{
@@ -475,6 +479,24 @@ void GameApplication::RunMainLoop(Game& aGame, GraphicsEngine& aGraphics)
 		aGame.Update(*myWorld, delta);
 		myWorld->Update(delta);
 		ServiceLocator::GetInstance().GetAudioManager().Update(delta);
+
+		if (GameWindowMessages::IsDebugUiVisible())
+		{
+			static bool showImGuiDemo = false;
+			ImGui::Begin("AGP Debug");
+			ImGui::Text("Frame time: %.2f ms", delta * 1000.0f);
+			ImGui::Text("Render pass: %s", GraphicsEngine::RenderSettings::GetRenderPassName(myRenderSettings.SelectedRenderPass));
+			const auto stats = aGraphics.GetLastRenderStats();
+			ImGui::Text("Visible render items: %u / %u", stats.VisibleRenderItems, stats.TotalRenderItems);
+			ImGui::Checkbox("Dear ImGui demo", &showImGuiDemo);
+			ImGui::TextUnformatted("F9: show or hide debug UI");
+			ImGui::End();
+			if (showImGuiDemo)
+			{
+				ImGui::ShowDemoWindow(&showImGuiDemo);
+			}
+			aGame.DrawDebugUI();
+		}
 
 		RenderFrame(aGraphics);
 	}
@@ -529,7 +551,12 @@ void GameApplication::RenderFrame(GraphicsEngine& aGraphics)
 	if (myCommandList.FinishCommandList())
 	{
 		aGraphics.ExecuteCommandList(myCommandList);
+		aGraphics.RenderDebugUi();
 		aGraphics.Present();
+	}
+	else
+	{
+		ImGui::EndFrame();
 	}
 }
 
@@ -636,6 +663,7 @@ void GameApplication::Cleanup(Game& aGame, std::exception_ptr& aFailure)
 	AttemptCleanup(aFailure, "World cleanup", &GameApplication::ClearWorld, *this);
 	AttemptCleanup(aFailure, "Application input cleanup", &GameApplication::RemoveApplicationInputListeners, *this);
 	AttemptCleanup(aFailure, "Render reference cleanup", &GameApplication::ReleaseRenderReferences, *this);
+	GraphicsEngine::Get().ShutdownDebugUi();
 	AttemptCleanup(aFailure, "Service cleanup", &GameApplication::KillServices, *this);
 	DestroyWindowIfCreated();
 }

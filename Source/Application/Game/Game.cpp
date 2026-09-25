@@ -42,6 +42,11 @@ void Game::Update([[maybe_unused]] World& aWorld, [[maybe_unused]] float aDeltaT
 	}
 }
 
+void Game::DrawDebugUI()
+{
+	// Add game-specific ImGui windows here. Called between NewFrame and Render.
+}
+
 void Game::Shutdown()
 {
 	if (auto* input = ServiceLocator::GetInstance().GetInputMapper())

@@ -21,6 +21,8 @@ project "Game"
 		dirs.source,
         dirs.utilities,
         dirs.utilities .. "CommonUtilities",
+        dirs.dependencies .. "ImGui",
+        dirs.dependencies .. "ImGui\\backends",
         dirs.dependencies .. "nlohmann_json\\include",
         dirs.dependencies .. "**" .. "include",
 		dirs.dependencies .. "TGAFBXImporter\\include",

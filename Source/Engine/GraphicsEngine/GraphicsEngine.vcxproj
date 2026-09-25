@@ -89,7 +89,7 @@
       <PrecompiledHeaderFile>GraphicsEngine.pch.h</PrecompiledHeaderFile>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.;..;..\..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..;..\..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\ImGui;..\..\..\Dependencies\ImGui\backends;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -120,7 +120,7 @@
       <PrecompiledHeaderFile>GraphicsEngine.pch.h</PrecompiledHeaderFile>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>_RELEASE;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.;..;..\..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..;..\..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\ImGui;..\..\..\Dependencies\ImGui\backends;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -156,7 +156,7 @@
       <PrecompiledHeaderFile>GraphicsEngine.pch.h</PrecompiledHeaderFile>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>_RETAIL;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.;..;..\..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..;..\..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\ImGui;..\..\..\Dependencies\ImGui\backends;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -217,6 +217,27 @@
     <ClInclude Include="TextWidget.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\Dependencies\ImGui\backends\imgui_impl_dx11.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Dependencies\ImGui\backends\imgui_impl_win32.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Dependencies\ImGui\imgui.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Dependencies\ImGui\imgui_demo.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Dependencies\ImGui\imgui_draw.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Dependencies\ImGui\imgui_tables.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Dependencies\ImGui\imgui_widgets.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="ConstantBuffers\FrameBuffer.cpp" />
     <ClCompile Include="ConstantBuffers\ObjectBuffer.cpp" />
     <ClCompile Include="GraphicsEngine.cpp" />

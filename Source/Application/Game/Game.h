@@ -13,6 +13,7 @@ public:
 	void ConfigureWorld(World& aWorld);
 	void Initialize(GameApplication& anApplication);
 	void Update(World& aWorld, float aDeltaTime);
+	void DrawDebugUI();
 	void Shutdown();
 private:
 	// Keeps the FBX importer initialized while AssetRegistry loads FBX assets.

@@ -4,6 +4,15 @@
     <Filter Include="ConstantBuffers">
       <UniqueIdentifier>{3CBE0720-A849-75E4-B15A-F8D81D65D1E4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Dependencies">
+      <UniqueIdentifier>{6C01343A-5864-C3DE-01EA-FB94ED2B8F61}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Dependencies\ImGui">
+      <UniqueIdentifier>{96D70AF8-82BB-CB4D-EB1B-C6A0D71EB6CF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Dependencies\ImGui\backends">
+      <UniqueIdentifier>{803AF3CE-EC47-21B5-752E-1DA0E13AED6B}</UniqueIdentifier>
+    </Filter>
     <Filter Include="InterOp">
       <UniqueIdentifier>{E6D11E00-52B1-9D9B-5BC9-2872C72704FD}</UniqueIdentifier>
     </Filter>
@@ -103,6 +112,27 @@
     <ClInclude Include="TextWidget.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\Dependencies\ImGui\backends\imgui_impl_dx11.cpp">
+      <Filter>Dependencies\ImGui\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Dependencies\ImGui\backends\imgui_impl_win32.cpp">
+      <Filter>Dependencies\ImGui\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Dependencies\ImGui\imgui.cpp">
+      <Filter>Dependencies\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Dependencies\ImGui\imgui_demo.cpp">
+      <Filter>Dependencies\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Dependencies\ImGui\imgui_draw.cpp">
+      <Filter>Dependencies\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Dependencies\ImGui\imgui_tables.cpp">
+      <Filter>Dependencies\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Dependencies\ImGui\imgui_widgets.cpp">
+      <Filter>Dependencies\ImGui</Filter>
+    </ClCompile>
     <ClCompile Include="ConstantBuffers\FrameBuffer.cpp">
       <Filter>ConstantBuffers</Filter>
     </ClCompile>

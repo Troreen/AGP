@@ -15,6 +15,9 @@
 #include "Objects/Shader.h"
 
 #include <d3dcompiler.h>
+#include "imgui.h"
+#include "imgui_impl_dx11.h"
+#include "imgui_impl_win32.h"
 
 #include <algorithm>
 #include <array>
@@ -1149,6 +1152,58 @@ void GraphicsEngine::RenderTonemapping(GraphicsCommandList& inoutCommandList, co
 void GraphicsEngine::Present() const
 {
 	myRHI.Present();
+}
+
+bool GraphicsEngine::InitializeDebugUi(HWND aWindowHandle)
+{
+	if (myDebugUiInitialized)
+	{
+		return true;
+	}
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui::GetIO().IniFilename = nullptr;
+	ImGui::StyleColorsDark();
+	if (!ImGui_ImplWin32_Init(aWindowHandle))
+	{
+		ImGui::DestroyContext();
+		return false;
+	}
+	if (!ImGui_ImplDX11_Init(myRHI.GetDevice(), myRHI.GetImmediateContext()))
+	{
+		ImGui_ImplWin32_Shutdown();
+		ImGui::DestroyContext();
+		return false;
+	}
+	myDebugUiInitialized = true;
+	return true;
+}
+
+void GraphicsEngine::BeginDebugUiFrame() const
+{
+	ImGui_ImplDX11_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+	ImGui::NewFrame();
+}
+
+void GraphicsEngine::RenderDebugUi() const
+{
+	ImGui::Render();
+	ID3D11RenderTargetView* backBuffer = myBackBuffer.myRTV.Get();
+	myRHI.GetImmediateContext()->OMSetRenderTargets(1, &backBuffer, nullptr);
+	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+}
+
+void GraphicsEngine::ShutdownDebugUi()
+{
+	if (!myDebugUiInitialized)
+	{
+		return;
+	}
+	ImGui_ImplDX11_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
+	myDebugUiInitialized = false;
 }
 
 bool GraphicsEngine::Resize(unsigned aWidth, unsigned aHeight)

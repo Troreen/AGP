@@ -24,10 +24,19 @@ project "GraphicsEngine"
 		dirs.source,
         dirs.utilities,
         dirs.utilities .. "CommonUtilities",
+        dirs.dependencies .. "ImGui",
+        dirs.dependencies .. "ImGui\\backends",
         dirs.dependencies .. "**" .. "include",
 	}
 
 	files {
+		dirs.dependencies .. "ImGui\\imgui.cpp",
+		dirs.dependencies .. "ImGui\\imgui_draw.cpp",
+		dirs.dependencies .. "ImGui\\imgui_tables.cpp",
+		dirs.dependencies .. "ImGui\\imgui_widgets.cpp",
+		dirs.dependencies .. "ImGui\\imgui_demo.cpp",
+		dirs.dependencies .. "ImGui\\backends\\imgui_impl_win32.cpp",
+		dirs.dependencies .. "ImGui\\backends\\imgui_impl_dx11.cpp",
 		"**.h",
 		"**.cpp",
 		"**.hpp",
@@ -77,6 +86,9 @@ project "GraphicsEngine"
         buildaction "None"
 
 	filter "files:**/DDSTextureLoader11.cpp"
+		enablepch "Off"
+
+	filter "files:**/ImGui/**.cpp"
 		enablepch "Off"
     
     filter {}

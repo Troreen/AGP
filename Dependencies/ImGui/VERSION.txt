@@ -1,0 +1,13 @@
+# Dear ImGui
+
+Vendored Dear ImGui v1.92.4 from https://github.com/ocornut/imgui/tree/v1.92.4
+(commit `9a5d5c45f54b1301ea471622eddede70384243af`). The original MIT license is
+in `LICENSE.txt`. These are unmodified upstream core files and the Win32/DX11
+backends needed by AGP; examples and unused backends are omitted.
+
+The files are stored directly in this directory so a Git checkout and a Perforce
+sync use the same version without a submodule, package manager, or download step.
+When updating, copy the core `.cpp` and `.h` files, `LICENSE.txt`, and the
+`imgui_impl_win32`/`imgui_impl_dx11` pairs from one upstream release, then update
+the version and commit above. Keep the set of compiled files in
+`Source/Engine/GraphicsEngine/premake5.lua` in sync.

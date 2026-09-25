@@ -33,6 +33,7 @@ namespace CommonUtilities
 		void HideCursor();
 		void CaptureMouse();
 		void ReleaseMouse();
+		void ClearInputState();
 		void CenterMouse();
 
 	private:

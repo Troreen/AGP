@@ -84,6 +84,13 @@ namespace CommonUtilities
 		myTentativeMouseDelta.y = 0;
 	}
 
+	void InputHandler::ClearInputState()
+	{
+		myTentativeState.reset();
+		myTentativeMouseDelta = {};
+		ReleaseMouse();
+	}
+
 	bool InputHandler::IsKeyDown(const int aKeyCode) const
 	{
 		return myCurrentState.test(static_cast<size_t>(aKeyCode));

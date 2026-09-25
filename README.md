@@ -14,6 +14,7 @@ C++20 / DirectX 11 graphics programming project for the AGP assignments. The cur
 - Spot light shadow maps.
 - Point light cube shadow maps.
 - Render-pass inspection and runtime lighting controls.
+- Dear ImGui debug UI, toggled with `F9`.
 - Demo scene with primitives, a textured floor, a chest mesh, and an animated character.
 
 ## Repository Layout
@@ -40,6 +41,21 @@ For a new Windows checkout, run `SetupWindows.bat`. It walks through the FMOD
 Studio API 2.02.05 header setup, downloads Premake if needed, and generates
 `Game.sln`. Open that solution in Visual Studio 2026 with the Desktop development
 with C++ workload and a Windows SDK, then build `Debug | x64`.
+
+Dear ImGui v1.92.4 is included in `Dependencies/ImGui`; neither Git nor Perforce
+users need a separate ImGui installation. Perforce users should add the new
+`Dependencies/ImGui` source and license files, the modified Premake scripts, and
+the game/engine source changes to the same changelist. Run `GenerateProject.bat`
+after syncing to regenerate `Game.sln` and the Visual Studio projects. Git users
+can use the tracked generated projects or regenerate them the same way.
+
+See [ImGui integration](Docs/ImGui.md) for the team workflow. `F9` shows or
+hides the debug panel (shown initially in Debug builds). Add game
+debug widgets in `Game::DrawDebugUI()` in `Source/Application/Game/Game.cpp`.
+That callback runs on the main thread between ImGui's `NewFrame()` and `Render()`.
+ImGui is available in all build configurations; Release and Retail start with
+the panel hidden. The Win32 input backend consumes mouse and keyboard input
+while a debug widget has focus or is hovered.
 
 Game resolves `Content` from the executable location; it does not depend on
 its working directory. Run `Bin/Debug/Game.exe` or

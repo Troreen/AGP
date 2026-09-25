@@ -92,7 +92,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.;..\..\Engine;..\..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;..\..\Engine\GraphicsEngine\Shaders\Material;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..\..\Engine;..\..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\ImGui;..\..\..\Dependencies\ImGui\backends;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;..\..\Engine\GraphicsEngine\Shaders\Material;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -106,7 +106,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.;..\..\Engine;..\..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;..\..\Engine\GraphicsEngine\Shaders\Material;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..\..\Engine;..\..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\ImGui;..\..\..\Dependencies\ImGui\backends;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;..\..\Engine\GraphicsEngine\Shaders\Material;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -144,7 +144,7 @@ exit /b 0</Command>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>_RELEASE;NDEBUG;_WINDOWS;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.;..\..\Engine;..\..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..\..\Engine;..\..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\ImGui;..\..\..\Dependencies\ImGui\backends;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -161,7 +161,7 @@ exit /b 0</Command>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_RELEASE;NDEBUG;_WINDOWS;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.;..\..\Engine;..\..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..\..\Engine;..\..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\ImGui;..\..\..\Dependencies\ImGui\backends;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -201,7 +201,7 @@ exit /b 0</Command>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>_RETAIL;NDEBUG;_WINDOWS;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.;..\..\Engine;..\..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..\..\Engine;..\..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\ImGui;..\..\..\Dependencies\ImGui\backends;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -218,7 +218,7 @@ exit /b 0</Command>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_RETAIL;NDEBUG;_WINDOWS;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.;..\..\Engine;..\..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..\..\Engine;..\..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\ImGui;..\..\..\Dependencies\ImGui\backends;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

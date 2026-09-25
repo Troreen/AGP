@@ -62,6 +62,8 @@ public:
 	void ExecuteCommandList(const GraphicsCommandList& aCommandList) const;
 
 	void Present() const;
+	ID3D11Device* GetDevice() const { return myDevice.Get(); }
+	ID3D11DeviceContext* GetImmediateContext() const { return myContext.Get(); }
 
 	bool CompileShader(ShaderType aShaderType, const std::filesystem::path& aPath, ID3DInclude* aIncludeHandler, bool aCompileDebug,
 	                   Shader& outShader) const;
