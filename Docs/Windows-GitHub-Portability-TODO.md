@@ -15,8 +15,8 @@ Status: in progress. This document records work to make a fresh GitHub checkout 
 ## Decisions before implementation
 
 - [ ] Decide whether an approved, versioned Content snapshot belongs in GitHub or whether a documented Perforce/content-package sync is required. State plainly when a GitHub checkout alone is insufficient.
-- [ ] Identify the exact sources and versions of Premake, FMOD runtime DLLs, and the FBX SDK runtime DLL. Decide how a new developer obtains them without relying on files already present on one machine.
-- [ ] Review redistribution rights for third-party SDK files, runtime DLLs, and Content before publishing the repository or a package. In particular, [FMOD's licence](https://fmod.com/legal) distinguishes SDK files from runtime libraries; FMOD headers and libraries are already tracked under `Dependencies`.
+- [ ] Identify the exact sources and versions of Premake, FMOD runtime DLLs, and the FBX SDK runtime DLL. Premake is pinned and runtime DLL bytes are recorded in `Dependencies/.dlls/README.md`. `SetupWindows.bat` guides developers through installing the required FMOD 2.02.05 SDK headers from FMOD's download page.
+- [ ] Review redistribution rights for third-party SDK files, runtime DLLs, and Content before publishing the repository or a package. In particular, [FMOD's licence](https://fmod.com/legal) distinguishes SDK files from runtime libraries. FMOD vendor headers are now obtained through `SetupWindows.bat`; the team-provided `SoundEngine` wrapper headers and libraries remain tracked.
 
 ## Implementation checklist
 

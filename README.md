@@ -36,7 +36,10 @@ code formatting conventions.
 
 ## Build
 
-Open `AGP.sln` in Visual Studio and build the `Debug | x64` configuration.
+For a new Windows checkout, run `SetupWindows.bat`. It walks through the FMOD
+Studio API 2.02.05 header setup, downloads Premake if needed, and generates
+`Game.sln`. Open that solution in Visual Studio 2026 with the Desktop development
+with C++ workload and a Windows SDK, then build `Debug | x64`.
 
 Game resolves `Content` from the executable location; it does not depend on
 its working directory. Run `Bin/Debug/Game.exe` or
