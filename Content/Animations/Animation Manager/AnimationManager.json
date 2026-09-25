@@ -1,0 +1,12 @@
+{
+  "Player Legs": {
+    "Name": "PlayerLegsTree",
+    "Start state": "IdleState",
+    "Variables": [
+      {
+        "Name": "IsIdle",
+        "Type": "Bool"
+      }
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "Idle": {
+    "Name": "IdleState",
+    "Animation": "Content/Animations/Characters/TGA_Bro/Idle/A_C_TGA_Bro_Idle.fbx",
+    "IsLooping": true,
+    "IsFullBody": true,
+    "IsGlobal": false,
+
+    "Transitions": []
+  }
+}
