@@ -88,7 +88,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.;..\..;..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\TGAFBXImporter\Source;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\TGAFBXImporter\FBXSDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..\..;..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -106,7 +106,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>..\..\..\Lib\$(Configuration);..\..\..\Dependencies\FMod\lib;..\..\..\Dependencies\TGAFBXImporter\FBXSDK\lib;..\..\..\Dependencies\TGAFBXImporter\FBXSDK\lib\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\Lib\$(Configuration);..\..\..\Dependencies\FMod\lib;..\..\..\Dependencies\TGAFBXImporter\lib;..\..\..\Dependencies\TGAFBXImporter\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <ProjectReference>
     </ProjectReference>
@@ -116,7 +116,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>_RELEASE;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.;..\..;..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\TGAFBXImporter\Source;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\TGAFBXImporter\FBXSDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..\..;..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -139,7 +139,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>..\..\..\Lib\$(Configuration);..\..\..\Dependencies\FMod\lib;..\..\..\Dependencies\TGAFBXImporter\FBXSDK\lib;..\..\..\Dependencies\TGAFBXImporter\FBXSDK\lib\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\Lib\$(Configuration);..\..\..\Dependencies\FMod\lib;..\..\..\Dependencies\TGAFBXImporter\lib;..\..\..\Dependencies\TGAFBXImporter\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <ProjectReference>
     </ProjectReference>
@@ -149,7 +149,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>_RETAIL;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.;..\..;..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\TGAFBXImporter\Source;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\TGAFBXImporter\FBXSDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..\..;..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -172,21 +172,31 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>..\..\..\Lib\$(Configuration);..\..\..\Dependencies\FMod\lib;..\..\..\Dependencies\TGAFBXImporter\FBXSDK\lib;..\..\..\Dependencies\TGAFBXImporter\FBXSDK\lib\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\Lib\$(Configuration);..\..\..\Dependencies\FMod\lib;..\..\..\Dependencies\TGAFBXImporter\lib;..\..\..\Dependencies\TGAFBXImporter\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <ProjectReference>
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="ActionNode.h" />
+    <ClInclude Include="..\..\..\Dependencies\nlohmann_json\include\nlohmann\json.hpp" />
+    <ClInclude Include="Animation\AnimationManager.h" />
+    <ClInclude Include="Animation\AnimationState.h" />
+    <ClInclude Include="Animation\AnimationTree.h" />
+    <ClInclude Include="AssetHandling\AnimationAsset.h" />
     <ClInclude Include="AssetHandling\Asset.h" />
+    <ClInclude Include="AssetHandling\AssetLoadingHelper.h" />
     <ClInclude Include="AssetHandling\AssetRegistry.h" />
     <ClInclude Include="AssetHandling\FontAsset.h" />
     <ClInclude Include="AssetHandling\MaterialAsset.h" />
     <ClInclude Include="AssetHandling\MeshAsset.h" />
     <ClInclude Include="AssetHandling\TextureAsset.h" />
     <ClInclude Include="AudioManager.h" />
-    <ClInclude Include="BTNode.h" />
+    <ClInclude Include="BehaviourTree\ActionNode.h" />
+    <ClInclude Include="BehaviourTree\BTNode.h" />
+    <ClInclude Include="BehaviourTree\FallbackNode.h" />
+    <ClInclude Include="BehaviourTree\LeafNode.h" />
+    <ClInclude Include="BehaviourTree\SequenceNode.h" />
+    <ClInclude Include="Components\AnimatorComponent.h" />
     <ClInclude Include="Components\CameraComponent.h" />
     <ClInclude Include="Components\DebugCameraController.h" />
     <ClInclude Include="Components\LightComponent.h" />
@@ -194,14 +204,15 @@
     <ClInclude Include="Components\SceneComponent.h" />
     <ClInclude Include="Components\SkeletalMeshComponent.h" />
     <ClInclude Include="Components\StaticMeshComponent.h" />
-    <ClInclude Include="FallbackNode.h" />
     <ClInclude Include="GameFrameworkLog.h" />
-    <ClInclude Include="LeafNode.h" />
+    <ClInclude Include="Helper\Event.hpp" />
     <ClInclude Include="Rendering\WorldRenderer.h" />
-    <ClInclude Include="Scenes\WorldFromSceneData.h" />
     <ClInclude Include="Scenes\SceneData.h" />
-    <ClInclude Include="SequenceNode.h" />
+    <ClInclude Include="Scenes\WorldFromSceneData.h" />
     <ClInclude Include="ServiceLocator.h" />
+    <ClInclude Include="Settings\EngineSettings.h" />
+    <ClInclude Include="Settings\InputSettingsApplier.h" />
+    <ClInclude Include="Settings\WindowSettings.h" />
     <ClInclude Include="SimdJson\simdjson.h" />
     <ClInclude Include="UnrealSceneImporter\UnrealSceneImporter.h" />
     <ClInclude Include="UnrealSceneImporter\UnrealSceneStructs.h" />
@@ -211,7 +222,12 @@
     <ClInclude Include="World\World.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Animation\AnimationManager.cpp" />
+    <ClCompile Include="Animation\AnimationState.cpp" />
+    <ClCompile Include="Animation\AnimationTree.cpp" />
+    <ClCompile Include="AssetHandling\AnimationAsset.cpp" />
     <ClCompile Include="AssetHandling\Asset.cpp" />
+    <ClCompile Include="AssetHandling\AssetLoadingHelper.cpp" />
     <ClCompile Include="AssetHandling\AssetRegistry.cpp">
       <DisableSpecificWarnings>4100;4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
@@ -220,18 +236,22 @@
     <ClCompile Include="AssetHandling\MeshAsset.cpp" />
     <ClCompile Include="AssetHandling\TextureAsset.cpp" />
     <ClCompile Include="AudioManager.cpp" />
+    <ClCompile Include="BehaviourTree\FallbackNode.cpp" />
+    <ClCompile Include="BehaviourTree\SequenceNode.cpp" />
+    <ClCompile Include="Components\AnimatorComponent.cpp" />
     <ClCompile Include="Components\CameraComponent.cpp" />
     <ClCompile Include="Components\DebugCameraController.cpp" />
     <ClCompile Include="Components\LightComponent.cpp" />
     <ClCompile Include="Components\MeshComponentBase.cpp" />
     <ClCompile Include="Components\SceneComponent.cpp" />
     <ClCompile Include="Components\SkeletalMeshComponent.cpp" />
-    <ClCompile Include="FallbackNode.cpp" />
     <ClCompile Include="GameFrameworkLog.cpp" />
     <ClCompile Include="Rendering\WorldRenderer.cpp" />
     <ClCompile Include="Scenes\WorldFromSceneData.cpp" />
-    <ClCompile Include="SequenceNode.cpp" />
     <ClCompile Include="ServiceLocator.cpp" />
+    <ClCompile Include="Settings\EngineSettings.cpp" />
+    <ClCompile Include="Settings\InputSettingsApplier.cpp" />
+    <ClCompile Include="Settings\WindowSettings.cpp" />
     <ClCompile Include="SimdJson\simdjson.cpp">
       <DisableSpecificWarnings>4100;4244;4505;26437;26495;26817;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>

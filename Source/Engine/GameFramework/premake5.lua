@@ -21,7 +21,8 @@ project "GameFramework"
 		dirs.engine,
 		dirs.utilities,
 		dirs.utilities .. "CommonUtilities",
-		dirs.dependencies .. "TGAFBXImporter\\Source",
+		dirs.dependencies .. "nlohmann_json\\include",
+		dirs.dependencies .. "TGAFBXImporter\\include",
 		dirs.dependencies .. "**" .. "include",
 	}
 
@@ -29,6 +30,7 @@ project "GameFramework"
 		"**.h",
 		"**.cpp",
 		"**.hpp",
+		dirs.dependencies .. "nlohmann_json/include/nlohmann/json.hpp",
 	}
 
 	links {

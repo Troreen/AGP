@@ -1,5 +1,6 @@
 #pragma once
 #include "GameFramework/World/Actor.h"
+#include "Vector2.hpp"
 
 class CameraComponent;
 class WorldRenderer;
@@ -21,6 +22,7 @@ public:
 
 	bool SetActiveCamera(CameraComponent* camera);
 	CameraComponent* GetActiveCamera() const;
+	bool SetCameraResolution(const CommonUtilities::Vector2u& aResolution);
 
 	// The application drives these; normal gameplay only spawns, finds and destroys.
 	void BeginPlay();

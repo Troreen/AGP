@@ -21,8 +21,9 @@ project "Game"
 		dirs.source,
         dirs.utilities,
         dirs.utilities .. "CommonUtilities",
+        dirs.dependencies .. "nlohmann_json\\include",
         dirs.dependencies .. "**" .. "include",
-        dirs.dependencies .. "**" .. "source",
+		dirs.dependencies .. "TGAFBXImporter\\include",
 	}
 
 	files {
@@ -35,8 +36,6 @@ project "Game"
 		"**.hlsli",
 	}
 
-	-- The executable enters through Main.cpp and its concrete GameApplication.
-	-- Keep historical standalone viewer sources out even if they appear in an import.
 	removefiles {
 		"Application.cpp",
 		"Application.h",
@@ -85,7 +84,9 @@ project "Game"
 		'robocopy "$(SolutionDir)Source\\Engine\\GraphicsEngine\\Shaders\\Internal" "$(OutDir)Content\\Shaders\\Internal" /MIR /L /COPY:DT /DCOPY:DT /R:1 /W:1 /NFL /NDL /NJH /NJS',
 		'if errorlevel 1 exit /b 1',
 		'robocopy "$(SolutionDir)Source\\Engine\\GraphicsEngine\\Shaders\\Material" "$(OutDir)Content\\Shaders\\Material" /MIR /L /COPY:DT /DCOPY:DT /R:1 /W:1 /NFL /NDL /NJH /NJS',
-		'if errorlevel 1 exit /b 1'
+		'if errorlevel 1 exit /b 1',
+		'if not exist "$(SolutionDir)Bin\\Settings\\ApplicationSettings.json" (echo ERROR: Application settings are missing & exit /b 1)',
+		'if not exist "$(SolutionDir)Bin\\Settings\\InputBindings.json" (echo ERROR: Input bindings are missing & exit /b 1)'
 	}
 
 	filter "configurations:Debug"

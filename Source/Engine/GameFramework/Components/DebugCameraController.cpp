@@ -3,6 +3,8 @@
 #include "GameFramework/World/Actor.h"
 #include "GameFramework/World/World.h"
 #include "GameFramework/Components/CameraComponent.h"
+#include "GameFramework/Settings/EngineSettings.h"
+#include "InputHandler.h"
 #include "Maths.hpp"
 #include <algorithm>
 #include <cmath>
@@ -117,6 +119,14 @@ void DebugCameraController::Update(float deltaTime)
 		myPitch = CU::Clamp(myPitch + myLookDelta.y * preset.LookSensitivity,
 		                    CU::DegreesToRadians(-MaximumPitchDegrees), CU::DegreesToRadians(MaximumPitchDegrees));
 		transform.SetLocalRotationDegrees(CU::RadiansToDegrees(myYaw), CU::RadiansToDegrees(myPitch), 0);
+		if (ServiceLocator::GetInstance().GetEngineSettings().GetApplicationSettings().EnableMouseLook)
+		{
+			if (auto* inputHandler = ServiceLocator::GetInstance().GetInputMapper()->GetInputHandler();
+				inputHandler && GetForegroundWindow() == inputHandler->GetWindowHandle())
+			{
+				inputHandler->CenterMouse();
+			}
+		}
 	}
 	myLookDelta = {};
 	CommonUtilities::Vector3f motion{};

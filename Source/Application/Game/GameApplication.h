@@ -9,6 +9,9 @@
 #include <Windows.h>
 
 #include "GameFramework/Components/DebugCameraController.h"
+#include "GameFramework/Settings/EngineSettings.h"
+#include "GameFramework/Settings/InputSettingsApplier.h"
+#include "GameFramework/Settings/WindowSettings.h"
 #include "GraphicsEngine/GraphicsEngine.h"
 #include "GraphicsEngine/RHI/GraphicsCommandList.h"
 #include "InputHandler.h"
@@ -38,17 +41,7 @@ enum class SceneId
 class GameApplication final
 {
 public:
-	struct Config
-	{
-		unsigned Width = 1920;
-		unsigned Height = 1080;
-		std::wstring Title = L"AGP Game";
-		std::filesystem::path ContentRoot;
-		bool EnableRenderDiagnostics = false;
-		bool EnableMouseLook = false;
-	};
-
-	explicit GameApplication(Config aConfig);
+	GameApplication();
 	~GameApplication();
 	GameApplication(const GameApplication&) = delete;
 	GameApplication& operator=(const GameApplication&) = delete;
@@ -65,16 +58,15 @@ private:
 	GraphicsEngine& InitializeWindowAndGraphics();
 	void InitializeServices();
 	void InitializeInputAndApplicationControls();
+	void ApplySoundSettings(const SoundSettings& soundSettings);
 
 	void RunSession(Game& aGame);
-	void StartGameSession(Game& aGame);
+	void InitializeGameSession(Game& aGame);
 	void RunMainLoop(Game& aGame, GraphicsEngine& aGraphics);
-	void PumpWindowMessages();
 	bool PrepareRenderTargetSize(GraphicsEngine& aGraphics);
 	void RenderFrame(GraphicsEngine& aGraphics);
 	void ProcessPendingSceneLoad(Game& aGame);
 
-	void RecenterMouseLook();
 	void ShowRenderPassNotification();
 	
 	void Cleanup(Game& aGame, std::exception_ptr& aFailure);
@@ -84,7 +76,7 @@ private:
 	void KillServices();
 	void DestroyWindowIfCreated() noexcept;
 
-	Config myConfig;
+	ApplicationSettings myApplicationSettings;
 	std::filesystem::path myContentRoot;
 	std::unique_ptr<World> myWorld;
 	std::optional<SceneId> myPendingSceneId;
@@ -95,13 +87,19 @@ private:
 	bool myGameInitializationStarted = false;
 	bool myInitialWorldStarted = false;
 
+	WindowSettings myWindowSettings;
 	HWND myMainWindowHandle = nullptr;
+	std::wstring myWindowClassName;
+	HCURSOR myCustomCursor = nullptr;
+	bool myWindowClassRegistered = false;
+	InputSettingsApplier myInputSettingsApplier;
 	CommonUtilities::InputHandler myInputHandler;
 	CommonUtilities::XInputHandler myXInputHandler;
 	std::vector<unsigned> myApplicationInputListenerIds;
 
 	GraphicsCommandList myCommandList;
 	GraphicsEngine::RenderSceneSnapshot mySnapshot;
+	GraphicsEngine::RenderSettings myRenderSettings;
 	std::shared_ptr<TextWidget> myRenderPassNotificationWidget;
 	std::shared_ptr<FontAsset> myRenderFont;
 	float myRenderPassNotificationRemainingSeconds = 0.0f;

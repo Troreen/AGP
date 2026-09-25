@@ -1,4 +1,5 @@
 #include "GameApplication.h"
+#include "GameWindowMessages.h"
 
 #include "Game.h"
 #include "GameFramework/AssetHandling/AssetRegistry.h"
@@ -6,6 +7,9 @@
 #include "GameFramework/AssetHandling/MaterialAsset.h"
 #include "GameFramework/AssetHandling/MeshAsset.h"
 #include "GameFramework/AudioManager.h"
+#include "GameFramework/Animation/AnimationManager.h"
+#include "GameFramework/Components/CameraComponent.h"
+#include "GameFramework/Settings/EngineSettings.h"
 #include "GameFramework/GameFrameworkLog.h"
 #include "GameFramework/Rendering/WorldRenderer.h"
 #include "GameFramework/Scenes/WorldFromSceneData.h"
@@ -13,10 +17,10 @@
 #include "GameFramework/UnrealSceneImporter/UnrealSceneImporter.h"
 #include "GameFramework/World/World.h"
 #include "GraphicsEngine/TextWidget.h"
-#include "EnumKeyCode.h"
 #include "InputMapper.h"
 #include "Maths.hpp"
 #include "PrimitiveMeshBuilder.h"
+#include "StringHelpers.h"
 #include "Timer.h"
 
 #include <algorithm>
@@ -32,12 +36,29 @@ namespace
 	constexpr float MaxFrameDeltaSeconds = 0.25f;
 	constexpr float RenderPassNotificationDurationSeconds = 2.0f;
 	constexpr float RenderPassNotificationFadeDurationSeconds = 0.5f;
-
 	struct GameSceneDefinition
 	{
 		std::string_view DisplayName;
 		std::filesystem::path RelativeFile;
 	};
+
+	SceneId GetSceneIdFromSettings(std::string_view sceneName)
+	{
+		if (sceneName == "Blockout")
+		{
+			return SceneId::Blockout;
+		}
+		if (sceneName == "Chests")
+		{
+			return SceneId::Chests;
+		}
+		if (sceneName == "ChestMaterials")
+		{
+			return SceneId::ChestMaterials;
+		}
+
+		throw std::runtime_error("Unknown initial scene: " + std::string(sceneName));
+	}
 
 	GameSceneDefinition GetGameSceneDefinition(SceneId aSceneId)
 	{
@@ -51,25 +72,6 @@ namespace
 			return {"ChestMaterials", "ExportedScenes/ChestMaterials_Level.json"};
 		}
 		throw std::runtime_error("Unknown game scene id");
-	}
-
-	LRESULT CALLBACK GameWindowProc(HWND aWindow, UINT aMessage, WPARAM aWParam, LPARAM anLParam)
-	{
-		if (aMessage == WM_NCCREATE)
-		{
-			const auto* create = reinterpret_cast<const CREATESTRUCTW*>(anLParam);
-			SetWindowLongPtrW(aWindow, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(create->lpCreateParams));
-		}
-		auto* input = reinterpret_cast<CommonUtilities::InputHandler*>(GetWindowLongPtrW(aWindow, GWLP_USERDATA));
-		if (input)
-		{
-			input->UpdateEvents(aMessage, aWParam, anLParam);
-		}
-		if (aMessage == WM_CLOSE || aMessage == WM_DESTROY)
-		{
-			PostQuitMessage(0);
-		}
-		return DefWindowProcW(aWindow, aMessage, aWParam, anLParam);
 	}
 
 	// Try one cleanup step without stopping the remaining steps if it fails.
@@ -106,9 +108,7 @@ namespace
 	}
 }
 
-GameApplication::GameApplication(Config aConfig) : myConfig(std::move(aConfig))
-{
-}
+GameApplication::GameApplication() = default;
 
 GameApplication::~GameApplication()
 {
@@ -125,12 +125,25 @@ int GameApplication::Run(Game& aGame)
 	catch (...)
 	{
 		failure = std::current_exception();
+		// Show the error before cleanup closes the window and services.
+		try
+		{
+			std::rethrow_exception(failure);
+		}
+		catch (const std::exception& error)
+		{
+			MessageBoxA(myMainWindowHandle, error.what(), "AGP Game error", MB_OK | MB_ICONERROR);
+		}
+		catch (...)
+		{
+			MessageBoxA(myMainWindowHandle, "Unknown application error", "AGP Game error", MB_OK | MB_ICONERROR);
+		}
 	}
 
 	// Clean up after normal exit or failure, preserving the first exception.
 	Cleanup(aGame, failure);
 
-	// Report the failure only after all cleanup steps have been attempted.
+	// Main logs the failure after cleanup has been attempted.
 	if (failure)
 	{
 		std::rethrow_exception(failure);
@@ -140,11 +153,44 @@ int GameApplication::Run(Game& aGame)
 
 void GameApplication::RunSession(Game& aGame)
 {
+	EngineSettings& settings = ServiceLocator::GetInstance().GetEngineSettings();
+	settings.SetAvailableResolutionsCallback([this]()
+	{
+		return WindowSettings::GetAvailableResolutions(WindowSettings::GetMonitor(myMainWindowHandle));
+	});
+
+	// Apply the loaded window settings to the starting monitor.
+	myApplicationSettings = WindowSettings::CapResolution(settings.GetApplicationSettings(), WindowSettings::GetMonitor(nullptr));
+	if (myApplicationSettings.WindowedWidth != settings.GetApplicationSettings().WindowedWidth ||
+		myApplicationSettings.WindowedHeight != settings.GetApplicationSettings().WindowedHeight)
+	{
+		settings.UpdateApplicationSettings(myApplicationSettings);
+	}
+	myContentRoot = settings.GetContentRoot();
+
 	GraphicsEngine& graphics = InitializeWindowAndGraphics();
 	InitializeServices();
 	InitializeInputAndApplicationControls();
+
+	// Apply later settings changes through the initialized window, audio, and input services.
+	settings.SetApplicationApplyCallback([this](const ApplicationSettings& requested)
+	{
+		ApplicationSettings effective = myWindowSettings.Apply(myMainWindowHandle, requested, myApplicationSettings.Mode);
+		myInputHandler.SetMouseDeltaEnabled(effective.EnableMouseLook);
+		myApplicationSettings = effective;
+		return effective;
+	});
+	settings.SetSoundApplyCallback([this](const SoundSettings& requested)
+	{
+		ApplySoundSettings(requested);
+	});
+	settings.SetInputApplyCallback([this](const InputSettings& requested)
+	{
+		myInputSettingsApplier.Apply(*ServiceLocator::GetInstance().GetInputMapper(), requested);
+	});
+
 	myGameInitializationStarted = true;
-	StartGameSession(aGame);
+	InitializeGameSession(aGame);
 	RunMainLoop(aGame, graphics);
 }
 
@@ -167,38 +213,89 @@ bool GameApplication::ReloadCurrentScene()
 
 GraphicsEngine& GameApplication::InitializeWindowAndGraphics()
 {
-	// TODO: read these from config instead of hardcoding them
 	// Window class and creation
-	const wchar_t* className = L"AGPGameWindow";
+	myWindowClassName = str::utf8_to_wide(myApplicationSettings.WindowClassName);
+	const wchar_t* className = myWindowClassName.c_str();
 	WNDCLASSW windowClass = {};
 	windowClass.style = CS_VREDRAW | CS_HREDRAW | CS_OWNDC;
-	windowClass.lpfnWndProc = GameWindowProc;
+	windowClass.lpfnWndProc = GameWindowMessages::WindowProc;
+
 	windowClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
+	if (!myApplicationSettings.CursorPath.empty())
+	{
+		const std::filesystem::path cursorFile = myApplicationSettings.CursorPath.is_absolute()
+			? myApplicationSettings.CursorPath : myContentRoot / myApplicationSettings.CursorPath;
+		if (std::filesystem::exists(cursorFile))
+		{
+			HCURSOR sourceCursor = static_cast<HCURSOR>(LoadImageW(nullptr, cursorFile.c_str(), IMAGE_CURSOR,
+				64, 64, LR_LOADFROMFILE));
+			if (sourceCursor)
+			{
+				ICONINFO info{};
+				if (GetIconInfo(sourceCursor, &info))
+				{
+					info.fIcon = FALSE;
+					info.xHotspot = 32;
+					info.yHotspot = 32;
+					myCustomCursor = CreateIconIndirect(&info);
+					DeleteObject(info.hbmColor);
+					DeleteObject(info.hbmMask);
+				}
+				DestroyCursor(sourceCursor);
+				if (myCustomCursor)
+				{
+					windowClass.hCursor = myCustomCursor;
+				}
+			}
+		}
+	}
 	windowClass.hInstance = GetModuleHandleW(nullptr);
 	windowClass.lpszClassName = className;
 
-	if (!RegisterClassW(&windowClass) && GetLastError() != ERROR_CLASS_ALREADY_EXISTS)
+	if (RegisterClassW(&windowClass))
+	{
+		myWindowClassRegistered = true;
+	}
+	else if (GetLastError() != ERROR_CLASS_ALREADY_EXISTS)
 	{
 		throw std::runtime_error("Could not register game window");
 	}
 
-	myMainWindowHandle = CreateWindowW(
-		className, myConfig.Title.c_str(), WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
-		myConfig.Width, myConfig.Height, nullptr, nullptr, windowClass.hInstance, &myInputHandler);
+	const bool borderless = myApplicationSettings.Mode == WindowMode::Borderless;
+	const DWORD style = WindowSettings::GetWindowStyle(myApplicationSettings.Mode);
+	RECT windowBounds{0, 0, static_cast<LONG>(myApplicationSettings.WindowedWidth), static_cast<LONG>(myApplicationSettings.WindowedHeight)};
+	int windowX = CW_USEDEFAULT;
+	int windowY = CW_USEDEFAULT;
+	if (borderless)
+	{
+		windowBounds = WindowSettings::GetMonitor(nullptr).Bounds;
+		windowX = windowBounds.left;
+		windowY = windowBounds.top;
+	}
+	else if (!AdjustWindowRectEx(&windowBounds, style, FALSE, 0))
+	{
+		throw std::runtime_error("Could not calculate the window size");
+	}
+	const std::wstring windowTitle = str::utf8_to_wide(myApplicationSettings.Title);
+	myMainWindowHandle = CreateWindowW(className, windowTitle.c_str(), style, windowX, windowY,
+		windowBounds.right - windowBounds.left, windowBounds.bottom - windowBounds.top,
+		nullptr, nullptr, windowClass.hInstance, &myInputHandler);
 
 	if (!myMainWindowHandle)
 	{
 		throw std::runtime_error("Could not create game window");
 	}
 
+	myApplicationSettings = myWindowSettings.Apply(myMainWindowHandle, myApplicationSettings, myApplicationSettings.Mode);
+
 	// Initialize graphics engine
-	myContentRoot = std::filesystem::canonical(myConfig.ContentRoot);
 	GraphicsEngine& graphics = GraphicsEngine::Get();
 	if (!graphics.Initialize(myMainWindowHandle, myContentRoot / "Shaders") || 
 		!graphics.CreateCommandList("Game Scene", myCommandList))
 	{
 		throw std::runtime_error("Could not initialize graphics engine: ");
 	}
+
 	myClientSize = graphics.GetClientSize();
 	return graphics;
 }
@@ -214,7 +311,7 @@ void GameApplication::InitializeServices()
 	}
 
 	// TODO: does this belong here?
-	if (myConfig.EnableRenderDiagnostics)
+	if (myApplicationSettings.EnableRenderDiagnostics)
 	{
 		const std::shared_ptr<FontAsset> font = assets.GetAsset<FontAsset>("Fonts/CascadiaCode.font.json");
 		if (font)
@@ -234,28 +331,35 @@ void GameApplication::InitializeServices()
 
 	AudioManager* audio = services.SetAudioManager(new AudioManager());
 	audio->Init();
+
+	// The buses must exist before applying saved volumes.
+	EngineSettings& settings = services.GetEngineSettings();
+	ApplySoundSettings(settings.GetSoundSettings());
+
 	services.SetInputMapper(new CommonUtilities::InputMapper());
+	services.SetAnimationManager(new AnimationManager());
+}
+
+void GameApplication::ApplySoundSettings(const SoundSettings& soundSettings)
+{
+	AudioManager& audio = ServiceLocator::GetInstance().GetAudioManager();
+	audio.SetMasterVolume(soundSettings.MasterVolume);
+	audio.SetBusVolume(BusID::eMusic, soundSettings.MusicVolume);
+	audio.SetBusVolume(BusID::eSFX, soundSettings.SfxVolume);
 }
 
 void GameApplication::InitializeInputAndApplicationControls()
 {
 	myInputHandler.SetWindowHandle(myMainWindowHandle);
 	myInputHandler.SetAutoMouseCapture(false);
-	myInputHandler.SetMouseDeltaEnabled(myConfig.EnableMouseLook);
-	auto& input = *ServiceLocator::GetInstance().GetInputMapper();
+	myInputHandler.SetMouseDeltaEnabled(myApplicationSettings.EnableMouseLook);
+
+	CU::InputMapper& input = *ServiceLocator::GetInstance().GetInputMapper();
 	input.Init(&myInputHandler, &myXInputHandler);
-	input.BindActionToInputCode("Quit", EKeyCode::ESCAPE);
-	input.BindActionToInputCode("DebugCamera", EKeyCode::F1);
-	input.BindActionToInputCode("PreviousRenderPass", EKeyCode::F5);
-	input.BindActionToInputCode("NextRenderPass", EKeyCode::F6);
-	input.BindActionToInputCode("CameraLookEnable", EKeyCode::MOUSERBUTTON);
-	input.BindActionToInputCode("CameraForward", EKeyCode::W);
-	input.BindActionToInputCode("CameraBack", EKeyCode::S);
-	input.BindActionToInputCode("CameraLeft", EKeyCode::A);
-	input.BindActionToInputCode("CameraRight", EKeyCode::D);
-	input.BindActionToInputCode("CameraUp", EKeyCode::SPACE);
-	input.BindActionToInputCode("CameraDown", EKeyCode::CONTROL);
-	input.BindActionToInputCode("CameraLookDelta", EPointerCode::MOUSE_DELTA);
+
+	// Install saved bindings before the game adds listeners to their action names.
+	EngineSettings& settings = ServiceLocator::GetInstance().GetEngineSettings();
+	myInputSettingsApplier.Apply(input, settings.GetInputSettings());
 
 	myApplicationInputListenerIds.push_back(input.AddEventListener("Quit", [this](const CommonUtilities::InputEvent& anEvent)
 	{
@@ -271,14 +375,15 @@ void GameApplication::InitializeInputAndApplicationControls()
 			myToggleDebugCameraRequested = true;
 		}
 	}));
-
-	if (myConfig.EnableRenderDiagnostics)
+	if (myApplicationSettings.EnableRenderDiagnostics)
 	{
 		myApplicationInputListenerIds.push_back(input.AddEventListener("PreviousRenderPass", [this](const CommonUtilities::InputEvent& anEvent)
 		{
 			if (anEvent.inputData.isPressed)
 			{
-				GraphicsEngine::Get().SelectPreviousRenderPass();
+				const uint32_t currentPass = static_cast<uint32_t>(myRenderSettings.SelectedRenderPass);
+				constexpr uint32_t maxPass = static_cast<uint32_t>(RenderPass::Count);
+				myRenderSettings.SelectedRenderPass = static_cast<RenderPass>(currentPass == 0 ? maxPass - 1 : currentPass - 1);
 				ShowRenderPassNotification();
 			}
 		}));
@@ -286,19 +391,23 @@ void GameApplication::InitializeInputAndApplicationControls()
 		{
 			if (anEvent.inputData.isPressed)
 			{
-				GraphicsEngine::Get().SelectNextRenderPass();
+				const uint32_t currentPass = static_cast<uint32_t>(myRenderSettings.SelectedRenderPass);
+				constexpr uint32_t maxPass = static_cast<uint32_t>(RenderPass::Count);
+				myRenderSettings.SelectedRenderPass = static_cast<RenderPass>((currentPass + 1) % maxPass);
 				ShowRenderPassNotification();
 			}
 		}));
 	}
 }
 
-void GameApplication::StartGameSession(Game& aGame)
+void GameApplication::InitializeGameSession(Game& aGame)
 {
 	aGame.Initialize(*this);
+
+	// Start the scene named in the settings unless the game requested one.
 	if (!myPendingSceneId)
 	{
-		throw std::runtime_error("Game initialization did not request an initial scene");
+		RequestSceneLoad(GetSceneIdFromSettings(myApplicationSettings.InitialScene));
 	}
 
 	ProcessPendingSceneLoad(aGame);
@@ -318,10 +427,14 @@ void GameApplication::RunMainLoop(Game& aGame, GraphicsEngine& aGraphics)
 	// Main loop
 	while (!myQuitRequested)
 	{
-		PumpWindowMessages();
+		GameWindowMessages::Pump(myQuitRequested);
 		if (myQuitRequested)
 		{
 			break;
+		}
+		if (myWindowSettings.MonitorChanged(myMainWindowHandle))
+		{
+			ServiceLocator::GetInstance().GetEngineSettings().UpdateApplicationSettings(myApplicationSettings);
 		}
 
 		// Process any pending scene load requests before ticking the timer, so that the first frame of a new scene is not delayed by a full frame time.
@@ -352,8 +465,7 @@ void GameApplication::RunMainLoop(Game& aGame, GraphicsEngine& aGraphics)
 			break;
 		}
 
-		// Handle debug camera toggle and mouse look
-		RecenterMouseLook();
+		// Handle debug camera toggle
 		if (std::exchange(myToggleDebugCameraRequested, false))
 		{
 			myDebugCamera.Toggle(*myWorld, myClientSize);
@@ -368,23 +480,8 @@ void GameApplication::RunMainLoop(Game& aGame, GraphicsEngine& aGraphics)
 	}
 }
 
-void GameApplication::PumpWindowMessages()
-{
-	MSG message = {};
-	while (PeekMessageW(&message, nullptr, 0, 0, PM_REMOVE))
-	{
-		if (message.message == WM_QUIT)
-		{
-			myQuitRequested = true;
-		}
-		TranslateMessage(&message);
-		DispatchMessageW(&message);
-	}
-}
-
 bool GameApplication::PrepareRenderTargetSize(GraphicsEngine& aGraphics)
 {
-	// we are supposed to disable window resizing according to spec but this gives us more options and can exist for now and be configured later
 	const CU::Vector2u clientSize = aGraphics.GetClientSize();
 	if (clientSize.x == 0 || clientSize.y == 0)
 	{
@@ -399,6 +496,11 @@ bool GameApplication::PrepareRenderTargetSize(GraphicsEngine& aGraphics)
 			throw std::runtime_error("Failed to resize rendering targets");
 		}
 		myClientSize = clientSize;
+
+		if (myWorld && !myWorld->SetCameraResolution(clientSize))
+		{
+			throw std::runtime_error("Failed to resize the cameras");
+		}
 	}
 
 	return true;
@@ -422,7 +524,7 @@ void GameApplication::RenderFrame(GraphicsEngine& aGraphics)
 
 	myCommandList.ResetCommandList();
 	
-	aGraphics.RenderSnapshot(myCommandList, mySnapshot);
+	aGraphics.RenderSnapshot(myCommandList, mySnapshot, myRenderSettings);
 	
 	if (myCommandList.FinishCommandList())
 	{
@@ -431,6 +533,7 @@ void GameApplication::RenderFrame(GraphicsEngine& aGraphics)
 	}
 }
 
+// TODO: this should be moved to a sceneloader class or similar aswell
 void GameApplication::ProcessPendingSceneLoad(Game& aGame)
 {
 	const SceneId requestedSceneId = *myPendingSceneId;
@@ -508,22 +611,13 @@ void GameApplication::ProcessPendingSceneLoad(Game& aGame)
 	myWorld->BeginPlay();
 }
 
-void GameApplication::RecenterMouseLook()
-{
-	if (myConfig.EnableMouseLook && GetForegroundWindow() == myMainWindowHandle &&
-	    myInputHandler.IsKeyDown(int(EKeyCode::MOUSERBUTTON)))
-	{
-		myInputHandler.CenterMouse();
-	}
-}
-
 void GameApplication::ShowRenderPassNotification()
 {
 	if (!myRenderPassNotificationWidget)
 	{
 		return;
 	}
-	myRenderPassNotificationWidget->SetText(std::string("Render Pass: ") + GraphicsEngine::Get().GetRenderPassName());
+	myRenderPassNotificationWidget->SetText(std::string("Render Pass: ") + GraphicsEngine::RenderSettings::GetRenderPassName(myRenderSettings.SelectedRenderPass));
 	myRenderPassNotificationWidget->SetOpacity(1.0f);
 	myRenderPassNotificationRemainingSeconds = RenderPassNotificationDurationSeconds;
 }
@@ -587,5 +681,17 @@ void GameApplication::DestroyWindowIfCreated() noexcept
 	{
 		DestroyWindow(myMainWindowHandle);
 		myMainWindowHandle = nullptr;
+	}
+
+	if (myWindowClassRegistered)
+	{
+		UnregisterClassW(myWindowClassName.c_str(), GetModuleHandleW(nullptr));
+		myWindowClassRegistered = false;
+	}
+
+	if (myCustomCursor)
+	{
+		DestroyCursor(myCustomCursor);
+		myCustomCursor = nullptr;
 	}
 }

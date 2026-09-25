@@ -15,6 +15,7 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameLog.h" />
     <ClInclude Include="GameApplication.h" />
+    <ClInclude Include="GameWindowMessages.h" />
     <ClInclude Include="MeshLibrary.h" />
     <ClInclude Include="PrimitiveMeshBuilder.h" />
     <ClInclude Include="SpinComponent.h" />
@@ -22,17 +23,9 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\Dependencies\TGAFBXImporter\source\Importer.cpp">
-      <Filter>Dependencies\TGAFBXImporter\source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Dependencies\TGAFBXImporter\source\Internals.cpp">
-      <Filter>Dependencies\TGAFBXImporter\source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Dependencies\TGAFBXImporter\source\TgaFbxStructs.cpp">
-      <Filter>Dependencies\TGAFBXImporter\source</Filter>
-    </ClCompile>
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameApplication.cpp" />
+    <ClCompile Include="GameWindowMessages.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MeshLibrary.cpp" />
     <ClCompile Include="PrimitiveMeshBuilder.cpp" />

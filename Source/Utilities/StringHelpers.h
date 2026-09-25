@@ -2,6 +2,8 @@
  * String Helpers
  * by Daniel Borgshammar @ TGA
  */
+#include <stdexcept>
+
 namespace string_helpers
 {
 	/**
@@ -135,14 +137,26 @@ namespace string_helpers
 	 */
 	inline std::wstring utf8_to_wide(const std::string& aString)
 	{
-		const int sLength = static_cast<int>(aString.length());
-		if (sLength == 0)
+		if (aString.empty())
 		{
 			return {};
 		}
-		const int len = MultiByteToWideChar(CP_UTF8, 0, aString.c_str(), sLength, 0, 0);
-		std::wstring result(len, L'\0');
-		MultiByteToWideChar(CP_UTF8, 0, aString.c_str(), -1, result.data(), len);
+
+		const int sourceLength = static_cast<int>(aString.length());
+		const int convertedLength = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
+			aString.data(), sourceLength, nullptr, 0);
+		if (convertedLength == 0)
+		{
+			throw std::runtime_error("Invalid UTF-8 string");
+		}
+
+		std::wstring result(static_cast<size_t>(convertedLength), L'\0');
+		if (MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
+			aString.data(), sourceLength, result.data(), convertedLength) == 0)
+		{
+			throw std::runtime_error("Could not convert UTF-8 string");
+		}
+
 		return result;
 	}
 

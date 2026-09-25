@@ -1,6 +1,8 @@
 #include "ServiceLocator.h"
 #include "GameFramework/AssetHandling/AssetRegistry.h"
 #include "GameFramework/AudioManager.h"
+#include "GameFramework/Animation/AnimationManager.h"
+#include "GameFramework/Settings/EngineSettings.h"
 #include <InputMapper.h>
 #include <stdexcept>
 
@@ -45,11 +47,26 @@ AssetRegistry* ServiceLocator::SetAssetRegistry(AssetRegistry* anAssetRegistry)
 	return anAssetRegistry;
 }
 
-AnimationManager& ServiceLocator::GetAnimationManager() const
+AnimationManager* ServiceLocator::SetAnimationManager(AnimationManager* anAnimationManager)
 {
-	if (!myAnimations) throw std::logic_error("AnimationManager service is unavailable");
-	return *myAnimations;
+	if (myAnimationManager != anAnimationManager)
+	{
+		delete myAnimationManager;
+		myAnimationManager = anAnimationManager;
+	}
+	return anAnimationManager;
 }
+
+EngineSettings* ServiceLocator::SetEngineSettings(EngineSettings* anEngineSettings)
+{
+	if (myOwnedEngineSettings != anEngineSettings)
+	{
+		delete myOwnedEngineSettings;
+		myOwnedEngineSettings = anEngineSettings;
+	}
+	return anEngineSettings;
+}
+
 
 void ServiceLocator::KillServices()
 {
@@ -59,13 +76,19 @@ void ServiceLocator::KillServices()
 	myOwnedAudioManager = nullptr;
 	delete myOwnedAssetRegistry;
 	myOwnedAssetRegistry = nullptr;
-	myAnimations = nullptr;
+	delete myAnimationManager;
+	myAnimationManager = nullptr;
+	// Settings stay available until the services that use them are gone.
+	delete myOwnedEngineSettings;
+	myOwnedEngineSettings = nullptr;
 }
 
 ServiceLocator::ServiceLocator()
 	: myOwnedInputMapper(nullptr)
 	, myOwnedAudioManager(nullptr)
 	, myOwnedAssetRegistry(nullptr)
+	, myOwnedEngineSettings(nullptr)
+	, myAnimationManager(nullptr)
 {}
 
 ServiceLocator::~ServiceLocator()
@@ -75,14 +98,39 @@ ServiceLocator::~ServiceLocator()
 
 AudioManager& ServiceLocator::GetAudioManager() const
 {
-	if (!myOwnedAudioManager) throw std::logic_error("AudioManager service is unavailable");
+	if (!myOwnedAudioManager)
+	{
+		throw std::logic_error("AudioManager service is unavailable");
+	}
+
 	return *myOwnedAudioManager;
 }
 
 AssetRegistry& ServiceLocator::GetAssetRegistry() const
 {
-	if (!myOwnedAssetRegistry) throw std::logic_error("AssetRegistry service is unavailable");
+	if (!myOwnedAssetRegistry)
+	{
+		throw std::logic_error("AssetRegistry service is unavailable");
+	}
+
 	return *myOwnedAssetRegistry;
+}
 
+AnimationManager& ServiceLocator::GetAnimationManager() const
+{
+	if (!myAnimationManager)
+	{
+		throw std::logic_error("AnimationManager service is unavailable");
+	}
+	return *myAnimationManager;
+}
 
+EngineSettings& ServiceLocator::GetEngineSettings() const
+{
+	if (!myOwnedEngineSettings)
+	{
+		throw std::logic_error("EngineSettings service is unavailable");
+	}
+
+	return *myOwnedEngineSettings;
 }

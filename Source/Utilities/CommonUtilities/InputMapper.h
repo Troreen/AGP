@@ -42,6 +42,9 @@ namespace CommonUtilities
 			void BindActionToInputCode(std::string_view anActionType, EKeyCode aKeyCode);
 			void BindActionToInputCode(std::string_view anActionType, EPointerCode aPointerCode);
 			void BindActionToInputCode(std::string_view anActionType, EGamepadCode aGamepadCode);
+			void RemoveKeyBindingFromAction(std::string_view anActionType);
+			void RemovePointerBindingFromAction(std::string_view anActionType);
+			void RemoveGamepadBindingFromAction(std::string_view anActionType);
 			void ClearBindingsFromAction(std::string_view anActionType);
 			void Update();
 

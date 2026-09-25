@@ -38,33 +38,27 @@ namespace CommonUtilities
 		UpdateInputMapEntry(myXInputMap, anActionType, static_cast<int>(aGamepadCode));
 	}
 
+	void InputMapper::RemoveKeyBindingFromAction(std::string_view anActionType)
+	{
+		myInputMap.erase(std::hash<std::string_view>{}(anActionType));
+	}
+
+	void InputMapper::RemovePointerBindingFromAction(std::string_view anActionType)
+	{
+		myPointerMap.erase(std::hash<std::string_view>{}(anActionType));
+	}
+
+	void InputMapper::RemoveGamepadBindingFromAction(std::string_view anActionType)
+	{
+		myXInputMap.erase(std::hash<std::string_view>{}(anActionType));
+	}
+
 	void InputMapper::ClearBindingsFromAction(std::string_view anActionType)
 	{
-		const size_t actionHash = std::hash<std::string_view>{}(anActionType);
-
-		std::unordered_map<size_t, int>* const inputMapList[]
-		{
-			&myInputMap,
-			&myXInputMap,
-			&myPointerMap
-		};
-
-		for (auto* inputMap : inputMapList)
-		{
-			if (inputMap->empty())
-			{
-				continue;
-			}
-
-			for (auto it = inputMap->begin(); it != inputMap->end(); ++it)
-			{
-				if (it->first == actionHash)
-				{
-					inputMap->erase(it);
-					return;
-				}
-			}
-		}
+		// An action can have one binding in each device map.
+		RemoveKeyBindingFromAction(anActionType);
+		RemovePointerBindingFromAction(anActionType);
+		RemoveGamepadBindingFromAction(anActionType);
 	}
 
 	void InputMapper::Update()

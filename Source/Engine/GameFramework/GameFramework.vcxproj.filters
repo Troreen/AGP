@@ -1,17 +1,41 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="Animation">
+      <UniqueIdentifier>{859E00A2-F108-B518-3A47-66BEA6F0926D}</UniqueIdentifier>
+    </Filter>
     <Filter Include="AssetHandling">
       <UniqueIdentifier>{4A86DE7F-B646-5AB6-7F81-A333EB009F92}</UniqueIdentifier>
     </Filter>
+    <Filter Include="BehaviourTree">
+      <UniqueIdentifier>{3A7B31FB-A63B-AD31-6F76-F6AEDBF5F10D}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Components">
       <UniqueIdentifier>{6B7DD516-5735-1764-C03C-F0BFAC13B254}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Dependencies">
+      <UniqueIdentifier>{6C01343A-5864-C3DE-01EA-FB94ED2B8F61}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Dependencies\nlohmann_json">
+      <UniqueIdentifier>{AF308C81-9B40-3852-04FA-9C70F02827EB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Dependencies\nlohmann_json\include">
+      <UniqueIdentifier>{22975A3E-0ED3-5DA8-77E5-759F634006C3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Dependencies\nlohmann_json\include\nlohmann">
+      <UniqueIdentifier>{6C99D333-D8FE-66BA-61D7-0893CD3B5C29}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Helper">
+      <UniqueIdentifier>{C53F33B7-B1E1-5D8D-9A9C-71E186DDE4DD}</UniqueIdentifier>
     </Filter>
     <Filter Include="Rendering">
       <UniqueIdentifier>{E3AE1F7C-4F19-D4F2-9857-85980401B247}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scenes">
       <UniqueIdentifier>{86EEB3D0-7290-DEA6-5B4B-F2FA478C65F7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Settings">
+      <UniqueIdentifier>{F63FCA8A-E20C-2596-0B26-133EF7515A24}</UniqueIdentifier>
     </Filter>
     <Filter Include="SimdJson">
       <UniqueIdentifier>{0CA52CAD-F871-87B8-218B-75600DB7BC46}</UniqueIdentifier>
@@ -24,8 +48,25 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ActionNode.h" />
+    <ClInclude Include="..\..\..\Dependencies\nlohmann_json\include\nlohmann\json.hpp">
+      <Filter>Dependencies\nlohmann_json\include\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\AnimationManager.h">
+      <Filter>Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\AnimationState.h">
+      <Filter>Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\AnimationTree.h">
+      <Filter>Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="AssetHandling\AnimationAsset.h">
+      <Filter>AssetHandling</Filter>
+    </ClInclude>
     <ClInclude Include="AssetHandling\Asset.h">
+      <Filter>AssetHandling</Filter>
+    </ClInclude>
+    <ClInclude Include="AssetHandling\AssetLoadingHelper.h">
       <Filter>AssetHandling</Filter>
     </ClInclude>
     <ClInclude Include="AssetHandling\AssetRegistry.h">
@@ -44,7 +85,24 @@
       <Filter>AssetHandling</Filter>
     </ClInclude>
     <ClInclude Include="AudioManager.h" />
-    <ClInclude Include="BTNode.h" />
+    <ClInclude Include="BehaviourTree\ActionNode.h">
+      <Filter>BehaviourTree</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviourTree\BTNode.h">
+      <Filter>BehaviourTree</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviourTree\FallbackNode.h">
+      <Filter>BehaviourTree</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviourTree\LeafNode.h">
+      <Filter>BehaviourTree</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviourTree\SequenceNode.h">
+      <Filter>BehaviourTree</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\AnimatorComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
     <ClInclude Include="Components\CameraComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
@@ -66,20 +124,29 @@
     <ClInclude Include="Components\StaticMeshComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
-    <ClInclude Include="FallbackNode.h" />
     <ClInclude Include="GameFrameworkLog.h" />
-    <ClInclude Include="LeafNode.h" />
+    <ClInclude Include="Helper\Event.hpp">
+      <Filter>Helper</Filter>
+    </ClInclude>
     <ClInclude Include="Rendering\WorldRenderer.h">
       <Filter>Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="Scenes\WorldFromSceneData.h">
-      <Filter>Scenes</Filter>
     </ClInclude>
     <ClInclude Include="Scenes\SceneData.h">
       <Filter>Scenes</Filter>
     </ClInclude>
-    <ClInclude Include="SequenceNode.h" />
+    <ClInclude Include="Scenes\WorldFromSceneData.h">
+      <Filter>Scenes</Filter>
+    </ClInclude>
     <ClInclude Include="ServiceLocator.h" />
+    <ClInclude Include="Settings\EngineSettings.h">
+      <Filter>Settings</Filter>
+    </ClInclude>
+    <ClInclude Include="Settings\InputSettingsApplier.h">
+      <Filter>Settings</Filter>
+    </ClInclude>
+    <ClInclude Include="Settings\WindowSettings.h">
+      <Filter>Settings</Filter>
+    </ClInclude>
     <ClInclude Include="SimdJson\simdjson.h">
       <Filter>SimdJson</Filter>
     </ClInclude>
@@ -103,7 +170,22 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Animation\AnimationManager.cpp">
+      <Filter>Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\AnimationState.cpp">
+      <Filter>Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\AnimationTree.cpp">
+      <Filter>Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="AssetHandling\AnimationAsset.cpp">
+      <Filter>AssetHandling</Filter>
+    </ClCompile>
     <ClCompile Include="AssetHandling\Asset.cpp">
+      <Filter>AssetHandling</Filter>
+    </ClCompile>
+    <ClCompile Include="AssetHandling\AssetLoadingHelper.cpp">
       <Filter>AssetHandling</Filter>
     </ClCompile>
     <ClCompile Include="AssetHandling\AssetRegistry.cpp">
@@ -122,6 +204,15 @@
       <Filter>AssetHandling</Filter>
     </ClCompile>
     <ClCompile Include="AudioManager.cpp" />
+    <ClCompile Include="BehaviourTree\FallbackNode.cpp">
+      <Filter>BehaviourTree</Filter>
+    </ClCompile>
+    <ClCompile Include="BehaviourTree\SequenceNode.cpp">
+      <Filter>BehaviourTree</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\AnimatorComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
     <ClCompile Include="Components\CameraComponent.cpp">
       <Filter>Components</Filter>
     </ClCompile>
@@ -140,7 +231,6 @@
     <ClCompile Include="Components\SkeletalMeshComponent.cpp">
       <Filter>Components</Filter>
     </ClCompile>
-    <ClCompile Include="FallbackNode.cpp" />
     <ClCompile Include="GameFrameworkLog.cpp" />
     <ClCompile Include="Rendering\WorldRenderer.cpp">
       <Filter>Rendering</Filter>
@@ -148,8 +238,16 @@
     <ClCompile Include="Scenes\WorldFromSceneData.cpp">
       <Filter>Scenes</Filter>
     </ClCompile>
-    <ClCompile Include="SequenceNode.cpp" />
     <ClCompile Include="ServiceLocator.cpp" />
+    <ClCompile Include="Settings\EngineSettings.cpp">
+      <Filter>Settings</Filter>
+    </ClCompile>
+    <ClCompile Include="Settings\InputSettingsApplier.cpp">
+      <Filter>Settings</Filter>
+    </ClCompile>
+    <ClCompile Include="Settings\WindowSettings.cpp">
+      <Filter>Settings</Filter>
+    </ClCompile>
     <ClCompile Include="SimdJson\simdjson.cpp">
       <Filter>SimdJson</Filter>
     </ClCompile>
