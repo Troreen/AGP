@@ -6,10 +6,12 @@
 #include <cassert>
 #include <unordered_map>
 #include <GameFramework/SimdJson/simdjson.h>
+#include <ServiceLocator.h>
+#include <AssetHandling/AssetRegistry.h>
 //#include <tge/model/ModelFactory.h>
 //#include <tge/settings/settings.h>
 
-AnimationTree::AnimationTree(const std::string& aName, const std::string& aStartState, const std::vector<AnimationVariable>& someVariables) : myName(aName), myStartState(aStartState)
+AnimationTree::AnimationTree(std::string_view aName, std::string_view aStartState, const std::vector<AnimationVariable>& someVariables) : myName(aName), myStartState(aStartState)
 {
 	//myModel = nullptr;
 	for (AnimationVariable variable : someVariables)
@@ -17,12 +19,14 @@ AnimationTree::AnimationTree(const std::string& aName, const std::string& aStart
 		AddVariable(variable);
 	}
 
-	std::string file = aName + ".json";
+	std::string file = static_cast<std::string>(aName.data()) + static_cast<std::string>(".json");
 
+	AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
+	const std::filesystem::path& contentRoot = assetRegistry.GetContentRoot();
 #ifndef _RETAIL
-	std::filesystem::path path = std::filesystem::path().root_directory() / "Animation Trees" / file;
+	std::filesystem::path path = contentRoot / "Animations" / "Animation Manager" / "Trees" / file;
 #else
-	std::filesystem::path path = std::filesystem::path().root_directory() / "Animation Trees" / file;
+	std::filesystem::path path = contentRoot / "Animations" / "Animation Manager" / "Trees" / file;
 #endif
 
 	simdjson::padded_string json = simdjson::padded_string::load(path.c_str());
@@ -203,7 +207,7 @@ void AnimationTree::AddVariable(const AnimationVariable& anAnimationVariable)
 //	myAnimationVariables[aName].IsActive = true;
 //}
 //
-const std::unordered_map<std::string, AnimationVariable> AnimationTree::GetVariables() const
+const std::unordered_map<std::string_view, AnimationVariable> AnimationTree::GetVariables() const
 {
 	return myAnimationVariables;
 }

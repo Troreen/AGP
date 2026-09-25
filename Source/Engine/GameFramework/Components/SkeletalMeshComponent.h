@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GameFramework/AssetHandling/AnimationAsset.h"
 #include "GameFramework/Components/MeshComponentBase.h"
 
 #include <array>
@@ -21,6 +22,11 @@ public:
 
 	void Update(float aDeltaTime) override;
 
+	// TODO: Move this to animator component
+	void AddAnimation(std::string_view aName, const std::shared_ptr<AnimationAsset>& anAnimation);
+	// TODO: Move this to animator component
+	std::shared_ptr<AnimationAsset> GetAnimation(std::string_view aName) const;
+
 	bool PlayAnimation(std::string_view anAnimationName, bool aShouldLoop);
 	bool PlayPartialAnimation(std::string_view anAnimationName, bool aShouldLoop);
 	bool ConfigurePartialLayerFromJointName(std::string_view aRootJointName);
@@ -34,7 +40,7 @@ private:
 
 	struct PlaybackState
 	{
-		std::shared_ptr<Animation> CurrentAnimation;
+		std::shared_ptr<AnimationAsset> CurrentAnimation;
 		std::string AnimationName;
 		std::size_t CurrentFrame = 0;
 		float Timer = 0.0f;
@@ -51,6 +57,9 @@ private:
 
 	PlaybackState myBaseLayer;
 	PlaybackState myPartialLayer;
+
+	std::unordered_map<std::string, std::shared_ptr<AnimationAsset>> myAnimations;
+
 	std::array<CommonUtilities::Matrix4f, 128> myJointTransforms;
 	std::array<bool, 128> myPartialLayerMask = {};
 };

@@ -15,6 +15,7 @@ public:
 	void Update(World& aWorld, float aDeltaTime);
 	void Shutdown();
 private:
+	// Keeps the FBX importer initialized while AssetRegistry loads FBX assets.
 	MeshLibrary myMeshLibrary;
 	std::vector<unsigned> myInputListenerIDs;
 };

@@ -162,7 +162,7 @@
     <None Include="Shaders\Internal\BRDF_LUT_PS.hlsl">
       <Filter>Shaders\Internal</Filter>
     </None>
-    <None Include="Shaders\Internal\DeferredComposite_PS.hlsl">
+    <None Include="Shaders\Internal\DeferredAmbient_PS.hlsl">
       <Filter>Shaders\Internal</Filter>
     </None>
     <None Include="Shaders\Internal\DeferredDirectional_PS.hlsl">

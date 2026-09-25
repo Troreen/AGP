@@ -214,7 +214,7 @@ namespace TGA
 			std::string Application;
 			std::string ApplicationVersion;
 			// The original Up axis of the file before conversion to DirectX Left Handed Y-Up.
-			Axis OriginalUpAxis;
+			Axis OriginalUpAxis = Axis::X;
 			// The system unit in the file before conversion to Centimeter.
 			SystemUnit OriginalSystemUnit = SystemUnit::Unknown;
 		};
@@ -255,7 +255,7 @@ namespace TGA
 				std::vector<Vertex> Vertices;
 				std::vector<unsigned int> Indices;
 
-				unsigned int MaterialIndex;
+				unsigned int MaterialIndex = 0;
 				std::string MeshName;
 				BoxSphereBounds BoxSphereBounds;
 				Box BoxBounds;
@@ -265,8 +265,8 @@ namespace TGA
 			{
 				struct LODLevel
 				{
-					unsigned int Level;
-					float Distance;
+					unsigned int Level = 0;
+					float Distance = 0;
 					std::vector<Element> Elements;
 					BoxSphereBounds BoxSphereBounds;
 				};
@@ -284,8 +284,8 @@ namespace TGA
 
 			std::string Name;
 
-			size_t TotalVertexCount;
-			size_t TotalIndexCount;
+			size_t TotalVertexCount = 0;
+			size_t TotalIndexCount = 0;
 
 			BoxSphereBounds BoxSphereBounds;
 			Box BoxBounds;
@@ -342,13 +342,13 @@ namespace TGA
 			std::vector<std::string> EventNames;
 
 			// How long this animation is in frames.
-			unsigned int Length;
+			unsigned int Length = 0;
 
 			// The duration of this animation.
-			double Duration;
+			double Duration = 0;
 
 			// The FPS of this animation.
-			float FramesPerSecond;
+			float FramesPerSecond = 0;
 
 			std::string Name;
 		};

@@ -1,16 +1,14 @@
 #include "GameFramework/AssetHandling/AssetRegistry.h"
 
-#include "GameFramework/SimdJson/simdjson.h"
-#include "GraphicsEngine/Objects/Font.h"
-#include "GameFramework/AssetHandling/MaterialAsset.h"
-#include "GameFramework/AssetHandling/TextureAsset.h"
-#include "GameFramework/AssetHandling/MeshAsset.h"
+#include "GameFramework/AssetHandling/AnimationAsset.h"
 #include "GameFramework/AssetHandling/FontAsset.h"
+#include "GameFramework/AssetHandling/MaterialAsset.h"
+#include "GameFramework/AssetHandling/MeshAsset.h"
+#include "GameFramework/AssetHandling/TextureAsset.h"
 
 #include <algorithm>
 #include <cctype>
 #include <format>
-#include <cmath>
 #include <ranges>
 
 namespace
@@ -24,6 +22,7 @@ namespace
 
 AssetRegistry::AssetRegistry()
 {
+	RegisterAssetType<AnimationAsset>({ ".fbx" });
 	RegisterAssetType<MeshAsset>({ ".fbx" });
 	RegisterAssetType<MaterialAsset>({ ".mat" });
 	RegisterAssetType<TextureAsset>({ ".dds", ".png", ".jpg", ".jpeg" });

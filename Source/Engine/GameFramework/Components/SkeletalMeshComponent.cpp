@@ -40,6 +40,28 @@ const std::array<CommonUtilities::Matrix4f, 128>* SkeletalMeshComponent::GetJoin
 	return &myJointTransforms;
 }
 
+void SkeletalMeshComponent::AddAnimation(std::string_view aName, const std::shared_ptr<AnimationAsset>& anAnimation)
+{
+	if (anAnimation == nullptr || anAnimation->GetAnimation() == nullptr ||
+		anAnimation->GetAnimation()->Name.empty() || !anAnimation->GetAnimation()->IsValid())
+	{
+		return;
+	}
+
+	myAnimations[aName.data()] = anAnimation;
+}
+
+std::shared_ptr<AnimationAsset> SkeletalMeshComponent::GetAnimation(std::string_view aName) const
+{
+	const auto foundAnimation = myAnimations.find(std::string(aName));
+	if (foundAnimation == myAnimations.end())
+	{
+		return nullptr;
+	}
+
+	return foundAnimation->second;
+}
+
 bool SkeletalMeshComponent::PlayAnimation(std::string_view anAnimationName, bool aShouldLoop)
 {
 	if (myMesh == nullptr)
@@ -47,7 +69,7 @@ bool SkeletalMeshComponent::PlayAnimation(std::string_view anAnimationName, bool
 		return false;
 	}
 
-	std::shared_ptr<Animation> animation = myMesh->GetMesh()->GetAnimation(anAnimationName);
+	const std::shared_ptr<AnimationAsset>& animation = GetAnimation(anAnimationName);
 	if (animation == nullptr)
 	{
 		return false;
@@ -59,7 +81,7 @@ bool SkeletalMeshComponent::PlayAnimation(std::string_view anAnimationName, bool
 		return true;
 	}
 
-	myBaseLayer.CurrentAnimation = std::move(animation);
+	myBaseLayer.CurrentAnimation = animation;
 	myBaseLayer.AnimationName = std::string(anAnimationName);
 	myBaseLayer.CurrentFrame = 0;
 	myBaseLayer.Timer = 0.0f;
@@ -76,7 +98,7 @@ bool SkeletalMeshComponent::PlayPartialAnimation(std::string_view anAnimationNam
 		return false;
 	}
 
-	std::shared_ptr<Animation> animation = myMesh->GetMesh()->GetAnimation(anAnimationName);
+	const std::shared_ptr<AnimationAsset>& animation = GetAnimation(anAnimationName);
 	if (animation == nullptr)
 	{
 		return false;
@@ -88,7 +110,7 @@ bool SkeletalMeshComponent::PlayPartialAnimation(std::string_view anAnimationNam
 		return true;
 	}
 
-	myPartialLayer.CurrentAnimation = std::move(animation);
+	myPartialLayer.CurrentAnimation = animation;
 	myPartialLayer.AnimationName = std::string(anAnimationName);
 	myPartialLayer.CurrentFrame = 0;
 	myPartialLayer.Timer = 0.0f;
@@ -141,12 +163,12 @@ void SkeletalMeshComponent::ResetJointTransforms()
 
 bool SkeletalMeshComponent::AdvancePlayback(PlaybackState& aPlayback, float aDeltaTime)
 {
-	if (!aPlayback.Active || aPlayback.CurrentAnimation == nullptr || !aPlayback.CurrentAnimation->IsValid())
+	if (!aPlayback.Active || aPlayback.CurrentAnimation == nullptr || !aPlayback.CurrentAnimation->GetAnimation()->IsValid())
 	{
 		return false;
 	}
 
-	const float frameTime = 1.0f / aPlayback.CurrentAnimation->FramesPerSecond;
+	const float frameTime = 1.0f / aPlayback.CurrentAnimation->GetAnimation()->FramesPerSecond;
 	aPlayback.Timer += aDeltaTime;
 
 	bool advanced = false;
@@ -155,7 +177,7 @@ bool SkeletalMeshComponent::AdvancePlayback(PlaybackState& aPlayback, float aDel
 		aPlayback.Timer -= frameTime;
 		advanced = true;
 
-		if (aPlayback.CurrentFrame + 1 < aPlayback.CurrentAnimation->Frames.size())
+		if (aPlayback.CurrentFrame + 1 < aPlayback.CurrentAnimation->GetAnimation()->Frames.size())
 		{
 			++aPlayback.CurrentFrame;
 			continue;
@@ -226,12 +248,12 @@ const CommonUtilities::Matrix4f& SkeletalMeshComponent::GetLocalTransformForJoin
 		selectedLayer = &myPartialLayer;
 	}
 
-	if (selectedLayer->CurrentAnimation == nullptr || selectedLayer->CurrentFrame >= selectedLayer->CurrentAnimation->Frames.size())
+	if (selectedLayer->CurrentAnimation == nullptr || selectedLayer->CurrentFrame >= selectedLayer->CurrentAnimation->GetAnimation()->Frames.size())
 	{
 		return identity;
 	}
 
-	const Animation::Frame& selectedFrame = selectedLayer->CurrentAnimation->Frames[selectedLayer->CurrentFrame];
+	const Animation::Frame& selectedFrame = selectedLayer->CurrentAnimation->GetAnimation()->Frames[selectedLayer->CurrentFrame];
 	const auto selectedTransform = selectedFrame.Transforms.find(jointName);
 	if (selectedTransform != selectedFrame.Transforms.end())
 	{
@@ -239,9 +261,9 @@ const CommonUtilities::Matrix4f& SkeletalMeshComponent::GetLocalTransformForJoin
 	}
 
 	if (selectedLayer == &myPartialLayer && myBaseLayer.CurrentAnimation != nullptr &&
-	    myBaseLayer.CurrentFrame < myBaseLayer.CurrentAnimation->Frames.size())
+	    myBaseLayer.CurrentFrame < myBaseLayer.CurrentAnimation->GetAnimation()->Frames.size())
 	{
-		const Animation::Frame& baseFrame = myBaseLayer.CurrentAnimation->Frames[myBaseLayer.CurrentFrame];
+		const Animation::Frame& baseFrame = myBaseLayer.CurrentAnimation->GetAnimation()->Frames[myBaseLayer.CurrentFrame];
 		const auto baseTransform = baseFrame.Transforms.find(jointName);
 		if (baseTransform != baseFrame.Transforms.end())
 		{

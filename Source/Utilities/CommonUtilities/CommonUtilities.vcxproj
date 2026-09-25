@@ -197,6 +197,7 @@
     <ClInclude Include="framework.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Camera3D.cpp" />
     <ClCompile Include="InputHandler.cpp" />
     <ClCompile Include="InputMapper.cpp" />
     <ClCompile Include="Timer.cpp" />

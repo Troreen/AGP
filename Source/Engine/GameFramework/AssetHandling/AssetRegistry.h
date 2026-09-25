@@ -41,6 +41,8 @@ public:
 
 		if (lowerName.empty() || !myAssets.contains(lowerName))
 		{
+			std::string extension = RegisteredExtension(lowerName);
+			lowerName = lowerName.substr(0, lowerName.size() - extension.size());
 			if (!myAssetAliases.contains(lowerName) || !myAssets.contains(myAssetAliases[lowerName]))
 			{
 				SetError("No asset exists with the name: '" + std::string(aName) + "'", AssetError::NotFound);

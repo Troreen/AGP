@@ -1,7 +1,6 @@
 #include "MeshLibrary.h"
 
 #include "GameLog.h"
-#include "GraphicsEngine/Objects/Mesh.h"
 #include "GraphicsEngine/Objects/Vertex.h"
 #include "PrimitiveMeshBuilder.h"
 #include "Importer.h"
@@ -327,39 +326,31 @@ bool MeshLibrary::LoadFBXMesh(const std::filesystem::path& aPath)
 
 // Adds a named clip to a shared mesh asset, not to a live actor's playback state.
 // Finish this mutation during loading before render/gameplay consumers share assets.
-bool MeshLibrary::LoadFBXAnimation(std::string_view aMeshName, std::string aAnimationName, const std::filesystem::path& aPath)
+std::shared_ptr<Animation> MeshLibrary::LoadFBXAnimation(std::string aAnimationName, const std::filesystem::path& aPath)
 {
-	std::shared_ptr<Mesh> mesh = GetMesh(aMeshName);
-	if (mesh == nullptr)
-	{
-		GAMELOG(Warning, "Could not load animation '{}': mesh '{}' is not registered.", aPath.string(), std::string(aMeshName));
-		return false;
-	}
-
 	const std::filesystem::path resolvedPath = ResolvePath(aPath);
 	if (resolvedPath.empty())
 	{
 		GAMELOG(Warning, "Could not load animation '{}': file was not found.", aPath.string());
-		return false;
+		return nullptr;
 	}
 
 	TGA::FBX::Animation importedAnimation;
 	if (!TGA::FBX::Importer::LoadAnimation(resolvedPath.wstring(), importedAnimation))
 	{
 		GAMELOG(Warning, "Could not load animation '{}': {}", resolvedPath.string(), TGA::FBX::Importer::GetLastSDKError());
-		return false;
+		return nullptr;
 	}
 
 	std::shared_ptr<Animation> animation = ConvertAnimation(importedAnimation, std::move(aAnimationName));
 	if (animation == nullptr || !animation->IsValid())
 	{
 		GAMELOG(Warning, "Could not load animation '{}': imported animation was empty.", resolvedPath.string());
-		return false;
+		return nullptr;
 	}
 
-	mesh->AddAnimation(animation);
-	GAMELOG(Log, "Loaded animation '{}' for mesh '{}'.", animation->Name, std::string(aMeshName));
-	return true;
+	GAMELOG(Log, "Loaded animation '{}'.", animation->Name);
+	return animation;
 }
 
 void MeshLibrary::RegisterPrimitiveMeshes()

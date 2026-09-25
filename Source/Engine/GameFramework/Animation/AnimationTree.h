@@ -11,7 +11,7 @@
 
 struct AnimationVariable
 {
-	std::string Name;
+	std::string_view Name;
 	bool IsTrigger;
 
 	bool IsActive;
@@ -24,7 +24,7 @@ public:
 	friend class AnimationState;
 
 	AnimationTree() : myAnimationPlayer(nullptr), myShouldUpdateAnimation(false), myCurrentState(0) {};
-	AnimationTree(const std::string& aName, const std::string& aStartState, const std::vector<AnimationVariable>& someVariables);
+	AnimationTree(std::string_view aName, std::string_view aStartState, const std::vector<AnimationVariable>& someVariables);
 	AnimationTree(const AnimationTree& aTree);
 	~AnimationTree() = default;
 
@@ -51,7 +51,7 @@ public:
 private:
 	void AddVariable(const AnimationVariable& anAnimationVariable);
 
-	const std::unordered_map<std::string, AnimationVariable> GetVariables() const;
+	const std::unordered_map<std::string_view, AnimationVariable> GetVariables() const;
 	const std::vector<AnimationState> GetStates() const;
 
 	const std::string myName;
@@ -63,7 +63,7 @@ private:
 	SkeletalMeshComponent* myAnimationPlayer;
 	bool myShouldUpdateAnimation;
 
-	std::unordered_map<std::string, AnimationVariable> myAnimationVariables;
+	std::unordered_map<std::string_view, AnimationVariable> myAnimationVariables;
 
 	std::vector<AnimationState> myAnimationStates;
 	int myCurrentState;

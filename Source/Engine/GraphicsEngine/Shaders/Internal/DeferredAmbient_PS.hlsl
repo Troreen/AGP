@@ -9,6 +9,6 @@ float4 main(FullTextureVertex aPixel) : SV_TARGET
         discard;
     }
     
-    const float3 radiance = CalculateAmbientIBL(diffuse, specular, roughness, normal, viewDir, ao) * 0.3f;
+    const float3 radiance = CalculateAmbientIBL(diffuse, specular, roughness, normal, viewDir, ao) * LB_AmbientColor;
     return float4(radiance, 1.0f);
 }

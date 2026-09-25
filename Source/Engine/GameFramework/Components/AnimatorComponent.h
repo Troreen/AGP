@@ -1,7 +1,8 @@
 #pragma once
+#include "../Animation/AnimationTree.h"
+
 #include <GameFramework/World/Component.h>
 #include <GameFramework/Components/SkeletalMeshComponent.h>
-#include "AnimationTree.h"
 
 class AnimatorComponent : public Component
 {
@@ -13,7 +14,6 @@ public:
 	void SetMeshComponent(SkeletalMeshComponent* skel) { myMeshComponent = skel; }
 
 private:
-
 	SkeletalMeshComponent* myMeshComponent;
 	AnimationTree* myAnimationTree;
 };

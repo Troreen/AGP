@@ -53,9 +53,10 @@ enum class RenderPass : uint8_t
 
 enum class Tonemapper : uint32_t
 {
-	ACES = 0,
-	Lottes = 1,
-	UnrealEngine = 2
+	None = 0,
+	ACES = 1,
+	Lottes = 2,
+	UnrealEngine = 3
 };
 
 struct RHIShaderReflectionInfo;
@@ -144,13 +145,25 @@ public:
 		void Clear();
 	};
 
+	struct RenderSettings
+	{
+		float DirectionalShadowBiasOffset = 0.0f;
+		float SpotShadowBiasOffset = 0.0f;
+		float PointShadowBiasOffset = 0.0f;
+
+		RenderPass SelectedRenderPass = RenderPass::Lit;
+		Tonemapper SelectedTonemapper = Tonemapper::ACES;
+
+		static const char* GetRenderPassName(const RenderPass& aRenderPass);
+	};
+
 	static GraphicsEngine& Get();
 
 	// --- Frame rendering ---
 	bool Initialize(HWND aWindowHandle, const std::filesystem::path& aShaderRoot);
 	// Finish culling and routing after integration has copied scene values.
 	void FinalizeRenderSnapshot(RenderSceneSnapshot& snapshot) const;
-	void RenderSnapshot(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot);
+	void RenderSnapshot(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot, const RenderSettings& aSettings);
 
 	RenderHardwareInterface::DebugMessages CollectDeviceDiagnostics() const
 	{
@@ -159,24 +172,16 @@ public:
 
 	void Present() const;
 	bool Resize(unsigned aWidth, unsigned aHeight);
-	void ToggleTonemapping() { myTonemappingEnabled = !myTonemappingEnabled; }
-	void SetTonemapper(Tonemapper aTonemapper) { myTonemapper = aTonemapper; }
-	// --- Diagnostics ---
-	void SelectPreviousRenderPass();
-	void SelectNextRenderPass();
-	const char* GetRenderPassName() const;
 
 	// --- Resource and command creation ---
-	template <class T> bool CreateConstantBuffer(ConstantBuffer aBufferId, std::string_view aName)
+	template <class T>
+	bool CreateConstantBuffer(ConstantBuffer aBufferId, std::string_view aName)
 	{
 		return CreateConstantBufferInternal(aBufferId, aName, sizeof(T));
 	}
-
 	bool CreateConstantBuffer(ConstantBuffer aBufferId, std::string_view aName, size_t aBufferSize);
-
 	template <class T>
-	bool UpdateAndSetConstantBuffer(GraphicsCommandList& inoutCommandList, ConstantBuffer aBufferId, const T& aData, unsigned aSlot,
-	                                PipeLineStages aStages)
+	bool UpdateAndSetConstantBuffer(GraphicsCommandList& inoutCommandList, ConstantBuffer aBufferId, const T& aData, unsigned aSlot, PipeLineStages aStages)
 	{
 		return UpdateAndSetConstantBufferInternal(inoutCommandList, aBufferId, &aData, sizeof(T), aSlot, aStages);
 	}
@@ -188,13 +193,8 @@ public:
 	RenderStats GetLastRenderStats() const;
 
 	bool CreateMaterial(const MaterialDescription& aDescription, Material& outMaterial) const;
-
 	bool LoadTexture(const std::filesystem::path& aPath, Texture& outTexture) const;
-
 	bool CreateShadowMap(std::string_view aName, unsigned aWidth, unsigned aHeight, Texture& outShadowMap, bool aCubeMap = false) const;
-	void AdjustShadowBias(RenderLightType aType, float aDelta);
-	void ResetShadowTuning();
-	void LogShadowTuning() const;
 
 private:
 	enum class RenderBlendFilter : uint8_t
@@ -207,6 +207,9 @@ private:
 	static constexpr unsigned DirectionalCascadeCount = 4;
 	static constexpr unsigned MaxSpotShadowMaps = 4;
 	static constexpr unsigned MaxPointShadowMaps = 4;
+
+	GraphicsEngine();
+	~GraphicsEngine();
 
 	bool CreateConstantBufferInternal(ConstantBuffer aBufferId, std::string_view aName, size_t aBufferSize);
 	bool UpdateAndSetConstantBufferInternal(GraphicsCommandList& inoutCommandList, ConstantBuffer aBufferId, const void* aData,
@@ -227,22 +230,25 @@ private:
 	struct ShadowRenderJob;
 	using GBufferBindings = std::array<const Texture*, GBuffer::TargetCount>;
 
-	std::vector<ShadowRenderJob> BuildShadowJobs(const RenderSceneSnapshot& aSnapshot, LightBuffer& lightBuffer, RenderStats& frameStats);
+	std::vector<ShadowRenderJob> BuildShadowJobs(const RenderSceneSnapshot& aSnapshot, LightBuffer& lightBuffer,
+		RenderStats& frameStats, const RenderSettings& aSettings);
 	// Joins all workers before playback or serial fallback; jobs and their snapshot remain alive throughout.
 	void RecordAndExecuteShadows(GraphicsCommandList& inoutCommandList, const std::vector<ShadowRenderJob>& shadowJobs,
 	                             RenderStats& frameStats);
 	// Establishes camera constants, samplers, environment and shadow bindings for the scene passes.
 	void PrepareSceneCommands(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot);
-	void RenderGBuffer(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot, const GBufferBindings& gbufferTargets);
+	void RenderGBuffer(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot,
+		const GBufferBindings& gbufferTargets, const RenderSettings& aSettings);
 	void RenderAmbientOcclusion(GraphicsCommandList& inoutCommandList, const GBufferBindings& gbufferTargets);
 	// Includes the linear-light composite to the HDR buffer, within the Deferred Lighting GPU event.
 	void RenderDeferredLighting(GraphicsCommandList& inoutCommandList, const LightBuffer& lightBuffer,
 	                            const GBufferBindings& gbufferTargets);
-	void RenderDebugView(GraphicsCommandList& inoutCommandList, const LightBuffer& lightBuffer, const GBufferBindings& gbufferTargets);
+	void RenderDebugView(GraphicsCommandList& inoutCommandList, const LightBuffer& lightBuffer,
+		const GBufferBindings& gbufferTargets, const RenderSettings& aSettings);
 	void RenderTransparentGeometry(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot,
 	                               const LightBuffer& lightBuffer);
 	void RenderScreenText(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot, RenderStats& frameStats);
-	void RenderTonemapping(GraphicsCommandList& inoutCommandList);
+	void RenderTonemapping(GraphicsCommandList& inoutCommandList, const RenderSettings& aSettings);
 
 	void PrepareSnapshotRenderResources(const RenderSceneSnapshot& aSnapshot) const;
 	bool PrepareRenderItemResources(const RenderItemSnapshot& aRenderItem) const;
@@ -251,11 +257,7 @@ private:
 	void RenderShadowMap(GraphicsCommandList& inoutCommandList, std::string_view aEventName, Texture& aShadowMap,
 	                     const FrameBuffer& aFrameBuffer, const PipelineStateObject& aOverridePSO, PipeLineStages aOverrideStages,
 	                     const void* aPointShadowBuffer, const std::vector<const RenderItemSnapshot*>& aRenderItems);
-	float GetShadowDepthBias(RenderLightType aType) const;
-	float GetShadowDepthBiasUnlocked(RenderLightType aType) const;
-
-	GraphicsEngine();
-	~GraphicsEngine();
+	float GetShadowDepthBias(RenderLightType aType, const RenderSettings& aSettings) const;
 
 	bool PrepareMeshForRendering(const Mesh& aMesh) const;
 	void RenderMesh(GraphicsCommandList& inoutCommandList, const RenderItemSnapshot& aRenderItem, bool aAllowLazyPrepare = false,
@@ -264,14 +266,14 @@ private:
 
 	// --- Frame targets and state ---
 	RenderHardwareInterface myRHI;
+
 	Texture myBackBuffer;
 	Texture myDepthBuffer;
 	GBuffer myGBuffer;
 	// Kept outside the production GBuffer; populated only for the tangent-normal debug view.
-	Texture myTangentNormalDebugTexture;
-	Texture myDeferredLightingTexture;
-	Texture myHDRBuffer;
+	Texture myTangentNormalDebugTexture; // TODO: If not used for anything other than debug, remove and move logic to GBuffer_PS.hlsl
 	Texture myScreenSpaceAOTexture;
+	Texture myHDRBuffer;
 
 	std::unordered_map<ConstantBuffer, Buffer> myConstantBuffers;
 	bool myConstantBuffersFrozen = false;
@@ -286,7 +288,6 @@ private:
 	PipelineStateObject myDeferredDirectionalPSO;
 	PipelineStateObject myDeferredPointPSO;
 	PipelineStateObject myDeferredSpotPSO;
-	PipelineStateObject myDeferredCompositePSO;
 	PipelineStateObject myTonemapPSO;
 	PipelineStateObject myScreenSpaceAOPSO;
 	PipelineStateObject myRenderPassDebugPSO;
@@ -298,11 +299,13 @@ private:
 
 	std::vector<Sampler> mySamplers;
 	std::vector<const Sampler*> mySamplerBindings;
+
 	// --- Shadow resources ---
 	std::vector<GraphicsCommandList> myShadowCommandLists;
 	std::array<Texture, DirectionalCascadeCount> myDirectionalShadowMaps;
 	std::array<Texture, MaxSpotShadowMaps> mySpotShadowMaps;
 	std::array<Texture, MaxPointShadowMaps> myPointShadowMaps;
+
 	// --- Lighting and material resources ---
 	Texture myEnvironmentCubeTexture;
 	Texture myBRDFLUTTexture;
@@ -311,14 +314,9 @@ private:
 	std::shared_ptr<Texture> myDefaultMaterialTexture;
 
 	Material myDefaultMaterial;
+
 	// --- Synchronized diagnostics and tuning ---
 	mutable std::mutex myShadowTuningMutex;
 	mutable std::mutex myRenderStatsMutex;
 	RenderStats myLastRenderStats;
-	float myDirectionalShadowBiasOffset = 0.0f;
-	float mySpotShadowBiasOffset = 0.0f;
-	float myPointShadowBiasOffset = 0.0f;
-	RenderPass myRenderPass = RenderPass::Lit;
-	Tonemapper myTonemapper = Tonemapper::ACES;
-	bool myTonemappingEnabled = true;
 };

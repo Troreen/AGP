@@ -3,30 +3,23 @@
 #include "GameLog.h"
 #include "GameFramework/AudioManager.h"
 #include "GameFramework/AssetHandling/AssetRegistry.h"
+#include "GameFramework/AssetHandling/AnimationAsset.h"
 #include "GameFramework/AssetHandling/MeshAsset.h"
 #include "GameFramework/Components/SkeletalMeshComponent.h"
 #include "GameFramework/ServiceLocator.h"
 #include "GameFramework/World/World.h"
 #include "InputMapper.h"
 
-#include <filesystem>
 #include <memory>
 
 DEFINE_LOG_CATEGORY(LogGame);
-
-
-constexpr float BackgroundMusicVolume = 0.35f;
-
 
 Game::Game() = default;
 Game::~Game() = default;
 
 void Game::Initialize(GameApplication& anApplication)
 {
-	myMeshLibrary.Initialize(ServiceLocator::GetInstance().GetAssetRegistry().GetContentRoot());
 	auto& input = *ServiceLocator::GetInstance().GetInputMapper();
-	input.BindActionToInputCode("ReloadScene", EKeyCode::F4);
-
 
 	myInputListenerIDs.push_back(input.AddEventListener("ReloadScene", [&anApplication](const CommonUtilities::InputEvent& anEvent)
 	{
@@ -36,15 +29,17 @@ void Game::Initialize(GameApplication& anApplication)
 		}
 	}));
 	
-	anApplication.RequestSceneLoad(SceneId::Blockout);
 	AudioManager& audio = ServiceLocator::GetInstance().GetAudioManager();
-	audio.SetBusVolume(BusID::eMusic, BackgroundMusicVolume);
 	audio.PlayMusic(SoundID::eMainTheme, true); // Todo: Get Viggo Mortensen's Signature
 	GAMELOG(Log, "Game ready: F4 reloads the current scene, ESC quits the game.");
 }
 
-void Game::Update(World& aWorld, float)
+void Game::Update([[maybe_unused]] World& aWorld, [[maybe_unused]] float aDeltaTime)
 {
+	if (!ServiceLocator::GetInstance().GetAudioManager().IsEventPlaying(eMainTheme))
+	{
+		ServiceLocator::GetInstance().GetAudioManager().PlayMusic(eMainTheme);
+	}
 }
 
 void Game::Shutdown()
@@ -74,20 +69,16 @@ void Game::ConfigureWorld(World& aWorld)
 			
 		SkeletalMeshComponent* component = bro->AddComponent<SkeletalMeshComponent>();
 		SkeletalMeshComponent* bigcomponent = big->AddComponent<SkeletalMeshComponent>();
-		//AnimatorComponent* animator = bro->AddComponent<AnimatorComponent>();
+		AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
 
-		const std::filesystem::path& contentRoot = ServiceLocator::GetInstance().GetAssetRegistry().GetContentRoot();
-		myMeshLibrary.LoadFBXMesh(contentRoot / "Meshes/Characters/TGA_Bro/SK_C_TGA_Bro.fbx");
-		myMeshLibrary.LoadFBXAnimation("SK_C_TGA_Bro", "Idle",
-			contentRoot / "Animations/Characters/TGA_Bro/Idle/A_C_TGA_Bro_Idle_Brething.fbx");
-
-		std::shared_ptr<Mesh> mesh = myMeshLibrary.GetMesh("SK_C_TGA_Bro");
-
-		std::shared_ptr<MeshAsset> meshAsset = std::make_shared<MeshAsset>(mesh);
+		std::shared_ptr<MeshAsset> meshAsset = assetRegistry.GetAsset<MeshAsset>("SK_C_TGA_Bro.fbx");
+		std::shared_ptr<AnimationAsset> animationAsset = assetRegistry.GetAsset<AnimationAsset>("A_C_TGA_Bro_Idle_Brething");
 		
 		component->SetMesh(meshAsset);
+		component->AddAnimation("Idle", animationAsset);
 		component->PlayAnimation("Idle", true);
 		bigcomponent->SetMesh(meshAsset);
+		bigcomponent->AddAnimation("Idle", animationAsset);
 		bigcomponent->PlayAnimation("Idle", true);
 	}
 }

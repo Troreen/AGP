@@ -72,40 +72,42 @@ float4 main(FullTextureVertex aPixel) : SV_TARGET
 
     // RenderPass values are deliberately stable because the label and shortcut
     // are exposed to users in every build configuration.
-    if (DebugRenderPass == RENDER_PASS_ALBEDO)
+    switch (DebugRenderPass)
     {
-        result = saturate(albedo.rgb);
-    }
-    else if (DebugRenderPass == RENDER_PASS_ROUGHNESS)
-    {
-        result = material.ggg; // Roughness, linear
-    }
-    else if (DebugRenderPass == RENDER_PASS_METALNESS)
-    {
-        result = material.bbb; // Metalness, linear
-    }
-    else if (DebugRenderPass == RENDER_PASS_TEXTURE_AO)
-    {
-        result = material.rrr; // Texture AO, linear
-    }
-    else if (DebugRenderPass == RENDER_PASS_SCREEN_SPACE_AO)
-    {
-        result = ScreenSpaceAO.Sample(TrilinearClamp, aPixel.UV).rrr;
-    }
-    else if (DebugRenderPass == RENDER_PASS_TANGENT_NORMAL)
-    {
-        result = GBufferTangentNormal.Sample(TrilinearClamp, aPixel.UV).xyz * 0.5f + 0.5f;
-    }
-    else if (DebugRenderPass == RENDER_PASS_WORLD_NORMAL)
-    {
-        result = GBufferNormal.Sample(TrilinearClamp, aPixel.UV).xyz * 0.5f + 0.5f;
-    }
-    else if (DebugRenderPass == RENDER_PASS_LIGHTING)
-    {
-        const float3 normal = normalize(GBufferNormal.Sample(TrilinearClamp, aPixel.UV).xyz);
-        const float3 position = GBufferWorldPosition.Sample(TrilinearClamp, aPixel.UV).xyz;
-        const float3 viewDirection = normalize(FB_CameraPosition - position);
-        result = CalculateLightOnly(normal, position, viewDirection);
+        case RENDER_PASS_ALBEDO:
+            result = saturate(albedo.rgb);
+            break;
+
+        case RENDER_PASS_ROUGHNESS:
+            result = material.ggg; // Roughness, linear
+            break;
+
+        case RENDER_PASS_METALNESS:
+            result = material.bbb; // Metalness, linear
+            break;
+
+        case RENDER_PASS_TEXTURE_AO:
+            result = material.rrr; // Texture AO, linear
+            break;
+
+        case RENDER_PASS_SCREEN_SPACE_AO:
+            result = ScreenSpaceAO.Sample(TrilinearClamp, aPixel.UV).rrr;
+            break;
+
+        case RENDER_PASS_TANGENT_NORMAL:
+            result = GBufferTangentNormal.Sample(TrilinearClamp, aPixel.UV).xyz * 0.5f + 0.5f;
+            break;
+
+        case RENDER_PASS_WORLD_NORMAL:
+            result = GBufferNormal.Sample(TrilinearClamp, aPixel.UV).xyz * 0.5f + 0.5f;
+            break;
+
+        case RENDER_PASS_LIGHTING:
+            const float3 normal = normalize(GBufferNormal.Sample(TrilinearClamp, aPixel.UV).xyz);
+            const float3 position = GBufferWorldPosition.Sample(TrilinearClamp, aPixel.UV).xyz;
+            const float3 viewDirection = normalize(FB_CameraPosition - position);
+            result = CalculateLightOnly(normal, position, viewDirection);
+            break;
     }
 
     return float4(result, 1.0f);

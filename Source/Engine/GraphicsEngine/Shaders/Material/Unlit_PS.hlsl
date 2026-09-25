@@ -11,6 +11,7 @@ float4 main(VStoPS aPixel) : SV_TARGET
 
 	MaterialPixelParameters parameters;
 	parameters.PixelColor = albedo;
+    parameters.SurfaceValues = float4(0, 0, 0, 0);
 	parameters.WorldPosition = aPixel.WorldPosition;
 	parameters.UV0 = aPixel.UV0;
 	parameters.UV1 = aPixel.UV1;

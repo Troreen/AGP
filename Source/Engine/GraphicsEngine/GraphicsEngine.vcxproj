@@ -89,7 +89,7 @@
       <PrecompiledHeaderFile>GraphicsEngine.pch.h</PrecompiledHeaderFile>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.;..;..\..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\TGAFBXImporter\FBXSDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..;..\..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -109,7 +109,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>..\..\..\Lib\$(Configuration);..\..\..\Dependencies\FMod\lib;..\..\..\Dependencies\TGAFBXImporter\FBXSDK\lib;..\..\..\Dependencies\TGAFBXImporter\FBXSDK\lib\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\Lib\$(Configuration);..\..\..\Dependencies\FMod\lib;..\..\..\Dependencies\TGAFBXImporter\lib;..\..\..\Dependencies\TGAFBXImporter\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <ProjectReference>
     </ProjectReference>
@@ -120,7 +120,7 @@
       <PrecompiledHeaderFile>GraphicsEngine.pch.h</PrecompiledHeaderFile>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>_RELEASE;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.;..;..\..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\TGAFBXImporter\FBXSDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..;..\..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -145,7 +145,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>..\..\..\Lib\$(Configuration);..\..\..\Dependencies\FMod\lib;..\..\..\Dependencies\TGAFBXImporter\FBXSDK\lib;..\..\..\Dependencies\TGAFBXImporter\FBXSDK\lib\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\Lib\$(Configuration);..\..\..\Dependencies\FMod\lib;..\..\..\Dependencies\TGAFBXImporter\lib;..\..\..\Dependencies\TGAFBXImporter\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <ProjectReference>
     </ProjectReference>
@@ -156,7 +156,7 @@
       <PrecompiledHeaderFile>GraphicsEngine.pch.h</PrecompiledHeaderFile>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>_RETAIL;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.;..;..\..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\TGAFBXImporter\FBXSDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..;..\..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -181,7 +181,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>..\..\..\Lib\$(Configuration);..\..\..\Dependencies\FMod\lib;..\..\..\Dependencies\TGAFBXImporter\FBXSDK\lib;..\..\..\Dependencies\TGAFBXImporter\FBXSDK\lib\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\Lib\$(Configuration);..\..\..\Dependencies\FMod\lib;..\..\..\Dependencies\TGAFBXImporter\lib;..\..\..\Dependencies\TGAFBXImporter\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <ProjectReference>
     </ProjectReference>
@@ -244,7 +244,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Internal\BRDF_LUT_PS.hlsl" />
-    <None Include="Shaders\Internal\DeferredComposite_PS.hlsl" />
+    <None Include="Shaders\Internal\DeferredAmbient_PS.hlsl" />
     <None Include="Shaders\Internal\DeferredDirectional_PS.hlsl" />
     <None Include="Shaders\Internal\DeferredLighting.hlsli" />
     <None Include="Shaders\Internal\DeferredPoint_PS.hlsl" />

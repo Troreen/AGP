@@ -1,8 +1,10 @@
 #include "AnimatorComponent.h"
-#include <GameFramework/ServiceLocator.h>
-#include "AnimationManager.h"
 
-AnimatorComponent::AnimatorComponent()
+#include "../Animation/AnimationManager.h"
+
+#include <GameFramework/ServiceLocator.h>
+
+AnimatorComponent::AnimatorComponent() : myMeshComponent(nullptr)
 {
 	myAnimationTree = new AnimationTree(ServiceLocator::GetInstance().GetAnimationManager().GetAnimationTree(""));
 }

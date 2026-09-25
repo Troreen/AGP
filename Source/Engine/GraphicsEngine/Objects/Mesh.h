@@ -76,9 +76,6 @@ public:
 	const Skeleton* GetSkeleton() const;
 	bool HasSkeleton() const;
 
-	void AddAnimation(std::shared_ptr<Animation> anAnimation);
-	std::shared_ptr<Animation> GetAnimation(std::string_view aName) const;
-
 	std::string_view GetName() const
 	{
 		return myName;
@@ -100,7 +97,6 @@ private:
 	std::vector<unsigned> myIndices;
 	std::vector<Element> myElements;
 	Skeleton mySkeleton;
-	std::unordered_map<std::string, std::shared_ptr<Animation>> myAnimations;
 
 	size_t myNumMaterialSlots = 0;
 	CU::Vector3f myLocalBoundsCenter = CU::Vector3f::Zero;

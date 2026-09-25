@@ -1,5 +1,5 @@
 #pragma once
-//#include "Event.hpp"
+#include "../Helper/Event.hpp"
 
 #include <string>
 
@@ -27,9 +27,9 @@ public:
 
 	void InitState(AnimationTree* anAnimationTree);
 
-	//Event<>& OnEnterEvent();
-	//Event<float>& UpdateEvent();
-	//Event<>& OnExitEvent();
+	Event<>& OnEnterEvent();
+	Event<float>& UpdateEvent();
+	Event<>& OnExitEvent();
 
 	AnimationState& operator=(const AnimationState& other);
 
@@ -54,9 +54,9 @@ private:
 
 	std::vector <Transition> myTransitions;
 
-	//Event<> myOnEnter;
-	//Event<float> myUpdate;
-	//Event<> myOnExit;
+	Event<> myOnEnter;
+	Event<float> myUpdate;
+	Event<> myOnExit;
 
 	std::string myFilePath;
 	bool myIsLooping;
