@@ -468,6 +468,11 @@ void GameApplication::RunMainLoop(Game& aGame, GraphicsEngine& aGraphics)
 		}
 
 		aGraphics.BeginDebugUiFrame();
+		// Detached ImGui windows use the backend's own Win32 window procedure.
+		if (ImGui::IsKeyPressed(ImGuiKey_F9))
+		{
+			GameWindowMessages::ToggleDebugUiVisibility();
+		}
 
 		// Handle debug camera toggle
 		if (std::exchange(myToggleDebugCameraRequested, false))

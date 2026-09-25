@@ -1,9 +1,10 @@
 # Dear ImGui
 
-Vendored Dear ImGui v1.92.4 from https://github.com/ocornut/imgui/tree/v1.92.4
-(commit `9a5d5c45f54b1301ea471622eddede70384243af`). The original MIT license is
+Vendored Dear ImGui v1.92.4-docking from https://github.com/ocornut/imgui/tree/v1.92.4-docking
+(commit `e7d2d636affeeac1fc7175fb13472ca02d1bc0d1`). The original MIT license is
 in `LICENSE.txt`. These are unmodified upstream core files and the Win32/DX11
-backends needed by AGP; examples and unused backends are omitted.
+backends needed by AGP; examples and unused backends are omitted. This release
+includes docking and multi-viewports so debug windows can move to other monitors.
 
 The files are stored directly in this directory so a Git checkout and a Perforce
 sync use the same version without a submodule, package manager, or download step.

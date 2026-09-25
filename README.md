@@ -42,7 +42,7 @@ Studio API 2.02.05 header setup, downloads Premake if needed, and generates
 `Game.sln`. Open that solution in Visual Studio 2026 with the Desktop development
 with C++ workload and a Windows SDK, then build `Debug | x64`.
 
-Dear ImGui v1.92.4 is included in `Dependencies/ImGui`; neither Git nor Perforce
+Dear ImGui v1.92.4-docking is included in `Dependencies/ImGui`; neither Git nor Perforce
 users need a separate ImGui installation. Perforce users should add the new
 `Dependencies/ImGui` source and license files, the modified Premake scripts, and
 the game/engine source changes to the same changelist. Run `GenerateProject.bat`

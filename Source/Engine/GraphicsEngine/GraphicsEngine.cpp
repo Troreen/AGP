@@ -1162,8 +1162,21 @@ bool GraphicsEngine::InitializeDebugUi(HWND aWindowHandle)
 	}
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-	ImGui::GetIO().IniFilename = nullptr;
+	ImGuiIO& io = ImGui::GetIO();
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable;
+	io.ConfigDpiScaleFonts = true;
+	io.ConfigDpiScaleViewports = true;
+	wchar_t executablePath[MAX_PATH] = {};
+	if (GetModuleFileNameW(nullptr, executablePath, MAX_PATH) != 0)
+	{
+		const std::u8string iniPath = (std::filesystem::path(executablePath).parent_path() / "imgui.ini").u8string();
+		myDebugUiIniPath.assign(reinterpret_cast<const char*>(iniPath.data()), iniPath.size());
+	}
+	io.IniFilename = myDebugUiIniPath.empty() ? nullptr : myDebugUiIniPath.c_str();
 	ImGui::StyleColorsDark();
+	ImGuiStyle& style = ImGui::GetStyle();
+	style.WindowRounding = 0.0f;
+	style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 	if (!ImGui_ImplWin32_Init(aWindowHandle))
 	{
 		ImGui::DestroyContext();
@@ -1192,6 +1205,11 @@ void GraphicsEngine::RenderDebugUi() const
 	ID3D11RenderTargetView* backBuffer = myBackBuffer.myRTV.Get();
 	myRHI.GetImmediateContext()->OMSetRenderTargets(1, &backBuffer, nullptr);
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+	if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+	{
+		ImGui::UpdatePlatformWindows();
+		ImGui::RenderPlatformWindowsDefault();
+	}
 }
 
 void GraphicsEngine::ShutdownDebugUi()
@@ -1204,6 +1222,7 @@ void GraphicsEngine::ShutdownDebugUi()
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
 	myDebugUiInitialized = false;
+	myDebugUiIniPath.clear();
 }
 
 bool GraphicsEngine::Resize(unsigned aWidth, unsigned aHeight)

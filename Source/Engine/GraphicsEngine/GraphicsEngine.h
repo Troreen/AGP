@@ -271,6 +271,7 @@ private:
 	// --- Frame targets and state ---
 	RenderHardwareInterface myRHI;
 	bool myDebugUiInitialized = false;
+	std::string myDebugUiIniPath;
 
 	Texture myBackBuffer;
 	Texture myDepthBuffer;

@@ -20,6 +20,11 @@ bool GameWindowMessages::IsDebugUiVisible()
 	return debugUiVisible;
 }
 
+void GameWindowMessages::ToggleDebugUiVisibility()
+{
+	debugUiVisible = !debugUiVisible;
+}
+
 LRESULT CALLBACK GameWindowMessages::WindowProc(HWND aWindow, UINT aMessage, WPARAM aWParam, LPARAM anLParam)
 {
 	if (aMessage == WM_NCCREATE)
@@ -30,7 +35,7 @@ LRESULT CALLBACK GameWindowMessages::WindowProc(HWND aWindow, UINT aMessage, WPA
 	auto* input = reinterpret_cast<CommonUtilities::InputHandler*>(GetWindowLongPtrW(aWindow, GWLP_USERDATA));
 	if (aMessage == WM_KEYDOWN && aWParam == VK_F9 && (anLParam & (1LL << 30)) == 0)
 	{
-		debugUiVisible = !debugUiVisible;
+		ToggleDebugUiVisibility();
 		if (input)
 		{
 			input->ClearInputState();
