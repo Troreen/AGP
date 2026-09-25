@@ -1,11 +1,11 @@
 # Windows GitHub Portability TODO
 
-Status: deferred. This document records work to make a fresh GitHub checkout buildable and a Release package runnable on another supported x64 Windows PC. It does not change the current build.
+Status: in progress. This document records work to make a fresh GitHub checkout buildable and a Release package runnable on another supported x64 Windows PC.
 
 ## Current blockers
 
-- `GenerateProject.bat` calls `Premake/premake5.exe`, but Git does not track that executable. The generated solution and projects are tracked, so project regeneration is the missing part.
-- `Source/Application/Game/premake5.lua` copies DLLs from `Dependencies/.dlls` before building Game. None of the five DLLs in that directory are tracked by Git. The single tracked `Bin/Debug/libfbxsdk.dll` is not a complete dependency source.
+- `GenerateProject.bat` now downloads and verifies Premake 5.0.0-beta8 when the executable is missing. A clean-clone run still needs verification.
+- `Source/Application/Game/premake5.lua` copies five DLLs from `Dependencies/.dlls` before building Game. Those exact files are now tracked in Git; their original sources and redistribution rights still need review. The single tracked `Bin/Debug/libfbxsdk.dll` is not a complete dependency source.
 - The workspace selects the `v145` C++ toolset in `premake5.lua`. A new development machine needs Visual Studio 2026 C++ build tools and a Windows SDK. See [Microsoft's MSVC toolset documentation](https://learn.microsoft.com/en-us/cpp/overview/what-s-new-for-msvc?view=msvc-170).
 - Git currently tracks a snapshot of `Content`, while the team updates Content through a separate Perforce stream. A GitHub clone does not automatically receive later Perforce updates.
 - `AudioManager.cpp` resolves `Dependencies/FMod/Desktop` relative to the process working directory. The app-only package made by `AGPCleaner.bat` does not include those banks.
@@ -22,8 +22,8 @@ Status: deferred. This document records work to make a fresh GitHub checkout bui
 
 ### Fresh-clone build
 
-- [ ] Supply a pinned Premake executable through an approved repository file or bootstrap download, including its licence and an integrity check. Make `GenerateProject.bat` fail with a useful message when Premake is unavailable.
-- [ ] Supply the required DLLs through an approved, versioned dependency package or bootstrap step. Do not rely on ignored `Dependencies/.dlls` files or `Bin/Debug/libfbxsdk.dll` from an old checkout.
+- [x] Supply a pinned Premake executable through an approved repository file or bootstrap download, including its licence and an integrity check. Make `GenerateProject.bat` fail with a useful message when Premake is unavailable. `GenerateProject.bat` now downloads the official 5.0.0-beta8 Windows archive when needed and verifies both the archive and executable SHA-256 hashes. The licence is at `Premake/LICENSE.txt`.
+- [ ] Confirm the sources and redistribution rights of the five runtime DLLs now tracked in `Dependencies/.dlls`, then verify that a clean clone builds from those files rather than an old checkout.
 - [ ] Add a preflight check that reports missing toolchain components, Content, and DLLs before compiling.
 - [ ] Document the required Visual Studio 2026 Desktop development with C++ workload, `v145` toolset, Windows SDK, and `Debug/Release | x64` build commands.
 

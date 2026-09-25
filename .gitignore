@@ -26,6 +26,11 @@ x86/
 *.exp
 *.exe
 *.dll
+!/Dependencies/.dlls/fmod.dll
+!/Dependencies/.dlls/fmodL.dll
+!/Dependencies/.dlls/fmodstudio.dll
+!/Dependencies/.dlls/fmodstudioL.dll
+!/Dependencies/.dlls/libfbxsdk.dll
 
 # Generated/copied shader artifacts
 /Source/Engine/GraphicsEngine/TemporaryShaders/
