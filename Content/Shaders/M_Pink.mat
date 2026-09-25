@@ -1,0 +1,8 @@
+{
+  "name": "M_Pink",
+  "masterMaterial" : "_DefaultMaterial",
+  
+  "parameters" : {
+    "MB_Tint" : [ 1.0, 0.078, 0.576, 1.0 ]
+  }
+}

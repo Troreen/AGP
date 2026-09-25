@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -58,10 +58,10 @@ enum class MaterialParameterType : uint8_t
 struct MaterialParameterInfo
 {
 	std::string Name;
-	MaterialParameterType Type;
-	size_t Offset;
-	size_t Size;
-	size_t Index;
+	MaterialParameterType Type = MaterialParameterType::Unknown;
+	size_t Offset = 0;
+	size_t Size = 0;
+	size_t Index = 0;
 };
 
 /**

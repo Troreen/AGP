@@ -24,6 +24,7 @@ public:
 
 	TransformData GetData() const { return myData; }
 	bool SetData(const TransformData& data);
+	void SetMatrix(const CommonUtilities::Matrix4x4<float>& aMatrix);
 
 	const CommonUtilities::Vector3f& GetLocalPosition() const { return myData.Position; }
 	const CommonUtilities::Vector3f& GetLocalRotationDegrees() const { return myData.RotationDegrees; }

@@ -22,9 +22,14 @@ public:
 	// Invalid projection values are rejected without changing the camera.
 	bool SetPerspective(float aHorizontalFieldOfViewDegrees, float aNearPlane, float aFarPlane,
 	                    const CommonUtilities::Vector2u& aResolution);
+	// Rebuild the projection with the camera's existing field of view and clipping planes.
+	bool SetResolution(const CommonUtilities::Vector2u& aResolution);
 
 private:
 	void SyncCameraToOwner();
 	CommonUtilities::Camera3D myCamera;
+	float myHorizontalFieldOfViewDegrees = DefaultFieldOfView;
+	float myNearPlane = DefaultNearPlane;
+	float myFarPlane = DefaultFarPlane;
 	friend class WorldRenderer;
 };

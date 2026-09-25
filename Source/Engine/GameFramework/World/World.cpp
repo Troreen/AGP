@@ -43,6 +43,36 @@ Actor* World::FindActor(const std::string& name) const
 	return nullptr;
 }
 
+bool World::SetCameraResolution(const CommonUtilities::Vector2u& aResolution)
+{
+	// Resize every camera so switching the active camera keeps the new aspect ratio.
+	for (const auto& actor : myActors)
+	{
+		if (actor->IsPendingDestroy())
+		{
+			continue;
+		}
+
+		for (const auto& component : actor->myComponents)
+		{
+			if (component->IsPendingDestroy())
+			{
+				continue;
+			}
+
+			if (auto* camera = dynamic_cast<CameraComponent*>(component.get()))
+			{
+				if (!camera->SetResolution(aResolution))
+				{
+					return false;
+				}
+			}
+		}
+	}
+
+	return true;
+}
+
 bool World::SetActiveCamera(CameraComponent* camera)
 {
 	if (camera && (&camera->GetWorld() != this || camera->IsPendingDestroy() || camera->GetOwner()->IsPendingDestroy()))

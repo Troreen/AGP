@@ -33,7 +33,7 @@ cbuffer LightBuffer : register(b4)
 {
     Light LB_Lights[MAX_LIGHTS];
     uint LB_NumActiveLights;
-    float3 __LB_padding;
+    float3 LB_AmbientColor;
 }
 
 #include "ShadowSampling.hlsli"

@@ -11,10 +11,7 @@ float4 main(FullTextureVertex aPixel) : SV_TARGET
     const Light light = LB_Lights[0];
     
     const float shadow = CalculateDirectionalShadow(light, position);
- 
-    const float3 ambient = CalculateAmbientIBL(diffuse, specular, roughness, normal, viewDir, ao);
-    const float3 direct = CalculateDirectionalLight(light, diffuse, specular, roughness, normal, viewDir) * shadow;
-    const float3 radiance = ambient + direct;
+    const float3 radiance = CalculateDirectionalLight(light, diffuse, specular, roughness, normal, viewDir) * shadow;
     
     return float4(radiance, 1.0f);
 }

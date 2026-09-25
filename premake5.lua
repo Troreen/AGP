@@ -1,7 +1,7 @@
 include "Premake/extensions.lua"
 
 -- Name of the VS Solution.
-workspace "AGP"
+workspace "Game"
     -- What configurations we will have.
     configurations { "Debug", "Release", "Retail" }
     platforms { "x64" }

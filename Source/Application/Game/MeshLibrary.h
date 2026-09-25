@@ -1,5 +1,7 @@
 #pragma once
 
+#include "GraphicsEngine/Objects/Mesh.h"
+
 #include <filesystem>
 #include <memory>
 #include <string>
@@ -24,7 +26,7 @@ public:
 	std::shared_ptr<Mesh> LoadMesh(const std::filesystem::path& aPath);
 	bool LoadFBXMesh(const std::filesystem::path& aPath);
 	std::shared_ptr<Mesh> LoadSceneMesh(std::string_view aName, std::string_view aContentPath);
-	bool LoadFBXAnimation(std::string_view aMeshName, std::string aAnimationName, const std::filesystem::path& aPath);
+	std::shared_ptr<Animation> LoadFBXAnimation(std::string aAnimationName, const std::filesystem::path& aPath);
 
 private:
 	void RegisterPrimitiveMeshes();

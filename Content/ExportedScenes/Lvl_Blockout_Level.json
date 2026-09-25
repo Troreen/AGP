@@ -607,7 +607,7 @@
 						1
 					],
 					"Mesh": "SM_Test_Ground_4u",
-					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_4u.fbx",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_4u.SM_Test_Ground_4u",
 					"Materials": [
 						{
 							"Name": "M_Pink",
@@ -664,7 +664,7 @@
 						1
 					],
 					"Mesh": "SM_Test_Ground_4u",
-					"ContentPath": "Meshes/Modules/ExampleKit/SM_Test_Ground_4u.SM_Test_Ground_4u",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_4u.SM_Test_Ground_4u",
 					"Materials": [
 						{
 							"Name": "M_Blue",

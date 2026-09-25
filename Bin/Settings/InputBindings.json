@@ -1,0 +1,32 @@
+{
+  "defaults": {
+    "Quit": { "key": "ESCAPE", "pointer": null, "gamepad": null },
+    "DebugCamera": { "key": "F1", "pointer": null, "gamepad": null },
+    "PreviousRenderPass": { "key": "F5", "pointer": null, "gamepad": null },
+    "NextRenderPass": { "key": "F6", "pointer": null, "gamepad": null },
+    "CameraLookEnable": { "key": "MOUSERBUTTON", "pointer": null, "gamepad": null },
+    "CameraForward": { "key": "W", "pointer": null, "gamepad": null },
+    "CameraBack": { "key": "S", "pointer": null, "gamepad": null },
+    "CameraLeft": { "key": "A", "pointer": null, "gamepad": null },
+    "CameraRight": { "key": "D", "pointer": null, "gamepad": null },
+    "CameraUp": { "key": "SPACE", "pointer": null, "gamepad": null },
+    "CameraDown": { "key": "CONTROL", "pointer": null, "gamepad": null },
+    "CameraLookDelta": { "key": null, "pointer": "MOUSE_DELTA", "gamepad": null },
+    "ReloadScene": { "key": "F4", "pointer": null, "gamepad": null }
+  },
+  "current": {
+    "Quit": { "key": "ESCAPE", "pointer": null, "gamepad": null },
+    "DebugCamera": { "key": "F1", "pointer": null, "gamepad": null },
+    "PreviousRenderPass": { "key": "F5", "pointer": null, "gamepad": null },
+    "NextRenderPass": { "key": "F6", "pointer": null, "gamepad": null },
+    "CameraLookEnable": { "key": "MOUSERBUTTON", "pointer": null, "gamepad": null },
+    "CameraForward": { "key": "W", "pointer": null, "gamepad": null },
+    "CameraBack": { "key": "S", "pointer": null, "gamepad": null },
+    "CameraLeft": { "key": "A", "pointer": null, "gamepad": null },
+    "CameraRight": { "key": "D", "pointer": null, "gamepad": null },
+    "CameraUp": { "key": "SPACE", "pointer": null, "gamepad": null },
+    "CameraDown": { "key": "CONTROL", "pointer": null, "gamepad": null },
+    "CameraLookDelta": { "key": null, "pointer": "MOUSE_DELTA", "gamepad": null },
+    "ReloadScene": { "key": "F4", "pointer": null, "gamepad": null }
+  }
+}

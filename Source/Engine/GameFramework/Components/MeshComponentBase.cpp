@@ -1,33 +1,32 @@
 #include "GameFramework/Components/MeshComponentBase.h"
 
+#include "GameFramework/AssetHandling/MaterialAsset.h"
+#include "GameFramework/AssetHandling/MeshAsset.h"
 #include "GraphicsEngine/Objects/Mesh.h"
 
 #include <utility>
 
-MeshComponentBase::MeshComponentBase(MeshHandle aMesh)
+MeshComponentBase::MeshComponentBase(const std::shared_ptr<MeshAsset>& aMesh)
 {
-	SetMesh(std::move(aMesh));
+	SetMesh(aMesh);
 }
 
-void MeshComponentBase::SetMesh(MeshHandle aMesh)
+void MeshComponentBase::SetMesh(const std::shared_ptr<MeshAsset>& aMesh)
 {
-	myMesh = aMesh.myResource;
-	myMeshHandle = std::move(aMesh);
+	myMesh = aMesh;
 
 	myMaterials.clear();
-	myMaterialHandles.clear();
-	if (myMesh != nullptr)
+	if (myMesh != nullptr && myMesh->GetMesh() != nullptr)
 	{
-		myMaterials.resize(myMesh->GetNumMaterialSlots());
-		myMaterialHandles.resize(myMesh->GetNumMaterialSlots());
+		myMaterials.resize(myMesh->GetMesh()->GetNumMaterialSlots());
 	}
 
 	OnMeshChanged();
 }
 
-MeshHandle MeshComponentBase::GetMesh() const
+const std::shared_ptr<MeshAsset>& MeshComponentBase::GetMesh() const
 {
-	return myMeshHandle;
+	return myMesh;
 }
 
 bool MeshComponentBase::HasMesh() const
@@ -35,20 +34,20 @@ bool MeshComponentBase::HasMesh() const
 	return myMesh != nullptr;
 }
 
-bool MeshComponentBase::SetMaterial(unsigned aMaterialIndex, MaterialHandle aMaterial)
+bool MeshComponentBase::SetMaterial(unsigned aMaterialIndex, const std::shared_ptr<MaterialAsset>& aMaterial)
 {
 	if (aMaterialIndex >= myMaterials.size() || !aMaterial)
 	{
 		return false;
 	}
-	myMaterials[aMaterialIndex] = aMaterial.myResource;
-	myMaterialHandles[aMaterialIndex] = std::move(aMaterial);
+
+	myMaterials[aMaterialIndex] = aMaterial;
 	return true;
 }
 
-MaterialHandle MeshComponentBase::GetMaterial(unsigned index) const
+const std::shared_ptr<MaterialAsset>& MeshComponentBase::GetMaterial(unsigned index) const
 {
-	return index < myMaterialHandles.size() ? myMaterialHandles[index] : MaterialHandle{};
+	return index < myMaterials.size() ? myMaterials[index] : nullptr;
 }
 
 void MeshComponentBase::SetVisible(bool aVisible)
@@ -66,7 +65,7 @@ bool MeshComponentBase::HasSkinning() const
 	return false;
 }
 
-const std::array<CU::Matrix4f, 128>* MeshComponentBase::GetJointTransforms() const
+const std::array<CommonUtilities::Matrix4f, 128>* MeshComponentBase::GetJointTransforms() const
 {
 	return nullptr;
 }

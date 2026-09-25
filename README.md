@@ -18,8 +18,10 @@ C++20 / DirectX 11 graphics programming project for the AGP assignments. The cur
 
 ## Repository Layout
 
-Start with the [plain-language engine architecture](Docs/EngineArchitectureBasics.md)
-for gameplay, scenes, assets, and the path to `BeginPlay`. The more detailed
+Start with the [game loop and gameplay guide](Docs/GameLoopOnboarding.md)
+for frame order and examples of adding game behavior. The
+[plain-language engine architecture](Docs/EngineArchitectureBasics.md)
+covers gameplay, scenes, assets, and the path to `BeginPlay`. The more detailed
 [engine map](Docs/Architecture.md) covers renderer flow, threading, snapshots, and
 code formatting conventions.
 
@@ -36,17 +38,19 @@ code formatting conventions.
 
 Open `AGP.sln` in Visual Studio and build the `Debug | x64` configuration.
 
-Game resolves `Assets` from the executable location; it does not depend on
+Game resolves `Content` from the executable location; it does not depend on
 its working directory. Run `Bin/Debug/Game.exe` or
 `Bin/Release/Game.exe`. The debug build opens a log console.
 
-The sample installs its scene source in Main.cpp. Game requests the scene by
-name and registers only its gameplay behaviors. GameScene.cpp imports
-`Content/ExportedScenes/lvl_blockout/Lvl_Blockout_Level.json`, resolves the
-available Content meshes, and hands the result to the engine for construction.
+`Main.cpp` constructs the concrete `Game` and `GameApplication`, then calls
+`application.Run(game)`. Game selects the initial scene and registers its gameplay
+controls. `GameApplication` owns the window, frame loop, current World, and scene
+requests. It selects an exported scene file, asks `UnrealSceneImporter` for
+`SceneData`, then passes that data to `BuildWorldFromSceneData`.
 Start with [the MVP guide](Docs/GameFrameworkMVP.md), then Game.cpp and
-GameComponents.cpp. Real Perforce scene integration requires the team inputs
+the component files in `Source/Application/Game`. Real Perforce scene integration requires the team inputs
 listed in [the importer handoff](Docs/ImporterHandoff.md).
+
 ## Controls
 
 ### Camera
@@ -63,40 +67,17 @@ Mouse look keeps the camera upright relative to world up: yaw follows
 world up, while pitch rotates around the camera's turned local right axis and
 is limited to ±89°. Actor hierarchies are deferred in the MVP.
 
-### Animation
-
-| Control | Action |
-| --- | --- |
-| `Numpad 0` | Play Breathing animation |
-| `Numpad 1` | Play Walk animation |
-| `Numpad 2` | Play Run animation |
-| `Numpad 3` | Play Wave animation, using the partial upper-body layer when available |
-
-### Light Toggles And Placement
-
-The number-row keys `7`, `8`, and `9` also work for the light controls.
-
-| Control | Action |
-| --- | --- |
-| `7` / `Numpad 7` | Toggle directional light |
-| `8` / `Numpad 8` | Toggle point lights |
-| `9` / `Numpad 9` | Toggle spot light |
-| `Shift + 7` / `Shift + Numpad 7` | Aim the directional light along the current camera direction |
-| `Shift + 8` / `Shift + Numpad 8` | Move the first point light to the current camera position |
-| `Shift + 9` / `Shift + Numpad 9` | Move the spot light to the camera and aim it along the current camera direction |
-| `P` | Log current light placement, active light count, and renderer statistics |
-
 ### Scene and diagnostics
 
 | Control | Action |
 | --- | --- |
-| `R` | Pause/resume chest rotation |
+| `Escape` | Quit the game |
+| `F1` | Toggle debug camera |
 | `F4` | Reload the current scene |
 | `F5` | Select the previous renderer debug view |
 | `F6` | Select the next renderer debug view |
 | `F7` | Spawn/destroy an extra chest |
 | `F8` | Attach a smaller, self-spinning child chest that orbits the extra chest |
-| `Esc` | Quit |
 
 Gameplay now runs synchronously. Renderer comparison switches include
 `AGP_DISABLE_PARALLEL_SHADOWS` and the switches documented in

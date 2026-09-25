@@ -60,6 +60,8 @@ void GraphicsCommandList::ResetCommandList()
 {
 	myRecordingFailed = false;
 	myCommandList.Reset();
+	if (myContext) myContext->ClearState();
+	myCurrentOverrides = PipeLineStage_None;
 }
 
 void GraphicsCommandList::ClearRenderTarget(const Texture& aTarget) const

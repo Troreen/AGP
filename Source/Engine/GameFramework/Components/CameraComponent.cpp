@@ -49,8 +49,16 @@ bool CameraComponent::SetPerspective(float aHorizontalFieldOfViewDegrees, float 
 		}
 	}
 	myCamera = std::move(candidate);
+	myHorizontalFieldOfViewDegrees = aHorizontalFieldOfViewDegrees;
+	myNearPlane = aNearPlane;
+	myFarPlane = aFarPlane;
 	SyncCameraToOwner();
 	return true;
+}
+
+bool CameraComponent::SetResolution(const CommonUtilities::Vector2u& aResolution)
+{
+	return SetPerspective(myHorizontalFieldOfViewDegrees, myNearPlane, myFarPlane, aResolution);
 }
 
 void CameraComponent::SyncCameraToOwner()

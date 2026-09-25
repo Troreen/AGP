@@ -137,6 +137,16 @@ bool MaterialAsset::CreateMaterial(const std::filesystem::path& aPath, const sim
         description.MaterialShaderCode = !JSON_EXISTS(shaderCode) ? "" : ResolveRelativePath(basePath, shaderCode);
     }
 
+    for (const std::filesystem::path& texturePath :
+         {description.AlbedoTexture, description.NormalTexture, description.MaterialTexture})
+    {
+        if (!texturePath.empty() && !std::filesystem::exists(texturePath))
+        {
+            LOG(MaterialAssetLog, Warning, "Material '{}' is missing texture '{}'.", description.Name, texturePath.string());
+            return false;
+        }
+    }
+
     std::unique_ptr<Material> material = std::make_unique<Material>();
     if (!GraphicsEngine::Get().CreateMaterial(description, *material))
     {
@@ -185,9 +195,16 @@ bool MaterialAsset::CreateMaterialInstance(const std::filesystem::path& aPath, c
 
             const auto applyTexture = [&](const std::filesystem::path& path, unsigned slot)
             {
-                if (path.empty()) return true;
-                const auto texture = aRegistry.GetAsset<TextureAsset>(aRegistry.MakeAssetId(path).Value);
-                if (!texture || !material->SetTexture(slot, texture->GetTextureShared())) return false;
+                if (path.empty())
+				{
+					return true;
+				}
+
+				const std::shared_ptr<TextureAsset> texture = aRegistry.GetAsset<TextureAsset>(path.generic_string());
+                if (!texture || !material->SetTexture(slot, texture->GetTextureShared()))
+				{
+					return false;
+				}
                 myTextureAssets.push_back(texture);
                 return true;
             };
@@ -214,8 +231,14 @@ bool MaterialAsset::CreateMaterialInstance(const std::filesystem::path& aPath, c
 bool MaterialAsset::SetParameters(const simdjson::dom::object& aRoot, std::shared_ptr<MaterialInstance>& aMaterial)
 {
     auto parameterResult = aRoot.at_key("parameters");
-    if (parameterResult.error() == simdjson::NO_SUCH_FIELD) return true;
-    if (parameterResult.error() || !parameterResult.value().is_object()) return false;
+    if (parameterResult.error() == simdjson::NO_SUCH_FIELD)
+	{
+		return true;
+	}
+    if (parameterResult.error() || !parameterResult.value().is_object())
+	{
+		return false;
+	}
     simdjson::dom::object parameters = parameterResult.value().get_object().value();
     bool applied = true;
     for (auto it = parameters.begin(); it != parameters.end(); ++it)
@@ -232,19 +255,23 @@ bool MaterialAsset::SetParameters(const simdjson::dom::object& aRoot, std::share
 
         if (parameterValue.is_uint64())
         {
-            handled = true; applied &= aMaterial->SetValue(parameterName, static_cast<uint32_t>(parameterValue.get_uint64().value()));
+            handled = true;
+			applied &= aMaterial->SetValue(parameterName, static_cast<uint32_t>(parameterValue.get_uint64().value()));
         }
         else if (parameterValue.is_int64())
         {
-            handled = true; applied &= aMaterial->SetValue(parameterName, static_cast<int>(parameterValue.get_int64().value()));
+            handled = true;
+			applied &= aMaterial->SetValue(parameterName, static_cast<int>(parameterValue.get_int64().value()));
         }
         else if (parameterValue.is_double())
         {
-            handled = true; applied &= aMaterial->SetValue(parameterName, static_cast<float>(parameterValue.get_double().value()));
+            handled = true;
+			applied &= aMaterial->SetValue(parameterName, static_cast<float>(parameterValue.get_double().value()));
         }
         else if (parameterValue.is_bool())
         {
-            handled = true; applied &= aMaterial->SetValue(parameterName, parameterValue.get_bool().value());
+            handled = true;
+			applied &= aMaterial->SetValue(parameterName, parameterValue.get_bool().value());
         }
         else if (parameterValue.is_array())
         {
@@ -259,19 +286,22 @@ bool MaterialAsset::SetParameters(const simdjson::dom::object& aRoot, std::share
                     {
                         CU::Vector2u value(static_cast<uint32_t>(parameterArray.at(0).get_uint64().value()),
                             static_cast<uint32_t>(parameterArray.at(1).get_uint64().value()));
-                        handled = true; applied &= aMaterial->SetValue(parameterName, value);
+                        handled = true;
+						applied &= aMaterial->SetValue(parameterName, value);
                     }
                     else if (arrayElement.is_int64())
                     {
                         CU::Vector2i value(static_cast<int>(parameterArray.at(0).get_int64().value()),
                             static_cast<int>(parameterArray.at(1).get_int64().value()));
-                        handled = true; applied &= aMaterial->SetValue(parameterName, value);
+                        handled = true;
+						applied &= aMaterial->SetValue(parameterName, value);
                     }
                     else if (arrayElement.is_double())
                     {
                         CU::Vector2f value(static_cast<float>(parameterArray.at(0).get_double().value()),
                             static_cast<float>(parameterArray.at(1).get_double().value()));
-                        handled = true; applied &= aMaterial->SetValue(parameterName, value);
+                        handled = true;
+						applied &= aMaterial->SetValue(parameterName, value);
                     }
                     break;
                 }
@@ -283,21 +313,24 @@ bool MaterialAsset::SetParameters(const simdjson::dom::object& aRoot, std::share
                         CU::Vector3<unsigned> value(static_cast<uint32_t>(parameterArray.at(0).get_uint64().value()),
                             static_cast<uint32_t>(parameterArray.at(1).get_uint64().value()),
                             static_cast<uint32_t>(parameterArray.at(2).get_uint64().value()));
-                        handled = true; applied &= aMaterial->SetValue(parameterName, value);
+                        handled = true;
+						applied &= aMaterial->SetValue(parameterName, value);
                     }
                     else if (arrayElement.is_int64())
                     {
                         CU::Vector3<int> value(static_cast<int>(parameterArray.at(0).get_int64().value()),
                             static_cast<int>(parameterArray.at(1).get_int64().value()),
                             static_cast<int>(parameterArray.at(2).get_int64().value()));
-                        handled = true; applied &= aMaterial->SetValue(parameterName, value);
+                        handled = true;
+						applied &= aMaterial->SetValue(parameterName, value);
                     }
                     else if (arrayElement.is_double())
                     {
                         CU::Vector3f value(static_cast<float>(parameterArray.at(0).get_double().value()),
                             static_cast<float>(parameterArray.at(1).get_double().value()),
                             static_cast<float>(parameterArray.at(2).get_double().value()));
-                        handled = true; applied &= aMaterial->SetValue(parameterName, value);
+                        handled = true;
+						applied &= aMaterial->SetValue(parameterName, value);
                     }
                     break;
                 }
@@ -310,7 +343,8 @@ bool MaterialAsset::SetParameters(const simdjson::dom::object& aRoot, std::share
                             static_cast<uint32_t>(parameterArray.at(1).get_uint64().value()),
                             static_cast<uint32_t>(parameterArray.at(2).get_uint64().value()),
                             static_cast<uint32_t>(parameterArray.at(3).get_uint64().value()));
-                        handled = true; applied &= aMaterial->SetValue(parameterName, value);
+                        handled = true;
+						applied &= aMaterial->SetValue(parameterName, value);
                     }
                     else if (arrayElement.is_int64())
                     {
@@ -318,7 +352,8 @@ bool MaterialAsset::SetParameters(const simdjson::dom::object& aRoot, std::share
                             static_cast<int>(parameterArray.at(1).get_int64().value()),
                             static_cast<int>(parameterArray.at(2).get_int64().value()),
                             static_cast<int>(parameterArray.at(3).get_int64().value()));
-                        handled = true; applied &= aMaterial->SetValue(parameterName, value);
+                        handled = true;
+						applied &= aMaterial->SetValue(parameterName, value);
                     }
                     else if (arrayElement.is_double())
                     {
@@ -326,13 +361,18 @@ bool MaterialAsset::SetParameters(const simdjson::dom::object& aRoot, std::share
                             static_cast<float>(parameterArray.at(1).get_double().value()),
                             static_cast<float>(parameterArray.at(2).get_double().value()),
                             static_cast<float>(parameterArray.at(3).get_double().value()));
-                        handled = true; applied &= aMaterial->SetValue(parameterName, value);
+                        handled = true;
+						applied &= aMaterial->SetValue(parameterName, value);
                     }
                     break;
                 }
             }
         }
-        if (!handled) return false;
+
+        if (!handled)
+		{
+			return false;
+		}
     }
     return applied;
 }

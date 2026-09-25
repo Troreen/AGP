@@ -8,7 +8,8 @@
 # Build outputs used by the solution
 Intermediate/
 /Lib/
-/Bin/
+/Bin/*
+!/Bin/Settings/
 x64/
 x86/
 /Debug/

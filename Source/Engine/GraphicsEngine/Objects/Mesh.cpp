@@ -92,24 +92,3 @@ bool Mesh::HasSkeleton() const
 {
 	return mySkeleton.IsValid();
 }
-
-void Mesh::AddAnimation(std::shared_ptr<Animation> anAnimation)
-{
-	if (anAnimation == nullptr || anAnimation->Name.empty() || !anAnimation->IsValid())
-	{
-		return;
-	}
-
-	myAnimations[anAnimation->Name] = std::move(anAnimation);
-}
-
-std::shared_ptr<Animation> Mesh::GetAnimation(std::string_view aName) const
-{
-	const auto foundAnimation = myAnimations.find(std::string(aName));
-	if (foundAnimation == myAnimations.end())
-	{
-		return nullptr;
-	}
-
-	return foundAnimation->second;
-}

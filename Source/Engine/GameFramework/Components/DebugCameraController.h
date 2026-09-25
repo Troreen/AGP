@@ -1,5 +1,6 @@
 #pragma once
-#include "GameFramework/Runtime/InputSystem.h"
+#include "InputMapper.h"
+#include "Vector2.hpp"
 #include "GameFramework/World/Component.h"
 #include "GameFramework/World/Transform.h"
 #include <vector>
@@ -37,6 +38,7 @@ class DebugCameraController final : public Component
 {
 public:
 	void BeginPlay() override;
+	void EndPlay() noexcept override;
 	void Update(float deltaTime) override;
 private:
 	float myYaw = 0, myPitch = 0;
@@ -50,5 +52,5 @@ private:
 	bool myUp 		= false; 
 	bool myDown 	= false;
 
-	std::vector<InputSubscription> mySubscriptions;
+	std::vector<unsigned> myListenerIDs;
 };

@@ -59,6 +59,11 @@ bool Transform::SetData(const TransformData& data)
 	return true;
 }
 
+void Transform::SetMatrix(const CommonUtilities::Matrix4x4<float>& aMatrix)
+{
+	myLocalMatrix = aMatrix;
+}
+
 bool Transform::SetLocalPosition(const CommonUtilities::Vector3f& position)
 {
 	TransformData data = myData;

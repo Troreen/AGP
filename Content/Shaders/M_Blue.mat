@@ -1,0 +1,8 @@
+{
+  "name": "M_Blue",
+  "masterMaterial" : "_DefaultMaterial",
+  
+  "parameters" : {
+    "MB_Tint" : [ 0.102, 0.569, 1.0, 1.0 ]
+  }
+}

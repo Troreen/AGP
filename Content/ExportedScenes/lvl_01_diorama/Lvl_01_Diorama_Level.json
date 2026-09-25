@@ -1,0 +1,5646 @@
+{
+	"Actors": [
+		{
+			"Name": "DirectionalLight",
+			"Archetype": "DirectionalLight",
+			"Transform": [
+				0.6387413344957884,
+				-0.11617802586728826,
+				-0.76059987767032844,
+				0,
+				-0.76013303566406543,
+				-0.24841989327276318,
+				-0.60040432586782944,
+				0,
+				-0.1191943511326358,
+				0.96166015428112528,
+				-0.24698680962430597,
+				0,
+				0,
+				0,
+				400,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "LightComponent0",
+					"TypeID": 5,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Color": [
+						1,
+						1,
+						1,
+						1
+					],
+					"Intensity": 6
+				}
+			]
+		},
+		{
+			"Name": "PlayerStart",
+			"Archetype": "PlayerStart",
+			"Transform": [
+				1,
+				0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				0,
+				0,
+				92,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "CollisionCapsule",
+					"TypeID": 8,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Radius": 40,
+					"HalfHeight": 92
+				}
+			]
+		},
+		{
+			"Name": "SM_SkySphere",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				400,
+				0,
+				0,
+				0,
+				0,
+				400,
+				0,
+				0,
+				0,
+				0,
+				400,
+				0,
+				0,
+				0,
+				0,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "SM_SkySphere",
+					"ContentPath": "/Engine/EngineSky/SM_SkySphere.SM_SkySphere",
+					"Materials": [
+						{
+							"Name": "M_SimpleSkyDome",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "CameraActor5",
+			"Archetype": "CameraActor",
+			"Transform": [
+				0.4298789200212586,
+				-0.40086857813238841,
+				-0.80901699437494679,
+				0,
+				0.68199836006249748,
+				0.73135370161917113,
+				-6.106226635438361e-16,
+				0,
+				0.59167757350893369,
+				-0.55174826342640459,
+				0.58778525229247336,
+				0,
+				-1166.3700590000001,
+				1087.657676,
+				2109.5755509999999,
+				1
+			],
+			"Tags": [
+				"ActiveCamera"
+			],
+			"Components": [
+				{
+					"Name": "SceneComponent",
+					"TypeID": 0,
+					"Parent": "",
+					"Tags": [
+						"ActiveCamera"
+					],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					]
+				}
+			]
+		},
+		{
+			"Name": "Landscape",
+			"Archetype": "Landscape",
+			"Transform": [
+				100,
+				0,
+				0,
+				0,
+				0,
+				100,
+				0,
+				0,
+				0,
+				0,
+				100,
+				0,
+				-25200,
+				-25200,
+				0,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "RootComponent0",
+					"TypeID": 0,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					]
+				}
+			]
+		},
+		{
+			"Name": "Box",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-3.5452619874178746,
+				-4.7501269297644324,
+				0.93134933923662233,
+				0,
+				3.0166174534154564,
+				-2.1133067790189979,
+				0.70459463346065676,
+				0,
+				-0.061274980921126446,
+				0.23588876633399342,
+				0.96984631082999029,
+				0,
+				27.45149120596686,
+				-507.28433518022155,
+				-307.69697579934314,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "White",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-0.74999997892445935,
+				-1.2990381178446264,
+				0,
+				0,
+				5.4126588243526097,
+				-3.1249999121852472,
+				-0,
+				0,
+				0,
+				0,
+				4,
+				0,
+				-321.45867548293171,
+				997.88546283260609,
+				0,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_Beige",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube2",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-0.26047224471255026,
+				-1.4772116333600973,
+				0,
+				0,
+				6.1550484723337382,
+				-1.0853010196356261,
+				-0,
+				0,
+				0,
+				0,
+				4,
+				0,
+				204.23425855053253,
+				692.35374352656629,
+				0,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_Beige",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Box2",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-12.901644520452807,
+				-9.0338291254523053,
+				0,
+				0,
+				2.1509116965362631,
+				-3.0718201239173353,
+				-0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				158.91410015641139,
+				-293.01020809013136,
+				-265,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "White",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube3",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-0.085505035982361699,
+				-0.48492315528907121,
+				0.086824088167663099,
+				0,
+				0.49240387652912604,
+				-0.086824088702899482,
+				1.515352517078572e-09,
+				0,
+				0.18092211834691282,
+				1.0260604252664214,
+				5.9088465194820348,
+				0,
+				972.10640313513079,
+				-4368.9007765437809,
+				-3110.7490002420705,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_LightBrown",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube4",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-0.25651508216488739,
+				-1.4547694704133112,
+				0.26047226450298949,
+				0,
+				1.2310096950536753,
+				-0.21706020059849201,
+				-3.3202607330196088e-14,
+				0,
+				0.045230529586728518,
+				0.25651510631660546,
+				1.4772116298705087,
+				0,
+				949.39004759321824,
+				-4324.9685119210153,
+				-2599.8146374083835,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "White",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube5",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-0.25651508216489038,
+				-1.4772116340644104,
+				0.045230529586728394,
+				0,
+				1.2123078920110595,
+				-0.21706020059849451,
+				-0.21376258859735947,
+				0,
+				0.26047226450321193,
+				-5.4123372450476381e-16,
+				1.4772116298704696,
+				0,
+				425.30999629933763,
+				-3604.2549932003053,
+				-2582.1914213621894,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "White",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube6",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-0.085505035851802247,
+				-0.49240387650610401,
+				0.01507684468792049,
+				0,
+				0.48492315531207947,
+				-0.086824088833466373,
+				-0.085505035175803185,
+				0,
+				1.0418890580128473,
+				-2.0816681711721685e-15,
+				5.9088465194818784,
+				0,
+				374.39531949365175,
+				-3560.2240502003056,
+				-3091.0813620840659,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_LightBrown",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube7",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-0.26047224071818942,
+				-1.4772116340644108,
+				0,
+				0,
+				1.2310096950536755,
+				-0.21706020059849118,
+				-0,
+				0,
+				0,
+				0,
+				1.5,
+				0,
+				1782.2968542233307,
+				-3831.2165445301221,
+				-2565.4734330000001,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "White",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube8",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-0.086824088833465263,
+				-0.49240387650610412,
+				0,
+				0,
+				0.49240387650610412,
+				-0.086824088833465263,
+				-0,
+				0,
+				0,
+				0,
+				6,
+				0,
+				1820.5234952233307,
+				-3787.1856015301223,
+				-3075.4734330000001,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_LightBrown",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube9",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-0.26047224071818942,
+				-1.4772116340644108,
+				0,
+				0,
+				1.2310096950536755,
+				-0.21706020059849118,
+				-0,
+				0,
+				0,
+				0,
+				1.5,
+				0,
+				1452.2968542233307,
+				-3761.2165445301221,
+				-2565.4734330000001,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "White",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube10",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-0.086824088833465263,
+				-0.49240387650610412,
+				0,
+				0,
+				0.49240387650610412,
+				-0.086824088833465263,
+				-0,
+				0,
+				0,
+				0,
+				6,
+				0,
+				1490.5234952233307,
+				-3717.1856015301223,
+				-3075.4734330000001,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_LightBrown",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube11",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-0.25651508216108376,
+				-1.4385833914119697,
+				0.33864116491874729,
+				0,
+				1.2123078920116179,
+				-0.15433822509553802,
+				0.26265811855091203,
+				0,
+				-0.2604722645032107,
+				0.38233050052109474,
+				1.4268768649732388,
+				0,
+				2143.388510324105,
+				-3000.1370483131373,
+				-2583.8675574391,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "White",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube12",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-0.085505035850532041,
+				-0.47952779605983925,
+				0.11288038647254998,
+				0,
+				0.48492315531230318,
+				-0.061735298407552763,
+				0.10506324939049845,
+				0,
+				-1.041889058012837,
+				1.5293220020843803,
+				5.7075074598929563,
+				0,
+				2269.5949720070171,
+				-3085.8807551834761,
+				-3073.9899358153834,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_LightBrown",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Box3",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-7.9873873490376006,
+				2.907171019467909,
+				0,
+				0,
+				-0.085505029984350264,
+				-0.23492315732463531,
+				0,
+				0,
+				0,
+				-0,
+				0.25,
+				0,
+				-551.80784100595645,
+				541.22077360059006,
+				-15,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "White",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Box4",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-7.9873873742291543,
+				2.9071709502546841,
+				0,
+				0,
+				-0.085505027948667184,
+				-0.23492315806556335,
+				0,
+				0,
+				0,
+				-0,
+				0.25,
+				0,
+				-623.78333681807703,
+				393.46970401233608,
+				-15,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "White",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Box5",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-13.543663368199553,
+				-2.3731166361746729,
+				0,
+				0,
+				0.043147575203175914,
+				-0.24624842487635573,
+				-0,
+				0,
+				0,
+				0,
+				0.25,
+				0,
+				157.10678742444998,
+				107.78576567311963,
+				-15,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "White",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Box6",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-12.556298785595317,
+				-2.2140146356466022,
+				0,
+				0,
+				0.043412051679345143,
+				-0.24620193697245718,
+				-0,
+				0,
+				0,
+				0,
+				0.25,
+				0,
+				233.04622341654542,
+				253.95273059949051,
+				-15,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "White",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube13",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-2.7082213330503864,
+				0.47753241901547749,
+				0,
+				0,
+				-0.21706019046158068,
+				-1.2310096968410846,
+				0,
+				0,
+				0,
+				-0,
+				0.5,
+				0,
+				8.6864611397177605,
+				-3296.412756528443,
+				-3020,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "Bush_Red",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube14",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-2.7082213291180843,
+				0.47753244131668016,
+				0,
+				0,
+				-0.1302361203590946,
+				-0.73860581703220485,
+				0,
+				0,
+				0,
+				-0,
+				0.5,
+				0,
+				1.7405345808482831,
+				-3335.8050672417176,
+				-3000,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "Bush_Red",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube15",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-2.7395354160551921,
+				-0.23967833481420883,
+				0,
+				0,
+				0.06536681858569332,
+				-0.74714602256050688,
+				-0,
+				0,
+				0,
+				0,
+				0.5,
+				0,
+				478.20787141602904,
+				-3342.2781165709275,
+				-3000,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "Bush_Red",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube16",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-2.7395354160551921,
+				-0.23967833481420883,
+				0,
+				0,
+				0.10894469764282219,
+				-1.2452433709341781,
+				-0,
+				0,
+				0,
+				0,
+				0.5,
+				0,
+				474.72164082996147,
+				-3302.4303290359298,
+				-3020,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "Bush_Red",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube17",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-2.6562960122782298,
+				-0.71175241141478651,
+				0,
+				0,
+				0.19411429402221453,
+				-0.72444436698497172,
+				-0,
+				0,
+				0,
+				0,
+				0.5,
+				0,
+				532.82764766256207,
+				-3070.2452289296166,
+				-3000,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "Bush_Red",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube18",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-2.6562960122782298,
+				-0.71175241141478651,
+				0,
+				0,
+				0.32352382337035751,
+				-1.2074072783082861,
+				-0,
+				0,
+				0,
+				0,
+				0.5,
+				0,
+				522.47488516757767,
+				-3031.6081963849715,
+				-3020,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "Bush_Red",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube19",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-2.7499999999999987,
+				-5.3573541495646778e-08,
+				0,
+				0,
+				1.4610965862449122e-08,
+				-0.74999999999999967,
+				-0,
+				0,
+				0,
+				0,
+				0.5,
+				0,
+				97.467522794255459,
+				-3085.4885834899542,
+				-3000,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "Bush_Red",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube20",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-2.7499999999999987,
+				-5.3573541495646778e-08,
+				0,
+				0,
+				2.4351609770748534e-08,
+				-1.2499999999999996,
+				-0,
+				0,
+				0,
+				0,
+				0.5,
+				0,
+				97.46752146352064,
+				-3045.4885832302384,
+				-3020,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "Bush_Red",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube21",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-2.7082213307321403,
+				0.47753243216291302,
+				0,
+				0,
+				-0.21706019643768776,
+				-1.2310096957873364,
+				0,
+				0,
+				0,
+				-0,
+				0.5,
+				0,
+				1368.1908868333853,
+				-2977.7693494545197,
+				-3020,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "Bush_Red",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube22",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-2.7082213307321403,
+				0.47753243216291302,
+				0,
+				0,
+				-0.13023611786261263,
+				-0.73860581747240195,
+				0,
+				0,
+				0,
+				-0,
+				0.5,
+				0,
+				1361.2449610986437,
+				-3017.1616600806396,
+				-3000,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "Bush_Red",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube23",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-2.7082213291180843,
+				0.47753244131668016,
+				0,
+				0,
+				-0.21706020059849096,
+				-1.2310096950536749,
+				0,
+				0,
+				0,
+				-0,
+				0.5,
+				0,
+				849.69169410105508,
+				-2693.4129055170033,
+				-3020,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "Bush_Red",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube24",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-2.7082213291180843,
+				0.47753244131668016,
+				0,
+				0,
+				-0.1302361203590946,
+				-0.73860581703220485,
+				0,
+				0,
+				0,
+				-0,
+				0.5,
+				0,
+				842.74576810105521,
+				-2732.8052165170034,
+				-3000,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "Bush_Red",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube25",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-2.7082213291180843,
+				0.47753244131668016,
+				0,
+				0,
+				-0.21706020059849096,
+				-1.2310096950536749,
+				0,
+				0,
+				0,
+				-0,
+				0.5,
+				0,
+				1032.8094831700714,
+				-3152.1806852625214,
+				-3020,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "Bush_Red",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube26",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-2.7082213291180843,
+				0.47753244131668016,
+				0,
+				0,
+				-0.1302361203590946,
+				-0.73860581703220485,
+				0,
+				0,
+				0,
+				-0,
+				0.5,
+				0,
+				1025.8635571700715,
+				-3191.5729962625219,
+				-3000,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "Bush_Red",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube27",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-2.7499999999999987,
+				-4.4278562708990917e-08,
+				0,
+				0,
+				1.2075971647906614e-08,
+				-0.74999999999999967,
+				-0,
+				0,
+				0,
+				0,
+				0.5,
+				0,
+				822.69520923981224,
+				-4343.7980705702385,
+				-3000,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "Bush_Red",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube28",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-2.7499999999999987,
+				-4.4278562708990917e-08,
+				0,
+				0,
+				2.0126619413177689e-08,
+				-1.2499999999999996,
+				-0,
+				0,
+				0,
+				0,
+				0.5,
+				0,
+				822.69520810538222,
+				-4303.7980698962619,
+				-3020,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "Bush_Red",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube29",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-2.7395354160551921,
+				-0.23967833481420883,
+				0,
+				0,
+				0.06536681858569332,
+				-0.74714602256050688,
+				-0,
+				0,
+				0,
+				0,
+				0.5,
+				0,
+				1246.1625440984642,
+				-4418.4667800058778,
+				-3000,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "Bush_Red",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube30",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-2.7395354160551921,
+				-0.23967833481420883,
+				0,
+				0,
+				0.10894469764282219,
+				-1.2452433709341781,
+				-0,
+				0,
+				0,
+				0,
+				0.5,
+				0,
+				1242.6763132535773,
+				-4378.6189915049545,
+				-3020,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "Bush_Red",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube31",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-2.5841547248486632,
+				0.94055534554981235,
+				0,
+				0,
+				-0.25651509424085789,
+				-0.70476947041327187,
+				0,
+				0,
+				0,
+				-0,
+				0.5,
+				0,
+				1464.328298959126,
+				-3268.8792402372114,
+				-3000,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "Bush_Red",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube32",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-2.5841547248486632,
+				0.94055534554981235,
+				0,
+				0,
+				-0.42752515706809652,
+				-1.1746157840221196,
+				0,
+				0,
+				0,
+				-0,
+				0.5,
+				0,
+				1478.0091036533775,
+				-3231.2915343104601,
+				-3020,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "Bush_Red",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube33",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-1.9445436914032512,
+				1.9445436051227576,
+				0,
+				0,
+				-0.53033007412438848,
+				-0.53033009765543215,
+				0,
+				0,
+				0,
+				-0,
+				0.5,
+				0,
+				1836.9774474470478,
+				-3151.9258266839797,
+				-3000,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "Bush_Red",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube34",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-1.9445436914032512,
+				1.9445436051227576,
+				0,
+				0,
+				-0.88388345687398073,
+				-0.88388349609238692,
+				0,
+				0,
+				0,
+				-0,
+				0.5,
+				0,
+				1865.261718024758,
+				-3123.6415538136189,
+				-3020,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "Bush_Red",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube35",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-0.26047224071818942,
+				-1.4772116340644108,
+				0,
+				0,
+				1.2310096950536755,
+				-0.21706020059849118,
+				-0,
+				0,
+				0,
+				0,
+				1.5,
+				0,
+				1872.2968540000002,
+				-2711.2165450000002,
+				-2565.4734330000001,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "White",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube36",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-0.086824088833465263,
+				-0.49240387650610412,
+				0,
+				0,
+				0.49240387650610412,
+				-0.086824088833465263,
+				-0,
+				0,
+				0,
+				0,
+				6,
+				0,
+				1910.5234949999999,
+				-2667.185602,
+				-3075.4734330000001,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_LightBrown",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube37",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				0.1763856255976162,
+				-0.28284133749091306,
+				0,
+				0,
+				0.42426200623636967,
+				0.26457843839642436,
+				-0,
+				0,
+				0,
+				0,
+				0.16666666666666663,
+				0,
+				415.0956687197729,
+				-487.17972991561692,
+				-165.83330000000086,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_Grey",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube38",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				0.088192813827322913,
+				-0.14142066810405374,
+				0,
+				0,
+				0.42426200431216132,
+				0.2645784414819688,
+				-0,
+				0,
+				0,
+				0,
+				0.16666666666666663,
+				0,
+				415.09566871977285,
+				-487.17972991561692,
+				-159.16663333333418,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_Grey",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "GroupActor7",
+			"Archetype": "GroupActor",
+			"Transform": [
+				0.39686765759463655,
+				-0.63639300935455445,
+				0,
+				0,
+				0.63639300935455445,
+				0.39686765759463655,
+				-0,
+				0,
+				0,
+				0,
+				0.75,
+				0,
+				350.0039231795846,
+				-310.74168468222365,
+				-57.499900000002526,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "GroupComponent",
+					"TypeID": 0,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube39",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-0.10127992242764912,
+				0.13236414243309744,
+				-3.9039451664446557e-13,
+				0,
+				-0.3835610640385006,
+				-0.29348609145993898,
+				-0.12940952157094537,
+				0,
+				-0.034258360691060391,
+				-0.026213172611909641,
+				0.16098795977767855,
+				0,
+				308.72732167571934,
+				-507.54279017686395,
+				-164.16663299999999,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_Grey",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "GroupActor_7",
+			"Archetype": "GroupActor",
+			"Transform": [
+				-0.99544073306707515,
+				-0.095382110224529151,
+				0,
+				0,
+				0.095382110224529151,
+				-0.99544073306707515,
+				-0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				221.51513670571342,
+				-386.90406605899761,
+				5.8333835000000001,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "GroupComponent",
+					"TypeID": 0,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube40",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-0.20255923717697902,
+				0.26472749068292861,
+				-7.8078669092651597e-13,
+				0,
+				-0.3835610640385006,
+				-0.29348609145993898,
+				-0.12940952157094537,
+				0,
+				-0.034258360691060391,
+				-0.026213172611909641,
+				0.16098795977767855,
+				0,
+				310.09765342086348,
+				-506.49426532496011,
+				-170.60613883756855,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_Grey",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube41",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-0.041049997755927686,
+				0.072521513404563823,
+				0,
+				0,
+				-0.2175641050854813,
+				-0.12314974696828912,
+				0,
+				0,
+				0,
+				-0,
+				0.083333500000000005,
+				0,
+				458.73864952575656,
+				-386.97495607957671,
+				-161.66662474999998,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_Grey",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "GroupActor_9",
+			"Archetype": "GroupActor",
+			"Transform": [
+				0.74426555750024725,
+				0.09256770451321672,
+				0,
+				0,
+				-0.09256770451321672,
+				0.74426555750024725,
+				0,
+				0,
+				0,
+				-0,
+				0.75,
+				0,
+				374.47986725905429,
+				-251.31751661720261,
+				5.8333835000000001,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "GroupComponent",
+					"TypeID": 0,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube42",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-0.082099749212361434,
+				0.14504259168091746,
+				0,
+				0,
+				-0.2175641050854813,
+				-0.12314974696828912,
+				0,
+				0,
+				0,
+				-0,
+				0.083333500000000005,
+				0,
+				458.73864952575656,
+				-386.97495607957671,
+				-164.99995824999999,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_Grey",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube43",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-0.076756460644760396,
+				0.14794030768620617,
+				0,
+				0,
+				-0.44382003541854764,
+				-0.2302689213964384,
+				0,
+				0,
+				0,
+				-0,
+				0.16666700000000001,
+				0,
+				336.48081007770594,
+				-414.07714007178373,
+				-159.16663299999999,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_Grey",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "GroupActor_10",
+			"Archetype": "GroupActor",
+			"Transform": [
+				0.99619469815066264,
+				0.08715574207423267,
+				0,
+				0,
+				-0.08715574207423267,
+				0.99619469815066264,
+				0,
+				0,
+				0,
+				-0,
+				1,
+				0,
+				244.47986686638558,
+				-291.3175161300681,
+				5.8333834999999965,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "GroupComponent",
+					"TypeID": 0,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube44",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-0.15351246075167799,
+				0.29587972773234145,
+				0,
+				0,
+				-0.44382003541854764,
+				-0.2302689213964384,
+				0,
+				0,
+				0,
+				-0,
+				0.16666700000000001,
+				0,
+				336.48081007770594,
+				-414.07714007178373,
+				-165.83330000000001,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_Grey",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube45",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				0.026154380487030972,
+				0.16395985179061395,
+				-0.014525986064275843,
+				0,
+				-0.49375746782011587,
+				0.078762700384556017,
+				4.9439619065339002e-15,
+				0,
+				0.0022882117763432124,
+				0.014344628193374002,
+				0.16603278175667741,
+				0,
+				324.61316155278251,
+				-593.59967035212003,
+				-169.15394866137791,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_Grey",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "GroupActor_11",
+			"Archetype": "GroupActor",
+			"Transform": [
+				0.85277592490336307,
+				-0.52227695900280113,
+				0,
+				0,
+				0.52227695900280113,
+				0.85277592490336307,
+				-0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				219.86006717428035,
+				-456.76615289707723,
+				5.8333835000000001,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "GroupComponent",
+					"TypeID": 0,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube46",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				0.052308604048092872,
+				0.32791871982408466,
+				-0.029051884972809607,
+				0,
+				-0.49375746782011587,
+				0.078762700384556017,
+				4.9439619065339002e-15,
+				0,
+				0.0022882117763432124,
+				0.014344628193374002,
+				0.16603278175667741,
+				0,
+				324.52163326091528,
+				-594.17345435654295,
+				-175.79524698150669,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_Grey",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube47",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-0.063570531844039754,
+				0.13781754513164887,
+				0.068869446229455442,
+				0,
+				-0.46220042493793484,
+				-0.17059676304671756,
+				-0.085249701613404547,
+				0,
+				1.8503754084520098e-16,
+				-0.074501712367208761,
+				0.14908850976300519,
+				0,
+				415.47786051165502,
+				-520.26456266637479,
+				-146.43516134781996,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_Grey",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "GroupActor_12",
+			"Archetype": "GroupActor",
+			"Transform": [
+				1,
+				0,
+				0,
+				0,
+				0,
+				0.89452926951949285,
+				0.44700938018449071,
+				0,
+				0,
+				-0.44700938018449071,
+				0.89452926951949285,
+				0,
+				321.23930891784755,
+				-395.74411189889798,
+				-3.1119091951949294,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "GroupComponent",
+					"TypeID": 0,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube48",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-0.12714068226565128,
+				0.27563426335968072,
+				0.13773847924305993,
+				0,
+				-0.46220042493793484,
+				-0.17059676304671756,
+				-0.085249701613404547,
+				0,
+				1.8503754084520098e-16,
+				-0.074501712367208761,
+				0.14908850976300519,
+				0,
+				415.47786051165502,
+				-517.2845000042164,
+				-152.3986901201576,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_Grey",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Box7",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-6.9627925241676776,
+				4.8753994980303661,
+				0,
+				0,
+				-2.1509115432486907,
+				-3.0718202312504457,
+				0,
+				0,
+				0,
+				-0,
+				8,
+				0,
+				-399.63228853770028,
+				263.30522173284015,
+				-1005,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "White",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Box8",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-8.9270800042949645,
+				3.2491910680840248,
+				0,
+				0,
+				-1.282575421612115,
+				-3.523847370116433,
+				0,
+				0,
+				0,
+				-0,
+				8.5,
+				0,
+				-780.35955086881188,
+				79.409222159032666,
+				-1375,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "White",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Sled",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				0.90101570508937823,
+				0.38456201036723853,
+				-0.20070565354418513,
+				0,
+				-0.52343244100685793,
+				1.1148201808395592,
+				-0.21376258815436977,
+				0,
+				0.11323659387016149,
+				0.23812743939691955,
+				0.9646101784736415,
+				0,
+				273.82721515269287,
+				-226.53688108689542,
+				-156.63600177623843,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Sled",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Sled.Sled",
+					"Materials": [
+						{
+							"Name": "M_LightBrown",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube49",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				1.2990381087186469,
+				-0.74999999473112067,
+				0,
+				0,
+				0.49999999648741378,
+				0.86602540581243126,
+				-0,
+				0,
+				0,
+				0,
+				2.5,
+				0,
+				35.000000105377595,
+				674.01923782562699,
+				0,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_LightBrown",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube50",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				0.72444438537869127,
+				1.2547744474740883,
+				0.38822856471334771,
+				0,
+				-1.5155444459756768,
+				0.87500001844130115,
+				-1.4484732857589222e-12,
+				0,
+				-0.032352381074803489,
+				-0.056035966192321304,
+				0.24148145670358154,
+				0,
+				88.535535046642195,
+				766.74550210551342,
+				252.24744869956561,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_LightBrown",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube51",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				0.014979529991210704,
+				0.15589774496932932,
+				0.057003470804156936,
+				0,
+				-0.49770774902108983,
+				0.047822552884176139,
+				-3.039235529911366e-15,
+				0,
+				-0.0054521029942277144,
+				-0.056742138280652644,
+				0.15661575018266721,
+				0,
+				517.68882587303415,
+				-319.44300840855766,
+				-149.56868220253205,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_Grey",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "GroupActor_13",
+			"Archetype": "GroupActor",
+			"Transform": [
+				0.81915204700314681,
+				-0.57357643247483114,
+				0,
+				0,
+				0.57357643247483114,
+				0.81915204700314681,
+				-0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				413.94187421982008,
+				-182.30538512326703,
+				5.8333835000000001,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "GroupComponent",
+					"TypeID": 0,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube52",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				0.029958970105421211,
+				0.31179455455405958,
+				0.11400659958817308,
+				0,
+				-0.49770774902108983,
+				0.047822552884176139,
+				-3.039235529911366e-15,
+				0,
+				-0.0054521029942277144,
+				-0.056742138280652644,
+				0.15661575018266721,
+				0,
+				517.90690956593164,
+				-317.17332732007213,
+				-155.83330000000001,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_Grey",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube53",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				0.13637558092139881,
+				0.095573029048416053,
+				-0.0067369084795355959,
+				0,
+				-0.28449106886607772,
+				0.40895514694980778,
+				0.042667546434003181,
+				0,
+				0.013665920103995021,
+				-0.0078044422744638414,
+				0.16592233784965721,
+				0,
+				616.70863772854943,
+				-389.27684542669459,
+				-164.11506080166259,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_Grey",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "GroupActor_14",
+			"Archetype": "GroupActor",
+			"Transform": [
+				0.58256342168121289,
+				-0.69427204117259644,
+				-0.42261825867455571,
+				0,
+				0.76604443877358896,
+				0.64278761486517233,
+				-2.606692639517405e-12,
+				0,
+				0.27165378249369987,
+				-0.32374436678030294,
+				0.90630778846641624,
+				0,
+				514.27822303515552,
+				-232.57157454583958,
+				1.6072009132544203,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "GroupComponent",
+					"TypeID": 0,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube54",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				0.27275034359094857,
+				0.19114548465980466,
+				-0.013473776537701156,
+				0,
+				-0.28449106886607772,
+				0.40895514694980778,
+				0.042667546434003181,
+				0,
+				0.013665920103995021,
+				-0.0078044422744638414,
+				0.16592233784965721,
+				0,
+				616.16200199442051,
+				-388.96466834700237,
+				-170.75194137418885,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_Grey",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube57",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				0.02168672641474112,
+				0.16470357625296128,
+				0.013427835115802983,
+				0,
+				-0.49527005989089146,
+				0.066567941978149692,
+				-0.016621578639433251,
+				0,
+				-0.0072629935875308457,
+				-0.012579874146948515,
+				0.166032781641441,
+				0,
+				-616.84175191642953,
+				174.51268298613294,
+				3.0262519999940296,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_Grey",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "GroupActor_16",
+			"Archetype": "GroupActor",
+			"Transform": [
+				0.70710678548857064,
+				0.70710677688452439,
+				0,
+				0,
+				-0.70710677688452439,
+				0.70710678548857064,
+				0,
+				0,
+				0,
+				-0,
+				1,
+				0,
+				-643.84655173978786,
+				161.2449724819553,
+				5.8333831668566107,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "GroupComponent",
+					"TypeID": 0,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube58",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				0.043373322709383988,
+				0.32940616428644143,
+				0.026855589664756402,
+				0,
+				-0.49527005989089146,
+				0.066567941978149692,
+				-0.016621578639433251,
+				0,
+				-0.0072629935875308457,
+				-0.012579874146948515,
+				0.166032781641441,
+				0,
+				-616.55123284661545,
+				175.01587713865291,
+				-3.61504700000597,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_Grey",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube60",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				0.20521208713881436,
+				0.56381557205537669,
+				0,
+				0,
+				-1.4283327825402878,
+				0.51987062075166302,
+				0,
+				0,
+				0,
+				-0,
+				0.050000000000000044,
+				0,
+				450.383884874731,
+				604.97044230484255,
+				40,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_LightBrown",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube61",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				0.017101007102760385,
+				0.046984631062415974,
+				0,
+				0,
+				-0.11276311454979959,
+				0.041042417046625375,
+				0,
+				0,
+				0,
+				-0,
+				0.45000000000000001,
+				0,
+				436.70307933291792,
+				567.38273748833865,
+				0,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_LightBrown",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube62",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				0.017101007102760368,
+				0.046984631062415932,
+				0,
+				0,
+				-0.11276311454979823,
+				0.041042417046624882,
+				0,
+				0,
+				0,
+				-0,
+				0.45000000000000001,
+				0,
+				446.9636836824393,
+				595.57351623979389,
+				0,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_LightBrown",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube63",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				0.017101007102760368,
+				0.046984631062415932,
+				0,
+				0,
+				-0.11276311454979823,
+				0.041042417046624882,
+				0,
+				0,
+				0,
+				-0,
+				0.45000000000000001,
+				0,
+				315.40671638907543,
+				643.45633641037409,
+				0,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_LightBrown",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube64",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				0.017101007102760368,
+				0.046984631062415932,
+				0,
+				0,
+				-0.11276311454979823,
+				0.041042417046624882,
+				0,
+				0,
+				0,
+				-0,
+				0.45000000000000001,
+				0,
+				305.14611241939519,
+				615.26555729833649,
+				0,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_LightBrown",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "SM_Barrel_Test",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				0.26200262947192587,
+				0.21984630733907795,
+				-0.93969262171157231,
+				0,
+				-0.6427876055435684,
+				0.76604444659534332,
+				-2.9629076969683865e-12,
+				0,
+				0.71984631436811741,
+				0.60402277025771611,
+				0.3420201407824276,
+				0,
+				453.93003944207885,
+				-56.702305389913867,
+				-14.095389325673619,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "SM_Barrel_Test",
+					"ContentPath": "/Game/Meshes/Props/SM_Barrel_Test.SM_Barrel_Test",
+					"Materials": [
+						{
+							"Name": "M_LightBrown",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "SM_Barrel_Test2",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				0.15038373237951463,
+				0.086824087555857826,
+				-0.98480775324715064,
+				0,
+				-0.49999999648729365,
+				0.86602540581250076,
+				-1.6671664049283663e-12,
+				0,
+				0.852868534153016,
+				0.49240387316448514,
+				0.17364817633450891,
+				0,
+				273.00767464759019,
+				-58.263518248882846,
+				-19.696155064942964,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "SM_Barrel_Test",
+					"ContentPath": "/Game/Meshes/Props/SM_Barrel_Test.SM_Barrel_Test",
+					"Materials": [
+						{
+							"Name": "M_LightBrown",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "SM_Barrel_Test3",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-4.4408920985006262e-16,
+				1.1102230246251565e-16,
+				-1.0000000000000007,
+				0,
+				-0.99619469709015473,
+				0.087155754195898272,
+				0,
+				0,
+				0.087155754195898771,
+				0.99619469709015473,
+				-4.4408920985006262e-16,
+				0,
+				354.14213519352802,
+				-130.71067820469523,
+				-34.999999999999972,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "SM_Barrel_Test",
+					"ContentPath": "/Game/Meshes/Props/SM_Barrel_Test.SM_Barrel_Test",
+					"Materials": [
+						{
+							"Name": "M_LightBrown",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "SM_Barrel_Test6",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				0.93969262171072776,
+				0.33682408556651755,
+				-0.059391178509087428,
+				0,
+				-3.5136893394849267e-12,
+				0.17364819035530732,
+				0.9848077507749049,
+				0,
+				0.34202014078474824,
+				-0.92541657720650683,
+				0.16317592325148578,
+				0,
+				820,
+				544.67564521446945,
+				-4.1346276971158185,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "SM_Barrel_Test",
+					"ContentPath": "/Game/Meshes/Props/SM_Barrel_Test.SM_Barrel_Test",
+					"Materials": [
+						{
+							"Name": "M_LightBrown",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube55",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-0.12675639573171679,
+				0.10821601096928496,
+				0,
+				0,
+				-0.32464738361308765,
+				-0.38026842665829708,
+				0,
+				0,
+				0,
+				-0,
+				0.16666700000000001,
+				0,
+				1035.3665239982536,
+				66.625365232736371,
+				0.83336699999999997,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_Grey",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "GroupActor_15",
+			"Archetype": "GroupActor",
+			"Transform": [
+				0.57357644244223993,
+				0.81915204002389175,
+				0,
+				0,
+				-0.81915204002389175,
+				0.57357644244223993,
+				0,
+				0,
+				0,
+				-0,
+				1,
+				0,
+				1031.8097561420759,
+				36.790375294079496,
+				5.8333835000000001,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "GroupComponent",
+					"TypeID": 0,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube56",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-0.25351203092658026,
+				0.21643137264380269,
+				0,
+				0,
+				-0.32464738361308765,
+				-0.38026842665829708,
+				0,
+				0,
+				0,
+				-0,
+				0.16666700000000001,
+				0,
+				1035.3665239982536,
+				66.625365232736371,
+				-5.8333000000000013,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "M_Grey",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube59",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				0.21643201885383476,
+				0.25351279409697114,
+				0,
+				0,
+				-0.760536861217191,
+				0.64929475797198832,
+				0,
+				0,
+				0,
+				-0,
+				0.33333400000000002,
+				0,
+				1112.9142851709655,
+				506.64952996896307,
+				-4.1666494999999983,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "White",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "GroupActor_17",
+			"Archetype": "GroupActor",
+			"Transform": [
+				1.228728070504721,
+				-0.86036464871224561,
+				0,
+				0,
+				0.86036464871224561,
+				1.228728070504721,
+				-0,
+				0,
+				0,
+				0,
+				1.5,
+				0,
+				1053.2443051205371,
+				513.76306422919458,
+				5.8333835000000001,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "GroupComponent",
+					"TypeID": 0,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube65",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				0.43286273911815354,
+				0.50702406712021986,
+				0,
+				0,
+				-0.760536861217191,
+				0.64929475797198832,
+				0,
+				0,
+				0,
+				-0,
+				0.33333400000000002,
+				0,
+				1112.9142851709655,
+				506.64952996896307,
+				-17.499983499999999,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "White",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "GroupActor20",
+			"Archetype": "GroupActor",
+			"Transform": [
+				-0.17364817766693208,
+				-0.98480775301220813,
+				0,
+				0,
+				0.98480775301220813,
+				-0.17364817766693208,
+				-0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				1329.995348735285,
+				-3408.1195703447465,
+				-2754.4083622116232,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "GroupComponent",
+					"TypeID": 0,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube66",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-2.7082213291180843,
+				0.47753244131667655,
+				0,
+				0,
+				-0.1302361203590936,
+				-0.73860581703220485,
+				0,
+				0,
+				0,
+				-0,
+				0.5,
+				0,
+				973.37631815631221,
+				-3428.3989055720181,
+				-3000,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "Bush_Red",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube67",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-2.7082213291180843,
+				0.47753244131667655,
+				0,
+				0,
+				-0.21706020059848935,
+				-1.2310096950536749,
+				0,
+				0,
+				0,
+				-0,
+				0.5,
+				0,
+				980.32224415631231,
+				-3389.006594572018,
+				-3020,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "Bush_Red",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube68",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-2.5841547235770355,
+				0.94055534904358118,
+				0,
+				0,
+				-0.25651509519370397,
+				-0.70476947006646418,
+				0,
+				0,
+				0,
+				-0,
+				0.5,
+				0,
+				1952.9684649150604,
+				-3446.7297059946172,
+				-3000,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "Bush_Red",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Blockout_Cube69",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-2.5841547235770355,
+				0.94055534904358118,
+				0,
+				0,
+				-0.42752515865617324,
+				-1.1746157834441071,
+				0,
+				0,
+				0,
+				-0,
+				0.5,
+				0,
+				1966.6492699150604,
+				-3409.141999994617,
+				-3020,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Blockout_Cube",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/Blockout_Cube.Blockout_Cube",
+					"Materials": [
+						{
+							"Name": "Bush_Red",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "SM_Barrel_Test4",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-0.10948842298394279,
+				0.063089883514586248,
+				-0.99198384655729477,
+				0,
+				-0.092716080379087379,
+				0.99298443731230568,
+				0.07338689048258043,
+				0,
+				0.98965449206863565,
+				0.10000786895879538,
+				-0.1028708533778766,
+				0,
+				-280.17454997595581,
+				16.032115756344112,
+				-16.539071678821109,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "SM_Barrel_Test",
+					"ContentPath": "/Game/Meshes/Props/SM_Barrel_Test.SM_Barrel_Test",
+					"Materials": [
+						{
+							"Name": "M_LightBrown",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "SM_Barrel_Test5",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				-0.10948842635784861,
+				0.063089885624368763,
+				-0.99198384605072376,
+				0,
+				-0.50227535790104805,
+				0.85768438103612055,
+				0.10998621446372664,
+				0,
+				0.85774806868861919,
+				0.51029125884987581,
+				-0.062218018309434076,
+				0,
+				-133.12053618116545,
+				-100.83152951848201,
+				-40.202387354982307,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "SM_Barrel_Test",
+					"ContentPath": "/Game/Meshes/Props/SM_Barrel_Test.SM_Barrel_Test",
+					"Materials": [
+						{
+							"Name": "M_LightBrown",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -21,8 +21,9 @@ project "Game"
 		dirs.source,
         dirs.utilities,
         dirs.utilities .. "CommonUtilities",
+        dirs.dependencies .. "nlohmann_json\\include",
         dirs.dependencies .. "**" .. "include",
-        dirs.dependencies .. "**" .. "source",
+		dirs.dependencies .. "TGAFBXImporter\\include",
 	}
 
 	files {
@@ -33,13 +34,8 @@ project "Game"
 		"**.rc",
 		"**.hlsl",
 		"**.hlsli",
-		path.join(dirs.dependencies, "TGAFBXImporter", "source", "Importer.cpp"),
-		path.join(dirs.dependencies, "TGAFBXImporter", "source", "Internals.cpp"),
-		path.join(dirs.dependencies, "TGAFBXImporter", "source", "TgaFbxStructs.cpp"),
 	}
 
-	-- The executable enters through Main.cpp and the reusable GameFramework runtime.
-	-- Keep historical standalone viewer sources out even if they appear in an import.
 	removefiles {
 		"Application.cpp",
 		"Application.h",
@@ -60,18 +56,16 @@ project "Game"
 		"GraphicsEngine",
 		"CommonUtilities",
 		"Logger",
-		"libfbxsdk.lib",
-		"libxml2-md.lib",
-		"zlib-md.lib",
 		"d3d11.lib",
 		"dxguid.lib",
 		"dxgi.lib",
 		"d3dcompiler.lib",
+		"TGAFbx.lib"
 	}
     
     multiprocessorcompile "On"
     conformancemode "On"
-	defines { "_WINDOWS", "FBXSDK_SHARED" }
+	defines { "_WINDOWS" }
 
 	prebuildcommands { 'xcopy /s /y "$(SolutionDir)Dependencies\\.dlls\\*.dll" "$(OutDir)"' }
 	-- Fix the old shader copy bug: Debug wrote into the separate repository Content
@@ -90,7 +84,9 @@ project "Game"
 		'robocopy "$(SolutionDir)Source\\Engine\\GraphicsEngine\\Shaders\\Internal" "$(OutDir)Content\\Shaders\\Internal" /MIR /L /COPY:DT /DCOPY:DT /R:1 /W:1 /NFL /NDL /NJH /NJS',
 		'if errorlevel 1 exit /b 1',
 		'robocopy "$(SolutionDir)Source\\Engine\\GraphicsEngine\\Shaders\\Material" "$(OutDir)Content\\Shaders\\Material" /MIR /L /COPY:DT /DCOPY:DT /R:1 /W:1 /NFL /NDL /NJH /NJS',
-		'if errorlevel 1 exit /b 1'
+		'if errorlevel 1 exit /b 1',
+		'if not exist "$(SolutionDir)Bin\\Settings\\ApplicationSettings.json" (echo ERROR: Application settings are missing & exit /b 1)',
+		'if not exist "$(SolutionDir)Bin\\Settings\\InputBindings.json" (echo ERROR: Input bindings are missing & exit /b 1)'
 	}
 
 	filter "configurations:Debug"
@@ -128,4 +124,7 @@ project "Game"
 		buildoptions { "/Gy" }
 		buildoptions { "/Gw" }
 
+	filter { "files:SimdJson/simdjson.cpp or SimdJson/simdjson.h" }
+		disablewarnings { "4100", "4244", "4505", "26437", "26495", "26817" }
+		
     filter {}

@@ -1,182 +1,183 @@
 # GameFramework MVP
 
-The MVP keeps the scene/object foundation and one main update loop.
-GameFramework has 33 C++ files (down from 62) and roughly 2,500 lines (down from
-5,500). The original implementation remains on the `game-framework` branch.
+The MVP has one concrete Game, one GameApplication, one current World, and one
+synchronous update loop. It keeps boundaries that carry real data or ownership
+for the game AGP runs.
 
 ## Start here
 
-Headers and implementations live together in Runtime, World, Components, Scenes
-and Rendering. The same folders appear in Solution Explorer. Rendering is the
-engine adapter; the other four folders contain the gameplay-facing headers.
-
 Read these files in order:
 
-1. `Source/Application/Game/Main.cpp`: create Game and its scene source, call Run.
-2. `Source/Application/Game/Game.cpp`: register behavior, request a scene, handle session input.
-3. `Source/Engine/GameFramework/Scenes/SceneData.h`: the entire scene-description boundary.
-4. `Source/Engine/GameFramework/Scenes/ComponentRegistry.cpp`: descriptions become owned runtime objects.
-5. `Source/Engine/GameFramework/World/World.h`, `Actor.h`, `Component.h`: ownership and the small API.
-6. `Source/Engine/GameFramework/World/World.cpp` and `Actor.cpp`: startup, Update and destruction.
-7. `Source/Application/Game/GameComponents.cpp`: camera, spin, animation and light behavior.
-8. `Source/Engine/GameFramework/Runtime/GameApplication.cpp`: the actual main loop and scene replacement.
-9. `Source/Engine/GameFramework/Rendering/WorldRenderer.cpp`: values copied to the existing renderer.
+1. `Source/Application/Game/Main.cpp`: construct Game and GameApplication and call
+   `application.Run(game)`.
+2. `Source/Application/Game/GameApplication.h/.cpp`: own startup, scene transitions,
+   the World, the frame loop, Escape handling, and shutdown.
+3. `Source/Application/Game/Game.h/.cpp`: choose the initial scene and add
+   project behavior.
+4. `Source/Engine/GameFramework/Scenes/SceneData.h`: the importer-to-World data
+   boundary.
+5. `Source/Engine/GameFramework/Scenes/WorldFromSceneData.h/.cpp`: convert
+   SceneData into a candidate World.
+6. `Source/Engine/GameFramework/World/World.h`, `Actor.h`, and `Component.h`:
+   live ownership and lifecycle.
+7. `Source/Engine/GameFramework/Rendering/WorldRenderer.cpp`: copy live World
+   values into the renderer snapshot.
 
-## Ownership and flow
-
-GameApplication owns GameContext. GameContext owns one World. World owns Actors,
-and each Actor owns its Components with `unique_ptr`. Actors have a transform;
-a SceneComponent adds a local camera/mesh/light offset.
+## Ownership and roles
 
 ```text
-Game::Initialize -> LoadScene("Game")
-                         |
-                     SceneData
-                         |
-                       World
-                         |
-                       Actor
-                         |
-     ComponentRegistry -> Component -> apply properties
-                         |
-                      BeginPlay
-                         |
-   each frame: Game::Update -> Component::Update -> renderer
-                         |
-                       EndPlay
+Main
+├── Game
+└── GameApplication
+    └── World
+        └── Actors
+            └── Components
+
+ServiceLocator
+├── InputMapper
+├── AudioManager
+└── AssetRegistry
 ```
 
-All gameplay runs on the application thread. The loop samples input, calls the
-game, updates components once, builds a snapshot, and renders it. The renderer's
-existing shadow workers remain renderer details. Gameplay has no worker, mailbox,
-mutex, triple-buffer queue, fixed step or late phase.
+GameApplication owns and coordinates one run. Game owns project-specific choices and
+behavior. ServiceLocator owns the shared service objects; GameApplication creates,
+updates, and shuts them down in the required order. GraphicsEngine remains a
+process singleton that GameApplication drives without owning.
 
-## Minimal behavior
+Game also owns one MeshLibrary for its code-configured skeletal demo. It
+initializes that library from AssetRegistry's Content root and reuses it whenever
+a new World is configured.
+
+Game is concrete. Its runtime-facing methods have only the dependencies they use:
 
 ```cpp
-#include <GameFramework/Runtime/IGame.h>
-#include <GameFramework/Runtime/GameContext.h>
-
-class Move final : public Component
+class Game
 {
-    void Update(float dt) override
-    {
-        auto& transform = GetOwner()->GetTransform();
-        transform.SetLocalPosition(transform.GetLocalPosition()
-                                   + CommonUtilities::Vector3f{0, 0, 100 * dt});
-    }
-};
-
-class Example final : public IGame
-{
-    void Initialize(GameContext& game) override
-    {
-        auto* player = game.GetWorld().SpawnActor("Player");
-        player->AddComponent<Move>();
-        // player->GetComponent<Move>() finds the owned behavior.
-        // player->Destroy() stops its updates immediately.
-    }
+public:
+    void Initialize(GameApplication& anApplication);
+    void ConfigureWorld(World& world);
+    void Update(World& world, float deltaTime);
+    void Shutdown();
 };
 ```
 
-For scene-created types, register a factory/property reader in RegisterComponents:
+Only initialization receives GameApplication because Game needs to request the first
+scene and register its reload callback. Update and configuration receive the live
+World directly. Shutdown does not require a World.
+
+GameApplication exposes three operations to Main and Game:
 
 ```cpp
-registry.Register<MyComponent>("MyComponent",
-    [](MyComponent& component, const SceneReader& fields)
-    {
-        component.Speed = fields.OptionalFloat("speed", 100.f);
-    });
+int Run(Game& game);
+bool RequestSceneLoad(SceneId sceneId);
+bool ReloadCurrentScene();
 ```
 
-The registry header is `GameFramework/Scenes/ComponentRegistry.h`. Properties are a small
-variant map. Factories construct and configure only their own component. The
-registry creates every Actor and Component before the host calls BeginPlay.
-Dependencies can be found by name or GetComponent in BeginPlay or Update.
-No reflection, reference binding, dependency resolver or mutation guard is involved.
+`Run` returns zero after a clean session and reports failure with an exception,
+which Main logs before returning one. The two scene methods return whether the
+request was accepted.
+
+## Startup and one frame
+
+Startup creates the window and graphics state, installs AssetRegistry,
+AudioManager, and InputMapper in ServiceLocator, connects input, and registers
+runtime controls. GameApplication then calls Game initialization and consumes the
+required initial scene request before showing the window.
+
+Each frame stays on the application thread:
+
+```text
+messages and pending scene request
+-> resize / timer
+-> InputMapper::Update
+-> quit check
+-> Game::Update
+-> World::Update
+-> AudioManager::Update
+-> WorldRenderer::Build
+-> render and present
+```
+
+There is no gameplay worker, mailbox, fixed-step layer, or scene-loading thread.
+The renderer's shadow workers remain renderer internals.
+
+Escape belongs to GameApplication. Its listener and `WM_QUIT` both set the runtime's
+private quit state. Game and Components cannot request process exit.
 
 ## Scene loading
 
-`game.LoadScene("Level")` records a request; the host handles the latest request
-at the next frame boundary. A SceneSource callback returns SceneData and can put
-ready mesh/material bindings into the supplied AssetLibrary. GameScene is the
-current C++ source; a future importer adapts to the same descriptions.
-
-Construction errors include Actor/component/property context. A failed load
-keeps the old World. A successful load clears it, installs the new World, then
-calls BeginPlay and OnSceneLoaded. ReloadScene requests the current name.
-There is no scene-status service or asynchronous loading pipeline.
-Exceptions during BeginPlay or Update terminate the session and run cleanup.
-
-## Lifetime and deliberate limits
-
-- BeginPlay occurs once, including for inactive/disabled objects. Only enabled
-  components on active Actors update, in insertion order.
-- Additions made during component callbacks start at the next World update.
-  Additions made by Game::Update are available to that frame's World update.
-- Destroy marks an object immediately; memory is released at the next update
-  boundary or Clear. EndPlay runs once for components whose BeginPlay was entered.
-  EndPlay is noexcept: cleanup callbacks must not throw.
-- Pointers are temporary borrows. Do not retain them after destruction or scene
-  replacement. Store names and look up again, as the light controls do.
-  Actor names must be unique per World; component names per Actor.
-- No Actor hierarchy, component parenting, reparent modes or checked handles.
-  Spatial components can still have local offsets relative to their Actor.
-- No GameTime service. Update receives seconds, capped at 250 ms; zero/invalid
-  deltas become zero and still produce one update.
-- Scene loading is synchronous. There is no physics, pause system, streaming,
-  event bus, reflection, editor integration or new importer.
-- Property readers reject wrong types for fields they read. Unused fields are
-  ignored; strict schema diagnostics are deferred.
-- Meshes, materials, skeletal playback, cameras, lights and render passes reuse
-  the existing graphics engine.
-
-## What was removed
-
-The entire Runtime/Internal directory; SessionState; WorldAccess, InputAccess,
-TimeAccess, RegistryAccess, SceneServiceAccess, AssetAccess and RenderAccess;
-ObjectRef/ObjectSlots; GameLoop; GameTime; SceneService, SceneId, SceneLoadError and
-SceneDiagnostic; References; SceneBuilder; TransformOperations and ReparentMode;
-the Integration include layer; separate framework logging files; and the empty
-StaticMeshComponent implementation.
-
-The old world states, Prepare/Activate/Flush stages, reference-fixup passes and
-configuration mutation guards were removed from the implementation as well.
-The old expanded tests and duplicated framework plans are removed from this branch.
-They remain in the original branch for future reference.
-
-## Checks
-
-GameFrameworkTests covers ownership, Add/Get, once-only startup/cleanup, disabled
-objects, runtime additions/destruction, one update per frame, delta/input behavior,
-scene factories/properties, useful failures and camera cleanup. GameRuntimeTests
-uses the actual Game scene to exercise rendering, invalid replacement, reload,
-empty scenes, and startup/update/shutdown failures. CameraControlsTests checks
-camera math, same-frame light aiming and spin pause/resume. PublicGameplayConsumer
-and RunPublicHeaderIsolation verify that gameplay headers need no graphics SDK.
-
-Build the solution and the test projects with Visual Studio v145, x64. Run:
+Game calls `RequestSceneLoad(SceneId)` or `ReloadCurrentScene()`. Requests are
+last-write-wins until the next frame boundary. The runtime captures and clears the
+request before it starts loading, so a newer request made during activation stays
+queued for the following boundary.
 
 ```text
-Bin/Tests/Debug/GameFrameworkTests.exe
-Bin/Tests/Debug/GameRuntimeTests.exe camera-controls
-Bin/Tests/Debug/GameRuntimeTests.exe sample
-Bin/Tests/Debug/GameRuntimeTests.exe invalid-initial
-Bin/Tests/Debug/GameRuntimeTests.exe initialize-failure
-Bin/Tests/Debug/GameRuntimeTests.exe begin-failure
-Bin/Tests/Debug/GameRuntimeTests.exe update-failure
-Bin/Tests/Debug/GameRuntimeTests.exe component-failure
-Bin/Tests/Debug/GameRuntimeTests.exe shutdown-failure
+SceneId
+-> GameApplication selects the scene file
+-> UnrealSceneImporter
+-> SceneData
+-> BuildWorldFromSceneData
+-> candidate World
+-> Game::ConfigureWorld
+-> replace World
+-> BeginPlay
 ```
 
-Verified 2026-09-17: Debug and Release x64 builds, both core suites, camera/control
-checks, real-content rendering/replacement, and all six failure scenarios passed.
-All 18 public headers compiled independently without graphics/platform includes.
-Runtime logs are under `Intermediate/GameFrameworkMVP/Small-Debug` and
-`Small-Release`. D3D debug queues reported no errors. Existing vendor/compiler
-warnings remain; no manual visual comparison or performance claim is made.
+Scene selection and material fallback are application concerns. Import conversion
+stops at SceneData. The builder owns the fixed mapping from SceneData variants to
+live component types.
 
-After the folder reorganization, the Debug x64 solution, core/runtime test projects
-and gameplay consumer rebuilt successfully. The core suite, all eight runtime
-scenarios and the 18-header isolation check passed again. Runtime logs for this
-check are under `Intermediate/GameFrameworkMVP/Layout-Debug`.
+A failed later load leaves the running World unchanged and consumes that attempt.
+It is retried only after another explicit request. A failed initial load is fatal.
+An exception after World commit is fatal because there is no rollback layer.
+
+## World and Component behavior
+
+- World owns Actors; Actors own Components with `unique_ptr`.
+- Every Actor has a transform. SceneComponent adds a local transform relative to
+  its Actor.
+- `BeginPlay` runs once for Components present when the World starts.
+- Enabled Components on active Actors update in insertion order.
+- Additions made during Component callbacks begin updating at the next World
+  update. Additions made by Game before `World::Update` are available that frame.
+- Destroy marks an object immediately; storage is released at an update boundary
+  or when the World clears.
+- A Component whose BeginPlay started receives `EndPlay` once.
+- Actor and Component pointers are temporary borrows. Do not keep them across
+  destruction or scene replacement.
+
+Actor names are unique within a World and Component names are unique within an
+Actor. Components can find dependencies by name or type during BeginPlay or
+Update. There is no Actor hierarchy, reflection, event bus, physics, streaming,
+or general dependency-injection layer.
+
+## Input and cleanup
+
+Runtime-wide bindings such as Escape, debug camera, and renderer views are
+installed by GameApplication. Game installs F4/F7/F8 because it owns those actions.
+Components listen to named actions and remove their listeners during EndPlay.
+
+Shutdown keeps InputMapper alive until every borrower can unregister:
+
+```text
+Game::Shutdown
+-> clear World and run Component EndPlay
+-> remove runtime listeners and release mouse
+-> clear retained render references
+-> ServiceLocator::KillServices
+-> destroy window/runtime state
+```
+
+GameApplication performs the same cleanup after a startup or frame exception. It
+preserves the first failure while still attempting later cleanup phases.
+
+## Deliberate scope
+
+Scene loading is synchronous. Delta time is capped at 250 ms. Meshes, materials,
+animation, cameras, lights, and render passes reuse the existing graphics engine.
+GameApplication calls the concrete Game directly, and SceneData is converted by one
+fixed world builder.
+
+Build the Game and relevant test projects in Visual Studio for x64. Runtime checks
+should exercise the concrete GameApplication path, especially Escape exit, scene
+replacement, failed replacement, input listener cleanup, and service teardown.

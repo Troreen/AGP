@@ -1,16 +1,11 @@
 #pragma once
-#include "GameFramework/Scenes/AssetRefs.h"
 #include "GameFramework/World/Transform.h"
 #include "Vector2.hpp"
 #include "Vector4.hpp"
 #include <cstdint>
-#include <filesystem>
-#include <functional>
 #include <string>
 #include <variant>
 #include <vector>
-
-class AssetRegistry;
 
 struct ComponentData
 {
@@ -26,12 +21,11 @@ struct CameraData { ComponentData Common; float FieldOfView = 90, NearPlane = 1,
 struct MaterialParameterData
 {
 	std::string Name;
-	std::variant<float, CommonUtilities::Vector4f, AssetId> Value;
+	std::variant<float, CommonUtilities::Vector4f, std::string> Value;
 };
 struct MaterialInstanceData
 {
 	std::string Name;
-	AssetId Parent;
 	std::vector<MaterialParameterData> Parameters;
 };
 struct StaticMeshData
@@ -39,7 +33,6 @@ struct StaticMeshData
 	ComponentData Common;
 	std::string MeshName;
 	std::string ContentPath;
-	AssetId Mesh;
 	std::vector<MaterialInstanceData> Materials;
 	bool Visible = true;
 };
@@ -67,8 +60,18 @@ struct PlaceholderComponentData
 	PlaceholderProperties Properties;
 };
 
-using ComponentRecord = std::variant<SceneComponentData, CameraData, StaticMeshData, SkeletalMeshData, DirectionalLightData,
-	PointLightData, SpotLightData, PlaceholderComponentData>;
+using ComponentRecord = 
+	std::variant
+	<
+		SceneComponentData, 
+		CameraData, 
+		StaticMeshData, 
+		SkeletalMeshData, 
+		DirectionalLightData,
+		PointLightData, 
+		SpotLightData, 
+		PlaceholderComponentData
+	>;
 
 struct ActorRecord
 {
@@ -81,12 +84,3 @@ struct ActorRecord
 };
 
 struct SceneData { std::vector<ActorRecord> Actors; };
-
-struct SceneLoadContext
-{
-	const std::filesystem::path& ContentRoot;
-	CommonUtilities::Vector2u ClientSize;
-	AssetRegistry& Assets;
-};
-
-using SceneSource = std::function<SceneData(const std::string& name, SceneLoadContext& context)>;

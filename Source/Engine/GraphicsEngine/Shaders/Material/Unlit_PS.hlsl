@@ -11,6 +11,7 @@ float4 main(VStoPS aPixel) : SV_TARGET
 
 	MaterialPixelParameters parameters;
 	parameters.PixelColor = albedo;
+    parameters.SurfaceValues = float4(0, 0, 0, 0);
 	parameters.WorldPosition = aPixel.WorldPosition;
 	parameters.UV0 = aPixel.UV0;
 	parameters.UV1 = aPixel.UV1;
@@ -19,5 +20,5 @@ float4 main(VStoPS aPixel) : SV_TARGET
 	parameters.Binormal = aPixel.Binormal;
 	Material_Pixel(parameters);
 
-	return float4(LinearToGamma(parameters.PixelColor.rgb), parameters.PixelColor.a);
+	return parameters.PixelColor;
 }

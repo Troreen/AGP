@@ -22,6 +22,7 @@ void AudioManager::Init()
 	SoundEngine::OverrideOtherListeners(myListener);
 
 	RegisterAllEvents();
+	myInitialized = true;
 }
 
 void AudioManager::Update(const float aDeltaTime)
@@ -182,24 +183,12 @@ AudioManager::AudioManager()
 	myEventVolume = 1;
 }
 
-AudioManager* AudioManager::GetInstance()
+AudioManager::~AudioManager()
 {
-	if (myInstance == nullptr)
+	if (myInitialized)
 	{
-		myInstance = new AudioManager();
+		myMusicList.clear();
+		myBusses.clear();
+		SoundEngine::Release();
 	}
-	return myInstance;
-}
-
-void AudioManager::Shutdown()
-{
-	if (myInstance == nullptr)
-	{
-		return;
-	}
-	myInstance->myMusicList.clear();
-	myInstance->myBusses.clear();
-	SoundEngine::Release();
-	delete myInstance;
-	myInstance = nullptr;
 }

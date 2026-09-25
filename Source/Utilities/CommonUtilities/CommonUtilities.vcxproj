@@ -166,6 +166,7 @@
     <ClInclude Include="Grid2D.hpp" />
     <ClInclude Include="GridRaytrace2D.hpp" />
     <ClInclude Include="InputHandler.h" />
+    <ClInclude Include="InputMapper.h" />
     <ClInclude Include="Intersection.hpp" />
     <ClInclude Include="KDTree2D.hpp" />
     <ClInclude Include="Line.hpp" />
@@ -196,7 +197,9 @@
     <ClInclude Include="framework.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Camera3D.cpp" />
     <ClCompile Include="InputHandler.cpp" />
+    <ClCompile Include="InputMapper.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="XInputHandler.cpp" />
   </ItemGroup>

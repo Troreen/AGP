@@ -27,6 +27,7 @@ namespace CommonUtilities
 		void SetWindowHandle(HWND aWindowHandle);
 		HWND GetWindowHandle() const;
 		void SetAutoMouseCapture(bool anEnabled);
+		void SetMouseDeltaEnabled(bool enabled) { myMouseDeltaEnabled = enabled; }
 
 		void ShowCursor();
 		void HideCursor();
@@ -47,6 +48,7 @@ namespace CommonUtilities
 		bool myIsCursorVisible = true;
 		bool myIsMouseCaptured = false;
 		bool myAutoMouseCapture = true;
+		bool myMouseDeltaEnabled = true;
 		HWND myWindowHandle = nullptr;
 	};
 }

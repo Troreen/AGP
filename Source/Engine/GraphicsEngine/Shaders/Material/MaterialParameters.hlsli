@@ -15,6 +15,7 @@ struct MaterialVertexParameters
 struct MaterialPixelParameters
 {
     float4 PixelColor;
+    float4 SurfaceValues;
     float4 WorldPosition;
     float2 UV0;
     float2 UV1;

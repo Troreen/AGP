@@ -2,21 +2,33 @@
 /Source/Engine/GraphicsEngine/TemporaryShaders/
 /Source/Engine/GraphicsEngine/Intermediate/
 
-# Ignore the local directory in TGE root
+# Ignore the local directory in the workspace root
 /Local
 
-# Ignore the Lib directory in TGE root
+# Build output directories
 /Lib
-
-# Ignore the Intermediate directory in root
 /Intermediate
+/Source/**/Lib/
+/Source/**/Intermediate/
+/Source/**/Bin/
 
-# ignore all Temp direcoties
-Temp/ 
+# Temporary directories
+Temp/
 
-**.cso
-**.obj
-**.log
+# Generated compiler and build files
+*.cso
+*.obj
+*.idb
+*.ipch
+*.pch
+*.ilk
+*.res
+*.exp
+*.tlog
+*.lastbuildstate
+*.recipe
+*.tmp
+*.log
 
 Makefile
 .vs
@@ -25,9 +37,18 @@ Makefile
 **.vcxproj
 **.vcxproj.*
 
-# Ignore the bin directory in TGE root. Remove these lines if the Bin directory is used as the binary distribuition for the team
-/Bin 
-/bin 
+# Keep Bin/Settings available for version control while ignoring build outputs.
+/Bin/Debug/
+/Bin/Release/
+/Bin/Retail/
+/Bin/SimplifiedBaseline/
+/Bin/Tests/
+
+# Local snapshots and conflict-resolution backups
+/WorkInProgress/
+
+# Local test code and fixtures
+/Tests/
 
 .gitignore
 /.git
@@ -35,5 +56,4 @@ README.md
 /.log
 .clang-format
 .clang-format-ignore
-/Docs
 .pch

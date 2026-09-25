@@ -1,20 +1,21 @@
 #pragma once
-#include "GameFramework/Runtime/IGame.h"
-#include "GameFramework/Runtime/InputSystem.h"
+#include "MeshLibrary.h"
 #include <vector>
 
-// The game entry object. For another project, replace this class and its content
-// while reusing GameFramework. It owns game-session setup, not the engine loop.
-// Read in this order: Main.cpp -> Game.cpp -> GameScene.cpp.
-class Game final : public IGame
+class GameApplication;
+class World;
+
+class Game final
 {
 public:
 	Game();
-	~Game() override;
-	void ConfigureWorld(World& world) override;
-	void Initialize(GameContext& context) override;
-	void Update(GameContext& context, float deltaTime) override;
-	void Shutdown(GameContext& context) override;
+	~Game();
+	void ConfigureWorld(World& aWorld);
+	void Initialize(GameApplication& anApplication);
+	void Update(World& aWorld, float aDeltaTime);
+	void Shutdown();
 private:
-	std::vector<InputSubscription> myInputSubscriptions;
+	// Keeps the FBX importer initialized while AssetRegistry loads FBX assets.
+	MeshLibrary myMeshLibrary;
+	std::vector<unsigned> myInputListenerIDs;
 };

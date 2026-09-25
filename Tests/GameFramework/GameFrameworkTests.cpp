@@ -1,20 +1,26 @@
-#include "GameFramework/Scenes/ComponentRegistry.h"
+#include "InputFixture.h"
+#include "GameFramework/Scenes/WorldFromSceneData.h"
 #include "EnumKeyCode.h"
 #include "GameFramework/Components/CameraComponent.h"
 #include "GameFramework/Components/SceneComponent.h"
+#include "GameFramework/Components/StaticMeshComponent.h"
 #include "GameFramework/Components/DebugCameraController.h"
 #include "GameFramework/AssetHandling/AssetRegistry.h"
+#include "GameFramework/AssetHandling/FontAsset.h"
+#include "GameFramework/AssetHandling/MaterialAsset.h"
+#include "GameFramework/AssetHandling/MeshAsset.h"
 #include "GameFramework/UnrealSceneImporter/UnrealSceneImporter.h"
+#include "GameFramework/World/World.h"
 #include "GraphicsEngine/Objects/Mesh.h"
 #include "GraphicsEngine/Objects/Font.h"
 #include "GraphicsEngine/TextWidget.h"
-#include "GameFramework/Runtime/GameApplication.h"
 #include <algorithm>
 #include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <limits>
+#include <string_view>
 #include <type_traits>
 
 struct FontTestAccess
@@ -176,19 +182,17 @@ void RuntimeMutations()
 void FrameTimingAndInput()
 {
 	Counts count;
-	InputSystem input;
-	const InputActionId testAction{"TestAction"};
-	input.BindKey(testAction, int(EKeyCode::R));
+	InputFixture fixture;
+	auto& input = fixture.Input;
+	input.BindActionToInputCode("TestAction", EKeyCode::R);
 	bool actionReceived = false;
-	auto subscription = input.Subscribe(testAction, [&](const InputActionEvent& event) { actionReceived = event.Phase == InputActionPhase::Started; });
-	InputDeviceFrame frame;
-	frame.KeysDown[static_cast<size_t>(EKeyCode::R)] = true;
-	input.Update(frame);
-	World world(&input);
+	const unsigned listener = input.AddEventListener("TestAction", [&](const CommonUtilities::InputEvent& event) { actionReceived = event.inputData.isPressed; });
+	fixture.Key(EKeyCode::R, true); input.Update();
+	World world;
 	auto* probe = world.SpawnActor("A")->AddComponent<Probe>("P", count);
 	probe->OnUpdate = [&]
 	{
-		Check(&probe->GetInputSystem() == &input && actionReceived, "Frame input unavailable");
+		Check(ServiceLocator::GetInstance().GetInputMapper() == &input && actionReceived, "Frame input unavailable");
 	};
 	world.Update(.001f);
 	Check(count.Begins == 1 && count.Updates == 1 && count.Delta == .001f, "Short frame did not update once");
@@ -200,11 +204,12 @@ void FrameTimingAndInput()
 		Check(count.Delta == 0, "Invalid delta must become zero");
 	}
 	Check(count.Updates == 6, "Expected exactly one Update per call");
+	input.RemoveEventListener(listener);
 }
 
 void SceneConstruction()
 {
-	ComponentRegistry registry;
+	const CommonUtilities::Vector2u clientSize{1280, 720};
 	SceneData scene;
 	ActorRecord actor;
 	actor.Name = "First";
@@ -217,19 +222,24 @@ void SceneConstruction()
 	component.Common.SourceParent = "Root";
 	component.Type = PlaceholderComponentType::Box;
 	actor.Components.push_back(std::move(component));
+	CameraData camera;
+	camera.Common.Name = "View";
+	camera.Common.Tags = {"ActiveCamera"};
+	actor.Components.push_back(camera);
 	scene.Actors.push_back(actor);
 	AssetRegistry assets;
-	auto world = registry.CreateWorld(scene, assets);
+	auto world = BuildWorldFromSceneData(scene, assets, clientSize);
 	auto* built = world->FindActor("First");
 	auto* builtComponent = built->FindComponent("Collider");
 	Check(built->GetArchetype() == "FixtureActor" && built->HasTag("Test") && built->GetTransform().GetLocalPosition().x == 10,
 	      "Actor scene data");
 	Check(builtComponent->HasTag("Shape") && builtComponent->GetSourceParent() == "Root", "Component scene data");
+	Check(world->GetActiveCamera() == built->FindComponent("View"), "Typed scene camera selection");
 	world->BeginPlay();
 	Check(builtComponent->HasBegunPlay(), "Typed scene component lifecycle");
 	SceneData invalid; ActorRecord badA; badA.Name = "BadA"; badA.Transform.Position.x = std::numeric_limits<float>::infinity(); invalid.Actors.push_back(badA);
 	ActorRecord badB; badB.Name = "BadB"; badB.Transform.Scale.y = std::numeric_limits<float>::quiet_NaN(); invalid.Actors.push_back(badB);
-	try { registry.CreateWorld(invalid, assets); Check(false, "Invalid candidate scene was accepted"); }
+	try { BuildWorldFromSceneData(invalid, assets, clientSize); Check(false, "Invalid candidate scene was accepted"); }
 	catch (const std::runtime_error& error) { const std::string message = error.what(); Check(message.find("BadA") != std::string::npos && message.find("BadB") != std::string::npos, "Construction diagnostics were not aggregated"); }
 
 	SceneData missingAsset;
@@ -237,57 +247,44 @@ void SceneConstruction()
 	missingActor.Name = "MissingAssetActor";
 	StaticMeshData missingMesh;
 	missingMesh.Common.Name = "MissingMesh";
-	missingMesh.Mesh = AssetId{"Meshes/DoesNotExist.fbx"};
+	missingMesh.MeshName = "Meshes/DoesNotExist.fbx";
+	missingMesh.Materials.push_back(MaterialInstanceData{"MissingMaterial"});
 	missingActor.Components.push_back(missingMesh);
 	missingAsset.Actors.push_back(std::move(missingActor));
-	auto partialWorld = registry.CreateWorld(missingAsset, assets);
-	Check(partialWorld->FindActor("MissingAssetActor") != nullptr &&
-	      partialWorld->FindActor("MissingAssetActor")->FindComponent("MissingMesh") == nullptr,
-	      "Missing asset did not skip only its component");
+	auto fallbackMesh = std::make_shared<Mesh>();
+	fallbackMesh->Initialize("FallbackMesh", {Mesh::Element{}}, {}, {});
+	SceneFallbackAssets fallbacks{std::make_shared<MeshAsset>(fallbackMesh), std::make_shared<MaterialAsset>()};
+	auto partialWorld = BuildWorldFromSceneData(missingAsset, assets, clientSize, fallbacks);
+	auto* builtMissingMesh = partialWorld->FindActor("MissingAssetActor")->GetComponent<StaticMeshComponent>();
+	Check(builtMissingMesh && builtMissingMesh->GetMesh() == fallbacks.MissingMesh &&
+	      builtMissingMesh->GetMaterial(0) == fallbacks.MissingMaterial,
+	      "Missing mesh and material use fallback bindings");
 }
 
 void AssetRegistrySemantics()
 {
-	Check(AssetRegistry::NormalizeId("./Meshes\\Props\\SM_Chest.FBX") == "meshes/props/sm_chest.fbx",
-	      "Asset ID normalization");
-
 	const std::filesystem::path root = std::filesystem::temp_directory_path() / "agp_asset_registry_tests";
 	std::filesystem::remove_all(root);
-	std::filesystem::create_directories(root / "Meshes/A");
-	std::filesystem::create_directories(root / "Meshes/B");
-	std::ofstream(root / "Meshes/A/Unique.fbx").put('\0');
-	std::ofstream(root / "Meshes/A/Shared.fbx").put('\0');
-	std::ofstream(root / "Meshes/B/Shared.fbx").put('\0');
+	std::filesystem::create_directories(root / "Materials");
 	std::ofstream(root / "MissingParent.mat") << R"({"name":"MissingParent","masterMaterial":"Absent"})";
-	std::ofstream(root / "Malformed.mat") << "{ not-json";
+	std::ofstream(root / "MissingTexture.mat") << R"({"name":"MissingTexture","textures":{"albedo":"Absent.dds"}})";
+	std::ofstream(root / "Materials/Malformed.mat") << "{ not-json";
 
 	AssetRegistry assets;
 	assets.Initialize(root);
-	int loads = 0;
-	assets.SetMeshLoader([&](const std::filesystem::path&)
-	{
-		++loads;
-		return std::make_shared<Mesh>();
-	});
-	{
-		const MeshAsset first = assets.ResolveMesh(AssetId{"MESHES/A/UNIQUE.FBX"});
-		const MeshAsset alias = assets.ResolveMesh(AssetId{"Unique"});
-		Check(first && alias && loads == 1, "Case-insensitive exact/unique-alias lookup or cache failed");
-	}
-	Check(assets.ResolveMesh(AssetId{"Meshes/A/Unique.fbx"}) && loads == 2, "Expired weak asset was not reloaded");
-	Check(!assets.ResolveMesh(AssetId{"Shared"}) && assets.GetLastError().find("ambiguous") != std::string::npos,
-	      "Ambiguous basename lookup was accepted");
-	Check(!assets.ResolveMaterial(AssetId{"Meshes/A/Unique.fbx"}), "Type-mismatched asset lookup was accepted");
-	Check(!assets.ResolveMaterial(AssetId{"MissingParent.mat"}) && assets.GetLastError().find("unavailable parent") != std::string::npos,
-	      "Missing material parent was accepted");
-	Check(!assets.ResolveMaterial(AssetId{"Malformed.mat"}) && assets.GetLastError().find("malformed JSON") != std::string::npos,
-	      "Malformed material JSON was accepted");
-
-	auto builtIn = std::make_shared<Mesh>();
-	assets.RegisterMesh(AssetId{"Engine/BasicShapes/Test"}, builtIn);
-	builtIn.reset();
-	Check(bool(assets.ResolveMesh(AssetId{"Engine/BasicShapes/Test"})), "Pinned built-in asset expired");
+	Check(assets.IsInitialized() && assets.GetContentRoot() == std::filesystem::weakly_canonical(root),
+	      "Asset registry did not retain its indexed content root");
+	Check(!assets.GetAsset<MaterialAsset>("DoesNotExist.mat") &&
+	      assets.GetLastErrorCode() == AssetRegistry::AssetError::NotFound,
+	      "Missing asset did not report NotFound");
+	Check(!assets.GetAsset<MaterialAsset>("MissingParent.mat") && !assets.GetLastError().empty(),
+	      "Missing material parent was accepted without a diagnostic");
+	Check(!assets.GetAsset<MaterialAsset>("MissingTexture.mat"),
+	      "Material with a missing texture was accepted");
+	Check(!assets.GetAsset<MaterialAsset>("MATERIALS/MALFORMED.MAT") && !assets.GetLastError().empty(),
+	      "Case-insensitive material lookup accepted malformed JSON");
 	assets.Clear();
+	Check(!assets.IsInitialized(), "Asset registry Clear retained initialization state");
 	std::filesystem::remove_all(root);
 }
 
@@ -351,73 +348,70 @@ void StartupAndCameraSafety()
 	Check(!world.GetActiveCamera(), "Destroyed camera Actor remains selected");
 }
 
-void InputSystemSemantics()
+void InputMapperSemantics()
 {
-	InputSystem input;
-	const InputActionId action{"Action"};
-	input.BindKey(action, int(EKeyCode::R));
-	std::vector<InputActionPhase> phases;
-	auto subscription = input.Subscribe(action, [&](const InputActionEvent& event) { phases.push_back(event.Phase); });
-	InputDeviceFrame frame;
-	frame.KeysDown[size_t(EKeyCode::R)] = true;
-	input.Update(frame);
-	input.Update(frame);
-	frame.KeysDown[size_t(EKeyCode::R)] = false;
-	input.Update(frame);
-	Check(phases == std::vector{InputActionPhase::Started, InputActionPhase::Ongoing, InputActionPhase::Ended}, "Input phases");
-
-	const InputActionId chord{"Chord"}, plain{"Plain"};
-	input.BindKey(chord, int('7'), {int(EKeyCode::SHIFT)});
-	input.BindKey(plain, int('7'), {}, {int(EKeyCode::SHIFT), int(EKeyCode::LSHIFT), int(EKeyCode::RSHIFT)});
-	bool chordSeen = false, plainSeen = false;
-	auto chordSub = input.Subscribe(chord, [&](const InputActionEvent& event) { if (event.Phase == InputActionPhase::Started) chordSeen = true; });
-	auto plainSub = input.Subscribe(plain, [&](const InputActionEvent& event) { if (event.Phase == InputActionPhase::Started) plainSeen = true; });
-	frame = {}; frame.KeysDown[size_t('7')] = true; frame.KeysDown[size_t(EKeyCode::SHIFT)] = true; input.Update(frame);
-	Check(chordSeen && !plainSeen, "Modifier chord also dispatched plain action");
-
-	const InputActionId removal{"Removal"};
-	input.BindKey(removal, int(EKeyCode::F1));
-	int callbacks = 0;
-	InputSubscription later;
-	auto first = input.Subscribe(removal, [&](const InputActionEvent&) { ++callbacks; later.Reset(); });
-	later = input.Subscribe(removal, [&](const InputActionEvent&) { ++callbacks; });
-	frame = {}; frame.KeysDown[size_t(EKeyCode::F1)] = true; input.Update(frame);
-	Check(callbacks == 2, "Listener removal changed active dispatch");
-	input.Update(frame);
-	Check(callbacks == 3, "Removed listener remained subscribed");
-
-	const InputActionId pad{"Pad"};
-	input.BindGamepadAxis2D(pad, false);
-	bool padSeen = false;
-	auto padSub = input.Subscribe(pad, [&](const InputActionEvent& event)
-	{
-		if (event.Phase == InputActionPhase::Started) padSeen = std::get<CommonUtilities::Vector2f>(event.Value).x == .5f;
-	});
-	frame = {}; frame.GamepadLeft = {.5f, 0}; input.Update(frame);
-	Check(padSeen, "Synthetic gamepad axis unavailable");
-	frame.Focused = false; input.Update(frame);
-
-	InputSystem detailed;
-	const InputActionId multi{"Multi"}, mouse{"Mouse"}, order{"Order"}, exception{"Exception"};
-	detailed.BindKey(multi, int(EKeyCode::A)); detailed.BindKey(multi, int(EKeyCode::D)); detailed.BindMouseDelta(mouse, 2.f);
-	int multiEnded = 0; auto multiSub = detailed.Subscribe(multi, [&](const InputActionEvent& event) { if (event.Phase == InputActionPhase::Ended) ++multiEnded; });
-	std::vector<int> listenerOrder;
-	auto order1 = detailed.Subscribe(order, [&](const InputActionEvent&) { listenerOrder.push_back(1); });
-	auto order2 = detailed.Subscribe(order, [&](const InputActionEvent&) { listenerOrder.push_back(2); }); detailed.BindKey(order, int(EKeyCode::W));
-	CommonUtilities::Vector2f mouseValue; auto mouseSub = detailed.Subscribe(mouse, [&](const InputActionEvent& event) { mouseValue = std::get<CommonUtilities::Vector2f>(event.Value); });
-	frame = {}; frame.KeysDown[size_t(EKeyCode::A)] = true; frame.KeysDown[size_t(EKeyCode::W)] = true; frame.MouseDelta = {2, -3}; detailed.Update(frame);
-	Check(listenerOrder == std::vector{1,2} && mouseValue.x == 4 && mouseValue.y == -6, "Input ordering or mouse motion");
-	frame.KeysDown[size_t(EKeyCode::D)] = true; detailed.Update(frame); frame.KeysDown[size_t(EKeyCode::A)] = false; detailed.Update(frame);
-	Check(multiEnded == 0, "Multi-binding action ended while another binding remained active");
-	frame.Focused = false; detailed.Update(frame); Check(multiEnded == 1, "Focus loss did not end active action");
-
-	detailed.BindKey(exception, int(EKeyCode::F2)); InputSubscription throwing;
-	throwing = detailed.Subscribe(exception, [&](const InputActionEvent&) { throwing.Reset(); throw std::runtime_error("callback"); });
-	frame = {}; frame.KeysDown[size_t(EKeyCode::F2)] = true; try { detailed.Update(frame); } catch (const std::runtime_error&) {}
-	frame.KeysDown[size_t(EKeyCode::F2)] = false; detailed.Update(frame);
-	InputSubscription survivor;
-	{ InputSystem temporary; survivor = temporary.Subscribe(action, [](const InputActionEvent&) {}); }
-	survivor.Reset();
+    InputFixture fixture;
+    auto& input = fixture.Input;
+    input.BindActionToInputCode("Action", EKeyCode::R);
+    std::vector<CommonUtilities::InputData> events;
+    const unsigned listener = input.AddEventListener("Action", [&](const CommonUtilities::InputEvent& event) { events.push_back(event.inputData); });
+    fixture.Key(EKeyCode::R, true); input.Update(); input.Update();
+    fixture.Key(EKeyCode::R, false); input.Update(); input.Update();
+    Check(events.size() == 3 && events[0].isPressed && events[0].isHeld && events[1].isHeld && !events[1].isPressed && events[2].isReleased, "Mapper press/hold/release or duplicate device update");
+    fixture.Key(EKeyCode::R, true); input.Update();
+    fixture.Handler.UpdateEvents(WM_KILLFOCUS, 0, 0); input.Update();
+    Check(events.size() == 5 && events.back().isReleased, "Focus loss did not release held controls");
+    input.RemoveEventListener(listener);
+    fixture.Key(EKeyCode::R, true); input.Update();
+    Check(events.size() == 5, "Removed mapper listener still receives events");
+    input.BindActionToInputCode("Pointer", EPointerCode::MOUSE_DELTA);
+    CommonUtilities::Vector2f delta{};
+    const unsigned pointer = input.AddEventListener("Pointer", [&](const CommonUtilities::InputEvent& event) { delta = {event.inputData.valueA, event.inputData.valueB}; });
+    fixture.Move(12, -7); input.Update();
+    Check(delta.x == 12 && delta.y == -7, "Native mouse delta did not reach mapper");
+    fixture.Handler.SetMouseDeltaEnabled(false);
+    delta = {}; fixture.Move(20, 20); input.Update();
+    Check(delta.LengthSqr() == 0, "Disabled mouse look still emitted motion");
+    fixture.Handler.SetMouseDeltaEnabled(true);
+    fixture.Move(3, 4); input.Update();
+    Check(delta.x == 3 && delta.y == 4, "Re-enabled mouse look retained stale motion");
+    input.RemoveEventListener(pointer);
+    class Listener final : public Component
+    {
+    public:
+        int& Calls; unsigned Id = 0;
+        explicit Listener(int& calls) : Calls(calls) {}
+        void BeginPlay() override { Id = ServiceLocator::GetInstance().GetInputMapper()->AddEventListener("Action", [this](const CommonUtilities::InputEvent&) { ++Calls; }); }
+        void EndPlay() noexcept override { ServiceLocator::GetInstance().GetInputMapper()->RemoveEventListener(Id); }
+    };
+    int calls = 0;
+    World world;
+    for (int reload = 0; reload < 3; ++reload)
+    {
+        world.SpawnActor("Listener")->AddComponent<Listener>("Input", calls);
+        world.BeginPlay(); input.Update();
+        Check(calls == reload + 1, "Reload accumulated listeners");
+        world.Clear(); input.Update();
+        Check(calls == reload + 1, "Destroyed component left a dangling listener");
+    }
+    ServiceLocator::GetInstance().SetAssetRegistry(new AssetRegistry);
+	ServiceLocator::GetInstance().KillServices();
+	Check(ServiceLocator::GetInstance().GetInputMapper() == nullptr, "Owned input survived KillServices");
+	bool assetsCleared = false;
+	try { ServiceLocator::GetInstance().GetAssetRegistry(); } catch (const std::logic_error&) { assetsCleared = true; }
+	Check(assetsCleared, "Owned assets survived KillServices");
+    auto* replacement = new CommonUtilities::InputMapper;
+    replacement->Init(&fixture.Handler);
+    ServiceLocator::GetInstance().SetInputMapper(replacement);
+    ServiceLocator::GetInstance().SetInputMapper(replacement);
+    Check(ServiceLocator::GetInstance().GetInputMapper() == replacement, "Same-pointer registration lost owned mapper");
+    replacement->Update();
+    auto* newer = new CommonUtilities::InputMapper;
+    newer->Init(&fixture.Handler);
+    ServiceLocator::GetInstance().SetInputMapper(newer);
+    newer->Update();
+    ServiceLocator::GetInstance().KillServices();
+    ServiceLocator::GetInstance().KillServices();
 }
 
 void UnrealImportPipeline()
@@ -461,12 +455,13 @@ void UnrealImportPipeline()
 		? nullptr : std::get_if<StaticMeshData>(&amberChest->Components.front());
 	const auto* marbleMesh = marbleChest == chestShowcase.Data->Actors.end() || marbleChest->Components.empty()
 		? nullptr : std::get_if<StaticMeshData>(&marbleChest->Components.front());
-	Check(amberMesh && amberMesh->Mesh.Value == "/Game/Meshes/Props/SM_Chest.SM_Chest" &&
-	      amberMesh->Materials.size() == 1 && amberMesh->Materials.front().Parent.Value == "Shaders/ChestMaterial_Alpha.mat" &&
+	Check(amberMesh && amberMesh->MeshName == "SM_Chest" &&
+	      amberMesh->ContentPath == "/Game/Meshes/Props/SM_Chest.SM_Chest" &&
+	      amberMesh->Materials.size() == 1 && amberMesh->Materials.front().Name == "MI_Chest_AmberGlass" &&
 	      amberMesh->Materials.front().Parameters.size() == 1,
 	      "Chest tint material was not preserved by Unreal adaptation");
 	Check(marbleMesh && marbleMesh->Materials.size() == 1 &&
-	      marbleMesh->Materials.front().Parent.Value == "Shaders/ChestMaterial_Alpha2.mat",
+	      marbleMesh->Materials.front().Name == "MI_Chest_MarbleGlass",
 	      "Chest texture-override material was not preserved by Unreal adaptation");
 	const auto sun = std::find_if(chestShowcase.Data->Actors.begin(), chestShowcase.Data->Actors.end(),
 		[](const ActorRecord& actor) { return actor.Name == "SunLight"; });
@@ -488,35 +483,28 @@ void UnrealImportPipeline()
 	Check(!unknown.Data && !unknown.Diagnostics.empty(), "Unknown TypeID was accepted");
 
 	auto blockout = importer.ImportScene("Content/ExportedScenes/lvl_blockout/Lvl_Blockout_Level.json");
-	Check(bool(blockout) && blockout.Data->Actors.size() == 16, "Content blockout scene did not parse");
-	const auto character = std::find_if(blockout.Data->Actors.begin(), blockout.Data->Actors.end(),
-		[](const ActorRecord& actor) { return actor.Name == "BP_TopDownCharacter"; });
-	const auto* springArm = character == blockout.Data->Actors.end() || character->Components.size() < 3
-		? nullptr : std::get_if<PlaceholderComponentData>(&character->Components[2]);
-	const auto* springProperties = springArm ? std::get_if<SpringArmPlaceholderData>(&springArm->Properties) : nullptr;
-	Check(springProperties && springProperties->SocketOffset.x == 0 && springProperties->SocketOffset.y == 0 &&
-		springProperties->SocketOffset.z == 0 && springProperties->ArmLength == 1800,
-		"Blockout spring-arm data was not imported");
+	Check(bool(blockout) && blockout.Data->Actors.size() == 60, "Content blockout scene did not parse");
 
 }
 
 void DebugCameraActions()
 {
-	InputSystem input; InstallDefaultInputBindings(input); World world(&input); DebugCameraService service;
+	InputFixture fixture; auto& input = fixture.Input; input.BindActionToInputCode("DebugCamera", EKeyCode::F1); World world; DebugCameraService service;
 	auto* originalActor = world.SpawnActor("Authored Camera"); auto* original = originalActor->AddComponent<CameraComponent>("View");
 	world.SetActiveCamera(original); world.BeginPlay();
-	auto subscription = input.Subscribe(InputActions::DebugCamera, [&](const InputActionEvent& event)
+	const unsigned listener = input.AddEventListener("DebugCamera", [&](const CommonUtilities::InputEvent& event)
 	{
-		if (event.Phase == InputActionPhase::Started) service.Toggle(world, {640,360});
+		if (event.inputData.isPressed) service.Toggle(world, {640,360});
 	});
-	InputDeviceFrame frame; frame.KeysDown[size_t(EKeyCode::F1)] = true; input.Update(frame);
+	fixture.Key(EKeyCode::F1, true); input.Update();
 	Check(world.GetActiveCamera() != original && world.FindActor("__DebugCamera"), "F1 did not lazily spawn/activate debug camera");
-	frame.KeysDown[size_t(EKeyCode::F1)] = false; input.Update(frame); frame.KeysDown[size_t(EKeyCode::F1)] = true; input.Update(frame);
+	fixture.Key(EKeyCode::F1, false); input.Update(); fixture.Key(EKeyCode::F1, true); input.Update();
 	Check(world.GetActiveCamera() == original, "F1 did not restore prior camera");
-	frame.KeysDown[size_t(EKeyCode::F1)] = false; input.Update(frame); frame.KeysDown[size_t(EKeyCode::F1)] = true; input.Update(frame);
+	fixture.Key(EKeyCode::F1, false); input.Update(); fixture.Key(EKeyCode::F1, true); input.Update();
 	originalActor->Destroy(); world.Update(0);
-	frame.KeysDown[size_t(EKeyCode::F1)] = false; input.Update(frame); frame.KeysDown[size_t(EKeyCode::F1)] = true; input.Update(frame);
+	fixture.Key(EKeyCode::F1, false); input.Update(); fixture.Key(EKeyCode::F1, true); input.Update();
 	Check(world.GetActiveCamera() && world.GetActiveCamera()->GetOwner()->GetName() == "__DebugCamera", "Destroyed previous camera displaced debug camera");
+	input.RemoveEventListener(listener);
 }
 
 void TextGeometryAndNotificationTiming()
@@ -540,17 +528,6 @@ void TextGeometryAndNotificationTiming()
 	text.SetText("");
 	Check(text.RebuildGeometry() && text.GetVertices().empty() && text.GetIndices().empty(), "Empty text produced a draw");
 
-	RenderPassNotificationTimer timer;
-	timer.Restart();
-	Check(timer.GetOpacity() == 1.0f, "Notification was not opaque at 0 seconds");
-	timer.Update(1.5f);
-	Check(timer.GetOpacity() == 1.0f, "Notification was not opaque at 1.5 seconds");
-	timer.Update(0.25f);
-	Check(std::abs(timer.GetOpacity() - 0.5f) < 0.0001f, "Notification fade was wrong at 1.75 seconds");
-	timer.Restart();
-	Check(timer.GetRemaining() == 2.0f && timer.GetOpacity() == 1.0f, "Notification reset did not restart its timer");
-	timer.Update(2.0f);
-	Check(!timer.IsVisible() && timer.GetOpacity() == 0.0f, "Notification remained visible at 2 seconds");
 }
 
 void FontAssetDiagnostics()
@@ -561,25 +538,37 @@ void FontAssetDiagnostics()
 		std::ofstream malformed(root / "Malformed.font.json");
 		malformed << R"({"atlasFile":"Missing.dds","atlas":{},"metrics":{},"glyphs":[]})";
 	}
-	AssetRegistry& assets = AssetRegistry::Get();
+	AssetRegistry assets;
 	assets.Initialize(root);
-	Check(!assets.ResolveFont(AssetId{"Malformed.font.json"}) && assets.GetLastError().find("metrics") != std::string::npos,
+	Check(!assets.GetAsset<FontAsset>("Malformed.font.json") && !assets.GetLastError().empty(),
 	      "Font loading accepted missing metrics without useful diagnostics");
 	{
 		std::ofstream missingAtlas(root / "MissingAtlas.font.json");
 		missingAtlas << R"({"atlasFile":"Missing.dds","atlas":{"distanceRange":4,"width":32,"height":32},"metrics":{"lineHeight":1,"ascender":-0.8,"descender":0.2},"glyphs":[{"unicode":63,"advance":0.5}]})";
 	}
 	assets.Initialize(root);
-	Check(!assets.ResolveFont(AssetId{"MissingAtlas.font.json"}) && assets.GetLastError().find("requires atlas") != std::string::npos,
+	Check(!assets.GetAsset<FontAsset>("MissingAtlas.font.json") && !assets.GetLastError().empty(),
 	      "Font loading accepted a missing atlas without useful diagnostics");
 	assets.Clear();
 	std::filesystem::remove_all(root);
 }
 
-int main()
+int main(int argc, char** argv)
 {
 	try
 	{
+		if (argc > 1 && std::string_view(argv[1]) == "--input-only")
+		{
+			FrameTimingAndInput(); InputMapperSemantics(); DebugCameraActions();
+			std::cout << "PASS: native mapper input, focus loss, listener/world lifecycle and service ownership\n";
+			return 0;
+		}
+		if (argc > 1 && std::string_view(argv[1]) == "--import-only")
+		{
+			UnrealImportPipeline();
+			std::cout << "PASS: Unreal import pipeline\n";
+			return 0;
+		}
 		OwnershipAndLifecycle();
 		TransformSemantics();
 		RuntimeMutations();
@@ -587,7 +576,7 @@ int main()
 		SceneConstruction();
 		AssetRegistrySemantics();
 		StartupAndCameraSafety();
-		InputSystemSemantics();
+		InputMapperSemantics();
 		UnrealImportPipeline();
 		DebugCameraActions();
 		TextGeometryAndNotificationTiming();

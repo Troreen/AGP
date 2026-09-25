@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <cmath>
 #include <ostream>
 
@@ -240,8 +240,8 @@ namespace CommonUtilities
 	template<typename T>
 	inline T Vector3<T>::Dot(const Vector3<T>& aVector) const
 	{
-		return 	  this->x * aVector.x 
-				+ this->y * aVector.y 
+		return 	  this->x * aVector.x
+				+ this->y * aVector.y
 				+ this->z * aVector.z;
 	}
 
@@ -250,8 +250,8 @@ namespace CommonUtilities
 	{
 		// Cross Product a × b = ( ay * bz - az * by, az * bx - ax * bz, ax * by - ay * bx )
 		return Vector3<T>(
-			this->y * aVector.z - this->z * aVector.y, 
-			this->z * aVector.x - this->x * aVector.z, 
+			this->y * aVector.z - this->z * aVector.y,
+			this->z * aVector.x - this->x * aVector.z,
 			this->x * aVector.y - this->y * aVector.x);
 	}
 
@@ -271,8 +271,8 @@ namespace CommonUtilities
 	inline Vector3<T> Vector3<T>::Lerp(const Vector3<T>& anOther, T aT) const
 	{
 		return Vector3<T>(
-			x + (anOther.x - x) * aT, 
-			y + (anOther.y - y) * aT, 
+			x + (anOther.x - x) * aT,
+			y + (anOther.y - y) * aT,
 			z + (anOther.z - z) * aT);
 	}
 
@@ -285,8 +285,8 @@ namespace CommonUtilities
 	template<typename T>
 	inline bool Vector3<T>::operator==(const Vector3<T>& anOther) const
 	{
-		return 	x == anOther.x && 
-				y == anOther.y && 
+		return 	x == anOther.x &&
+				y == anOther.y &&
 				z == anOther.z;
 	}
 
@@ -296,7 +296,7 @@ namespace CommonUtilities
 		return !(*this == anOther);
 	}
 
-	
+
 	template<typename T>
 	template<class TargetType>
 	inline Vector3<TargetType> Vector3<T>::ToType() const
@@ -312,8 +312,8 @@ namespace CommonUtilities
 	{
 		// Addition a + b = (ax + bx, ay + by, az + bz)
 		return Vector3<T>(
-			aVector0.x + aVector1.x, 
-			aVector0.y + aVector1.y, 
+			aVector0.x + aVector1.x,
+			aVector0.y + aVector1.y,
 			aVector0.z + aVector1.z);
 	}
 
@@ -322,18 +322,18 @@ namespace CommonUtilities
 	{
 		// Subtraction a − b = (ax − bx, ay − by, az − bz)
 		return Vector3<T>(
-			aVector0.x - aVector1.x, 
-			aVector0.y - aVector1.y, 
+			aVector0.x - aVector1.x,
+			aVector0.y - aVector1.y,
 			aVector0.z - aVector1.z);
 	}
 
 	template<typename T>
 	Vector3<T> operator*(const Vector3<T>& aVector0, const Vector3<T>& aVector1)
 	{
-		// Component-wise Multiplication a * b = (ax * bx, ay * by, az * bz) 
+		// Component-wise Multiplication a * b = (ax * bx, ay * by, az * bz)
 		return Vector3<T>(
-			aVector0.x * aVector1.x, 
-			aVector0.y * aVector1.y, 
+			aVector0.x * aVector1.x,
+			aVector0.y * aVector1.y,
 			aVector0.z * aVector1.z);
 	}
 
@@ -342,8 +342,8 @@ namespace CommonUtilities
 	{
 		// Scalar Multiplication s * a = (s * ax, s * ay, s * az) a * s is the same.
 		return Vector3<T>(
-			aScalar * aVector.x, 
-			aScalar * aVector.y, 
+			aScalar * aVector.x,
+			aScalar * aVector.y,
 			aScalar * aVector.z);
 	}
 
@@ -351,8 +351,8 @@ namespace CommonUtilities
 	Vector3<T> operator*(const T& aScalar, const Vector3<T>& aVector)
 	{
 		return Vector3<T>(
-			aScalar * aVector.x, 
-			aScalar * aVector.y, 
+			aScalar * aVector.x,
+			aScalar * aVector.y,
 			aScalar * aVector.z);
 	}
 
@@ -361,8 +361,8 @@ namespace CommonUtilities
 	{
 		// Scalar Division a / s = (ax / s, ay / s, az / s)  (Assuming s isnt 0.)
 		return Vector3<T>(
-			aVector.x / aScalar, 
-			aVector.y / aScalar, 
+			aVector.x / aScalar,
+			aVector.y / aScalar,
 			aVector.z / aScalar);
 	}
 
@@ -407,5 +407,7 @@ namespace CommonUtilities
 
 	// (dimension-changing helper implementations are located earlier in this file)
 
-	using Vector3f = Vector3<float>; 
+	using Vector3u = Vector3<unsigned>;
+	using Vector3f = Vector3<float>;
+	using Vector3i = Vector3<int>;
 }

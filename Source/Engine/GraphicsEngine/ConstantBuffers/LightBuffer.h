@@ -34,5 +34,5 @@ struct LightBuffer
 
 	std::array<Light, MaxLights> Lights = {};
 	unsigned NumActiveLights = 0;
-	CU::Vector3f __padding = CU::Vector3f::Zero;
+	CU::Vector3f AmbientColor = CU::Vector3f::One;
 };

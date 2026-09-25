@@ -1,5 +1,5 @@
 #include "UnrealSceneImporter.h"
-#include "PerforceSceneStructs.h"
+#include "UnrealSceneStructs.h"
 #include "Maths.hpp"
 #include "Quaternion.hpp"
 #include <SimdJson/simdjson.h>
@@ -7,7 +7,7 @@
 #include <stdexcept>
 #include <type_traits>
 
-namespace PerforceScene
+namespace UnrealScene
 {
 	void ReadCommonComponent(simdjson::dom::element component, BaseComponentData& outComponent, UnrealComponentType type)
 	{
@@ -21,14 +21,35 @@ namespace PerforceScene
 
 		const auto& matrix = component["Transform"].get_array().value();
 		outComponent.transform = {
-		    static_cast<float>(matrix.at(5).get_double().value()),  static_cast<float>(matrix.at(6).get_double().value()),
-		    static_cast<float>(matrix.at(4).get_double().value()),  static_cast<float>(matrix.at(7).get_double().value()),
-		    static_cast<float>(matrix.at(9).get_double().value()),  static_cast<float>(matrix.at(10).get_double().value()),
-		    static_cast<float>(matrix.at(8).get_double().value()),  static_cast<float>(matrix.at(7).get_double().value()),
-		    static_cast<float>(matrix.at(1).get_double().value()),  static_cast<float>(matrix.at(2).get_double().value()),
-		    static_cast<float>(matrix.at(0).get_double().value()),  static_cast<float>(matrix.at(11).get_double().value()),
-		    static_cast<float>(matrix.at(13).get_double().value()), static_cast<float>(matrix.at(14).get_double().value()),
-		    static_cast<float>(matrix.at(12).get_double().value()), static_cast<float>(matrix.at(15).get_double().value())};
+		    static_cast<float>(matrix.at(5).get_double().value()),  
+			static_cast<float>(matrix.at(6).get_double().value()),
+		    static_cast<float>(matrix.at(4).get_double().value()),  
+			static_cast<float>(matrix.at(3).get_double().value()),
+		    static_cast<float>(matrix.at(9).get_double().value()),  
+			static_cast<float>(matrix.at(10).get_double().value()),
+		    static_cast<float>(matrix.at(8).get_double().value()),  
+			static_cast<float>(matrix.at(7).get_double().value()),
+		    static_cast<float>(matrix.at(1).get_double().value()),  
+			static_cast<float>(matrix.at(2).get_double().value()),
+		    static_cast<float>(matrix.at(0).get_double().value()),  
+			static_cast<float>(matrix.at(11).get_double().value()),
+		    static_cast<float>(matrix.at(13).get_double().value()), 
+			static_cast<float>(matrix.at(14).get_double().value()),
+		    static_cast<float>(matrix.at(12).get_double().value()), 
+			static_cast<float>(matrix.at(15).get_double().value())};
+	}
+
+	void ReadCommonLightComponent(simdjson::dom::element component, CommonLightComponentData& outComponent, UnrealComponentType type)
+	{
+		ReadCommonComponent(component, outComponent, type);
+		outComponent.intensity = static_cast<float>(component["Intensity"].get_double().value());
+		const auto& color = component["Color"].get_array().value();
+		outComponent.color = {
+		    static_cast<float>(color.at(0).get_double().value()),
+		    static_cast<float>(color.at(1).get_double().value()),
+		    static_cast<float>(color.at(2).get_double().value()),
+			static_cast<float>(color.at(3).get_double().value())
+		};
 	}
 
 UnrealSceneData ImportScene(std::filesystem::path aJSONPath)
@@ -37,9 +58,6 @@ UnrealSceneData ImportScene(std::filesystem::path aJSONPath)
 	simdjson::dom::parser parser;
 	simdjson::dom::object root;
 	const auto& error = parser.parse(json).get(root);
-
-	// TODO: create structs with level data
-	//std::cout << root["Actors"].get_array().size() << std::endl;
 
 	if (error)
 	{
@@ -52,7 +70,6 @@ UnrealSceneData ImportScene(std::filesystem::path aJSONPath)
 	for (const auto& actor : root["Actors"])
 	{
 		UnrealActorData actorData = {};
-		//std::cout << actor["Name"].get_c_str() << std::endl;
 		actorData.name = actor["Name"];
 		actorData.archetype = actor["Archetype"];
 		for (const auto& tag : actor["Tags"])
@@ -63,193 +80,49 @@ UnrealSceneData ImportScene(std::filesystem::path aJSONPath)
 
 		{
 			const auto& matrix = actor["Transform"].get_array().value();
-			actorData.transform = {static_cast<float>(matrix.at(5).get_double().value()),
-				                   static_cast<float>(matrix.at(6).get_double().value()),
-				                   static_cast<float>(matrix.at(4).get_double().value()),
-				                   static_cast<float>(matrix.at(7).get_double().value()),
-				                   static_cast<float>(matrix.at(9).get_double().value()),
-				                   static_cast<float>(matrix.at(10).get_double().value()),
-				                   static_cast<float>(matrix.at(8).get_double().value()),
-				                   static_cast<float>(matrix.at(7).get_double().value()),
-				                   static_cast<float>(matrix.at(1).get_double().value()),
-				                   static_cast<float>(matrix.at(2).get_double().value()),
-				                   static_cast<float>(matrix.at(0).get_double().value()),
-				                   static_cast<float>(matrix.at(11).get_double().value()),
-				                   static_cast<float>(matrix.at(13).get_double().value()),
-				                   static_cast<float>(matrix.at(14).get_double().value()),
-				                   static_cast<float>(matrix.at(12).get_double().value()),
-				                   static_cast<float>(matrix.at(15).get_double().value())
+			actorData.transform =
+			{
+				-static_cast<float>(matrix.at(1).get_double().value()),
+				-static_cast<float>(matrix.at(2).get_double().value()),
+				-static_cast<float>(matrix.at(0).get_double().value()),
+			    static_cast<float>(matrix.at(11).get_double().value()),
+
+                 static_cast<float>(matrix.at(9).get_double().value()),
+				 static_cast<float>(matrix.at(10).get_double().value()),
+				 static_cast<float>(matrix.at(8).get_double().value()),
+				 static_cast<float>(matrix.at(7).get_double().value()),
+
+				 static_cast<float>(matrix.at(5).get_double().value()),
+				 static_cast<float>(matrix.at(6).get_double().value()),
+				 static_cast<float>(matrix.at(4).get_double().value()),
+				 static_cast<float>(matrix.at(3).get_double().value()),
+
+				 static_cast<float>(matrix.at(13).get_double().value()),
+				 static_cast<float>(matrix.at(14).get_double().value()),
+				 static_cast<float>(matrix.at(12).get_double().value()),
+				 static_cast<float>(matrix.at(15).get_double().value())
 
 			};
 		}
 
 		for (const auto& component : actor["Components"])
 		{
-			switch (static_cast<UnrealComponentType>(component["TypeID"].get_int64().value()))
+			const UnrealComponentType type = static_cast<UnrealComponentType>(component["TypeID"].get_int64().value());
+			switch (type)
 			{
 				case UnrealComponentType::Custom:
 				case UnrealComponentType::SceneComponent:
 				{
 					BaseComponentData componentData = {};
-					componentData.name = component["Name"];
-					componentData.parent = component["Parent"];
-					componentData.typeID = static_cast<UnrealComponentType>(component["TypeID"].get_int64().value());
-					for (const auto& tag : component["Tags"])
-					{
-						std::string componentTag(tag.get_c_str());
-						componentData.tags.emplace_back(componentTag);
-					}
-
-					const auto& matrix = component["Transform"].get_array().value();
-					componentData.transform = {static_cast<float>(matrix.at(5).get_double().value()),
-					                           static_cast<float>(matrix.at(6).get_double().value()),
-					                           static_cast<float>(matrix.at(4).get_double().value()),
-					                           static_cast<float>(matrix.at(7).get_double().value()),
-					                           static_cast<float>(matrix.at(9).get_double().value()),
-					                           static_cast<float>(matrix.at(10).get_double().value()),
-					                           static_cast<float>(matrix.at(8).get_double().value()),
-					                           static_cast<float>(matrix.at(7).get_double().value()),
-					                           static_cast<float>(matrix.at(1).get_double().value()),
-					                           static_cast<float>(matrix.at(2).get_double().value()),
-					                           static_cast<float>(matrix.at(0).get_double().value()),
-					                           static_cast<float>(matrix.at(11).get_double().value()),
-					                           static_cast<float>(matrix.at(13).get_double().value()),
-					                           static_cast<float>(matrix.at(14).get_double().value()),
-					                           static_cast<float>(matrix.at(12).get_double().value()),
-					                           static_cast<float>(matrix.at(15).get_double().value())
-
-					};
-					actorData.components.emplace_back(componentData);
+					ReadCommonComponent(component, componentData, type);
+					actorData.components.push_back(std::move(componentData));
 				}
 				break;
 				case UnrealComponentType::StaticMesh:
-				{
-					StaticMeshComponentData componentData = {};
-					componentData.name = component["Name"];
-					componentData.parent = component["Parent"];
-					componentData.typeID = UnrealComponentType::StaticMesh;
-					for (const auto& tag : component["Tags"])
-					{
-						std::string componentTag = tag.get_c_str().value();
-						componentData.tags.emplace_back(componentTag);
-					}
-
-					const auto& matrix = component["Transform"].get_array().value();
-					componentData.transform = {static_cast<float>(matrix.at(5).get_double().value()),
-					                           static_cast<float>(matrix.at(6).get_double().value()),
-					                           static_cast<float>(matrix.at(4).get_double().value()),
-					                           static_cast<float>(matrix.at(7).get_double().value()),
-					                           static_cast<float>(matrix.at(9).get_double().value()),
-					                           static_cast<float>(matrix.at(10).get_double().value()),
-					                           static_cast<float>(matrix.at(8).get_double().value()),
-					                           static_cast<float>(matrix.at(7).get_double().value()),
-					                           static_cast<float>(matrix.at(1).get_double().value()),
-					                           static_cast<float>(matrix.at(2).get_double().value()),
-					                           static_cast<float>(matrix.at(0).get_double().value()),
-					                           static_cast<float>(matrix.at(11).get_double().value()),
-					                           static_cast<float>(matrix.at(13).get_double().value()),
-					                           static_cast<float>(matrix.at(14).get_double().value()),
-					                           static_cast<float>(matrix.at(12).get_double().value()),
-					                           static_cast<float>(matrix.at(15).get_double().value())
-
-					};
-
-					componentData.mesh = component["Mesh"];
-					componentData.contentPath = component["ContentPath"];
-
-					for (const auto& material : component["Materials"])
-					{
-
-						MaterialData& materialData = componentData.materials.emplace_back();
-						materialData.name = material["Name"];
-						materialData.parent = material["Parent"].has_value() ? material["Parent"].get_c_str().value() : "";
-
-						for (const auto& parameter : material["Parameters"].get_array().value())
-						{
-							MaterialParameterData parameterData = materialData.parameters.emplace_back();
-							parameterData.name = parameter["Name"];
-							parameterData.type = static_cast<MaterialType>(parameter["Type"].get_int64().value());
-
-							switch (parameterData.type)
-							{
-								case MaterialType::Scalar:
-								{
-									float scalar = 0;
-
-									scalar = static_cast<float>(parameter["Value"].get_double());
-									parameterData.value = scalar;
-									materialData.parameters.emplace_back(parameterData);
-								}
-								break;
-								case MaterialType::Vector3f:
-								{
-									CommonUtilities::Vector4f vector;
-
-									const auto& value = parameter["Value"].get_array().value();
-
-									vector.x = static_cast<float>(value.at(0).get_double());
-									vector.y = static_cast<float>(value.at(1).get_double());
-									vector.z = static_cast<float>(value.at(2).get_double());
-									vector.w = static_cast<float>(value.at(3).get_double());
-
-									parameterData.value = vector;
-									materialData.parameters.emplace_back(parameterData);
-								}
-
-								break;
-								case MaterialType::Texture:
-								{
-									TextureValue textureValue;
-									const auto& value = parameter["Value"].get_object().value();
-									textureValue.name = value["Name"].get_string().value();
-									textureValue.path = value["Path"].get_string().value();
-
-									parameterData.value = textureValue;
-									materialData.parameters.emplace_back(parameterData);
-								}
-								break;
-								default:
-									break;
-							}
-						}
-						componentData.materials.emplace_back(materialData);
-					}
-
-					actorData.components.emplace_back(componentData);
-				}
-				break;
 				case UnrealComponentType::SkeletalMesh:
-					//If we want
 				{
 					StaticMeshComponentData componentData = {};
-					componentData.name = component["Name"];
-					componentData.parent = component["Parent"];
-					componentData.typeID = UnrealComponentType::SkeletalMesh;
-					for (const auto& tag : component["Tags"])
-					{
-						std::string componentTag = tag.get_c_str().value();
-						componentData.tags.emplace_back(componentTag);
-					}
-
-					const auto& matrix = component["Transform"].get_array().value();
-					componentData.transform = {static_cast<float>(matrix.at(5).get_double().value()),
-						                       static_cast<float>(matrix.at(6).get_double().value()),
-						                       static_cast<float>(matrix.at(4).get_double().value()),
-						                       static_cast<float>(matrix.at(7).get_double().value()),
-						                       static_cast<float>(matrix.at(9).get_double().value()),
-						                       static_cast<float>(matrix.at(10).get_double().value()),
-						                       static_cast<float>(matrix.at(8).get_double().value()),
-						                       static_cast<float>(matrix.at(7).get_double().value()),
-						                       static_cast<float>(matrix.at(1).get_double().value()),
-						                       static_cast<float>(matrix.at(2).get_double().value()),
-						                       static_cast<float>(matrix.at(0).get_double().value()),
-						                       static_cast<float>(matrix.at(11).get_double().value()),
-						                       static_cast<float>(matrix.at(13).get_double().value()),
-						                       static_cast<float>(matrix.at(14).get_double().value()),
-						                       static_cast<float>(matrix.at(12).get_double().value()),
-						                       static_cast<float>(matrix.at(15).get_double().value())
-
-					};
+					ReadCommonComponent(component, componentData, type);
 
 					componentData.mesh = component["Mesh"];
 					componentData.contentPath = component["ContentPath"];
@@ -257,13 +130,13 @@ UnrealSceneData ImportScene(std::filesystem::path aJSONPath)
 					for (const auto& material : component["Materials"])
 					{
 
-						MaterialData& materialData = componentData.materials.emplace_back();
+						MaterialData materialData;
 						materialData.name = material["Name"];
 						materialData.parent = material["Parent"].has_value() ? material["Parent"].get_c_str().value() : "";
 
 						for (const auto& parameter : material["Parameters"].get_array().value())
 						{
-							MaterialParameterData parameterData = materialData.parameters.emplace_back();
+							MaterialParameterData parameterData;
 							parameterData.name = parameter["Name"];
 							parameterData.type = static_cast<MaterialType>(parameter["Type"].get_int64().value());
 
@@ -275,7 +148,6 @@ UnrealSceneData ImportScene(std::filesystem::path aJSONPath)
 
 									scalar = static_cast<float>(parameter["Value"].get_double());
 									parameterData.value = scalar;
-									materialData.parameters.emplace_back(parameterData);
 								}
 								break;
 								case MaterialType::Vector3f:
@@ -290,7 +162,6 @@ UnrealSceneData ImportScene(std::filesystem::path aJSONPath)
 									vector.w = static_cast<float>(value.at(3).get_double());
 
 									parameterData.value = vector;
-									materialData.parameters.emplace_back(parameterData);
 								}
 
 								break;
@@ -302,14 +173,14 @@ UnrealSceneData ImportScene(std::filesystem::path aJSONPath)
 									textureValue.path = value["Path"].get_string().value();
 
 									parameterData.value = textureValue;
-									materialData.parameters.emplace_back(parameterData);
 								}
 								break;
 								default:
-									break;
+									continue;
 							}
-						}
-						componentData.materials.emplace_back(materialData);
+							materialData.parameters.emplace_back(parameterData);
+							}
+							componentData.materials.emplace_back(materialData);
 					}
 
 					actorData.components.emplace_back(componentData);
@@ -318,183 +189,41 @@ UnrealSceneData ImportScene(std::filesystem::path aJSONPath)
 				case UnrealComponentType::PointLight:
 				{
 					PointLightComponentData componentData = {};
-					componentData.name = component["Name"];
-					componentData.parent = component["Parent"];
-
-
-					componentData.typeID = UnrealComponentType::PointLight;
-					for (const auto& tag : component["Tags"])
-					{
-						std::string componentTag = tag.get_c_str().value();
-						componentData.tags.emplace_back(componentTag);
-					}
-
-					const auto& matrix = component["Transform"].get_array().value();
-					componentData.transform = {static_cast<float>(matrix.at(5).get_double().value()),
-					                           static_cast<float>(matrix.at(6).get_double().value()),
-					                           static_cast<float>(matrix.at(4).get_double().value()),
-					                           static_cast<float>(matrix.at(7).get_double().value()),
-					                           static_cast<float>(matrix.at(9).get_double().value()),
-					                           static_cast<float>(matrix.at(10).get_double().value()),
-					                           static_cast<float>(matrix.at(8).get_double().value()),
-					                           static_cast<float>(matrix.at(7).get_double().value()),
-					                           static_cast<float>(matrix.at(1).get_double().value()),
-					                           static_cast<float>(matrix.at(2).get_double().value()),
-					                           static_cast<float>(matrix.at(0).get_double().value()),
-					                           static_cast<float>(matrix.at(11).get_double().value()),
-					                           static_cast<float>(matrix.at(13).get_double().value()),
-					                           static_cast<float>(matrix.at(14).get_double().value()),
-					                           static_cast<float>(matrix.at(12).get_double().value()),
-					                           static_cast<float>(matrix.at(15).get_double().value())
-
-					};
-
-					CommonUtilities::Vector4f vector;
-					const auto& array = component["Color"].get_array().value();
-					vector.x = static_cast<float>(array.at(0).get_double().value());
-					vector.y = static_cast<float>(array.at(1).get_double().value());
-					vector.z = static_cast<float>(array.at(2).get_double().value());
-					vector.w = static_cast<float>(array.at(3).get_double().value());
-
-					componentData.color = vector;
-					componentData.intensity = static_cast<float>(component["Intensity"].get_double());
+					ReadCommonLightComponent(component, componentData, UnrealComponentType::PointLight);
 
 					componentData.attenuationRadius = static_cast<float>(component["AttenuationRadius"].get_double());
 					componentData.falloffExponent = static_cast<float>(component["FalloffExponent"].get_double());
-					actorData.components.emplace_back(componentData);
+					actorData.components.push_back(std::move(componentData));
 				}
 
 				break;
 				case UnrealComponentType::SpotLight:
 				{
 					SpotLightComponentData componentData = {};
-					componentData.name = component["Name"];
-					componentData.parent = component["Parent"];
-
-
-					componentData.typeID = UnrealComponentType::SpotLight;
-					for (const auto& tag : component["Tags"])
-					{
-						std::string componentTag = tag.get_c_str().value();
-						componentData.tags.emplace_back(componentTag);
-					}
-
-					const auto& matrix = component["Transform"].get_array().value();
-					componentData.transform = {static_cast<float>(matrix.at(5).get_double().value()),
-					                           static_cast<float>(matrix.at(6).get_double().value()),
-					                           static_cast<float>(matrix.at(4).get_double().value()),
-					                           static_cast<float>(matrix.at(7).get_double().value()),
-					                           static_cast<float>(matrix.at(9).get_double().value()),
-					                           static_cast<float>(matrix.at(10).get_double().value()),
-					                           static_cast<float>(matrix.at(8).get_double().value()),
-					                           static_cast<float>(matrix.at(7).get_double().value()),
-					                           static_cast<float>(matrix.at(1).get_double().value()),
-					                           static_cast<float>(matrix.at(2).get_double().value()),
-					                           static_cast<float>(matrix.at(0).get_double().value()),
-					                           static_cast<float>(matrix.at(11).get_double().value()),
-					                           static_cast<float>(matrix.at(13).get_double().value()),
-					                           static_cast<float>(matrix.at(14).get_double().value()),
-					                           static_cast<float>(matrix.at(12).get_double().value()),
-					                           static_cast<float>(matrix.at(15).get_double().value())
-
-					};
-
-					CommonUtilities::Vector4f vector;
-					const auto& array = component["Color"].get_array().value();
-					vector.x = static_cast<float>(array.at(0).get_double().value());
-					vector.y = static_cast<float>(array.at(1).get_double().value());
-					vector.z = static_cast<float>(array.at(2).get_double().value());
-					vector.w = static_cast<float>(array.at(3).get_double().value());
-
-					componentData.color = vector;
-					componentData.intensity = static_cast<float>(component["Intensity"].get_double());
+					ReadCommonLightComponent(component, componentData, UnrealComponentType::SpotLight);
 
 					componentData.attenuationRadius = static_cast<float>(component["AttenuationRadius"].get_double());
 					componentData.outerConeAngle = static_cast<float>(component["OuterConeAngle"].get_double());
 					componentData.innerConeAngle = static_cast<float>(component["InnerConeAngle"].get_double());
 
 					componentData.falloffExponent = static_cast<float>(component["FalloffExponent"].get_double());
-					actorData.components.emplace_back(componentData);
+					actorData.components.push_back(std::move(componentData));
 				}
 				break;
 				case UnrealComponentType::DirectionalLight:
 				{
 					CommonLightComponentData componentData = {};
-					componentData.name = component["Name"];
-					componentData.parent = component["Parent"];
-					componentData.typeID = UnrealComponentType::DirectionalLight;
-					for (const auto& tag : component["Tags"])
-					{
-						std::string componentTag = tag.get_c_str().value();
-						componentData.tags.emplace_back(componentTag);
-					}
+					ReadCommonLightComponent(component, componentData, UnrealComponentType::DirectionalLight);
 
-					const auto& matrix = component["Transform"].get_array().value();
-					componentData.transform = {static_cast<float>(matrix.at(5).get_double().value()),
-					                           static_cast<float>(matrix.at(6).get_double().value()),
-					                           static_cast<float>(matrix.at(4).get_double().value()),
-					                           static_cast<float>(matrix.at(7).get_double().value()),
-					                           static_cast<float>(matrix.at(9).get_double().value()),
-					                           static_cast<float>(matrix.at(10).get_double().value()),
-					                           static_cast<float>(matrix.at(8).get_double().value()),
-					                           static_cast<float>(matrix.at(7).get_double().value()),
-					                           static_cast<float>(matrix.at(1).get_double().value()),
-					                           static_cast<float>(matrix.at(2).get_double().value()),
-					                           static_cast<float>(matrix.at(0).get_double().value()),
-					                           static_cast<float>(matrix.at(11).get_double().value()),
-					                           static_cast<float>(matrix.at(13).get_double().value()),
-					                           static_cast<float>(matrix.at(14).get_double().value()),
-					                           static_cast<float>(matrix.at(12).get_double().value()),
-					                           static_cast<float>(matrix.at(15).get_double().value())
-
-					};
-
-					CommonUtilities::Vector4f vector;
-					const auto& array = component["Color"].get_array().value();
-					vector.x = static_cast<float>(array.at(0).get_double().value());
-					vector.y = static_cast<float>(array.at(1).get_double().value());
-					vector.z = static_cast<float>(array.at(2).get_double().value());
-					vector.w = static_cast<float>(array.at(3).get_double().value());
-
-					componentData.color = vector;
-					componentData.intensity = static_cast<float>(component["Intensity"].get_double());
-					actorData.components.emplace_back(componentData);
+					actorData.components.push_back(std::move(componentData));
 				}
 
 				break;
 				case UnrealComponentType::Box:
-					//If we want
 				{
 					BoxComponentData componentData = {};
 
-					componentData.name = component["Name"];
-					componentData.parent = component["Parent"];
-					componentData.typeID = UnrealComponentType::Box;
-					for (const auto& tag : component["Tags"])
-					{
-						std::string componentTag = tag.get_c_str().value();
-						componentData.tags.emplace_back(componentTag);
-					}
-
-					const auto& matrix = component["Transform"].get_array().value();
-					componentData.transform = {static_cast<float>(matrix.at(5).get_double().value()),
-						                       static_cast<float>(matrix.at(6).get_double().value()),
-						                       static_cast<float>(matrix.at(4).get_double().value()),
-						                       static_cast<float>(matrix.at(7).get_double().value()),
-						                       static_cast<float>(matrix.at(9).get_double().value()),
-						                       static_cast<float>(matrix.at(10).get_double().value()),
-						                       static_cast<float>(matrix.at(8).get_double().value()),
-						                       static_cast<float>(matrix.at(7).get_double().value()),
-						                       static_cast<float>(matrix.at(1).get_double().value()),
-						                       static_cast<float>(matrix.at(2).get_double().value()),
-						                       static_cast<float>(matrix.at(0).get_double().value()),
-						                       static_cast<float>(matrix.at(11).get_double().value()),
-						                       static_cast<float>(matrix.at(13).get_double().value()),
-						                       static_cast<float>(matrix.at(14).get_double().value()),
-						                       static_cast<float>(matrix.at(12).get_double().value()),
-						                       static_cast<float>(matrix.at(15).get_double().value())
-
-					};
+					ReadCommonComponent(component, componentData, UnrealComponentType::Box);
 
 					CommonUtilities::Vector3f bounds;
 					const auto& array = component["Bounds"].get_array().value();
@@ -503,89 +232,32 @@ UnrealSceneData ImportScene(std::filesystem::path aJSONPath)
 					bounds.z = static_cast<float>(array.at(0).get_double().value());
 					componentData.boundsMaxima = bounds;
 
-					actorData.components.emplace_back(componentData);
+					actorData.components.push_back(std::move(componentData));
 				}
 				break;
 				case UnrealComponentType::Sphere:
-					//If we want
 				{
 					BaseSphericalComponentData componentData = {};
-					componentData.name = component["Name"];
-					componentData.parent = component["Parent"];
-					componentData.typeID = UnrealComponentType::Sphere;
-					for (const auto& tag : component["Tags"])
-					{
-						std::string componentTag = tag.get_c_str().value();
-						componentData.tags.emplace_back(componentTag);
-					}
-
-					const auto& matrix = component["Transform"].get_array().value();
-					componentData.transform = {static_cast<float>(matrix.at(5).get_double().value()),
-						                       static_cast<float>(matrix.at(6).get_double().value()),
-						                       static_cast<float>(matrix.at(4).get_double().value()),
-						                       static_cast<float>(matrix.at(7).get_double().value()),
-						                       static_cast<float>(matrix.at(9).get_double().value()),
-						                       static_cast<float>(matrix.at(10).get_double().value()),
-						                       static_cast<float>(matrix.at(8).get_double().value()),
-						                       static_cast<float>(matrix.at(7).get_double().value()),
-						                       static_cast<float>(matrix.at(1).get_double().value()),
-						                       static_cast<float>(matrix.at(2).get_double().value()),
-						                       static_cast<float>(matrix.at(0).get_double().value()),
-						                       static_cast<float>(matrix.at(11).get_double().value()),
-						                       static_cast<float>(matrix.at(13).get_double().value()),
-						                       static_cast<float>(matrix.at(14).get_double().value()),
-						                       static_cast<float>(matrix.at(12).get_double().value()),
-						                       static_cast<float>(matrix.at(15).get_double().value())
-
-					};
+					ReadCommonComponent(component, componentData, UnrealComponentType::Sphere);
 
 					componentData.radius = static_cast<float>(component["Radius"].get_double().value());
-					actorData.components.emplace_back(componentData);
+					actorData.components.push_back(std::move(componentData));
 				}
 				break;
 				case UnrealComponentType::Capsule:
-					//If we want
 				{
 
 					CapsuleComponentData componentData = {};
 					ReadCommonComponent(component, componentData, UnrealComponentType::Capsule);
 					componentData.radius = static_cast<float>(component["Radius"].get_double().value());
 					componentData.halfHeight = static_cast<float>(component["HalfHeight"].get_double().value());
-					actorData.components.emplace_back(componentData);
+					actorData.components.push_back(std::move(componentData));
 				}
 				break;
 				case UnrealComponentType::SpringArm:
-					//If we want
 				{
 					SpringArmComponentData componentData = {};
-					componentData.name = component["Name"];
-					componentData.parent = component["Parent"];
-					componentData.typeID = UnrealComponentType::SpringArm;
-					for (const auto& tag : component["Tags"])
-					{
-						std::string componentTag = tag.get_c_str().value();
-						componentData.tags.emplace_back(componentTag);
-					}
-
-					const auto& matrix = component["Transform"].get_array().value();
-					componentData.transform = {static_cast<float>(matrix.at(5).get_double().value()),
-						                       static_cast<float>(matrix.at(6).get_double().value()),
-						                       static_cast<float>(matrix.at(4).get_double().value()),
-						                       static_cast<float>(matrix.at(7).get_double().value()),
-						                       static_cast<float>(matrix.at(9).get_double().value()),
-						                       static_cast<float>(matrix.at(10).get_double().value()),
-						                       static_cast<float>(matrix.at(8).get_double().value()),
-						                       static_cast<float>(matrix.at(7).get_double().value()),
-						                       static_cast<float>(matrix.at(1).get_double().value()),
-						                       static_cast<float>(matrix.at(2).get_double().value()),
-						                       static_cast<float>(matrix.at(0).get_double().value()),
-						                       static_cast<float>(matrix.at(11).get_double().value()),
-						                       static_cast<float>(matrix.at(13).get_double().value()),
-						                       static_cast<float>(matrix.at(14).get_double().value()),
-						                       static_cast<float>(matrix.at(12).get_double().value()),
-						                       static_cast<float>(matrix.at(15).get_double().value())
-
-					};
+					ReadCommonComponent(component, componentData, UnrealComponentType::SpringArm);
 					const auto socketOffset = component["SocketOffset"].get_object().value();
 					componentData.socketOffset =
 					{
@@ -594,7 +266,7 @@ UnrealSceneData ImportScene(std::filesystem::path aJSONPath)
 						static_cast<float>(socketOffset["x"].get_double().value())
 					};
 					componentData.armLength = static_cast<float>(component["ArmLength"].get_double().value());
-					actorData.components.emplace_back(componentData);
+					actorData.components.push_back(std::move(componentData));
 				}
 				break;
 				default:
@@ -613,177 +285,7 @@ UnrealSceneData ImportScene(std::filesystem::path aJSONPath)
 namespace
 {
 	constexpr float UnrealUnitScale = 1.0f;
-
-	BaseComponentData ConvertBaseComponent(const PerforceScene::BaseComponentData& source)
-	{
-		BaseComponentData component;
-		component.Name = source.name;
-		component.TypeID = source.typeID;
-		component.Parent = source.parent;
-		component.Tags = source.tags;
-		component.Transform = source.transform;
-		return component;
-	}
-
-	ImportedMaterialParameter ConvertMaterialParameter(const PerforceScene::MaterialParameterData& source)
-	{
-		ImportedMaterialParameter parameter;
-		parameter.Name = source.name;
-		parameter.Type = source.type;
-		if (const float* scalar = std::get_if<float>(&source.value))
-		{
-			parameter.Value = *scalar;
-		}
-		else if (const CommonUtilities::Vector4f* vector = std::get_if<CommonUtilities::Vector4f>(&source.value))
-		{
-			parameter.Value = *vector;
-		}
-		else if (const PerforceScene::TextureValue* texture = std::get_if<PerforceScene::TextureValue>(&source.value))
-		{
-			parameter.Value = TextureValue{texture->name, texture->path};
-		}
-		return parameter;
-	}
-
-	std::vector<ImportedMaterial> ConvertMaterials(const std::vector<PerforceScene::MaterialData>& sourceMaterials)
-	{
-		std::vector<ImportedMaterial> materials;
-		for (size_t materialIndex = 0; materialIndex < sourceMaterials.size(); ++materialIndex)
-		{
-			const PerforceScene::MaterialData* sourceMaterial = &sourceMaterials[materialIndex];
-			// The Perforce parser appends completed records after filling an in-place
-			// record. Collapse those adjacent duplicates at the compatibility boundary.
-			while (materialIndex + 1 < sourceMaterials.size() &&
-			       sourceMaterials[materialIndex + 1].name == sourceMaterial->name &&
-			       sourceMaterials[materialIndex + 1].parent == sourceMaterial->parent)
-			{
-				sourceMaterial = &sourceMaterials[++materialIndex];
-			}
-
-			ImportedMaterial material;
-			material.Name = sourceMaterial->name;
-			material.Parent = sourceMaterial->parent;
-			for (size_t parameterIndex = 0; parameterIndex < sourceMaterial->parameters.size(); ++parameterIndex)
-			{
-				const PerforceScene::MaterialParameterData* sourceParameter = &sourceMaterial->parameters[parameterIndex];
-				// The parser leaves an empty in-place record before each completed
-				// parameter. It is bookkeeping, not authored material data.
-				if (sourceParameter->name.empty())
-				{
-					continue;
-				}
-				while (parameterIndex + 1 < sourceMaterial->parameters.size() &&
-				       sourceMaterial->parameters[parameterIndex + 1].name == sourceParameter->name &&
-				       sourceMaterial->parameters[parameterIndex + 1].type == sourceParameter->type)
-				{
-					sourceParameter = &sourceMaterial->parameters[++parameterIndex];
-				}
-				material.Parameters.push_back(ConvertMaterialParameter(*sourceParameter));
-			}
-			materials.push_back(std::move(material));
-		}
-		return materials;
-	}
-
-	ImportedComponentData ConvertComponent(const PerforceScene::ComponentData& source)
-	{
-		return std::visit([](const auto& component) -> ImportedComponentData
-		{
-			using ComponentType = std::decay_t<decltype(component)>;
-			if constexpr (std::is_same_v<ComponentType, PerforceScene::StaticMeshComponentData>)
-			{
-				ImportedMeshComponent mesh;
-				static_cast<BaseComponentData&>(mesh) = ConvertBaseComponent(component);
-				mesh.Mesh = component.mesh;
-				mesh.ContentPath = component.contentPath;
-				mesh.Materials = ConvertMaterials(component.materials);
-				return mesh;
-			}
-			else if constexpr (std::is_same_v<ComponentType, PerforceScene::SpotLightComponentData>)
-			{
-				ImportedSpotLightComponent light;
-				static_cast<BaseComponentData&>(light) = ConvertBaseComponent(component);
-				light.Color = component.color;
-				light.Intensity = component.intensity;
-				light.FalloffExponent = component.falloffExponent;
-				light.AttenuationRadius = component.attenuationRadius;
-				light.InnerConeAngle = component.innerConeAngle;
-				light.OuterConeAngle = component.outerConeAngle;
-				return light;
-			}
-			else if constexpr (std::is_same_v<ComponentType, PerforceScene::PointLightComponentData>)
-			{
-				ImportedPointLightComponent light;
-				static_cast<BaseComponentData&>(light) = ConvertBaseComponent(component);
-				light.Color = component.color;
-				light.Intensity = component.intensity;
-				light.FalloffExponent = component.falloffExponent;
-				light.AttenuationRadius = component.attenuationRadius;
-				return light;
-			}
-			else if constexpr (std::is_same_v<ComponentType, PerforceScene::CommonLightComponentData>)
-			{
-				ImportedLightComponent light;
-				static_cast<BaseComponentData&>(light) = ConvertBaseComponent(component);
-				light.Color = component.color;
-				light.Intensity = component.intensity;
-				return light;
-			}
-			else if constexpr (std::is_same_v<ComponentType, PerforceScene::BoxComponentData>)
-			{
-				ImportedBoxComponent box;
-				static_cast<BaseComponentData&>(box) = ConvertBaseComponent(component);
-				box.BoundsMaxima = component.boundsMaxima;
-				return box;
-			}
-			else if constexpr (std::is_same_v<ComponentType, PerforceScene::CapsuleComponentData>)
-			{
-				ImportedCapsuleComponent capsule;
-				static_cast<BaseComponentData&>(capsule) = ConvertBaseComponent(component);
-				capsule.Radius = component.radius;
-				capsule.HalfHeight = component.halfHeight;
-				return capsule;
-			}
-			else if constexpr (std::is_same_v<ComponentType, PerforceScene::BaseSphericalComponentData>)
-			{
-				ImportedSphereComponent sphere;
-				static_cast<BaseComponentData&>(sphere) = ConvertBaseComponent(component);
-				sphere.Radius = component.radius;
-				return sphere;
-			}
-			else if constexpr (std::is_same_v<ComponentType, PerforceScene::SpringArmComponentData>)
-			{
-				ImportedSpringArmComponent springArm;
-				static_cast<BaseComponentData&>(springArm) = ConvertBaseComponent(component);
-				springArm.SocketOffset = component.socketOffset;
-				springArm.ArmLength = component.armLength;
-				return springArm;
-			}
-			else
-			{
-				return ConvertBaseComponent(component);
-			}
-		}, source);
-	}
-
-	UnrealSceneData ConvertImportedScene(const PerforceScene::UnrealSceneData& source)
-	{
-		UnrealSceneData scene;
-		for (const PerforceScene::UnrealActorData& sourceActor : source.actors)
-		{
-			UnrealActorData actor;
-			actor.Name = sourceActor.name;
-			actor.Archetype = sourceActor.archetype;
-			actor.Tags = sourceActor.tags;
-			actor.Transform = sourceActor.transform;
-			for (const PerforceScene::ComponentData& sourceComponent : sourceActor.components)
-			{
-				actor.Components.push_back(ConvertComponent(sourceComponent));
-			}
-			scene.Actors.push_back(std::move(actor));
-		}
-		return scene;
-	}
+	using UnrealScene::UnrealComponentType;
 
 	std::optional<TransformData> ConvertTransform(const CommonUtilities::Matrix4f& source)
 	{
@@ -806,17 +308,17 @@ namespace
 		return transform;
 	}
 
-	const BaseComponentData& GetBaseComponent(const ImportedComponentData& component)
+	const UnrealScene::BaseComponentData& GetBaseComponent(const UnrealScene::ComponentData& component)
 	{
-		return std::visit([](const auto& value) -> const BaseComponentData& { return value; }, component);
+		return std::visit([](const auto& value) -> const UnrealScene::BaseComponentData& { return value; }, component);
 	}
 
-	ComponentData ConvertCommonData(const BaseComponentData& source, const TransformData& transform)
+	ComponentData ConvertCommonData(const UnrealScene::BaseComponentData& source, const TransformData& transform)
 	{
 		ComponentData component;
-		component.Name = source.Name;
-		component.SourceParent = source.Parent;
-		component.Tags = source.Tags;
+		component.Name = source.name;
+		component.SourceParent = source.parent;
+		component.Tags = source.tags;
 		component.Transform = transform;
 		return component;
 	}
@@ -844,30 +346,30 @@ namespace
 		std::vector<ImportDiagnostic> Diagnostics;
 	};
 
-	RuntimeConversionResult ConvertRuntimeScene(const UnrealSceneData& source)
+	RuntimeConversionResult ConvertRuntimeScene(const UnrealScene::UnrealSceneData& source)
 	{
 		RuntimeConversionResult result;
 		SceneData scene;
-		for (const UnrealActorData& sourceActor : source.Actors)
+		for (const UnrealScene::UnrealActorData& sourceActor : source.actors)
 		{
-			const std::optional<TransformData> actorTransform = ConvertTransform(sourceActor.Transform);
+			const std::optional<TransformData> actorTransform = ConvertTransform(sourceActor.transform);
 			if (!actorTransform)
 			{
-				result.Diagnostics.push_back({sourceActor.Name, "actor transform cannot be decomposed"});
+				result.Diagnostics.push_back({sourceActor.name, "actor transform cannot be decomposed"});
 				continue;
 			}
 
 			ActorRecord actor;
-			actor.Name = sourceActor.Name;
-			actor.Archetype = sourceActor.Archetype;
-			actor.Tags = sourceActor.Tags;
+			actor.Name = sourceActor.name;
+			actor.Archetype = sourceActor.archetype;
+			actor.Tags = sourceActor.tags;
 			actor.Transform = *actorTransform;
 
-			for (const ImportedComponentData& sourceComponent : sourceActor.Components)
+			for (const UnrealScene::ComponentData& sourceComponent : sourceActor.components)
 			{
-				const BaseComponentData& base = GetBaseComponent(sourceComponent);
-				const std::string context = sourceActor.Name + "/" + base.Name;
-				const std::optional<TransformData> componentTransform = ConvertTransform(base.Transform);
+				const UnrealScene::BaseComponentData& base = GetBaseComponent(sourceComponent);
+				const std::string context = sourceActor.name + "/" + base.name;
+				const std::optional<TransformData> componentTransform = ConvertTransform(base.transform);
 				if (!componentTransform)
 				{
 					result.Diagnostics.push_back({context, "component transform cannot be decomposed"});
@@ -876,42 +378,41 @@ namespace
 
 				std::visit([&](const auto& imported)
 				{
-					using ImportedType = std::decay_t<decltype(imported)>;
+					using SourceType = std::decay_t<decltype(imported)>;
 					const ComponentData common = ConvertCommonData(base, *componentTransform);
-					if constexpr (std::is_same_v<ImportedType, ImportedMeshComponent>)
+					if constexpr (std::is_same_v<SourceType, UnrealScene::StaticMeshComponentData>)
 					{
 						StaticMeshData mesh;
 						mesh.Common = common;
-						mesh.MeshName = imported.Mesh;
-						mesh.ContentPath = imported.ContentPath;
-						mesh.Mesh = AssetId{imported.ContentPath};
-						for (const ImportedMaterial& importedMaterial : imported.Materials)
+						mesh.MeshName = imported.mesh;
+						mesh.ContentPath = imported.contentPath;
+						for (const UnrealScene::MaterialData& sourceMaterial : imported.materials)
 						{
 							MaterialInstanceData material;
-							material.Name = importedMaterial.Name;
-							material.Parent = AssetId{importedMaterial.Parent.empty() ? importedMaterial.Name : importedMaterial.Parent};
-							for (const ImportedMaterialParameter& importedParameter : importedMaterial.Parameters)
+							material.Name = sourceMaterial.name;
+							for (const UnrealScene::MaterialParameterData& sourceParameter : sourceMaterial.parameters)
 							{
 								MaterialParameterData parameter;
-								parameter.Name = importedParameter.Name;
-								if (const float* scalar = std::get_if<float>(&importedParameter.Value))
+								parameter.Name = sourceParameter.name;
+								if (const float* scalar = std::get_if<float>(&sourceParameter.value))
 								{
 									parameter.Value = *scalar;
 								}
 								else if (const CommonUtilities::Vector4f* vector =
-								             std::get_if<CommonUtilities::Vector4f>(&importedParameter.Value))
+								             std::get_if<CommonUtilities::Vector4f>(&sourceParameter.value))
 								{
 									parameter.Value = *vector;
 								}
-								else if (const TextureValue* texture = std::get_if<TextureValue>(&importedParameter.Value))
+								else if (const UnrealScene::TextureValue* texture =
+								             std::get_if<UnrealScene::TextureValue>(&sourceParameter.value))
 								{
-									parameter.Value = AssetId{texture->Path};
+									parameter.Value = texture->path;
 								}
 								material.Parameters.push_back(std::move(parameter));
 							}
 							mesh.Materials.push_back(std::move(material));
 						}
-						if (base.TypeID == UnrealComponentType::SkeletalMesh)
+						if (base.typeID == UnrealComponentType::SkeletalMesh)
 						{
 							SkeletalMeshData skeletalMesh;
 							static_cast<StaticMeshData&>(skeletalMesh) = std::move(mesh);
@@ -922,45 +423,45 @@ namespace
 							actor.Components.push_back(std::move(mesh));
 						}
 					}
-					else if constexpr (std::is_same_v<ImportedType, ImportedSpotLightComponent>)
+					else if constexpr (std::is_same_v<SourceType, UnrealScene::SpotLightComponentData>)
 					{
 						SpotLightData light;
 						light.Common = common;
-						light.Color = {imported.Color.x, imported.Color.y, imported.Color.z};
-						light.ColorAlpha = imported.Color.w;
-						light.Intensity = imported.Intensity;
-						light.Radius = imported.AttenuationRadius * UnrealUnitScale;
-						light.FalloffExponent = imported.FalloffExponent;
-						light.InnerConeDegrees = imported.InnerConeAngle;
-						light.OuterConeDegrees = imported.OuterConeAngle;
+						light.Color = {imported.color.x, imported.color.y, imported.color.z};
+						light.ColorAlpha = imported.color.w;
+						light.Intensity = imported.intensity;
+						light.Radius = imported.attenuationRadius * UnrealUnitScale;
+						light.FalloffExponent = imported.falloffExponent;
+						light.InnerConeDegrees = imported.innerConeAngle;
+						light.OuterConeDegrees = imported.outerConeAngle;
 						actor.Components.push_back(std::move(light));
 					}
-					else if constexpr (std::is_same_v<ImportedType, ImportedPointLightComponent>)
+					else if constexpr (std::is_same_v<SourceType, UnrealScene::PointLightComponentData>)
 					{
 						PointLightData light;
 						light.Common = common;
-						light.Color = {imported.Color.x, imported.Color.y, imported.Color.z};
-						light.ColorAlpha = imported.Color.w;
-						light.Intensity = imported.Intensity;
-						light.Radius = imported.AttenuationRadius * UnrealUnitScale;
-						light.FalloffExponent = imported.FalloffExponent;
+						light.Color = {imported.color.x, imported.color.y, imported.color.z};
+						light.ColorAlpha = imported.color.w;
+						light.Intensity = imported.intensity;
+						light.Radius = imported.attenuationRadius * UnrealUnitScale;
+						light.FalloffExponent = imported.falloffExponent;
 						actor.Components.push_back(std::move(light));
 					}
-					else if constexpr (std::is_same_v<ImportedType, ImportedLightComponent>)
+					else if constexpr (std::is_same_v<SourceType, UnrealScene::CommonLightComponentData>)
 					{
 						DirectionalLightData light;
 						light.Common = common;
-						light.Color = {imported.Color.x, imported.Color.y, imported.Color.z};
-						light.ColorAlpha = imported.Color.w;
-						light.Intensity = imported.Intensity;
+						light.Color = {imported.color.x, imported.color.y, imported.color.z};
+						light.ColorAlpha = imported.color.w;
+						light.Intensity = imported.intensity;
 						actor.Components.push_back(std::move(light));
 					}
-					else if (base.TypeID == UnrealComponentType::SceneComponent &&
-					         std::find(base.Tags.begin(), base.Tags.end(), "ActiveCamera") != base.Tags.end())
+					else if (base.typeID == UnrealComponentType::SceneComponent &&
+					         std::find(base.tags.begin(), base.tags.end(), "ActiveCamera") != base.tags.end())
 					{
 						actor.Components.push_back(CameraData{common});
 					}
-					else if (base.TypeID == UnrealComponentType::SceneComponent)
+					else if (base.typeID == UnrealComponentType::SceneComponent)
 					{
 						actor.Components.push_back(SceneComponentData{common});
 					}
@@ -968,24 +469,24 @@ namespace
 					{
 						PlaceholderComponentData placeholder;
 						placeholder.Common = common;
-						placeholder.Type = ConvertPlaceholderType(base.TypeID);
-						if constexpr (std::is_same_v<ImportedType, ImportedBoxComponent>)
+						placeholder.Type = ConvertPlaceholderType(base.typeID);
+						if constexpr (std::is_same_v<SourceType, UnrealScene::BoxComponentData>)
 						{
-							placeholder.Properties = BoxPlaceholderData{imported.BoundsMaxima * UnrealUnitScale};
+							placeholder.Properties = BoxPlaceholderData{imported.boundsMaxima * UnrealUnitScale};
 						}
-						else if constexpr (std::is_same_v<ImportedType, ImportedSphereComponent>)
+						else if constexpr (std::is_same_v<SourceType, UnrealScene::BaseSphericalComponentData>)
 						{
-							placeholder.Properties = SpherePlaceholderData{imported.Radius * UnrealUnitScale};
+							placeholder.Properties = SpherePlaceholderData{imported.radius * UnrealUnitScale};
 						}
-						else if constexpr (std::is_same_v<ImportedType, ImportedCapsuleComponent>)
+						else if constexpr (std::is_same_v<SourceType, UnrealScene::CapsuleComponentData>)
 						{
 							placeholder.Properties = CapsulePlaceholderData{
-								imported.Radius * UnrealUnitScale, imported.HalfHeight * UnrealUnitScale};
+								imported.radius * UnrealUnitScale, imported.halfHeight * UnrealUnitScale};
 						}
-						else if constexpr (std::is_same_v<ImportedType, ImportedSpringArmComponent>)
+						else if constexpr (std::is_same_v<SourceType, UnrealScene::SpringArmComponentData>)
 						{
 							placeholder.Properties = SpringArmPlaceholderData{
-								imported.SocketOffset * UnrealUnitScale, imported.ArmLength * UnrealUnitScale};
+								imported.socketOffset * UnrealUnitScale, imported.armLength * UnrealUnitScale};
 						}
 						actor.Components.push_back(std::move(placeholder));
 					}
@@ -1007,14 +508,13 @@ UnrealImportResult UnrealSceneImporter::ImportScene(const std::filesystem::path&
 	UnrealImportResult result;
 	try
 	{
-		const PerforceScene::UnrealSceneData importedScene = PerforceScene::ImportScene(jsonPath);
+		const UnrealScene::UnrealSceneData importedScene = UnrealScene::ImportScene(jsonPath);
 		if (!importedScene.parsed)
 		{
 			result.Diagnostics.push_back({jsonPath.string(), "could not parse scene JSON"});
 			return result;
 		}
-		const UnrealSceneData sourceScene = ConvertImportedScene(importedScene);
-		RuntimeConversionResult converted = ConvertRuntimeScene(sourceScene);
+		RuntimeConversionResult converted = ConvertRuntimeScene(importedScene);
 		result.Diagnostics = std::move(converted.Diagnostics);
 		result.Data = std::move(converted.Scene);
 	}

@@ -4,6 +4,14 @@
 #ifndef SIMDJSON_H
 #define SIMDJSON_H
 
+#pragma warning(push)
+#pragma warning(disable : 001)
+#pragma warning(disable : 4100)
+#pragma warning(disable : 4244)
+#pragma warning(disable : 26437)
+#pragma warning(disable : 26495)
+#pragma warning(disable : 26817)
+
 /**
  * @mainpage
  *
@@ -187865,6 +187873,8 @@ template <constevalutil::fixed_string json_str> consteval auto parse_json() {
 #endif // SIMDJSON_STATIC_REFLECTION
 #endif // SIMDJSON_GENERIC_COMPILE_TIME_JSON_INL_H
 /* end file simdjson/compile_time_json-inl.h */
+
+#pragma warning(pop)
 
 #endif // SIMDJSON_H
 /* end file simdjson.h */

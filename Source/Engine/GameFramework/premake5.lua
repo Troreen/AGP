@@ -21,6 +21,8 @@ project "GameFramework"
 		dirs.engine,
 		dirs.utilities,
 		dirs.utilities .. "CommonUtilities",
+		dirs.dependencies .. "nlohmann_json\\include",
+		dirs.dependencies .. "TGAFBXImporter\\include",
 		dirs.dependencies .. "**" .. "include",
 	}
 
@@ -28,6 +30,7 @@ project "GameFramework"
 		"**.h",
 		"**.cpp",
 		"**.hpp",
+		dirs.dependencies .. "nlohmann_json/include/nlohmann/json.hpp",
 	}
 
 	links {
@@ -70,8 +73,8 @@ project "GameFramework"
 	-- compiled and from its inline implementation included by our two adapters.
 	-- Keep the generated third-party source untouched and scope suppression to
 	-- the translation units that compile it.
-	filter "files:SimdJson/simdjson.cpp"
-		disablewarnings { "4100", "4244", "4505" }
+	filter { "files:SimdJson/simdjson.cpp or SimdJson/simdjson.h" }
+		disablewarnings { "4100", "4244", "4505", "26437", "26495", "26817" }
 
 	filter "files:AssetHandling/AssetRegistry.cpp"
 		disablewarnings { "4100", "4244" }

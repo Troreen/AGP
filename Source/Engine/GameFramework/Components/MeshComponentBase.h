@@ -1,16 +1,14 @@
 #pragma once
 
 #include "GameFramework/Components/SceneComponent.h"
-#include "Matrix.hpp"
+#include "Matrix4x4.hpp"
 
 #include <array>
 #include <memory>
-#include <string>
 #include <vector>
 
-#include "GameFramework/Scenes/AssetRefs.h"
-
-class Mesh;
+class MaterialAsset;
+class MeshAsset;
 class SkeletalMeshComponent;
 
 class WorldRenderer;
@@ -21,25 +19,22 @@ class WorldRenderer;
 // TODO: runtime asset editing needs a future safe API.
 class MeshComponentBase : public SceneComponent
 {
+	friend class SkeletalMeshComponent;
+	friend class WorldRenderer;
+
 public:
 	MeshComponentBase() = default;
-	explicit MeshComponentBase(MeshHandle aMesh);
+	explicit MeshComponentBase(const std::shared_ptr<MeshAsset>& aMesh);
 	~MeshComponentBase() override = default;
 
 	// An empty binding clears the mesh. This never loads resources.
-	void SetMesh(MeshHandle aMesh);
-	MeshHandle GetMesh() const;
+	void SetMesh(const std::shared_ptr<MeshAsset>& aMesh);
+	const std::shared_ptr<MeshAsset>& GetMesh() const;
 	bool HasMesh() const;
-	void SetSourceAssetIdentity(std::string meshName, std::string contentPath)
-	{
-		mySourceMeshName = std::move(meshName); mySourceContentPath = std::move(contentPath);
-	}
-	const std::string& GetSourceMeshName() const { return mySourceMeshName; }
-	const std::string& GetSourceContentPath() const { return mySourceContentPath; }
 
 	// Invalid slots or empty materials leave the existing binding unchanged.
-	bool SetMaterial(unsigned aMaterialIndex, MaterialHandle aMaterial);
-	MaterialHandle GetMaterial(unsigned index) const;
+	bool SetMaterial(unsigned aMaterialIndex, const std::shared_ptr<MaterialAsset>& aMaterial);
+	const std::shared_ptr<MaterialAsset>& GetMaterial(unsigned index) const;
 
 	unsigned GetMaterialCount() const
 	{
@@ -55,14 +50,10 @@ protected:
 
 private:
 	virtual bool HasSkinning() const;
-	virtual const std::array<CU::Matrix4f, 128>* GetJointTransforms() const;
-	std::shared_ptr<Mesh> myMesh;
-	MeshHandle myMeshHandle;
-	std::vector<std::shared_ptr<MaterialInterface>> myMaterials;
-	std::vector<MaterialHandle> myMaterialHandles;
-	std::string mySourceMeshName;
-	std::string mySourceContentPath;
+	virtual const std::array<CommonUtilities::Matrix4f, 128>* GetJointTransforms() const;
+
+	std::shared_ptr<MeshAsset> myMesh;
+	std::vector<std::shared_ptr<MaterialAsset>> myMaterials;
+
 	bool myVisible = true;
-	friend class SkeletalMeshComponent;
-	friend class WorldRenderer;
 };
