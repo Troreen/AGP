@@ -16,7 +16,7 @@ struct GBufferOutput
 
 GBufferOutput main(VStoPS aPixel)
 {
-    const float4 albedo = AlbedoTexture.Sample(TrilinearWrap, aPixel.UV0) * aPixel.Color;
+    const float4 albedo = AlbedoTexture.Sample(TrilinearWrap, aPixel.UV0);
     const float4 surface = MaterialTexture.Sample(TrilinearWrap, aPixel.UV0);
     const float3 tangentNormal = SampleTangentNormal(aPixel.UV0);
     const float3 pixelNormal = TangentToWorldNormal(tangentNormal, aPixel.Normal, aPixel.Tangent, aPixel.Binormal);
@@ -34,7 +34,7 @@ GBufferOutput main(VStoPS aPixel)
 
     GBufferOutput output;
     output.Albedo = float4(saturate(parameters.PixelColor.rgb), parameters.PixelColor.a);
-    output.PixelNormal = float4(normalize(parameters.Normal), 0.0f);
+    output.PixelNormal = float4(normalize(parameters.Normal), aPixel.ViewDepth);
     output.Surface = float4(parameters.SurfaceValues.rgb, 0.0f);
     // Emission is reserved for bloom and other post-process effects. Materials
     // do not expose emission yet, so initialize the future-facing buffer to 0.

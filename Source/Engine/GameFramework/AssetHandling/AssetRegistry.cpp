@@ -24,12 +24,25 @@ AssetRegistry::AssetRegistry()
 {
 	RegisterAssetType<AnimationAsset>({ ".fbx" });
 	RegisterAssetType<MeshAsset>({ ".fbx" });
-	RegisterAssetType<MaterialAsset>({ ".mat" });
-	RegisterAssetType<TextureAsset>({ ".dds", ".png", ".jpg", ".jpeg" });
+	RegisterAssetType<TextureAsset>({ ".dds" });
 	RegisterAssetType<FontAsset>({ ".font.json" });
 }
 
 AssetRegistry::~AssetRegistry() = default;
+
+void AssetRegistry::Pin(std::string_view aName, const std::shared_ptr<Asset>& aAsset)
+{
+	std::string lowerName = GetFullAssetName(aName);
+	if (lowerName.empty() || myAssets.contains(lowerName))
+	{
+		return;
+	}
+
+	AssetInfo info;
+	info.Pin = aAsset;
+	info.AssetHolder = aAsset;
+	myAssets.try_emplace(lowerName, info);
+}
 
 void AssetRegistry::Initialize(const std::filesystem::path& contentRoot)
 {

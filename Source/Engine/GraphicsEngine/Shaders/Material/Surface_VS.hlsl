@@ -28,13 +28,13 @@ VStoPS main(Vertex aVertex)
         skinMatrix += AB_JointTransforms[aVertex.BoneIDs.w] * aVertex.SkinWeights.w;
         localPosition = mul(aVertex.Position, skinMatrix);
 
-        const float3x3 skinRotation = (float3x3)skinMatrix;
+        const float3x3 skinRotation = (float3x3) skinMatrix;
         localNormal = mul(localNormal, skinRotation);
         localTangent = mul(localTangent, skinRotation);
     }
 
     const float4 worldPos = mul(localPosition, OB_World);
-    const float3x3 worldNormalRot = (float3x3)OB_WorldInvT;
+    const float3x3 worldNormalRot = (float3x3) OB_WorldInvT;
     const float3 worldNormal = normalize(mul(localNormal, worldNormalRot));
     const float3 worldTangent = normalize(mul(localTangent, worldNormalRot));
     const float3 worldBinormal = normalize(cross(worldNormal, worldTangent));
@@ -61,5 +61,6 @@ VStoPS main(Vertex aVertex)
     result.Normal = parameters.Normal;
     result.Tangent = parameters.Tangent;
     result.Binormal = parameters.Binormal;
+    result.ViewDepth = viewPos.z;
     return result;
 }

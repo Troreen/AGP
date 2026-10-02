@@ -1,5 +1,92 @@
 {
+	"MasterMaterials": [
+		{
+			"Name": "M_Blue",
+			"Domain": 0,
+			"ShadingModel": 1,
+			"BlendMode": 0,
+			"BaseColor": [
+				0.080534003674983978,
+				0,
+				0.5,
+				1
+			],
+			"Metallic": 0,
+			"Roughness": 0.5,
+			"Parameters": []
+		},
+		{
+			"Name": "BasicShapeMaterial",
+			"Domain": 0,
+			"ShadingModel": 1,
+			"BlendMode": 0,
+			"BaseColor": [
+				0.50196081399917603,
+				0.50196081399917603,
+				0.50196081399917603,
+				1
+			],
+			"Metallic": 0,
+			"Roughness": 0.5,
+			"Parameters": [
+				{
+					"Name": "Color",
+					"Type": 1,
+					"Value": [
+						0.89999997615814209,
+						0.89999997615814209,
+						0.89999997615814209,
+						1
+					]
+				},
+				{
+					"Name": "Roughness",
+					"Type": 0,
+					"Value": 0.64069998264312744
+				}
+			]
+		},
+		{
+			"Name": "WorldGridMaterial",
+			"Domain": 0,
+			"ShadingModel": 1,
+			"BlendMode": 0,
+			"BaseColor": [
+				0.50196081399917603,
+				0.50196081399917603,
+				0.50196081399917603,
+				1
+			],
+			"Metallic": 0,
+			"Roughness": 0.42379999160766602,
+			"Parameters": []
+		}
+	],
 	"Actors": [
+		{
+			"Name": "SkyLight",
+			"Archetype": "SkyLight",
+			"Transform": [
+				1,
+				0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				0,
+				0,
+				600,
+				1
+			],
+			"Tags": [],
+			"Components": []
+		},
 		{
 			"Name": "DirectionalLight",
 			"Archetype": "DirectionalLight",
@@ -451,9 +538,11 @@
 					],
 					"Mesh": "SM_Test_Ground_8u_AppliedScale",
 					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
+					"AssetImportPath": "C:/Users/jacoblennart.nilsso/Desktop/P5G4Content/Content/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.fbx",
 					"Materials": [
 						{
 							"Name": "M_Blue",
+							"Parent": "Self",
 							"Parameters": []
 						}
 					]
@@ -508,9 +597,11 @@
 					],
 					"Mesh": "SM_Test_Ground_8u_AppliedScale",
 					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
+					"AssetImportPath": "C:/Users/jacoblennart.nilsso/Desktop/P5G4Content/Content/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.fbx",
 					"Materials": [
 						{
 							"Name": "M_Blue",
+							"Parent": "Self",
 							"Parameters": []
 						}
 					]
@@ -565,9 +656,11 @@
 					],
 					"Mesh": "SM_Test_Ground_8u_AppliedScale",
 					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
+					"AssetImportPath": "C:/Users/jacoblennart.nilsso/Desktop/P5G4Content/Content/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.fbx",
 					"Materials": [
 						{
 							"Name": "M_Blue",
+							"Parent": "Self",
 							"Parameters": []
 						}
 					]
@@ -622,9 +715,11 @@
 					],
 					"Mesh": "SM_Test_Ground_8u_AppliedScale",
 					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
+					"AssetImportPath": "C:/Users/jacoblennart.nilsso/Desktop/P5G4Content/Content/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.fbx",
 					"Materials": [
 						{
 							"Name": "M_Blue",
+							"Parent": "Self",
 							"Parameters": []
 						}
 					]
@@ -679,9 +774,11 @@
 					],
 					"Mesh": "SM_Test_Ground_8u_AppliedScale",
 					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
+					"AssetImportPath": "C:/Users/jacoblennart.nilsso/Desktop/P5G4Content/Content/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.fbx",
 					"Materials": [
 						{
 							"Name": "M_Blue",
+							"Parent": "Self",
 							"Parameters": []
 						}
 					]
@@ -736,9 +833,11 @@
 					],
 					"Mesh": "SM_Test_Ground_8u_AppliedScale",
 					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
+					"AssetImportPath": "C:/Users/jacoblennart.nilsso/Desktop/P5G4Content/Content/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.fbx",
 					"Materials": [
 						{
 							"Name": "M_Blue",
+							"Parent": "Self",
 							"Parameters": []
 						}
 					]
@@ -793,9 +892,11 @@
 					],
 					"Mesh": "SM_Test_Ground_8u_AppliedScale",
 					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
+					"AssetImportPath": "C:/Users/jacoblennart.nilsso/Desktop/P5G4Content/Content/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.fbx",
 					"Materials": [
 						{
 							"Name": "M_Blue",
+							"Parent": "Self",
 							"Parameters": []
 						}
 					]
@@ -850,9 +951,11 @@
 					],
 					"Mesh": "SM_Test_Ground_8u_AppliedScale",
 					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
+					"AssetImportPath": "C:/Users/jacoblennart.nilsso/Desktop/P5G4Content/Content/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.fbx",
 					"Materials": [
 						{
 							"Name": "M_Blue",
+							"Parent": "Self",
 							"Parameters": []
 						}
 					]
@@ -907,9 +1010,11 @@
 					],
 					"Mesh": "SM_Test_Ground_8u_AppliedScale",
 					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
+					"AssetImportPath": "C:/Users/jacoblennart.nilsso/Desktop/P5G4Content/Content/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.fbx",
 					"Materials": [
 						{
 							"Name": "M_Blue",
+							"Parent": "Self",
 							"Parameters": []
 						}
 					]
@@ -964,9 +1069,11 @@
 					],
 					"Mesh": "SM_Test_Ground_8u_AppliedScale",
 					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
+					"AssetImportPath": "C:/Users/jacoblennart.nilsso/Desktop/P5G4Content/Content/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.fbx",
 					"Materials": [
 						{
 							"Name": "M_Blue",
+							"Parent": "Self",
 							"Parameters": []
 						}
 					]
@@ -1021,127 +1128,11 @@
 					],
 					"Mesh": "SM_Test_Ground_8u_AppliedScale",
 					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
+					"AssetImportPath": "C:/Users/jacoblennart.nilsso/Desktop/P5G4Content/Content/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.fbx",
 					"Materials": [
 						{
 							"Name": "M_Blue",
-							"Parameters": []
-						}
-					]
-				}
-			]
-		},
-		{
-			"Name": "SM_Test_Ground_8u_AppliedScale14",
-			"Archetype": "StaticMeshActor",
-			"Transform": [
-				1.7453292144864463e-08,
-				-1.0000000000000002,
-				-1.1102230246251565e-16,
-				0,
-				1.7453292588953673e-08,
-				0,
-				-1.0000000000000002,
-				0,
-				1,
-				1.7453292588953673e-08,
-				1.7453292144864463e-08,
-				0,
-				-500,
-				800,
-				400,
-				1
-			],
-			"Tags": [],
-			"Components": [
-				{
-					"Name": "StaticMeshComponent0",
-					"TypeID": 1,
-					"Parent": "",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Mesh": "SM_Test_Ground_8u_AppliedScale",
-					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
-					"Materials": [
-						{
-							"Name": "M_Blue",
-							"Parameters": []
-						}
-					]
-				}
-			]
-		},
-		{
-			"Name": "SM_Prop_SnowPile_MaybeFix_",
-			"Archetype": "StaticMeshActor",
-			"Transform": [
-				-2.2204460492503131e-16,
-				0,
-				-1.0000000000000002,
-				0,
-				-0,
-				1,
-				0,
-				0,
-				1.0000000000000002,
-				0,
-				-2.2204460492503131e-16,
-				0,
-				-400,
-				1100,
-				500,
-				1
-			],
-			"Tags": [],
-			"Components": [
-				{
-					"Name": "StaticMeshComponent0",
-					"TypeID": 1,
-					"Parent": "",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Mesh": "SM_Prop_SnowPile_MaybeFix_",
-					"ContentPath": "/Game/Meshes/Props/SM_Prop_SnowPile_MaybeFix_.SM_Prop_SnowPile_MaybeFix_",
-					"Materials": [
-						{
-							"Name": "WorldGridMaterial",
-							"Parameters": []
-						},
-						{
-							"Name": "WorldGridMaterial",
+							"Parent": "Self",
 							"Parameters": []
 						}
 					]
@@ -1196,9 +1187,11 @@
 					],
 					"Mesh": "SM_Test_Ground_8u_AppliedScale",
 					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
+					"AssetImportPath": "C:/Users/jacoblennart.nilsso/Desktop/P5G4Content/Content/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.fbx",
 					"Materials": [
 						{
 							"Name": "M_Blue",
+							"Parent": "Self",
 							"Parameters": []
 						}
 					]
@@ -1253,9 +1246,11 @@
 					],
 					"Mesh": "SM_Test_Ground_8u_AppliedScale",
 					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
+					"AssetImportPath": "C:/Users/jacoblennart.nilsso/Desktop/P5G4Content/Content/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.fbx",
 					"Materials": [
 						{
 							"Name": "M_Blue",
+							"Parent": "Self",
 							"Parameters": []
 						}
 					]
@@ -1310,9 +1305,11 @@
 					],
 					"Mesh": "SM_Test_Ground_8u_AppliedScale",
 					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
+					"AssetImportPath": "C:/Users/jacoblennart.nilsso/Desktop/P5G4Content/Content/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.fbx",
 					"Materials": [
 						{
 							"Name": "M_Blue",
+							"Parent": "Self",
 							"Parameters": []
 						}
 					]
@@ -1367,9 +1364,11 @@
 					],
 					"Mesh": "SM_Test_Ground_8u_AppliedScale",
 					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
+					"AssetImportPath": "C:/Users/jacoblennart.nilsso/Desktop/P5G4Content/Content/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.fbx",
 					"Materials": [
 						{
 							"Name": "M_Blue",
+							"Parent": "Self",
 							"Parameters": []
 						}
 					]
@@ -1424,9 +1423,11 @@
 					],
 					"Mesh": "SM_Test_Ground_8u_AppliedScale",
 					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
+					"AssetImportPath": "C:/Users/jacoblennart.nilsso/Desktop/P5G4Content/Content/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.fbx",
 					"Materials": [
 						{
 							"Name": "M_Blue",
+							"Parent": "Self",
 							"Parameters": []
 						}
 					]
@@ -1481,9 +1482,11 @@
 					],
 					"Mesh": "SM_Test_Ground_8u_AppliedScale",
 					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
+					"AssetImportPath": "C:/Users/jacoblennart.nilsso/Desktop/P5G4Content/Content/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.fbx",
 					"Materials": [
 						{
 							"Name": "M_Blue",
+							"Parent": "Self",
 							"Parameters": []
 						}
 					]
@@ -1538,9 +1541,11 @@
 					],
 					"Mesh": "SM_Test_Ground_8u_AppliedScale",
 					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
+					"AssetImportPath": "C:/Users/jacoblennart.nilsso/Desktop/P5G4Content/Content/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.fbx",
 					"Materials": [
 						{
 							"Name": "M_Blue",
+							"Parent": "Self",
 							"Parameters": []
 						}
 					]
@@ -1595,9 +1600,11 @@
 					],
 					"Mesh": "SM_Test_Ground_8u_AppliedScale",
 					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
+					"AssetImportPath": "C:/Users/jacoblennart.nilsso/Desktop/P5G4Content/Content/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.fbx",
 					"Materials": [
 						{
 							"Name": "M_Blue",
+							"Parent": "Self",
 							"Parameters": []
 						}
 					]
@@ -1652,9 +1659,11 @@
 					],
 					"Mesh": "SM_Test_Ground_8u_AppliedScale",
 					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
+					"AssetImportPath": "C:/Users/jacoblennart.nilsso/Desktop/P5G4Content/Content/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.fbx",
 					"Materials": [
 						{
 							"Name": "M_Blue",
+							"Parent": "Self",
 							"Parameters": []
 						}
 					]
@@ -1709,9 +1718,11 @@
 					],
 					"Mesh": "SM_Test_Ground_8u_AppliedScale",
 					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
+					"AssetImportPath": "C:/Users/jacoblennart.nilsso/Desktop/P5G4Content/Content/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.fbx",
 					"Materials": [
 						{
 							"Name": "M_Blue",
+							"Parent": "Self",
 							"Parameters": []
 						}
 					]
@@ -1766,9 +1777,11 @@
 					],
 					"Mesh": "SM_Test_Ground_8u_AppliedScale",
 					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
+					"AssetImportPath": "C:/Users/jacoblennart.nilsso/Desktop/P5G4Content/Content/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.fbx",
 					"Materials": [
 						{
 							"Name": "M_Blue",
+							"Parent": "Self",
 							"Parameters": []
 						}
 					]
@@ -1823,9 +1836,11 @@
 					],
 					"Mesh": "SM_Test_Ground_8u_AppliedScale",
 					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
+					"AssetImportPath": "C:/Users/jacoblennart.nilsso/Desktop/P5G4Content/Content/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.fbx",
 					"Materials": [
 						{
 							"Name": "M_Blue",
+							"Parent": "Self",
 							"Parameters": []
 						}
 					]
@@ -1880,9 +1895,11 @@
 					],
 					"Mesh": "SM_Test_Ground_8u_AppliedScale",
 					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
+					"AssetImportPath": "C:/Users/jacoblennart.nilsso/Desktop/P5G4Content/Content/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.fbx",
 					"Materials": [
 						{
 							"Name": "M_Blue",
+							"Parent": "Self",
 							"Parameters": []
 						}
 					]
@@ -1937,9 +1954,11 @@
 					],
 					"Mesh": "SM_Test_Ground_8u_AppliedScale",
 					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
+					"AssetImportPath": "C:/Users/jacoblennart.nilsso/Desktop/P5G4Content/Content/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.fbx",
 					"Materials": [
 						{
 							"Name": "M_Blue",
+							"Parent": "Self",
 							"Parameters": []
 						}
 					]
@@ -1994,9 +2013,11 @@
 					],
 					"Mesh": "SM_Test_Ground_8u_AppliedScale",
 					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
+					"AssetImportPath": "C:/Users/jacoblennart.nilsso/Desktop/P5G4Content/Content/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.fbx",
 					"Materials": [
 						{
 							"Name": "M_Blue",
+							"Parent": "Self",
 							"Parameters": []
 						}
 					]
@@ -2026,67 +2047,6 @@
 			],
 			"Tags": [],
 			"Components": []
-		},
-		{
-			"Name": "SM_Prop_SnowPile_MaybeFix_6",
-			"Archetype": "StaticMeshActor",
-			"Transform": [
-				1,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				2290,
-				1010,
-				100,
-				1
-			],
-			"Tags": [],
-			"Components": [
-				{
-					"Name": "StaticMeshComponent0",
-					"TypeID": 1,
-					"Parent": "",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Mesh": "SM_Prop_SnowPile_MaybeFix_",
-					"ContentPath": "/Game/Meshes/Props/SM_Prop_SnowPile_MaybeFix_.SM_Prop_SnowPile_MaybeFix_",
-					"Materials": [
-						{
-							"Name": "WorldGridMaterial",
-							"Parameters": []
-						},
-						{
-							"Name": "WorldGridMaterial",
-							"Parameters": []
-						}
-					]
-				}
-			]
 		},
 		{
 			"Name": "SM_Test_Ground_8u_AppliedScale29",
@@ -2136,501 +2096,11 @@
 					],
 					"Mesh": "SM_Test_Ground_8u_AppliedScale",
 					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
+					"AssetImportPath": "C:/Users/jacoblennart.nilsso/Desktop/P5G4Content/Content/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.fbx",
 					"Materials": [
 						{
 							"Name": "M_Blue",
-							"Parameters": []
-						}
-					]
-				}
-			]
-		},
-		{
-			"Name": "SM_Prop_SnowPile_MaybeFix_7",
-			"Archetype": "StaticMeshActor",
-			"Transform": [
-				-2.2204460492503131e-16,
-				1.1102230246251565e-16,
-				-1.0000000000000002,
-				0,
-				-1,
-				1.2167970298015973e-08,
-				1.1102230246251565e-16,
-				0,
-				1.2167970464549427e-08,
-				1,
-				0,
-				0,
-				2290,
-				-1090,
-				500,
-				1
-			],
-			"Tags": [],
-			"Components": [
-				{
-					"Name": "StaticMeshComponent0",
-					"TypeID": 1,
-					"Parent": "",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Mesh": "SM_Prop_SnowPile_MaybeFix_",
-					"ContentPath": "/Game/Meshes/Props/SM_Prop_SnowPile_MaybeFix_.SM_Prop_SnowPile_MaybeFix_",
-					"Materials": [
-						{
-							"Name": "WorldGridMaterial",
-							"Parameters": []
-						},
-						{
-							"Name": "WorldGridMaterial",
-							"Parameters": []
-						}
-					]
-				}
-			]
-		},
-		{
-			"Name": "Cube",
-			"Archetype": "StaticMeshActor",
-			"Transform": [
-				1,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				600,
-				-900,
-				150.04160390624747,
-				1
-			],
-			"Tags": [],
-			"Components": [
-				{
-					"Name": "StaticMeshComponent0",
-					"TypeID": 1,
-					"Parent": "",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Mesh": "Cube",
-					"ContentPath": "/Engine/BasicShapes/Cube.Cube",
-					"Materials": [
-						{
-							"Name": "BasicShapeMaterial",
-							"Parameters": [
-								{
-									"Name": "Color",
-									"Type": 1,
-									"Value": [
-										0.89999997615814209,
-										0.89999997615814209,
-										0.89999997615814209,
-										1
-									]
-								},
-								{
-									"Name": "Roughness",
-									"Type": 0,
-									"Value": 0.64069998264312744
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"Name": "Cube2",
-			"Archetype": "StaticMeshActor",
-			"Transform": [
-				6.75,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				0,
-				0,
-				0,
-				16.75,
-				0,
-				1300,
-				-900,
-				937.54152089452873,
-				1
-			],
-			"Tags": [],
-			"Components": [
-				{
-					"Name": "StaticMeshComponent0",
-					"TypeID": 1,
-					"Parent": "",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Mesh": "Cube",
-					"ContentPath": "/Engine/BasicShapes/Cube.Cube",
-					"Materials": [
-						{
-							"Name": "BasicShapeMaterial",
-							"Parameters": [
-								{
-									"Name": "Color",
-									"Type": 1,
-									"Value": [
-										0.89999997615814209,
-										0.89999997615814209,
-										0.89999997615814209,
-										1
-									]
-								},
-								{
-									"Name": "Roughness",
-									"Type": 0,
-									"Value": 0.64069998264312744
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"Name": "OrientationGizmo_ExportA",
-			"Archetype": "StaticMeshActor",
-			"Transform": [
-				1,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				600,
-				1100,
-				115.3441246582006,
-				1
-			],
-			"Tags": [],
-			"Components": [
-				{
-					"Name": "StaticMeshComponent0",
-					"TypeID": 1,
-					"Parent": "",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Mesh": "OrientationGizmo_ExportA",
-					"ContentPath": "/Game/Meshes/Orientation_Testing/OrientationGizmo_ExportA.OrientationGizmo_ExportA",
-					"Materials": [
-						{
-							"Name": "WorldGridMaterial",
-							"Parameters": []
-						}
-					]
-				}
-			]
-		},
-		{
-			"Name": "OrientationGizmo_ExportB",
-			"Archetype": "StaticMeshActor",
-			"Transform": [
-				1,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				1000,
-				1100,
-				115.3441246582006,
-				1
-			],
-			"Tags": [],
-			"Components": [
-				{
-					"Name": "StaticMeshComponent0",
-					"TypeID": 1,
-					"Parent": "",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Mesh": "OrientationGizmo_ExportB",
-					"ContentPath": "/Game/Meshes/Orientation_Testing/OrientationGizmo_ExportB.OrientationGizmo_ExportB",
-					"Materials": [
-						{
-							"Name": "WorldGridMaterial",
-							"Parameters": []
-						}
-					]
-				}
-			]
-		},
-		{
-			"Name": "OrientationGizmo_ExportC",
-			"Archetype": "StaticMeshActor",
-			"Transform": [
-				1,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				1200,
-				2400,
-				100.3441246582006,
-				1
-			],
-			"Tags": [],
-			"Components": [
-				{
-					"Name": "StaticMeshComponent0",
-					"TypeID": 1,
-					"Parent": "",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Mesh": "OrientationGizmo_ExportC",
-					"ContentPath": "/Game/Meshes/Orientation_Testing/OrientationGizmo_ExportC.OrientationGizmo_ExportC",
-					"Materials": [
-						{
-							"Name": "WorldGridMaterial",
-							"Parameters": []
-						}
-					]
-				}
-			]
-		},
-		{
-			"Name": "OrientationGizmo_ExportD",
-			"Archetype": "StaticMeshActor",
-			"Transform": [
-				-0.99999999999999956,
-				1.224646799147353e-16,
-				0,
-				0,
-				-1.224646799147353e-16,
-				-0.99999999999999956,
-				0,
-				0,
-				0,
-				-0,
-				1,
-				0,
-				1300,
-				1100,
-				115.3441246582006,
-				1
-			],
-			"Tags": [],
-			"Components": [
-				{
-					"Name": "StaticMeshComponent0",
-					"TypeID": 1,
-					"Parent": "",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Mesh": "OrientationGizmo_ExportD",
-					"ContentPath": "/Game/Meshes/Orientation_Testing/OrientationGizmo_ExportD.OrientationGizmo_ExportD",
-					"Materials": [
-						{
-							"Name": "WorldGridMaterial",
-							"Parameters": []
-						}
-					]
-				}
-			]
-		},
-		{
-			"Name": "OrientationGizmo_ExportE",
-			"Archetype": "StaticMeshActor",
-			"Transform": [
-				1,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				1700,
-				1100,
-				115.3441246582006,
-				1
-			],
-			"Tags": [],
-			"Components": [
-				{
-					"Name": "StaticMeshComponent0",
-					"TypeID": 1,
-					"Parent": "",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Mesh": "OrientationGizmo_ExportE",
-					"ContentPath": "/Game/Meshes/Orientation_Testing/OrientationGizmo_ExportE.OrientationGizmo_ExportE",
-					"Materials": [
-						{
-							"Name": "WorldGridMaterial",
+							"Parent": "Self",
 							"Parameters": []
 						}
 					]
@@ -2685,9 +2155,11 @@
 					],
 					"Mesh": "SM_Test_Ground_8u_AppliedScale",
 					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
+					"AssetImportPath": "C:/Users/jacoblennart.nilsso/Desktop/P5G4Content/Content/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.fbx",
 					"Materials": [
 						{
 							"Name": "M_Blue",
+							"Parent": "Self",
 							"Parameters": []
 						}
 					]
@@ -2695,7 +2167,184 @@
 			]
 		},
 		{
-			"Name": "SM_Test_Ground_8u_AppliedScale30",
+			"Name": "SM_Test_Ground_8u_AppliedScale14",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				1.7453292144864463e-08,
+				-1.0000000000000002,
+				-1.1102230246251565e-16,
+				0,
+				1.7453292588953673e-08,
+				0,
+				-1.0000000000000002,
+				0,
+				1,
+				1.7453292588953673e-08,
+				1.7453292144864463e-08,
+				0,
+				-499.99998603736634,
+				800,
+				399.99999999999994,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "SM_Test_Ground_8u_AppliedScale",
+					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
+					"AssetImportPath": "C:/Users/jacoblennart.nilsso/Desktop/P5G4Content/Content/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.fbx",
+					"Materials": [
+						{
+							"Name": "M_Blue",
+							"Parent": "Self",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Cube",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				3.75,
+				0,
+				0,
+				0,
+				0,
+				4.5,
+				0,
+				0,
+				0,
+				0,
+				4.5,
+				0,
+				2000,
+				900,
+				325.04153605956526,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Cube",
+					"ContentPath": "/Engine/BasicShapes/Cube.Cube",
+					"AssetImportPath": "",
+					"Materials": [
+						{
+							"Name": "BasicShapeMaterial",
+							"Parent": "Self",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "Cube2",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				3.75,
+				0,
+				0,
+				0,
+				0,
+				0.5,
+				0,
+				0,
+				0,
+				0,
+				4.5,
+				0,
+				400,
+				900,
+				325.04153600000001,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "Cube",
+					"ContentPath": "/Engine/BasicShapes/Cube.Cube",
+					"AssetImportPath": "",
+					"Materials": [
+						{
+							"Name": "BasicShapeMaterial",
+							"Parent": "Self",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "OrientationGizmos_TGE",
 			"Archetype": "StaticMeshActor",
 			"Transform": [
 				1,
@@ -2711,699 +2360,7 @@
 				1,
 				0,
 				1600,
-				2400,
-				0,
-				1
-			],
-			"Tags": [],
-			"Components": [
-				{
-					"Name": "StaticMeshComponent0",
-					"TypeID": 1,
-					"Parent": "",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Mesh": "SM_Test_Ground_8u_AppliedScale",
-					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
-					"Materials": [
-						{
-							"Name": "M_PrototypeGrid",
-							"Parameters": [
-								{
-									"Name": "TopSurfaceColor",
-									"Type": 1,
-									"Value": [
-										0.048000000417232513,
-										0.048000000417232513,
-										0.048000000417232513,
-										1
-									]
-								},
-								{
-									"Name": "Grid Size",
-									"Type": 0,
-									"Value": 100
-								},
-								{
-									"Name": "Sub Grid Number",
-									"Type": 0,
-									"Value": 5
-								},
-								{
-									"Name": "CircleSize",
-									"Type": 0,
-									"Value": 100
-								},
-								{
-									"Name": "SurfaceColor",
-									"Type": 1,
-									"Value": [
-										0.18000000715255737,
-										0.18000000715255737,
-										0.18000000715255737,
-										1
-									]
-								},
-								{
-									"Name": "TopGridColor",
-									"Type": 1,
-									"Value": [
-										0.16770799458026886,
-										0.16770799458026886,
-										0.16770799458026886,
-										1
-									]
-								},
-								{
-									"Name": "GridColor",
-									"Type": 1,
-									"Value": [
-										0,
-										0,
-										0,
-										1
-									]
-								},
-								{
-									"Name": "Roughness",
-									"Type": 0,
-									"Value": 1
-								},
-								{
-									"Name": "TopSubGridGridColor",
-									"Type": 1,
-									"Value": [
-										0.16770799458026886,
-										0.16770799458026886,
-										0.16770799458026886,
-										1
-									]
-								},
-								{
-									"Name": "SubGridColor",
-									"Type": 1,
-									"Value": [
-										0,
-										0,
-										0,
-										1
-									]
-								},
-								{
-									"Name": "Line Dimensions",
-									"Type": 1,
-									"Value": [
-										0.021838000044226646,
-										0.0013470000121742487,
-										0.5,
-										0
-									]
-								},
-								{
-									"Name": "TopSurfaceColor",
-									"Type": 8,
-									"Value": false
-								},
-								{
-									"Name": "ObjectAligned",
-									"Type": 8,
-									"Value": false
-								},
-								{
-									"Name": "Grid",
-									"Type": 8,
-									"Value": true
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"Name": "SM_Test_Ground_8u_AppliedScale31",
-			"Archetype": "StaticMeshActor",
-			"Transform": [
-				1.2167966190190782e-08,
-				-1,
-				1.1102230246251565e-16,
-				0,
-				1.2167967522458412e-08,
-				0,
-				-1,
-				0,
-				0.99999999999999989,
-				1.2167966245701933e-08,
-				1.2167967522458412e-08,
-				0,
-				1100,
-				2400,
-				400,
-				1
-			],
-			"Tags": [],
-			"Components": [
-				{
-					"Name": "StaticMeshComponent0",
-					"TypeID": 1,
-					"Parent": "",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Mesh": "SM_Test_Ground_8u_AppliedScale",
-					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
-					"Materials": [
-						{
-							"Name": "M_PrototypeGrid",
-							"Parameters": [
-								{
-									"Name": "TopSurfaceColor",
-									"Type": 1,
-									"Value": [
-										0.048000000417232513,
-										0.048000000417232513,
-										0.048000000417232513,
-										1
-									]
-								},
-								{
-									"Name": "Grid Size",
-									"Type": 0,
-									"Value": 100
-								},
-								{
-									"Name": "Sub Grid Number",
-									"Type": 0,
-									"Value": 5
-								},
-								{
-									"Name": "CircleSize",
-									"Type": 0,
-									"Value": 100
-								},
-								{
-									"Name": "SurfaceColor",
-									"Type": 1,
-									"Value": [
-										0.18000000715255737,
-										0.18000000715255737,
-										0.18000000715255737,
-										1
-									]
-								},
-								{
-									"Name": "TopGridColor",
-									"Type": 1,
-									"Value": [
-										0.16770799458026886,
-										0.16770799458026886,
-										0.16770799458026886,
-										1
-									]
-								},
-								{
-									"Name": "GridColor",
-									"Type": 1,
-									"Value": [
-										0,
-										0,
-										0,
-										1
-									]
-								},
-								{
-									"Name": "Roughness",
-									"Type": 0,
-									"Value": 1
-								},
-								{
-									"Name": "TopSubGridGridColor",
-									"Type": 1,
-									"Value": [
-										0.16770799458026886,
-										0.16770799458026886,
-										0.16770799458026886,
-										1
-									]
-								},
-								{
-									"Name": "SubGridColor",
-									"Type": 1,
-									"Value": [
-										0,
-										0,
-										0,
-										1
-									]
-								},
-								{
-									"Name": "Line Dimensions",
-									"Type": 1,
-									"Value": [
-										0.021838000044226646,
-										0.0013470000121742487,
-										0.5,
-										0
-									]
-								},
-								{
-									"Name": "TopSurfaceColor",
-									"Type": 8,
-									"Value": false
-								},
-								{
-									"Name": "ObjectAligned",
-									"Type": 8,
-									"Value": false
-								},
-								{
-									"Name": "Grid",
-									"Type": 8,
-									"Value": true
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"Name": "SM_Test_Ground_8u_AppliedScale32",
-			"Archetype": "StaticMeshActor",
-			"Transform": [
-				1.7453292144864463e-08,
-				-1.0000000000000002,
-				-1.1102230246251565e-16,
-				0,
-				1.7453292588953673e-08,
-				0,
-				-1.0000000000000002,
-				0,
-				1,
-				1.7453292588953673e-08,
-				1.7453292144864463e-08,
-				0,
-				300,
-				1200,
-				500,
-				1
-			],
-			"Tags": [],
-			"Components": [
-				{
-					"Name": "StaticMeshComponent0",
-					"TypeID": 1,
-					"Parent": "",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Mesh": "SM_Test_Ground_8u_AppliedScale",
-					"ContentPath": "/Game/Meshes/Modules/ExampleKit/SM_Test_Ground_8u_AppliedScale.SM_Test_Ground_8u_AppliedScale",
-					"Materials": [
-						{
-							"Name": "M_Blue",
-							"Parameters": []
-						}
-					]
-				}
-			]
-		},
-		{
-			"Name": "OrientationGizmo_ExportF",
-			"Archetype": "StaticMeshActor",
-			"Transform": [
-				1,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				1930,
-				1110,
-				110,
-				1
-			],
-			"Tags": [],
-			"Components": []
-		},
-		{
-			"Name": "OrientationGizmo_ExportF2",
-			"Archetype": "StaticMeshActor",
-			"Transform": [
-				1,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				1910,
-				1120,
-				120,
-				1
-			],
-			"Tags": [],
-			"Components": [
-				{
-					"Name": "StaticMeshComponent0",
-					"TypeID": 1,
-					"Parent": "",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Mesh": "OrientationGizmo_ExportF",
-					"ContentPath": "/Game/Meshes/Orientation_Testing/OrientationGizmo_ExportF.OrientationGizmo_ExportF",
-					"Materials": [
-						{
-							"Name": "WorldGridMaterial",
-							"Parameters": []
-						}
-					]
-				}
-			]
-		},
-		{
-			"Name": "OrientationGizmo_ExportG",
-			"Archetype": "StaticMeshActor",
-			"Transform": [
-				1,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				1910,
-				1470,
-				120,
-				1
-			],
-			"Tags": [],
-			"Components": [
-				{
-					"Name": "StaticMeshComponent0",
-					"TypeID": 1,
-					"Parent": "",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Mesh": "OrientationGizmo_ExportG",
-					"ContentPath": "/Game/Meshes/Orientation_Testing/OrientationGizmo_ExportG.OrientationGizmo_ExportG",
-					"Materials": [
-						{
-							"Name": "WorldGridMaterial",
-							"Parameters": []
-						}
-					]
-				}
-			]
-		},
-		{
-			"Name": "OrientationGizmo_ExportK",
-			"Archetype": "StaticMeshActor",
-			"Transform": [
-				1,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				2200,
-				1640,
-				110,
-				1
-			],
-			"Tags": [],
-			"Components": [
-				{
-					"Name": "StaticMeshComponent0",
-					"TypeID": 1,
-					"Parent": "",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Mesh": "OrientationGizmo_ExportK",
-					"ContentPath": "/Game/Meshes/Orientation_Testing/OrientationGizmo_ExportK.OrientationGizmo_ExportK",
-					"Materials": [
-						{
-							"Name": "WorldGridMaterial",
-							"Parameters": []
-						}
-					]
-				}
-			]
-		},
-		{
-			"Name": "OrientationGizmo_ExportL",
-			"Archetype": "StaticMeshActor",
-			"Transform": [
-				1,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				2360,
-				1860,
-				110,
-				1
-			],
-			"Tags": [],
-			"Components": [
-				{
-					"Name": "StaticMeshComponent0",
-					"TypeID": 1,
-					"Parent": "",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Mesh": "OrientationGizmo_ExportL",
-					"ContentPath": "/Game/Meshes/Orientation_Testing/OrientationGizmo_ExportL.OrientationGizmo_ExportL",
-					"Materials": [
-						{
-							"Name": "WorldGridMaterial",
-							"Parameters": []
-						}
-					]
-				}
-			]
-		},
-		{
-			"Name": "New_OrientationGizmo_Export_01",
-			"Archetype": "StaticMeshActor",
-			"Transform": [
-				1,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				1310,
-				-340,
-				120,
-				1
-			],
-			"Tags": [],
-			"Components": [
-				{
-					"Name": "StaticMeshComponent0",
-					"TypeID": 1,
-					"Parent": "",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Mesh": "New_OrientationGizmo_Export_01",
-					"ContentPath": "/Game/Meshes/Orientation_Testing/New_OrientationGizmo_Export_01.New_OrientationGizmo_Export_01",
-					"Materials": [
-						{
-							"Name": "WorldGridMaterial",
-							"Parameters": []
-						}
-					]
-				}
-			]
-		},
-		{
-			"Name": "New_OrientationGizmo_Export_02",
-			"Archetype": "StaticMeshActor",
-			"Transform": [
-				1,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				1170,
-				-340,
+				1600,
 				100,
 				1
 			],
@@ -3432,13 +2389,172 @@
 						0,
 						1
 					],
-					"Mesh": "New_OrientationGizmo_Export_02",
-					"ContentPath": "/Game/Meshes/Orientation_Testing/New_OrientationGizmo_Export_02.New_OrientationGizmo_Export_02",
+					"Mesh": "OrientationGizmos_TGE",
+					"ContentPath": "/Game/Meshes/Orientation_Testing/OrientationGizmos_TGE.OrientationGizmos_TGE",
+					"AssetImportPath": "C:/Users/jacoblennart.nilsso/Desktop/P5G4Content/Content/Meshes/OrientationTesting/OrientationGizmos_TGE.fbx",
 					"Materials": [
 						{
 							"Name": "WorldGridMaterial",
+							"Parent": "Self",
 							"Parameters": []
 						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "SM_Landscape_Test_01",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				1,
+				0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				2700,
+				3130,
+				200,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "SM_Landscape_Test_01",
+					"ContentPath": "/Game/Meshes/Orientation_Testing/SM_Landscape_Test_01.SM_Landscape_Test_01",
+					"AssetImportPath": "C:/Users/erikwilliam.ensbo/Desktop/P5G4 Content/Content/Meshes/OrientationTesting/SM_Landscape_Test_01.fbx",
+					"Materials": [
+						{
+							"Name": "M_Blue",
+							"Parent": "Self",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "LandscapeGizmoActiveActor0",
+			"Archetype": "LandscapeGizmoActiveActor",
+			"Transform": [
+				1,
+				0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				0,
+				0,
+				-300,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "RootComponent0",
+					"TypeID": 0,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					]
+				}
+			]
+		},
+		{
+			"Name": "Landscape",
+			"Archetype": "Landscape",
+			"Transform": [
+				100,
+				0,
+				0,
+				0,
+				0,
+				100,
+				0,
+				0,
+				0,
+				0,
+				100,
+				0,
+				-25200,
+				-25200,
+				0,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "RootComponent0",
+					"TypeID": 0,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
 					]
 				}
 			]

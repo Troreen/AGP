@@ -302,12 +302,12 @@ std::shared_ptr<Mesh> PrimitiveMeshBuilder::CreateCube()
 	std::vector<Vertex> vertices;
 	std::vector<unsigned> indices;
 
-	AddQuad(vertices, indices, Point3(-0.5f, -0.5f, -0.5f), Point3(0.5f, -0.5f, -0.5f), Point3(0.5f, 0.5f, -0.5f), Point3(-0.5f, 0.5f, -0.5f));
-	AddQuad(vertices, indices, Point3(0.5f, -0.5f, 0.5f), Point3(-0.5f, -0.5f, 0.5f), Point3(-0.5f, 0.5f, 0.5f), Point3(0.5f, 0.5f, 0.5f));
-	AddQuad(vertices, indices, Point3(-0.5f, -0.5f, 0.5f), Point3(-0.5f, -0.5f, -0.5f), Point3(-0.5f, 0.5f, -0.5f), Point3(-0.5f, 0.5f, 0.5f));
-	AddQuad(vertices, indices, Point3(0.5f, -0.5f, -0.5f), Point3(0.5f, -0.5f, 0.5f), Point3(0.5f, 0.5f, 0.5f), Point3(0.5f, 0.5f, -0.5f));
-	AddQuad(vertices, indices, Point3(-0.5f, 0.5f, -0.5f), Point3(0.5f, 0.5f, -0.5f), Point3(0.5f, 0.5f, 0.5f), Point3(-0.5f, 0.5f, 0.5f));
-	AddQuad(vertices, indices, Point3(-0.5f, -0.5f, 0.5f), Point3(0.5f, -0.5f, 0.5f), Point3(0.5f, -0.5f, -0.5f), Point3(-0.5f, -0.5f, -0.5f));
+	AddQuad(vertices, indices, Point3(-0.5f, -0.5f, -0.5f) * 100.0f, Point3(0.5f, -0.5f, -0.5f) * 100.0f, Point3(0.5f, 0.5f, -0.5f) * 100.0f, Point3(-0.5f, 0.5f, -0.5f) * 100.0f);
+	AddQuad(vertices, indices, Point3(0.5f, -0.5f, 0.5f) * 100.0f, Point3(-0.5f, -0.5f, 0.5f) * 100.0f, Point3(-0.5f, 0.5f, 0.5f) * 100.0f, Point3(0.5f, 0.5f, 0.5f) * 100.0f);
+	AddQuad(vertices, indices, Point3(-0.5f, -0.5f, 0.5f) * 100.0f, Point3(-0.5f, -0.5f, -0.5f) * 100.0f, Point3(-0.5f, 0.5f, -0.5f) * 100.0f, Point3(-0.5f, 0.5f, 0.5f) * 100.0f);
+	AddQuad(vertices, indices, Point3(0.5f, -0.5f, -0.5f) * 100.0f, Point3(0.5f, -0.5f, 0.5f) * 100.0f, Point3(0.5f, 0.5f, 0.5f) * 100.0f, Point3(0.5f, 0.5f, -0.5f) * 100.0f);
+	AddQuad(vertices, indices, Point3(-0.5f, 0.5f, -0.5f) * 100.0f, Point3(0.5f, 0.5f, -0.5f) * 100.0f, Point3(0.5f, 0.5f, 0.5f) * 100.0f, Point3(-0.5f, 0.5f, 0.5f) * 100.0f);
+	AddQuad(vertices, indices, Point3(-0.5f, -0.5f, 0.5f) * 100.0f, Point3(0.5f, -0.5f, 0.5f) * 100.0f, Point3(0.5f, -0.5f, -0.5f) * 100.0f, Point3(-0.5f, -0.5f, -0.5f) * 100.0f);
 
 	return CreateMesh("Cube", std::move(vertices), std::move(indices));
 }

@@ -159,61 +159,69 @@
     <ClCompile Include="TextWidget.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\Internal\BRDF_LUT_PS.hlsl">
+    <FxCompile Include="Shaders\Internal\BRDF_LUT_PS.hlsl">
       <Filter>Shaders\Internal</Filter>
-    </None>
-    <None Include="Shaders\Internal\DeferredAmbient_PS.hlsl">
+    </FxCompile>
+    <FxCompile Include="Shaders\Internal\DeferredAmbient_PS.hlsl">
       <Filter>Shaders\Internal</Filter>
-    </None>
-    <None Include="Shaders\Internal\DeferredDirectional_PS.hlsl">
+    </FxCompile>
+    <FxCompile Include="Shaders\Internal\DeferredDirectional_PS.hlsl">
       <Filter>Shaders\Internal</Filter>
-    </None>
+    </FxCompile>
+    <FxCompile Include="Shaders\Internal\DeferredPoint_PS.hlsl">
+      <Filter>Shaders\Internal</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Internal\DeferredSpot_PS.hlsl">
+      <Filter>Shaders\Internal</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Internal\FullTexture_VS.hlsl">
+      <Filter>Shaders\Internal</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Internal\PointShadow_GS.hlsl">
+      <Filter>Shaders\Internal</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Internal\RenderPassDebug_PS.hlsl">
+      <Filter>Shaders\Internal</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Internal\ScreenSpaceAO_PS.hlsl">
+      <Filter>Shaders\Internal</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Internal\TextOverlay_PS.hlsl">
+      <Filter>Shaders\Internal</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Internal\TextOverlay_VS.hlsl">
+      <Filter>Shaders\Internal</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Internal\Tonemap_PS.hlsl">
+      <Filter>Shaders\Internal</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Material\GBuffer_PS.hlsl">
+      <Filter>Shaders\Material</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Material\Lit_PS.hlsl">
+      <Filter>Shaders\Material</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Material\Surface_VS.hlsl">
+      <Filter>Shaders\Material</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Material\Unlit_PS.hlsl">
+      <Filter>Shaders\Material</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
     <None Include="Shaders\Internal\DeferredLighting.hlsli">
-      <Filter>Shaders\Internal</Filter>
-    </None>
-    <None Include="Shaders\Internal\DeferredPoint_PS.hlsl">
-      <Filter>Shaders\Internal</Filter>
-    </None>
-    <None Include="Shaders\Internal\DeferredSpot_PS.hlsl">
-      <Filter>Shaders\Internal</Filter>
-    </None>
-    <None Include="Shaders\Internal\FullTexture_VS.hlsl">
-      <Filter>Shaders\Internal</Filter>
-    </None>
-    <None Include="Shaders\Internal\PointShadow_GS.hlsl">
-      <Filter>Shaders\Internal</Filter>
-    </None>
-    <None Include="Shaders\Internal\RenderPassDebug_PS.hlsl">
-      <Filter>Shaders\Internal</Filter>
-    </None>
-    <None Include="Shaders\Internal\ScreenSpaceAO_PS.hlsl">
-      <Filter>Shaders\Internal</Filter>
-    </None>
-    <None Include="Shaders\Internal\TextOverlay_PS.hlsl">
-      <Filter>Shaders\Internal</Filter>
-    </None>
-    <None Include="Shaders\Internal\TextOverlay_VS.hlsl">
       <Filter>Shaders\Internal</Filter>
     </None>
     <None Include="Shaders\Internal\Tonemap.hlsli">
       <Filter>Shaders\Internal</Filter>
     </None>
-    <None Include="Shaders\Internal\Tonemap_PS.hlsl">
-      <Filter>Shaders\Internal</Filter>
-    </None>
     <None Include="Shaders\Material\Common.hlsli">
-      <Filter>Shaders\Material</Filter>
-    </None>
-    <None Include="Shaders\Material\GBuffer_PS.hlsl">
       <Filter>Shaders\Material</Filter>
     </None>
     <None Include="Shaders\Material\GlobalLightingTextures.hlsli">
       <Filter>Shaders\Material</Filter>
     </None>
     <None Include="Shaders\Material\Lighting.hlsli">
-      <Filter>Shaders\Material</Filter>
-    </None>
-    <None Include="Shaders\Material\Lit_PS.hlsl">
       <Filter>Shaders\Material</Filter>
     </None>
     <None Include="Shaders\Material\Material.hlsli">
@@ -235,12 +243,6 @@
       <Filter>Shaders\Material</Filter>
     </None>
     <None Include="Shaders\Material\ShadowSampling.hlsli">
-      <Filter>Shaders\Material</Filter>
-    </None>
-    <None Include="Shaders\Material\Surface_VS.hlsl">
-      <Filter>Shaders\Material</Filter>
-    </None>
-    <None Include="Shaders\Material\Unlit_PS.hlsl">
       <Filter>Shaders\Material</Filter>
     </None>
   </ItemGroup>

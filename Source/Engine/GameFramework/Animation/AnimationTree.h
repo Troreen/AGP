@@ -1,7 +1,6 @@
 #pragma once
 #include "AnimationState.h"
 
-#include <GameFramework/Components/SkeletalMeshComponent.h>
 //#include "AnimatedModel.h"
 
 #include "CommonUtilities/Vector3.hpp"
@@ -9,9 +8,11 @@
 #include <string>
 #include <unordered_map>
 
+class AnimatorComponent;
+
 struct AnimationVariable
 {
-	std::string_view Name;
+	std::string Name;
 	bool IsTrigger;
 
 	bool IsActive;
@@ -23,8 +24,8 @@ public:
 	friend class AnimationManager;
 	friend class AnimationState;
 
-	AnimationTree() : myAnimationPlayer(nullptr), myShouldUpdateAnimation(false), myCurrentState(0) {};
-	AnimationTree(std::string_view aName, std::string_view aStartState, const std::vector<AnimationVariable>& someVariables);
+	AnimationTree() : myAnimationPlayer(nullptr), myShouldUpdateAnimation(false), myCurrentState(0){};
+	AnimationTree(const std::string& aName, const std::string& aStartState, const std::vector<AnimationVariable>& someVariables);
 	AnimationTree(const AnimationTree& aTree);
 	~AnimationTree() = default;
 
@@ -46,12 +47,13 @@ public:
 
 	void PlayState(const std::string& aName);
 
-	SkeletalMeshComponent& GetAnimationPlayer();
+	void SetAnimationPlayer(AnimatorComponent* aAnimationPlayer);
+	AnimatorComponent* GetAnimationPlayer();
 
 private:
 	void AddVariable(const AnimationVariable& anAnimationVariable);
 
-	const std::unordered_map<std::string_view, AnimationVariable> GetVariables() const;
+	const std::unordered_map<std::string, AnimationVariable> GetVariables() const;
 	const std::vector<AnimationState> GetStates() const;
 
 	const std::string myName;
@@ -60,10 +62,10 @@ private:
 	std::vector <Transition> myGlobalTransitions;
 	void AddGlobalTransition(const Transition aTransition);
 
-	SkeletalMeshComponent* myAnimationPlayer;
+	AnimatorComponent* myAnimationPlayer;
 	bool myShouldUpdateAnimation;
 
-	std::unordered_map<std::string_view, AnimationVariable> myAnimationVariables;
+	std::unordered_map<std::string, AnimationVariable> myAnimationVariables;
 
 	std::vector<AnimationState> myAnimationStates;
 	int myCurrentState;

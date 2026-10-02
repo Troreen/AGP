@@ -73,8 +73,26 @@ project "GraphicsEngine"
     filter {}
 
     -- GraphicsEngine compiles HLSL at runtime from deployed Content/Shaders.
-    filter "files:Shaders/**.hlsl"
-        buildaction "None"
+	shadermodel "5.0"
+    shaderentry "main"
+	
+	filter "files:**.hlsl"
+        shaderobjectfileoutput ""
+        shaderheaderfileoutput "%{wks.location}\\Intermediate\\$(ProjectName)\\$(Configuration)\\PrecompiledShaders\\%%(Filename).h"
+        shadervariablename "INTERNAL_%%(Filename)_ByteCode"
+
+        vsprops {
+            ParallelCompilation = "true"
+        }
+
+    filter "files:Shaders/**_PS.hlsl"
+		shadertype "Pixel"
+		
+    filter "files:Shaders/**_VS.hlsl"
+		shadertype "Vertex"
+		
+    filter "files:Shaders/**_GS.hlsl"
+		shadertype "Geometry"
 
 	filter "files:**/DDSTextureLoader11.cpp"
 		enablepch "Off"

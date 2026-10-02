@@ -6,6 +6,7 @@
 #include "GameFramework/AssetHandling/AnimationAsset.h"
 #include "GameFramework/AssetHandling/MeshAsset.h"
 #include "GameFramework/Components/SkeletalMeshComponent.h"
+#include "GameFramework/Components/AnimatorComponent.h"
 #include "GameFramework/ServiceLocator.h"
 #include "GameFramework/World/World.h"
 #include "InputMapper.h"
@@ -28,17 +29,17 @@ void Game::Initialize(GameApplication& anApplication)
 			anApplication.ReloadCurrentScene();
 		}
 	}));
-	
-	AudioManager& audio = ServiceLocator::GetInstance().GetAudioManager();
-	audio.PlayMusic(SoundID::eMainTheme, true); // Todo: Get Viggo Mortensen's Signature
+
+	ServiceLocator::GetInstance().GetAudioManager().PlaySFX(eIntroSwell);
+
 	GAMELOG(Log, "Game ready: F4 reloads the current scene, ESC quits the game.");
 }
 
 void Game::Update([[maybe_unused]] World& aWorld, [[maybe_unused]] float aDeltaTime)
 {
-	if (!ServiceLocator::GetInstance().GetAudioManager().IsEventPlaying(eMainTheme))
+	if (!ServiceLocator::GetInstance().GetAudioManager().IsEventPlaying(eBlizzardAmbience))
 	{
-		ServiceLocator::GetInstance().GetAudioManager().PlayMusic(eMainTheme);
+		ServiceLocator::GetInstance().GetAudioManager().PlayMusic(eBlizzardAmbience);
 	}
 }
 
@@ -58,27 +59,20 @@ void Game::Shutdown()
 void Game::ConfigureWorld(World& aWorld)
 {
 	{
-		Actor* big = aWorld.SpawnActor("TGE_BIG");
-		big->GetTransform().SetLocalRotationDegrees({ 180, 0, 0 });
-		big->GetTransform().SetWorldPosition({ 0, 200, 0 });
-		big->GetTransform().SetLocalScale({ 10, 10, 10 });
+		Actor* playerBro = aWorld.SpawnActor("PLAYAH_BRO");
+		playerBro->GetTransform().SetLocalRotationDegrees({ 180, 0, 0 });
+		playerBro->GetTransform().SetWorldPosition({ 0, -15, 0 });
 
-		Actor* bro = aWorld.SpawnActor("TGE_BRO");
-		bro->GetTransform().SetLocalRotationDegrees({ 180, 0, 0 });
-		bro->GetTransform().SetWorldPosition({ 0, 900, -450 });
-			
-		SkeletalMeshComponent* component = bro->AddComponent<SkeletalMeshComponent>();
-		SkeletalMeshComponent* bigcomponent = big->AddComponent<SkeletalMeshComponent>();
+		SkeletalMeshComponent* component = playerBro->AddComponent<SkeletalMeshComponent>();
+		AnimatorComponent* animatorBro = playerBro->AddComponent<AnimatorComponent>();
+		animatorBro->SetMeshComponent(component);
+		animatorBro->Init("PlayerTree");
 		AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
 
-		std::shared_ptr<MeshAsset> meshAsset = assetRegistry.GetAsset<MeshAsset>("SK_C_TGA_Bro.fbx");
-		std::shared_ptr<AnimationAsset> animationAsset = assetRegistry.GetAsset<AnimationAsset>("A_C_TGA_Bro_Idle_Brething");
-		
+		std::shared_ptr<MeshAsset> meshAsset = assetRegistry.GetAsset<MeshAsset>("SK_player.fbx");
+
 		component->SetMesh(meshAsset);
-		component->AddAnimation("Idle", animationAsset);
-		component->PlayAnimation("Idle", true);
-		bigcomponent->SetMesh(meshAsset);
-		bigcomponent->AddAnimation("Idle", animationAsset);
-		bigcomponent->PlayAnimation("Idle", true);
+		animatorBro->GetTree().SetBool("IsIdle", true);
+		animatorBro->GetTree().PlayState("IdleState");
 	}
 }

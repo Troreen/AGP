@@ -105,6 +105,11 @@ public:
 		float Radius = 1.0f;
 	};
 
+	struct AmbientLightSnapshot
+	{
+		CU::Vector3f Color = CU::Vector3f::One;
+	};
+
 	struct RenderStats
 	{
 		uint32_t TotalRenderItems = 0;
@@ -133,14 +138,19 @@ public:
 	class RenderSceneSnapshot
 	{
 	public:
-		bool HasCamera = false;
+		RenderStats Stats;
+
 		CU::Camera3D Camera;
+
 		std::vector<RenderItemSnapshot> ShadowCasters;
 		std::vector<size_t> OpaqueRenderItems;
 		std::vector<size_t> BlendedRenderItems;
 		std::vector<LightSnapshot> RelevantLights;
 		std::vector<std::shared_ptr<TextWidget>> ScreenTextItems;
-		RenderStats Stats;
+
+		AmbientLightSnapshot AmbientLight;
+
+		bool HasCamera = false;
 
 		void Clear();
 	};
@@ -152,7 +162,7 @@ public:
 		float PointShadowBiasOffset = 0.0f;
 
 		RenderPass SelectedRenderPass = RenderPass::Lit;
-		Tonemapper SelectedTonemapper = Tonemapper::ACES;
+		Tonemapper SelectedTonemapper = Tonemapper::UnrealEngine;
 
 		static const char* GetRenderPassName(const RenderPass& aRenderPass);
 	};
@@ -241,8 +251,8 @@ private:
 		const GBufferBindings& gbufferTargets, const RenderSettings& aSettings);
 	void RenderAmbientOcclusion(GraphicsCommandList& inoutCommandList, const GBufferBindings& gbufferTargets);
 	// Includes the linear-light composite to the HDR buffer, within the Deferred Lighting GPU event.
-	void RenderDeferredLighting(GraphicsCommandList& inoutCommandList, const LightBuffer& lightBuffer,
-	                            const GBufferBindings& gbufferTargets);
+	void RenderDeferredLighting(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot,
+								   const LightBuffer& lightBuffer, const GBufferBindings& gbufferTargets);
 	void RenderDebugView(GraphicsCommandList& inoutCommandList, const LightBuffer& lightBuffer,
 		const GBufferBindings& gbufferTargets, const RenderSettings& aSettings);
 	void RenderTransparentGeometry(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot,

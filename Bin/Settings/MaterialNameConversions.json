@@ -1,0 +1,20 @@
+{
+  "UnrealBaseNames" : {
+    "Base Color" : "MB_DiffuseColor",
+    "Metallic" : "MB_Metalness",
+    "Roughness" : "MB_Roughness"
+  },
+  "TextureParameterNamesToSlot" : {
+    "DiffuseColorMap" : 0,
+    "AlbedoMap" : 0,
+    "Albedo" : 0,
+    "BaseColor" : 0,
+    "ColorMap" : 0,
+    "NormalMap" : 1,
+    "Normal" : 1,
+    "ORMMap" : 2,
+    "ORM" : 2,
+    "RoughnessMap" : 2,
+    "ShininessMap" : 2
+  }
+}

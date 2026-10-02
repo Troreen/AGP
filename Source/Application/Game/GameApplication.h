@@ -34,7 +34,8 @@ enum class SceneId
 {
 	Blockout,
 	Chests,
-	ChestMaterials
+	ChestMaterials,
+	Diorama
 };
 
 // Owns one game run: platform state, the main loop, the live World and scene requests.

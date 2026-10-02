@@ -8,10 +8,12 @@
 #include <GameFramework/SimdJson/simdjson.h>
 #include <ServiceLocator.h>
 #include <AssetHandling/AssetRegistry.h>
+#include <GameFramework/Components/AnimatorComponent.h>
+
 //#include <tge/model/ModelFactory.h>
 //#include <tge/settings/settings.h>
 
-AnimationTree::AnimationTree(std::string_view aName, std::string_view aStartState, const std::vector<AnimationVariable>& someVariables) : myName(aName), myStartState(aStartState)
+AnimationTree::AnimationTree(const std::string& aName, const std::string& aStartState, const std::vector<AnimationVariable>& someVariables) : myName(aName), myStartState(aStartState)
 {
 	//myModel = nullptr;
 	for (AnimationVariable variable : someVariables)
@@ -52,7 +54,8 @@ AnimationTree::AnimationTree(std::string_view aName, std::string_view aStartStat
 		simdjson::dom::element currentState = state.value;
 
 		//currentState["Name", "Default"]; // Why here?
-		std::string_view name = currentState["Name"].get<std::string_view>();
+		std::string name(currentState["Name"].get<const char*>());
+		std::string path(state.value["Animation"].get<const char*>());
 
 		bool overwriteGlobal = false;
 		if (!state.value["OverwriteGlobal"].error())
@@ -60,7 +63,7 @@ AnimationTree::AnimationTree(std::string_view aName, std::string_view aStartStat
 			overwriteGlobal = state.value["OverwriteGlobal"].get<bool>();
 		}
 
-		myAnimationStates.emplace_back(name, overwriteGlobal); // Creates a state
+		myAnimationStates.emplace_back(name, path, overwriteGlobal); // Creates a state
 
 		bool isLooping = true;
 		bool isFullbody = true;
@@ -69,12 +72,14 @@ AnimationTree::AnimationTree(std::string_view aName, std::string_view aStartStat
 		{
 			isLooping = state.value["IsLooping"].get<bool>();
 		}
-		if (!state.value["IsFullBody"].error())
+		if (!state.value["IsBaseLayer"].error())
 		{
-			isFullbody = state.value["IsFullBody"].get<bool>();
+			isFullbody = state.value["IsBaseLayer"].get<bool>();
 		}
 
-		myAnimationStates[myAnimationStates.size() - 1].SetAnimation(state.value["Animation"].get<std::string_view>(), isLooping, isFullbody); // Gives the state essentials for animation
+
+
+		myAnimationStates[myAnimationStates.size() - 1].SetAnimation(name, isLooping, isFullbody); // Gives the state essentials for animation
 
 		if (!state.value["IsGlobal"].error())
 		{
@@ -93,7 +98,7 @@ AnimationTree::AnimationTree(std::string_view aName, std::string_view aStartStat
 					Transition newTransition = {
 					name,
 					hasExitTime,
-					transitions["Variable"].get<std::string_view>(),
+					std::string(transitions["Variable"].get<const char*>()),
 					transitions["Expected"].get<bool>()
 					};
 
@@ -102,24 +107,27 @@ AnimationTree::AnimationTree(std::string_view aName, std::string_view aStartStat
 			}
 		}
 
-		simdjson::dom::array transitionArray = currentState["Transitions"];
-		for (auto transitions : transitionArray)
+		if (!currentState["Transitions"].error())
 		{
-			bool hasExitTime = false;
-
-			if (!transitions["HasExitTime"].error())
+			simdjson::dom::array transitionArray = currentState["Transitions"];
+			for (auto transitions : transitionArray)
 			{
-				hasExitTime = transitions["HasExitTime"].get<bool>();
+				bool hasExitTime = false;
+
+				if (!transitions["HasExitTime"].error())
+				{
+					hasExitTime = transitions["HasExitTime"].get<bool>();
+				}
+
+				Transition newTransition = {
+				std::string(transitions["TransitionTo"].get<const char*>()),
+				hasExitTime,
+				std::string(transitions["Variable"].get<const char*>()),
+				transitions["Expected"].get<bool>()
+				};
+
+				myAnimationStates[myAnimationStates.size() - 1].AddTransition(newTransition);
 			}
-
-			Transition newTransition = {
-			transitions["TransitionTo"].get<std::string_view>(),
-			hasExitTime,
-			transitions["Variable"].get<std::string_view>(),
-			transitions["Expected"].get<bool>()
-			};
-
-			myAnimationStates[myAnimationStates.size() - 1].AddTransition(newTransition);
 		}
 	}
 }
@@ -129,6 +137,7 @@ AnimationTree::AnimationTree(const AnimationTree& aTree) : myName(aTree.myName),
 	myAnimationStates = aTree.GetStates();
 	myAnimationVariables = aTree.GetVariables();
 	myGlobalTransitions = aTree.myGlobalTransitions;
+
 }
 
 void AnimationTree::AddVariable(const AnimationVariable& anAnimationVariable)
@@ -164,50 +173,50 @@ void AnimationTree::AddVariable(const AnimationVariable& anAnimationVariable)
 //	PlayState(myStartState);
 //}
 //
-//AnimationVariable& AnimationTree::GetAnimationVariable(const std::string& aName)
-//{
-//	if (!myAnimationVariables.contains(aName))
-//	{
-//		std::cout << "No Animation Variable with the name '" << aName << "' exists in the tree '" << myName << "'!" << std::endl;
-//		return myAnimationVariables.begin()->second;
-//	}
-//
-//	return myAnimationVariables[aName];
-//}
-//
-//void AnimationTree::SetBool(const std::string& aName, const bool aValue)
-//{
-//	if (!myAnimationVariables.contains(aName))
-//	{
-//		std::cout << "No Animation Bool with the name '" << aName << "' exists in the tree '" << myName << "'!" << std::endl;
-//		return;
-//	}
-//	if (myAnimationVariables[aName].IsTrigger)
-//	{
-//		std::cout << "'" << aName << "' is not a bool in the tree '" << myName << "'!" << std::endl;
-//		return;
-//	}
-//
-//	myAnimationVariables[aName].IsActive = aValue;
-//}
-//
-//void AnimationTree::SetTrigger(const std::string& aName)
-//{
-//	if (!myAnimationVariables.contains(aName))
-//	{
-//		std::cout << "No Animation Trigger with the name '" << aName << "' exists in the tree '" << myName << "'!" << std::endl;
-//		return;
-//	}
-//	if (!myAnimationVariables[aName].IsTrigger)
-//	{
-//		std::cout << "'" << aName << "' is not a trigger in the tree '" << myName << "'!" << std::endl;
-//		return;
-//	}
-//
-//	myAnimationVariables[aName].IsActive = true;
-//}
-//
-const std::unordered_map<std::string_view, AnimationVariable> AnimationTree::GetVariables() const
+AnimationVariable& AnimationTree::GetAnimationVariable(const std::string& aName)
+{
+	if (!myAnimationVariables.contains(aName))
+	{
+		std::cout << "No Animation Variable with the name '" << aName << "' exists in the tree '" << myName << "'!" << std::endl;
+		return myAnimationVariables.begin()->second;
+	}
+
+	return myAnimationVariables[aName];
+}
+
+void AnimationTree::SetBool(const std::string& aName, const bool aValue)
+{
+	if (!myAnimationVariables.contains(aName))
+	{
+		std::cout << "No Animation Bool with the name '" << aName << "' exists in the tree '" << myName << "'!" << std::endl;
+		return;
+	}
+	if (myAnimationVariables[aName].IsTrigger)
+	{
+		std::cout << "'" << aName << "' is not a bool in the tree '" << myName << "'!" << std::endl;
+		return;
+	}
+
+	myAnimationVariables[aName].IsActive = aValue;
+}
+
+void AnimationTree::SetTrigger(const std::string& aName)
+{
+	if (!myAnimationVariables.contains(aName))
+	{
+		std::cout << "No Animation Trigger with the name '" << aName << "' exists in the tree '" << myName << "'!" << std::endl;
+		return;
+	}
+	if (!myAnimationVariables[aName].IsTrigger)
+	{
+		std::cout << "'" << aName << "' is not a trigger in the tree '" << myName << "'!" << std::endl;
+		return;
+	}
+
+	myAnimationVariables[aName].IsActive = true;
+}
+
+const std::unordered_map<std::string, AnimationVariable> AnimationTree::GetVariables() const
 {
 	return myAnimationVariables;
 }
@@ -216,7 +225,6 @@ const std::vector<AnimationState> AnimationTree::GetStates() const
 {
 	return myAnimationStates;
 }
-
 
 void AnimationTree::AddGlobalTransition(const Transition aTransition)
 {
@@ -230,51 +238,68 @@ const std::string& AnimationTree::GetName()
 
 void AnimationTree::Update(const float aDeltaTime)
 {
-	aDeltaTime;
-	//myAnimationStates[myCurrentState].Update(aDeltaTime, myGlobalTransitions);
+	myAnimationStates[myCurrentState].Update(aDeltaTime, myGlobalTransitions);
 	//if (myShouldUpdateAnimation)
 	//{
 	//	myAnimationPlayer->Update(aDeltaTime);
 	//}
 }
-//
-//void AnimationTree::PlayState(const std::string& aName) // Used when we want to transition to new state
-//{
-//	for (int i = 0; i < myAnimationStates.size(); i++)
-//	{
-//		if (myAnimationStates[i].GetName() == aName)
-//		{
-//			myAnimationStates[myCurrentState].OnExit(); // Kan orsaka problem om state 0 har exit events, fast tbh om vi bara sätter events efter init är det kanske inte något att oroa sig om
-//			myCurrentState = i;
-//			myAnimationStates[myCurrentState].OnEnter();
-//
-//			return;
-//		}
-//	}
-//
-//	std::cout << "No AnimationState with the name '" << aName << "' exists in the tree '" << myName << "'!" << std::endl;
-//}
-//
-//CoolAnimationPlayer& AnimationTree::GetAnimationPlayer()
-//{
-//	return *myAnimationPlayer;
-//}
-//
-//AnimationState& AnimationTree::GetAnimationState(const std::string& aName)
-//{
-//	for (int i = 0; i < myAnimationStates.size(); i++)
-//	{
-//		if (myAnimationStates[i].GetName() == aName)
-//		{
-//			return myAnimationStates[i];
-//		}
-//	}
-//
-//	std::cout << "No AnimationState with the name '" << aName << "' exists in the tree '" << myName << "'!" << std::endl;
-//	return myAnimationStates[0];
-//}
-//
-//AnimationState& AnimationTree::GetCurrentAnimationState()
-//{
-//	return myAnimationStates[myCurrentState];
-//}
+
+void AnimationTree::PlayState(const std::string& aName) // Used when we want to transition to new state
+{
+	for (int i = 0; i < myAnimationStates.size(); i++)
+	{
+		if (myAnimationStates[i].GetName() == aName)
+		{
+			myAnimationStates[myCurrentState].OnExit(); // Kan orsaka problem om state 0 har exit events, fast tbh om vi bara sätter events efter init är det kanske inte något att oroa sig om
+			myCurrentState = i;
+			myAnimationStates[myCurrentState].OnEnter();
+
+			return;
+		}
+	}
+
+	std::cout << "No AnimationState with the name '" << aName << "' exists in the tree '" << myName << "'!" << std::endl;
+}
+
+void AnimationTree::SetAnimationPlayer(AnimatorComponent* aAnimationPlayer)
+{
+	myAnimationPlayer = aAnimationPlayer;
+
+	for (auto& state : myAnimationStates)
+	{
+		state.myAnimationTree = this;
+
+		std::shared_ptr<AnimationAsset> asset = ServiceLocator::GetInstance().GetAssetRegistry().GetAsset<AnimationAsset>(state.myPath);
+		myAnimationPlayer->AddAnimation(state.myName, asset);
+	}
+}
+
+AnimatorComponent* AnimationTree::GetAnimationPlayer()
+{
+	if (!myAnimationPlayer)
+	{
+		std::cout << "No Animation Player exists in " << myName << "!" << std::endl;
+	}
+
+	return myAnimationPlayer;
+}
+
+AnimationState& AnimationTree::GetAnimationState(const std::string& aName)
+{
+	for (int i = 0; i < myAnimationStates.size(); i++)
+	{
+		if (myAnimationStates[i].GetName() == aName)
+		{
+			return myAnimationStates[i];
+		}
+	}
+
+	std::cout << "No AnimationState with the name '" << aName << "' exists in the tree '" << myName << "'!" << std::endl;
+	return myAnimationStates[0];
+}
+
+AnimationState& AnimationTree::GetCurrentAnimationState()
+{
+	return myAnimationStates[myCurrentState];
+}

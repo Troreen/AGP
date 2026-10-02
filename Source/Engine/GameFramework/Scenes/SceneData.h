@@ -26,6 +26,7 @@ struct MaterialParameterData
 struct MaterialInstanceData
 {
 	std::string Name;
+	std::string Parent;
 	std::vector<MaterialParameterData> Parameters;
 };
 struct StaticMeshData
@@ -73,6 +74,19 @@ using ComponentRecord =
 		PlaceholderComponentData
 	>;
 
+struct MasterMaterialRecord
+{
+	std::string Name;
+	uint8_t Domain = 0;
+	uint8_t ShadingModel = 0;
+	uint8_t BlendMode = 0;
+	CommonUtilities::Vector4f BaseColor;
+	float Metallic = 0.f;
+	float Roughness = 0.5f;
+	bool TwoSided = false;
+	std::vector<MaterialParameterData> Parameters;
+};
+
 struct ActorRecord
 {
 	std::string Name;
@@ -83,4 +97,8 @@ struct ActorRecord
 	std::vector<ComponentRecord> Components;
 };
 
-struct SceneData { std::vector<ActorRecord> Actors; };
+struct SceneData
+{
+	std::vector<MasterMaterialRecord> Materials;
+	std::vector<ActorRecord> Actors;
+};

@@ -7,18 +7,18 @@
 
 float4 main(VStoPS aPixel) : SV_TARGET
 {
-	float4 albedo = AlbedoTexture.Sample(TrilinearWrap, aPixel.UV0) * aPixel.Color;
+    float4 albedo = AlbedoTexture.Sample(TrilinearWrap, aPixel.UV0);
 
-	MaterialPixelParameters parameters;
-	parameters.PixelColor = albedo;
+    MaterialPixelParameters parameters;
+    parameters.PixelColor = albedo;
     parameters.SurfaceValues = float4(0, 0, 0, 0);
-	parameters.WorldPosition = aPixel.WorldPosition;
-	parameters.UV0 = aPixel.UV0;
-	parameters.UV1 = aPixel.UV1;
-	parameters.Normal = aPixel.Normal;
-	parameters.Tangent = aPixel.Tangent;
-	parameters.Binormal = aPixel.Binormal;
-	Material_Pixel(parameters);
+    parameters.WorldPosition = aPixel.WorldPosition;
+    parameters.UV0 = aPixel.UV0;
+    parameters.UV1 = aPixel.UV1;
+    parameters.Normal = aPixel.Normal;
+    parameters.Tangent = aPixel.Tangent;
+    parameters.Binormal = aPixel.Binormal;
+    Material_Pixel(parameters);
 
-	return parameters.PixelColor;
+    return parameters.PixelColor;
 }

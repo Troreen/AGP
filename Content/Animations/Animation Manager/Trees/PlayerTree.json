@@ -1,0 +1,9 @@
+{
+  "Idle": {
+    "Name": "IdleState",
+    "Animation": "A_idle",
+    "IsLooping": true,
+    "IsBaseLayer": true,
+    "IsGlobal": false
+  }
+}

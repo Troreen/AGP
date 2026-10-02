@@ -10,6 +10,7 @@ struct VStoPS
     float3 Normal : NORMAL;
     float3 Tangent : TANGENT;
     float3 Binormal : BINORMAL;
+    float ViewDepth : VIEWDEPTH;
 };
 
 cbuffer FrameBuffer : register(b0)

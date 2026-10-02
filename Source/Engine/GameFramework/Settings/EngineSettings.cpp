@@ -385,9 +385,10 @@ namespace
 		// TODO: scene name having to be set in multiple places feels wrong shuold be changed.
 		if (applicationSettings.InitialScene != "Blockout" &&
 			applicationSettings.InitialScene != "Chests" &&
-			applicationSettings.InitialScene != "ChestMaterials")
+			applicationSettings.InitialScene != "ChestMaterials" &&
+			applicationSettings.InitialScene != "Diorama")
 		{
-			Invalid(aField + ".initialScene", "expected Blockout, Chests, or ChestMaterials");
+			Invalid(aField + ".initialScene", "expected Blockout, Chests, ChestMaterials or Diorama");
 		}
 	}
 

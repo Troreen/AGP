@@ -7,7 +7,7 @@
 
 float4 main(VStoPS aPixel) : SV_TARGET
 {
-    const float4 albedo = AlbedoTexture.Sample(TrilinearWrap, aPixel.UV0) * aPixel.Color;
+    const float4 albedo = AlbedoTexture.Sample(TrilinearWrap, aPixel.UV0);
     const float4 surfaceMap = MaterialTexture.Sample(TrilinearWrap, aPixel.UV0);
     const float3 pixelNormal = SampleWorldNormal(aPixel.UV0, aPixel.Normal, aPixel.Tangent, aPixel.Binormal);
 
@@ -29,8 +29,8 @@ float4 main(VStoPS aPixel) : SV_TARGET
     const float3 albedoColor = saturate(parameters.PixelColor.rgb);
     const float3 normal = normalize(parameters.Normal);
     const float3 viewDir = normalize(FB_CameraPosition - parameters.WorldPosition.xyz);
-    const float3 diffuseColor = lerp((float3)0.0f, albedoColor, 1.0f - metalness);
-    const float3 specularColor = lerp((float3)DIELECTRIC_SPECULAR, albedoColor, metalness);
+    const float3 diffuseColor = lerp((float3) 0.0f, albedoColor, 1.0f - metalness);
+    const float3 specularColor = lerp((float3) DIELECTRIC_SPECULAR, albedoColor, metalness);
 
     const float3 ambient = CalculateAmbientIBL(diffuseColor, specularColor, roughness, normal, viewDir, ambientOcclusion) * LB_AmbientColor;
     const float3 directLighting = CalculateLighting(diffuseColor, specularColor, roughness, normal, parameters.WorldPosition.xyz, viewDir);

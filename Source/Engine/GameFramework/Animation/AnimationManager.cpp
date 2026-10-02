@@ -4,6 +4,7 @@
 #include <iostream>
 #include <ServiceLocator.h>
 #include <AssetHandling/AssetRegistry.h>
+#include <Components/SkeletalMeshComponent.h>
 
 #include <GameFramework/SimdJson/simdjson.h>
 #include <filesystem>
@@ -49,21 +50,21 @@ AnimationManager::AnimationManager()
 		{
 			bool isTrigger = false;
 
-			if (variable["Type"].get_c_str() == "Trigger")
+			if (variable["Type"].get<std::string_view>() == std::string_view("Trigger"))
 			{
 				isTrigger = true;
 			}
 
 			variableNames.emplace_back(
-			variable["Name"].get<std::string_view>(),
+			std::string(variable["Name"].get<const char*>()),
 			isTrigger,
 			false
 			);
 		}
 
 		//entity.value("Name", "Default");
-		std::string_view name = tree["Name"].get<std::string_view>();
-		std::string_view startState = tree["Start state"].get<std::string_view>();
+		std::string name(tree["Name"].get<const char*>());
+		std::string startState(tree["Start state"].get<const char*>());
 		myAnimationTrees.emplace_back(name, startState, variableNames);
 	}
 }

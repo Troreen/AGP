@@ -8,12 +8,19 @@
 
 struct Transition
 {
-	std::string_view TransitionState;
+	std::string TransitionState;
 
 	bool HasExitTime;
 
-	std::string_view VariableName;
+	std::string VariableName;
 	bool Expected;
+};
+
+enum class eAnimationLayer
+{
+	BaseLayer,
+	PartialLayer
+
 };
 
 class AnimationState
@@ -22,7 +29,7 @@ class AnimationState
 
 public:
 	AnimationState();
-	AnimationState(const std::string_view& aName, bool aOverwriteGlobal);
+	AnimationState(const std::string& aName, const std::string& aPath, bool aOverwriteGlobal);
 	~AnimationState();
 
 	void InitState(AnimationTree* anAnimationTree);
@@ -37,7 +44,7 @@ public:
 	const std::string& GetName() const;
 
 private:
-	void SetAnimation(const std::string_view& aFilePath, bool aIsLooping = false, bool aIsFullBody = true);
+	void SetAnimation(const std::string& aFilePath, bool aIsLooping = false, bool aIsFullBody = true);
 
 	void AddTransition(const Transition aTransition);
 
@@ -46,10 +53,9 @@ private:
 	void OnExit();
 	bool TransitionCheck(const std::vector<Transition>& someTransitions);
 
-	std::string myName;
 	AnimationTree* myAnimationTree;
 
-	//eAnimationLayer myLayer;
+	eAnimationLayer myLayer;
 	bool myOverwriteGlobal;
 
 	std::vector <Transition> myTransitions;
@@ -58,6 +64,7 @@ private:
 	Event<float> myUpdate;
 	Event<> myOnExit;
 
-	std::string myFilePath;
+	std::string myName;
+	std::string myPath;
 	bool myIsLooping;
 };

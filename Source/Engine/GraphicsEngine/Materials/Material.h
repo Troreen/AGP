@@ -16,6 +16,7 @@ struct MaterialDescription
 	MaterialDomain Domain = MaterialDomain::None;
 	ShadingModel ShadingModel = ShadingModel::None;
 	BlendMode BlendMode = BlendMode::Opaque;
+	RasterizerCullMode CullMode = RasterizerCullMode::Back;
 	std::filesystem::path MaterialShaderCode;
 	std::filesystem::path AlbedoTexture;
 	std::filesystem::path NormalTexture;
@@ -175,7 +176,10 @@ public:
 			return false;
 		}
 
-		if (!MaterialHelpers::MaterialParameterTraits<T>::IsA(*param)) return false;
+		if (!MaterialHelpers::MaterialParameterTraits<T>::IsA(*param))
+		{
+			return false;
+		}
 
 		return SetRawParameterValue(*param, &aValue, sizeof(T));
 	}

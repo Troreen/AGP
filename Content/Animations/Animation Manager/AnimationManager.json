@@ -1,6 +1,6 @@
 {
   "Player Legs": {
-    "Name": "PlayerLegsTree",
+    "Name": "PlayerTree",
     "Start state": "IdleState",
     "Variables": [
       {

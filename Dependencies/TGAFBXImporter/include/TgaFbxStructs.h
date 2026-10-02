@@ -176,6 +176,7 @@ namespace TGA
 			InternalError,
 			NotInitialized,
 			FileNotFound,
+			NoData,
 			NoSkeletonData,
 			NoAnimationData,
 			NoMeshData,
@@ -214,7 +215,7 @@ namespace TGA
 			std::string Application;
 			std::string ApplicationVersion;
 			// The original Up axis of the file before conversion to DirectX Left Handed Y-Up.
-			Axis OriginalUpAxis = Axis::X;
+			Axis OriginalUpAxis;
 			// The system unit in the file before conversion to Centimeter.
 			SystemUnit OriginalSystemUnit = SystemUnit::Unknown;
 		};
@@ -255,18 +256,25 @@ namespace TGA
 				std::vector<Vertex> Vertices;
 				std::vector<unsigned int> Indices;
 
-				unsigned int MaterialIndex = 0;
+				unsigned int MaterialIndex;
 				std::string MeshName;
 				BoxSphereBounds BoxSphereBounds;
 				Box BoxBounds;
+
+				// Local-Only transform which does not affect children in the FBX file.
+				Matrix GeometricTransform;
+				// Local-Level transform which propagates to children in the FBX file.
+				Matrix LocalTransform;
+				// Complete Global-Level transform for this mesh in the FBX file.
+				Matrix GlobalTransform;
 			};
 
 			struct LODGroup
 			{
 				struct LODLevel
 				{
-					unsigned int Level = 0;
-					float Distance = 0;
+					unsigned int Level;
+					float Distance;
 					std::vector<Element> Elements;
 					BoxSphereBounds BoxSphereBounds;
 				};
@@ -284,8 +292,8 @@ namespace TGA
 
 			std::string Name;
 
-			size_t TotalVertexCount = 0;
-			size_t TotalIndexCount = 0;
+			size_t TotalVertexCount;
+			size_t TotalIndexCount;
 
 			BoxSphereBounds BoxSphereBounds;
 			Box BoxBounds;
@@ -342,13 +350,13 @@ namespace TGA
 			std::vector<std::string> EventNames;
 
 			// How long this animation is in frames.
-			unsigned int Length = 0;
+			unsigned int Length;
 
 			// The duration of this animation.
-			double Duration = 0;
+			double Duration;
 
 			// The FPS of this animation.
-			float FramesPerSecond = 0;
+			float FramesPerSecond;
 
 			std::string Name;
 		};

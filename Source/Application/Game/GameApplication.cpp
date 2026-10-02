@@ -56,6 +56,10 @@ namespace
 		{
 			return SceneId::ChestMaterials;
 		}
+		if (sceneName == "Diorama")
+		{
+			return SceneId::Diorama;
+		}
 
 		throw std::runtime_error("Unknown initial scene: " + std::string(sceneName));
 	}
@@ -70,6 +74,8 @@ namespace
 			return {"TestExportMap", "ExportedScenes/TestExportMap_Level.json"};
 		case SceneId::ChestMaterials:
 			return {"ChestMaterials", "ExportedScenes/ChestMaterials_Level.json"};
+		case SceneId::Diorama:
+			return {"Diorama", "ExportedScenes/lvl_01_diorama/Lvl_01_Diorama_Level.json"};
 		}
 		throw std::runtime_error("Unknown game scene id");
 	}
@@ -565,14 +571,28 @@ void GameApplication::ProcessPendingSceneLoad(Game& aGame)
 		SceneFallbackAssets fallbacks;
 		// TODO: Replace the procedural cube with the dedicated missing-mesh asset.
 		fallbacks.MissingMesh = std::make_shared<MeshAsset>(PrimitiveMeshBuilder::CreateCube());
-		// TODO: Replace the default material with the dedicated error texture/material.
-		fallbacks.MissingMaterial = assets.GetAsset<MaterialAsset>("Shaders/_DefaultMaterial.mat");
-		if (!fallbacks.MissingMaterial)
+		fallbacks.MissingShader = myContentRoot / "Shaders" / "_DefaultMaterial.hlsli";
+
+		MaterialDescription matDesc;
+		matDesc.Name = "_Default Material_";
+		matDesc.Domain = MaterialDomain::Surface;
+		matDesc.ShadingModel = ShadingModel::Lit;
+		matDesc.BlendMode = BlendMode::Opaque;
+		matDesc.MaterialShaderCode = fallbacks.MissingShader;
+
+		std::shared_ptr<Material> material = std::make_shared<Material>();
+		if (!GraphicsEngine::Get().CreateMaterial(matDesc, *material))
 		{
-			throw std::runtime_error("Could not load fallback material: " + assets.GetLastError());
+			LOG(LogGameFramework, Warning, "Could not create default material!");
+		}
+		else
+		{
+			fallbacks.MissingMaterial = std::make_shared<MaterialAsset>(material);
 		}
 
-		candidateWorld = BuildWorldFromSceneData(scene, assets, myClientSize, fallbacks);
+		WorldFromSceneConverter converter;
+		converter.Initialize(ServiceLocator::GetInstance().GetEngineSettings().GetSettingsDirectory() / "MaterialNameConversions.json");
+		candidateWorld = converter.BuildWorldFromSceneData(scene, assets, myContentRoot / "Shaders", myClientSize, fallbacks);
 		aGame.ConfigureWorld(*candidateWorld);
 	}
 	catch (const std::bad_alloc&)

@@ -21,11 +21,19 @@ Actor* World::SpawnActor(std::string name)
 	{
 		throw std::logic_error("Cannot spawn during World cleanup");
 	}
-	if (name.empty() || FindActor(name))
+	if (name.empty())
 	{
-		throw std::invalid_argument("Actor name must be nonempty and unique: " + name);
+		throw std::invalid_argument("Actor name must be nonempty: " + name);
 	}
-	std::unique_ptr<Actor> actor(new Actor(*this, std::move(name)));
+
+	unsigned counter = 1;
+	std::string finalName = name;
+	while (FindActor(finalName))
+	{
+		finalName = name + "(" + std::to_string(counter) + ")";
+	}
+
+	std::unique_ptr<Actor> actor(new Actor(*this, std::move(finalName)));
 	Actor* spawnedActor = actor.get();
 	myActors.push_back(std::move(actor));
 	return spawnedActor;

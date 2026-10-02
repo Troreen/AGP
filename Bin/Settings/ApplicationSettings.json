@@ -25,7 +25,7 @@
       "mouseLook": true,
       "contentPath": "Content",
       "cursorPath": "",
-      "initialScene": "Blockout"
+      "initialScene": "Diorama"
     },
     "sound": { "masterVolume": 1.0, "musicVolume": 0.35, "sfxVolume": 1.0 }
   }

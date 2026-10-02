@@ -1,11 +1,12 @@
 #include "AnimationState.h"
 #include "AnimationTree.h"
+#include <Components/AnimatorComponent.h>
 //#include <tge/model/ModelFactory.h>
 //
 AnimationState::AnimationState()
 {}
 
-AnimationState::AnimationState(const std::string_view& aName, bool aOverwriteGlobal) : myName(aName), myOverwriteGlobal(aOverwriteGlobal)
+AnimationState::AnimationState(const std::string& aName, const std::string& aPath, bool aOverwriteGlobal) : myName(aName), myPath(aPath), myOverwriteGlobal(aOverwriteGlobal)
 {
 	myAnimationTree = nullptr;
 }
@@ -16,18 +17,18 @@ AnimationState::~AnimationState()
 }
 
 
-void AnimationState::SetAnimation(const std::string_view& aFilePath, bool aIsLooping, bool aIsFullBody)
+void AnimationState::SetAnimation(const std::string& aName, bool aIsLooping, bool aIsBaseLayer)
 {
-	myFilePath = aFilePath;
+	myName = aName;
 	myIsLooping = aIsLooping;
 
-	if (aIsFullBody)
+	if (aIsBaseLayer)
 	{
-		//myLayer = eAnimationLayer::FullBody;
+		myLayer = eAnimationLayer::BaseLayer;
 	}
 	else
 	{
-		//myLayer = eAnimationLayer::UpperBody;
+		myLayer = eAnimationLayer::PartialLayer;
 	}
 }
 
@@ -45,7 +46,15 @@ void AnimationState::OnEnter()
 {
 	myOnEnter.Invoke();
 
-	//myAnimationTree->myAnimationPlayer->SetAnimation(myFilePath, myIsLooping, myLayer);
+	if (myLayer == eAnimationLayer::BaseLayer)
+	{
+		myAnimationTree->myAnimationPlayer->PlayAnimation(myName, myIsLooping);
+	}
+	else
+	{
+		myAnimationTree->myAnimationPlayer->PlayPartialAnimation(myName, myIsLooping);
+
+	}
 	//myAnimationTree->myAnimationPlayer->Play(myLayer);
 }
 
@@ -60,15 +69,13 @@ void AnimationState::Update(const float aDeltaTime, std::vector<Transition> some
 			return;
 		}
 	}
-
+	
 	TransitionCheck(myTransitions);
 }
 
 void AnimationState::OnExit()
 {
 	myOnExit.Invoke();
-
-	//myAnimationTree->myAnimationPlayer->Stop(myLayer);
 }
 
 Event<>& AnimationState::OnEnterEvent()
@@ -102,16 +109,15 @@ AnimationState& AnimationState::operator=(const AnimationState& other)
 		myTransitions.emplace_back(other.myTransitions[i]);
 	}
 
-	myFilePath = other.myFilePath;
 	myIsLooping = other.myIsLooping;
-	//myLayer = other.myLayer;
+	myLayer = other.myLayer;
 
 	return *this;
 }
 
 const std::string AnimationState::GetAnimationPath() const
 {
-	return myFilePath;
+	return myName;
 }
 
 const std::string& AnimationState::GetName() const
@@ -121,45 +127,45 @@ const std::string& AnimationState::GetName() const
 
 bool AnimationState::TransitionCheck(const std::vector<Transition>& someTransitions)
 {
-	//for (Transition transition : someTransitions)
-	//{
-	//	if (transition.TransitionState == myName)
-	//	{
-	//		continue;
-	//	}
+	for (Transition transition : someTransitions)
+	{
+		if (transition.TransitionState == myName)
+		{
+			continue;
+		}
 
-	//	AnimationVariable& variable = myAnimationTree->GetAnimationVariable(transition.VariableName);
+		AnimationVariable& variable = myAnimationTree->GetAnimationVariable(transition.VariableName);
 
-	//	if (variable.IsActive == transition.Expected)
-	//	{
-	//		if (transition.HasExitTime)
-	//		{
-	//			if (myIsLooping)
-	//			{
-	//				if (!myAnimationTree->myAnimationPlayer->IsLoopFinished(myLayer))
-	//				{
-	//					continue;
-	//				}
-	//			}
-	//			else
-	//			{
-	//				if (!myAnimationTree->myAnimationPlayer->IsFinished(myLayer))
-	//				{
-	//					continue;
-	//				}
-	//			}
-	//		}
+		if (variable.IsActive == transition.Expected)
+		{
+			if (transition.HasExitTime)
+			{
+				if (myIsLooping)
+				{
+					if (!myAnimationTree->myAnimationPlayer->GetCurrentPlayBackState(myLayer == eAnimationLayer::BaseLayer).Looped)
+					{
+						continue;
+					}
+				}
+				else
+				{
+					if (myAnimationTree->myAnimationPlayer->GetCurrentPlayBackState(myLayer == eAnimationLayer::BaseLayer).Active)
+					{
+						continue;
+					}
+				}
+			}
 
-	//		if (variable.IsTrigger)
-	//		{
-	//			variable.IsActive = false;
-	//		}
+			if (variable.IsTrigger)
+			{
+				variable.IsActive = false;
+			}
 
-	//		myAnimationTree->PlayState(transition.TransitionState);
+			myAnimationTree->PlayState(transition.TransitionState);
 
-	//		return true;
-	//	}
-	//}
+			return true;
+		}
+	}
 
 	return false;
 }

@@ -25,8 +25,6 @@ public:
 		LoadFailed
 	};
 
-	static AssetRegistry& Get();
-
 	AssetRegistry();
 	~AssetRegistry();
 
@@ -59,9 +57,9 @@ public:
 			return nullptr;
 		}
 
-		if (!assetInfo.Asset.expired())
+		if (!assetInfo.AssetHolder.expired())
 		{
-			std::shared_ptr<T> castedAsset = std::dynamic_pointer_cast<T>(assetInfo.Asset.lock());
+			std::shared_ptr<T> castedAsset = std::dynamic_pointer_cast<T>(assetInfo.AssetHolder.lock());
 			if (castedAsset != nullptr)
 			{
 				return castedAsset;
@@ -89,7 +87,7 @@ public:
 			if (asset->Load(assetInfo.Path, *this))
 			{
 				asset->myName = assetInfo.Path.stem().string();
-				assetInfo.Asset = asset;
+				assetInfo.AssetHolder = asset;
 				std::shared_ptr<T> castedAsset = std::dynamic_pointer_cast<T>(asset);
 				if (castedAsset != nullptr)
 				{
@@ -123,6 +121,8 @@ public:
 		}
 	}
 
+	void Pin(std::string_view aName, const std::shared_ptr<Asset>& aAsset);
+
 	void Initialize(const std::filesystem::path& contentRoot);
 	void Clear();
 
@@ -136,7 +136,8 @@ private:
 	struct AssetInfo
 	{
 		std::filesystem::path Path;
-		std::weak_ptr<Asset> Asset;
+		std::weak_ptr<Asset> AssetHolder;
+		std::shared_ptr<Asset> Pin = nullptr;
 		bool Loading = false;
 	};
 

@@ -240,6 +240,7 @@ std::shared_ptr<Mesh> MeshLibrary::LoadSceneMesh(std::string_view, std::string_v
 	// the equivalent engine primitives only when the content path explicitly names
 	// one. Looking up the display name first can silently turn a missing asset named
 	// "Cube" into AGP's registered debug cube.
+
 	if (aContentPath == "/Engine/BasicShapes/Plane.Plane")
 	{
 		return GetMesh("Floor");

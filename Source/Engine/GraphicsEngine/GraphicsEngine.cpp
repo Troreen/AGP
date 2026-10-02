@@ -672,7 +672,7 @@ void GraphicsEngine::RenderSnapshot(GraphicsCommandList& inoutCommandList, const
 
 	RenderGBuffer(inoutCommandList, aSnapshot, gbufferTargets, aSettings);
 	RenderAmbientOcclusion(inoutCommandList, gbufferTargets);
-	RenderDeferredLighting(inoutCommandList, lightBuffer, gbufferTargets);
+	RenderDeferredLighting(inoutCommandList, aSnapshot, lightBuffer, gbufferTargets);
 	RenderDebugView(inoutCommandList, lightBuffer, gbufferTargets, aSettings);
 	RenderTransparentGeometry(inoutCommandList, aSnapshot, lightBuffer);
 	RenderTonemapping(inoutCommandList, aSettings);
@@ -977,8 +977,8 @@ void GraphicsEngine::RenderAmbientOcclusion(GraphicsCommandList& inoutCommandLis
 	inoutCommandList.EndEvent();
 }
 
-void GraphicsEngine::RenderDeferredLighting(GraphicsCommandList& inoutCommandList, const LightBuffer& lightBuffer,
-	const GBufferBindings& gbufferTargets)
+void GraphicsEngine::RenderDeferredLighting(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot,
+	const LightBuffer& lightBuffer, const GBufferBindings& gbufferTargets)
 {
 	// --- Deferred Lighting ---
 	// Reads GBuffer, SSAO, and completed shadow maps.
@@ -993,7 +993,7 @@ void GraphicsEngine::RenderDeferredLighting(GraphicsCommandList& inoutCommandLis
 	inoutCommandList.SetShaderResources(&screenSpaceAOResource, 1, TextureSlot::ScreenSpaceAO, PipeLineStage_PixelShader);
 
 	LightBuffer ambientLightBuffer;
-	ambientLightBuffer.AmbientColor = CU::Vector3f(0.3f, 0.3f, 0.3f);
+	ambientLightBuffer.AmbientColor = aSnapshot.AmbientLight.Color;
 	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::LightBuffer, ambientLightBuffer, ConstantBufferSlot::Light, PipeLineStage_PixelShader);
 	inoutCommandList.SetPipelineState(&myDeferredAmbientPSO);
 	inoutCommandList.Draw(RenderConfig::FullscreenVertexCount);
@@ -1610,6 +1610,10 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 	matPSOdesc.Topology = Topology::TriangleList;
 	matPSOdesc.BlendMode = aDescription.BlendMode;
 
+	RasterizerStateDescription rasterizerDesc;
+	rasterizerDesc.CullMode = aDescription.CullMode;
+	matPSOdesc.RasterizerState = rasterizerDesc;
+
 	PipelineStateObject matPSO;
 	if (!myRHI.CreatePipelineStateObject(matPSOdesc, matPSO))
 	{
@@ -1621,6 +1625,7 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 	gbufferPSOdesc.PixelShader.ByteCode = gbufferPS.GetDataPtr();
 	gbufferPSOdesc.PixelShader.ByteCodeSize = gbufferPS.GetDataSize();
 	gbufferPSOdesc.BlendMode = BlendMode::Opaque;
+	gbufferPSOdesc.RasterizerState = rasterizerDesc;
 	PipelineStateObject gbufferPSO;
 	if (!myRHI.CreatePipelineStateObject(gbufferPSOdesc, gbufferPSO))
 	{

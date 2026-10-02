@@ -22,7 +22,9 @@ namespace UnrealScene
 		Box,
 		Sphere,
 		Capsule,
-		SpringArm
+		SpringArm,
+		SkyLight,
+		Camera
 	};
 
 	enum class MaterialType : int64_t
@@ -116,6 +118,11 @@ namespace UnrealScene
 		float armLength = 0.0f;
 	};
 
+	struct CameraComponentData : BaseComponentData
+	{
+		float fieldOfView = 0.0f;
+	};
+
 	using ComponentData = std::variant<
 		BaseComponentData,
 		StaticMeshComponentData,
@@ -125,7 +132,21 @@ namespace UnrealScene
 		BoxComponentData,
 		BaseSphericalComponentData,
 		CapsuleComponentData,
-		SpringArmComponentData>;
+		SpringArmComponentData,
+		CameraComponentData>;
+
+	struct MasterMaterialData
+	{
+		std::string name;
+		unsigned domain = 0;
+		unsigned shadingModel = 0;
+		unsigned blendMode = 0;
+		CommonUtilities::Vector4f baseColor;
+		float metallic = 0;
+		float roughness = 0;
+		bool twoSided = false;
+		std::vector<MaterialParameterData> parameters;
+	};
 
 	struct UnrealActorData
 	{
@@ -138,6 +159,7 @@ namespace UnrealScene
 
 	struct UnrealSceneData
 	{
+		std::vector<MasterMaterialData> materials;
 		std::vector<UnrealActorData> actors;
 		bool parsed = false;
 	};
