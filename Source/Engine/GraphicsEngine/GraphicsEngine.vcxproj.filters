@@ -4,6 +4,9 @@
     <Filter Include="ConstantBuffers">
       <UniqueIdentifier>{3CBE0720-A849-75E4-B15A-F8D81D65D1E4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Drawers">
+      <UniqueIdentifier>{1D1F4287-89FE-C022-9216-4CF9FE742784}</UniqueIdentifier>
+    </Filter>
     <Filter Include="InterOp">
       <UniqueIdentifier>{E6D11E00-52B1-9D9B-5BC9-2872C72704FD}</UniqueIdentifier>
     </Filter>
@@ -25,6 +28,9 @@
     <Filter Include="Shaders\Material">
       <UniqueIdentifier>{6DD8FDB3-59D1-1C06-8203-028B6E5BFC11}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sprite">
+      <UniqueIdentifier>{9C3AA6D1-88DC-D0A7-7197-E4FB5DD857F8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConstantBuffers\AnimationBuffer.h">
@@ -38,6 +44,9 @@
     </ClInclude>
     <ClInclude Include="ConstantBuffers\ObjectBuffer.h">
       <Filter>ConstantBuffers</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawers\SpriteDrawer.h">
+      <Filter>Drawers</Filter>
     </ClInclude>
     <ClInclude Include="GraphicsEngine.h" />
     <ClInclude Include="GraphicsEngine.pch.h" />
@@ -100,6 +109,9 @@
     </ClInclude>
     <ClInclude Include="RenderCulling.h" />
     <ClInclude Include="RenderItemRouting.h" />
+    <ClInclude Include="Sprite\SpriteStructs.h">
+      <Filter>Sprite</Filter>
+    </ClInclude>
     <ClInclude Include="TextWidget.h" />
   </ItemGroup>
   <ItemGroup>
@@ -108,6 +120,9 @@
     </ClCompile>
     <ClCompile Include="ConstantBuffers\ObjectBuffer.cpp">
       <Filter>ConstantBuffers</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawers\SpriteDrawer.cpp">
+      <Filter>Drawers</Filter>
     </ClCompile>
     <ClCompile Include="GraphicsEngine.cpp" />
     <ClCompile Include="GraphicsEngine.pch.cpp" />
@@ -184,6 +199,12 @@
       <Filter>Shaders\Internal</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Internal\ScreenSpaceAO_PS.hlsl">
+      <Filter>Shaders\Internal</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Internal\Sprite_PS.hlsl">
+      <Filter>Shaders\Internal</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Internal\Sprite_VS.hlsl">
       <Filter>Shaders\Internal</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Internal\TextOverlay_PS.hlsl">

@@ -203,6 +203,7 @@
     <ClInclude Include="Components\MeshComponentBase.h" />
     <ClInclude Include="Components\SceneComponent.h" />
     <ClInclude Include="Components\SkeletalMeshComponent.h" />
+    <ClInclude Include="Components\SpriteComponent.h" />
     <ClInclude Include="Components\StaticMeshComponent.h" />
     <ClInclude Include="Coroutine\Coroutine.h" />
     <ClInclude Include="Coroutine\CoroutineHandler.h" />
@@ -249,6 +250,7 @@
     <ClCompile Include="Components\MeshComponentBase.cpp" />
     <ClCompile Include="Components\SceneComponent.cpp" />
     <ClCompile Include="Components\SkeletalMeshComponent.cpp" />
+    <ClCompile Include="Components\SpriteComponent.cpp" />
     <ClCompile Include="Coroutine\Coroutine.cpp" />
     <ClCompile Include="Coroutine\CoroutineHandler.cpp" />
     <ClCompile Include="Coroutine\Scheduler.cpp" />

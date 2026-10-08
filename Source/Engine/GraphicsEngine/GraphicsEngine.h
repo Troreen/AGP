@@ -28,6 +28,7 @@
 #include "Materials/MaterialInterface.h"
 #include "Materials/Material.h"
 #include "TextWidget.h"
+#include "Drawers/SpriteDrawer.h"
 
 enum class RenderLightType : uint32_t
 {
@@ -79,6 +80,13 @@ enum class ConstantBuffer : uint8_t
 class GraphicsEngine
 {
 public:
+
+	struct SpriteRenderResources
+	{
+		CommonUtilities::Matrix4f Projection;
+		std::vector<Vertex> Vertices;
+		Buffer VertexBuffer;
+	};
 	// --- Snapshot data ---
 	// Transforms are copied; shared mesh/material contents stay stable during rendering.
 	struct RenderItemSnapshot
@@ -147,6 +155,7 @@ public:
 		std::vector<size_t> BlendedRenderItems;
 		std::vector<LightSnapshot> RelevantLights;
 		std::vector<std::shared_ptr<TextWidget>> ScreenTextItems;
+		std::vector<SpriteDrawCall> ScreenSpriteItems;
 
 		AmbientLightSnapshot AmbientLight;
 
@@ -234,6 +243,7 @@ private:
 	void BindPBLResources(GraphicsCommandList& inoutCommandList) const;
 	bool CreateShadowResources();
 	bool CreateShadowPipelineStates();
+	bool CreateSpritePipelineState();
 	void UnbindShadowResources(GraphicsCommandList& inoutCommandList) const;
 	void BindShadowResources(GraphicsCommandList& inoutCommandList) const;
 	// --- Frame recording ---
@@ -258,6 +268,7 @@ private:
 	void RenderTransparentGeometry(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot,
 	                               const LightBuffer& lightBuffer);
 	void RenderScreenText(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot, RenderStats& frameStats);
+	void RenderScreenSprites(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot, RenderHardwareInterface& aRHI);
 	void RenderTonemapping(GraphicsCommandList& inoutCommandList, const RenderSettings& aSettings);
 
 	void PrepareSnapshotRenderResources(const RenderSceneSnapshot& aSnapshot) const;
@@ -302,6 +313,10 @@ private:
 	PipelineStateObject myScreenSpaceAOPSO;
 	PipelineStateObject myRenderPassDebugPSO;
 	PipelineStateObject myTextOverlayPSO;
+
+	//Sprites
+	PipelineStateObject mySpritePSO;
+	SpriteRenderResources mySpriteRenderResources;
 
 	std::filesystem::path myShaderRoot;
 	std::unordered_map<MaterialDomain, std::filesystem::path> myMaterialDomainShaders;

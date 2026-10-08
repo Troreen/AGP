@@ -124,6 +124,9 @@
     <ClInclude Include="Components\SkeletalMeshComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
+    <ClInclude Include="Components\SpriteComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
     <ClInclude Include="Components\StaticMeshComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
@@ -242,6 +245,9 @@
       <Filter>Components</Filter>
     </ClCompile>
     <ClCompile Include="Components\SkeletalMeshComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\SpriteComponent.cpp">
       <Filter>Components</Filter>
     </ClCompile>
     <ClCompile Include="Coroutine\Coroutine.cpp">

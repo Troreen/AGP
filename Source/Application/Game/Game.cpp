@@ -5,8 +5,10 @@
 #include "GameFramework/AssetHandling/AssetRegistry.h"
 #include "GameFramework/AssetHandling/AnimationAsset.h"
 #include "GameFramework/AssetHandling/MeshAsset.h"
+#include "GameFramework/AssetHandling/TextureAsset.h"
 #include "GameFramework/Components/SkeletalMeshComponent.h"
 #include "GameFramework/Components/AnimatorComponent.h"
+#include "GameFramework/Components/SpriteComponent.h"
 #include "GameFramework/ServiceLocator.h"
 #include "GameFramework/World/World.h"
 #include <GameFramework/Animation/AnimationManager.h>
@@ -120,4 +122,14 @@ void Game::ConfigureWorld(World& aWorld)
 	}
 #endif
 
+	//{
+	//	Actor* actor = aWorld.SpawnActor("TGALOGO");
+	//	SpriteComponent* component = actor->AddComponent<SpriteComponent>();
+
+	//	AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
+
+	//	std::shared_ptr<TextureAsset> asset = assetRegistry.GetAsset<TextureAsset>("TgaLogo.dds");
+	//	component->SetSprite(asset);
+	//	component->SendDrawCall();
+	//}
 }

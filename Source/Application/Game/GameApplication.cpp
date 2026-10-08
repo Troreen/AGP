@@ -24,6 +24,7 @@
 #include "PrimitiveMeshBuilder.h"
 #include "StringHelpers.h"
 #include "Timer.h"
+#include <GraphicsEngine/Drawers/SpriteDrawer.h>
 
 #include <algorithm>
 #include <exception>
@@ -482,7 +483,16 @@ void GameApplication::RenderFrame(GraphicsEngine& aGraphics)
 	}
 
 	myCommandList.ResetCommandList();
-	
+
+	std::vector<SpriteDrawCall> spriteDrawCalls = SpriteDrawer::Get().GetDrawCalls();
+
+	std::sort(spriteDrawCalls.begin(), spriteDrawCalls.end(), [](const SpriteDrawCall& A, const SpriteDrawCall& B)
+		{
+			return A.SpriteInstanceData->Depth < B.SpriteInstanceData->Depth;
+		});
+
+	mySnapshot.ScreenSpriteItems = spriteDrawCalls;
+
 	aGraphics.RenderSnapshot(myCommandList, mySnapshot, myRenderSettings);
 	
 	if (myCommandList.FinishCommandList())

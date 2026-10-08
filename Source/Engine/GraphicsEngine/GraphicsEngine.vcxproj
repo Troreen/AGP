@@ -197,6 +197,7 @@
     <ClInclude Include="ConstantBuffers\FrameBuffer.h" />
     <ClInclude Include="ConstantBuffers\LightBuffer.h" />
     <ClInclude Include="ConstantBuffers\ObjectBuffer.h" />
+    <ClInclude Include="Drawers\SpriteDrawer.h" />
     <ClInclude Include="GraphicsEngine.h" />
     <ClInclude Include="GraphicsEngine.pch.h" />
     <ClInclude Include="InterOp\DDSTextureLoader11.h" />
@@ -220,11 +221,13 @@
     <ClInclude Include="RHI\RenderHardwareInterface.h" />
     <ClInclude Include="RenderCulling.h" />
     <ClInclude Include="RenderItemRouting.h" />
+    <ClInclude Include="Sprite\SpriteStructs.h" />
     <ClInclude Include="TextWidget.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ConstantBuffers\FrameBuffer.cpp" />
     <ClCompile Include="ConstantBuffers\ObjectBuffer.cpp" />
+    <ClCompile Include="Drawers\SpriteDrawer.cpp" />
     <ClCompile Include="GraphicsEngine.cpp" />
     <ClCompile Include="GraphicsEngine.pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
@@ -299,6 +302,18 @@
     </FxCompile>
     <FxCompile Include="Shaders\Internal\ScreenSpaceAO_PS.hlsl">
       <ShaderType>Pixel</ShaderType>
+      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
+      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
+      <ObjectFileOutput></ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shaders\Internal\Sprite_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
+      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
+      <ObjectFileOutput></ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shaders\Internal\Sprite_VS.hlsl">
+      <ShaderType>Vertex</ShaderType>
       <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
       <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
       <ObjectFileOutput></ObjectFileOutput>

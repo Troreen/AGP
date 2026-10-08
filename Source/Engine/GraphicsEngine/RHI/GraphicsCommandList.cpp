@@ -115,6 +115,49 @@ void GraphicsCommandList::SetRenderTargets(const Texture* const* aTargets, size_
 	myContext->RSSetViewports(1, &viewport);
 }
 
+bool GraphicsCommandList::UpdateVertexBuffer(const Buffer& aVertexBuffer, const std::vector<Vertex>& aVertices) const
+{
+	if (!aVertexBuffer.IsValid())
+	{
+		LOG(CmdLog, Error, "Failed to update Vertex buffer! Buffer is either null!");
+		return false;
+	}
+
+	if (aVertices.empty())
+	{
+		LOG(CmdLog, Error, "Failed to update Vertex buffer {}! Data provided is larger than buffer capacity!", aVertexBuffer.myName);
+		return false;
+	}
+
+	if (aVertexBuffer.myType != BufferType::VertexBuffer)
+	{
+		LOG(CmdLog, Error, "Failed to update Vertex buffer! Buffer  invalid type!");
+		return false;
+	}
+
+	const size_t dataSize = sizeof(Vertex) * aVertices.size();
+
+	if (dataSize > aVertexBuffer.mySize)
+	{
+		return false;
+	}
+
+	D3D11_MAPPED_SUBRESOURCE mappedResource = {};
+
+	const HRESULT result = myContext->Map(aVertexBuffer.myBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+
+	if (FAILED(result))
+	{
+		return false;
+	}
+
+	memcpy(mappedResource.pData, aVertices.data(), dataSize);
+
+	myContext->Unmap(aVertexBuffer.myBuffer.Get(), 0);
+
+	return true;
+}
+
 bool GraphicsCommandList::UpdateConstantBuffer(const Buffer& aConstantBuffer, const void* aBufferData, size_t aBufferDataSize) const
 {
 	ensure(!IsReadyForExecution());
@@ -332,6 +375,13 @@ void GraphicsCommandList::DrawIndexed(unsigned aIndexCount, unsigned aIndexOffse
 {
 	ensure(!IsReadyForExecution());
 	myContext->DrawIndexed(aIndexCount, aIndexOffset, 0);
+}
+
+void GraphicsCommandList::DrawSpecificVertices(unsigned aNumVertices, unsigned aFirstVertexIndex) const
+{
+	ensure(!IsReadyForExecution());
+
+	myContext->Draw(aNumVertices, aFirstVertexIndex);
 }
 
 void GraphicsCommandList::SetMarker(std::string_view aMarker) const

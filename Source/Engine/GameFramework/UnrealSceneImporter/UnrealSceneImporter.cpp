@@ -94,13 +94,13 @@ namespace UnrealScene
 	CommonUtilities::Matrix4f UnrealToDirectX(const CommonUtilities::Matrix4f& aUEMatrix)
 	{
 		CommonUtilities::Matrix4f result;
-		constexpr int p[4] = { 1, 2, 0, 3 };
+		constexpr int p[4] = { 2, 3, 1, 4 };
 
-		for (int r = 1; r < 5; ++r)
+		for (int r = 0; r < 4; ++r)
 		{
-			for (int c = 1; c < 5; ++c)
+			for (int c = 0; c < 4; ++c)
 			{
-				result(r, c) = aUEMatrix(p[r], p[c]);
+				result(r + 1, c + 1) = aUEMatrix(p[r], p[c]);
 			}
 		}
 

@@ -28,6 +28,8 @@
 #include <limits>
 #include <vector>
 
+#include "Drawers/SpriteDrawer.h"
+
 namespace
 {
 	using namespace RenderCulling;
@@ -419,6 +421,7 @@ void GraphicsEngine::RenderSceneSnapshot::Clear()
 	BlendedRenderItems.clear();
 	RelevantLights.clear();
 	ScreenTextItems.clear();
+	ScreenSpriteItems.clear();
 	Stats = {};
 }
 
@@ -452,7 +455,7 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path&
 		return false;
 	}
 
-	if (!CreateGBufferResources() || !CreateDeferredPipelineStates() || !CreateTextPipelineState())
+	if (!CreateGBufferResources() || !CreateDeferredPipelineStates() || !CreateTextPipelineState() || !CreateSpritePipelineState())
 	{
 		return false;
 	}
@@ -677,6 +680,9 @@ void GraphicsEngine::RenderSnapshot(GraphicsCommandList& inoutCommandList, const
 	RenderTransparentGeometry(inoutCommandList, aSnapshot, lightBuffer);
 	RenderTonemapping(inoutCommandList, aSettings);
 	RenderScreenText(inoutCommandList, aSnapshot, frameStats);
+
+	RenderScreenSprites(inoutCommandList, aSnapshot, myRHI);
+	SpriteDrawer::Get().myDrawCalls.clear();
 
 	frameStats.SceneRecordingMilliseconds = ElapsedMilliseconds(sceneStart);
 	StoreLastRenderStats(frameStats);
@@ -1126,6 +1132,115 @@ void GraphicsEngine::RenderScreenText(GraphicsCommandList& inoutCommandList, con
 	inoutCommandList.EndEvent();
 }
 
+void GraphicsEngine::RenderScreenSprites(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot, RenderHardwareInterface& aRHI)
+{
+	inoutCommandList.BeginEvent("Render sprites");
+
+	constexpr float designWidth = 1920.0f;
+	constexpr float designHeight = 1080.0f;
+
+	mySpriteRenderResources.Projection = CommonUtilities::Matrix4f{};
+
+	mySpriteRenderResources.Projection(1, 1) = 2.0f / designWidth;
+	mySpriteRenderResources.Projection(2, 2) = -2.0f / designHeight;
+	mySpriteRenderResources.Projection(4, 1) = -1.0f;
+	mySpriteRenderResources.Projection(4, 2) = 1.0f;
+
+	aRHI.CreateDynamicVertexBuffer("SpriteRenderer", 10000, mySpriteRenderResources.VertexBuffer);
+
+	FrameBuffer frameBuffer;
+	frameBuffer.Projection = mySpriteRenderResources.Projection;
+	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::FrameBuffer, frameBuffer, ConstantBufferSlot::Frame, PipeLineStage_VertexShader | PipeLineStage_PixelShader);
+
+	mySpriteRenderResources.Vertices.clear();
+	for (size_t i = 0; i < aSnapshot.ScreenSpriteItems.size(); i++)
+	{
+		const CommonUtilities::Vector2f parentSize =
+		{
+			1920.0f,
+			1080.0f
+		};
+
+		const CommonUtilities::Vector2f position =
+		{
+			parentSize.x * aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Anchor.x + aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Position.x - aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Size.x * aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Pivot.x,
+			parentSize.y * aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Anchor.y + aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Position.y - aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Size.y * aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Pivot.y
+		};
+
+		const CommonUtilities::Vector2f size = aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Size;
+
+		const float left = position.x;
+		const float top = position.y;
+		const float right = left + size.x;
+		const float bottom = top + size.y;
+
+		Vertex v0 =
+		{
+			.Position = { left, top, aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Depth, 1.0f },
+			.UV0 = { 0.0f, 0.0f }
+		};
+
+		Vertex v1 =
+		{
+			.Position = { right, top, aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Depth, 1.0f },
+			.UV0 = { 1.0f, 0.0f }
+		};
+
+		Vertex v2 =
+		{
+			.Position = { left,  bottom, aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Depth, 1.0f },
+			.UV0 = { 0.0f, 1.0f }
+		};
+
+		Vertex v3 =
+		{
+			.Position = { right, bottom, aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Depth, 1.0f },
+			.UV0 = { 1.0f, 1.0f }
+		};
+
+		v0.Color = aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Color;
+		v1.Color = aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Color;
+		v2.Color = aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Color;
+		v3.Color = aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Color;
+
+		mySpriteRenderResources.Vertices.push_back(v0);
+		mySpriteRenderResources.Vertices.push_back(v1);
+		mySpriteRenderResources.Vertices.push_back(v2);
+		mySpriteRenderResources.Vertices.push_back(v1);
+		mySpriteRenderResources.Vertices.push_back(v3);
+		mySpriteRenderResources.Vertices.push_back(v2);
+
+		const Texture* textures = { aSnapshot.ScreenSpriteItems[i].SpriteSharedData->Texture.get()};
+		inoutCommandList.SetShaderResources(&textures, 1, 0, PipeLineStage_PixelShader);
+
+		const MaterialInterface* material = aSnapshot.ScreenSpriteItems[i].Material;
+
+		if (material == nullptr)
+		{
+			material = &myDefaultMaterial;
+		}
+
+		if (material->HasParameters())
+		{
+			if (material->IsMaterialDataDirty())
+			{
+				material->RefreshMaterialData();
+			}
+
+			UpdateAndSetConstantBufferInternal(inoutCommandList, ConstantBuffer::MaterialBuffer, material->GetParameterDataBlock(), Material::MATERIAL_BUFFER_SIZE, ConstantBufferSlot::Material, PipeLineStage_VertexShader | PipeLineStage_PixelShader);
+		}
+
+		inoutCommandList.SetPipelineState(&mySpritePSO);
+
+		inoutCommandList.UpdateVertexBuffer(mySpriteRenderResources.VertexBuffer, mySpriteRenderResources.Vertices);
+		inoutCommandList.SetVertexBuffer(&mySpriteRenderResources.VertexBuffer);
+		inoutCommandList.DrawSpecificVertices(static_cast<unsigned int>(mySpriteRenderResources.Vertices.size()), 0);
+
+	}
+
+	inoutCommandList.EndEvent();
+}
+
 void GraphicsEngine::RenderTonemapping(GraphicsCommandList& inoutCommandList, const RenderSettings& aSettings)
 {
 	inoutCommandList.BeginEvent("Tonemapping");
@@ -1501,6 +1616,32 @@ bool GraphicsEngine::CreateShadowPipelineStates()
 	pointShadowPSODesc.GeometryShader.ByteCode = pointShadowGS.GetDataPtr();
 	pointShadowPSODesc.GeometryShader.ByteCodeSize = pointShadowGS.GetDataSize();
 	return myRHI.CreatePipelineStateObject(pointShadowPSODesc, myPointShadowOverridePSO);
+}
+
+bool GraphicsEngine::CreateSpritePipelineState()
+{
+	const std::filesystem::path vertexShaderPath = myShaderRoot / "Internal" / "Sprite_VS.hlsl";
+	const std::filesystem::path pixelShaderPath = myShaderRoot / "Internal" / "Sprite_PS.hlsl";
+	MaterialShaderIncludeHandler vertexIncludeHandler(myShaderRoot, vertexShaderPath, {});
+	MaterialShaderIncludeHandler pixelIncludeHandler(myShaderRoot, pixelShaderPath, {});
+	Shader vertexShader;
+	Shader pixelShader;
+	if (!myRHI.CompileShader(ShaderType::VertexShader, vertexShaderPath, &vertexIncludeHandler, true, vertexShader) ||
+		!myRHI.CompileShader(ShaderType::PixelShader, pixelShaderPath, &pixelIncludeHandler, true, pixelShader))
+	{
+		return false;
+	}
+	PipelineStateDescription description;
+	description.Name = "Sprite_PSO";
+	description.VertexShader.ByteCode = vertexShader.GetDataPtr();
+	description.VertexShader.ByteCodeSize = vertexShader.GetDataSize();
+	description.PixelShader.ByteCode = pixelShader.GetDataPtr();
+	description.PixelShader.ByteCodeSize = pixelShader.GetDataSize();
+	description.InputLayoutElements = Vertex::Description;
+	description.Topology = Topology::TriangleList;
+	description.BlendMode = BlendMode::Alpha;
+	description.RasterizerState.CullMode = RasterizerCullMode::None;
+	return myRHI.CreatePipelineStateObject(description, mySpritePSO);
 }
 
 // --- Materials and textures ---

@@ -375,6 +375,44 @@ bool RenderHardwareInterface::CreateConstantBuffer(std::string_view aName, size_
 	return true;
 }
 
+bool RenderHardwareInterface::CreateDynamicVertexBuffer(std::string_view aName, unsigned int aMaxVertexCount, Buffer& outBuffer) const
+{
+	if (aMaxVertexCount == 0)
+	{
+		LOG(RhiLog, Error, "Failed to create dynamic vertex buffer for {}! Max vertex count is 0", aName);
+
+		return false;
+	}
+
+	D3D11_BUFFER_DESC desc = {};
+
+	desc.Usage = D3D11_USAGE_DYNAMIC;
+	desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	desc.ByteWidth = static_cast<unsigned int>(sizeof(Vertex) * aMaxVertexCount);
+
+	const HRESULT result = myDevice->CreateBuffer(&desc, nullptr, &outBuffer.myBuffer);
+
+	if (FAILED(result))
+	{
+		LOG(RhiLog, Error, "Failed to create dynamic vertex buffer for {}!", aName);
+
+		return false;
+	}
+
+	const std::string bufferName = std::format("{}_Dynamic_VX", aName);
+
+	SetObjectName(outBuffer.myBuffer, bufferName);
+
+	outBuffer.myName = aName;
+	outBuffer.mySize = desc.ByteWidth;
+	outBuffer.myStride = sizeof(Vertex);
+	outBuffer.myType = BufferType::VertexBuffer;
+
+	return true;
+}
+
+
 bool RenderHardwareInterface::CreateDepthStencil(std::string_view aName, unsigned aWidth, unsigned aHeight, Texture& outDepthStencil,
                                                  bool aCubeMap) const
 {

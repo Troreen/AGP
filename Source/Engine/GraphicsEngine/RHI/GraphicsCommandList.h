@@ -38,6 +38,7 @@ public:
 	void SetRenderTarget(const Texture* aTarget, const Texture* aDepthStencil) const;
 	void SetRenderTargets(const Texture* const* aTargets, size_t aNumTargets, const Texture* aDepthStencil) const;
 
+	bool UpdateVertexBuffer(const Buffer& aVertexBuffer, const std::vector<Vertex>& aVertices) const;
 	bool UpdateConstantBuffer(const Buffer& aConstantBuffer, const void* aBufferData, size_t aBufferDataSize) const;
 
 	void SetVertexBuffer(const Buffer* aBuffer) const;
@@ -53,6 +54,7 @@ public:
 
 	void Draw(unsigned aNumVertices) const;
 	void DrawIndexed(unsigned aIndexCount, unsigned aIndexOffset) const;
+	void DrawSpecificVertices(unsigned aNumVertices, unsigned aFirstVertexIndex) const;
 
 	void SetMarker(std::string_view aMarker) const;
 	void BeginEvent(std::string_view aEvent) const;
