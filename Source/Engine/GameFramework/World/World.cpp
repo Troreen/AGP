@@ -36,6 +36,7 @@ Actor* World::SpawnActor(std::string name)
 	while (FindActor(finalName))
 	{
 		finalName = name + "(" + std::to_string(counter) + ")";
+		++counter;
 	}
 
 	std::unique_ptr<Actor> actor(new Actor(*this, std::move(finalName)));

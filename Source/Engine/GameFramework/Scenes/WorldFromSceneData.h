@@ -3,7 +3,9 @@
 #include "GameFramework/Scenes/SceneData.h"
 #include "Vector2.hpp"
 
+#include <filesystem>
 #include <memory>
+
 
 class AssetRegistry;
 class MaterialAsset;

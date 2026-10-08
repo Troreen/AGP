@@ -69,12 +69,21 @@ std::unique_ptr<World> WorldFromSceneConverter::BuildWorldFromSceneData(const Sc
 	{
 		MaterialDescription matDesc;
 		matDesc.Name = materialData.Name;
-		matDesc.Domain = static_cast<MaterialDomain>(materialData.Domain + 1);
-		matDesc.ShadingModel = static_cast<ShadingModel>(materialData.ShadingModel + 1);
+		if (materialData.Domain != 0)
+		{
+			LOG(WorldParser, Warning, "Material '{}' skipped: unsupported Unreal material domain {}. Scene loading will continue.", materialData.Name, materialData.Domain);
+			continue;
+		}
+		matDesc.Domain = MaterialDomain::Surface;
+		if (materialData.ShadingModel != 0 && materialData.ShadingModel != 1)
+		{
+			LOG(WorldParser, Warning, "Material '{}' skipped: unsupported Unreal shading model {}. Scene loading will continue.", materialData.Name, materialData.ShadingModel);
+			continue;
+		}
+		matDesc.ShadingModel = materialData.ShadingModel == 0 ? ShadingModel::Unlit : ShadingModel::Lit;
 		switch (materialData.BlendMode)
 		{
 			case 0:
-			default:
 				matDesc.BlendMode = BlendMode::Opaque;
 				break;
 
@@ -85,6 +94,10 @@ std::unique_ptr<World> WorldFromSceneConverter::BuildWorldFromSceneData(const Sc
 			case 3:
 				matDesc.BlendMode = BlendMode::Additive;
 				break;
+
+			default:
+				LOG(WorldParser, Warning, "Material '{}' skipped: unsupported Unreal blend mode {}. Scene loading will continue.", materialData.Name, materialData.BlendMode);
+				continue;
 		}
 		matDesc.CullMode = materialData.TwoSided ? RasterizerCullMode::None : RasterizerCullMode::Back;
 

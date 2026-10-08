@@ -227,8 +227,25 @@ void SceneConstruction()
 	camera.Common.Tags = {"ActiveCamera"};
 	actor.Components.push_back(camera);
 	scene.Actors.push_back(actor);
+	actor.Components.clear();
+	scene.Actors.push_back(actor);
+	scene.Actors.push_back(actor);
+	MasterMaterialRecord unsupported;
+	unsupported.Name = "UnsupportedDomain";
+	unsupported.Domain = 1;
+	scene.Materials.push_back(unsupported);
+	unsupported.Name = "UnsupportedShadingModel";
+	unsupported.Domain = 0;
+	unsupported.ShadingModel = 99;
+	scene.Materials.push_back(unsupported);
+	unsupported.Name = "UnsupportedBlendMode";
+	unsupported.ShadingModel = 1;
+	unsupported.BlendMode = 99;
+	scene.Materials.push_back(unsupported);
 	AssetRegistry assets;
-	auto world = BuildWorldFromSceneData(scene, assets, clientSize);
+	WorldFromSceneConverter converter;
+	auto world = converter.BuildWorldFromSceneData(scene, assets, "", clientSize);
+	Check(world->FindActor("First(1)") && world->FindActor("First(2)"), "Repeated actor names did not receive unique suffixes");
 	auto* built = world->FindActor("First");
 	auto* builtComponent = built->FindComponent("Collider");
 	Check(built->GetArchetype() == "FixtureActor" && built->HasTag("Test") && built->GetTransform().GetLocalPosition().x == 10,
@@ -239,7 +256,7 @@ void SceneConstruction()
 	Check(builtComponent->HasBegunPlay(), "Typed scene component lifecycle");
 	SceneData invalid; ActorRecord badA; badA.Name = "BadA"; badA.Transform.Position.x = std::numeric_limits<float>::infinity(); invalid.Actors.push_back(badA);
 	ActorRecord badB; badB.Name = "BadB"; badB.Transform.Scale.y = std::numeric_limits<float>::quiet_NaN(); invalid.Actors.push_back(badB);
-	try { BuildWorldFromSceneData(invalid, assets, clientSize); Check(false, "Invalid candidate scene was accepted"); }
+	try { converter.BuildWorldFromSceneData(invalid, assets, "", clientSize); Check(false, "Invalid candidate scene was accepted"); }
 	catch (const std::runtime_error& error) { const std::string message = error.what(); Check(message.find("BadA") != std::string::npos && message.find("BadB") != std::string::npos, "Construction diagnostics were not aggregated"); }
 
 	SceneData missingAsset;
@@ -254,7 +271,7 @@ void SceneConstruction()
 	auto fallbackMesh = std::make_shared<Mesh>();
 	fallbackMesh->Initialize("FallbackMesh", {Mesh::Element{}}, {}, {});
 	SceneFallbackAssets fallbacks{std::make_shared<MeshAsset>(fallbackMesh), std::make_shared<MaterialAsset>()};
-	auto partialWorld = BuildWorldFromSceneData(missingAsset, assets, clientSize, fallbacks);
+	auto partialWorld = converter.BuildWorldFromSceneData(missingAsset, assets, "", clientSize, fallbacks);
 	auto* builtMissingMesh = partialWorld->FindActor("MissingAssetActor")->GetComponent<StaticMeshComponent>();
 	Check(builtMissingMesh && builtMissingMesh->GetMesh() == fallbacks.MissingMesh &&
 	      builtMissingMesh->GetMaterial(0) == fallbacks.MissingMaterial,

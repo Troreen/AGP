@@ -1652,14 +1652,17 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 	Shader materialPS;
 	Shader gbufferPS;
 
-	if (aDescription.ShadingModel == ShadingModel::None)
+	const auto domainShader = myMaterialDomainShaders.find(aDescription.Domain);
+	const auto shadingModelShader = myMaterialShadingModelShaders.find(aDescription.ShadingModel);
+
+	if (shadingModelShader == myMaterialShadingModelShaders.end())
 	{
-		GELOG(Error, "Material {} has invalid shading model!", aDescription.Name);
+		GELOG(Warning, "Material '{}' skipped: unsupported shading model.", aDescription.Name);
 		return false;
 	}
-	if (aDescription.Domain == MaterialDomain::None)
+	if (domainShader == myMaterialDomainShaders.end())
 	{
-		GELOG(Error, "Material {} has invalid material domain!", aDescription.Name);
+		GELOG(Warning, "Material '{}' skipped: unsupported material domain.", aDescription.Name);
 		return false;
 	}
 	if (aDescription.Name.empty())
@@ -1669,7 +1672,7 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 	}
 
 	{
-		const std::filesystem::path& path = myMaterialDomainShaders.at(aDescription.Domain);
+		const std::filesystem::path& path = domainShader->second;
 		MaterialShaderIncludeHandler handler(myShaderRoot / "Material", path, aDescription.MaterialShaderCode);
 		if (!myRHI.CompileShader(ShaderType::VertexShader, path, &handler, true, materialVS))
 		{
@@ -1678,7 +1681,7 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 	}
 
 	{
-		const std::filesystem::path& path = myMaterialShadingModelShaders.at(aDescription.ShadingModel);
+		const std::filesystem::path& path = shadingModelShader->second;
 		MaterialShaderIncludeHandler handler(myShaderRoot / "Material", path, aDescription.MaterialShaderCode);
 		if (!myRHI.CompileShader(ShaderType::PixelShader, path, &handler, true, materialPS))
 		{
