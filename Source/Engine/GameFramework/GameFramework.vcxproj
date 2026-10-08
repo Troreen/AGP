@@ -207,6 +207,7 @@
     <ClInclude Include="Coroutine\Coroutine.h" />
     <ClInclude Include="Coroutine\CoroutineHandler.h" />
     <ClInclude Include="Coroutine\Scheduler.h" />
+    <ClInclude Include="EventBus.hpp" />
     <ClInclude Include="GameFrameworkLog.h" />
     <ClInclude Include="Helper\Event.hpp" />
     <ClInclude Include="Rendering\WorldRenderer.h" />
@@ -251,6 +252,7 @@
     <ClCompile Include="Coroutine\Coroutine.cpp" />
     <ClCompile Include="Coroutine\CoroutineHandler.cpp" />
     <ClCompile Include="Coroutine\Scheduler.cpp" />
+    <ClCompile Include="EventBus.cpp" />
     <ClCompile Include="GameFrameworkLog.cpp" />
     <ClCompile Include="Rendering\WorldRenderer.cpp" />
     <ClCompile Include="Scenes\WorldFromSceneData.cpp" />

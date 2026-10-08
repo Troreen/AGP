@@ -1,6 +1,7 @@
 #include "ServiceLocator.h"
 
 #include "GameFramework/AudioManager.h"
+#include "GameFramework/EventBus.hpp"
 #include "GameFramework/AssetHandling/AssetRegistry.h"
 #include "GameFramework/Animation/AnimationManager.h"
 #include "GameFramework/Settings/EngineSettings.h"
@@ -19,6 +20,7 @@ void ServiceLocator::Initialize()
 {
 	myInputMapper = new CommonUtilities::InputMapper();
 	myAudioManager = new AudioManager();
+	myEventBus = new EventBus();
 	myAssetRegistry = new AssetRegistry();
 	myAnimationManager = new AnimationManager();
 	myEngineSettings = new EngineSettings();
@@ -34,6 +36,11 @@ CommonUtilities::InputMapper& ServiceLocator::GetInputMapper()
 AudioManager& ServiceLocator::GetAudioManager() const
 {
 	return *myAudioManager;
+}
+
+EventBus& ServiceLocator::GetEventBus() const
+{
+	return *myEventBus;
 }
 
 AssetRegistry& ServiceLocator::GetAssetRegistry() const
@@ -69,6 +76,9 @@ void ServiceLocator::KillServices()
 	delete myAudioManager;
 	myAudioManager = nullptr;
 
+	delete myEventBus;
+	myEventBus = nullptr;
+
 	delete myAssetRegistry;
 	myAssetRegistry = nullptr;
 
@@ -86,6 +96,7 @@ void ServiceLocator::KillServices()
 ServiceLocator::ServiceLocator()
 	: myInputMapper(nullptr)
 	, myAudioManager(nullptr)
+	, myEventBus(nullptr)
 	, myAssetRegistry(nullptr)
 	, myAnimationManager(nullptr)
 	, myEngineSettings(nullptr)

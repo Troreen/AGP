@@ -136,6 +136,7 @@
     <ClInclude Include="Coroutine\Scheduler.h">
       <Filter>Coroutine</Filter>
     </ClInclude>
+    <ClInclude Include="EventBus.hpp" />
     <ClInclude Include="GameFrameworkLog.h" />
     <ClInclude Include="Helper\Event.hpp">
       <Filter>Helper</Filter>
@@ -252,6 +253,7 @@
     <ClCompile Include="Coroutine\Scheduler.cpp">
       <Filter>Coroutine</Filter>
     </ClCompile>
+    <ClCompile Include="EventBus.cpp" />
     <ClCompile Include="GameFrameworkLog.cpp" />
     <ClCompile Include="Rendering\WorldRenderer.cpp">
       <Filter>Rendering</Filter>

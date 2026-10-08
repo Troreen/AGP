@@ -6,6 +6,7 @@ namespace CommonUtilities
 }
 
 class AudioManager;
+class EventBus;
 class AssetRegistry;
 class AnimationManager;
 class EngineSettings;
@@ -26,6 +27,7 @@ public:
 
 	CommonUtilities::InputMapper& GetInputMapper();
 	AudioManager& GetAudioManager() const;
+	EventBus& GetEventBus() const;
 	AssetRegistry& GetAssetRegistry() const;
 	AnimationManager& GetAnimationManager() const;
 	EngineSettings& GetEngineSettings() const;
@@ -40,6 +42,7 @@ private:
 
 	CommonUtilities::InputMapper* myInputMapper;
 	AudioManager* myAudioManager;
+	EventBus* myEventBus;
 	AssetRegistry* myAssetRegistry;
 	AnimationManager* myAnimationManager;
 	EngineSettings* myEngineSettings;
