@@ -1134,22 +1134,38 @@ void GraphicsEngine::RenderScreenText(GraphicsCommandList& inoutCommandList, con
 
 void GraphicsEngine::RenderScreenSprites(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot, RenderHardwareInterface& aRHI)
 {
+	if (aSnapshot.ScreenSpriteItems.empty())
+	{
+		return;
+	}
+
 	inoutCommandList.BeginEvent("Render sprites");
 
 	constexpr float designWidth = 1920.0f;
 	constexpr float designHeight = 1080.0f;
 
+	CommonUtilities::Vector2u windowSize = GetClientSize();
+
+	float scaleX = windowSize.x / designWidth;
+	float scaleY = windowSize.y / designHeight;
+	float scale = CommonUtilities::Maths::Min(scaleX, scaleY);
+
 	mySpriteRenderResources.Projection = CommonUtilities::Matrix4f{};
 
-	mySpriteRenderResources.Projection(1, 1) = 2.0f / designWidth;
-	mySpriteRenderResources.Projection(2, 2) = -2.0f / designHeight;
-	mySpriteRenderResources.Projection(4, 1) = -1.0f;
-	mySpriteRenderResources.Projection(4, 2) = 1.0f;
+	mySpriteRenderResources.Projection(1, 1) = (2.0f / designWidth) * (scale / scaleX);
+	mySpriteRenderResources.Projection(1, 4) = 1.0f;
+	mySpriteRenderResources.Projection(2, 2) = (- 2.0f / designHeight) * (scale / scaleY);
+	mySpriteRenderResources.Projection(2, 4) = 1.0f;
+	mySpriteRenderResources.Projection(3, 3) = -1.0f;
+	mySpriteRenderResources.Projection(4, 4) = 1.0f;
 
 	aRHI.CreateDynamicVertexBuffer("SpriteRenderer", 10000, mySpriteRenderResources.VertexBuffer);
 
 	FrameBuffer frameBuffer;
 	frameBuffer.Projection = mySpriteRenderResources.Projection;
+	inoutCommandList.SetRenderTarget(&myBackBuffer, nullptr);
+	inoutCommandList.SetPipelineState(&mySpritePSO);
+
 	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::FrameBuffer, frameBuffer, ConstantBufferSlot::Frame, PipeLineStage_VertexShader | PipeLineStage_PixelShader);
 
 	mySpriteRenderResources.Vertices.clear();
@@ -1165,6 +1181,8 @@ void GraphicsEngine::RenderScreenSprites(GraphicsCommandList& inoutCommandList, 
 		{
 			parentSize.x * aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Anchor.x + aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Position.x - aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Size.x * aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Pivot.x,
 			parentSize.y * aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Anchor.y + aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Position.y - aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Size.y * aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Pivot.y
+			//aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Position.x,
+			//aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Position.y
 		};
 
 		const CommonUtilities::Vector2f size = aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Size;
@@ -1229,8 +1247,6 @@ void GraphicsEngine::RenderScreenSprites(GraphicsCommandList& inoutCommandList, 
 
 			UpdateAndSetConstantBufferInternal(inoutCommandList, ConstantBuffer::MaterialBuffer, material->GetParameterDataBlock(), Material::MATERIAL_BUFFER_SIZE, ConstantBufferSlot::Material, PipeLineStage_VertexShader | PipeLineStage_PixelShader);
 		}
-
-		inoutCommandList.SetPipelineState(&mySpritePSO);
 
 		inoutCommandList.UpdateVertexBuffer(mySpriteRenderResources.VertexBuffer, mySpriteRenderResources.Vertices);
 		inoutCommandList.SetVertexBuffer(&mySpriteRenderResources.VertexBuffer);
@@ -1639,7 +1655,7 @@ bool GraphicsEngine::CreateSpritePipelineState()
 	description.PixelShader.ByteCodeSize = pixelShader.GetDataSize();
 	description.InputLayoutElements = Vertex::Description;
 	description.Topology = Topology::TriangleList;
-	description.BlendMode = BlendMode::Alpha;
+	description.BlendMode = BlendMode::Opaque;
 	description.RasterizerState.CullMode = RasterizerCullMode::None;
 	return myRHI.CreatePipelineStateObject(description, mySpritePSO);
 }
