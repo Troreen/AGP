@@ -201,7 +201,7 @@ bool MaterialAsset::CreateMaterialInstance(const std::filesystem::path& aPath, c
 				}
 
 				const std::shared_ptr<TextureAsset> texture = aRegistry.GetAsset<TextureAsset>(path.generic_string());
-                if (!texture || !material->SetTexture(slot, texture->GetTextureShared()))
+                if (!texture || !material->SetTexture(slot, texture->GetTexture()))
 				{
 					return false;
 				}

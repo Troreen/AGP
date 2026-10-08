@@ -135,9 +135,9 @@ std::unique_ptr<World> WorldFromSceneConverter::BuildWorldFromSceneData(const Sc
 			else if (string != nullptr && myUnrealParameterNameToTextureSlot.contains(parameterData.Name))
 			{
 				std::shared_ptr<TextureAsset> texture = anAssetRegistry.GetAsset<TextureAsset>(*string);
-				if (texture != nullptr && texture->GetTextureShared() != nullptr)
+				if (texture != nullptr && texture->GetTexture() != nullptr)
 				{
-					instance->SetTexture(myUnrealParameterNameToTextureSlot[parameterData.Name], texture->GetTextureShared());
+					instance->SetTexture(myUnrealParameterNameToTextureSlot[parameterData.Name], texture->GetTexture());
 				}
 			}
 		}
@@ -232,12 +232,12 @@ void WorldFromSceneConverter::ApplyComponentData(Component& aComponent, const Co
 	}
 }
 
-bool WorldFromSceneConverter::ApplyMesh(MeshComponentBase& aComponent, const StaticMeshData& someData, AssetRegistry& anAssetRegistry, const SceneFallbackAssets& someFallbacks)
+bool WorldFromSceneConverter::ApplyMesh(Actor& anActor, MeshComponentBase& aComponent, const StaticMeshData& someData, AssetRegistry& anAssetRegistry, const SceneFallbackAssets& someFallbacks)
 {
 	std::shared_ptr<MeshAsset> mesh = anAssetRegistry.GetAsset<MeshAsset>(someData.MeshName);
 	if (!mesh)
 	{
-		GFLOG(Warning, "Using fallback cube for mesh component '{}': {}", someData.Common.Name, anAssetRegistry.GetLastError());
+		GFLOG(Warning, "Using fallback cube for mesh component '{}' on actor '{}': {}", someData.Common.Name, anActor.GetName(), anAssetRegistry.GetLastError());
 		mesh = someFallbacks.MissingMesh;
 		if (!mesh)
 		{
@@ -305,9 +305,9 @@ bool WorldFromSceneConverter::ApplyMesh(MeshComponentBase& aComponent, const Sta
 							else if (string != nullptr && myUnrealParameterNameToTextureSlot.contains(parameterData.Name))
 							{
 								std::shared_ptr<TextureAsset> texture = anAssetRegistry.GetAsset<TextureAsset>(*string);
-								if (texture != nullptr && texture->GetTextureShared() != nullptr)
+								if (texture != nullptr && texture->GetTexture() != nullptr)
 								{
-									instance->SetTexture(myUnrealParameterNameToTextureSlot[parameterData.Name], texture->GetTextureShared());
+									instance->SetTexture(myUnrealParameterNameToTextureSlot[parameterData.Name], texture->GetTexture());
 								}
 							}
 						}
@@ -324,7 +324,7 @@ bool WorldFromSceneConverter::ApplyMesh(MeshComponentBase& aComponent, const Sta
 			// TODO: Bind a dedicated error texture/material when those assets are available.
 			if (!usingFallbackMesh)
 			{
-				GFLOG(Warning, "Using fallback material for mesh component '{}' at slot {}.", someData.Common.Name, materialSlot);
+				GFLOG(Warning, "Using fallback material for mesh component '{}' on actor '{}' at slot {}.", someData.Common.Name, anActor.GetName(), materialSlot);
 			}
 			material = someFallbacks.MissingMaterial;
 			if (!material)
@@ -360,7 +360,7 @@ Component* WorldFromSceneConverter::CreateComponent(Actor& anActor, const Compon
 			else if constexpr (std::is_same_v<ComponentType, StaticMeshData>)
 			{
 				StaticMeshComponent* meshComponent = anActor.AddComponent<StaticMeshComponent>(common.Name);
-				if (!ApplyMesh(*meshComponent, someComponentData, anAssetRegistry, someFallbacks))
+				if (!ApplyMesh(anActor, *meshComponent, someComponentData, anAssetRegistry, someFallbacks))
 				{
 					// No usable mesh or material was available, so discard this component.
 					meshComponent->Destroy();
@@ -375,7 +375,7 @@ Component* WorldFromSceneConverter::CreateComponent(Actor& anActor, const Compon
 				AnimatorComponent* animatorComponent = anActor.AddComponent<AnimatorComponent>(common.Name + "Anim");
 				animatorComponent->SetMeshComponent(meshComponent);
 
-				if (!ApplyMesh(*meshComponent, someComponentData, anAssetRegistry, someFallbacks))
+				if (!ApplyMesh(anActor, *meshComponent, someComponentData, anAssetRegistry, someFallbacks))
 				{
 					meshComponent->Destroy();
 					return nullptr;

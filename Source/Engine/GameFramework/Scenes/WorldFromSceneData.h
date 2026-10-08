@@ -40,7 +40,7 @@ private:
 
 	const ComponentData& Common(const ComponentRecord& aRecord);
 	void ApplyComponentData(Component& aComponent, const ComponentData& someData);
-	bool ApplyMesh(MeshComponentBase& aComponent, const StaticMeshData& someData, AssetRegistry& anAssetRegistry, const SceneFallbackAssets& someFallbacks);
+	bool ApplyMesh(Actor& anActor, MeshComponentBase& aComponent, const StaticMeshData& someData, AssetRegistry& anAssetRegistry, const SceneFallbackAssets& someFallbacks);
 	Component* CreateComponent(Actor& anActor, const ComponentRecord& aRecord, AssetRegistry& anAssetRegistry, CommonUtilities::Vector2u aClientSize, const SceneFallbackAssets& someFallbacks);
 
 	std::unordered_map<std::string, std::string> myUnrealDataNameToMaterialParameterName;

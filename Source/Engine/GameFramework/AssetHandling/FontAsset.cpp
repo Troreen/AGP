@@ -98,7 +98,7 @@ bool FontAsset::Load(const std::filesystem::path& path, AssetRegistry& registry)
 		return false;
 	}
 
-	font->myAtlas = myAtlasAsset->GetTextureShared();
+	font->myAtlas = myAtlasAsset->GetTexture();
 	for (const simdjson::dom::element element : glyphsResult.value().get_array().value())
 	{
 		if (!element.is_object())

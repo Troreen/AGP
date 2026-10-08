@@ -15,11 +15,6 @@ TextureAsset::TextureAsset(std::shared_ptr<Texture> aTexture) : myTexture(std::m
 
 TextureAsset::~TextureAsset() = default;
 
-const Texture* TextureAsset::GetTexture() const
-{
-    return myTexture.get();
-}
-
 bool TextureAsset::Load(const std::filesystem::path& aPath, [[maybe_unused]] AssetRegistry& aRegistry)
 {
     std::shared_ptr<Texture> texture = std::make_shared<Texture>();

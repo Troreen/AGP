@@ -137,7 +137,6 @@ private:
 	{
 		std::filesystem::path Path;
 		std::weak_ptr<Asset> AssetHolder;
-		std::shared_ptr<Asset> Pin = nullptr;
 		bool Loading = false;
 	};
 
@@ -149,6 +148,8 @@ private:
 	std::unordered_map<std::string, AssetInfo> myAssets;
 	std::unordered_map<std::string, std::vector<MakeAssetFunc>> myFileExtToAssetType;
 	std::unordered_map<std::string,std::string> myAssetAliases;
+
+	std::vector<std::shared_ptr<Asset>> myPinnedAssets;
 
 	std::filesystem::path myContentRoot;
 

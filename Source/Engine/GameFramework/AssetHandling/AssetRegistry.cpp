@@ -39,9 +39,9 @@ void AssetRegistry::Pin(std::string_view aName, const std::shared_ptr<Asset>& aA
 	}
 
 	AssetInfo info;
-	info.Pin = aAsset;
 	info.AssetHolder = aAsset;
 	myAssets.try_emplace(lowerName, info);
+	myPinnedAssets.emplace_back(aAsset);
 }
 
 void AssetRegistry::Initialize(const std::filesystem::path& contentRoot)
