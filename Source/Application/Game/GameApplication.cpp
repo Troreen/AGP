@@ -38,49 +38,6 @@ namespace
 	constexpr float MaxFrameDeltaSeconds = 0.25f;
 	constexpr float RenderPassNotificationDurationSeconds = 2.0f;
 	constexpr float RenderPassNotificationFadeDurationSeconds = 0.5f;
-	struct GameSceneDefinition
-	{
-		std::string_view DisplayName;
-		std::filesystem::path RelativeFile;
-	};
-
-	SceneId GetSceneIdFromSettings(std::string_view sceneName)
-	{
-		if (sceneName == "Blockout")
-		{
-			return SceneId::Blockout;
-		}
-		if (sceneName == "Chests")
-		{
-			return SceneId::Chests;
-		}
-		if (sceneName == "ChestMaterials")
-		{
-			return SceneId::ChestMaterials;
-		}
-		if (sceneName == "Diorama")
-		{
-			return SceneId::Diorama;
-		}
-
-		throw std::runtime_error("Unknown initial scene: " + std::string(sceneName));
-	}
-
-	GameSceneDefinition GetGameSceneDefinition(SceneId aSceneId)
-	{
-		switch (aSceneId)
-		{
-		case SceneId::Blockout:
-			return {"Lvl_Blockout_Level", "ExportedScenes/lvl_blockout/Lvl_Blockout_Level.json"};
-		case SceneId::Chests:
-			return {"TestExportMap", "ExportedScenes/TestExportMap_Level.json"};
-		case SceneId::ChestMaterials:
-			return {"ChestMaterials", "ExportedScenes/ChestMaterials_Level.json"};
-		case SceneId::Diorama:
-			return {"Diorama", "ExportedScenes/lvl_01_diorama/Lvl_01_Diorama_Level.json"};
-		}
-		throw std::runtime_error("Unknown game scene id");
-	}
 
 	// Try one cleanup step without stopping the remaining steps if it fails.
 	template <class Action, class... Arguments>
@@ -198,25 +155,25 @@ void GameApplication::RunSession(Game& aGame)
 	});
 
 	myGameInitializationStarted = true;
-	InitializeGameSession(aGame);
+	InitializeGameSession(aGame, graphics);
 	RunMainLoop(aGame, graphics);
 }
 
-bool GameApplication::RequestSceneLoad(SceneId aSceneId)
+bool GameApplication::RequestSceneLoad(const std::filesystem::path& aScene)
 {
 	if (!myAcceptSceneRequests)
 	{
 		return false;
 	}
 	// pendingScene is consumed in the next frame by the update loop
-	myPendingSceneId = aSceneId;
+	myPendingScene = aScene;
 	return true;
 }
 
 // TODO: this probably should be moved to a sceneloader class or similar, since it is not really a GameApplication concern.
 bool GameApplication::ReloadCurrentScene()
 {
-	return myCurrentSceneId && RequestSceneLoad(*myCurrentSceneId);
+	return myCurrentScene && RequestSceneLoad(*myCurrentScene);
 }
 
 GraphicsEngine& GameApplication::InitializeWindowAndGraphics()
@@ -298,7 +255,7 @@ GraphicsEngine& GameApplication::InitializeWindowAndGraphics()
 
 	// Initialize graphics engine
 	GraphicsEngine& graphics = GraphicsEngine::Get();
-	if (!graphics.Initialize(myMainWindowHandle, myContentRoot / "Shaders") || 
+	if (!graphics.Initialize(myMainWindowHandle, myContentRoot / myApplicationSettings.ShaderFolder) || 
 		!graphics.CreateCommandList("Game Scene", myCommandList))
 	{
 		throw std::runtime_error("Could not initialize graphics engine: ");
@@ -398,22 +355,23 @@ void GameApplication::InitializeInputAndApplicationControls()
 	}
 }
 
-void GameApplication::InitializeGameSession(Game& aGame)
+void GameApplication::InitializeGameSession(Game& aGame, GraphicsEngine& aGraphics)
 {
 	aGame.Initialize(*this);
 
 	// Start the scene named in the settings unless the game requested one.
-	if (!myPendingSceneId)
+	if (!myPendingScene)
 	{
-		RequestSceneLoad(GetSceneIdFromSettings(myApplicationSettings.InitialScene));
+		RequestSceneLoad(myApplicationSettings.InitialScene);
 	}
 
-	ProcessPendingSceneLoad(aGame);
-	
 	myInitialWorldStarted = true;
 	
 	ShowWindow(myMainWindowHandle, SW_SHOW);
 	SetForegroundWindow(myMainWindowHandle);
+	aGraphics.Present();
+
+	ProcessPendingSceneLoad(aGame);
 }
 
 void GameApplication::RunMainLoop(Game& aGame, GraphicsEngine& aGraphics)
@@ -436,7 +394,7 @@ void GameApplication::RunMainLoop(Game& aGame, GraphicsEngine& aGraphics)
 		}
 
 		// Process any pending scene load requests before ticking the timer, so that the first frame of a new scene is not delayed by a full frame time.
-		if (myPendingSceneId)
+		if (myPendingScene)
 		{
 			ProcessPendingSceneLoad(aGame);
 			timer.Update();
@@ -537,19 +495,27 @@ void GameApplication::RenderFrame(GraphicsEngine& aGraphics)
 // TODO: this should be moved to a sceneloader class or similar aswell
 void GameApplication::ProcessPendingSceneLoad(Game& aGame)
 {
-	const SceneId requestedSceneId = *myPendingSceneId;
+	const std::filesystem::path requestedScene = *myPendingScene;
 	// Consume the request so it is not loaded again next frame
-	myPendingSceneId.reset();
+	myPendingScene.reset();
 
-	const GameSceneDefinition sceneDefinition = GetGameSceneDefinition(requestedSceneId);
-	const std::string sceneName(sceneDefinition.DisplayName);
+	const std::string sceneName = requestedScene.stem().string();
+	std::filesystem::path scenePath = myContentRoot / myApplicationSettings.SceneFolder / requestedScene;
 	
 	std::unique_ptr<World> candidateWorld;
 	try
 	{
+		if (!std::filesystem::exists(scenePath))
+		{
+			throw std::runtime_error(
+				std::format("Scene '{}' does not exist within the scene folder '{}' in the content folder!",
+					requestedScene.string(),
+					myApplicationSettings.SceneFolder));
+		}
+
 		// Build and configure a replacemet before changing the running world.
 		AssetRegistry& assets = ServiceLocator::GetInstance().GetAssetRegistry();
-		UnrealImportResult importResult = UnrealSceneImporter{}.ImportScene(myContentRoot / sceneDefinition.RelativeFile);
+		UnrealImportResult importResult = UnrealSceneImporter{}.ImportScene(scenePath);
 		if (!importResult)
 		{
 			std::ostringstream message;
@@ -561,12 +527,12 @@ void GameApplication::ProcessPendingSceneLoad(Game& aGame)
 			throw std::runtime_error(message.str());
 		}
 		SceneData scene = std::move(*importResult.Data);
-		LOG(LogGameFramework, Log, "Loaded scene '{}' from '{}' ({} actors).", sceneDefinition.DisplayName, sceneDefinition.RelativeFile.string(), scene.Actors.size());
+		LOG(LogGameFramework, Log, "Loaded scene '{}' from '{}' ({} actors).", sceneName, requestedScene.string(), scene.Actors.size());
 		
 		SceneFallbackAssets fallbacks;
 		// TODO: Replace the procedural cube with the dedicated missing-mesh asset.
 		fallbacks.MissingMesh = std::make_shared<MeshAsset>(PrimitiveMeshBuilder::CreateCube());
-		fallbacks.MissingShader = myContentRoot / "Shaders" / "_DefaultMaterial.hlsli";
+		fallbacks.MissingShader = myContentRoot / myApplicationSettings.ShaderFolder / "_DefaultMaterial.hlsli";
 
 		MaterialDescription matDesc;
 		matDesc.Name = "_Default Material_";
@@ -587,7 +553,7 @@ void GameApplication::ProcessPendingSceneLoad(Game& aGame)
 
 		WorldFromSceneConverter converter;
 		converter.Initialize(ServiceLocator::GetInstance().GetEngineSettings().GetSettingsDirectory() / "MaterialNameConversions.json");
-		candidateWorld = converter.BuildWorldFromSceneData(scene, assets, myContentRoot / "Shaders", myClientSize, fallbacks);
+		candidateWorld = converter.BuildWorldFromSceneData(scene, assets, myContentRoot / myApplicationSettings.ShaderFolder, myClientSize, fallbacks);
 		aGame.ConfigureWorld(*candidateWorld);
 	}
 	catch (const std::bad_alloc&)
@@ -612,7 +578,7 @@ void GameApplication::ProcessPendingSceneLoad(Game& aGame)
 		myWorld->Clear();
 	}
 	myWorld = std::move(candidateWorld);
-	myCurrentSceneId = requestedSceneId;
+	myCurrentScene = requestedScene;
 
 	// Select a debug camera if the scene did not provide an active camera.
 	myToggleDebugCameraRequested = false;

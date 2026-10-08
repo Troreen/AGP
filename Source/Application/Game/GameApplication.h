@@ -30,14 +30,6 @@ class Game;
 class TextWidget;
 class World;
 
-enum class SceneId
-{
-	Blockout,
-	Chests,
-	ChestMaterials,
-	Diorama
-};
-
 // Owns one game run: platform state, the main loop, the live World and scene requests.
 class GameApplication final
 {
@@ -52,7 +44,7 @@ public:
 	int Run(Game& aGame);
 
 	// Requests are last-write-wins and are processed only at safe frame boundaries.
-	bool RequestSceneLoad(SceneId aSceneId);
+	bool RequestSceneLoad(const std::filesystem::path& aScene);
 	bool ReloadCurrentScene();
 
 private:
@@ -62,7 +54,7 @@ private:
 	void ApplySoundSettings(const SoundSettings& soundSettings);
 
 	void RunSession(Game& aGame);
-	void InitializeGameSession(Game& aGame);
+	void InitializeGameSession(Game& aGame, GraphicsEngine& aGraphics);
 	void RunMainLoop(Game& aGame, GraphicsEngine& aGraphics);
 	bool PrepareRenderTargetSize(GraphicsEngine& aGraphics);
 	void RenderFrame(GraphicsEngine& aGraphics);
@@ -78,17 +70,18 @@ private:
 	void DestroyWindowIfCreated() noexcept;
 
 	ApplicationSettings myApplicationSettings;
+	WindowSettings myWindowSettings;
+
 	std::filesystem::path myContentRoot;
 	std::unique_ptr<World> myWorld;
-	std::optional<SceneId> myPendingSceneId;
-	std::optional<SceneId> myCurrentSceneId;
+	std::optional<std::filesystem::path> myPendingScene;
+	std::optional<std::filesystem::path> myCurrentScene;
 	CommonUtilities::Vector2u myClientSize{};
 	bool myQuitRequested = false;
 	bool myAcceptSceneRequests = true;
 	bool myGameInitializationStarted = false;
 	bool myInitialWorldStarted = false;
 
-	WindowSettings myWindowSettings;
 	HWND myMainWindowHandle = nullptr;
 	std::wstring myWindowClassName;
 	HCURSOR myCustomCursor = nullptr;

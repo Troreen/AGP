@@ -381,15 +381,6 @@ namespace
 		{
 			Invalid(aField + ".contentPath", "must be a relative folder path");
 		}
-
-		// TODO: scene name having to be set in multiple places feels wrong shuold be changed.
-		if (applicationSettings.InitialScene != "Blockout" &&
-			applicationSettings.InitialScene != "Chests" &&
-			applicationSettings.InitialScene != "ChestMaterials" &&
-			applicationSettings.InitialScene != "Diorama")
-		{
-			Invalid(aField + ".initialScene", "expected Blockout, Chests, ChestMaterials or Diorama");
-		}
 	}
 
 	void ValidateSound(const SoundSettings& soundSettings, const std::string& aField)
@@ -477,6 +468,16 @@ namespace
 		const std::string contentPathUtf8 = ReadString(Required(anObject, "contentPath", aField), aField + ".contentPath");
 		const std::u8string contentPath(reinterpret_cast<const char8_t*>(contentPathUtf8.data()), contentPathUtf8.size());
 		settings.ContentPath = std::filesystem::path(contentPath);
+
+		if (const auto shaderFolder = ReadOptionalString(anObject, "shaderFolder", aField))
+		{
+			settings.ShaderFolder = shaderFolder.value();
+		}
+
+		if (const auto sceneFolder = ReadOptionalString(anObject, "scenesFolder", aField))
+		{
+			settings.SceneFolder = sceneFolder.value();
+		}
 
 		if (const auto cursorPath = ReadOptionalString(anObject, "cursorPath", aField))
 		{
