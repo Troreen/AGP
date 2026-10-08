@@ -13,5 +13,5 @@
 {4b86d6ba-16b7-4d29-b2f2-f1b4811636ac} event:/Intro Swell
 {3a428b39-fd8c-4541-a4e8-33d80326b938} event:/Potion Drink
 {6f677fe5-1a80-4808-af9e-14cb88aba8eb} event:/Sickle Slash
+{5df00fd9-ba2b-44d2-b933-9d27cd963cfc} event:/Slash
 {d4124cfd-63af-450e-a691-cd40fdde6788} event:/Slash Hit
-{5df00fd9-ba2b-44d2-b933-9d27cd963cfc} event:/Whirlwind

@@ -165,7 +165,7 @@ void AudioManager::RegisterAllEvents()
 	SoundEngine::RegisterEvent("event:/Potion Drink", SoundID::ePotion);
 	SoundEngine::RegisterEvent("event:/Sickle Slash", SoundID::eSickleSlash);
 	SoundEngine::RegisterEvent("event:/Slash Hit", SoundID::eSlashHit);
-	SoundEngine::RegisterEvent("event:/Whirlwind", SoundID::eWhirlwind);
+	SoundEngine::RegisterEvent("event:/Slash", SoundID::eSlash);
 	myMusicList.insert({ SoundID::eMainTheme, SoundEngine::CreateEventInstance(SoundID::eMainTheme) });
 	myMusicList.insert({ SoundID::eBlizzardAmbience, SoundEngine::CreateEventInstance(SoundID::eBlizzardAmbience) });
 	myMusicList.insert({ SoundID::eCastleAmbienceOne, SoundEngine::CreateEventInstance(SoundID::eCastleAmbienceOne) });
@@ -177,7 +177,7 @@ void AudioManager::RegisterAllEvents()
 	myMusicList.insert({ SoundID::ePotion, SoundEngine::CreateEventInstance(SoundID::ePotion) });
 	myMusicList.insert({ SoundID::eSickleSlash, SoundEngine::CreateEventInstance(SoundID::eSickleSlash) });
 	myMusicList.insert({ SoundID::eSlashHit, SoundEngine::CreateEventInstance(SoundID::eSlashHit) });
-	myMusicList.insert({ SoundID::eWhirlwind, SoundEngine::CreateEventInstance(SoundID::eWhirlwind) });
+	myMusicList.insert({ SoundID::eSlash, SoundEngine::CreateEventInstance(SoundID::eSlash) });
 }
 
 AudioManager::AudioManager()

@@ -42,6 +42,11 @@ void Game::Update([[maybe_unused]] World& aWorld, [[maybe_unused]] float aDeltaT
 	{
 		ServiceLocator::GetInstance().GetAudioManager().PlayMusic(eBlizzardAmbience);
 	}
+
+	if (!ServiceLocator::GetInstance().GetAudioManager().IsEventPlaying(eSlash))
+	{
+		ServiceLocator::GetInstance().GetAudioManager().PlayMusic(eSlash);
+	}
 }
 
 void Game::Shutdown()

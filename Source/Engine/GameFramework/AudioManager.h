@@ -16,7 +16,7 @@ enum SoundID
 	ePotion,
 	eSickleSlash,
 	eSlashHit,
-	eWhirlwind
+	eSlash
 };
 
 enum BusID
