@@ -3,6 +3,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+Import-Module Microsoft.PowerShell.Utility -ErrorAction Stop
 $destination = Join-Path $PSScriptRoot 'FMod\include'
 $expectedHeaders = [ordered]@{
     'fmod.h' = 'F66B2A2C93BF4163306FF967DD1F7FE34AA3AE4F4715B88E6C6961B269C674E2'
