@@ -1,11 +1,25 @@
 {
-  "Player Legs": {
+  "Player": {
     "Name": "PlayerTree",
     "Start state": "IdleState",
     "Variables": [
       {
         "Name": "IsIdle",
         "Type": "Bool"
+      }
+    ]
+  },
+  "Bro":{
+    "Name": "BroTree",
+    "Start state": "IdleState",
+    "Variables": [
+      {
+        "Name": "IsIdle",
+        "Type": "Bool"
+      },
+      {
+        "Name": "IsWaving",
+        "Type": "Trigger"
       }
     ]
   }

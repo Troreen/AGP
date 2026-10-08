@@ -25,13 +25,9 @@ AnimationTree::AnimationTree(const std::string& aName, const std::string& aStart
 
 	AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
 	const std::filesystem::path& contentRoot = assetRegistry.GetContentRoot();
-#ifndef _RETAIL
-	std::filesystem::path path = contentRoot / "Animations" / "Animation Manager" / "Trees" / file;
-#else
-	std::filesystem::path path = contentRoot / "Animations" / "Animation Manager" / "Trees" / file;
-#endif
+	std::filesystem::path treePath = contentRoot / "Animations" / "Animation Manager" / "Trees" / file;
 
-	simdjson::padded_string json = simdjson::padded_string::load(path.c_str());
+	simdjson::padded_string json = simdjson::padded_string::load(treePath.c_str());
 	simdjson::dom::parser parser;
 	simdjson::dom::object root;
 
@@ -72,38 +68,35 @@ AnimationTree::AnimationTree(const std::string& aName, const std::string& aStart
 		{
 			isLooping = state.value["IsLooping"].get<bool>();
 		}
-		if (!state.value["IsBaseLayer"].error())
-		{
-			isFullbody = state.value["IsBaseLayer"].get<bool>();
-		}
+		//if (!state.value["IsBaseLayer"].error())
+		//{
+		//	isFullbody = state.value["IsBaseLayer"].get<bool>();
+		//}
 
 
 
 		myAnimationStates[myAnimationStates.size() - 1].SetAnimation(name, isLooping, isFullbody); // Gives the state essentials for animation
 
-		if (!state.value["IsGlobal"].error())
+		if (!currentState["Global Transitions"].error())
 		{
-			if (state.value["IsGlobal"].get<bool>())
+			simdjson::dom::array transitionArray = currentState["Global Transitions"];
+			for (auto transitions : transitionArray)
 			{
-				simdjson::dom::array transitionArray = currentState["Global Transitions"];
-				for (auto transitions : transitionArray)
+				bool hasExitTime = false;
+
+				if (!state.value["HasExitTime"].error())
 				{
-					bool hasExitTime = false;
-
-					if (!state.value["HasExitTime"].error())
-					{
-						hasExitTime = state.value["HasExitTime"].get<bool>();
-					}
-
-					Transition newTransition = {
-					name,
-					hasExitTime,
-					std::string(transitions["Variable"].get<const char*>()),
-					transitions["Expected"].get<bool>()
-					};
-
-					AddGlobalTransition(newTransition);
+					hasExitTime = state.value["HasExitTime"].get<bool>();
 				}
+
+				Transition newTransition = {
+				name,
+				hasExitTime,
+				std::string(transitions["Variable"].get<const char*>()),
+				transitions["Expected"].get<bool>()
+				};
+
+				AddGlobalTransition(newTransition);
 			}
 		}
 
@@ -160,19 +153,11 @@ void AnimationTree::AddVariable(const AnimationVariable& anAnimationVariable)
 //	PlayState(myStartState);
 //}
 //
-//void AnimationTree::InitTree(AnimationTree& aTree)
-//{
-//	myAnimationPlayer = aTree.myAnimationPlayer;
-//	myShouldUpdateAnimation = false;
-//
-//	for (AnimationState& state : myAnimationStates)
-//	{
-//		state.InitState(this);
-//	}
-//
-//	PlayState(myStartState);
-//}
-//
+void AnimationTree::InitTree()
+{
+	PlayState(myStartState);
+}
+
 AnimationVariable& AnimationTree::GetAnimationVariable(const std::string& aName)
 {
 	if (!myAnimationVariables.contains(aName))

@@ -7,29 +7,9 @@
 
 class AnimatorComponent : public Component
 {
-public:
-	AnimatorComponent();
-
-	struct PlaybackState;
-
-	void Init(const std::string& aTree);
-	void Update(float aDeltaTime) override;
-
-	void SetMeshComponent(SkeletalMeshComponent* aMeshComponent);
-	void AddAnimation(const std::string& aName, const std::shared_ptr<AnimationAsset>& anAnimation);
-	std::shared_ptr<AnimationAsset> GetAnimation(const std::string& aName) const;
-	const PlaybackState& GetCurrentPlayBackState(bool aIsBaseLayer) const;
-
-	AnimationTree& GetTree();
-
-	bool PlayAnimation(const std::string& anAnimationName, bool aShouldLoop);
-	bool PlayPartialAnimation(const std::string& anAnimationName, bool aShouldLoop);
-	bool ConfigurePartialLayerFromJointName(const std::string& aRootJointName);
-
-private:
-
 	friend class AnimationState;
 
+public:
 	struct PlaybackState
 	{
 		std::shared_ptr<AnimationAsset> CurrentAnimation;
@@ -40,6 +20,23 @@ private:
 		bool Looped = false;
 		bool Active = false;
 	};
+
+	AnimatorComponent();
+
+	void Update(float aDeltaTime) override;
+
+	void SetTree(const std::string& aTree);
+	void SetMeshComponent(SkeletalMeshComponent* aMeshComponent);
+	void AddAnimation(const std::string& aName, const std::shared_ptr<AnimationAsset>& anAnimation);
+	std::shared_ptr<AnimationAsset> GetAnimation(const std::string& aName) const;
+	const PlaybackState& GetCurrentPlayBackState(bool aIsBaseLayer) const;
+	AnimationTree& GetTree();
+
+	bool PlayAnimation(const std::string& anAnimationName, bool aShouldLoop);
+	bool PlayPartialAnimation(const std::string& anAnimationName, bool aShouldLoop);
+	bool ConfigurePartialLayerFromJointName(const std::string& aRootJointName);
+
+private:
 
 	bool AdvancePlayback(PlaybackState& aPlayback, float aDeltaTime);
 	void MarkJointAndChildren(std::size_t aJointIndex);

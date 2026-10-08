@@ -4,6 +4,11 @@
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
+#include <ServiceLocator.h>
+#include <CommonUtilities/InputMapper.h>
+#include <CommonUtilities/InputHandler.h>
+#include <CommonUtilities/EnumKeyCode.h>
+#include <GameFramework/Components/AnimatorComponent.h>
 
 namespace
 {
@@ -180,6 +185,9 @@ void World::BeginPlay()
 		throw;
 	}
 	myUpdating = false;
+
+
+	myBro = FindActor("BRO");
 }
 
 void World::Update(float deltaTime)
@@ -209,6 +217,14 @@ void World::Update(float deltaTime)
 				component->Update(deltaTime);
 			}
 		}
+
+		CommonUtilities::InputMapper& imput = ServiceLocator::GetInstance().GetInputMapper();
+
+		if (imput.GetInputHandler()->IsKeyPressed(static_cast<int>(EKeyCode::NUMPAD1)))
+		{
+			myBro->GetComponent<AnimatorComponent>()->GetTree().SetTrigger("IsWaving");
+		}
+
 	}
 	catch (...)
 	{

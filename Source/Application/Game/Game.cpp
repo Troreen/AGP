@@ -9,6 +9,7 @@
 #include "GameFramework/Components/AnimatorComponent.h"
 #include "GameFramework/ServiceLocator.h"
 #include "GameFramework/World/World.h"
+#include <GameFramework/Animation/AnimationManager.h>
 #include "InputMapper.h"
 
 #include <memory>
@@ -58,19 +59,60 @@ void Game::ConfigureWorld(World& aWorld)
 {
 	{
 		Actor* playerBro = aWorld.SpawnActor("PLAYAH_BRO");
-		playerBro->GetTransform().SetLocalRotationDegrees({ 180, 0, 0 });
+		playerBro->GetTransform().SetLocalRotationDegrees({ 0, 0, 0 });
 		playerBro->GetTransform().SetWorldPosition({ 0, -15, 0 });
 
 		SkeletalMeshComponent* component = playerBro->AddComponent<SkeletalMeshComponent>();
+		AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
+		std::shared_ptr<MeshAsset> meshAsset = assetRegistry.GetAsset<MeshAsset>("SK_player.fbx");
+		component->SetMesh(meshAsset);
+
 		AnimatorComponent* animatorBro = playerBro->AddComponent<AnimatorComponent>();
 		animatorBro->SetMeshComponent(component);
-		animatorBro->Init("PlayerTree");
-		AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
+		animatorBro->SetTree("PlayerTree");
 
-		std::shared_ptr<MeshAsset> meshAsset = assetRegistry.GetAsset<MeshAsset>("SK_player.fbx");
 
-		component->SetMesh(meshAsset);
 		animatorBro->GetTree().SetBool("IsIdle", true);
-		animatorBro->GetTree().PlayState("IdleState");
 	}
+
+	{
+		Actor* playerBro = aWorld.SpawnActor("BRO");
+		playerBro->GetTransform().SetLocalRotationDegrees({ 0, 0, 0 });
+		playerBro->GetTransform().SetWorldPosition({ -100, 100, 0 });
+
+		SkeletalMeshComponent* component = playerBro->AddComponent<SkeletalMeshComponent>();
+		AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
+		std::shared_ptr<MeshAsset> meshAsset = assetRegistry.GetAsset<MeshAsset>("SK_C_Tga_Bro.fbx");
+		component->SetMesh(meshAsset);
+
+		AnimatorComponent* animatorBro = playerBro->AddComponent<AnimatorComponent>();
+		animatorBro->SetMeshComponent(component);
+		animatorBro->SetTree("BroTree");
+		animatorBro->ConfigurePartialLayerFromJointName("RightArm");
+
+
+		animatorBro->GetTree().SetBool("IsIdle", true);
+	}
+
+#ifdef _DEBUG
+	{
+		AnimationManager::DebugData data = ServiceLocator::GetInstance().GetAnimationManager().GetDebugData();
+
+		Actor* playerBro = aWorld.SpawnActor("A_Debug");
+		playerBro->GetTransform().SetLocalRotationDegrees({ 0, 0, 0 });
+		playerBro->GetTransform().SetWorldPosition({ 100, 100, 0 });
+
+		SkeletalMeshComponent* component = playerBro->AddComponent<SkeletalMeshComponent>();
+		AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
+		std::shared_ptr<MeshAsset> meshAsset = assetRegistry.GetAsset<MeshAsset>(data.Mesh);
+		component->SetMesh(meshAsset);
+
+		AnimatorComponent* animatorBro = playerBro->AddComponent<AnimatorComponent>();
+		animatorBro->SetMeshComponent(component);
+		animatorBro->SetTree(data.Tree);
+
+		animatorBro->GetTree().SetBool("IsIdle", true);
+	}
+#endif
+
 }

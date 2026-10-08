@@ -32,7 +32,7 @@ public:
 	//void InitTree(AnimatedModel* aModel);
 
 	// Only used for animation masking and syncing anims
-	void InitTree(AnimationTree& aTree);
+	void InitTree();
 
 	void Update(const float aDeltaTime);
 

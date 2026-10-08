@@ -1,0 +1,35 @@
+{
+  "Idle": {
+    "Name": "IdleState",
+    "Animation": "A_C_Tga_Bro_Idle_Breathing",
+    "IsLooping": true,
+    "IsGlobal": false,
+
+    "Transitions":[
+      {
+        "TransitionTo": "WaveState",
+
+        "Variable": "IsWaving",
+        "Expected": true
+      }
+    ]
+
+  },
+  "Waving":{
+    "Name": "WaveState",
+    "Animation": "A_C_Tga_Bro_Idle_Wave",
+    "IsLooping": false,
+    "IsGlobal": false,
+
+    "Transitions":[
+      {
+        "TransitionTo": "IdleState",
+
+        "HasExitTime": true,
+
+        "Variable": "IsIdle",
+        "Expected": true
+      }
+    ]
+  }
+}

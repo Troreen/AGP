@@ -10,17 +10,6 @@ AnimatorComponent::AnimatorComponent() : myMeshComponent(nullptr), myAnimationTr
 	myAnimations;
 }
 
-void AnimatorComponent::Init(const std::string& aTree)
-{
-	if (!myAnimationTree)
-	{
-		delete myAnimationTree;
-	}
-	myAnimationTree = new AnimationTree(ServiceLocator::GetInstance().GetAnimationManager().GetAnimationTree(aTree));
-
-	myAnimationTree->SetAnimationPlayer(this);
-}
-
 void AnimatorComponent::Update(float aDeltaTime)
 {
 	if (myAnimationTree)
@@ -47,6 +36,17 @@ std::shared_ptr<AnimationAsset> AnimatorComponent::GetAnimation(const std::strin
 	return foundAnimation->second;
 }
 
+void AnimatorComponent::SetTree(const std::string& aTree)
+{
+	if (!myAnimationTree)
+	{
+		delete myAnimationTree;
+	}
+	myAnimationTree = new AnimationTree(ServiceLocator::GetInstance().GetAnimationManager().GetAnimationTree(aTree));
+
+	myAnimationTree->SetAnimationPlayer(this);
+	myAnimationTree->InitTree();
+}
 void AnimatorComponent::SetMeshComponent(SkeletalMeshComponent* aMeshComponent)
 {
 	myMeshComponent = aMeshComponent;

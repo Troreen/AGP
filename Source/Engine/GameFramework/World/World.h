@@ -36,4 +36,6 @@ private:
 	CameraComponent* myCamera = nullptr;
 	bool myUpdating = false;
 	bool myClearing = false;
+
+	Actor* myBro;
 };
