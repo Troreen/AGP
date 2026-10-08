@@ -385,8 +385,7 @@ Component* WorldFromSceneConverter::CreateComponent(Actor& anActor, const Compon
 			{
 				// TODO: Load animator component from Unreal as well
 				SkeletalMeshComponent* meshComponent = anActor.AddComponent<SkeletalMeshComponent>(common.Name);
-				AnimatorComponent* animatorComponent = anActor.AddComponent<AnimatorComponent>(common.Name + "Anim");
-				animatorComponent->SetMeshComponent(meshComponent);
+				AnimatorComponent* animatorComponent = anActor.GetComponent<AnimatorComponent>();
 
 				if (!ApplyMesh(anActor, *meshComponent, someComponentData, anAssetRegistry, someFallbacks))
 				{
@@ -398,16 +397,22 @@ Component* WorldFromSceneConverter::CreateComponent(Actor& anActor, const Compon
 					// The fallback cube has no skeleton to animate.
 					return meshComponent;
 				}
-				if (!someComponentData.PartialRoot.empty() &&
-					!animatorComponent->ConfigurePartialLayerFromJointName(someComponentData.PartialRoot))
+
+				if (animatorComponent != nullptr)
 				{
-					throw std::runtime_error("Invalid partial root");
+					animatorComponent->SetMeshComponent(meshComponent);
+					if (!someComponentData.PartialRoot.empty() &&
+						!animatorComponent->ConfigurePartialLayerFromJointName(someComponentData.PartialRoot))
+					{
+						throw std::runtime_error("Invalid partial root");
+					}
+					if (!someComponentData.InitialAnimation.empty() &&
+						!animatorComponent->PlayAnimation(someComponentData.InitialAnimation, someComponentData.Loop))
+					{
+						throw std::runtime_error("Invalid animation");
+					}
 				}
-				if (!someComponentData.InitialAnimation.empty() &&
-					!animatorComponent->PlayAnimation(someComponentData.InitialAnimation, someComponentData.Loop))
-				{
-					throw std::runtime_error("Invalid animation");
-				}
+
 				return meshComponent;
 			}
 			else if constexpr (std::is_same_v<ComponentType, DirectionalLightData>)
