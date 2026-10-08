@@ -17,7 +17,7 @@ SkeletalMeshComponent::SkeletalMeshComponent(const std::shared_ptr<MeshAsset>& a
 
 void SkeletalMeshComponent::Update(float aDeltaTime)
 {
-
+	(void)aDeltaTime;
 }
 
 bool SkeletalMeshComponent::HasSkinning() const

@@ -29,12 +29,12 @@ public:
 
 	// An empty binding clears the mesh. This never loads resources.
 	void SetMesh(const std::shared_ptr<MeshAsset>& aMesh);
-	const std::shared_ptr<MeshAsset>& GetMesh() const;
+	const std::shared_ptr<MeshAsset> GetMesh() const;
 	bool HasMesh() const;
 
 	// Invalid slots or empty materials leave the existing binding unchanged.
 	bool SetMaterial(unsigned aMaterialIndex, const std::shared_ptr<MaterialAsset>& aMaterial);
-	const std::shared_ptr<MaterialAsset>& GetMaterial(unsigned index) const;
+	const std::shared_ptr<MaterialAsset> GetMaterial(unsigned index) const;
 
 	unsigned GetMaterialCount() const
 	{

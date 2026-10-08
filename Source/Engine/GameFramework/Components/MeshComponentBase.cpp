@@ -24,7 +24,7 @@ void MeshComponentBase::SetMesh(const std::shared_ptr<MeshAsset>& aMesh)
 	OnMeshChanged();
 }
 
-const std::shared_ptr<MeshAsset>& MeshComponentBase::GetMesh() const
+const std::shared_ptr<MeshAsset> MeshComponentBase::GetMesh() const
 {
 	return myMesh;
 }
@@ -45,7 +45,7 @@ bool MeshComponentBase::SetMaterial(unsigned aMaterialIndex, const std::shared_p
 	return true;
 }
 
-const std::shared_ptr<MaterialAsset>& MeshComponentBase::GetMaterial(unsigned index) const
+const std::shared_ptr<MaterialAsset> MeshComponentBase::GetMaterial(unsigned index) const
 {
 	return index < myMaterials.size() ? myMaterials[index] : nullptr;
 }
