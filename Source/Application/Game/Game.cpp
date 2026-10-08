@@ -20,7 +20,7 @@ Game::~Game() = default;
 
 void Game::Initialize(GameApplication& anApplication)
 {
-	auto& input = *ServiceLocator::GetInstance().GetInputMapper();
+	CommonUtilities::InputMapper& input = ServiceLocator::GetInstance().GetInputMapper();
 
 	myInputListenerIDs.push_back(input.AddEventListener("ReloadScene", [&anApplication](const CommonUtilities::InputEvent& anEvent)
 	{
@@ -45,12 +45,10 @@ void Game::Update([[maybe_unused]] World& aWorld, [[maybe_unused]] float aDeltaT
 
 void Game::Shutdown()
 {
-	if (auto* input = ServiceLocator::GetInstance().GetInputMapper())
+	CommonUtilities::InputMapper& input = ServiceLocator::GetInstance().GetInputMapper();
+	for (unsigned id : myInputListenerIDs)
 	{
-		for (unsigned id : myInputListenerIDs) 
-		{
-			input->RemoveEventListener(id);
-		}
+		input.RemoveEventListener(id);
 	}
 
 	myInputListenerIDs.clear();

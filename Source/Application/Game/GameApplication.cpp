@@ -1,3 +1,4 @@
+#pragma once
 #include "GameApplication.h"
 #include "GameWindowMessages.h"
 
@@ -6,6 +7,7 @@
 #include "GameFramework/AssetHandling/FontAsset.h"
 #include "GameFramework/AssetHandling/MaterialAsset.h"
 #include "GameFramework/AssetHandling/MeshAsset.h"
+#include "GameFramework/Coroutine/Scheduler.h"
 #include "GameFramework/AudioManager.h"
 #include "GameFramework/Animation/AnimationManager.h"
 #include "GameFramework/Components/CameraComponent.h"
@@ -192,7 +194,7 @@ void GameApplication::RunSession(Game& aGame)
 	});
 	settings.SetInputApplyCallback([this](const InputSettings& requested)
 	{
-		myInputSettingsApplier.Apply(*ServiceLocator::GetInstance().GetInputMapper(), requested);
+		myInputSettingsApplier.Apply(ServiceLocator::GetInstance().GetInputMapper(), requested);
 	});
 
 	myGameInitializationStarted = true;
@@ -309,17 +311,13 @@ GraphicsEngine& GameApplication::InitializeWindowAndGraphics()
 void GameApplication::InitializeServices()
 {
 	ServiceLocator& services = ServiceLocator::GetInstance();
-	AssetRegistry& assets = *services.SetAssetRegistry(new AssetRegistry());
-	assets.Initialize(myContentRoot);
-	if (!assets.IsInitialized())
-	{
-		throw std::runtime_error(assets.GetLastError());
-	}
 
 	// TODO: does this belong here?
 	if (myApplicationSettings.EnableRenderDiagnostics)
 	{
+		AssetRegistry& assets = services.GetAssetRegistry();
 		const std::shared_ptr<FontAsset> font = assets.GetAsset<FontAsset>("Fonts/CascadiaCode.font.json");
+
 		if (font)
 		{
 			myRenderFont = font;
@@ -335,15 +333,9 @@ void GameApplication::InitializeServices()
 		}
 	}
 
-	AudioManager* audio = services.SetAudioManager(new AudioManager());
-	audio->Init();
-
 	// The buses must exist before applying saved volumes.
 	EngineSettings& settings = services.GetEngineSettings();
 	ApplySoundSettings(settings.GetSoundSettings());
-
-	services.SetInputMapper(new CommonUtilities::InputMapper());
-	services.SetAnimationManager(new AnimationManager());
 }
 
 void GameApplication::ApplySoundSettings(const SoundSettings& soundSettings)
@@ -360,7 +352,7 @@ void GameApplication::InitializeInputAndApplicationControls()
 	myInputHandler.SetAutoMouseCapture(false);
 	myInputHandler.SetMouseDeltaEnabled(myApplicationSettings.EnableMouseLook);
 
-	CU::InputMapper& input = *ServiceLocator::GetInstance().GetInputMapper();
+	CU::InputMapper& input = ServiceLocator::GetInstance().GetInputMapper();
 	input.Init(&myInputHandler, &myXInputHandler);
 
 	// Install saved bindings before the game adds listeners to their action names.
@@ -464,7 +456,7 @@ void GameApplication::RunMainLoop(Game& aGame, GraphicsEngine& aGraphics)
 		myRenderPassNotificationRemainingSeconds = (std::max)(0.0f, myRenderPassNotificationRemainingSeconds - delta);
 
 		// Update input
-		ServiceLocator::GetInstance().GetInputMapper()->Update();
+		ServiceLocator::GetInstance().GetInputMapper().Update();
 		
 		if (myQuitRequested)
 		{
@@ -481,6 +473,9 @@ void GameApplication::RunMainLoop(Game& aGame, GraphicsEngine& aGraphics)
 		aGame.Update(*myWorld, delta);
 		myWorld->Update(delta);
 		ServiceLocator::GetInstance().GetAudioManager().Update(delta);
+
+		ServiceLocator::GetInstance().GetScheduler().IncreaseTimers(delta);
+		ServiceLocator::GetInstance().GetScheduler().Update();
 
 		RenderFrame(aGraphics);
 	}
@@ -671,12 +666,10 @@ void GameApplication::ClearWorld()
 
 void GameApplication::RemoveApplicationInputListeners()
 {
-	if (auto* input = ServiceLocator::GetInstance().GetInputMapper())
+	CommonUtilities::InputMapper& input = ServiceLocator::GetInstance().GetInputMapper();
+	for (unsigned id : myApplicationInputListenerIds)
 	{
-		for (unsigned id : myApplicationInputListenerIds)
-		{
-			input->RemoveEventListener(id);
-		}
+		input.RemoveEventListener(id);
 	}
 	myApplicationInputListenerIds.clear();
 	myInputHandler.ReleaseMouse();

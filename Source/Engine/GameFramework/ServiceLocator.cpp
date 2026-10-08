@@ -1,10 +1,13 @@
 #include "ServiceLocator.h"
-#include "GameFramework/AssetHandling/AssetRegistry.h"
+
 #include "GameFramework/AudioManager.h"
+#include "GameFramework/AssetHandling/AssetRegistry.h"
 #include "GameFramework/Animation/AnimationManager.h"
 #include "GameFramework/Settings/EngineSettings.h"
+#include "GameFramework/Coroutine/Scheduler.h"
+#include "GameFramework/Coroutine/CoroutineHandler.h"
+
 #include <InputMapper.h>
-#include <stdexcept>
 
 ServiceLocator& ServiceLocator::GetInstance()
 {
@@ -12,125 +15,86 @@ ServiceLocator& ServiceLocator::GetInstance()
 	return instance;
 }
 
-CommonUtilities::InputMapper* ServiceLocator::GetInputMapper()
+void ServiceLocator::Initialize()
 {
-	return myOwnedInputMapper;
+	myInputMapper = new CommonUtilities::InputMapper();
+	myAudioManager = new AudioManager();
+	myAssetRegistry = new AssetRegistry();
+	myAnimationManager = new AnimationManager();
+	myEngineSettings = new EngineSettings();
+	myScheduler = new Scheduler();
+	myCouroutineHandler = new CoroutineHandler();
 }
 
-CommonUtilities::InputMapper* ServiceLocator::SetInputMapper(CommonUtilities::InputMapper* anInputMapper)
+CommonUtilities::InputMapper& ServiceLocator::GetInputMapper()
 {
-	if (myOwnedInputMapper != anInputMapper)
-	{
-		delete myOwnedInputMapper;
-		myOwnedInputMapper = anInputMapper;
-	}
-	return anInputMapper;
-}
-
-AudioManager* ServiceLocator::SetAudioManager(AudioManager* anAudioManager)
-{
-	if (myOwnedAudioManager != anAudioManager)
-	{
-		delete myOwnedAudioManager;
-		myOwnedAudioManager = anAudioManager;
-	}
-	return anAudioManager;
-}
-
-AssetRegistry* ServiceLocator::SetAssetRegistry(AssetRegistry* anAssetRegistry)
-{
-	if (myOwnedAssetRegistry != anAssetRegistry)
-	{
-		delete myOwnedAssetRegistry;
-		myOwnedAssetRegistry = anAssetRegistry;
-	}
-	return anAssetRegistry;
-}
-
-AnimationManager* ServiceLocator::SetAnimationManager(AnimationManager* anAnimationManager)
-{
-	if (myAnimationManager != anAnimationManager)
-	{
-		delete myAnimationManager;
-		myAnimationManager = anAnimationManager;
-	}
-	return anAnimationManager;
-}
-
-EngineSettings* ServiceLocator::SetEngineSettings(EngineSettings* anEngineSettings)
-{
-	if (myOwnedEngineSettings != anEngineSettings)
-	{
-		delete myOwnedEngineSettings;
-		myOwnedEngineSettings = anEngineSettings;
-	}
-	return anEngineSettings;
-}
-
-
-void ServiceLocator::KillServices()
-{
-	delete myOwnedInputMapper;
-	myOwnedInputMapper = nullptr;
-	delete myOwnedAudioManager;
-	myOwnedAudioManager = nullptr;
-	delete myOwnedAssetRegistry;
-	myOwnedAssetRegistry = nullptr;
-	delete myAnimationManager;
-	myAnimationManager = nullptr;
-	// Settings stay available until the services that use them are gone.
-	delete myOwnedEngineSettings;
-	myOwnedEngineSettings = nullptr;
-}
-
-ServiceLocator::ServiceLocator()
-	: myOwnedInputMapper(nullptr)
-	, myOwnedAudioManager(nullptr)
-	, myOwnedAssetRegistry(nullptr)
-	, myOwnedEngineSettings(nullptr)
-	, myAnimationManager(nullptr)
-{}
-
-ServiceLocator::~ServiceLocator()
-{
-	KillServices();
+	return *myInputMapper;
 }
 
 AudioManager& ServiceLocator::GetAudioManager() const
 {
-	if (!myOwnedAudioManager)
-	{
-		throw std::logic_error("AudioManager service is unavailable");
-	}
-
-	return *myOwnedAudioManager;
+	return *myAudioManager;
 }
 
 AssetRegistry& ServiceLocator::GetAssetRegistry() const
 {
-	if (!myOwnedAssetRegistry)
-	{
-		throw std::logic_error("AssetRegistry service is unavailable");
-	}
-
-	return *myOwnedAssetRegistry;
+	return *myAssetRegistry;
 }
 
 AnimationManager& ServiceLocator::GetAnimationManager() const
 {
-	if (!myAnimationManager)
-	{
-		throw std::logic_error("AnimationManager service is unavailable");
-	}
 	return *myAnimationManager;
 }
 
 EngineSettings& ServiceLocator::GetEngineSettings() const
 {
-	if (!myOwnedEngineSettings)
-	{
-		throw std::logic_error("EngineSettings service is unavailable");
-	}
+	return *myEngineSettings;
+}
 
-	return *myOwnedEngineSettings;
+Scheduler& ServiceLocator::GetScheduler() const
+{
+	return *myScheduler;
+}
+
+CoroutineHandler& ServiceLocator::GetCoroutineHandler() const
+{
+	return *myCouroutineHandler;
+}
+
+void ServiceLocator::KillServices()
+{
+	delete myInputMapper;
+	myInputMapper = nullptr;
+
+	delete myAudioManager;
+	myAudioManager = nullptr;
+
+	delete myAssetRegistry;
+	myAssetRegistry = nullptr;
+
+	delete myAnimationManager;
+	myAnimationManager = nullptr;
+
+	// Settings stay available until the services that use them are gone.
+	delete myEngineSettings;
+	myEngineSettings = nullptr;
+
+	delete myScheduler;
+	myScheduler = nullptr;
+}
+
+ServiceLocator::ServiceLocator()
+	: myInputMapper(nullptr)
+	, myAudioManager(nullptr)
+	, myAssetRegistry(nullptr)
+	, myAnimationManager(nullptr)
+	, myEngineSettings(nullptr)
+	, myScheduler(nullptr)
+	, myCouroutineHandler(nullptr)
+{
+}
+
+ServiceLocator::~ServiceLocator()
+{
+	KillServices();
 }

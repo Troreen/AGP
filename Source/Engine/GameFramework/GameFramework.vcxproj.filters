@@ -13,6 +13,9 @@
     <Filter Include="Components">
       <UniqueIdentifier>{6B7DD516-5735-1764-C03C-F0BFAC13B254}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Coroutine">
+      <UniqueIdentifier>{5DB31B32-C91D-D0A8-125C-814E7E05AEFD}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Dependencies">
       <UniqueIdentifier>{6C01343A-5864-C3DE-01EA-FB94ED2B8F61}</UniqueIdentifier>
     </Filter>
@@ -124,6 +127,15 @@
     <ClInclude Include="Components\StaticMeshComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
+    <ClInclude Include="Coroutine\Coroutine.h">
+      <Filter>Coroutine</Filter>
+    </ClInclude>
+    <ClInclude Include="Coroutine\CoroutineHandler.h">
+      <Filter>Coroutine</Filter>
+    </ClInclude>
+    <ClInclude Include="Coroutine\Scheduler.h">
+      <Filter>Coroutine</Filter>
+    </ClInclude>
     <ClInclude Include="GameFrameworkLog.h" />
     <ClInclude Include="Helper\Event.hpp">
       <Filter>Helper</Filter>
@@ -230,6 +242,15 @@
     </ClCompile>
     <ClCompile Include="Components\SkeletalMeshComponent.cpp">
       <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Coroutine\Coroutine.cpp">
+      <Filter>Coroutine</Filter>
+    </ClCompile>
+    <ClCompile Include="Coroutine\CoroutineHandler.cpp">
+      <Filter>Coroutine</Filter>
+    </ClCompile>
+    <ClCompile Include="Coroutine\Scheduler.cpp">
+      <Filter>Coroutine</Filter>
     </ClCompile>
     <ClCompile Include="GameFrameworkLog.cpp" />
     <ClCompile Include="Rendering\WorldRenderer.cpp">

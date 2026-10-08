@@ -13,12 +13,14 @@
 
 AnimationManager::AnimationManager()
 {
-	AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
-	const std::filesystem::path& contentRoot = assetRegistry.GetContentRoot();
+}
+
+void AnimationManager::Initialize(const std::filesystem::path& aContentRoot)
+{
 #ifndef _RETAIL
-	std::filesystem::path path = contentRoot / "Animations" /"Animation Manager" / "AnimationManager.json";
+	std::filesystem::path path = aContentRoot / "Animations" /"Animation Manager" / "AnimationManager.json";
 #else
-	std::filesystem::path path = contentRoot / "Animations" /"Animation Manager" / "AnimationManager.json";
+	std::filesystem::path path = aContentRoot / "Animations" /"Animation Manager" / "AnimationManager.json";
 #endif
 
 	//const char* fileName = "AnimationTree.json";

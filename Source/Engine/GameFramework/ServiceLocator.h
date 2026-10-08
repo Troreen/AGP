@@ -9,6 +9,8 @@ class AudioManager;
 class AssetRegistry;
 class AnimationManager;
 class EngineSettings;
+class Scheduler;
+class CoroutineHandler;
 
 class ServiceLocator
 {
@@ -20,27 +22,27 @@ public:
 
 	static ServiceLocator& GetInstance();
 
-	CommonUtilities::InputMapper* GetInputMapper();
+	void Initialize();
+
+	CommonUtilities::InputMapper& GetInputMapper();
 	AudioManager& GetAudioManager() const;
 	AssetRegistry& GetAssetRegistry() const;
-	EngineSettings& GetEngineSettings() const;
 	AnimationManager& GetAnimationManager() const;
+	EngineSettings& GetEngineSettings() const;
+	Scheduler& GetScheduler() const;
+	CoroutineHandler& GetCoroutineHandler() const;
 
-	// Every setter transfers ownership. Replace the mapper only after removing all its listeners.
-	CommonUtilities::InputMapper* SetInputMapper(CommonUtilities::InputMapper* anInputMapper);
-	AudioManager* SetAudioManager(AudioManager* anAudioManager);
-	AssetRegistry* SetAssetRegistry(AssetRegistry* anAssetRegistry);
-	EngineSettings* SetEngineSettings(EngineSettings* anEngineSettings);
-	AnimationManager* SetAnimationManager(AnimationManager* anAnimationManager);
 	void KillServices();
 
 private:
 	ServiceLocator();
 	~ServiceLocator();
 
-	CommonUtilities::InputMapper* myOwnedInputMapper;
-	AudioManager* myOwnedAudioManager;
-	AssetRegistry* myOwnedAssetRegistry;
-	EngineSettings* myOwnedEngineSettings;
+	CommonUtilities::InputMapper* myInputMapper;
+	AudioManager* myAudioManager;
+	AssetRegistry* myAssetRegistry;
 	AnimationManager* myAnimationManager;
+	EngineSettings* myEngineSettings;
+	Scheduler* myScheduler;
+	CoroutineHandler* myCouroutineHandler;
 };

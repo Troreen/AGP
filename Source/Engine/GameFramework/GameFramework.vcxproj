@@ -204,6 +204,9 @@
     <ClInclude Include="Components\SceneComponent.h" />
     <ClInclude Include="Components\SkeletalMeshComponent.h" />
     <ClInclude Include="Components\StaticMeshComponent.h" />
+    <ClInclude Include="Coroutine\Coroutine.h" />
+    <ClInclude Include="Coroutine\CoroutineHandler.h" />
+    <ClInclude Include="Coroutine\Scheduler.h" />
     <ClInclude Include="GameFrameworkLog.h" />
     <ClInclude Include="Helper\Event.hpp" />
     <ClInclude Include="Rendering\WorldRenderer.h" />
@@ -245,6 +248,9 @@
     <ClCompile Include="Components\MeshComponentBase.cpp" />
     <ClCompile Include="Components\SceneComponent.cpp" />
     <ClCompile Include="Components\SkeletalMeshComponent.cpp" />
+    <ClCompile Include="Coroutine\Coroutine.cpp" />
+    <ClCompile Include="Coroutine\CoroutineHandler.cpp" />
+    <ClCompile Include="Coroutine\Scheduler.cpp" />
     <ClCompile Include="GameFrameworkLog.cpp" />
     <ClCompile Include="Rendering\WorldRenderer.cpp" />
     <ClCompile Include="Scenes\WorldFromSceneData.cpp" />

@@ -705,14 +705,11 @@ namespace
 
 }
 
-EngineSettings::EngineSettings(std::filesystem::path anExecutableDirectory, std::filesystem::path aSettingsDirectory)
-	: myExecutableDirectory(std::move(anExecutableDirectory))
-	, mySettingsDirectory(std::move(aSettingsDirectory))
+void EngineSettings::Load(const std::filesystem::path& anExecutableDirectory, const std::filesystem::path& aSettingsDirectory)
 {
-}
+	myExecutableDirectory = anExecutableDirectory;
+	mySettingsDirectory = aSettingsDirectory;
 
-void EngineSettings::Load()
-{
 	const std::filesystem::path applicationFile = mySettingsDirectory / "ApplicationSettings.json";
 	const std::filesystem::path inputFile = mySettingsDirectory / "InputBindings.json";
 

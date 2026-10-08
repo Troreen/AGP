@@ -302,12 +302,21 @@ std::shared_ptr<Mesh> PrimitiveMeshBuilder::CreateCube()
 	std::vector<Vertex> vertices;
 	std::vector<unsigned> indices;
 
-	AddQuad(vertices, indices, Point3(-0.5f, -0.5f, -0.5f) * 100.0f, Point3(0.5f, -0.5f, -0.5f) * 100.0f, Point3(0.5f, 0.5f, -0.5f) * 100.0f, Point3(-0.5f, 0.5f, -0.5f) * 100.0f);
-	AddQuad(vertices, indices, Point3(0.5f, -0.5f, 0.5f) * 100.0f, Point3(-0.5f, -0.5f, 0.5f) * 100.0f, Point3(-0.5f, 0.5f, 0.5f) * 100.0f, Point3(0.5f, 0.5f, 0.5f) * 100.0f);
-	AddQuad(vertices, indices, Point3(-0.5f, -0.5f, 0.5f) * 100.0f, Point3(-0.5f, -0.5f, -0.5f) * 100.0f, Point3(-0.5f, 0.5f, -0.5f) * 100.0f, Point3(-0.5f, 0.5f, 0.5f) * 100.0f);
-	AddQuad(vertices, indices, Point3(0.5f, -0.5f, -0.5f) * 100.0f, Point3(0.5f, -0.5f, 0.5f) * 100.0f, Point3(0.5f, 0.5f, 0.5f) * 100.0f, Point3(0.5f, 0.5f, -0.5f) * 100.0f);
-	AddQuad(vertices, indices, Point3(-0.5f, 0.5f, -0.5f) * 100.0f, Point3(0.5f, 0.5f, -0.5f) * 100.0f, Point3(0.5f, 0.5f, 0.5f) * 100.0f, Point3(-0.5f, 0.5f, 0.5f) * 100.0f);
-	AddQuad(vertices, indices, Point3(-0.5f, -0.5f, 0.5f) * 100.0f, Point3(0.5f, -0.5f, 0.5f) * 100.0f, Point3(0.5f, -0.5f, -0.5f) * 100.0f, Point3(-0.5f, -0.5f, -0.5f) * 100.0f);
+	const Point3 leftBottomBack = Point3(-0.5f, -0.5f, -0.5f) * 100.0f;
+	const Point3 rightBottomBack = Point3(0.5f, -0.5f, -0.5f) * 100.0f;
+	const Point3 rightTopBack = Point3(0.5f, 0.5f, -0.5f) * 100.0f;
+	const Point3 leftTopBack = Point3(-0.5f, 0.5f, -0.5f) * 100.0f;
+	const Point3 rightBottomFront = Point3(0.5f, -0.5f, 0.5f) * 100.0f;
+	const Point3 leftBottomFront = Point3(-0.5f, -0.5f, 0.5f) * 100.0f;
+	const Point3 leftTopFront = Point3(-0.5f, 0.5f, 0.5f) * 100.0f;
+	const Point3 rightTopFront = Point3(0.5f, 0.5f, 0.5f) * 100.0f;
+
+	AddQuad(vertices, indices, leftBottomBack, rightBottomBack, rightTopBack, leftTopBack);
+	AddQuad(vertices, indices, rightBottomFront, leftBottomFront, leftTopFront, rightTopFront);
+	AddQuad(vertices, indices, leftBottomFront, leftBottomBack, leftTopBack, leftTopFront);
+	AddQuad(vertices, indices, rightBottomBack, rightBottomFront, rightTopFront, rightTopBack);
+	AddQuad(vertices, indices, leftTopBack, rightTopBack, rightTopFront, leftTopFront);
+	AddQuad(vertices, indices, leftBottomFront, rightBottomFront, rightBottomBack, leftBottomBack);
 
 	return CreateMesh("Cube", std::move(vertices), std::move(indices));
 }

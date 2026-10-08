@@ -66,8 +66,7 @@ public:
 	using InputApplyCallback = std::function<void(const InputSettings&)>;
 	using AvailableResolutionsCallback = std::function<std::vector<WindowResolution>()>;
 
-	EngineSettings(std::filesystem::path anExecutableDirectory, std::filesystem::path aSettingsDirectory);
-	void Load();
+	void Load(const std::filesystem::path& anExecutableDirectory, const std::filesystem::path& aSettingsDirectory);
 
 	const ApplicationSettings& GetApplicationSettings() const { return myCurrentApplication; }
 	const SoundSettings& GetSoundSettings() const { return myCurrentSound; }

@@ -3,20 +3,23 @@
 
 #include <cstdio>
 #include <filesystem>
-#include <memory>
 #include <stdexcept>
 
 #include "Game.h"
 #include "GameApplication.h"
-#include "GameLog.h"
-#include "GameFramework/Settings/EngineSettings.h"
+#include "GameFramework/Animation/AnimationManager.h"
+#include "GameFramework/AssetHandling/AssetRegistry.h"
+#include "GameFramework/AudioManager.h"
 #include "GameFramework/ServiceLocator.h"
-#include "StringHelpers.h"
+#include "GameFramework/Settings/EngineSettings.h"
+#include "GameLog.h"
+
+#include <StringHelpers.h>
 
 int APIENTRY wWinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ int)
 {
 	bool applicationStarted = false;
-#ifdef _DEBUG
+#ifndef _RETAIL
 	AllocConsole();
 	FILE* output = nullptr;
 	freopen_s(&output, "CONOUT$", "w", stdout);
@@ -26,6 +29,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ int)
 
 	try
 	{
+		ServiceLocator::GetInstance().Initialize();
+
 		wchar_t executablePath[MAX_PATH] = {};
 		const DWORD executablePathLength = GetModuleFileNameW(nullptr, executablePath, MAX_PATH);
 		if (executablePathLength == 0 || executablePathLength == MAX_PATH)
@@ -37,9 +42,20 @@ int APIENTRY wWinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ int)
 		const std::filesystem::path executableDirectory = std::filesystem::path(executablePath).parent_path();
 		const std::filesystem::path settingsDirectory = executableDirectory.parent_path() / "Settings";
 		GAMELOG(Log, "Loading settings from {}", settingsDirectory.string());
-		auto settingsService = std::make_unique<EngineSettings>(executableDirectory, settingsDirectory);
-		settingsService->Load();
-		ServiceLocator::GetInstance().SetEngineSettings(settingsService.release());
+
+		EngineSettings& settings = ServiceLocator::GetInstance().GetEngineSettings();
+		settings.Load(executableDirectory, settingsDirectory);
+
+		const std::filesystem::path contentRoot = settings.GetContentRoot();
+
+		AssetRegistry& assets = ServiceLocator::GetInstance().GetAssetRegistry();
+		assets.Initialize(contentRoot);
+		if (!assets.IsInitialized())
+		{
+			throw std::runtime_error(assets.GetLastError());
+		}
+		ServiceLocator::GetInstance().GetAnimationManager().Initialize(contentRoot);
+		ServiceLocator::GetInstance().GetAudioManager().Init();
 
 		Game game;
 		GameApplication application;

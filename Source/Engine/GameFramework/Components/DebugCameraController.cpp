@@ -78,7 +78,7 @@ void DebugCameraController::BeginPlay()
 	const CU::Vector3f forward = CU::NormalizeSafe(GetOwner()->GetTransform().GetLocalForward(), CU::Vector3f::UnitZ);
 	myYaw = std::atan2(forward.x, forward.z);
 	myPitch = -std::asin(CU::Clamp(forward.y, -1.f, 1.f));
-	CommonUtilities::InputMapper& input = *ServiceLocator::GetInstance().GetInputMapper();
+	CommonUtilities::InputMapper& input = ServiceLocator::GetInstance().GetInputMapper();
 
 	auto held = [this, &input](std::string_view action, bool& target)
 	{
@@ -121,7 +121,7 @@ void DebugCameraController::Update(float deltaTime)
 		transform.SetLocalRotationDegrees(CU::RadiansToDegrees(myYaw), CU::RadiansToDegrees(myPitch), 0);
 		if (ServiceLocator::GetInstance().GetEngineSettings().GetApplicationSettings().EnableMouseLook)
 		{
-			if (auto* inputHandler = ServiceLocator::GetInstance().GetInputMapper()->GetInputHandler();
+			if (CommonUtilities::InputHandler* inputHandler = ServiceLocator::GetInstance().GetInputMapper().GetInputHandler();
 				inputHandler && GetForegroundWindow() == inputHandler->GetWindowHandle())
 			{
 				inputHandler->CenterMouse();
@@ -162,8 +162,10 @@ void DebugCameraController::Update(float deltaTime)
 
 void DebugCameraController::EndPlay() noexcept
 {
-	auto* input = ServiceLocator::GetInstance().GetInputMapper();
-	if (!input) return;
-	for (unsigned id : myListenerIDs) input->RemoveEventListener(id);
+	CommonUtilities::InputMapper& input = ServiceLocator::GetInstance().GetInputMapper();
+	for (unsigned id : myListenerIDs)
+	{
+		input.RemoveEventListener(id);
+	}
 	myListenerIDs.clear();
 }
