@@ -550,6 +550,7 @@ void GameApplication::ProcessPendingSceneLoad(Game& aGame)
 		matDesc.ShadingModel = ShadingModel::Lit;
 		matDesc.BlendMode = BlendMode::Opaque;
 		matDesc.MaterialShaderCode = fallbacks.MissingShader;
+		matDesc.AlbedoTexture = myContentRoot / "Textures" / "T_ERROR_FALLBACK_BaseColor.dds";
 
 		std::shared_ptr<Material> material = std::make_shared<Material>();
 		if (!GraphicsEngine::Get().CreateMaterial(matDesc, *material))
