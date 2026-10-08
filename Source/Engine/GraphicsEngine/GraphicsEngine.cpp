@@ -213,7 +213,7 @@ namespace
 	{
 		if (aLight.Type == RenderLightType::Directional)
 		{
-			return aLight.Intensity;
+			return aLight.Intensity / 100000;
 		}
 
 		return aLight.Intensity * RenderConfig::LocalLightIntensityScale;

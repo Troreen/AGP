@@ -107,7 +107,7 @@ public:
 
 	struct AmbientLightSnapshot
 	{
-		CU::Vector3f Color = CU::Vector3f::One;
+		CU::Vector3f Color = CU::Vector3f::One * 0.1f;
 	};
 
 	struct RenderStats
