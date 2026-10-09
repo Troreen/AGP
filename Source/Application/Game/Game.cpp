@@ -74,42 +74,42 @@ void Game::ConfigureWorld(World& aWorld)
 		rotator->SetDegreesPerSecond(45.0f);
 	}
 
-	{
-		Actor* playerBro = aWorld.SpawnActor("PLAYAH_BRO");
-		playerBro->GetTransform().SetLocalRotationDegrees({ 0, 0, 0 });
-		playerBro->GetTransform().SetWorldPosition({ 0, -15, 0 });
+	// {
+	// 	Actor* playerBro = aWorld.SpawnActor("PLAYAH_BRO");
+	// 	playerBro->GetTransform().SetLocalRotationDegrees({ 0, 0, 0 });
+	// 	playerBro->GetTransform().SetWorldPosition({ 0, -15, 0 });
 
-		SkeletalMeshComponent* component = playerBro->AddComponent<SkeletalMeshComponent>();
-		AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
-		std::shared_ptr<MeshAsset> meshAsset = assetRegistry.GetAsset<MeshAsset>("SK_player.fbx");
-		component->SetMesh(meshAsset);
+	//	SkeletalMeshComponent* component = playerBro->AddComponent<SkeletalMeshComponent>();
+	//	AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
+	//	std::shared_ptr<MeshAsset> meshAsset = assetRegistry.GetAsset<MeshAsset>("SK_player.fbx");
+	//	component->SetMesh(meshAsset);
 
-		AnimatorComponent* animatorBro = playerBro->AddComponent<AnimatorComponent>();
-		animatorBro->SetMeshComponent(component);
-		animatorBro->SetTree("PlayerTree");
-
-
-		animatorBro->GetTree().SetBool("IsIdle", true);
-	}
-
-	{
-		Actor* playerBro = aWorld.SpawnActor("BRO");
-		playerBro->GetTransform().SetLocalRotationDegrees({ 0, 0, 0 });
-		playerBro->GetTransform().SetWorldPosition({ -100, 100, 0 });
-
-		SkeletalMeshComponent* component = playerBro->AddComponent<SkeletalMeshComponent>();
-		AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
-		std::shared_ptr<MeshAsset> meshAsset = assetRegistry.GetAsset<MeshAsset>("SK_C_Tga_Bro.fbx");
-		component->SetMesh(meshAsset);
-
-		AnimatorComponent* animatorBro = playerBro->AddComponent<AnimatorComponent>();
-		animatorBro->SetMeshComponent(component);
-		animatorBro->SetTree("BroTree");
-		animatorBro->ConfigurePartialLayerFromJointName("RightArm");
+	//	AnimatorComponent* animatorBro = playerBro->AddComponent<AnimatorComponent>();
+	//	animatorBro->SetMeshComponent(component);
+	//	animatorBro->SetTree("PlayerTree");
 
 
-		animatorBro->GetTree().SetBool("IsIdle", true);
-	}
+	//	animatorBro->GetTree().SetBool("IsIdle", true);
+	//}
+
+	//{
+	//	Actor* playerBro = aWorld.SpawnActor("BRO");
+	//	playerBro->GetTransform().SetLocalRotationDegrees({ 0, 0, 0 });
+	//	playerBro->GetTransform().SetWorldPosition({ -100, 100, 0 });
+
+	//	SkeletalMeshComponent* component = playerBro->AddComponent<SkeletalMeshComponent>();
+	//	AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
+	//	std::shared_ptr<MeshAsset> meshAsset = assetRegistry.GetAsset<MeshAsset>("SK_C_Tga_Bro.fbx");
+	//	component->SetMesh(meshAsset);
+
+	//	AnimatorComponent* animatorBro = playerBro->AddComponent<AnimatorComponent>();
+	//	animatorBro->SetMeshComponent(component);
+	//	animatorBro->SetTree("BroTree");
+	//	animatorBro->ConfigurePartialLayerFromJointName("RightArm");
+
+
+	//	animatorBro->GetTree().SetBool("IsIdle", true);
+	//}
 
 	{
 		Actor* actor = aWorld.SpawnActor("TGALOGO");
@@ -126,14 +126,17 @@ void Game::ConfigureWorld(World& aWorld)
 		//component->SendDrawCall();
 	}
 
+	{ // TODO : Temporary place for debug animation
+		AnimationManager::DebugData& data = ServiceLocator::GetInstance().GetAnimationManager().GetDebugData();
 
-#ifdef _DEBUG
-	{
-		AnimationManager::DebugData data = ServiceLocator::GetInstance().GetAnimationManager().GetDebugData();
+		if (!data.Enabled)
+		{
+			return;
+		}
 
 		Actor* playerBro = aWorld.SpawnActor("A_Debug");
 		playerBro->GetTransform().SetLocalRotationDegrees({ 0, 0, 0 });
-		playerBro->GetTransform().SetWorldPosition({ 100, 100, 0 });
+		playerBro->GetTransform().SetWorldPosition({ data.Position.x, data.Position.y, data.Position.z });
 
 		SkeletalMeshComponent* component = playerBro->AddComponent<SkeletalMeshComponent>();
 		AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
@@ -145,8 +148,35 @@ void Game::ConfigureWorld(World& aWorld)
 		animatorBro->SetTree(data.Tree);
 
 		animatorBro->GetTree().SetBool("IsIdle", true);
-	}
-#endif
 
+		CommonUtilities::InputMapper& map = ServiceLocator::GetInstance().GetInputMapper();
 
+		EKeyCode key = EKeyCode::NUMPAD0;
+		for (AnimationManager::Variable& var : data.Variables)
+		{
+			map.BindActionToInputCode(var.Name, key);
+			key = EKeyCode(static_cast<int>(key) + 1);
+
+			map.AddEventListener(var.Name, [var, animatorBro](const CommonUtilities::InputEvent event)
+				{
+					if (!event.inputData.isPressed)
+					{
+						return;
+					}
+					if (var.Type == "Bool")
+					{
+						animatorBro->GetTree().SetBool(var.Name, !animatorBro->GetTree().GetAnimationVariable(var.Name).IsActive);
+					}
+					else
+					{
+						animatorBro->GetTree().SetTrigger(var.Name);
+					}
+				});
+
+			if (key == EKeyCode(static_cast<int>(EKeyCode::NUMPAD9) + 1))
+			{
+				break;
+			}
+		}
+	} //Dont put anything below this line
 }

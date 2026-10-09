@@ -37,5 +37,5 @@ private:
 	bool myUpdating = false;
 	bool myClearing = false;
 
-	Actor* myBro;
+	Actor* myDebugActor;
 };

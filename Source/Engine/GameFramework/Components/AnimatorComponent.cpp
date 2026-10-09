@@ -38,7 +38,7 @@ std::shared_ptr<AnimationAsset> AnimatorComponent::GetAnimation(const std::strin
 
 void AnimatorComponent::SetTree(const std::string& aTree)
 {
-	if (!myAnimationTree)
+	if (myAnimationTree != nullptr)
 	{
 		delete myAnimationTree;
 	}

@@ -53,7 +53,7 @@ void AnimationManager::Initialize(const std::filesystem::path& aContentRoot)
 			}
 
 			//entity.value("Name", "Default");
-			std::string name(tree["Name"].get<const char*>());
+			std::string name(t.key);
 			std::string startState(tree["Start state"].get<const char*>());
 			myAnimationTrees.emplace_back(name, startState, variableNames);
 		}
@@ -73,13 +73,53 @@ void AnimationManager::Initialize(const std::filesystem::path& aContentRoot)
 			return;
 		}
 
-		if (root["Debug Animation"]["Enabled"].get<bool>() == false)
+		if (root["Debug Animation"]["Enabled"].error())
+		{
+			return;
+		}
+
+		bool enabled = root["Debug Animation"]["Enabled"].get<bool>();
+		myDebugData.Enabled = enabled;
+
+		if (enabled == false)
 		{
 			return;
 		}
 
 		myDebugData.Mesh = root["Debug Animation"]["SK Mesh"].get<const char*>();
 		myDebugData.Tree = root["Debug Animation"]["Tree"].get<const char*>();
+
+		std::filesystem::path path_d = aContentRoot / "Animations" / "Animation Manager" / "AnimationManager.json";
+		simdjson::padded_string json_d = simdjson::padded_string::load(path_d.c_str());
+		simdjson::dom::parser parser_d;
+		simdjson::dom::object root_d;
+
+		const auto& error_d = parser_d.parse(json_d).get(root_d);
+
+		if (error_d)
+		{
+			return;
+		}
+
+		if (root_d[myDebugData.Tree]["Variables"].get_array().error())
+		{
+			return;
+		}
+
+		simdjson::dom::array variables = root_d[myDebugData.Tree]["Variables"].get_array();
+
+		for (const auto& v : variables)
+		{
+			Variable variable;
+			variable.Name = v["Name"];
+			variable.Type = v["Type"];
+
+			myDebugData.Variables.push_back(variable);
+		}
+
+		myDebugData.Position.x = root["Debug Animation"]["World Position"]["X"].get<double>();
+		myDebugData.Position.y = root["Debug Animation"]["World Position"]["Y"].get<double>();
+		myDebugData.Position.z = root["Debug Animation"]["World Position"]["Z"].get<double>();
 	}
 
 }

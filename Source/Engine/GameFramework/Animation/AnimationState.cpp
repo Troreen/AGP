@@ -60,7 +60,7 @@ void AnimationState::OnEnter()
 
 void AnimationState::Update(const float aDeltaTime, std::vector<Transition> someGlobalTransitions)
 {
-	myUpdate.Invoke(aDeltaTime);
+	myUpdate.Invoke(myAnimationTree->GetAnimationPlayer()->GetCurrentPlayBackState(true).CurrentFrame);
 
 	if (!someGlobalTransitions.empty() && !myOverwriteGlobal) // If there are global transitions, they will be checked first
 	{

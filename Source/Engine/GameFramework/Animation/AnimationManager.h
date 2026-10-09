@@ -4,15 +4,28 @@
 
 #include <filesystem>
 #include <string>
+#include <Vector.hpp>
 
 
 class AnimationManager
 {
 public:
+
+	struct Variable
+	{
+		std::string Name;
+		std::string Type;
+		bool Active = false;
+	};
+
 	struct DebugData
 	{
+		bool Enabled = false;
 		std::string Mesh;
 		std::string Tree;
+
+		std::vector<Variable> Variables;
+		CommonUtilities::Vector3<float> Position;
 	};
 
 	AnimationManager();

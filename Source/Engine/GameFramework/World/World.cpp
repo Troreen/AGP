@@ -188,7 +188,7 @@ void World::BeginPlay()
 	myUpdating = false;
 
 
-	myBro = FindActor("BRO");
+	myDebugActor = FindActor("A_Debug");
 }
 
 void World::Update(float deltaTime)
@@ -217,13 +217,6 @@ void World::Update(float deltaTime)
 			{
 				component->Update(deltaTime);
 			}
-		}
-
-		CommonUtilities::InputMapper& imput = ServiceLocator::GetInstance().GetInputMapper();
-
-		if (imput.GetInputHandler()->IsKeyPressed(static_cast<int>(EKeyCode::NUMPAD1)))
-		{
-			myBro->GetComponent<AnimatorComponent>()->GetTree().SetTrigger("IsWaving");
 		}
 
 	}

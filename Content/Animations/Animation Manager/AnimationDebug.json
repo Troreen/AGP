@@ -1,8 +1,14 @@
 {
   "Debug Animation":{
     "Enabled": false,
-    "SK Mesh": "SK_C_Tga_Bro",
+    "Animation Only": false,
+    "SK Mesh": "SK_C_Tga_Bro.fbx",
     "Tree": "BroTree",
-    "Layer Joint" : ""
+    
+    "World Position":{
+      "X": -100,
+      "Y": 100,
+      "Z": 0
+    }
   }
 }

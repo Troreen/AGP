@@ -50,13 +50,13 @@ AnimationTree::AnimationTree(const std::string& aName, const std::string& aStart
 		simdjson::dom::element currentState = state.value;
 
 		//currentState["Name", "Default"]; // Why here?
-		std::string name(currentState["Name"].get<const char*>());
+		std::string name(state.key);
 		std::string path(state.value["Animation"].get<const char*>());
 
 		bool overwriteGlobal = false;
 		if (!state.value["OverwriteGlobal"].error())
 		{
-			overwriteGlobal = state.value["OverwriteGlobal"].get<bool>();
+			overwriteGlobal = true;
 		}
 
 		myAnimationStates.emplace_back(name, path, overwriteGlobal); // Creates a state

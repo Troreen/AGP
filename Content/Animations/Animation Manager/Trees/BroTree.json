@@ -1,33 +1,100 @@
 {
   "Idle": {
-    "Name": "IdleState",
     "Animation": "A_C_Tga_Bro_Idle_Breathing",
     "IsLooping": true,
-    "IsGlobal": false,
-
     "Transitions":[
       {
-        "TransitionTo": "WaveState",
+        "TransitionTo": "Wave",
 
         "Variable": "IsWaving",
+        "Expected": true
+      },
+      {
+        "TransitionTo": "Walk",
+
+        "Variable": "IsWalking",
+        "Expected": true
+      },
+      {
+        "TransitionTo": "Run",
+
+        "Variable": "IsRunning",
         "Expected": true
       }
     ]
 
   },
-  "Waving":{
-    "Name": "WaveState",
+  "Wave":{
     "Animation": "A_C_Tga_Bro_Idle_Wave",
     "IsLooping": false,
-    "IsGlobal": false,
 
     "Transitions":[
       {
-        "TransitionTo": "IdleState",
+        "TransitionTo": "Idle",
 
         "HasExitTime": true,
 
         "Variable": "IsIdle",
+        "Expected": true
+      },
+      {
+        "TransitionTo": "Walk",
+
+        "HasExitTime": true,
+
+        "Variable": "IsWalking",
+        "Expected": true
+      },
+      {
+        "TransitionTo": "Run",
+
+        "HasExitTime": true,
+
+        "Variable": "IsRunning",
+        "Expected": true
+      }
+    ]
+  },
+  "Walk": {
+    "Animation": "A_C_Tga_Bro_Walk",
+    "IsLooping": true,
+
+    "Transitions":[
+      {
+        "TransitionTo": "Idle",
+
+        "Variable": "IsWalking",
+        "Expected": false
+      },
+      {
+        "TransitionTo": "Run",
+
+        "Variable": "IsRunning",
+        "Expected": true
+      },
+      {
+        "TransitionTo": "Wave",
+
+        "Variable": "IsWaving",
+        "Expected": true
+      }
+    ]
+  },
+    "Run": {
+    "Animation": "A_C_Tga_Bro_Run",
+    "IsLooping": true,
+
+    "Transitions":[
+      {
+        "TransitionTo": "Walk",
+
+        "Variable": "IsRunning",
+        "Expected": false
+      },
+      {
+        "TransitionTo": "Wave",
+
+        "Variable": "IsWaving",
         "Expected": true
       }
     ]

@@ -1,7 +1,6 @@
 {
-  "Player": {
-    "Name": "PlayerTree",
-    "Start state": "IdleState",
+  "PlayerTree": {
+    "Start state": "Idle",
     "Variables": [
       {
         "Name": "IsIdle",
@@ -9,9 +8,8 @@
       }
     ]
   },
-  "Bro":{
-    "Name": "BroTree",
-    "Start state": "IdleState",
+  "BroTree":{
+    "Start state": "Idle",
     "Variables": [
       {
         "Name": "IsIdle",
@@ -20,6 +18,14 @@
       {
         "Name": "IsWaving",
         "Type": "Trigger"
+      },
+      {
+        "Name": "IsWalking",
+        "Type": "Bool"
+      },
+      { 
+        "Name": "IsRunning",
+        "Type": "Bool"
       }
     ]
   }

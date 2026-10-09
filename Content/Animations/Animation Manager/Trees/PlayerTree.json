@@ -1,9 +1,6 @@
 {
   "Idle": {
-    "Name": "IdleState",
     "Animation": "A_Slash",
-    "IsLooping": true,
-    "IsBaseLayer": true,
-    "IsGlobal": false
+    "IsLooping": true
   }
 }
