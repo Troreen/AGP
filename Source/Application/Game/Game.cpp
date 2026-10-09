@@ -63,8 +63,10 @@ void Game::Shutdown()
 	myInputListenerIDs.clear();
 }
 
+// this can be removed after component factory is in place. 
 void Game::ConfigureWorld(World& aWorld)
 {
+	// currently showing ow spincomp works in the blockout scene. 
 	// TODO: Replace manual attachment with the game-owned factory after verifying the Unreal custom export.
 	if (Actor* actor = aWorld.FindActor("OrientationGizmos_TGE"))
 	{
