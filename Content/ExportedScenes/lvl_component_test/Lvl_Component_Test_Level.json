@@ -1,0 +1,512 @@
+{
+	"MasterMaterials": [
+		{
+			"Name": "M_ProcGrid",
+			"Domain": 0,
+			"ShadingModel": 1,
+			"BlendMode": 0,
+			"BaseColor": [
+				0.5,
+				0.5,
+				0.5,
+				1
+			],
+			"Metallic": 0,
+			"Roughness": 0.5,
+			"TwoSided": false,
+			"Parameters": [
+				{
+					"Name": "Line Colour",
+					"Type": 1,
+					"Value": [
+						0.33854201436042786,
+						0.33854201436042786,
+						0.33854201436042786,
+						0
+					]
+				},
+				{
+					"Name": "Checker Rough 2",
+					"Type": 0,
+					"Value": 0.64999997615814209
+				},
+				{
+					"Name": "Sea Level Base",
+					"Type": 0,
+					"Value": 1203.732666015625
+				},
+				{
+					"Name": "Fade",
+					"Type": 0,
+					"Value": 265.96734619140625
+				},
+				{
+					"Name": "Tile Scale",
+					"Type": 0,
+					"Value": 100
+				},
+				{
+					"Name": "Checker Colour 1",
+					"Type": 1,
+					"Value": [
+						0.29166701436042786,
+						0.29166701436042786,
+						0.29166701436042786,
+						0
+					]
+				},
+				{
+					"Name": "Checker Colour 2",
+					"Type": 1,
+					"Value": [
+						0.23958300054073334,
+						0.23958300054073334,
+						0.23958300054073334,
+						0
+					]
+				},
+				{
+					"Name": "Checker Rough 1",
+					"Type": 0,
+					"Value": 0.5
+				},
+				{
+					"Name": "Side Parameters",
+					"Type": 1,
+					"Value": [
+						1.0402120351791382,
+						28.152517318725586,
+						0.30000001192092896,
+						0
+					]
+				},
+				{
+					"Name": "Water Colour",
+					"Type": 1,
+					"Value": [
+						0.18680499494075775,
+						0.49003198742866516,
+						0.70833301544189453,
+						0
+					]
+				},
+				{
+					"Name": "ObjectAligned",
+					"Type": 8,
+					"Value": false
+				},
+				{
+					"Name": "Tri-Planar (Or Uni-Planar)",
+					"Type": 8,
+					"Value": false
+				},
+				{
+					"Name": "Enable Side Tint",
+					"Type": 8,
+					"Value": true
+				},
+				{
+					"Name": "Water Level Tint",
+					"Type": 8,
+					"Value": true
+				}
+			]
+		},
+		{
+			"Name": "MM_MaskedMaterial",
+			"Domain": 0,
+			"ShadingModel": 1,
+			"BlendMode": 1,
+			"BaseColor": [
+				0.5,
+				0.5,
+				0.5,
+				1
+			],
+			"Metallic": 0,
+			"Roughness": 0.5,
+			"TwoSided": true,
+			"Parameters": []
+		},
+		{
+			"Name": "MatineeCam_mat",
+			"Domain": 0,
+			"ShadingModel": 1,
+			"BlendMode": 0,
+			"BaseColor": [
+				0.50196081399917603,
+				0.50196081399917603,
+				0.50196081399917603,
+				1
+			],
+			"Metallic": 0,
+			"Roughness": 0.5,
+			"TwoSided": false,
+			"Parameters": []
+		}
+	],
+	"Actors": [
+		{
+			"Name": "DirectionalLight",
+			"Archetype": "DirectionalLight",
+			"Transform": [
+				0.6387413344957884,
+				-0.11617802586728826,
+				-0.76059987767032844,
+				0,
+				-0.76013303566406543,
+				-0.24841989327276318,
+				-0.60040432586782944,
+				0,
+				-0.1191943511326358,
+				0.96166015428112528,
+				-0.24698680962430597,
+				0,
+				0,
+				0,
+				400,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "LightComponent0",
+					"TypeID": 5,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Color": [
+						1,
+						1,
+						1,
+						1
+					],
+					"Intensity": 6
+				}
+			]
+		},
+		{
+			"Name": "Floor",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				8,
+				0,
+				0,
+				0,
+				0,
+				8,
+				0,
+				0,
+				0,
+				0,
+				8,
+				0,
+				0,
+				0,
+				-0.5,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"TypeID": 1,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "SM_Template_Map_Floor",
+					"ContentPath": "/Engine/MapTemplates/SM_Template_Map_Floor.SM_Template_Map_Floor",
+					"AssetImportPath": "C:/Users/Warren.Marshall/Desktop/SM_Template_Map_Floor.FBX",
+					"Materials": [
+						{
+							"Name": "MI_ProcGrid",
+							"Parent": "M_ProcGrid",
+							"Parameters": [
+								{
+									"Name": "Line Colour",
+									"Type": 1,
+									"Value": [
+										0.33854201436042786,
+										0.33854201436042786,
+										0.33854201436042786,
+										0
+									]
+								},
+								{
+									"Name": "Checker Rough 2",
+									"Type": 0,
+									"Value": 0.64999997615814209
+								},
+								{
+									"Name": "Sea Level Base",
+									"Type": 0,
+									"Value": 1203.732666015625
+								},
+								{
+									"Name": "Fade",
+									"Type": 0,
+									"Value": 265.96734619140625
+								},
+								{
+									"Name": "Tile Scale",
+									"Type": 0,
+									"Value": 100
+								},
+								{
+									"Name": "Checker Colour 1",
+									"Type": 1,
+									"Value": [
+										0.18000000715255737,
+										0.18000000715255737,
+										0.18000000715255737,
+										0
+									]
+								},
+								{
+									"Name": "Checker Colour 2",
+									"Type": 1,
+									"Value": [
+										0.23000000417232513,
+										0.23000000417232513,
+										0.23000000417232513,
+										0
+									]
+								},
+								{
+									"Name": "Checker Rough 1",
+									"Type": 0,
+									"Value": 0.5
+								},
+								{
+									"Name": "Side Parameters",
+									"Type": 1,
+									"Value": [
+										1.0402120351791382,
+										28.152517318725586,
+										0.30000001192092896,
+										0
+									]
+								},
+								{
+									"Name": "Water Colour",
+									"Type": 1,
+									"Value": [
+										0.18680499494075775,
+										0.49003198742866516,
+										0.70833301544189453,
+										0
+									]
+								},
+								{
+									"Name": "ObjectAligned",
+									"Type": 8,
+									"Value": true
+								},
+								{
+									"Name": "Tri-Planar (Or Uni-Planar)",
+									"Type": 8,
+									"Value": true
+								},
+								{
+									"Name": "Enable Side Tint",
+									"Type": 8,
+									"Value": false
+								},
+								{
+									"Name": "Water Level Tint",
+									"Type": 8,
+									"Value": false
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "BP_TopDownCharacter",
+			"Archetype": "BP_TopDownCharacter_C",
+			"Transform": [
+				1,
+				0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				0,
+				0,
+				0,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "CollisionCylinder",
+					"TypeID": 8,
+					"Parent": "",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Radius": 42,
+					"HalfHeight": 96
+				},
+				{
+					"Name": "CharacterMesh0",
+					"TypeID": 2,
+					"Parent": "CollisionCylinder",
+					"Tags": [],
+					"Transform": [
+						-2.2204460492503131e-16,
+						-1.0000000000000002,
+						0,
+						0,
+						1.0000000000000002,
+						-2.2204460492503131e-16,
+						-0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						-95,
+						1
+					],
+					"Mesh": "SKM_Manny_Simple",
+					"ContentPath": "/Game/Characters/Mannequins/Meshes/SKM_Manny_Simple.SKM_Manny_Simple",
+					"AssetImportPath": "C:/Program Files/Epic Games/depot/ArtSource/UE5/Characters/Mannequin/Manny/Rig/Manny_lod1.fbx",
+					"Materials": [
+						{
+							"Name": "MM_MaskedMaterial",
+							"Parent": "Self",
+							"Parameters": []
+						},
+						{
+							"Name": "MM_MaskedMaterial",
+							"Parent": "Self",
+							"Parameters": []
+						}
+					]
+				},
+				{
+					"Name": "SpringArm",
+					"TypeID": 9,
+					"Parent": "CollisionCylinder",
+					"Tags": [],
+					"Transform": [
+						0.44013964487227741,
+						-0.41043685885067138,
+						-0.79863551004729261,
+						0,
+						0.68199836006249825,
+						0.73135370161917057,
+						0,
+						0,
+						0.58408503651760157,
+						-0.54466810813993061,
+						0.60181502315204838,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"TargetArmLength": 2650,
+					"SocketOffset":
+					{
+						"x": 0,
+						"y": 0,
+						"z": 0
+					},
+					"ArmLength": 2650
+				},
+				{
+					"Name": "Camera",
+					"TypeID": 11,
+					"Parent": "SpringArm",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"FOV": 42
+				}
+			],
+			"Custom":
+			{
+				"SpinSpeed": 3
+			}
+		}
+	]
+}
