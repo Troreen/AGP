@@ -1,0 +1,141 @@
+{
+  "title": "Implementing gameplay with GameFramework",
+  "subtitle": "A component walkthrough for the game team",
+  "slides": [
+    {
+      "title": "Implementing gameplay\nwith GameFramework",
+      "layout": "cover",
+      "lead": "Find an actor. Attach behavior. Let the World run it.",
+      "caption": "Working example: the rotating orientation gizmo",
+      "notes": "Allow 30 seconds. This is a developer integration walkthrough for teammates who can already import and run a scene. The goal is to show where code belongs and how components become active. The actual Unreal custom export and game factory are deferred until the school environment is available; we will flag that boundary clearly.",
+      "sources": ["Docs/GameFrameworkWalkthroughPlan.md", "Source/Application/Game/Game.cpp"]
+    },
+    {
+      "title": "The rotator example",
+      "lead": "The scene supplies the actor and mesh. Our component supplies rotation.",
+      "points": ["Imported actor: OrientationGizmos_TGE", "Game behavior: SpinComponent", "Demo setting: 45 degrees per second"],
+      "caption": "Live demo: show the gizmo, then press F4 to reload",
+      "notes": "Allow 90 seconds. Show the running Blockout scene and the orientation gizmo first. Locate it before the session, rather than searching during the presentation. The programmer confirmed rotation on the gizmo and previously confirmed that Cube2 rotation and F4 reload did not crash. The manual demo is implemented; no Unreal custom component is responsible for this attachment yet. If the app is unavailable, use a runtime capture made at school, not an invented screenshot.",
+      "sources": ["Source/Application/Game/Game.cpp", "Bin/Settings/ApplicationSettings.json", "Content/ExportedScenes/lvl_blockout/Lvl_Blockout_Level.json", "Docs/GameFrameworkWalkthroughPlan.md"]
+    },
+    {
+      "title": "Where your code belongs",
+      "layout": "rows",
+      "rows": [
+        ["Your behavior", "Source/Application/Game — custom components and feature systems"],
+        ["Scene setup", "Game::ConfigureWorld — attach and configure per-scene behavior"],
+        ["Engine components", "GameFramework/Components — reuse meshes, animation, cameras, lights"],
+        ["Runtime", "GameApplication — scene loading and the frame loop"]
+      ],
+      "caption": "New source files must also be included in the generated Game project",
+      "notes": "Allow 90 seconds. Open the source tree. SpinComponent is beside Game.cpp today; feature subfolders are an optional organization choice, not an existing mandatory convention. Independent algorithms can also live in game feature folders without inheriting Component. Premake includes game headers and C++ files recursively, but an already generated Visual Studio project must be regenerated or explicitly updated. Leave engine lifecycle and window/render-loop control in GameApplication.",
+      "sources": ["Source/Application/Game/premake5.lua", "Source/Application/Game/SpinComponent.h", "Source/Application/Game/GameApplication.cpp"]
+    },
+    {
+      "title": "Find an actor or create one",
+      "layout": "code",
+      "code": "// Use an actor already imported from the scene.\nActor* actor = world.FindActor(\n    \"OrientationGizmos_TGE\");\n\n// Or create a new actor for a runtime feature.\nActor* pickup = world.SpawnActor(\"LootPickup\");",
+      "points": ["Lookups can return null", "A new actor needs a visual component to be visible"],
+      "notes": "Allow 60 seconds. The second snippet is illustrative and is not part of the implemented rotator demo. An actor has a transform; adding a mesh or other visual is a separate step. World owns actors, which own components. Returned pointers are borrowed. World currently suffixes repeated actor names rather than rejecting them, so inspect the returned actor's actual name if later lookup matters. Actor is final; extend behavior through components.",
+      "sources": ["Source/Engine/GameFramework/World/World.cpp", "Source/Engine/GameFramework/World/Actor.h"]
+    },
+    {
+      "title": "Attach and configure behavior",
+      "layout": "code",
+      "code": "// Inside Game::ConfigureWorld\nif (Actor* actor = aWorld.FindActor(\n    \"OrientationGizmos_TGE\"))\n{\n    auto* rotator = actor->AddComponent<SpinComponent>(\n        \"WalkthroughRotator\");\n    rotator->SetDegreesPerSecond(45.0f);\n}",
+      "caption": "C++ type selects the class; the string names this instance",
+      "notes": "Allow 2 minutes. This is the actual attachment logic, shortened with auto for slide readability. Open Game.cpp and point to ConfigureWorld. AddComponent constructs and attaches the component, then setters configure it. Owner is available after attachment, not in the constructor. Instance names are nonempty and unique within an actor. ConfigureWorld runs on a candidate World before BeginPlay, so dependencies and settings are ready for initialization. Reload creates a fresh World and repeats the attachment. Do not retain the returned pointer across reload.",
+      "sources": ["Source/Application/Game/Game.cpp", "Source/Engine/GameFramework/World/Actor.h", "Source/Engine/GameFramework/World/Actor.cpp", "Source/Application/Game/GameApplication.cpp"]
+    },
+    {
+      "title": "Retrieve existing components",
+      "layout": "code",
+      "code": "// First component of this engine type.\nauto* mesh = actor->GetComponent<StaticMeshComponent>();\n\n// One named instance, checked for its game type.\nComponent* component = actor->FindComponent(\n    \"WalkthroughRotator\");\nauto* rotator = dynamic_cast<SpinComponent*>(component);",
+      "points": ["Include the engine or game component header", "Check for null before using either result"],
+      "notes": "Allow 90 seconds. The lookup snippet illustrates existing APIs; it is not an extra implemented code block. Include GameFramework/Components/StaticMeshComponent.h and SpinComponent.h. GetComponent returns the first matching C++ type. When several components have the same type, use FindComponent with a name and check the cast. Inside your own component, use GetOwner and GetWorld. Resolve dependencies in BeginPlay after construction when possible. The companion walkthrough includes null-checked usage.",
+      "sources": ["Source/Engine/GameFramework/World/Actor.h", "Source/Engine/GameFramework/World/Component.h"]
+    },
+    {
+      "title": "The custom component class",
+      "layout": "code",
+      "code": "class SpinComponent final : public Component\n{\npublic:\n    void SetDegreesPerSecond(float speed);\n    void BeginPlay() override;\n    void Update(float deltaTime) override;\n\n    // Target selection and private state omitted here.\n};",
+      "caption": "Component adds behavior; SceneComponent also adds a spatial offset",
+      "notes": "Allow 90 seconds. This is a shortened class outline; show SpinComponent.h for the full class. The parameter is renamed to speed only for brevity, not as a new API. SpinComponent inherits Component because it modifies its owner or a target component rather than needing its own transform. Use SceneComponent when the feature has an actor-relative position or orientation of its own. Our rotator already has setters, a default speed, a target lookup helper, and yaw state. It has no input listener or owned resource that needs an EndPlay override.",
+      "sources": ["Source/Application/Game/SpinComponent.h", "Source/Engine/GameFramework/Components/SceneComponent.h"]
+    },
+    {
+      "title": "Component lifecycle",
+      "layout": "rows",
+      "rows": [
+        ["Configure", "Defaults and setters establish values before play"],
+        ["BeginPlay", "Resolve dependencies and initialize runtime state"],
+        ["Update", "Advance enabled behavior on an active actor"],
+        ["EndPlay", "Remove subscriptions and release runtime connections"]
+      ],
+      "caption": "The application and World drive lifecycle calls for you",
+      "notes": "Allow 2 minutes. Open SpinComponent::BeginPlay: it reads the authored yaw so spinning starts from the existing orientation. Explain that disabled components can still begin play, but enabled/active checks control normal updates. Components that subscribe to input should retain their listener IDs and remove them in EndPlay; this rotator has no subscription. Additions from component callbacks wait for a later collected World frame. Gameplay should not manually call World.BeginPlay or World.Update.",
+      "sources": ["Source/Application/Game/SpinComponent.cpp", "Source/Engine/GameFramework/World/World.cpp", "Source/Engine/GameFramework/World/Component.h"]
+    },
+    {
+      "title": "Rotation during Update",
+      "layout": "code",
+      "code": "myYaw += myDegreesPerSecond * deltaTime;\nmyYaw = std::fmod(myYaw, FullRotationDegrees);\n\nif (Transform* transform = FindTargetTransform())\n{\n    const auto rotation = transform->GetLocalRotationDegrees();\n    transform->SetLocalRotationDegrees(\n        myYaw, rotation.y, rotation.z);\n}",
+      "caption": "45 degrees/second × 0.1 seconds = 4.5 degrees",
+      "notes": "Allow 90 seconds. This is the actual Update body, reflowed to fit. State advances with elapsed time, not once by a fixed angle per frame. FullRotationDegrees is 360. Negative speed reverses direction; zero stops it. The setter rejects non-finite speed. The modulo bounds yaw, and negative remainders still represent valid angles. Reading the existing rotation retains pitch and roll. This component writes yaw, so coordinate with any other component that also writes the same target transform.",
+      "sources": ["Source/Application/Game/SpinComponent.cpp"]
+    },
+    {
+      "title": "Actor and component transforms",
+      "lead": "This engine stores rotation as yaw, pitch, roll.",
+      "points": ["Vector x: yaw about Y · y: pitch about X · z: roll about Z", "No target name: rotate the actor", "Named SceneComponent: rotate its actor-relative offset"],
+      "caption": "A missing or wrong-type named target receives no transform update",
+      "notes": "Allow 60 seconds. This convention is easy to misread: GetLocalRotationDegrees().x is yaw, not rotation about X. Open Transform.h if needed. The three-argument setter takes yaw, pitch, roll. The actor is the root transform; SceneComponent composes an actor-relative transform. The current demo uses the actor target, which keeps the example simple. Target-name lookup is optional existing behavior. Position and scale are not changed by the rotator.",
+      "sources": ["Source/Engine/GameFramework/World/Transform.h", "Source/Engine/GameFramework/Components/SceneComponent.h", "Source/Application/Game/SpinComponent.cpp"]
+    },
+    {
+      "title": "Scene construction and activation",
+      "layout": "sequence",
+      "steps": ["Exported scene → UnrealSceneImporter → SceneData", "World builder creates the candidate World", "Game::ConfigureWorld adds game behavior", "GameApplication replaces the current World", "World::BeginPlay initializes components"],
+      "caption": "Configure settings before activation; reacquire pointers after reload",
+      "notes": "Allow 90 seconds. Follow ProcessPendingSceneLoad in GameApplication.cpp. Source conversion returns plain SceneData. BuildWorldFromSceneData creates engine actors and components. ConfigureWorld is the current extension for game behavior. After successful pre-commit construction the runtime clears the old World, commits the candidate, handles camera fallback, and calls BeginPlay. A later load that fails before replacement leaves the old World running; initial loading must succeed. Current scene requests use filesystem paths, not the SceneId mentioned in older guides.",
+      "sources": ["Source/Application/Game/GameApplication.cpp", "Source/Application/Game/GameApplication.h", "Source/Engine/GameFramework/Scenes/SceneData.h", "Source/Engine/GameFramework/Scenes/WorldFromSceneData.cpp"]
+    },
+    {
+      "title": "One frame in the current runtime",
+      "layout": "sequence",
+      "steps": ["Messages, scene requests, resize and delta time", "InputMapper → application controls", "Game::Update → World::Update", "Audio → coroutine scheduler", "Render snapshot → render and present"],
+      "caption": "Your component Update runs inside World::Update",
+      "notes": "Allow 60 seconds. Keep this high level. The current loop runs Game.Update before World.Update, then audio and coroutine scheduler work, followed by rendering. Delta time is capped at 0.25 seconds. World collects a frame list in actor/component order. Components added from callbacks wait for a later update; components added by Game.Update before World.Update can be collected that frame. Do not depend on incidental update order for a feature that should exchange intent explicitly.",
+      "sources": ["Source/Application/Game/GameApplication.cpp", "Source/Engine/GameFramework/World/World.cpp"]
+    },
+    {
+      "title": "Integrating team features",
+      "layout": "rows",
+      "rows": [
+        ["Player", "Controller records intent; movement changes the actor"],
+        ["Enemy", "A component connects decisions to movement and animation"],
+        ["Navmesh", "Pathfinding stays separate; a component requests and follows paths"],
+        ["VFX", "A component connects the effect to actor transforms and lifecycle"]
+      ],
+      "caption": "Design examples — these gameplay features are not implemented by this demo",
+      "notes": "Allow 90 seconds. Explain the division between an independent algorithm and the component integrating it. Pathfinding can operate on navigation data without inheriting Component; an actor component connects its output to movement. Existing skeletal mesh and AnimatorComponent types can be reused. This engine does not acquire a complete player, navmesh, physics, or VFX system just by adding a component. Renderer or service integration may still be required by the feature itself.",
+      "sources": ["Source/Engine/GameFramework/World/Component.h", "Source/Engine/GameFramework/Components/AnimatorComponent.h", "Docs/GameFrameworkWalkthroughPlan.md"]
+    },
+    {
+      "title": "Unreal authoring and factory — TODO",
+      "lead": "Complete this section after inspecting a real custom export at school.",
+      "points": ["Verify class identity, instance name, and encoded settings", "Preserve settings through importer conversion and SceneData", "Register game creators and configure components before BeginPlay"],
+      "caption": "Replace the manual attachment after the mapping works",
+      "notes": "Allow 60 seconds today; expand after the school integration. Blockout has no custom component example. The current importer categorizes Custom, but custom records become placeholders. Name identifies an instance; the category alone does not identify a Rotator or PlayerMovement class. Do not claim a ClassName or Properties field is already exported. Intended design: Game owns a small registry, registration is explicit and separated into a game registration file, duplicates fail, and unknown-type diagnostics are defined. Keep game classes out of the importer. Add the actual Unreal settings screenshot, a real JSON excerpt, the completed factory code, and a verified runtime speed change tomorrow. Remove manual attachment to avoid duplicates. No working factory API is shown in this deck.",
+      "sources": ["Content/ExportedScenes/lvl_blockout/Lvl_Blockout_Level.json", "Source/Engine/GameFramework/UnrealSceneImporter/UnrealSceneStructs.h", "Source/Engine/GameFramework/UnrealSceneImporter/UnrealSceneImporter.cpp", "Source/Engine/GameFramework/Scenes/SceneData.h", "Docs/GameFrameworkWalkthroughPlan.md"]
+    },
+    {
+      "title": "Gameplay implementation checklist",
+      "layout": "sequence",
+      "steps": ["Create the game class and include it in the build", "Find or spawn its actor; reuse engine components", "Attach, configure, and resolve dependencies", "Implement behavior and subscription cleanup", "Verify behavior, missing dependencies, and scene reload"],
+      "caption": "Reference: Docs/GameFrameworkWalkthrough.md",
+      "notes": "Allow 60 seconds, then questions. Return to the running demo or the attachment block. The key handoff is that teammates know where their classes go, how they get engine components, and when their behavior runs. For the current manual example, change SetDegreesPerSecond, rebuild, and reload to see configuration take effect; F4 reload alone does not compile C++ changes. Follow the companion guide's troubleshooting table. Finish by distinguishing the working manual demo from the deferred Unreal mapping.",
+      "sources": ["Docs/GameFrameworkWalkthrough.md", "Source/Application/Game/Game.cpp", "Source/Application/Game/SpinComponent.cpp"]
+    }
+  ]
+}

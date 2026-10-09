@@ -10,6 +10,7 @@ class SpinComponent final : public Component
 {
 public:
 	void SetTargetComponentName(const char* aComponentName);
+	void SetDegreesPerSecond(float aDegreesPerSecond);
 	void BeginPlay() override;
 	void Update(float deltaTime) override;
 
@@ -17,4 +18,5 @@ private:
 	Transform* FindTargetTransform() const;
 	std::string myTargetComponentName;
 	float myYaw = 0;
+	float myDegreesPerSecond = 25.0f;
 };

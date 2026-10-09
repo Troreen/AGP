@@ -202,7 +202,11 @@ namespace UnrealScene
 			materialData.baseColor = { r, g, b, a };
 			materialData.metallic = static_cast<float>(material["Metallic"].operator double());
 			materialData.roughness = static_cast<float>(material["Roughness"].operator double());
-			materialData.twoSided = material["TwoSided"];
+			const auto twoSided = material["TwoSided"];
+			if (twoSided.error() != simdjson::NO_SUCH_FIELD)
+			{
+				materialData.twoSided = twoSided.get_bool().value();
+			}
 
 			ReadMaterialParameters(material, materialData.parameters);
 

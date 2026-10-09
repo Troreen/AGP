@@ -13,6 +13,7 @@
 #include "GameFramework/World/World.h"
 #include <GameFramework/Animation/AnimationManager.h>
 #include "InputMapper.h"
+#include "SpinComponent.h"
 
 #include <memory>
 
@@ -64,6 +65,13 @@ void Game::Shutdown()
 
 void Game::ConfigureWorld(World& aWorld)
 {
+	// TODO: Replace manual attachment with the game-owned factory after verifying the Unreal custom export.
+	if (Actor* actor = aWorld.FindActor("OrientationGizmos_TGE"))
+	{
+		SpinComponent* rotator = actor->AddComponent<SpinComponent>("WalkthroughRotator");
+		rotator->SetDegreesPerSecond(45.0f);
+	}
+
 	{
 		Actor* playerBro = aWorld.SpawnActor("PLAYAH_BRO");
 		playerBro->GetTransform().SetLocalRotationDegrees({ 0, 0, 0 });

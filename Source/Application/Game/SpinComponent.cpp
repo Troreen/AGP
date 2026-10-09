@@ -4,16 +4,25 @@
 #include "GameFramework/World/Actor.h"
 
 #include <cmath>
+#include <stdexcept>
 
 namespace
 {
-	constexpr float SpinDegreesPerSecond = 25.0f;
 	constexpr float FullRotationDegrees = 360.0f;
 }
 
 void SpinComponent::SetTargetComponentName(const char* aComponentName)
 {
 	myTargetComponentName = aComponentName;
+}
+
+void SpinComponent::SetDegreesPerSecond(float aDegreesPerSecond)
+{
+	if (!std::isfinite(aDegreesPerSecond))
+	{
+		throw std::invalid_argument("Rotation speed must be finite");
+	}
+	myDegreesPerSecond = aDegreesPerSecond;
 }
 
 void SpinComponent::BeginPlay()
@@ -28,12 +37,13 @@ void SpinComponent::BeginPlay()
 
 void SpinComponent::Update(float deltaTime)
 {
-	myYaw += SpinDegreesPerSecond * deltaTime;
+	myYaw += myDegreesPerSecond * deltaTime;
 	myYaw = std::fmod(myYaw, FullRotationDegrees);
 
 	if (Transform* transform = FindTargetTransform())
 	{
-		transform->SetLocalRotationDegrees(myYaw, 0, 0);
+		const auto rotation = transform->GetLocalRotationDegrees();
+		transform->SetLocalRotationDegrees(myYaw, rotation.y, rotation.z);
 	}
 }
 

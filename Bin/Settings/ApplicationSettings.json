@@ -29,7 +29,7 @@
       "shaderFolder" : "Shaders",
       "scenesFolder" : "ExportedScenes",
       "cursorPath": "",
-      "initialScene": "lvl_topdown/Lvl_Topdown_Level.json"
+      "initialScene": "lvl_blockout/Lvl_Blockout_Level.json"
     },
     "sound": { "masterVolume": 1.0, "musicVolume": 0.35, "sfxVolume": 1.0 }
   }
