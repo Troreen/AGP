@@ -111,6 +111,22 @@ void Game::ConfigureWorld(World& aWorld)
 		animatorBro->GetTree().SetBool("IsIdle", true);
 	}
 
+	{
+		Actor* actor = aWorld.SpawnActor("TGALOGO");
+		SpriteComponent* component = actor->AddComponent<SpriteComponent>();
+
+		AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
+
+		std::shared_ptr<TextureAsset> asset = assetRegistry.GetAsset<TextureAsset>("TgaLogo.dds");
+		component->SetSprite(asset);
+		component->SetSize({ 2048.0f * 0.5f, 512.0f * 0.5f });
+		component->SetPivot({ 1, 1 });
+		component->SetPosition({ 0.0f, 0.0f });
+		component->SetAnchor({ 1.0f, 1.0f });
+		//component->SendDrawCall();
+	}
+
+
 #ifdef _DEBUG
 	{
 		AnimationManager::DebugData data = ServiceLocator::GetInstance().GetAnimationManager().GetDebugData();
@@ -132,14 +148,5 @@ void Game::ConfigureWorld(World& aWorld)
 	}
 #endif
 
-	//{
-	//	Actor* actor = aWorld.SpawnActor("TGALOGO");
-	//	SpriteComponent* component = actor->AddComponent<SpriteComponent>();
 
-	//	AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
-
-	//	std::shared_ptr<TextureAsset> asset = assetRegistry.GetAsset<TextureAsset>("TgaLogo.dds");
-	//	component->SetSprite(asset);
-	//	component->SendDrawCall();
-	//}
 }

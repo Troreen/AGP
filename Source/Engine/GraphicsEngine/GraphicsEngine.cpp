@@ -1153,11 +1153,16 @@ void GraphicsEngine::RenderScreenSprites(GraphicsCommandList& inoutCommandList, 
 	mySpriteRenderResources.Projection = CommonUtilities::Matrix4f{};
 
 	mySpriteRenderResources.Projection(1, 1) = (2.0f / designWidth) * (scale / scaleX);
-	mySpriteRenderResources.Projection(1, 4) = 1.0f;
-	mySpriteRenderResources.Projection(2, 2) = (- 2.0f / designHeight) * (scale / scaleY);
-	mySpriteRenderResources.Projection(2, 4) = 1.0f;
+	mySpriteRenderResources.Projection(1, 4) = -1.0f;
+	mySpriteRenderResources.Projection(2, 2) = (2.0f / designHeight) * (scale / scaleY);
+	mySpriteRenderResources.Projection(2, 4) = -1.0f;
 	mySpriteRenderResources.Projection(3, 3) = -1.0f;
 	mySpriteRenderResources.Projection(4, 4) = 1.0f;
+
+	//mySpriteRenderResources.Projection(1, 1) = 2.0f / designWidth;
+	//mySpriteRenderResources.Projection(2, 2) = -2.0f / designHeight;
+	//mySpriteRenderResources.Projection(4, 1) = -1.0f;
+	//mySpriteRenderResources.Projection(4, 2) = 1.0f;
 
 	aRHI.CreateDynamicVertexBuffer("SpriteRenderer", 10000, mySpriteRenderResources.VertexBuffer);
 
@@ -1168,9 +1173,9 @@ void GraphicsEngine::RenderScreenSprites(GraphicsCommandList& inoutCommandList, 
 
 	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::FrameBuffer, frameBuffer, ConstantBufferSlot::Frame, PipeLineStage_VertexShader | PipeLineStage_PixelShader);
 
-	mySpriteRenderResources.Vertices.clear();
 	for (size_t i = 0; i < aSnapshot.ScreenSpriteItems.size(); i++)
 	{
+		mySpriteRenderResources.Vertices.clear();
 		const CommonUtilities::Vector2f parentSize =
 		{
 			1920.0f,
@@ -1179,18 +1184,25 @@ void GraphicsEngine::RenderScreenSprites(GraphicsCommandList& inoutCommandList, 
 
 		const CommonUtilities::Vector2f position =
 		{
-			parentSize.x * aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Anchor.x + aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Position.x - aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Size.x * aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Pivot.x,
-			parentSize.y * aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Anchor.y + aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Position.y - aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Size.y * aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Pivot.y
-			//aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Position.x,
-			//aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Position.y
+			parentSize.x *
+			aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Anchor.x +
+			aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Position.x -
+			aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Size.x *
+			aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Pivot.x,
+
+			parentSize.y *
+			aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Anchor.y +
+			aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Position.y -
+			aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Size.y *
+			aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Pivot.y
 		};
 
 		const CommonUtilities::Vector2f size = aSnapshot.ScreenSpriteItems[i].SpriteInstanceData->Size;
 
 		const float left = position.x;
-		const float top = position.y;
+		const float bottom = position.y;
 		const float right = left + size.x;
-		const float bottom = top + size.y;
+		const float top = bottom + size.y;
 
 		Vertex v0 =
 		{
