@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -198,6 +198,8 @@
     <ClInclude Include="BehaviourTree\SequenceNode.h" />
     <ClInclude Include="Components\AnimatorComponent.h" />
     <ClInclude Include="Components\CameraComponent.h" />
+    <ClInclude Include="Components\CustomComponent.h" />
+    <ClInclude Include="Scenes\CustomComponentProperties.h" />
     <ClInclude Include="Components\DebugCameraController.h" />
     <ClInclude Include="Components\LightComponent.h" />
     <ClInclude Include="Components\MeshComponentBase.h" />

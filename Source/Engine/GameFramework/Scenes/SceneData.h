@@ -2,10 +2,12 @@
 #include "GameFramework/World/Transform.h"
 #include "Vector2.hpp"
 #include "Vector4.hpp"
+#include "GameFramework/Scenes/CustomComponentProperties.h"
 #include <cstdint>
 #include <string>
 #include <variant>
 #include <vector>
+
 
 struct ComponentData
 {
@@ -61,6 +63,13 @@ struct PlaceholderComponentData
 	PlaceholderProperties Properties;
 };
 
+struct CustomComponentData
+{
+	ComponentData Common;
+	std::string CustomType;
+	CustomComponentProperties Properties;
+};
+
 using ComponentRecord = 
 	std::variant
 	<
@@ -71,7 +80,8 @@ using ComponentRecord =
 		DirectionalLightData,
 		PointLightData, 
 		SpotLightData, 
-		PlaceholderComponentData
+		PlaceholderComponentData,
+		CustomComponentData
 	>;
 
 struct MasterMaterialRecord

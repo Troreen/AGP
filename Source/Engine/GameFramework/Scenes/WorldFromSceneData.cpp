@@ -57,7 +57,7 @@ bool WorldFromSceneConverter::Initialize(const std::filesystem::path& aNameConve
 	return true;
 }
 
-std::unique_ptr<World> WorldFromSceneConverter::BuildWorldFromSceneData(const SceneData& aScene, AssetRegistry& anAssetRegistry, const std::filesystem::path& aShaderPath, CommonUtilities::Vector2u aClientSize, const SceneFallbackAssets& someFallbacks)
+std::unique_ptr<World> WorldFromSceneConverter::BuildWorldFromSceneData(const SceneData& aScene, AssetRegistry& anAssetRegistry, const std::filesystem::path& aShaderPath, CommonUtilities::Vector2u aClientSize, const SceneFallbackAssets& someFallbacks, const CustomComponentCreator& aCustomCreator)
 {
 	std::unique_ptr<World> world = std::make_unique<World>();
 	CameraComponent* selectedCamera = nullptr;
@@ -185,7 +185,20 @@ std::unique_ptr<World> WorldFromSceneConverter::BuildWorldFromSceneData(const Sc
 			const ComponentData& common = Common(record);
 			try
 			{
-				Component* created = CreateComponent(*actor, record, anAssetRegistry, aClientSize, someFallbacks);
+				Component* created = nullptr;
+				const auto* customComponentData = std::get_if<CustomComponentData>(&record);
+				if (customComponentData && aCustomCreator)
+				{
+					created = aCustomCreator(*actor, *customComponentData);
+				}
+				else if (!customComponentData)
+				{
+					created = CreateComponent(*actor, record, anAssetRegistry, someFallbacks);
+				}
+				else
+				{
+					throw std::runtime_error("No custom component creator supplied for " + customComponentData->CustomType);
+				}
 				if (created == nullptr)
 				{
 					continue;
@@ -197,6 +210,11 @@ std::unique_ptr<World> WorldFromSceneConverter::BuildWorldFromSceneData(const Sc
 				if (std::holds_alternative<CameraData>(record))
 				{
 					selectedCamera = static_cast<CameraComponent*>(created);
+					const auto& cameraData = std::get<CameraData>(record);
+					if (!selectedCamera->SetPerspective(cameraData.FieldOfView, cameraData.NearPlane, cameraData.FarPlane, aClientSize))
+					{
+						throw std::runtime_error("Invalid camera projection");
+					}
 				}
 			}
 			catch (const std::exception& error)
@@ -354,7 +372,7 @@ bool WorldFromSceneConverter::ApplyMesh(Actor& anActor, MeshComponentBase& aComp
 	return true;
 }
 
-Component* WorldFromSceneConverter::CreateComponent(Actor& anActor, const ComponentRecord& aRecord, AssetRegistry& anAssetRegistry, CommonUtilities::Vector2u aClientSize, const SceneFallbackAssets& someFallbacks)
+Component* WorldFromSceneConverter::CreateComponent(Actor& anActor, const ComponentRecord& aRecord, AssetRegistry& anAssetRegistry, const SceneFallbackAssets& someFallbacks)
 {
 	const ComponentData& common = Common(aRecord);
 	// Create the component that matches the data stored in this record.
@@ -367,8 +385,7 @@ Component* WorldFromSceneConverter::CreateComponent(Actor& anActor, const Compon
 			}
 			else if constexpr (std::is_same_v<ComponentType, CameraData>)
 			{
-				return anActor.AddComponent<CameraComponent>(common.Name, someComponentData.FieldOfView,
-					someComponentData.NearPlane, someComponentData.FarPlane, aClientSize);
+				return anActor.AddComponent<CameraComponent>(common.Name);
 			}
 			else if constexpr (std::is_same_v<ComponentType, StaticMeshData>)
 			{
@@ -443,6 +460,10 @@ Component* WorldFromSceneConverter::CreateComponent(Actor& anActor, const Compon
 				light->SetFalloffExponent(someComponentData.FalloffExponent);
 				light->SetConeAnglesDegrees(someComponentData.InnerConeDegrees, someComponentData.OuterConeDegrees);
 				return light;
+			}
+			else if constexpr (std::is_same_v<ComponentType, CustomComponentData>)
+			{
+				return nullptr;
 			}
 			else
 			{

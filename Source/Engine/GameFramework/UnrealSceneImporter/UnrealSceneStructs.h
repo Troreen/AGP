@@ -2,6 +2,7 @@
 
 #include <Matrix.hpp>
 #include <Vector.hpp>
+#include "GameFramework/Scenes/CustomComponentProperties.h"
 
 #include <cstdint>
 #include <string>
@@ -70,6 +71,8 @@ namespace UnrealScene
 		std::string parent;
 		std::vector<std::string> tags;
 		CommonUtilities::Matrix4f transform;
+		std::string customType;
+		CustomComponentProperties customProperties;
 	};
 
 	struct StaticMeshComponentData : BaseComponentData
@@ -123,17 +126,9 @@ namespace UnrealScene
 		float fieldOfView = 0.0f;
 	};
 
-	using ComponentData = std::variant<
-		BaseComponentData,
-		StaticMeshComponentData,
-		CommonLightComponentData,
-		PointLightComponentData,
-		SpotLightComponentData,
-		BoxComponentData,
-		BaseSphericalComponentData,
-		CapsuleComponentData,
-		SpringArmComponentData,
-		CameraComponentData>;
+	using ComponentData =
+	    std::variant<BaseComponentData, StaticMeshComponentData, CommonLightComponentData, PointLightComponentData, SpotLightComponentData,
+	                 BoxComponentData, BaseSphericalComponentData, CapsuleComponentData, SpringArmComponentData, CameraComponentData>;
 
 	struct MasterMaterialData
 	{

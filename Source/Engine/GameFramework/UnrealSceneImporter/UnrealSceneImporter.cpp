@@ -6,14 +6,118 @@
 #include <algorithm>
 #include <stdexcept>
 #include <type_traits>
+#include <cmath>
 
 namespace UnrealScene
 {
+	CommonUtilities::Vector3f ReadCustomVector(simdjson::dom::element aValue)
+	{
+		CommonUtilities::Vector3f vector;
+		vector.x = static_cast<float>(aValue["x"].get_double().value());
+		vector.y = static_cast<float>(aValue["y"].get_double().value());
+		vector.z = static_cast<float>(aValue["z"].get_double().value());
+		if (!std::isfinite(vector.x) || !std::isfinite(vector.y) || !std::isfinite(vector.z))
+		{
+			throw std::invalid_argument("Custom vector axes must be finite numbers");
+		}
+		return vector;
+	}
+
+	CustomComponentProperties ReadCustomProperties(simdjson::dom::object someProperties)
+	{
+		CustomComponentProperties customProperties;
+		for (const auto& property : someProperties)
+		{
+			const std::string propertyName(property.key);
+			if (customProperties.Contains(propertyName))
+			{
+				throw std::invalid_argument("Duplicate custom property: " + propertyName);
+			}
+			switch (property.value.type())
+			{
+			case simdjson::dom::element_type::INT64:
+				customProperties.Integers.emplace(propertyName, property.value.get_int64().value());
+				break;
+			case simdjson::dom::element_type::BOOL:
+				customProperties.Booleans.emplace(propertyName, property.value.get_bool().value());
+				break;
+			case simdjson::dom::element_type::STRING:
+				customProperties.Strings.emplace(propertyName, property.value.get_string().value());
+				break;
+			case simdjson::dom::element_type::DOUBLE:
+			{
+				const float value = static_cast<float>(property.value.get_double().value());
+				if (!std::isfinite(value))
+				{
+					throw std::invalid_argument(propertyName + " must be a finite float");
+				}
+				customProperties.Floats.emplace(propertyName, value);
+				break;
+			}
+			case simdjson::dom::element_type::OBJECT:
+				try
+				{
+					const auto object = property.value.get_object().value();
+					if (object.size() != 3)
+					{
+						throw std::invalid_argument(propertyName + " must be a vector or transform object");
+					}
+					if (object["rotation"].error() == simdjson::SUCCESS)
+					{
+						CustomTransformData transform;
+						transform.Translation = ReadCustomVector(object["translation"].value());
+						transform.Scale = ReadCustomVector(object["scale3D"].value());
+						const auto rotation = object["rotation"].value();
+						const auto rotationAxes = ReadCustomVector(rotation);
+						transform.Rotation = {rotationAxes.x, rotationAxes.y, rotationAxes.z,
+						                      static_cast<float>(rotation["w"].get_double().value())};
+						if (!std::isfinite(transform.Rotation.w))
+						{
+							throw std::invalid_argument(propertyName);
+						}
+						customProperties.Transforms.emplace(propertyName, transform);
+					}
+					else
+					{
+						customProperties.Vectors.emplace(propertyName, ReadCustomVector(property.value));
+					}
+					break;
+				}
+				catch (const std::exception& error)
+				{
+					throw std::invalid_argument(propertyName + ": " + error.what());
+				}
+			default:
+				throw std::invalid_argument(propertyName + " has an unsupported custom property type");
+			}
+		}
+		return customProperties;
+	}
+
 	void ReadCommonComponent(simdjson::dom::element component, BaseComponentData& outComponent, UnrealComponentType type)
 	{
 		outComponent.name = component["Name"];
 		outComponent.parent = component["Parent"];
 		outComponent.typeID = type;
+		if (type == UnrealComponentType::Custom)
+		{
+			std::string_view customType;
+			const auto typeError = component["CustomType"].get(customType);
+			if (typeError != simdjson::NO_SUCH_FIELD)
+			{
+				if (typeError != simdjson::SUCCESS || customType.empty())
+				{
+					throw std::invalid_argument(outComponent.name + ": CustomType must be a nonempty string");
+				}
+				outComponent.customType = customType;
+				simdjson::dom::object properties;
+				if (component["Custom"].get(properties) != simdjson::SUCCESS)
+				{
+					throw std::invalid_argument(outComponent.name + ": Custom must be an object");
+				}
+				outComponent.customProperties = ReadCustomProperties(properties);
+			}
+		}
 		for (const auto& tag : component["Tags"])
 		{
 			outComponent.tags.emplace_back(tag.get_c_str().value());
@@ -561,9 +665,9 @@ namespace
 
 			for (const UnrealScene::ComponentData& sourceComponent : sourceActor.components)
 			{
-				const UnrealScene::BaseComponentData& base = GetBaseComponent(sourceComponent);
-				const std::string context = sourceActor.name + "/" + base.name;
-				const std::optional<TransformData> componentTransform = ConvertTransform(base.transform);
+				const UnrealScene::BaseComponentData& baseComponentData = GetBaseComponent(sourceComponent);
+				const std::string context = sourceActor.name + "/" + baseComponentData.name;
+				const std::optional<TransformData> componentTransform = ConvertTransform(baseComponentData.transform);
 				if (!componentTransform)
 				{
 					result.Diagnostics.push_back({ context, "component transform cannot be decomposed" });
@@ -573,7 +677,7 @@ namespace
 				std::visit([&](const auto& imported)
 					{
 						using SourceType = std::decay_t<decltype(imported)>;
-						const ComponentData common = ConvertCommonData(base, *componentTransform);
+						const ComponentData common = ConvertCommonData(baseComponentData, *componentTransform);
 						if constexpr (std::is_same_v<SourceType, UnrealScene::StaticMeshComponentData>)
 						{
 							StaticMeshData mesh;
@@ -607,7 +711,7 @@ namespace
 								}
 								mesh.Materials.push_back(std::move(material));
 							}
-							if (base.typeID == UnrealComponentType::SkeletalMesh)
+							if (baseComponentData.typeID == UnrealComponentType::SkeletalMesh)
 							{
 								SkeletalMeshData skeletalMesh;
 								static_cast<StaticMeshData&>(skeletalMesh) = std::move(mesh);
@@ -655,15 +759,23 @@ namespace
 						{
 							actor.Components.push_back(CameraData{ common, imported.fieldOfView });
 						}
-						else if (base.typeID == UnrealComponentType::SceneComponent)
+						else if (baseComponentData.typeID == UnrealComponentType::SceneComponent)
 						{
 							actor.Components.push_back(SceneComponentData{ common });
+						}
+						else if (baseComponentData.typeID == UnrealComponentType::Custom && !baseComponentData.customType.empty())
+						{
+							CustomComponentData customComponentData;
+							customComponentData.Common = common;
+							customComponentData.CustomType = baseComponentData.customType;
+							customComponentData.Properties = baseComponentData.customProperties;
+							actor.Components.push_back(std::move(customComponentData));
 						}
 						else
 						{
 							PlaceholderComponentData placeholder;
 							placeholder.Common = common;
-							placeholder.Type = ConvertPlaceholderType(base.typeID);
+							placeholder.Type = ConvertPlaceholderType(baseComponentData.typeID);
 							if constexpr (std::is_same_v<SourceType, UnrealScene::BoxComponentData>)
 							{
 								placeholder.Properties = BoxPlaceholderData{ imported.boundsMaxima * UnrealUnitScale };
@@ -700,8 +812,8 @@ namespace
 UnrealImportResult UnrealSceneImporter::ImportScene(const std::filesystem::path& jsonPath) const
 {
 	UnrealImportResult result;
-	/*try
-	{*/
+	try
+	{
 		const UnrealScene::UnrealSceneData importedScene = UnrealScene::ImportScene(jsonPath);
 		if (!importedScene.parsed)
 		{
@@ -711,10 +823,10 @@ UnrealImportResult UnrealSceneImporter::ImportScene(const std::filesystem::path&
 		RuntimeConversionResult converted = ConvertRuntimeScene(importedScene);
 		result.Diagnostics = std::move(converted.Diagnostics);
 		result.Data = std::move(converted.Scene);
-	/*}
+	}
 	catch (const std::exception& error)
 	{
 		result.Diagnostics.push_back({ jsonPath.string(), error.what() });
-	}*/
+	}
 	return result;
 }
