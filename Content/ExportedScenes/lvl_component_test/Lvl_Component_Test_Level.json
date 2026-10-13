@@ -113,22 +113,6 @@
 			]
 		},
 		{
-			"Name": "MM_MaskedMaterial",
-			"Domain": 0,
-			"ShadingModel": 1,
-			"BlendMode": 1,
-			"BaseColor": [
-				0.5,
-				0.5,
-				0.5,
-				1
-			],
-			"Metallic": 0,
-			"Roughness": 0.5,
-			"TwoSided": true,
-			"Parameters": []
-		},
-		{
 			"Name": "MatineeCam_mat",
 			"Domain": 0,
 			"ShadingModel": 1,
@@ -171,8 +155,8 @@
 			"Components": [
 				{
 					"Name": "LightComponent0",
-					"TypeID": 5,
 					"Parent": "",
+					"TypeID": 5,
 					"Tags": [],
 					"Transform": [
 						1,
@@ -198,7 +182,7 @@
 						1,
 						1
 					],
-					"Intensity": 6
+					"Intensity": 68.170845031738281
 				}
 			]
 		},
@@ -227,8 +211,8 @@
 			"Components": [
 				{
 					"Name": "StaticMeshComponent0",
-					"TypeID": 1,
 					"Parent": "",
+					"TypeID": 1,
 					"Tags": [],
 					"Transform": [
 						1,
@@ -354,12 +338,151 @@
 							]
 						}
 					]
+				},
+				{
+					"Name": "SpinComponent",
+					"Parent": "",
+					"TypeID": -1,
+					"CustomType": "SpinComponent_C",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Custom":
+					{
+						"SpinSpeed": 25.00001,
+						"TargetComponentName": "",
+						"BoolProbe": true,
+						"IntProbe": 7,
+						"VectorProbe":
+						{
+							"x": 1,
+							"y": 2,
+							"z": 3
+						},
+						"TransformProbe":
+						{
+							"rotation":
+							{
+								"x": 0,
+								"y": -0,
+								"z": 0.70710678118654768,
+								"w": 0.70710678118654746
+							},
+							"translation":
+							{
+								"x": 10,
+								"y": 20,
+								"z": 30
+							},
+							"scale3D":
+							{
+								"x": 1,
+								"y": 2,
+								"z": 3
+							}
+						}
+					}
+				},
+				{
+					"Name": "CustomComponentBase",
+					"Parent": "",
+					"TypeID": -1,
+					"CustomType": "CustomComponentBase_C",
+					"Properties": [
+						{
+							"Name": "UberGraphFrame",
+							"Type": "FPointerToUberGraphFrame",
+							"Value":
+							{
+							}
+						},
+						{
+							"Name": "FloatVariables",
+							"Type": "TMap",
+							"Value":
+							{
+							}
+						},
+						{
+							"Name": "BoolVariables",
+							"Type": "TMap",
+							"Value":
+							{
+							}
+						},
+						{
+							"Name": "StringVariables",
+							"Type": "TMap",
+							"Value":
+							{
+							}
+						},
+						{
+							"Name": "IntVariables",
+							"Type": "TMap",
+							"Value":
+							{
+							}
+						},
+						{
+							"Name": "VectorVariables",
+							"Type": "TMap",
+							"Value":
+							{
+							}
+						},
+						{
+							"Name": "TransformVariables",
+							"Type": "TMap",
+							"Value":
+							{
+							}
+						}
+					],
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Custom":
+					{
+					}
 				}
 			]
 		},
 		{
-			"Name": "BP_TopDownCharacter",
-			"Archetype": "BP_TopDownCharacter_C",
+			"Name": "CameraActor",
+			"Archetype": "CameraActor",
 			"Transform": [
 				1,
 				0,
@@ -373,17 +496,17 @@
 				0,
 				1,
 				0,
-				0,
-				0,
-				0,
+				-1010,
+				540,
+				440,
 				1
 			],
 			"Tags": [],
 			"Components": [
 				{
-					"Name": "CollisionCylinder",
-					"TypeID": 8,
+					"Name": "SceneComponent",
 					"Parent": "",
+					"TypeID": 0,
 					"Tags": [],
 					"Transform": [
 						1,
@@ -402,85 +525,12 @@
 						0,
 						0,
 						1
-					],
-					"Radius": 42,
-					"HalfHeight": 96
-				},
-				{
-					"Name": "CharacterMesh0",
-					"TypeID": 2,
-					"Parent": "CollisionCylinder",
-					"Tags": [],
-					"Transform": [
-						-2.2204460492503131e-16,
-						-1.0000000000000002,
-						0,
-						0,
-						1.0000000000000002,
-						-2.2204460492503131e-16,
-						-0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						-95,
-						1
-					],
-					"Mesh": "SKM_Manny_Simple",
-					"ContentPath": "/Game/Characters/Mannequins/Meshes/SKM_Manny_Simple.SKM_Manny_Simple",
-					"AssetImportPath": "C:/Program Files/Epic Games/depot/ArtSource/UE5/Characters/Mannequin/Manny/Rig/Manny_lod1.fbx",
-					"Materials": [
-						{
-							"Name": "MM_MaskedMaterial",
-							"Parent": "Self",
-							"Parameters": []
-						},
-						{
-							"Name": "MM_MaskedMaterial",
-							"Parent": "Self",
-							"Parameters": []
-						}
 					]
 				},
 				{
-					"Name": "SpringArm",
-					"TypeID": 9,
-					"Parent": "CollisionCylinder",
-					"Tags": [],
-					"Transform": [
-						0.44013964487227741,
-						-0.41043685885067138,
-						-0.79863551004729261,
-						0,
-						0.68199836006249825,
-						0.73135370161917057,
-						0,
-						0,
-						0.58408503651760157,
-						-0.54466810813993061,
-						0.60181502315204838,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"TargetArmLength": 2650,
-					"SocketOffset":
-					{
-						"x": 0,
-						"y": 0,
-						"z": 0
-					},
-					"ArmLength": 2650
-				},
-				{
-					"Name": "Camera",
+					"Name": "CameraComponent",
+					"Parent": "SceneComponent",
 					"TypeID": 11,
-					"Parent": "SpringArm",
 					"Tags": [],
 					"Transform": [
 						1,
@@ -500,13 +550,9 @@
 						0,
 						1
 					],
-					"FOV": 42
+					"FOV": 90
 				}
-			],
-			"Custom":
-			{
-				"SpinSpeed": 3
-			}
+			]
 		}
 	]
 }
