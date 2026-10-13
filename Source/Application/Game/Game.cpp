@@ -13,14 +13,29 @@
 #include "GameFramework/World/World.h"
 #include <GameFramework/Animation/AnimationManager.h>
 #include "InputMapper.h"
-#include "SpinComponent.h"
+#include "RegisterGameComponents.h"
 
 #include <memory>
 
 DEFINE_LOG_CATEGORY(LogGame);
 
-Game::Game() = default;
+Game::Game()
+{
+	RegisterGameComponents(myComponentRegistry);
+}
+
 Game::~Game() = default;
+
+Component* Game::CreateCustomComponent(Actor& anActor, const CustomComponentData& aCustomComponentData) const
+{
+	Component* component = myComponentRegistry.Create(anActor, aCustomComponentData);
+	if (!component)
+	{
+		GAMELOG(Warning, "Skipping unknown custom component '{}' on actor '{}': {}", aCustomComponentData.Common.Name, anActor.GetName(),
+		        aCustomComponentData.CustomType);
+	}
+	return component;
+}
 
 void Game::Initialize(GameApplication& anApplication)
 {
@@ -63,16 +78,8 @@ void Game::Shutdown()
 	myInputListenerIDs.clear();
 }
 
-// this can be removed after component factory is in place. 
 void Game::ConfigureWorld(World& aWorld)
 {
-	// currently showing ow spincomp works in the blockout scene. 
-	// TODO: Replace manual attachment with the game-owned factory after verifying the Unreal custom export.
-	if (Actor* actor = aWorld.FindActor("OrientationGizmos_TGE"))
-	{
-		SpinComponent* rotator = actor->AddComponent<SpinComponent>("WalkthroughRotator");
-		rotator->SetDegreesPerSecond(45.0f);
-	}
 
 	// {
 	// 	Actor* playerBro = aWorld.SpawnActor("PLAYAH_BRO");
@@ -87,7 +94,6 @@ void Game::ConfigureWorld(World& aWorld)
 	//	AnimatorComponent* animatorBro = playerBro->AddComponent<AnimatorComponent>();
 	//	animatorBro->SetMeshComponent(component);
 	//	animatorBro->SetTree("PlayerTree");
-
 
 	//	animatorBro->GetTree().SetBool("IsIdle", true);
 	//}
@@ -107,7 +113,6 @@ void Game::ConfigureWorld(World& aWorld)
 	//	animatorBro->SetTree("BroTree");
 	//	animatorBro->ConfigurePartialLayerFromJointName("RightArm");
 
-
 	//	animatorBro->GetTree().SetBool("IsIdle", true);
 	//}
 
@@ -119,10 +124,10 @@ void Game::ConfigureWorld(World& aWorld)
 
 		std::shared_ptr<TextureAsset> asset = assetRegistry.GetAsset<TextureAsset>("TgaLogo.dds");
 		component->SetSprite(asset);
-		component->SetSize({ 2048.0f * 0.5f, 512.0f * 0.5f });
-		component->SetPivot({ 1, 1 });
-		component->SetPosition({ 0.0f, 0.0f });
-		component->SetAnchor({ 1.0f, 1.0f });
+		component->SetSize({2048.0f * 0.5f, 512.0f * 0.5f});
+		component->SetPivot({1, 1});
+		component->SetPosition({0.0f, 0.0f});
+		component->SetAnchor({1.0f, 1.0f});
 		//component->SendDrawCall();
 	}
 
@@ -135,8 +140,8 @@ void Game::ConfigureWorld(World& aWorld)
 		}
 
 		Actor* playerBro = aWorld.SpawnActor("A_Debug");
-		playerBro->GetTransform().SetLocalRotationDegrees({ 0, 0, 0 });
-		playerBro->GetTransform().SetWorldPosition({ data.Position.x, data.Position.y, data.Position.z });
+		playerBro->GetTransform().SetLocalRotationDegrees({0, 0, 0});
+		playerBro->GetTransform().SetWorldPosition({data.Position.x, data.Position.y, data.Position.z});
 
 		SkeletalMeshComponent* component = playerBro->AddComponent<SkeletalMeshComponent>();
 		AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
@@ -158,20 +163,20 @@ void Game::ConfigureWorld(World& aWorld)
 			key = EKeyCode(static_cast<int>(key) + 1);
 
 			map.AddEventListener(var.Name, [var, animatorBro](const CommonUtilities::InputEvent event)
+			{
+				if (!event.inputData.isPressed)
 				{
-					if (!event.inputData.isPressed)
-					{
-						return;
-					}
-					if (var.Type == "Bool")
-					{
-						animatorBro->GetTree().SetBool(var.Name, !animatorBro->GetTree().GetAnimationVariable(var.Name).IsActive);
-					}
-					else
-					{
-						animatorBro->GetTree().SetTrigger(var.Name);
-					}
-				});
+					return;
+				}
+				if (var.Type == "Bool")
+				{
+					animatorBro->GetTree().SetBool(var.Name, !animatorBro->GetTree().GetAnimationVariable(var.Name).IsActive);
+				}
+				else
+				{
+					animatorBro->GetTree().SetTrigger(var.Name);
+				}
+			});
 
 			if (key == EKeyCode(static_cast<int>(EKeyCode::NUMPAD9) + 1))
 			{

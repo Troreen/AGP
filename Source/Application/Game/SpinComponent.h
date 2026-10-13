@@ -1,16 +1,18 @@
 #pragma once
-#include "GameFramework/World/Component.h"
+#include "GameFramework/Components/CustomComponent.h"
 
 #include <string>
 
 class Transform;
+struct CustomComponentProperties;
 
 // Continuously rotates the owning Actor or a named SceneComponent.
-class SpinComponent final : public Component
+class SpinComponent final : public CustomComponent
 {
 public:
 	void SetTargetComponentName(const char* aComponentName);
 	void SetDegreesPerSecond(float aDegreesPerSecond);
+	void Configure(const CustomComponentProperties& someProperties) override;
 	void BeginPlay() override;
 	void Update(float deltaTime) override;
 

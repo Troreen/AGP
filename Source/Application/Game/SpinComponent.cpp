@@ -2,6 +2,7 @@
 
 #include "GameFramework/Components/SceneComponent.h"
 #include "GameFramework/World/Actor.h"
+#include "GameFramework/Scenes/CustomComponentProperties.h"
 
 #include <cmath>
 #include <stdexcept>
@@ -25,6 +26,14 @@ void SpinComponent::SetDegreesPerSecond(float aDegreesPerSecond)
 	myDegreesPerSecond = aDegreesPerSecond;
 }
 
+void SpinComponent::Configure(const CustomComponentProperties& someProperties)
+{
+	const float spinSpeed = someProperties.Get<float>("SpinSpeed", myDegreesPerSecond);
+	const std::string targetComponentName = someProperties.Get<std::string>("TargetComponentName", myTargetComponentName);
+	SetDegreesPerSecond(spinSpeed);
+	SetTargetComponentName(targetComponentName.c_str());
+}
+
 void SpinComponent::BeginPlay()
 {
 	Transform* targetTransform = FindTargetTransform();
@@ -32,7 +41,6 @@ void SpinComponent::BeginPlay()
 	{
 		myYaw = targetTransform->GetLocalRotationDegrees().x;
 	}
-
 }
 
 void SpinComponent::Update(float deltaTime)

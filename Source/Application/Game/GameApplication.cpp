@@ -564,7 +564,11 @@ void GameApplication::ProcessPendingSceneLoad(Game& aGame)
 
 		WorldFromSceneConverter converter;
 		converter.Initialize(ServiceLocator::GetInstance().GetEngineSettings().GetSettingsDirectory() / "MaterialNameConversions.json");
-		candidateWorld = converter.BuildWorldFromSceneData(scene, assets, myContentRoot / myApplicationSettings.ShaderFolder, myClientSize, fallbacks);
+		candidateWorld = converter.BuildWorldFromSceneData(scene, assets, myContentRoot / myApplicationSettings.ShaderFolder, myClientSize, fallbacks,
+			[&aGame](Actor& anActor, const CustomComponentData& aCustomComponentData)
+			{
+				return aGame.CreateCustomComponent(anActor, aCustomComponentData);
+			});
 		aGame.ConfigureWorld(*candidateWorld);
 	}
 	catch (const std::bad_alloc&)
