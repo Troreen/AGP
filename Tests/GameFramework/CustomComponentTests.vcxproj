@@ -32,7 +32,7 @@
       <AdditionalDependencies>GraphicsEngine.lib;TGAFbx.lib;$(SoundEngineLibrary);d3d11.lib;dxguid.lib;dxgi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup><ClCompile Include="CustomComponentTests.cpp" /><ClCompile Include="..\..\Source\Application\Game\SpinComponent.cpp" /></ItemGroup>
+  <ItemGroup><ClCompile Include="CustomComponentTests.cpp" /><ClCompile Include="..\..\Source\Application\Game\Components\SpinComponent.cpp" /></ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Source\Engine\GameFramework\GameFramework.vcxproj">
       <Project>{cd9f039d-3960-7fd3-029b-c8506e1ac4af}</Project>

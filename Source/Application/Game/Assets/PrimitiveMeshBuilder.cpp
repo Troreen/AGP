@@ -1,4 +1,4 @@
-#include "PrimitiveMeshBuilder.h"
+#include "Assets/PrimitiveMeshBuilder.h"
 
 #include "GraphicsEngine/Objects/Mesh.h"
 #include "GraphicsEngine/Objects/Vertex.h"

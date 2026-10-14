@@ -1,5 +1,5 @@
-#include "RegisterGameComponents.h"
-#include "SpinComponent.h"
+#include "Components/RegisterCustomComponents.h"
+#include "Components/SpinComponent.h"
 #include "GameFramework/UnrealSceneImporter/UnrealSceneImporter.h"
 #include "GameFramework/World/World.h"
 #include "GameFramework/Scenes/SceneWorldBuilder.h"
@@ -67,8 +67,8 @@ int RunCustomComponentTests()
 	          std::abs(transform.Rotation.w - 0.70710678f) < 0.0001f,
 	      "Transform property values changed during import");
 
-	GameComponentRegistry registry;
-	RegisterGameComponents(registry);
+	CustomComponentRegistry registry;
+	RegisterCustomComponents(registry);
 	registry.Register<SetupOrderComponent>("SetupOrderComponent");
 	SceneData sceneData;
 	ActorRecord actorData;

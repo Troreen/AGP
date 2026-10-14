@@ -255,33 +255,33 @@ exit /b 0</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Game.h" />
-    <ClInclude Include="GameApplication.h" />
+    <ClInclude Include="Runtime\GameApplication.h" />
     <ClInclude Include="GameLog.h" />
-    <ClInclude Include="GameWindowMessages.h" />
-    <ClInclude Include="MeshLibrary.h" />
-    <ClInclude Include="PrimitiveMeshBuilder.h" />
-    <ClInclude Include="SpinComponent.h" />
-    <ClInclude Include="GameComponentRegistry.h" />
-    <ClInclude Include="RegisterGameComponents.h" />
-    <ClInclude Include="resource.h" />
-    <ClInclude Include="targetver.h" />
+    <ClInclude Include="Runtime\GameWindowMessages.h" />
+    <ClInclude Include="Assets\MeshLibrary.h" />
+    <ClInclude Include="Assets\PrimitiveMeshBuilder.h" />
+    <ClInclude Include="Components\SpinComponent.h" />
+    <ClInclude Include="Components\CustomComponentRegistry.h" />
+    <ClInclude Include="Components\RegisterCustomComponents.h" />
+    <ClInclude Include="Resources\resource.h" />
+    <ClInclude Include="Resources\targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Game.cpp" />
-    <ClCompile Include="GameApplication.cpp" />
-    <ClCompile Include="GameWindowMessages.cpp" />
+    <ClCompile Include="Runtime\GameApplication.cpp" />
+    <ClCompile Include="Runtime\GameWindowMessages.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="MeshLibrary.cpp" />
-    <ClCompile Include="PrimitiveMeshBuilder.cpp" />
-    <ClCompile Include="SpinComponent.cpp" />
+    <ClCompile Include="Assets\MeshLibrary.cpp" />
+    <ClCompile Include="Assets\PrimitiveMeshBuilder.cpp" />
+    <ClCompile Include="Components\SpinComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Game.ico" />
-    <None Include="ModelViewer.ico" />
-    <None Include="small.ico" />
+    <None Include="Resources\Game.ico" />
+    <None Include="Resources\ModelViewer.ico" />
+    <None Include="Resources\small.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Game.rc" />
+    <ResourceCompile Include="Resources\Game.rc" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Engine\GameFramework\GameFramework.vcxproj">

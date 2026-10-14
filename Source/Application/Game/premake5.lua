@@ -43,7 +43,7 @@ project "Game"
 		"FreeFlyCameraController.h",
 		"ModelViewer.cpp",
 		"ModelViewer.h",
-		"ModelViewer.rc",
+		"Resources/ModelViewer.rc",
 	}
 
 	libdirs {

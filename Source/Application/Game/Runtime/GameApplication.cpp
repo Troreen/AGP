@@ -1,8 +1,9 @@
 #pragma once
-#include "GameApplication.h"
-#include "GameWindowMessages.h"
+#include "Runtime/GameApplication.h"
+#include "Runtime/GameWindowMessages.h"
 
 #include "Game.h"
+#include "Components/RegisterCustomComponents.h"
 #include "GameFramework/AssetHandling/AssetRegistry.h"
 #include "GameFramework/AssetHandling/FontAsset.h"
 #include "GameFramework/AssetHandling/MaterialAsset.h"
@@ -21,7 +22,7 @@
 #include "GraphicsEngine/TextWidget.h"
 #include "InputMapper.h"
 #include "Maths.hpp"
-#include "PrimitiveMeshBuilder.h"
+#include "Assets/PrimitiveMeshBuilder.h"
 #include "StringHelpers.h"
 #include "Timer.h"
 #include <GraphicsEngine/Drawers/SpriteDrawer.h>
@@ -74,7 +75,10 @@ namespace
 	}
 }
 
-GameApplication::GameApplication() = default;
+GameApplication::GameApplication()
+{
+	RegisterCustomComponents(myComponentRegistry);
+}
 
 GameApplication::~GameApplication()
 {
@@ -565,9 +569,15 @@ void GameApplication::ProcessPendingSceneLoad(Game& aGame)
 		SceneWorldBuilder worldBuilder;
 		worldBuilder.Initialize(ServiceLocator::GetInstance().GetEngineSettings().GetSettingsDirectory() / "MaterialNameConversions.json");
 		candidateWorld = worldBuilder.BuildWorld(scene, assets, myContentRoot / myApplicationSettings.ShaderFolder, myClientSize, fallbacks,
-			[&aGame](Actor& anActor, const CustomComponentData& aCustomComponentData)
+			[this](Actor& anActor, const CustomComponentData& aCustomComponentData)
 			{
-				return aGame.CreateCustomComponent(anActor, aCustomComponentData);
+				CustomComponent* component = myComponentRegistry.Create(anActor, aCustomComponentData);
+				if (!component)
+				{
+					LOG(LogGameFramework, Warning, "Skipping unknown custom component '{}' on actor '{}': {}", aCustomComponentData.Common.Name, anActor.GetName(),
+					    aCustomComponentData.CustomType);
+				}
+				return component;
 			});
 		aGame.ConfigureWorld(*candidateWorld);
 	}

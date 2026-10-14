@@ -6,7 +6,7 @@
 #include <stdexcept>
 
 #include "Game.h"
-#include "GameApplication.h"
+#include "Runtime/GameApplication.h"
 #include "GameFramework/Animation/AnimationManager.h"
 #include "GameFramework/AssetHandling/AssetRegistry.h"
 #include "GameFramework/AudioManager.h"

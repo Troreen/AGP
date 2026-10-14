@@ -1,8 +1,8 @@
-#include "MeshLibrary.h"
+#include "Assets/MeshLibrary.h"
 
 #include "GameLog.h"
 #include "GraphicsEngine/Objects/Vertex.h"
-#include "PrimitiveMeshBuilder.h"
+#include "Assets/PrimitiveMeshBuilder.h"
 #include "Importer.h"
 
 #include <utility>

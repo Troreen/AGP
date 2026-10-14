@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <unordered_map>
 
-class GameComponentRegistry
+class CustomComponentRegistry
 {
 public:
 	using Creator = std::function<CustomComponent*(Actor&, const CustomComponentData&)>;

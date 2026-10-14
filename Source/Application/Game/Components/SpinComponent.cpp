@@ -1,4 +1,4 @@
-#include "SpinComponent.h"
+#include "Components/SpinComponent.h"
 
 #include "GameFramework/Components/SceneComponent.h"
 #include "GameFramework/World/Actor.h"

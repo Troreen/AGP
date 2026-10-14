@@ -1,6 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="Runtime">
+      <UniqueIdentifier>{9AAAB326-BF12-4C05-B99E-2FF1423C2A0E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Components">
+      <UniqueIdentifier>{D9864B77-5CD9-41D4-9617-0777DCD8EE5D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assets">
+      <UniqueIdentifier>{B15CCC85-879A-4AEF-940B-668727298644}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{C7E648A4-5D71-4E7F-85DD-22CAF6841A1A}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Dependencies">
       <UniqueIdentifier>{6C01343A-5864-C3DE-01EA-FB94ED2B8F61}</UniqueIdentifier>
     </Filter>
@@ -12,31 +24,69 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Components\CustomComponentRegistry.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\RegisterCustomComponents.h">
+      <Filter>Components</Filter>
+    </ClInclude>
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameLog.h" />
-    <ClInclude Include="GameApplication.h" />
-    <ClInclude Include="GameWindowMessages.h" />
-    <ClInclude Include="MeshLibrary.h" />
-    <ClInclude Include="PrimitiveMeshBuilder.h" />
-    <ClInclude Include="SpinComponent.h" />
-    <ClInclude Include="resource.h" />
-    <ClInclude Include="targetver.h" />
+    <ClInclude Include="Runtime\GameApplication.h">
+      <Filter>Runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="Runtime\GameWindowMessages.h">
+      <Filter>Runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="Assets\MeshLibrary.h">
+      <Filter>Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="Assets\PrimitiveMeshBuilder.h">
+      <Filter>Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\SpinComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Resources\resource.h">
+      <Filter>Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Resources\targetver.h">
+      <Filter>Resources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Game.cpp" />
-    <ClCompile Include="GameApplication.cpp" />
-    <ClCompile Include="GameWindowMessages.cpp" />
+    <ClCompile Include="Runtime\GameApplication.cpp">
+      <Filter>Runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="Runtime\GameWindowMessages.cpp">
+      <Filter>Runtime</Filter>
+    </ClCompile>
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="MeshLibrary.cpp" />
-    <ClCompile Include="PrimitiveMeshBuilder.cpp" />
-    <ClCompile Include="SpinComponent.cpp" />
+    <ClCompile Include="Assets\MeshLibrary.cpp">
+      <Filter>Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="Assets\PrimitiveMeshBuilder.cpp">
+      <Filter>Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\SpinComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Game.ico" />
-    <None Include="ModelViewer.ico" />
-    <None Include="small.ico" />
+    <None Include="Resources\Game.ico">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Resources\ModelViewer.ico">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Resources\small.ico">
+      <Filter>Resources</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Game.rc" />
+    <ResourceCompile Include="Resources\Game.rc">
+      <Filter>Resources</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

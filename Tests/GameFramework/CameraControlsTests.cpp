@@ -1,5 +1,5 @@
 #include "InputFixture.h"
-#include "SpinComponent.h"
+#include "Components/SpinComponent.h"
 #include "GameFramework/Components/CameraComponent.h"
 #include "GameFramework/Components/DebugCameraController.h"
 #include "GameFramework/World/World.h"

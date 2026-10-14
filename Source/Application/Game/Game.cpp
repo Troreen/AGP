@@ -1,5 +1,5 @@
 #include "Game.h"
-#include "GameApplication.h"
+#include "Runtime/GameApplication.h"
 #include "GameLog.h"
 #include "GameFramework/AudioManager.h"
 #include "GameFramework/AssetHandling/AssetRegistry.h"
@@ -13,29 +13,14 @@
 #include "GameFramework/World/World.h"
 #include <GameFramework/Animation/AnimationManager.h>
 #include "InputMapper.h"
-#include "RegisterGameComponents.h"
 
 #include <memory>
 
 DEFINE_LOG_CATEGORY(LogGame);
 
-Game::Game()
-{
-	RegisterGameComponents(myComponentRegistry);
-}
+Game::Game() = default;
 
 Game::~Game() = default;
-
-CustomComponent* Game::CreateCustomComponent(Actor& anActor, const CustomComponentData& aCustomComponentData) const
-{
-	CustomComponent* component = myComponentRegistry.Create(anActor, aCustomComponentData);
-	if (!component)
-	{
-		GAMELOG(Warning, "Skipping unknown custom component '{}' on actor '{}': {}", aCustomComponentData.Common.Name, anActor.GetName(),
-		        aCustomComponentData.CustomType);
-	}
-	return component;
-}
 
 void Game::Initialize(GameApplication& anApplication)
 {

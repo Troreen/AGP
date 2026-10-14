@@ -8,6 +8,7 @@
 #endif
 #include <Windows.h>
 
+#include "Components/CustomComponentRegistry.h"
 #include "GameFramework/Components/DebugCameraController.h"
 #include "GameFramework/Settings/EngineSettings.h"
 #include "GameFramework/Settings/InputSettingsApplier.h"
@@ -74,6 +75,7 @@ private:
 
 	std::filesystem::path myContentRoot;
 	std::unique_ptr<World> myWorld;
+	CustomComponentRegistry myComponentRegistry;
 	std::optional<std::filesystem::path> myPendingScene;
 	std::optional<std::filesystem::path> myCurrentScene;
 	CommonUtilities::Vector2u myClientSize{};
