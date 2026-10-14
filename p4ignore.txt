@@ -40,7 +40,7 @@ Makefile
 # Keep Bin/Settings available for version control while ignoring build outputs.
 /Bin/Debug/
 /Bin/Release/
-# /Bin/Retail/
+/Bin/Retail/
 /Bin/SimplifiedBaseline/
 /Bin/Tests/
 
@@ -49,6 +49,9 @@ Makefile
 
 # Local test code and fixtures
 /Tests/
+
+# Local documentation and reference material stay outside Perforce submissions.
+/Docs/
 
 .gitignore
 /.git
