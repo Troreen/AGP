@@ -233,7 +233,7 @@ namespace CommonUtilities
         const T eps = static_cast<T>(1e-6);
 
         T tEnter = std::numeric_limits<T>::lowest();
-        T tExit = std::numeric_limits<T>::max();
+		T tExit = (std::numeric_limits<T>::max)();
 
         auto processAxis = [&](T origin, T dir, T minVal, T maxVal) -> bool
             {
@@ -274,7 +274,7 @@ namespace CommonUtilities
         const T eps = static_cast<T>(1e-6);
 
         T tEnter = std::numeric_limits<T>::lowest();
-        T tExit = std::numeric_limits<T>::max();
+		T tExit = (std::numeric_limits<T>::max)();
 
         auto processAxis = [&](T origin, T dir, T minVal, T maxVal) -> bool
             {

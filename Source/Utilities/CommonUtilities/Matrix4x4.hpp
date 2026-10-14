@@ -17,6 +17,8 @@ namespace CommonUtilities
 	class Matrix4x4
 	{
 	public:
+		static const Matrix4x4 Identity;
+
 		// Creates the identity matrix.
 		Matrix4x4();
 
@@ -53,6 +55,8 @@ namespace CommonUtilities
 		// Creates a transposed copy of the matrix.
 		Matrix4x4<T> GetTranspose() const;
 
+		Matrix4x4<T> GetInverse() const;
+
 		// Assumes the matrix is made up of nothing but rotations and translations.
 		Matrix4x4<T> GetFastInverse() const;
 
@@ -60,9 +64,16 @@ namespace CommonUtilities
 		Matrix4x4<T> GetInverseTranspose3x3() const;
 
 		// Static functions for creating rotation matrices.
-		static Matrix4x4 CreateRotationAroundX(const T aAngleInRadians);
-		static Matrix4x4 CreateRotationAroundY(const T aAngleInRadians);
-		static Matrix4x4 CreateRotationAroundZ(const T aAngleInRadians);
+		static Matrix4x4<T> CreateRotationAroundX(const T aAngleInRadians);
+		static Matrix4x4<T> CreateRotationAroundY(const T aAngleInRadians);
+		static Matrix4x4<T> CreateRotationAroundZ(const T aAngleInRadians);
+		static Matrix4x4<T> FromTranslation(const T& aX, const T& aY, const T& aZ);
+		static Matrix4x4<T> FromRotation(const T& aPitch, const T& aYaw, const T& aRoll);
+		static Matrix4x4<T> LookAt(const Vector3<T>& aEyePoint, const Vector3<T>& aTarget, const Vector3<T>& aUp);
+		static Matrix4x4<T> CreateOrthographicProjection(const T& aWidth, const T& aHeight, const T& aNear, const T& aFar);
+		static Matrix4x4<T> CreateOrthographicProjection(const T& aLeft, const T& aRight, const T& aBottom, const T& aTop, const T& aNear, const T& aFar);
+		static Matrix4x4<T> CreatePerspectiveProjection(const T& aWidth, const T& aHeight, const T& aHorizontalFov, const T& aNear, const T& aFar);
+		static Matrix4x4<T> CreateNDCToTextureSpace();
 
 		// Compound assignment operators
 		Matrix4x4& operator+=(const Matrix4x4& aMatrix);
@@ -74,7 +85,11 @@ namespace CommonUtilities
 		bool operator!=(const Matrix4x4& aOther) const { return !(*this == aOther); }
 	
 	private:
-		T myMatrix[4][4];
+		union
+		{
+			T myGridValues[4][4];
+			T myValues[16];
+		};
 	};
 
 	// Free function operators
@@ -102,52 +117,41 @@ namespace CommonUtilities
 
 	// --- Implementation ---
 
+	template<typename T>
+	const Matrix4x4<T> Matrix4x4<T>::Identity = Matrix4x4<T>();
+
 	template <typename T>
-	inline Matrix4x4<T>::Matrix4x4()
+	inline Matrix4x4<T>::Matrix4x4() : myValues()
+    {
+        std::memset(myValues, 0, 16 * sizeof(T));
+        constexpr T one = static_cast<T>(1);
+        myGridValues[0][0] = one;
+        myGridValues[1][1] = one;
+        myGridValues[2][2] = one;
+        myGridValues[3][3] = one;
+    }
+
+	template <typename T>
+	inline Matrix4x4<T>::Matrix4x4(const Matrix3x3<T>& aMatrix) : myValues()
 	{
-		for (int row = 0; row < 4; ++row)
-		{
-			for (int col = 0; col < 4; ++col)
-			{
-				myMatrix[row][col] = (row == col) ? static_cast<T>(1) : static_cast<T>(0);
-			}
-		}
+		std::memset(myValues, 0, 16 * sizeof(T));
+
+		constexpr size_t rowLength = sizeof(T) * 3;
+		std::memcpy(myValues, &aMatrix(1, 1), rowLength);
+		std::memcpy(myValues + 4, &aMatrix(2, 1), rowLength);
+		std::memcpy(myValues + 8, &aMatrix(3, 1), rowLength);
+		myGridValues[3][3] = static_cast<T>(1);
 	}
 
 	template <typename T>
-	inline Matrix4x4<T>::Matrix4x4(const Matrix3x3<T>& aMatrix)
-	{
-		for (int row = 0; row < 3; ++row)
-		{
-			for (int col = 0; col < 3; ++col)
-			{
-				myMatrix[row][col] = aMatrix(row + 1, col + 1);
-			}
-		}
-
-		for (int i = 0; i < 4; ++i)
-		{
-			myMatrix[i][3] = (i == 3) ? static_cast<T>(1) : static_cast<T>(0);
-			myMatrix[3][i] = (i == 3) ? static_cast<T>(1) : static_cast<T>(0);
-		}
-	}
-
-	template <typename T>
-	inline Matrix4x4<T>::Matrix4x4(std::initializer_list<T> aElements)
+	inline Matrix4x4<T>::Matrix4x4(std::initializer_list<T> aElements) : myValues()
 	{
 		if (aElements.size() != 16)
 		{
 			throw std::invalid_argument("Matrix4x4 requires exactly 16 elements");
 		}
 
-		auto it = aElements.begin();
-		for (int r = 0; r < 4; ++r)
-		{
-			for (int c = 0; c < 4; ++c)
-			{
-				myMatrix[r][c] = *it++;
-			}
-		}
+		std::memcpy(myValues, aElements.begin(), sizeof(T) * 16);
 	}
 
 	template <typename T>
@@ -169,7 +173,7 @@ namespace CommonUtilities
 			int c = 0;
 			for (const auto& value : row)
 			{
-				myMatrix[r][c++] = value;
+				myGridValues[r][c++] = value;
 			}
 			++r;
 		}
@@ -183,7 +187,7 @@ namespace CommonUtilities
 			throw std::out_of_range("Matrix4x4 index out of range");
 		}
 
-		return myMatrix[aRow - 1][aColumn - 1];
+		return myGridValues[aRow - 1][aColumn - 1];
 	}
 
 	template <typename T>
@@ -194,7 +198,7 @@ namespace CommonUtilities
 			throw std::out_of_range("Matrix4x4 index out of range");
 		}
 
-		return myMatrix[aRow - 1][aColumn - 1];
+		return myGridValues[aRow - 1][aColumn - 1];
 	}
 
 	template <typename T>
@@ -205,7 +209,7 @@ namespace CommonUtilities
 			throw std::out_of_range("Matrix4x4 row index out of range");
 		}
 
-		return myMatrix[aRow];
+		return myGridValues[aRow];
 	}
 
 	template <typename T>
@@ -216,7 +220,7 @@ namespace CommonUtilities
 			throw std::out_of_range("Matrix4x4 row index out of range");
 		}
 
-		return myMatrix[aRow];
+		return myGridValues[aRow];
 	}
 
 	template <typename T>
@@ -262,58 +266,179 @@ namespace CommonUtilities
 	template <typename T>
 	inline Matrix4x4<T> Matrix4x4<T>::GetTranspose() const
 	{
-		Matrix4x4<T> transposedMatrix;
-		for (int row = 0; row < 4; ++row)
+		return Matrix4x4{
+			myGridValues[0][0], myGridValues[1][0], myGridValues[2][0], myGridValues[3][0],
+			myGridValues[0][1], myGridValues[1][1], myGridValues[2][1], myGridValues[3][1],
+			myGridValues[0][2], myGridValues[1][2], myGridValues[2][2], myGridValues[3][2],
+			myGridValues[0][3], myGridValues[1][3], myGridValues[2][3], myGridValues[3][3]
+		};
+	}
+
+	template<typename T>
+	inline Matrix4x4<T> Matrix4x4<T>::GetInverse() const
+	{
+		T inv[16]{};
+
+		inv[0] = myValues[5] * myValues[10] * myValues[15] -
+			myValues[5] * myValues[11] * myValues[14] -
+			myValues[9] * myValues[6] * myValues[15] +
+			myValues[9] * myValues[7] * myValues[14] +
+			myValues[13] * myValues[6] * myValues[11] -
+			myValues[13] * myValues[7] * myValues[10];
+
+		inv[4] = -myValues[4] * myValues[10] * myValues[15] +
+			myValues[4] * myValues[11] * myValues[14] +
+			myValues[8] * myValues[6] * myValues[15] -
+			myValues[8] * myValues[7] * myValues[14] -
+			myValues[12] * myValues[6] * myValues[11] +
+			myValues[12] * myValues[7] * myValues[10];
+
+		inv[8] = myValues[4] * myValues[9] * myValues[15] -
+			myValues[4] * myValues[11] * myValues[13] -
+			myValues[8] * myValues[5] * myValues[15] +
+			myValues[8] * myValues[7] * myValues[13] +
+			myValues[12] * myValues[5] * myValues[11] -
+			myValues[12] * myValues[7] * myValues[9];
+
+		inv[12] = -myValues[4] * myValues[9] * myValues[14] +
+			myValues[4] * myValues[10] * myValues[13] +
+			myValues[8] * myValues[5] * myValues[14] -
+			myValues[8] * myValues[6] * myValues[13] -
+			myValues[12] * myValues[5] * myValues[10] +
+			myValues[12] * myValues[6] * myValues[9];
+
+		inv[1] = -myValues[1] * myValues[10] * myValues[15] +
+			myValues[1] * myValues[11] * myValues[14] +
+			myValues[9] * myValues[2] * myValues[15] -
+			myValues[9] * myValues[3] * myValues[14] -
+			myValues[13] * myValues[2] * myValues[11] +
+			myValues[13] * myValues[3] * myValues[10];
+
+		inv[5] = myValues[0] * myValues[10] * myValues[15] -
+			myValues[0] * myValues[11] * myValues[14] -
+			myValues[8] * myValues[2] * myValues[15] +
+			myValues[8] * myValues[3] * myValues[14] +
+			myValues[12] * myValues[2] * myValues[11] -
+			myValues[12] * myValues[3] * myValues[10];
+
+		inv[9] = -myValues[0] * myValues[9] * myValues[15] +
+			myValues[0] * myValues[11] * myValues[13] +
+			myValues[8] * myValues[1] * myValues[15] -
+			myValues[8] * myValues[3] * myValues[13] -
+			myValues[12] * myValues[1] * myValues[11] +
+			myValues[12] * myValues[3] * myValues[9];
+
+		inv[13] = myValues[0] * myValues[9] * myValues[14] -
+			myValues[0] * myValues[10] * myValues[13] -
+			myValues[8] * myValues[1] * myValues[14] +
+			myValues[8] * myValues[2] * myValues[13] +
+			myValues[12] * myValues[1] * myValues[10] -
+			myValues[12] * myValues[2] * myValues[9];
+
+		inv[2] = myValues[1] * myValues[6] * myValues[15] -
+			myValues[1] * myValues[7] * myValues[14] -
+			myValues[5] * myValues[2] * myValues[15] +
+			myValues[5] * myValues[3] * myValues[14] +
+			myValues[13] * myValues[2] * myValues[7] -
+			myValues[13] * myValues[3] * myValues[6];
+
+		inv[6] = -myValues[0] * myValues[6] * myValues[15] +
+			myValues[0] * myValues[7] * myValues[14] +
+			myValues[4] * myValues[2] * myValues[15] -
+			myValues[4] * myValues[3] * myValues[14] -
+			myValues[12] * myValues[2] * myValues[7] +
+			myValues[12] * myValues[3] * myValues[6];
+
+		inv[10] = myValues[0] * myValues[5] * myValues[15] -
+			myValues[0] * myValues[7] * myValues[13] -
+			myValues[4] * myValues[1] * myValues[15] +
+			myValues[4] * myValues[3] * myValues[13] +
+			myValues[12] * myValues[1] * myValues[7] -
+			myValues[12] * myValues[3] * myValues[5];
+
+		inv[14] = -myValues[0] * myValues[5] * myValues[14] +
+			myValues[0] * myValues[6] * myValues[13] +
+			myValues[4] * myValues[1] * myValues[14] -
+			myValues[4] * myValues[2] * myValues[13] -
+			myValues[12] * myValues[1] * myValues[6] +
+			myValues[12] * myValues[2] * myValues[5];
+
+		inv[3] = -myValues[1] * myValues[6] * myValues[11] +
+			myValues[1] * myValues[7] * myValues[10] +
+			myValues[5] * myValues[2] * myValues[11] -
+			myValues[5] * myValues[3] * myValues[10] -
+			myValues[9] * myValues[2] * myValues[7] +
+			myValues[9] * myValues[3] * myValues[6];
+
+		inv[7] = myValues[0] * myValues[6] * myValues[11] -
+			myValues[0] * myValues[7] * myValues[10] -
+			myValues[4] * myValues[2] * myValues[11] +
+			myValues[4] * myValues[3] * myValues[10] +
+			myValues[8] * myValues[2] * myValues[7] -
+			myValues[8] * myValues[3] * myValues[6];
+
+		inv[11] = -myValues[0] * myValues[5] * myValues[11] +
+			myValues[0] * myValues[7] * myValues[9] +
+			myValues[4] * myValues[1] * myValues[11] -
+			myValues[4] * myValues[3] * myValues[9] -
+			myValues[8] * myValues[1] * myValues[7] +
+			myValues[8] * myValues[3] * myValues[5];
+
+		inv[15] = myValues[0] * myValues[5] * myValues[10] -
+			myValues[0] * myValues[6] * myValues[9] -
+			myValues[4] * myValues[1] * myValues[10] +
+			myValues[4] * myValues[2] * myValues[9] +
+			myValues[8] * myValues[1] * myValues[6] -
+			myValues[8] * myValues[2] * myValues[5];
+
+		T det = myValues[0] * inv[0] + myValues[1] * inv[4] + myValues[2] * inv[8] + myValues[3] * inv[12];
+
+		//if (det == 0)
+		//	return false;
+
+		det = T(1.0) / det;
+
+		Matrix4x4<T> returnMatrix;
+		for (int i = 0; i < 16; ++i)
 		{
-			for (int col = 0; col < 4; ++col)
-			{
-				transposedMatrix.myMatrix[col][row] = myMatrix[row][col];
-			}
+			returnMatrix.myValues[i] = inv[i] * det;
 		}
-		return transposedMatrix;
+
+		return returnMatrix;
 	}
 
 	template <typename T>
 	inline Matrix4x4<T> Matrix4x4<T>::GetFastInverse() const
 	{
-		Matrix4x4<T> inverseMatrix;
+		Matrix4x4<T> result = {
+			1, 0, 0, 0,
+			0, 1, 0, 0,
+			0, 0, 1, 0,
+			-myGridValues[3][0], -myGridValues[3][1], -myGridValues[3][2], 1
+		};
 
-		// Transpose the rotation part (upper-left 3x3)
-		for (int r = 0; r < 3; ++r)
-		{
-			for (int c = 0; c < 3; ++c)
-			{
-				inverseMatrix(r + 1, c + 1) = myMatrix[c][r];
-			}
-		}
+		result *= {
+			myGridValues[0][0], myGridValues[1][0], myGridValues[2][0], 0,
+				myGridValues[0][1], myGridValues[1][1], myGridValues[2][1], 0,
+				myGridValues[0][2], myGridValues[1][2], myGridValues[2][2], 0,
+				0, 0, 0, 1
+		};
 
-		// Invert translation for row-vector convention (translation is stored in row 4, columns 1..3).
-		Vector4<T> translation(-myMatrix[3][0], -myMatrix[3][1], -myMatrix[3][2], static_cast<T>(1));
-		Vector4<T> invertedTranslation = translation * inverseMatrix;
-
-		inverseMatrix(4, 1) = invertedTranslation.x;
-		inverseMatrix(4, 2) = invertedTranslation.y;
-		inverseMatrix(4, 3) = invertedTranslation.z;
-		inverseMatrix(1, 4) = static_cast<T>(0);
-		inverseMatrix(2, 4) = static_cast<T>(0);
-		inverseMatrix(3, 4) = static_cast<T>(0);
-		inverseMatrix(4, 4) = static_cast<T>(1);
-
-		return inverseMatrix;
+		return result;
 	}
 
 	template <typename T>
 	inline Matrix4x4<T> Matrix4x4<T>::GetInverseTranspose3x3() const
 	{
-		const T m00 = myMatrix[0][0];
-		const T m01 = myMatrix[0][1];
-		const T m02 = myMatrix[0][2];
-		const T m10 = myMatrix[1][0];
-		const T m11 = myMatrix[1][1];
-		const T m12 = myMatrix[1][2];
-		const T m20 = myMatrix[2][0];
-		const T m21 = myMatrix[2][1];
-		const T m22 = myMatrix[2][2];
+		const T m00 = myGridValues[0][0];
+		const T m01 = myGridValues[0][1];
+		const T m02 = myGridValues[0][2];
+		const T m10 = myGridValues[1][0];
+		const T m11 = myGridValues[1][1];
+		const T m12 = myGridValues[1][2];
+		const T m20 = myGridValues[2][0];
+		const T m21 = myGridValues[2][1];
+		const T m22 = myGridValues[2][2];
 
 		const T determinant =
 			m00 * (m11 * m22 - m12 * m21) -
@@ -403,16 +528,122 @@ namespace CommonUtilities
 		return rotationMatrix;
 	}
 
+	template<typename T>
+	inline Matrix4x4<T> Matrix4x4<T>::FromTranslation(const T& aX, const T& aY, const T& aZ)
+	{
+		return {
+			1,  0,  0,  0,
+			0,  1,  0,  0,
+			0,  0,  1,  0,
+			aX, aY, aZ, 1
+		};
+	}
+
+	template<typename T>
+	inline Matrix4x4<T> Matrix4x4<T>::FromRotation(const T& aPitch, const T& aYaw, const T& aRoll)
+	{
+		Matrix4x4<T> toReturn = CreateRotationAroundZ(aRoll);
+		toReturn *= CreateRotationAroundX(aPitch);
+		toReturn *= CreateRotationAroundY(aYaw);
+		return toReturn;
+	}
+
+	template<typename T>
+	inline Matrix4x4<T> Matrix4x4<T>::LookAt(const Vector3<T>& aEyePoint, const Vector3<T>& aTarget, const Vector3<T>& aUp)
+	{
+		Vector3<T> forward = aTarget - aEyePoint;
+		forward.Normalize();
+		Vector3<T> right = aUp.Cross(forward);
+		right.Normalize();
+		const Vector3<T> up = forward.Cross(right);
+
+		Matrix4x4<T> view;
+		view(1, 1) = right.x;
+		view(2, 1) = right.y;
+		view(3, 1) = right.z;
+		view(1, 2) = up.x;
+		view(2, 2) = up.y;
+		view(3, 2) = up.z;
+		view(1, 3) = forward.x;
+		view(2, 3) = forward.y;
+		view(3, 3) = forward.z;
+		view(4, 1) = -aEyePoint.Dot(right);
+		view(4, 2) = -aEyePoint.Dot(up);
+		view(4, 3) = -aEyePoint.Dot(forward);
+		return view;
+	}
+
+	template<typename T>
+	inline Matrix4x4<T> Matrix4x4<T>::CreateOrthographicProjection(const T& aWidth, const T& aHeight, const T& aNear, const T& aFar)
+	{
+		Matrix4x4<T> projection;
+		projection(1, 1) = static_cast<T>(2) / aWidth;
+		projection(2, 2) = static_cast<T>(2) / aHeight;
+		projection(3, 3) = static_cast<T>(1) / (aFar - aNear);
+		projection(4, 3) = aNear / (aNear - aFar);
+
+		return projection;
+	}
+
+	template<typename T>
+	inline Matrix4x4<T> Matrix4x4<T>::CreateOrthographicProjection(const T& aLeft, const T& aRight, const T& aBottom, const T& aTop, const T& aNear, const T& aFar)
+	{
+		Matrix4x4<T> projection;
+		const T width = aRight - aLeft;
+		const T height = aTop - aBottom;
+		const T depth = aFar - aNear;
+		projection(1, 1) = static_cast<T>(2) / width;
+		projection(2, 2) = static_cast<T>(2) / height;
+		projection(3, 3) = static_cast<T>(1) / depth;
+		projection(4, 1) = -(aRight + aLeft) / width;
+		projection(4, 2) = -(aTop + aBottom) / height;
+		projection(4, 3) = aNear / (aNear - aFar);
+		return projection;
+	}
+
+	template<typename T>
+	inline Matrix4x4<T> Matrix4x4<T>::CreatePerspectiveProjection(const T& aWidth, const T& aHeight, const T& aHorizontalFov, const T& aNear, const T& aFar)
+	{
+		const float hFoVRad = static_cast<float>(aHorizontalFov);
+		const float vFoVRad = 2.0f * std::atan(std::tan(hFoVRad * 0.5f) * (static_cast<float>(aHeight) / static_cast<float>(aWidth)));
+
+		const float xScale = 1.0f / std::tanf(hFoVRad * 0.5f);
+		const float yScale = 1.0f / std::tanf(vFoVRad * 0.5f);
+		const T zRange = aFar / (aFar - aNear);
+
+		Matrix4x4<T> projection;
+		projection(1, 1) = xScale;
+		projection(2, 2) = yScale;
+		projection(3, 3) = zRange;
+		projection(3, 4) = static_cast<T>(1);
+		projection(4, 3) = -zRange * aNear;
+		projection(4, 4) = static_cast<T>(0);
+
+		return projection;
+	}
+
+	template<typename T>
+	inline Matrix4x4<T> Matrix4x4<T>::CreateNDCToTextureSpace()
+	{
+		constexpr T zero = static_cast<T>(0);
+		constexpr T pointFive = static_cast<T>(0.5f);
+		constexpr T one = static_cast<T>(1);
+
+		return Matrix4x4<T>{
+			pointFive, zero, zero, zero,
+			zero, -pointFive, zero, zero,
+			zero, zero, one, zero,
+			pointFive, pointFive, zero, one
+		};
+	}
+
 	// Compound operators
 	template <typename T>
 	inline Matrix4x4<T>& Matrix4x4<T>::operator+=(const Matrix4x4<T>& aMatrix)
 	{
-		for (int r = 0; r < 4; ++r)
+		for (size_t i = 0; i < 16; ++i)
 		{
-			for (int c = 0; c < 4; ++c)
-			{
-				myMatrix[r][c] += aMatrix.myMatrix[r][c];
-			}
+			myValues[i] += aMatrix.myValues[i];
 		}
 		return *this;
 	}
@@ -420,12 +651,9 @@ namespace CommonUtilities
 	template <typename T>
 	inline Matrix4x4<T>& Matrix4x4<T>::operator-=(const Matrix4x4<T>& aMatrix)
 	{
-		for (int r = 0; r < 4; ++r)
+		for (size_t i = 0; i < 16; ++i)
 		{
-			for (int c = 0; c < 4; ++c)
-			{
-				myMatrix[r][c] -= aMatrix.myMatrix[r][c];
-			}
+			myValues[i] -= aMatrix.myValues[i];
 		}
 		return *this;
 	}
@@ -433,32 +661,16 @@ namespace CommonUtilities
 	template <typename T>
 	inline Matrix4x4<T>& Matrix4x4<T>::operator*=(const Matrix4x4<T>& aMatrix)
 	{
-		Matrix4x4<T> result;
-		for (int r = 0; r < 4; ++r)
-		{
-			for (int c = 0; c < 4; ++c)
-			{
-				T sum = static_cast<T>(0);
-				for (int k = 0; k < 4; ++k)
-				{
-					sum += myMatrix[r][k] * aMatrix.myMatrix[k][c];
-				}
-				result.myMatrix[r][c] = sum;
-			}
-		}
-		*this = result;
+		*this = (*this) * aMatrix;
 		return *this;
 	}
 
 	template <typename T>
 	inline Matrix4x4<T>& Matrix4x4<T>::operator*=(const T& aScalar)
 	{
-		for (int r = 0; r < 4; ++r)
+		for (size_t i = 0; i < 16; ++i)
 		{
-			for (int c = 0; c < 4; ++c)
-			{
-				myMatrix[r][c] *= aScalar;
-			}
+			myValues[i] *= aScalar;
 		}
 		return *this;
 	}
@@ -466,14 +678,11 @@ namespace CommonUtilities
 	template <typename T>
 	inline bool Matrix4x4<T>::operator==(const Matrix4x4<T>& aOther) const
 	{
-		for (int r = 0; r < 4; ++r)
+		for (size_t i = 0; i < 16; ++i)
 		{
-			for (int c = 0; c < 4; ++c)
+			if (!(myValues[i] == aOther.myValues[i]))
 			{
-				if (myMatrix[r][c] != aOther.myMatrix[r][c])
-				{
-					return false;
-				}
+				return false;
 			}
 		}
 		return true;
@@ -497,21 +706,94 @@ namespace CommonUtilities
 	}
 
 	template <typename T>
-	inline Matrix4x4<T> operator*(const Matrix4x4<T>& aMatrix0, const Matrix4x4<T>& aMatrix1)
+	inline Matrix4x4<T> operator*(const Matrix4x4<T>& aMatrixA, const Matrix4x4<T>& aMatrixB)
 	{
 		Matrix4x4<T> result;
-		for (int r = 1; r <= 4; ++r)
-		{
-			for (int c = 1; c <= 4; ++c)
-			{
-				T sum = static_cast<T>(0);
-				for (int k = 1; k <= 4; ++k)
-				{
-					sum += aMatrix0(r, k) * aMatrix1(k, c);
-				}
-				result(r, c) = sum;
-			}
-		}
+
+		// Row 1
+		result(1, 1) = aMatrixA(1, 1) * aMatrixB(1, 1)
+			+ aMatrixA(1, 2) * aMatrixB(2, 1)
+			+ aMatrixA(1, 3) * aMatrixB(3, 1)
+			+ aMatrixA(1, 4) * aMatrixB(4, 1);
+
+		result(1, 2) = aMatrixA(1, 1) * aMatrixB(1, 2)
+			+ aMatrixA(1, 2) * aMatrixB(2, 2)
+			+ aMatrixA(1, 3) * aMatrixB(3, 2)
+			+ aMatrixA(1, 4) * aMatrixB(4, 2);
+
+		result(1, 3) = aMatrixA(1, 1) * aMatrixB(1, 3)
+			+ aMatrixA(1, 2) * aMatrixB(2, 3)
+			+ aMatrixA(1, 3) * aMatrixB(3, 3)
+			+ aMatrixA(1, 4) * aMatrixB(4, 3);
+
+		result(1, 4) = aMatrixA(1, 1) * aMatrixB(1, 4)
+			+ aMatrixA(1, 2) * aMatrixB(2, 4)
+			+ aMatrixA(1, 3) * aMatrixB(3, 4)
+			+ aMatrixA(1, 4) * aMatrixB(4, 4);
+
+		// Row 2
+		result(2, 1) = aMatrixA(2, 1) * aMatrixB(1, 1)
+			+ aMatrixA(2, 2) * aMatrixB(2, 1)
+			+ aMatrixA(2, 3) * aMatrixB(3, 1)
+			+ aMatrixA(2, 4) * aMatrixB(4, 1);
+
+		result(2, 2) = aMatrixA(2, 1) * aMatrixB(1, 2)
+			+ aMatrixA(2, 2) * aMatrixB(2, 2)
+			+ aMatrixA(2, 3) * aMatrixB(3, 2)
+			+ aMatrixA(2, 4) * aMatrixB(4, 2);
+
+		result(2, 3) = aMatrixA(2, 1) * aMatrixB(1, 3)
+			+ aMatrixA(2, 2) * aMatrixB(2, 3)
+			+ aMatrixA(2, 3) * aMatrixB(3, 3)
+			+ aMatrixA(2, 4) * aMatrixB(4, 3);
+
+		result(2, 4) = aMatrixA(2, 1) * aMatrixB(1, 4)
+			+ aMatrixA(2, 2) * aMatrixB(2, 4)
+			+ aMatrixA(2, 3) * aMatrixB(3, 4)
+			+ aMatrixA(2, 4) * aMatrixB(4, 4);
+
+		// Row 3
+		result(3, 1) = aMatrixA(3, 1) * aMatrixB(1, 1)
+			+ aMatrixA(3, 2) * aMatrixB(2, 1)
+			+ aMatrixA(3, 3) * aMatrixB(3, 1)
+			+ aMatrixA(3, 4) * aMatrixB(4, 1);
+
+		result(3, 2) = aMatrixA(3, 1) * aMatrixB(1, 2)
+			+ aMatrixA(3, 2) * aMatrixB(2, 2)
+			+ aMatrixA(3, 3) * aMatrixB(3, 2)
+			+ aMatrixA(3, 4) * aMatrixB(4, 2);
+
+		result(3, 3) = aMatrixA(3, 1) * aMatrixB(1, 3)
+			+ aMatrixA(3, 2) * aMatrixB(2, 3)
+			+ aMatrixA(3, 3) * aMatrixB(3, 3)
+			+ aMatrixA(3, 4) * aMatrixB(4, 3);
+
+		result(3, 4) = aMatrixA(3, 1) * aMatrixB(1, 4)
+			+ aMatrixA(3, 2) * aMatrixB(2, 4)
+			+ aMatrixA(3, 3) * aMatrixB(3, 4)
+			+ aMatrixA(3, 4) * aMatrixB(4, 4);
+
+		// Row 4
+		result(4, 1) = aMatrixA(4, 1) * aMatrixB(1, 1)
+			+ aMatrixA(4, 2) * aMatrixB(2, 1)
+			+ aMatrixA(4, 3) * aMatrixB(3, 1)
+			+ aMatrixA(4, 4) * aMatrixB(4, 1);
+
+		result(4, 2) = aMatrixA(4, 1) * aMatrixB(1, 2)
+			+ aMatrixA(4, 2) * aMatrixB(2, 2)
+			+ aMatrixA(4, 3) * aMatrixB(3, 2)
+			+ aMatrixA(4, 4) * aMatrixB(4, 2);
+
+		result(4, 3) = aMatrixA(4, 1) * aMatrixB(1, 3)
+			+ aMatrixA(4, 2) * aMatrixB(2, 3)
+			+ aMatrixA(4, 3) * aMatrixB(3, 3)
+			+ aMatrixA(4, 4) * aMatrixB(4, 3);
+
+		result(4, 4) = aMatrixA(4, 1) * aMatrixB(1, 4)
+			+ aMatrixA(4, 2) * aMatrixB(2, 4)
+			+ aMatrixA(4, 3) * aMatrixB(3, 4)
+			+ aMatrixA(4, 4) * aMatrixB(4, 4);
+
 		return result;
 	}
 

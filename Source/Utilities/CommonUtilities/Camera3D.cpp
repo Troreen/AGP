@@ -144,10 +144,7 @@ CommonUtilities::Ray<float> CommonUtilities::Camera3D::ScreenPointToRay(const Ve
 	const float ndcX = (aNormalizedScreenPos.x * 2.0f) - 1.0f;
 	const float ndcY = 1.0f - (aNormalizedScreenPos.y * 2.0f);
 
-	Vector3<float> localDir(
-		ndcX * tanHalfFov * myAspectRatio,
-		ndcY * tanHalfFov,
-		1.0f);
+	Vector3<float> localDir(ndcX * tanHalfFov * myAspectRatio, ndcY * tanHalfFov, 1.0f);
 
 	localDir = localDir.GetNormalized();
 

@@ -38,6 +38,9 @@ namespace CommonUtilities
 		Vector4& operator=(const Vector4<T>&) = default;
 		~Vector4() = default;
 
+		Vector2<T> XY() const;
+		Vector3<T> XYZ() const;
+
 		template<class TargetType>
 		Vector4<TargetType> ToType() const;
 		Tga::Vector4<T> ToTga() const;
@@ -133,6 +136,18 @@ namespace CommonUtilities
 		z(aZ),
 		w(aW)
 	{
+	}
+
+	template<typename T>
+	inline Vector2<T> Vector4<T>::XY() const
+	{
+		return Vector2<T>{x, y};
+	}
+
+	template<typename T>
+	inline Vector3<T> Vector4<T>::XYZ() const
+	{
+		return Vector3<T>{x, y, z};
 	}
 
 	template<typename T>
