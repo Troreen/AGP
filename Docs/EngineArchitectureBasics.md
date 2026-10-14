@@ -105,8 +105,8 @@ can remove theirs, runtime listeners are removed, and only then does
 ServiceLocator delete InputMapper, AudioManager, and AssetRegistry.
 
 GraphicsEngine remains a process singleton. GameApplication initializes and drives it
-but does not own its storage. WorldRenderer is the narrow bridge that reads a live
-World and builds the renderer snapshot.
+but does not own its storage. `World::GenerateRenderSnapshot` gathers borrowed
+camera, mesh, and light Component pointers for `GraphicsEngine::Render`.
 
 ## Following startup to BeginPlay
 

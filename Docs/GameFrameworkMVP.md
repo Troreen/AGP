@@ -20,8 +20,8 @@ Read these files in order:
    SceneData into a candidate World.
 6. `Source/Engine/GameFramework/World/World.h`, `Actor.h`, and `Component.h`:
    live ownership and lifecycle.
-7. `Source/Engine/GameFramework/Rendering/WorldRenderer.cpp`: copy live World
-   values into the renderer snapshot.
+7. `Source/Engine/GameFramework/World/World.cpp`: gather live Components through
+   `GenerateRenderSnapshot` for `GraphicsEngine::Render`.
 
 ## Ownership and roles
 
@@ -94,7 +94,7 @@ messages and pending scene request
 -> Game::Update
 -> World::Update
 -> AudioManager::Update
--> WorldRenderer::Build
+-> World::GenerateRenderSnapshot
 -> render and present
 ```
 

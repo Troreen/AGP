@@ -140,9 +140,9 @@ Reloading builds fresh Actors and Components. It doesn't preserve pointers into 
 
 ## From the World to the screen
 
-Finally, open [WorldRenderer.cpp](../Source/Engine/GameFramework/Rendering/WorldRenderer.cpp). `WorldRenderer::Build` reads the World after gameplay has updated and fills a render snapshot with what needs drawing.
+Finally, open [World.cpp](../Source/Engine/GameFramework/World/World.cpp). `World::GenerateRenderSnapshot` reads the World after gameplay has updated and gathers borrowed Component pointers for rendering.
 
-The camera must have begun play, be enabled, and belong to an active Actor. Rendered Components also need to have begun play and be enabled, with an active owner. `RenderFrame` passes the snapshot to the graphics engine.
+The snapshot uses the World's selected camera. Mesh and light Components are gathered after they have begun play, while enabled and owned by an active Actor. `RenderFrame` adds text and sprites and passes the snapshot to `GraphicsEngine::Render`. The World must remain alive while these borrowed pointers are used.
 
 This is why moving an Actor in a Component's `Update` affects the image drawn that frame: rendering reads the World afterward.
 
