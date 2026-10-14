@@ -1,9 +1,5 @@
 #pragma once
-#include "Vector.hpp"
-
-#include <cstdint>
-#include <string>
-#include <wrl.h>
+#include "CommonUtilities/CommonUtilities.h"
 
 struct ID3D11SamplerState;
 

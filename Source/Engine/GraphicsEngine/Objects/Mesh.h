@@ -1,24 +1,21 @@
 #pragma once
 #include "Buffer.h"
-#include "Matrix.hpp"
-#include "Vector.hpp"
 
-#include <memory>
+#include <CommonUtilities/CommonUtilities.h>
 #include <string>
 #include <string_view>
-#include <unordered_map>
 #include <vector>
+#include <unordered_map>
 
 struct Vertex;
 
-class Skeleton
+struct Skeleton
 {
-public:
 	struct Joint
 	{
 		CU::Matrix4f BindPoseInverse;
 		int Parent = -1;
-		std::vector<int> Children;
+		std::vector<unsigned> Children;
 		std::string Name;
 	};
 
@@ -28,81 +25,49 @@ public:
 	bool IsValid() const;
 };
 
-class Animation
-{
-public:
-	struct Frame
-	{
-		std::unordered_map<std::string, CU::Matrix4f> Transforms;
-	};
-
-	std::vector<Frame> Frames;
-	float Duration = 0.0f;
-	float FramesPerSecond = 0.0f;
-	std::string Name;
-
-	bool IsValid() const;
-};
-
 class Mesh
 {
-	friend class GraphicsEngine;
+    friend class GraphicsEngine;
 
 public:
-	struct Element
-	{
-		// The start position in the Vertex Array / Buffer
-		unsigned VertexOffset = 0;
-		// The start position in the Index Array / Buffer
-		unsigned IndexOffset = 0;
-		// How many vertices this Element is.
-		unsigned NumVertices = 0;
-		// How many indices this Element is.
-		unsigned NumIndices = 0;
-		// The Material Index of this Element.
-		unsigned MaterialIndex = 0;
-	};
+    struct Element 
+    {
+        unsigned VertexOffset = 0;
+        unsigned IndexOffset = 0;
+        unsigned NumVertices = 0;
+        unsigned NumIndices = 0;
+        unsigned MaterialIndex = 0;
+    };
 
-	Mesh();
-	~Mesh();
+    Mesh() = default;
+    ~Mesh() = default;
 
-	Mesh operator=(Mesh& other) = delete;
-	Mesh operator=(Mesh&& other) noexcept = delete;
+    Mesh& operator=(Mesh&) = delete;
+    Mesh& operator=(Mesh&&) noexcept = default;
 
-	void Initialize(std::string_view aName, std::vector<Element>&& aElementList, std::vector<Vertex>&& aVertexList,
-	                std::vector<unsigned>&& aIndexList);
+    void Initialize(std::string_view aName, std::vector<Element>&& aElementList, std::vector<Vertex>&& aVertexList, std::vector<unsigned>&& aIndexList);
 
 	void SetSkeleton(Skeleton&& aSkeleton);
 	const Skeleton* GetSkeleton() const;
 	bool HasSkeleton() const;
 
-	std::string_view GetName() const
-	{
-		return myName;
-	}
-
-	size_t GetNumMaterialSlots() const
-	{
-		return myNumMaterialSlots;
-	}
-
-	const std::vector<Element>& GetElements() const
-	{
-		return myElements;
-	}
+    size_t GetNumMaterialSlots() const { return myNumMaterialSlots; }
 
 private:
-	std::string myName;
-	std::vector<Vertex> myVertices;
-	std::vector<unsigned> myIndices;
-	std::vector<Element> myElements;
-	Skeleton mySkeleton;
+    Skeleton mySkeleton;
 
-	size_t myNumMaterialSlots = 0;
+    std::string myName;
+    std::vector<Vertex> myVertices;
+    std::vector<unsigned> myIndices;
+    std::vector<Element> myElements;
+
+    size_t myNumMaterialSlots = 0;
+
 	CU::Vector3f myLocalBoundsCenter = CU::Vector3f::Zero;
 	float myLocalBoundsRadius = 0.0f;
 	bool myHasLocalBounds = false;
 
-	mutable Buffer myVertexBuffer;
-	mutable Buffer myIndexBuffer;
+    mutable Buffer myVertexBuffer;
+    mutable Buffer myIndexBuffer;
 };
+

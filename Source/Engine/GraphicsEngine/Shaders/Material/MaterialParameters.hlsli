@@ -1,5 +1,5 @@
 #ifndef MATERIAL_PARAMETERS_HLSLI
-#define MATERIAL_PARAMETERS_HLSLI  
+#define MATERIAL_PARAMETERS_HLSLI
 
 struct MaterialVertexParameters
 {
@@ -7,9 +7,6 @@ struct MaterialVertexParameters
     float4 VertexColor;
     float2 UV0;
     float2 UV1;
-    float3 Normal;
-    float3 Tangent;
-    float3 Binormal;
 };
 
 struct MaterialPixelParameters
@@ -18,10 +15,10 @@ struct MaterialPixelParameters
     float4 SurfaceValues;
     float4 WorldPosition;
     float2 UV0;
-    float2 UV1;
     float3 Normal;
     float3 Tangent;
-    float3 Binormal;
+    float3 BiNormal;
+    float4 Emission;
 };
 
-#endif 
+#endif

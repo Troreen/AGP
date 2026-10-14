@@ -213,6 +213,8 @@ bool Material::SetTexture(const std::string& aName, const std::shared_ptr<Textur
 	return SetTexture(slot, aTexture);
 }
 
+#pragma warning(push)
+#pragma warning(disable: 6385)
 bool Material::SetTexture(unsigned aSlot, const std::shared_ptr<Texture>& aTexture)
 {
 	if (aSlot >= MAX_MATERIAL_TEXTURE_COUNT)
@@ -339,6 +341,7 @@ std::shared_ptr<Texture> MaterialInstance::GetTexture(unsigned aSlot) const
 
 	return myTextures[aSlot].value();
 }
+#pragma warning(pop)
 
 bool MaterialInstance::SetRawParameterValue(const MaterialParameterInfo& aParamInfo, const void* aPtr, size_t aPtrSize)
 {

@@ -1,32 +1,64 @@
 #include "GraphicsEngine.pch.h"
 #include "Camera.h"
-#include "Maths.hpp"
 
-Camera::Camera() : myProjection(Matrix4f()), myNearPlane(0), myFarPlane(0), myHorizontalFoV(0), myVerticalFoV(0)
+#include <CommonUtilities/Utility.hpp>
+
+Camera::Camera() :
+	myProjection(CommonUtilities::Matrix4f::Identity),
+	myNearPlane(0), myFarPlane(0),
+	myHorizontalFoV(0), myVerticalFoV(0), myAspectRatio(0)
 {
 }
 
-Camera::Camera(float aHorizontalFoV, float aNearPlane, float aFarPlane, Vector2f aResolution)
+Camera::Camera(float aHorizontalFoV, float aNearPlane, float aFarPlane, float aCascadeSplits[DirectionalLightComponent::ShadowCascadeCount], float aAspectRatio)
 {
-	myNearPlane = aNearPlane;
-	myFarPlane = aFarPlane;
-	myHorizontalFoV = aHorizontalFoV;
+    myNearPlane = aNearPlane;
+    myFarPlane = aFarPlane;
+    myHorizontalFoV = aHorizontalFoV;
+    myAspectRatio = aAspectRatio;
 
-	const float hFoVRad = Maths::DegreesToRadians(aHorizontalFoV);
+    const float hFoVRad = aHorizontalFoV * CommonUtilities::Math::DEGREES_TO_RADIANS<float>;
+    const float vFoVRad = 2 * std::atan(std::tan(hFoVRad * 0.5f) * aAspectRatio);
 
-	const float aspectRatio = static_cast<float>(aResolution.x) / static_cast<float>(aResolution.y);
-	const float vFoVRad = 2.0f * std::atan(std::tan(hFoVRad * 0.5f) / aspectRatio);
+    myVerticalFoV = vFoVRad * CommonUtilities::Math::RADIANS_TO_DEGREES<float>;
 
-	myVerticalFoV = Maths::RadiansToDegrees(vFoVRad);
+    myProjection = CreatePerspectiveFovProjection(hFoVRad, vFoVRad, myNearPlane, myFarPlane);
+    myNearProjection = CreatePerspectiveFovProjection(hFoVRad, vFoVRad, myNearPlane, aCascadeSplits[0]);
+    myMidProjection = CreatePerspectiveFovProjection(hFoVRad, vFoVRad, aCascadeSplits[0], aCascadeSplits[1]);
+    myFarProjection = CreatePerspectiveFovProjection(hFoVRad, vFoVRad, aCascadeSplits[1], aCascadeSplits[2]);
+}
 
-	const float xScale = 1.0f / std::tan(hFoVRad * 0.5f);
-	const float yScale = 1.0f / std::tan(vFoVRad * 0.5f);
-	const float zRange = myFarPlane / (myFarPlane - myNearPlane);
+const CommonUtilities::Matrix4f& Camera::GetProjectionByCascadeIndex(size_t aIndex) const
+{
+    switch (aIndex)
+    {
+        case 0:
+            return myNearProjection;
 
-	myProjection(1, 1) = xScale;
-	myProjection(2, 2) = yScale;
-	myProjection(3, 3) = zRange;
-	myProjection(3, 4) = 1.0f;
-	myProjection(4, 3) = -zRange * myNearPlane;
-	myProjection(4, 4) = 0.0f;
+        case 1:
+            return myMidProjection;
+
+        case 2:
+            return myFarProjection;
+    }
+
+    return myProjection;
+}
+
+CommonUtilities::Matrix4f Camera::CreatePerspectiveFovProjection(float aHorizontalFov, float aVerticalFov, float aNearPlane, float aFarPlane) const
+{
+    CommonUtilities::Matrix4f result;
+
+    const float myXScale = 1 / std::tanf(aHorizontalFov * 0.5f);
+    const float myYScale = 1 / std::tanf(aVerticalFov * 0.5f);
+    const float zRange = aFarPlane / (aFarPlane - aNearPlane);
+
+    result(1, 1) = myXScale;
+    result(2, 2) = myYScale;
+    result(3, 3) = zRange;
+    result(3, 4) = 1.0f;
+    result(4, 3) = -zRange * aNearPlane;
+    result(4, 4) = 0.0f;
+
+    return result;
 }

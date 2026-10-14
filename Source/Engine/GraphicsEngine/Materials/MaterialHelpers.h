@@ -1,9 +1,8 @@
 #pragma once
 // Include your Common Utilities Types here as needed
-#include "Matrix.hpp"
-#include "Vector.hpp"
 #include "MaterialInterface.h"
 
+#include <CommonUtilities/CommonUtilities.h>
 #include <string>
 #include <unordered_map>
 

@@ -1,6 +1,12 @@
 #include "GraphicsEngine.pch.h"
 #include "SpriteDrawer.h"
 
+SpriteDrawer& SpriteDrawer::Get()
+{
+	static SpriteDrawer instance;
+	return instance;
+}
+
 void SpriteDrawer::AddDrawCall(const SpriteDrawCall& aDrawCall)
 {
 	if (aDrawCall.SpriteSharedData == nullptr || aDrawCall.SpriteInstanceData == nullptr)
@@ -20,4 +26,9 @@ void SpriteDrawer::AddDrawCall(const SpriteDrawCall& aDrawCall)
 std::vector<SpriteDrawCall> SpriteDrawer::GetDrawCalls()
 {
 	return myDrawCalls;
+}
+
+void SpriteDrawer::Clear()
+{
+	myDrawCalls.clear();
 }

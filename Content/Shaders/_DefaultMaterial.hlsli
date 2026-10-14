@@ -1,6 +1,6 @@
 #include "MaterialParameters.hlsli"
 
-cbuffer MaterialBuffer : register(b3)
+cbuffer MaterialBuffer : register(b4)
 {
     float4 MB_DiffuseColor = float4(1.0, 1.0, 1.0, 1);
     float MB_Roughness = 0;

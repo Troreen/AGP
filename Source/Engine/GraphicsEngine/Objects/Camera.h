@@ -1,26 +1,30 @@
 #pragma once
 
-#include "Vector.hpp"
-#include "Matrix.hpp"
-
-using namespace CommonUtilities;
+#include <CommonUtilities/Matrix.hpp>
+#include <GameFramework/Components/LightComponent.h>
 
 class Camera
 {
 public:
-	Camera();
-	Camera(float aHorizontalFoV, float aNearPlane, float aFarPlane, Vector2f aResolution);
+    Camera();
 
-	inline const Matrix4f& GetProjection() const
-	{
-		return myProjection;
-	}
+    Camera(float aHorizontalFoV, float aNearPlane, float aFarPlane, float aCascadeSplits[DirectionalLightComponent::ShadowCascadeCount], float aAspectRatio);
+
+    const CommonUtilities::Matrix4f& GetProjection() const { return myProjection; }
+    const CommonUtilities::Matrix4f& GetProjectionByCascadeIndex(size_t aIndex) const;
 
 private:
-	Matrix4f myProjection;
+    CommonUtilities::Matrix4f CreatePerspectiveFovProjection(float aHorizontalFov, float aVerticalFov, float aNearPlane, float aFarPlane) const;
 
-	float myNearPlane;
-	float myFarPlane;
-	float myHorizontalFoV;
-	float myVerticalFoV;
+    float myHorizontalFoV;
+    float myNearPlane;
+    float myFarPlane;
+    float myVerticalFoV;
+	float myAspectRatio;
+
+    CommonUtilities::Matrix4f myProjection;
+    CommonUtilities::Matrix4f myNearProjection;
+    CommonUtilities::Matrix4f myMidProjection;
+    CommonUtilities::Matrix4f myFarProjection;
 };
+

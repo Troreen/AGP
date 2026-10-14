@@ -1,3 +1,6 @@
+#ifndef TONEMAP_HLSLI
+#define TONEMAP_HLSLI
+
 // Pick one of these at a time. Keep in mind that ACES and Lottes need to be
 // corrected after output but no the Unreal one!
 
@@ -32,16 +35,18 @@ float3 Tonemap_Lottes(float3 aColor)
 
 	// Can be precomputed
 	const float b =
-		(-pow(midIn, a) + pow(hdrMax, a) * midOut) /
-		((pow(hdrMax, a * d) - pow(midIn, a * d)) * midOut);
+		(-pow(abs(midIn), a) + pow(abs(hdrMax), a) * midOut) /
+		((pow(abs(hdrMax), a * d) - pow(abs(midIn), a * d)) * midOut);
 	const float c =
-		(pow(hdrMax, a * d) * pow(midIn, a) - pow(hdrMax, a) * pow(midIn, a * d) * midOut) /
-		((pow(hdrMax, a * d) - pow(midIn, a * d)) * midOut);
+		(pow(abs(hdrMax), a * d) * pow(abs(midIn), a) - pow(abs(hdrMax), a) * pow(abs(midIn), a * d) * midOut) /
+		((pow(abs(hdrMax), a * d) - pow(abs(midIn), a * d)) * midOut);
 
-	return pow(aColor, a) / (pow(aColor, a * d) * b + c);
+	return pow(abs(aColor), a) / (pow(abs(aColor), a * d) * b + c);
 }
 
 float3 LinearToGamma(float3 aColor)
 {
 	return pow(abs(aColor), 1.0 / 2.2);
 }
+
+#endif

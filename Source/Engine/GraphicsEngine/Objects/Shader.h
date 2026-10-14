@@ -10,25 +10,14 @@ class Shader
 	friend class RenderHardwareInterface;
 
 public:
-	Shader();
+	Shader(); 
 	~Shader();
 
-	ShaderType GetShaderType() const
-	{
-		return myType;
-	}
-
-	const uint8_t* GetDataPtr() const
-	{
-		return static_cast<uint8_t*>(myBlob->GetBufferPointer());
-	};
-
-	size_t GetDataSize() const
-	{
-		return myBlob->GetBufferSize();
-	}
+	ShaderType GetShaderType() const { return myType; }
+	const uint8_t* GetDataPtr() const { return static_cast<uint8_t*>(myBlob->GetBufferPointer()); }
+	size_t GetDataSize() const { return myBlob->GetBufferSize(); }
 
 private:
 	Microsoft::WRL::ComPtr<ID3DBlob> myBlob;
-	ShaderType myType = ShaderType::Unknown;
+	ShaderType myType = ShaderType::Unknown; 
 };

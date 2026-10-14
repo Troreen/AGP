@@ -36,18 +36,9 @@ enum class ShadingModel : uint8_t
 enum class MaterialParameterType : uint8_t
 {
 	Unknown,
-	Float,
-	Float2,
-	Float3,
-	Float4,
-	Int,
-	Int2,
-	Int3,
-	Int4,
-	Uint,
-	Uint2,
-	Uint3,
-	Uint4,
+	Float, Float2, Float3, Float4,
+	Int, Int2, Int3, Int4,
+	Uint, Uint2, Uint3, Uint4,
 	Bool,
 	Matrix4x4
 };

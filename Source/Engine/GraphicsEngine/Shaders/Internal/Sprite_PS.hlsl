@@ -1,4 +1,4 @@
-#include "../Material/Samplers.hlsli"
+#include "../Material/Lighting.hlsli"
 #include "../Material/Common.hlsli"
 Texture2D SpriteTexture : register(t0);
 

@@ -1,29 +1,27 @@
 #pragma once
-#include <cstddef>
+
+#include "GraphicsEngine/RHI/RHIStructs.h"
+
 #include <string>
 #include <wrl/client.h>
-#include "GraphicsEngine/RHI/RHIStructs.h"
 
 struct ID3D11Buffer;
 
 class Buffer
 {
-	friend class RenderHardwareInterface;
-	friend class GraphicsCommandList;
+    friend class RenderHardwareInterface;
+    friend class GraphicsCommandList;
 
 public:
-	Buffer();
-	~Buffer();
+    Buffer();
+    ~Buffer();
 
-	bool IsValid() const
-	{
-		return myBuffer && myType != BufferType::Unknown;
-	}
+    bool IsValid() const { return myBuffer && myType != BufferType::Unknown; }
 
 private:
-	std::string myName;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> myBuffer;
-	size_t mySize;
-	unsigned myStride;
-	BufferType myType;
+    std::string myName;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> myBuffer;
+    size_t mySize;
+    unsigned myStride;
+    BufferType myType;
 };

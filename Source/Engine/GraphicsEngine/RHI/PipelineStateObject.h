@@ -1,7 +1,10 @@
 #pragma once
-#include "GraphicsEngine/RHI/RHIStructs.h"
-#include "wrl.h"
+
+#include "RHIStructs.h"
+
+#include <string>
 #include <vector>
+#include <wrl.h>
 
 struct PipelineStateDescription
 {
@@ -14,12 +17,14 @@ struct PipelineStateDescription
 	};
 
 	ShaderData VertexShader;
-	ShaderData PixelShader;
 	ShaderData GeometryShader;
+	ShaderData PixelShader;
 
 	std::vector<VertexElementDesc> InputLayoutElements;
 	Topology Topology = Topology::TriangleList;
-	RasterizerStateDescription RasterizerState;
+
+	RasterizerState FillMode = RasterizerState::FillSolid;
+	RasterizerCullMode CullMode = RasterizerCullMode::Back;
 	BlendMode BlendMode = BlendMode::Opaque;
 };
 
@@ -42,5 +47,4 @@ private:
 
 	std::string myName;
 	Topology myTopology;
-	BlendMode myBlendMode;
 };

@@ -3,15 +3,12 @@
 #include "RHIStructs.h"
 #include <d3dcompiler.h>
 #include <d3d11shader.h>
-#include <Ensure.h>
-
-#include <algorithm>
 
 using namespace Microsoft::WRL;
 
-template <> class std::hash<RHIShaderReflectionInfo::ResourceBinding>
+template<>
+struct std::hash<RHIShaderReflectionInfo::ResourceBinding>
 {
-public:
 	size_t operator()(const RHIShaderReflectionInfo::ResourceBinding& x) const noexcept
 	{
 		return std::hash<std::string>{}(x.Name);
@@ -25,65 +22,61 @@ inline bool operator==(const RHIShaderReflectionInfo::ResourceBinding& a, const 
 
 namespace
 {
-	constexpr size_t EstimatedHLSLTypeNameLength = 32;
-
 	std::string DeriveHLSLType(const D3D11_SHADER_TYPE_DESC& aTypeDesc)
 	{
 		std::string typeString;
-		typeString.reserve(EstimatedHLSLTypeNameLength);
+		typeString.reserve(32);
 		switch (aTypeDesc.Type)
 		{
-		case D3D_SVT_FLOAT:
-			typeString += "float";
-			break;
-		case D3D_SVT_UINT:
-			// If it's a single uint it's shown as dword, otherwise uint
-			if (aTypeDesc.Columns > 1 || aTypeDesc.Rows > 1)
-			{
-				typeString += "uint";
-			}
-			else
-			{
-				typeString += "dword";
-			}
-			break;
-		case D3D_SVT_INT:
-			typeString += "int";
-			break;
-		case D3D_SVT_BOOL:
-			typeString += "bool";
-			break;
-		case D3D_SVT_DOUBLE:
-			typeString += "double";
-			break;
-		default:
-			ensure(false);
+			case D3D_SVT_FLOAT:
+				typeString += "float";
+				break;
+			case D3D_SVT_UINT:
+				// If it's a single uint it's shown as dword, otherwise uint
+				if (aTypeDesc.Columns > 1 || aTypeDesc.Rows > 1)
+				{
+					typeString += "uint";
+				}
+				else
+				{
+					typeString += "dword";
+				}
+				break;
+			case D3D_SVT_INT:
+				typeString += "int";
+				break;
+			case D3D_SVT_BOOL:
+				typeString += "bool";
+				break;
+			case D3D_SVT_DOUBLE:
+				typeString += "double";
+				break;
+			default:
+				ensure(false);
 		}
 
 		switch (aTypeDesc.Class)
 		{
-		case D3D_SVC_MATRIX_COLUMNS:
-			typeString += std::format("{}x{}", aTypeDesc.Columns, aTypeDesc.Rows);
-			break;
-		case D3D_SVC_MATRIX_ROWS:
-			typeString += std::format("{}x{}", aTypeDesc.Rows, aTypeDesc.Columns);
-			break;
-		case D3D_SVC_VECTOR:
-			typeString += std::format("{}", aTypeDesc.Columns);
-			break;
-		case D3D_SVC_SCALAR:
-			// Scalar is just a single so no change.
-			break;
-		default:
-			ensure(false);
+			case D3D_SVC_MATRIX_COLUMNS:
+				typeString += std::format("{}x{}", aTypeDesc.Columns, aTypeDesc.Rows);
+				break;
+			case D3D_SVC_MATRIX_ROWS:
+				typeString += std::format("{}x{}", aTypeDesc.Rows, aTypeDesc.Columns);
+				break;
+			case D3D_SVC_VECTOR:
+				typeString += std::format("{}", aTypeDesc.Columns);
+				break;
+			case D3D_SVC_SCALAR:
+				// Scalar is just a single so no change.
+				break;
+			default:
+				ensure(false);
 		}
 
 		return typeString;
 	}
 
-	void ReflectVariable(std::string_view aDomain, ID3D11ShaderReflectionType* aVarType, const D3D11_SHADER_VARIABLE_DESC* aVarDesc,
-	                     const D3D11_SHADER_TYPE_DESC& aVarTypeDesc, RHIShaderReflectionInfo::ConstantBufferInfo& inoutBufferInfo,
-	                     size_t& inoutOffset)
+	void ReflectVariable(std::string_view aDomain, ID3D11ShaderReflectionType* aVarType, const D3D11_SHADER_VARIABLE_DESC* aVarDesc, const D3D11_SHADER_TYPE_DESC& aVarTypeDesc, RHIShaderReflectionInfo::ConstantBufferInfo& inoutBufferInfo, size_t& inoutOffset)
 	{
 		if (aVarTypeDesc.Members > 0)
 		{
@@ -114,9 +107,7 @@ namespace
 		{
 			RHIShaderReflectionInfo::ConstantBufferInfo::MemberInfo memInfo;
 			if (aDomain.starts_with("__"))
-			{
 				return;
-			}
 			memInfo.Name = aDomain;
 			std::string typeString = DeriveHLSLType(aVarTypeDesc);
 			memInfo.Type = typeString.c_str();
@@ -129,8 +120,7 @@ namespace
 			memInfo.Size = static_cast<size_t>(aVarTypeDesc.Rows * aVarTypeDesc.Columns) * sizeof(float);
 			if (aVarDesc && aVarDesc->DefaultValue != nullptr)
 			{
-				const size_t defaultValueSize = (std::min)(static_cast<size_t>(aVarDesc->Size), memInfo.Default.size());
-				memcpy_s(memInfo.Default.data(), memInfo.Default.size(), aVarDesc->DefaultValue, defaultValueSize);
+				memcpy_s(memInfo.Default, 64, aVarDesc->DefaultValue, aVarDesc->Size);
 			}
 			memInfo.Offset = inoutOffset;
 			inoutOffset += memInfo.Size;
@@ -212,8 +202,7 @@ namespace
 bool RHIShaderReflector::Reflect(const uint8_t* aShaderData, size_t aShaderDataSize, RHIShaderReflectionInfo& outReflectionInfo)
 {
 	ComPtr<ID3D11ShaderReflection> shaderRefl;
-	HRESULT reflectResult =
-	    D3DReflect(aShaderData, aShaderDataSize, IID_ID3D11ShaderReflection, reinterpret_cast<void**>(shaderRefl.GetAddressOf()));
+	HRESULT reflectResult = D3DReflect(aShaderData, aShaderDataSize, IID_ID3D11ShaderReflection, reinterpret_cast<void**>(shaderRefl.GetAddressOf()));
 	if (SUCCEEDED(reflectResult))
 	{
 		return ReflectShader(shaderRefl, outReflectionInfo);
@@ -221,3 +210,4 @@ bool RHIShaderReflector::Reflect(const uint8_t* aShaderData, size_t aShaderDataS
 
 	return false;
 }
+

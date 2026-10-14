@@ -15,52 +15,48 @@ struct Vertex
 
 VStoPS main(Vertex aVertex)
 {
-    float4 localPosition = aVertex.Position;
-    float3 localNormal = aVertex.Normal;
-    float3 localTangent = aVertex.Tangent;
-
+    [flatten]
     if (OB_HasSkinning)
     {
         float4x4 skinMatrix = 0;
-        skinMatrix += AB_JointTransforms[aVertex.BoneIDs.x] * aVertex.SkinWeights.x;
-        skinMatrix += AB_JointTransforms[aVertex.BoneIDs.y] * aVertex.SkinWeights.y;
-        skinMatrix += AB_JointTransforms[aVertex.BoneIDs.z] * aVertex.SkinWeights.z;
-        skinMatrix += AB_JointTransforms[aVertex.BoneIDs.w] * aVertex.SkinWeights.w;
-        localPosition = mul(aVertex.Position, skinMatrix);
-
+        
+        skinMatrix += AB_JointTransforms[aVertex.BoneIDs[0]] * aVertex.SkinWeights[0];
+        skinMatrix += AB_JointTransforms[aVertex.BoneIDs[1]] * aVertex.SkinWeights[1];
+        skinMatrix += AB_JointTransforms[aVertex.BoneIDs[2]] * aVertex.SkinWeights[2];
+        skinMatrix += AB_JointTransforms[aVertex.BoneIDs[3]] * aVertex.SkinWeights[3];
+        
+        aVertex.Position = mul(skinMatrix, aVertex.Position);
+        
         const float3x3 skinRotation = (float3x3) skinMatrix;
-        localNormal = mul(localNormal, skinRotation);
-        localTangent = mul(localTangent, skinRotation);
+        aVertex.Normal = mul(skinRotation, aVertex.Normal);
+        aVertex.Tangent = mul(skinRotation, aVertex.Tangent);
     }
-
-    const float4 worldPos = mul(localPosition, OB_World);
-    const float3x3 worldNormalRot = (float3x3) OB_WorldInvT;
-    const float3 worldNormal = normalize(mul(localNormal, worldNormalRot));
-    const float3 worldTangent = normalize(mul(localTangent, worldNormalRot));
-    const float3 worldBinormal = normalize(cross(worldNormal, worldTangent));
-
+    
+    const float4 worldPos = mul(OB_World, aVertex.Position);
+    
     MaterialVertexParameters parameters;
     parameters.WorldPosition = worldPos;
     parameters.VertexColor = aVertex.Color;
     parameters.UV0 = aVertex.UV0;
     parameters.UV1 = aVertex.UV1;
-    parameters.Normal = worldNormal;
-    parameters.Tangent = worldTangent;
-    parameters.Binormal = worldBinormal;
     Material_Vertex(parameters);
-
-    const float4 viewPos = mul(parameters.WorldPosition, FB_View);
-    const float4 clipPos = mul(viewPos, FB_Projection);
-
+    
+    const float4 viewPos = mul(FB_View, parameters.WorldPosition);
+    const float4 clipPos = mul(FB_Projection, viewPos);
+    
     VStoPS result;
     result.Position = clipPos;
+    result.WorldPosition = worldPos;
     result.Color = parameters.VertexColor;
-    result.WorldPosition = parameters.WorldPosition;
     result.UV0 = parameters.UV0;
     result.UV1 = parameters.UV1;
-    result.Normal = parameters.Normal;
-    result.Tangent = parameters.Tangent;
-    result.Binormal = parameters.Binormal;
+    
+    const float3x3 worldNormalRot = (float3x3) OB_WorldInvT;
+    result.Normal = normalize(mul(worldNormalRot, aVertex.Normal));
+    result.Tangent = normalize(mul(worldNormalRot, aVertex.Tangent));
+    result.BiNormal = normalize(cross(result.Normal, result.Tangent));
+    
     result.ViewDepth = viewPos.z;
+    
     return result;
 }

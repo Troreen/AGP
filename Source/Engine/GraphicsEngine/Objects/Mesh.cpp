@@ -1,32 +1,20 @@
 #include "GraphicsEngine.pch.h"
+
+#include "ConstantBuffers/AnimationBuffer.h"
 #include "Mesh.h"
 #include "Vertex.h"
-#include "ConstantBuffers/AnimationBuffer.h"
-
-#include <algorithm>
-#include <limits>
-#include <cmath>
 
 bool Skeleton::IsValid() const
 {
 	return !Joints.empty() && Joints.size() <= AnimationBuffer::MaxJointCount;
 }
 
-bool Animation::IsValid() const
+void Mesh::Initialize(std::string_view aName, std::vector<Element>&& aElementList, std::vector<Vertex>&& aVertexList, std::vector<unsigned>&& aIndexList)
 {
-	return !Frames.empty() && FramesPerSecond > 0.0f;
-}
-
-Mesh::Mesh() = default;
-Mesh::~Mesh() = default;
-
-void Mesh::Initialize(std::string_view aName, std::vector<Element>&& aElementList, std::vector<Vertex>&& aVertexList,
-                      std::vector<unsigned>&& aIndexList)
-{
-	myName = aName;
-	myElements = std::move(aElementList);
-	myVertices = std::move(aVertexList);
-	myIndices = std::move(aIndexList);
+    myName = aName;
+    myElements = std::move(aElementList);
+    myVertices = std::move(aVertexList);
+    myIndices = std::move(aIndexList);
 
 	unsigned highestMaterialIndex = 0;
 	for (const Element& element : myElements)
@@ -43,9 +31,9 @@ void Mesh::Initialize(std::string_view aName, std::vector<Element>&& aElementLis
 	if (myHasLocalBounds)
 	{
 		CU::Vector3f minBounds((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)(),
-		                       (std::numeric_limits<float>::max)());
+			(std::numeric_limits<float>::max)());
 		CU::Vector3f maxBounds((std::numeric_limits<float>::lowest)(), (std::numeric_limits<float>::lowest)(),
-		                       (std::numeric_limits<float>::lowest)());
+			(std::numeric_limits<float>::lowest)());
 
 		for (const Vertex& vertex : myVertices)
 		{

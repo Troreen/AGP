@@ -1,347 +1,152 @@
 #pragma once
 
-#include <cstdint>
-#include <array>
-#include <memory>
-#include <mutex>
-#include <string>
-#include <unordered_map>
-#include <vector>
-#include <wrl.h>
-
-#include "RHI/RenderHardwareInterface.h"
-#include "RHI/GraphicsCommandList.h"
-#include "ConstantBuffers/AnimationBuffer.h"
 #include "ConstantBuffers/FrameBuffer.h"
 #include "ConstantBuffers/LightBuffer.h"
+#include "GraphicsRenderSettings.h"
 #include "Objects/Buffer.h"
-#include "Objects/Texture.h"
 #include "Objects/GBuffer.h"
-#include "Objects/Vertex.h"
 #include "Objects/Mesh.h"
 #include "Objects/Sampler.h"
-
-#include "Camera3D.hpp"
-#include "Matrix.hpp"
-
-#include "RHI/PipelineStateObject.h"
-#include "Materials/MaterialInterface.h"
+#include "Objects/Texture.h"
 #include "Materials/Material.h"
-#include "TextWidget.h"
-#include "Drawers/SpriteDrawer.h"
+#include "Materials/MaterialInterface.h"
+#include "PostProcessing/PostProcessCache.h"
+#include "PostProcessing/PostProcessEffect.h"
+#include "RenderSnapshot.h"
+#include "RHI/PipelineStateObject.h"
+#include "RHI/RenderHardwareInterface.h"
 
-enum class RenderLightType : uint32_t
-{
-	Directional = 0,
-	Point = 1,
-	Spot = 2
-};
+#include <CommonUtilities/CommonUtilities.h>
+#include <unordered_map>
+#include <filesystem>
 
-// Kept available in every build; these are user-facing renderer diagnostics.
-enum class RenderPass : uint8_t
-{
-	Lit,
-	Albedo,
-	Roughness,
-	Metalness,
-	AmbientOcclusionTexture,
-	AmbientOcclusionScreenSpace,
-	NormalsTangentSpace,
-	NormalsWorldSpace,
-	Shadows,
-	Count
-};
-
-enum class Tonemapper : uint32_t
-{
-	None = 0,
-	ACES = 1,
-	Lottes = 2,
-	UnrealEngine = 3
-};
-
-struct RHIShaderReflectionInfo;
 struct MaterialDescription;
+struct RHIShaderReflectionInfo;
 
 enum class ConstantBuffer : uint8_t
 {
 	FrameBuffer,
+	LightBuffer,
 	ObjectBuffer,
 	AnimationBuffer,
 	MaterialBuffer,
-	LightBuffer,
-	PointShadowBuffer,
-		RenderPassDebugBuffer,
-		TonemapBuffer,
+	PostProcessBuffer,
 	TextOverlayBuffer,
 	MAX
 };
+
+typedef struct HWND__ *HWND;
 
 class GraphicsEngine
 {
 public:
 
-	struct SpriteRenderResources
-	{
-		CommonUtilities::Matrix4f Projection;
-		std::vector<Vertex> Vertices;
-		Buffer VertexBuffer;
-	};
-	// --- Snapshot data ---
-	// Transforms are copied; shared mesh/material contents stay stable during rendering.
-	struct RenderItemSnapshot
-	{
-		std::shared_ptr<Mesh> Mesh;
-		std::vector<std::shared_ptr<MaterialInterface>> Materials;
-		CU::Matrix4f World;
-		std::array<CU::Matrix4f, AnimationBuffer::MaxJointCount> JointTransforms = {};
-		CU::Vector3f BoundsCenter = CU::Vector3f::Zero;
-		float BoundsRadius = 0.0f;
-		bool HasSkinning = false;
-		bool HasBounds = false;
-	};
-
-	struct LightSnapshot
-	{
-		RenderLightType Type{};
-		CU::Vector3f Color = CU::Vector3f::One;
-		float Intensity = 0.0f;
-		CU::Vector3f Position = CU::Vector3f::Zero;
-		CU::Vector3f Direction = CU::Vector3f::UnitZ;
-		float InnerCone = 0.0f;
-		float OuterCone = 0.0f;
-		float Radius = 1.0f;
-	};
-
-	struct AmbientLightSnapshot
-	{
-		CU::Vector3f Color = CU::Vector3f::One * 0.1f;
-	};
-
-	struct RenderStats
-	{
-		uint32_t TotalRenderItems = 0;
-		uint32_t VisibleRenderItems = 0;
-		uint32_t OpaqueRenderItems = 0;
-		uint32_t BlendedRenderItems = 0;
-		uint32_t ShadowCasters = 0;
-		uint32_t TotalLights = 0;
-		uint32_t RelevantLights = 0;
-		uint32_t DirectionalShadowPasses = 0;
-		uint32_t SpotShadowPasses = 0;
-		uint32_t PointShadowPasses = 0;
-		uint32_t ShadowCasterDraws = 0;
-		uint32_t CulledShadowCasters = 0;
-		uint32_t ShadowCommandListsRecorded = 0;
-		uint32_t ShadowCommandListsExecuted = 0;
-		uint32_t TextDrawCalls = 0;
-		uint32_t RenderedGlyphs = 0;
-		double SnapshotMilliseconds = 0.0;
-		double ResourcePreparationMilliseconds = 0.0;
-		double ShadowRecordingMilliseconds = 0.0;
-		double ShadowWaitMilliseconds = 0.0;
-		double SceneRecordingMilliseconds = 0.0;
-	};
-
-	class RenderSceneSnapshot
-	{
-	public:
-		RenderStats Stats;
-
-		CU::Camera3D Camera;
-
-		std::vector<RenderItemSnapshot> ShadowCasters;
-		std::vector<size_t> OpaqueRenderItems;
-		std::vector<size_t> BlendedRenderItems;
-		std::vector<LightSnapshot> RelevantLights;
-		std::vector<std::shared_ptr<TextWidget>> ScreenTextItems;
-		std::vector<SpriteDrawCall> ScreenSpriteItems;
-
-		AmbientLightSnapshot AmbientLight;
-
-		bool HasCamera = false;
-
-		void Clear();
-	};
-
-	struct RenderSettings
-	{
-		float DirectionalShadowBiasOffset = 0.0f;
-		float SpotShadowBiasOffset = 0.0f;
-		float PointShadowBiasOffset = 0.0f;
-
-		RenderPass SelectedRenderPass = RenderPass::Lit;
-		Tonemapper SelectedTonemapper = Tonemapper::UnrealEngine;
-
-		static const char* GetRenderPassName(const RenderPass& aRenderPass);
-	};
-
 	static GraphicsEngine& Get();
 
-	// --- Frame rendering ---
 	bool Initialize(HWND aWindowHandle, const std::filesystem::path& aShaderRoot);
-	// Finish culling and routing after integration has copied scene values.
-	void FinalizeRenderSnapshot(RenderSceneSnapshot& snapshot) const;
-	void RenderSnapshot(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot, const RenderSettings& aSettings);
-
-	RenderHardwareInterface::DebugMessages CollectDeviceDiagnostics() const
-	{
-		return myRHI.CollectDeviceDiagnostics();
-	}
-
+	void Render(GraphicsCommandList& inoutCommandList, const RenderSnapshot& aSnapshot, const GraphicsRenderSettings& aSettings);
 	void Present() const;
-	bool Resize(unsigned aWidth, unsigned aHeight);
 
-	// --- Resource and command creation ---
-	template <class T>
+	bool SetEnvironmentMap(const std::filesystem::path& aCubeTexturePath);
+	void AddPostProcessEffect(const std::shared_ptr<PostProcessEffect>& aEffect);
+	void RemovePostProcessEffect(const std::shared_ptr<PostProcessEffect>& aEffect);
+
+	template<class T>
 	bool CreateConstantBuffer(ConstantBuffer aBufferId, std::string_view aName)
 	{
 		return CreateConstantBufferInternal(aBufferId, aName, sizeof(T));
 	}
+
 	bool CreateConstantBuffer(ConstantBuffer aBufferId, std::string_view aName, size_t aBufferSize);
-	template <class T>
-	bool UpdateAndSetConstantBuffer(GraphicsCommandList& inoutCommandList, ConstantBuffer aBufferId, const T& aData, unsigned aSlot, PipeLineStages aStages)
+
+	template<class T>
+	bool UpdateAndSetConstantBuffer(GraphicsCommandList& inputCommandList, ConstantBuffer aBufferId, const T& aData, unsigned aSlot, PipelineStages aStages)
 	{
-		return UpdateAndSetConstantBufferInternal(inoutCommandList, aBufferId, &aData, sizeof(T), aSlot, aStages);
+		return UpdateAndSetConstantBufferInternal(inputCommandList, aBufferId, &aData, sizeof(T), aSlot, aStages);
 	}
 
 	CU::Vector2u GetClientSize() const;
+	bool Resize(unsigned aWidth, unsigned aHeight);
 
 	bool CreateCommandList(std::string_view aName, GraphicsCommandList& outCommandList) const;
 	void ExecuteCommandList(const GraphicsCommandList& aCommandList) const;
-	RenderStats GetLastRenderStats() const;
 
 	bool CreateMaterial(const MaterialDescription& aDescription, Material& outMaterial) const;
+
 	bool LoadTexture(const std::filesystem::path& aPath, Texture& outTexture) const;
-	bool CreateShadowMap(std::string_view aName, unsigned aWidth, unsigned aHeight, Texture& outShadowMap, bool aCubeMap = false) const;
+	bool CreateTexture(std::string_view aName, unsigned aWidth, unsigned aHeight, unsigned aNumMips, ResourceFormat aFormat, ResourceBindFlags aBindFlags, Texture& outTexture) const;
+	bool CreateShadowMap(std::string_view aName, unsigned aWidth, unsigned aHeight, Texture& outShadowMap, bool aCube) const;
 
 private:
-	enum class RenderBlendFilter : uint8_t
-	{
-		All,
-		OpaqueOnly,
-		BlendedOnly
-	};
+	using MeshList = std::vector<MeshComponentBase*>;
 
-	static constexpr unsigned DirectionalCascadeCount = 4;
-	static constexpr unsigned MaxSpotShadowMaps = 4;
-	static constexpr unsigned MaxPointShadowMaps = 4;
+	bool CreateConstantBufferInternal(ConstantBuffer aBufferId, std::string_view aName, size_t aBufferSize);
+	bool UpdateAndSetConstantBufferInternal(GraphicsCommandList& inputCommandList, ConstantBuffer aBufferId, const void* aData, size_t aDataSize, unsigned aSlot, PipelineStages aStages);
+
+	void CreateMaterialTextureSlots(const RHIShaderReflectionInfo& aShaderInfo, Material& inoutMaterial) const;
 
 	GraphicsEngine();
 	~GraphicsEngine();
 
-	bool CreateConstantBufferInternal(ConstantBuffer aBufferId, std::string_view aName, size_t aBufferSize);
-	bool UpdateAndSetConstantBufferInternal(GraphicsCommandList& inoutCommandList, ConstantBuffer aBufferId, const void* aData,
-	                                        size_t aDataSize, unsigned aSlot, PipeLineStages aStages);
+	bool CreatePSOs();
+	void CreateSamplers();
+	bool GenerateLUT();
 
-	void CreateMaterialTextureSlots(const RHIShaderReflectionInfo& aShaderInfo, Material& inoutMaterial) const;
-	bool CreatePBLResources();
-	bool CreateGBufferResources();
-	bool CreateDeferredPipelineStates();
-	bool CreateTextPipelineState();
-	bool CreateBRDFLUT();
-	void BindPBLResources(GraphicsCommandList& inoutCommandList) const;
-	bool CreateShadowResources();
-	bool CreateShadowPipelineStates();
-	bool CreateSpritePipelineState();
-	void UnbindShadowResources(GraphicsCommandList& inoutCommandList) const;
-	void BindShadowResources(GraphicsCommandList& inoutCommandList) const;
-	// --- Frame recording ---
-	struct ShadowRenderJob;
-	using GBufferBindings = std::array<const Texture*, GBuffer::TargetCount>;
+	void ResetPipeline(GraphicsCommandList& inoutCommandList);
+	std::vector<Light> SetupLights(GraphicsCommandList& inoutCommandList, const RenderSnapshot& aSnapshot);
+	void SortMeshObjects(const RenderSnapshot& aSnapshot, const CU::Vector3f& aCameraPosition, MeshList& outOpaqueMeshes, MeshList& outBlendedMeshes);
+	const Texture** CreateDeferredTextures(GraphicsCommandList& inoutCommandList, const FrameBuffer& aFb, const MeshList aOpaqueMeshes);
+	void RunPreLightPostProcess(GraphicsCommandList& inoutCommandList, const Texture** aGBuffer, const GraphicsRenderSettings& aSettings);
+	void RenderDeferredLight(GraphicsCommandList& inoutCommandList, const GraphicsRenderSettings& aSettings, const Texture** aGBuffer,
+		LightBuffer& aLb, const std::vector<Light>& aLights);
+	void RenderBlendedObjects(GraphicsCommandList& inoutCommandList, const MeshList aBlendedMeshes, LightBuffer& aLb, const std::vector<Light>& aLights);
+	void RunPostLightPostProcess(GraphicsCommandList& inoutCommandList, const GraphicsRenderSettings& aSettings);
+	void RunTonemap(GraphicsCommandList& inoutCommandList);
+	void RenderScreenText(GraphicsCommandList& inoutCommandList, const RenderSnapshot& aSnapshot);
+	void RenderScreenSprites(GraphicsCommandList& inoutCommandList, const RenderSnapshot& aSnapshot);
 
-	std::vector<ShadowRenderJob> BuildShadowJobs(const RenderSceneSnapshot& aSnapshot, LightBuffer& lightBuffer,
-		RenderStats& frameStats, const RenderSettings& aSettings);
-	// Joins all workers before playback or serial fallback; jobs and their snapshot remain alive throughout.
-	void RecordAndExecuteShadows(GraphicsCommandList& inoutCommandList, const std::vector<ShadowRenderJob>& shadowJobs,
-	                             RenderStats& frameStats);
-	// Establishes camera constants, samplers, environment and shadow bindings for the scene passes.
-	void PrepareSceneCommands(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot);
-	void RenderGBuffer(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot,
-		const GBufferBindings& gbufferTargets, const RenderSettings& aSettings);
-	void RenderAmbientOcclusion(GraphicsCommandList& inoutCommandList, const GBufferBindings& gbufferTargets);
-	// Includes the linear-light composite to the HDR buffer, within the Deferred Lighting GPU event.
-	void RenderDeferredLighting(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot,
-								   const LightBuffer& lightBuffer, const GBufferBindings& gbufferTargets);
-	void RenderDebugView(GraphicsCommandList& inoutCommandList, const LightBuffer& lightBuffer,
-		const GBufferBindings& gbufferTargets, const RenderSettings& aSettings);
-	void RenderTransparentGeometry(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot,
-	                               const LightBuffer& lightBuffer);
-	void RenderScreenText(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot, RenderStats& frameStats);
-	void RenderScreenSprites(GraphicsCommandList& inoutCommandList, const RenderSceneSnapshot& aSnapshot, RenderHardwareInterface& aRHI);
-	void RenderTonemapping(GraphicsCommandList& inoutCommandList, const RenderSettings& aSettings);
+	const Texture* RenderShadowCascade(GraphicsCommandList& inoutCommandList, const RenderSnapshot& aSnapshot,
+		const DirectionalLightComponent* aDirectionalLight, Light& aLight, size_t aCascadeIndex);
 
-	void PrepareSnapshotRenderResources(const RenderSceneSnapshot& aSnapshot) const;
-	bool PrepareRenderItemResources(const RenderItemSnapshot& aRenderItem) const;
-	bool EnsureShadowCommandListCount(size_t aCount);
-	void StoreLastRenderStats(const RenderStats& aStats);
-	void RenderShadowMap(GraphicsCommandList& inoutCommandList, std::string_view aEventName, Texture& aShadowMap,
-	                     const FrameBuffer& aFrameBuffer, const PipelineStateObject& aOverridePSO, PipeLineStages aOverrideStages,
-	                     const void* aPointShadowBuffer, const std::vector<const RenderItemSnapshot*>& aRenderItems);
-	float GetShadowDepthBias(RenderLightType aType, const RenderSettings& aSettings) const;
+	CU::Matrix4f RenderShadowMap(GraphicsCommandList& inoutCommandList, const RenderSnapshot& aSnapshot,
+		const LightComponent* aLight, unsigned aStartSlot, PipelineStages aFrameBufferStages);
 
 	bool PrepareMeshForRendering(const Mesh& aMesh) const;
-	void RenderMesh(GraphicsCommandList& inoutCommandList, const RenderItemSnapshot& aRenderItem, bool aAllowLazyPrepare = false,
-	                RenderBlendFilter aBlendFilter = RenderBlendFilter::All, bool aUseGBufferPSO = false);
-	bool CreateDefaultTextures();
+	void RenderMesh(GraphicsCommandList& inoutCommandList, const MeshComponentBase* aWorldObject, char aOpaqueOrBlended);
 
-	// --- Frame targets and state ---
+	GBuffer myGBuffer;
+	Buffer mySpriteVertexBuffer;
+
+	std::unique_ptr<PipelineStateObject> myAmbientLightPSO;
+	std::unique_ptr<PipelineStateObject> myDirLightPSO;
+	std::unique_ptr<PipelineStateObject> myPointLightPSO;
+	std::unique_ptr<PipelineStateObject> mySpotLightPSO;
+	std::unique_ptr<PipelineStateObject> myShadowPSO;
+	std::unique_ptr<PipelineStateObject> myTonemapPSO;
+	std::unique_ptr<PipelineStateObject> myTextOverlayPSO;
+	std::unique_ptr<PipelineStateObject> mySpritePSO;
+
 	RenderHardwareInterface myRHI;
-
 	Texture myBackBuffer;
 	Texture myDepthBuffer;
-	GBuffer myGBuffer;
-	// Kept outside the production GBuffer; populated only for the tangent-normal debug view.
-	Texture myTangentNormalDebugTexture; // TODO: If not used for anything other than debug, remove and move logic to GBuffer_PS.hlsl
-	Texture myScreenSpaceAOTexture;
 	Texture myHDRBuffer;
+	Texture myLut;
+	Texture myEnvironmentCubeTexture;
+
+	std::shared_ptr<Texture> myPlainWhiteTexture;
+	std::shared_ptr<Texture> myFlatNormalTexture;
+	std::shared_ptr<Texture> myDefaultORMTexture;
+	std::shared_ptr<Texture> myNoEmissionTexture;
 
 	std::unordered_map<ConstantBuffer, Buffer> myConstantBuffers;
-	bool myConstantBuffersFrozen = false;
-	bool myCullingEnabled = true;
-	bool myParallelShadowsEnabled = true;
-
-	PipelineStateObject myDefaultSurfacePSO;
-	PipelineStateObject myShadowOverridePSO;
-	PipelineStateObject myLocalShadowOverridePSO;
-	PipelineStateObject myPointShadowOverridePSO;
-	PipelineStateObject myDeferredAmbientPSO;
-	PipelineStateObject myDeferredDirectionalPSO;
-	PipelineStateObject myDeferredPointPSO;
-	PipelineStateObject myDeferredSpotPSO;
-	PipelineStateObject myTonemapPSO;
-	PipelineStateObject myScreenSpaceAOPSO;
-	PipelineStateObject myRenderPassDebugPSO;
-	PipelineStateObject myTextOverlayPSO;
-
-	//Sprites
-	PipelineStateObject mySpritePSO;
-	SpriteRenderResources mySpriteRenderResources;
 
 	std::filesystem::path myShaderRoot;
 	std::unordered_map<MaterialDomain, std::filesystem::path> myMaterialDomainShaders;
 	std::unordered_map<ShadingModel, std::filesystem::path> myMaterialShadingModelShaders;
 
 	std::vector<Sampler> mySamplers;
-	std::vector<const Sampler*> mySamplerBindings;
-
-	// --- Shadow resources ---
-	std::vector<GraphicsCommandList> myShadowCommandLists;
-	std::array<Texture, DirectionalCascadeCount> myDirectionalShadowMaps;
-	std::array<Texture, MaxSpotShadowMaps> mySpotShadowMaps;
-	std::array<Texture, MaxPointShadowMaps> myPointShadowMaps;
-
-	// --- Lighting and material resources ---
-	Texture myEnvironmentCubeTexture;
-	Texture myBRDFLUTTexture;
-	std::shared_ptr<Texture> myDefaultAlbedoTexture;
-	std::shared_ptr<Texture> myDefaultNormalTexture;
-	std::shared_ptr<Texture> myDefaultMaterialTexture;
-
+	std::vector<std::shared_ptr<PostProcessEffect>> myPostProcessEffects;
+	PostProcessCache myPostProcessCache;
+	
 	Material myDefaultMaterial;
-
-	// --- Synchronized diagnostics and tuning ---
-	mutable std::mutex myShadowTuningMutex;
-	mutable std::mutex myRenderStatsMutex;
-	RenderStats myLastRenderStats;
 };

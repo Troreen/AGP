@@ -1,35 +1,27 @@
 #pragma once
 
-#include <array>
-
 #include "Texture.h"
+
+#include <array>
+#include <string>
 
 class GBuffer
 {
+	friend class RenderHardwareInterface;
+	friend class GraphicsCommandList;
+
 public:
-	static constexpr size_t TargetCount = 5;
+	GBuffer() = default;
+	~GBuffer() = default;
 
-	// The compact deferred layout intentionally stores only the calculated pixel
-	// normal. Interpolated vertex normals are not needed by deferred lighting.
-	enum Target : size_t
-	{
-		Albedo,
-		PixelNormal,
-		Surface,
-		Emission,
-		WorldPosition
-	};
-
-	const std::array<Texture, TargetCount>& GetTextures() const
-	{
-		return myTextures;
-	}
-
-	std::array<Texture, TargetCount>& GetTextures()
-	{
-		return myTextures;
-	}
+	// Pointer to the first texture in myTextures.
+	const Texture* GetTextures() const { return myTextures.data(); }
+	const Texture** GetTexturePointers() { return myTexturePointers.data(); }
+	// Number of textures available.
+	static constexpr unsigned NumGBufferTargets = 5;
 
 private:
-	std::array<Texture, TargetCount> myTextures;
+	std::array<Texture, NumGBufferTargets> myTextures;
+	std::array<const Texture*, NumGBufferTargets> myTexturePointers{};
+	std::string myName;
 };

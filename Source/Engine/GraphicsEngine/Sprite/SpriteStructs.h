@@ -1,6 +1,9 @@
 #pragma once
+
 #include <Vector.hpp>
-#include "../Objects/Texture.h"
+
+class MaterialInterface;
+class Texture;
 
 struct SpriteSharedData
 {
@@ -19,4 +22,11 @@ struct SpriteInstanceData
 	float Depth = 0;
 
 	bool IsVisible = true;
+};
+
+struct SpriteDrawCall
+{
+	const SpriteInstanceData* SpriteInstanceData = nullptr;
+	const SpriteSharedData* SpriteSharedData = nullptr;
+	const MaterialInterface* Material;
 };
