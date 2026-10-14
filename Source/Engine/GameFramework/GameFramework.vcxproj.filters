@@ -81,6 +81,9 @@
     <ClInclude Include="AssetHandling\MeshAsset.h">
       <Filter>AssetHandling</Filter>
     </ClInclude>
+    <ClInclude Include="AssetHandling\NavMeshAsset.h">
+      <Filter>AssetHandling</Filter>
+    </ClInclude>
     <ClInclude Include="AssetHandling\TextureAsset.h">
       <Filter>AssetHandling</Filter>
     </ClInclude>
@@ -205,6 +208,9 @@
       <Filter>AssetHandling</Filter>
     </ClCompile>
     <ClCompile Include="AssetHandling\MeshAsset.cpp">
+      <Filter>AssetHandling</Filter>
+    </ClCompile>
+    <ClCompile Include="AssetHandling\NavMeshAsset.cpp">
       <Filter>AssetHandling</Filter>
     </ClCompile>
     <ClCompile Include="AssetHandling\TextureAsset.cpp">

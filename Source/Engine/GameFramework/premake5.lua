@@ -34,6 +34,7 @@ project "GameFramework"
 	}
 
 	links {
+		"AISystems",
 		"GraphicsEngine",
 		"CommonUtilities",
 		"Logger",

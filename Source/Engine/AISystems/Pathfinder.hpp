@@ -44,6 +44,7 @@ struct Pathfinder<Type>::GraphNode
 	};
 
 	CommonUtilities::Vector3<Type> position;
+	CommonUtilities::Vector3<Type> halfPortalVec;
 	std::vector<Neighbor> neighbors;
 };
 

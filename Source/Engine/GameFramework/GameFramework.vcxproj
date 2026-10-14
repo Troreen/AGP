@@ -189,6 +189,7 @@
     <ClInclude Include="AssetHandling\FontAsset.h" />
     <ClInclude Include="AssetHandling\MaterialAsset.h" />
     <ClInclude Include="AssetHandling\MeshAsset.h" />
+    <ClInclude Include="AssetHandling\NavMeshAsset.h" />
     <ClInclude Include="AssetHandling\TextureAsset.h" />
     <ClInclude Include="AudioManager.h" />
     <ClInclude Include="Components\AnimatorComponent.h" />
@@ -237,6 +238,7 @@
     <ClCompile Include="AssetHandling\FontAsset.cpp" />
     <ClCompile Include="AssetHandling\MaterialAsset.cpp" />
     <ClCompile Include="AssetHandling\MeshAsset.cpp" />
+    <ClCompile Include="AssetHandling\NavMeshAsset.cpp" />
     <ClCompile Include="AssetHandling\TextureAsset.cpp" />
     <ClCompile Include="AudioManager.cpp" />
     <ClCompile Include="Components\AnimatorComponent.cpp" />
@@ -269,6 +271,9 @@
     <ClCompile Include="World\World.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AISystems\AISystems.vcxproj">
+      <Project>{C7303FFC-339B-F372-7CD9-A418E882D1C7}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\GraphicsEngine\GraphicsEngine.vcxproj">
       <Project>{AC8E76BE-985C-6AC4-81F0-DAEA6D5D4629}</Project>
     </ProjectReference>
