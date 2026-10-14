@@ -10,13 +10,13 @@ Read these files in order:
 
 1. `Source/Application/Game/Main.cpp`: construct Game and GameApplication and call
    `application.Run(game)`.
-2. `Source/Application/Game/GameApplication.h/.cpp`: own startup, scene transitions,
+2. `Source/Application/Game/Runtime/GameApplication.h/.cpp`: own startup, scene transitions,
    the World, the frame loop, Escape handling, and shutdown.
 3. `Source/Application/Game/Game.h/.cpp`: choose the initial scene and add
    project behavior.
 4. `Source/Engine/GameFramework/Scenes/SceneData.h`: the importer-to-World data
    boundary.
-5. `Source/Engine/GameFramework/Scenes/WorldFromSceneData.h/.cpp`: convert
+5. `Source/Engine/GameFramework/Scenes/SceneWorldBuilder.h/.cpp`: convert
    SceneData into a candidate World.
 6. `Source/Engine/GameFramework/World/World.h`, `Actor.h`, and `Component.h`:
    live ownership and lifecycle.
@@ -116,7 +116,7 @@ SceneId
 -> GameApplication selects the scene file
 -> UnrealSceneImporter
 -> SceneData
--> BuildWorldFromSceneData
+-> BuildWorld
 -> candidate World
 -> Game::ConfigureWorld
 -> replace World

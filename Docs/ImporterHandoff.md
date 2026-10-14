@@ -15,13 +15,13 @@ GameApplication captures SceneId
 -> GameApplication selects the exported scene file
 -> UnrealSceneImporter converts the source file
 -> SceneData value
--> BuildWorldFromSceneData(SceneData, AssetRegistry, client size, fallback assets)
+-> BuildWorld(SceneData, AssetRegistry, client size, fallback assets)
 -> candidate World
 ```
 
 SceneId-to-file mapping and fallback asset selection live in GameApplication
 because they are project policy.
-`BuildWorldFromSceneData` lives in GameFramework because it maps the engine's
+`BuildWorld` lives in GameFramework because it maps the engine's
 fixed SceneData variants to live engine Components.
 
 The importer should report useful diagnostics and return plain data. Empty

@@ -47,12 +47,12 @@ Primary code locations to review:
 | Area | Location |
 | --- | --- |
 | Game configuration and behavior | `Source/Application/Game/Game.h` and `Game.cpp` |
-| Runtime startup, scene loading, and frame loop | `Source/Application/Game/GameApplication.h` and `GameApplication.cpp` |
-| Existing rotation example | `Source/Application/Game/SpinComponent.h` and `SpinComponent.cpp` |
+| Runtime startup, scene loading, and frame loop | `Source/Application/Game/Runtime/GameApplication.h` and `GameApplication.cpp` |
+| Existing rotation example | `Source/Application/Game/Components/SpinComponent.h` and `SpinComponent.cpp` |
 | Actor, component, and transform APIs | `Source/Engine/GameFramework/World/` |
 | Existing engine components | `Source/Engine/GameFramework/Components/` |
 | Scene interchange data | `Source/Engine/GameFramework/Scenes/SceneData.h` |
-| Runtime world construction | `Source/Engine/GameFramework/Scenes/WorldFromSceneData.h` and `.cpp` |
+| Runtime world construction | `Source/Engine/GameFramework/Scenes/SceneWorldBuilder.h` and `.cpp` |
 | Unreal source parsing and conversion | `Source/Engine/GameFramework/UnrealSceneImporter/` |
 | Game project file inclusion | `Source/Application/Game/premake5.lua` |
 | Existing framework and application checks | `Tests/GameFramework/` |

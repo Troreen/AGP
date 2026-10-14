@@ -4,7 +4,7 @@
 
 `GameApplication` runs the application: the window, scene loading, frame timing, and rendering. `Game` is where our game code starts. Most gameplay will live in Components attached to Actors.
 
-Open [GameApplication.cpp](../Source/Application/Game/GameApplication.cpp) and find `RunSession`. After the window, services, and input are ready, it calls `InitializeGameSession`, then `RunMainLoop`.
+Open [GameApplication.cpp](../Source/Application/Game/Runtime/GameApplication.cpp) and find `RunSession`. After the window, services, and input are ready, it calls `InitializeGameSession`, then `RunMainLoop`.
 
 ## How a level becomes a World
 
@@ -15,12 +15,12 @@ Next, open `ProcessPendingSceneLoad`. Follow these calls:
 1. Take the pending scene path and clear the request.
 2. Find the file under `contentRoot / SceneFolder / requestedScene`.
 3. Read it with `UnrealSceneImporter`, which returns `SceneData`.
-4. Use `BuildWorldFromSceneData` to create a new World with Actors and Components.
+4. Use `BuildWorld` to create a new World with Actors and Components.
 5. Call `Game::ConfigureWorld` on that new World.
 6. Clear the old World and replace it with the new one.
 7. Add and select a debug camera if there isn't an active camera, then call `World::BeginPlay`.
 
-The importer reads data; the builder turns that data into objects. Open [SceneData.h](../Source/Engine/GameFramework/Scenes/SceneData.h) to see the records, then [WorldFromSceneData.cpp](../Source/Engine/GameFramework/Scenes/WorldFromSceneData.cpp) to see Actor spawning and `CreateComponent`. A mesh record becomes a mesh Component, a light record becomes a light Component, and so on.
+The importer reads data; the builder turns that data into objects. Open [SceneData.h](../Source/Engine/GameFramework/Scenes/SceneData.h) to see the records, then [SceneWorldBuilder.cpp](../Source/Engine/GameFramework/Scenes/SceneWorldBuilder.cpp) to see Actor spawning and `CreateComponent`. A mesh record becomes a mesh Component, a light record becomes a light Component, and so on.
 
 We build the new World before replacing the old one. For later loads, ordinary import or construction errors are logged and leave the old World running. That recovery also covers `ConfigureWorld`. It doesn't cover allocation failures, or camera setup and `BeginPlay` after the replacement.
 
@@ -59,7 +59,7 @@ The level supplies the Actor and its mesh. We find that Actor by its exported na
 
 `SpinComponent` is the C++ type. `WalkthroughRotator` is the name of this particular Component on the Actor. Component names must be nonempty and unique on their Actor.
 
-Now open [SpinComponent.h](../Source/Application/Game/SpinComponent.h) and [SpinComponent.cpp](../Source/Application/Game/SpinComponent.cpp):
+Now open [SpinComponent.h](../Source/Application/Game/Components/SpinComponent.h) and [SpinComponent.cpp](../Source/Application/Game/Components/SpinComponent.cpp):
 
 - `BeginPlay` reads the target's existing rotation, so it starts from the orientation in the level.
 - `Update` adds `degreesPerSecond * deltaTime` to the yaw and writes the rotation back. At 45 degrees per second, a 0.1-second update adds 4.5 degrees.

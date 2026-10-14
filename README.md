@@ -50,7 +50,7 @@ its working directory. Run `Bin/Debug/Game.exe` or
 `application.Run(game)`. Game selects the initial scene and registers its gameplay
 controls. `GameApplication` owns the window, frame loop, current World, and scene
 requests. It selects an exported scene file, asks `UnrealSceneImporter` for
-`SceneData`, then passes that data to `BuildWorldFromSceneData`.
+`SceneData`, then passes that data to `BuildWorld`.
 Start with [the MVP guide](Docs/GameFrameworkMVP.md), then Game.cpp and
 the component files in `Source/Application/Game`. Real Perforce scene integration requires the team inputs
 listed in [the importer handoff](Docs/ImporterHandoff.md).

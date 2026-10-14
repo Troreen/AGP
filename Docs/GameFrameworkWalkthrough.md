@@ -14,13 +14,13 @@ Allow about 15–20 minutes for the tour, with questions and demonstrations taki
 
 | Stop | File | Function or declaration |
 | --- | --- | --- |
-| 1 | [Main.cpp](../Source/Application/Game/Main.cpp), [GameApplication.cpp](../Source/Application/Game/GameApplication.cpp) | wWinMain, RunSession, RunMainLoop |
+| 1 | [Main.cpp](../Source/Application/Game/Main.cpp), [GameApplication.cpp](../Source/Application/Game/Runtime/GameApplication.cpp) | wWinMain, RunSession, RunMainLoop |
 | 2 | [Game.cpp](../Source/Application/Game/Game.cpp) | Game::ConfigureWorld |
-| 3 | [SpinComponent.h](../Source/Application/Game/SpinComponent.h) | SpinComponent |
+| 3 | [SpinComponent.h](../Source/Application/Game/Components/SpinComponent.h) | SpinComponent |
 | 4 | [Actor.h](../Source/Engine/GameFramework/World/Actor.h), [Component.h](../Source/Engine/GameFramework/World/Component.h) | Attachment, lookup, ownership |
-| 5 | [SpinComponent.cpp](../Source/Application/Game/SpinComponent.cpp) | BeginPlay, FindTargetTransform, Update |
+| 5 | [SpinComponent.cpp](../Source/Application/Game/Components/SpinComponent.cpp) | BeginPlay, FindTargetTransform, Update |
 | 6 | [World.cpp](../Source/Engine/GameFramework/World/World.cpp) | BeginPlay, Update |
-| 7 | [GameApplication.cpp](../Source/Application/Game/GameApplication.cpp), [WorldFromSceneData.cpp](../Source/Engine/GameFramework/Scenes/WorldFromSceneData.cpp) | Scene construction and activation |
+| 7 | [GameApplication.cpp](../Source/Application/Game/Runtime/GameApplication.cpp), [SceneWorldBuilder.cpp](../Source/Engine/GameFramework/Scenes/SceneWorldBuilder.cpp) | Scene construction and activation |
 | 8 | Game folders and engine components | Integration choices for team features |
 | 9 | [UnrealSceneImporter.cpp](../Source/Engine/GameFramework/UnrealSceneImporter/UnrealSceneImporter.cpp), [SceneData.h](../Source/Engine/GameFramework/Scenes/SceneData.h) | Unfinished custom-component path |
 
@@ -185,7 +185,7 @@ Skip the unrelated animation-demo controls below the component loop.
 
 **Open:** GameApplication.cpp → ProcessPendingSceneLoad.
 
-**Show:** import, BuildWorldFromSceneData, aGame.ConfigureWorld(*candidateWorld), replacement of myWorld, and myWorld->BeginPlay().
+**Show:** import, BuildWorld, aGame.ConfigureWorld(*candidateWorld), replacement of myWorld, and myWorld->BeginPlay().
 
 Explain the sequence while pointing to the calls:
 
@@ -195,7 +195,7 @@ Explain the sequence while pointing to the calls:
         → application replaces the old World
         → camera fallback if needed → World.BeginPlay
 
-**Briefly open:** WorldFromSceneData.cpp → BuildWorldFromSceneData and CreateComponent. Show actor spawning and one built-in mapping, such as StaticMeshData to StaticMeshComponent. Skip the material pipeline.
+**Briefly open:** SceneWorldBuilder.cpp → BuildWorld and CreateComponent. Show actor spawning and one built-in mapping, such as StaticMeshData to StaticMeshComponent. Skip the material pipeline.
 
 **Explain:** importer converts data, builder creates engine objects, Game supplies project behavior. That is why our attachment belongs in ConfigureWorld today.
 

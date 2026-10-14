@@ -10,7 +10,7 @@ Main constructs Game and GameApplication
     -> GameApplication starts the window and engine services
     -> Game requests the initial SceneId
     -> GameApplication selects a file; UnrealSceneImporter creates SceneData
-    -> BuildWorldFromSceneData builds a candidate World
+    -> BuildWorld builds a candidate World
     -> Game adds project-specific behavior
     -> GameApplication commits the World and calls BeginPlay
     -> the frame loop updates Game, World, audio, and rendering
@@ -61,7 +61,7 @@ GameApplication maps the game-local `SceneId` to an exported JSON file and calls
 `UnrealSceneImporter`. It supplies fallback assets when building the World.
 
 The result is `SceneData`: plain Actor and Component records, not live objects.
-`BuildWorldFromSceneData` turns those records into a candidate World. Keeping this
+`BuildWorld` turns those records into a candidate World. Keeping this
 data boundary lets import errors fail before the current World is touched.
 
 If a later candidate cannot be built or configured, the current World stays live.
@@ -121,7 +121,7 @@ World and builds the renderer snapshot.
    Blockout scene.
 6. The runtime captures that request, selects its exported file, and calls
    `UnrealSceneImporter` to produce SceneData.
-7. `BuildWorldFromSceneData` creates Actors and Components in a candidate World.
+7. `BuildWorld` creates Actors and Components in a candidate World.
 8. `Game::ConfigureWorld` adds project-only behavior.
 9. GameApplication commits the candidate, adds a debug camera if the scene has no
    active camera, and calls `World::BeginPlay`.

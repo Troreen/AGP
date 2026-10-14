@@ -12,7 +12,7 @@
 
 |World.h|- Nuvarande, aktiva scenen<br />- Kan hitta en actor<br />- Kan spawna actors i pågående scen|\* Camera ptr<br />\* Ptr till alla Actors||
 |-|-|-|-|
-|Actor.h|- Varje grej i världen|\* World ptr, vilken värld actorn tillhör<br />\* Tranform<br />\* Componenter|!! Hårdkodade actors skapas i Game::ConfigureWorld men spawnas med World.SpawnActor()<br />!! Scenskapade actors skapas i WorldFromSceneConverter::BuildWorldFromSceneData() i samband med att World skapas<br />!! DebugCamera spawnar sin egen actor|
+|Actor.h|- Varje grej i världen|\* World ptr, vilken värld actorn tillhör<br />\* Tranform<br />\* Componenter|!! Hårdkodade actors skapas i Game::ConfigureWorld men spawnas med World.SpawnActor()<br />!! Scenskapade actors skapas i SceneWorldBuilder::BuildWorld() i samband med att World skapas<br />!! DebugCamera spawnar sin egen actor|
 |Component.h||\* Actor ptr, ägare<br />\* Name<br />\* Tags||
 |SceneComponent.h||% Component<br />\* Transform, en local offset av sin actor||
 |MeshComponentBase.h||% SceneComponent<br />\* Mesh ptr, något från meshLibrary<br />\* Lista av materials (MaterialAsset)||
