@@ -25,6 +25,7 @@ project "GraphicsEngine"
         dirs.utilities,
         dirs.utilities .. "CommonUtilities",
         dirs.dependencies .. "**" .. "include",
+		"$(IntDir)PrecompiledShaders",
 	}
 
 	files {

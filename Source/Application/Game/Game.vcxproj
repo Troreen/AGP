@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -128,9 +128,7 @@ if not exist "$(SolutionDir)Dependencies\FMod\Desktop\Master.strings.bank" (echo
 if exist "$(OutDir)Content" attrib -R "$(OutDir)Content\*" /S /D &gt;nul
 robocopy "$(SolutionDir)Content" "$(OutDir)Content" /MIR /COPY:DT /DCOPY:DT /R:1 /W:1 /NFL /NDL /NJH /NJS
 if errorlevel 8 exit /b 1
-robocopy "$(SolutionDir)Source\Engine\GraphicsEngine\Shaders\Internal" "$(OutDir)Content\Shaders\Internal" /E /IS /IT /COPY:DT /DCOPY:DT /R:1 /W:1 /NFL /NDL /NJH /NJS
-if errorlevel 8 exit /b 1
-robocopy "$(SolutionDir)Source\Engine\GraphicsEngine\Shaders\Material" "$(OutDir)Content\Shaders\Material" /E /IS /IT /COPY:DT /DCOPY:DT /R:1 /W:1 /NFL /NDL /NJH /NJS
+robocopy "$(SolutionDir)Source\Engine\GraphicsEngine\Shaders" "$(OutDir)Content\Shaders" /E /IS /IT /COPY:DT /DCOPY:DT /R:1 /W:1 /NFL /NDL /NJH /NJS
 if errorlevel 8 exit /b 1
 robocopy "$(SolutionDir)Dependencies\FMod\Desktop" "$(OutDir)Audio" *.bank /MIR /COPY:DT /DCOPY:DT /R:1 /W:1 /NFL /NDL /NJH /NJS
 if errorlevel 8 exit /b 1
@@ -185,9 +183,7 @@ if not exist "$(SolutionDir)Dependencies\FMod\Desktop\Master.strings.bank" (echo
 if exist "$(OutDir)Content" attrib -R "$(OutDir)Content\*" /S /D &gt;nul
 robocopy "$(SolutionDir)Content" "$(OutDir)Content" /MIR /COPY:DT /DCOPY:DT /R:1 /W:1 /NFL /NDL /NJH /NJS
 if errorlevel 8 exit /b 1
-robocopy "$(SolutionDir)Source\Engine\GraphicsEngine\Shaders\Internal" "$(OutDir)Content\Shaders\Internal" /E /IS /IT /COPY:DT /DCOPY:DT /R:1 /W:1 /NFL /NDL /NJH /NJS
-if errorlevel 8 exit /b 1
-robocopy "$(SolutionDir)Source\Engine\GraphicsEngine\Shaders\Material" "$(OutDir)Content\Shaders\Material" /E /IS /IT /COPY:DT /DCOPY:DT /R:1 /W:1 /NFL /NDL /NJH /NJS
+robocopy "$(SolutionDir)Source\Engine\GraphicsEngine\Shaders" "$(OutDir)Content\Shaders" /E /IS /IT /COPY:DT /DCOPY:DT /R:1 /W:1 /NFL /NDL /NJH /NJS
 if errorlevel 8 exit /b 1
 robocopy "$(SolutionDir)Dependencies\FMod\Desktop" "$(OutDir)Audio" *.bank /MIR /COPY:DT /DCOPY:DT /R:1 /W:1 /NFL /NDL /NJH /NJS
 if errorlevel 8 exit /b 1
@@ -242,9 +238,7 @@ if not exist "$(SolutionDir)Dependencies\FMod\Desktop\Master.strings.bank" (echo
 if exist "$(OutDir)Content" attrib -R "$(OutDir)Content\*" /S /D &gt;nul
 robocopy "$(SolutionDir)Content" "$(OutDir)Content" /MIR /COPY:DT /DCOPY:DT /R:1 /W:1 /NFL /NDL /NJH /NJS
 if errorlevel 8 exit /b 1
-robocopy "$(SolutionDir)Source\Engine\GraphicsEngine\Shaders\Internal" "$(OutDir)Content\Shaders\Internal" /E /IS /IT /COPY:DT /DCOPY:DT /R:1 /W:1 /NFL /NDL /NJH /NJS
-if errorlevel 8 exit /b 1
-robocopy "$(SolutionDir)Source\Engine\GraphicsEngine\Shaders\Material" "$(OutDir)Content\Shaders\Material" /E /IS /IT /COPY:DT /DCOPY:DT /R:1 /W:1 /NFL /NDL /NJH /NJS
+robocopy "$(SolutionDir)Source\Engine\GraphicsEngine\Shaders" "$(OutDir)Content\Shaders" /E /IS /IT /COPY:DT /DCOPY:DT /R:1 /W:1 /NFL /NDL /NJH /NJS
 if errorlevel 8 exit /b 1
 robocopy "$(SolutionDir)Dependencies\FMod\Desktop" "$(OutDir)Audio" *.bank /MIR /COPY:DT /DCOPY:DT /R:1 /W:1 /NFL /NDL /NJH /NJS
 if errorlevel 8 exit /b 1
@@ -254,26 +248,56 @@ exit /b 0</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Game.h" />
-    <ClInclude Include="Runtime\GameApplication.h" />
-    <ClInclude Include="GameLog.h" />
-    <ClInclude Include="Runtime\GameWindowMessages.h" />
     <ClInclude Include="Assets\MeshLibrary.h" />
     <ClInclude Include="Assets\PrimitiveMeshBuilder.h" />
-    <ClInclude Include="Components\SpinComponent.h" />
+    <ClInclude Include="BehaviourTree\BaseNodes\BT_CompositeNode.h" />
+    <ClInclude Include="BehaviourTree\BaseNodes\BT_DecoratorNode.h" />
+    <ClInclude Include="BehaviourTree\BaseNodes\BT_LeafNodeAction.h" />
+    <ClInclude Include="BehaviourTree\BaseNodes\BT_LeafNodeCondition.h" />
+    <ClInclude Include="BehaviourTree\BaseNodes\BT_Node.h" />
+    <ClInclude Include="BehaviourTree\BaseNodes\BT_SelectorNode.h" />
+    <ClInclude Include="BehaviourTree\BaseNodes\BT_SequenceNode.h" />
+    <ClInclude Include="BehaviourTree\BehaviourTree.h" />
+    <ClInclude Include="BehaviourTree\BlackBoard.h" />
+    <ClInclude Include="BehaviourTree\CustomNodes\ActionNodes\BT_Action_FollowPlayer.h" />
+    <ClInclude Include="BehaviourTree\CustomNodes\ActionNodes\BT_Action_Idle.h" />
+    <ClInclude Include="BehaviourTree\CustomNodes\ConditionNodes\BT_Condition_IsPlayerInLOS.h" />
     <ClInclude Include="Components\CustomComponentRegistry.h" />
     <ClInclude Include="Components\RegisterCustomComponents.h" />
+    <ClInclude Include="Components\SpinComponent.h" />
+    <ClInclude Include="EnemyComponent.h" />
+    <ClInclude Include="Game.h" />
+    <ClInclude Include="GameLog.h" />
+    <ClInclude Include="Player\PlayerActor.h" />
+    <ClInclude Include="Player\PlayerController.h" />
+    <ClInclude Include="Player\PlayerDataStruct.h" />
+    <ClInclude Include="Player\PlayerMovementComponent.h" />
     <ClInclude Include="Resources\resource.h" />
     <ClInclude Include="Resources\targetver.h" />
+    <ClInclude Include="Runtime\GameApplication.h" />
+    <ClInclude Include="Runtime\GameWindowMessages.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Game.cpp" />
-    <ClCompile Include="Runtime\GameApplication.cpp" />
-    <ClCompile Include="Runtime\GameWindowMessages.cpp" />
-    <ClCompile Include="Main.cpp" />
     <ClCompile Include="Assets\MeshLibrary.cpp" />
     <ClCompile Include="Assets\PrimitiveMeshBuilder.cpp" />
+    <ClCompile Include="BehaviourTree\BaseNodes\BT_LeafNodeCondition.cpp" />
+    <ClCompile Include="BehaviourTree\BaseNodes\BT_Node.cpp" />
+    <ClCompile Include="BehaviourTree\BaseNodes\BT_SelectorNode.cpp" />
+    <ClCompile Include="BehaviourTree\BaseNodes\BT_SequenceNode.cpp" />
+    <ClCompile Include="BehaviourTree\BehaviourTree.cpp" />
+    <ClCompile Include="BehaviourTree\BlackBoard.cpp" />
+    <ClCompile Include="BehaviourTree\CustomNodes\ActionNodes\BT_Action_FollowPlayer.cpp" />
+    <ClCompile Include="BehaviourTree\CustomNodes\ActionNodes\BT_Action_Idle.cpp" />
+    <ClCompile Include="BehaviourTree\CustomNodes\ConditionNodes\BT_Condition_IsPlayerInLOS.cpp" />
     <ClCompile Include="Components\SpinComponent.cpp" />
+    <ClCompile Include="EnemyComponent.cpp" />
+    <ClCompile Include="Game.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Player\PlayerActor.cpp" />
+    <ClCompile Include="Player\PlayerController.cpp" />
+    <ClCompile Include="Player\PlayerMovementComponent.cpp" />
+    <ClCompile Include="Runtime\GameApplication.cpp" />
+    <ClCompile Include="Runtime\GameWindowMessages.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Game.ico" />
@@ -292,6 +316,9 @@ exit /b 0</Command>
     </ProjectReference>
     <ProjectReference Include="..\..\Utilities\CommonUtilities\CommonUtilities.vcxproj">
       <Project>{AA29E689-16B5-534E-1FC6-D6428BD0AF4E}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Engine\AISystems\AISystems.vcxproj">
+      <Project>{C7303FFC-339B-F372-7CD9-A418E882D1C7}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\Utilities\Logger\Logger.vcxproj">
       <Project>{25F339C1-1195-6497-FA4F-78EBE690EBE7}</Project>

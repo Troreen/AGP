@@ -16,6 +16,9 @@
     <Filter Include="Objects">
       <UniqueIdentifier>{CF2649B1-3B06-C84C-441E-5323B07C2EAE}</UniqueIdentifier>
     </Filter>
+    <Filter Include="PostProcessing">
+      <UniqueIdentifier>{488E05B2-345C-F9B7-1DF0-69DE095DD51C}</UniqueIdentifier>
+    </Filter>
     <Filter Include="RHI">
       <UniqueIdentifier>{4819880B-B422-887C-3D9E-9E7CA9A6937C}</UniqueIdentifier>
     </Filter>
@@ -27,6 +30,12 @@
     </Filter>
     <Filter Include="Shaders\Material">
       <UniqueIdentifier>{6DD8FDB3-59D1-1C06-8203-028B6E5BFC11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\PostProcess">
+      <UniqueIdentifier>{A335500E-0F97-2D1C-9804-74CE046564DB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Text">
+      <UniqueIdentifier>{6367FCFA-4FCA-8B9F-F84F-C455E4915722}</UniqueIdentifier>
     </Filter>
     <Filter Include="Sprite">
       <UniqueIdentifier>{9C3AA6D1-88DC-D0A7-7197-E4FB5DD857F8}</UniqueIdentifier>
@@ -45,11 +54,15 @@
     <ClInclude Include="ConstantBuffers\ObjectBuffer.h">
       <Filter>ConstantBuffers</Filter>
     </ClInclude>
+    <ClInclude Include="ConstantBuffers\TextOverlayBuffer.h">
+      <Filter>ConstantBuffers</Filter>
+    </ClInclude>
     <ClInclude Include="Drawers\SpriteDrawer.h">
       <Filter>Drawers</Filter>
     </ClInclude>
     <ClInclude Include="GraphicsEngine.h" />
     <ClInclude Include="GraphicsEngine.pch.h" />
+    <ClInclude Include="GraphicsRenderSettings.h" />
     <ClInclude Include="InterOp\DDSTextureLoader11.h">
       <Filter>InterOp</Filter>
     </ClInclude>
@@ -64,6 +77,9 @@
     </ClInclude>
     <ClInclude Include="Materials\MaterialShaderIncludeHandler.h">
       <Filter>Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\Animation.h">
+      <Filter>Objects</Filter>
     </ClInclude>
     <ClInclude Include="Objects\Buffer.h">
       <Filter>Objects</Filter>
@@ -92,6 +108,18 @@
     <ClInclude Include="Objects\Vertex.h">
       <Filter>Objects</Filter>
     </ClInclude>
+    <ClInclude Include="PostProcessing\BloomEffect.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="PostProcessing\PostProcessCache.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="PostProcessing\PostProcessEffect.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="PostProcessing\SSAOEffect.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
     <ClInclude Include="RHI\GraphicsCommandList.h">
       <Filter>RHI</Filter>
     </ClInclude>
@@ -109,23 +137,19 @@
     </ClInclude>
     <ClInclude Include="RenderCulling.h" />
     <ClInclude Include="RenderItemRouting.h" />
+    <ClInclude Include="RenderSnapshot.h" />
     <ClInclude Include="Sprite\SpriteStructs.h">
       <Filter>Sprite</Filter>
     </ClInclude>
     <ClInclude Include="TextWidget.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ConstantBuffers\FrameBuffer.cpp">
-      <Filter>ConstantBuffers</Filter>
-    </ClCompile>
-    <ClCompile Include="ConstantBuffers\ObjectBuffer.cpp">
-      <Filter>ConstantBuffers</Filter>
-    </ClCompile>
     <ClCompile Include="Drawers\SpriteDrawer.cpp">
       <Filter>Drawers</Filter>
     </ClCompile>
     <ClCompile Include="GraphicsEngine.cpp" />
     <ClCompile Include="GraphicsEngine.pch.cpp" />
+    <ClCompile Include="GraphicsRenderSettings.cpp" />
     <ClCompile Include="InterOp\DDSTextureLoader11.cpp">
       <Filter>InterOp</Filter>
     </ClCompile>
@@ -137,6 +161,9 @@
     </ClCompile>
     <ClCompile Include="Materials\MaterialShaderIncludeHandler.cpp">
       <Filter>Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\Animation.cpp">
+      <Filter>Objects</Filter>
     </ClCompile>
     <ClCompile Include="Objects\Buffer.cpp">
       <Filter>Objects</Filter>
@@ -159,6 +186,18 @@
     <ClCompile Include="Objects\Vertex.cpp">
       <Filter>Objects</Filter>
     </ClCompile>
+    <ClCompile Include="PostProcessing\BloomEffect.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="PostProcessing\PostProcessCache.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="PostProcessing\PostProcessEffect.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="PostProcessing\SSAOEffect.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
     <ClCompile Include="RHI\GraphicsCommandList.cpp">
       <Filter>RHI</Filter>
     </ClCompile>
@@ -171,35 +210,15 @@
     <ClCompile Include="RHI\RenderHardwareInterface.cpp">
       <Filter>RHI</Filter>
     </ClCompile>
+    <ClCompile Include="RenderSnapshot.cpp" />
     <ClCompile Include="TextWidget.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shaders\Internal\BRDF_LUT_PS.hlsl">
-      <Filter>Shaders\Internal</Filter>
+    <FxCompile Include="Shaders\BRDF LUT_PS.hlsl">
+      <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\Internal\DeferredAmbient_PS.hlsl">
-      <Filter>Shaders\Internal</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\Internal\DeferredDirectional_PS.hlsl">
-      <Filter>Shaders\Internal</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\Internal\DeferredPoint_PS.hlsl">
-      <Filter>Shaders\Internal</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\Internal\DeferredSpot_PS.hlsl">
-      <Filter>Shaders\Internal</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\Internal\FullTexture_VS.hlsl">
-      <Filter>Shaders\Internal</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\Internal\PointShadow_GS.hlsl">
-      <Filter>Shaders\Internal</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\Internal\RenderPassDebug_PS.hlsl">
-      <Filter>Shaders\Internal</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\Internal\ScreenSpaceAO_PS.hlsl">
-      <Filter>Shaders\Internal</Filter>
+    <FxCompile Include="Shaders\FullTexture_VS.hlsl">
+      <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Internal\Sprite_PS.hlsl">
       <Filter>Shaders\Internal</Filter>
@@ -207,14 +226,17 @@
     <FxCompile Include="Shaders\Internal\Sprite_VS.hlsl">
       <Filter>Shaders\Internal</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\Internal\TextOverlay_PS.hlsl">
-      <Filter>Shaders\Internal</Filter>
+    <FxCompile Include="Shaders\Material\Deferred_AmbientLight_PS.hlsl">
+      <Filter>Shaders\Material</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\Internal\TextOverlay_VS.hlsl">
-      <Filter>Shaders\Internal</Filter>
+    <FxCompile Include="Shaders\Material\Deferred_DirLight_PS.hlsl">
+      <Filter>Shaders\Material</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\Internal\Tonemap_PS.hlsl">
-      <Filter>Shaders\Internal</Filter>
+    <FxCompile Include="Shaders\Material\Deferred_PointLight_PS.hlsl">
+      <Filter>Shaders\Material</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Material\Deferred_SpotLight_PS.hlsl">
+      <Filter>Shaders\Material</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Material\GBuffer_PS.hlsl">
       <Filter>Shaders\Material</Filter>
@@ -222,24 +244,54 @@
     <FxCompile Include="Shaders\Material\Lit_PS.hlsl">
       <Filter>Shaders\Material</Filter>
     </FxCompile>
+    <FxCompile Include="Shaders\Material\ShadowCube_GS.hlsl">
+      <Filter>Shaders\Material</Filter>
+    </FxCompile>
     <FxCompile Include="Shaders\Material\Surface_VS.hlsl">
+      <Filter>Shaders\Material</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Material\Tonemapper_PS.hlsl">
       <Filter>Shaders\Material</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Material\Unlit_PS.hlsl">
       <Filter>Shaders\Material</Filter>
     </FxCompile>
+    <FxCompile Include="Shaders\PostProcess\Bloom_PS.hlsl">
+      <Filter>Shaders\PostProcess</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\PostProcess\GaussianBlurH_PS.hlsl">
+      <Filter>Shaders\PostProcess</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\PostProcess\GaussianBlurV_PS.hlsl">
+      <Filter>Shaders\PostProcess</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\PostProcess\Luminance_PS.hlsl">
+      <Filter>Shaders\PostProcess</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\PostProcess\Resample_PS.hlsl">
+      <Filter>Shaders\PostProcess</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\PostProcess\SSAO_BlurH_PS.hlsl">
+      <Filter>Shaders\PostProcess</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\PostProcess\SSAO_BlurV_PS.hlsl">
+      <Filter>Shaders\PostProcess</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\PostProcess\SSAO_PS.hlsl">
+      <Filter>Shaders\PostProcess</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Text\TextOverlay_PS.hlsl">
+      <Filter>Shaders\Text</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Text\TextOverlay_VS.hlsl">
+      <Filter>Shaders\Text</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\Internal\DeferredLighting.hlsli">
-      <Filter>Shaders\Internal</Filter>
-    </None>
-    <None Include="Shaders\Internal\Tonemap.hlsli">
-      <Filter>Shaders\Internal</Filter>
+    <None Include="Shaders\LUTFunctions.hlsli">
+      <Filter>Shaders</Filter>
     </None>
     <None Include="Shaders\Material\Common.hlsli">
-      <Filter>Shaders\Material</Filter>
-    </None>
-    <None Include="Shaders\Material\GlobalLightingTextures.hlsli">
       <Filter>Shaders\Material</Filter>
     </None>
     <None Include="Shaders\Material\Lighting.hlsli">
@@ -251,20 +303,20 @@
     <None Include="Shaders\Material\MaterialParameters.hlsli">
       <Filter>Shaders\Material</Filter>
     </None>
-    <None Include="Shaders\Material\MaterialTextures.hlsli">
-      <Filter>Shaders\Material</Filter>
-    </None>
-    <None Include="Shaders\Material\PBR.hlsli">
-      <Filter>Shaders\Material</Filter>
-    </None>
     <None Include="Shaders\Material\PoissonDisks.hlsli">
       <Filter>Shaders\Material</Filter>
     </None>
-    <None Include="Shaders\Material\Samplers.hlsli">
+    <None Include="Shaders\Material\Tonemap.hlsli">
       <Filter>Shaders\Material</Filter>
     </None>
-    <None Include="Shaders\Material\ShadowSampling.hlsli">
-      <Filter>Shaders\Material</Filter>
+    <None Include="Shaders\PostProcess\BloomHelper.hlsli">
+      <Filter>Shaders\PostProcess</Filter>
+    </None>
+    <None Include="Shaders\PostProcess\SSAOHelper.hlsli">
+      <Filter>Shaders\PostProcess</Filter>
+    </None>
+    <None Include="Shaders\Text\TextOverlayHelper.hlsli">
+      <Filter>Shaders\Text</Filter>
     </None>
   </ItemGroup>
 </Project>

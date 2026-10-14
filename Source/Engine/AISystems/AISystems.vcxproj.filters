@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Pathfinding">
+      <UniqueIdentifier>{1123268C-7DD8-9E81-06CD-985872819585}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Pathfinder.hpp" />
+    <ClInclude Include="Pathfinding\AStar.h">
+      <Filter>Pathfinding</Filter>
+    </ClInclude>
+    <ClInclude Include="Pathfinding\Dijkstra.h">
+      <Filter>Pathfinding</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Pathfinding\AStar.cpp">
+      <Filter>Pathfinding</Filter>
+    </ClCompile>
+    <ClCompile Include="Pathfinding\Dijkstra.cpp">
+      <Filter>Pathfinding</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

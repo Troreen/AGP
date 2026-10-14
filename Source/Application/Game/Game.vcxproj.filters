@@ -1,51 +1,103 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Runtime">
-      <UniqueIdentifier>{9AAAB326-BF12-4C05-B99E-2FF1423C2A0E}</UniqueIdentifier>
+    <Filter Include="Assets">
+      <UniqueIdentifier>{3824E0A7-24C6-0A7E-0D81-1ED2F9C191CE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="BehaviourTree">
+      <UniqueIdentifier>{3A7B31FB-A63B-AD31-6F76-F6AEDBF5F10D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="BehaviourTree\BaseNodes">
+      <UniqueIdentifier>{BD1A44FF-2952-8C96-325C-F0B99E12B38F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="BehaviourTree\CustomNodes">
+      <UniqueIdentifier>{FDF4CF74-69B7-03FF-B267-928B1E69DCDC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="BehaviourTree\CustomNodes\ActionNodes">
+      <UniqueIdentifier>{6300D6A8-CFC4-D498-982A-056304AE70CE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="BehaviourTree\CustomNodes\ConditionNodes">
+      <UniqueIdentifier>{4C0F0D13-388C-0056-6109-016A4DE59CE9}</UniqueIdentifier>
     </Filter>
     <Filter Include="Components">
-      <UniqueIdentifier>{D9864B77-5CD9-41D4-9617-0777DCD8EE5D}</UniqueIdentifier>
+      <UniqueIdentifier>{6B7DD516-5735-1764-C03C-F0BFAC13B254}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Assets">
-      <UniqueIdentifier>{B15CCC85-879A-4AEF-940B-668727298644}</UniqueIdentifier>
+    <Filter Include="Player">
+      <UniqueIdentifier>{724E55CA-5EF0-7FA0-47AB-93F433EC06F1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Resources">
-      <UniqueIdentifier>{C7E648A4-5D71-4E7F-85DD-22CAF6841A1A}</UniqueIdentifier>
+      <UniqueIdentifier>{000BCD17-6C75-818E-B5B3-3234215D5FE3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Dependencies">
-      <UniqueIdentifier>{6C01343A-5864-C3DE-01EA-FB94ED2B8F61}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Dependencies\TGAFBXImporter">
-      <UniqueIdentifier>{098D22A3-759A-5089-FE80-4C746A8D1C40}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Dependencies\TGAFBXImporter\source">
-      <UniqueIdentifier>{098BBF4F-F5C6-C2B9-5ED9-DAB04A346BD4}</UniqueIdentifier>
+    <Filter Include="Runtime">
+      <UniqueIdentifier>{4995DAC4-B574-5960-BE8C-E4362AEBBFC1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Components\CustomComponentRegistry.h">
-      <Filter>Components</Filter>
-    </ClInclude>
-    <ClInclude Include="Components\RegisterCustomComponents.h">
-      <Filter>Components</Filter>
-    </ClInclude>
-    <ClInclude Include="Game.h" />
-    <ClInclude Include="GameLog.h" />
-    <ClInclude Include="Runtime\GameApplication.h">
-      <Filter>Runtime</Filter>
-    </ClInclude>
-    <ClInclude Include="Runtime\GameWindowMessages.h">
-      <Filter>Runtime</Filter>
-    </ClInclude>
     <ClInclude Include="Assets\MeshLibrary.h">
       <Filter>Assets</Filter>
     </ClInclude>
     <ClInclude Include="Assets\PrimitiveMeshBuilder.h">
       <Filter>Assets</Filter>
     </ClInclude>
+    <ClInclude Include="BehaviourTree\BaseNodes\BT_CompositeNode.h">
+      <Filter>BehaviourTree\BaseNodes</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviourTree\BaseNodes\BT_DecoratorNode.h">
+      <Filter>BehaviourTree\BaseNodes</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviourTree\BaseNodes\BT_LeafNodeAction.h">
+      <Filter>BehaviourTree\BaseNodes</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviourTree\BaseNodes\BT_LeafNodeCondition.h">
+      <Filter>BehaviourTree\BaseNodes</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviourTree\BaseNodes\BT_Node.h">
+      <Filter>BehaviourTree\BaseNodes</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviourTree\BaseNodes\BT_SelectorNode.h">
+      <Filter>BehaviourTree\BaseNodes</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviourTree\BaseNodes\BT_SequenceNode.h">
+      <Filter>BehaviourTree\BaseNodes</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviourTree\BehaviourTree.h">
+      <Filter>BehaviourTree</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviourTree\BlackBoard.h">
+      <Filter>BehaviourTree</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviourTree\CustomNodes\ActionNodes\BT_Action_FollowPlayer.h">
+      <Filter>BehaviourTree\CustomNodes\ActionNodes</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviourTree\CustomNodes\ActionNodes\BT_Action_Idle.h">
+      <Filter>BehaviourTree\CustomNodes\ActionNodes</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviourTree\CustomNodes\ConditionNodes\BT_Condition_IsPlayerInLOS.h">
+      <Filter>BehaviourTree\CustomNodes\ConditionNodes</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\CustomComponentRegistry.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\RegisterCustomComponents.h">
+      <Filter>Components</Filter>
+    </ClInclude>
     <ClInclude Include="Components\SpinComponent.h">
       <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="EnemyComponent.h" />
+    <ClInclude Include="Game.h" />
+    <ClInclude Include="GameLog.h" />
+    <ClInclude Include="Player\PlayerActor.h">
+      <Filter>Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Player\PlayerController.h">
+      <Filter>Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Player\PlayerDataStruct.h">
+      <Filter>Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Player\PlayerMovementComponent.h">
+      <Filter>Player</Filter>
     </ClInclude>
     <ClInclude Include="Resources\resource.h">
       <Filter>Resources</Filter>
@@ -53,24 +105,67 @@
     <ClInclude Include="Resources\targetver.h">
       <Filter>Resources</Filter>
     </ClInclude>
+    <ClInclude Include="Runtime\GameApplication.h">
+      <Filter>Runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="Runtime\GameWindowMessages.h">
+      <Filter>Runtime</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Game.cpp" />
-    <ClCompile Include="Runtime\GameApplication.cpp">
-      <Filter>Runtime</Filter>
-    </ClCompile>
-    <ClCompile Include="Runtime\GameWindowMessages.cpp">
-      <Filter>Runtime</Filter>
-    </ClCompile>
-    <ClCompile Include="Main.cpp" />
     <ClCompile Include="Assets\MeshLibrary.cpp">
       <Filter>Assets</Filter>
     </ClCompile>
     <ClCompile Include="Assets\PrimitiveMeshBuilder.cpp">
       <Filter>Assets</Filter>
     </ClCompile>
+    <ClCompile Include="BehaviourTree\BaseNodes\BT_LeafNodeCondition.cpp">
+      <Filter>BehaviourTree\BaseNodes</Filter>
+    </ClCompile>
+    <ClCompile Include="BehaviourTree\BaseNodes\BT_Node.cpp">
+      <Filter>BehaviourTree\BaseNodes</Filter>
+    </ClCompile>
+    <ClCompile Include="BehaviourTree\BaseNodes\BT_SelectorNode.cpp">
+      <Filter>BehaviourTree\BaseNodes</Filter>
+    </ClCompile>
+    <ClCompile Include="BehaviourTree\BaseNodes\BT_SequenceNode.cpp">
+      <Filter>BehaviourTree\BaseNodes</Filter>
+    </ClCompile>
+    <ClCompile Include="BehaviourTree\BehaviourTree.cpp">
+      <Filter>BehaviourTree</Filter>
+    </ClCompile>
+    <ClCompile Include="BehaviourTree\BlackBoard.cpp">
+      <Filter>BehaviourTree</Filter>
+    </ClCompile>
+    <ClCompile Include="BehaviourTree\CustomNodes\ActionNodes\BT_Action_FollowPlayer.cpp">
+      <Filter>BehaviourTree\CustomNodes\ActionNodes</Filter>
+    </ClCompile>
+    <ClCompile Include="BehaviourTree\CustomNodes\ActionNodes\BT_Action_Idle.cpp">
+      <Filter>BehaviourTree\CustomNodes\ActionNodes</Filter>
+    </ClCompile>
+    <ClCompile Include="BehaviourTree\CustomNodes\ConditionNodes\BT_Condition_IsPlayerInLOS.cpp">
+      <Filter>BehaviourTree\CustomNodes\ConditionNodes</Filter>
+    </ClCompile>
     <ClCompile Include="Components\SpinComponent.cpp">
       <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="EnemyComponent.cpp" />
+    <ClCompile Include="Game.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Player\PlayerActor.cpp">
+      <Filter>Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Player\PlayerController.cpp">
+      <Filter>Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Player\PlayerMovementComponent.cpp">
+      <Filter>Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Runtime\GameApplication.cpp">
+      <Filter>Runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="Runtime\GameWindowMessages.cpp">
+      <Filter>Runtime</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

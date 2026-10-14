@@ -35,11 +35,12 @@ filter "configurations:Retail"
 filter "not configurations:Debug"
     defines {"NDEBUG"}
 
-filter {} 
+filter {}
 
 group "Engine"
     include "Source/Engine/GraphicsEngine/premake5.lua"
     include "Source/Engine/GameFramework/premake5.lua"
+    include "Source/Engine/AISystems/premake5.lua"
 
 group "External"
     include "Source/Utilities/Logger/premake5.lua"

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -191,15 +191,9 @@
     <ClInclude Include="AssetHandling\MeshAsset.h" />
     <ClInclude Include="AssetHandling\TextureAsset.h" />
     <ClInclude Include="AudioManager.h" />
-    <ClInclude Include="BehaviourTree\ActionNode.h" />
-    <ClInclude Include="BehaviourTree\BTNode.h" />
-    <ClInclude Include="BehaviourTree\FallbackNode.h" />
-    <ClInclude Include="BehaviourTree\LeafNode.h" />
-    <ClInclude Include="BehaviourTree\SequenceNode.h" />
     <ClInclude Include="Components\AnimatorComponent.h" />
     <ClInclude Include="Components\CameraComponent.h" />
     <ClInclude Include="Components\CustomComponent.h" />
-    <ClInclude Include="Scenes\CustomComponentVariables.h" />
     <ClInclude Include="Components\DebugCameraController.h" />
     <ClInclude Include="Components\LightComponent.h" />
     <ClInclude Include="Components\MeshComponentBase.h" />
@@ -213,7 +207,7 @@
     <ClInclude Include="EventBus.hpp" />
     <ClInclude Include="GameFrameworkLog.h" />
     <ClInclude Include="Helper\Event.hpp" />
-    <ClInclude Include="Rendering\WorldRenderer.h" />
+    <ClInclude Include="Scenes\CustomComponentVariables.h" />
     <ClInclude Include="Scenes\SceneData.h" />
     <ClInclude Include="Scenes\SceneWorldBuilder.h" />
     <ClInclude Include="ServiceLocator.h" />
@@ -221,6 +215,8 @@
     <ClInclude Include="Settings\InputSettingsApplier.h" />
     <ClInclude Include="Settings\WindowSettings.h" />
     <ClInclude Include="SimdJson\simdjson.h" />
+    <ClInclude Include="Threadpool\ThreadPool.hpp" />
+    <ClInclude Include="Threadpool\ThreadSafeQueue.hpp" />
     <ClInclude Include="UnrealSceneImporter\UnrealSceneImporter.h" />
     <ClInclude Include="UnrealSceneImporter\UnrealSceneStructs.h" />
     <ClInclude Include="World\Actor.h" />
@@ -243,8 +239,6 @@
     <ClCompile Include="AssetHandling\MeshAsset.cpp" />
     <ClCompile Include="AssetHandling\TextureAsset.cpp" />
     <ClCompile Include="AudioManager.cpp" />
-    <ClCompile Include="BehaviourTree\FallbackNode.cpp" />
-    <ClCompile Include="BehaviourTree\SequenceNode.cpp" />
     <ClCompile Include="Components\AnimatorComponent.cpp" />
     <ClCompile Include="Components\CameraComponent.cpp" />
     <ClCompile Include="Components\DebugCameraController.cpp" />
@@ -258,7 +252,6 @@
     <ClCompile Include="Coroutine\Scheduler.cpp" />
     <ClCompile Include="EventBus.cpp" />
     <ClCompile Include="GameFrameworkLog.cpp" />
-    <ClCompile Include="Rendering\WorldRenderer.cpp" />
     <ClCompile Include="Scenes\SceneWorldBuilder.cpp" />
     <ClCompile Include="ServiceLocator.cpp" />
     <ClCompile Include="Settings\EngineSettings.cpp" />

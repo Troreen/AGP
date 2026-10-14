@@ -7,9 +7,6 @@
     <Filter Include="AssetHandling">
       <UniqueIdentifier>{4A86DE7F-B646-5AB6-7F81-A333EB009F92}</UniqueIdentifier>
     </Filter>
-    <Filter Include="BehaviourTree">
-      <UniqueIdentifier>{3A7B31FB-A63B-AD31-6F76-F6AEDBF5F10D}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Components">
       <UniqueIdentifier>{6B7DD516-5735-1764-C03C-F0BFAC13B254}</UniqueIdentifier>
     </Filter>
@@ -31,9 +28,6 @@
     <Filter Include="Helper">
       <UniqueIdentifier>{C53F33B7-B1E1-5D8D-9A9C-71E186DDE4DD}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Rendering">
-      <UniqueIdentifier>{E3AE1F7C-4F19-D4F2-9857-85980401B247}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Scenes">
       <UniqueIdentifier>{86EEB3D0-7290-DEA6-5B4B-F2FA478C65F7}</UniqueIdentifier>
     </Filter>
@@ -42,6 +36,9 @@
     </Filter>
     <Filter Include="SimdJson">
       <UniqueIdentifier>{0CA52CAD-F871-87B8-218B-75600DB7BC46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Threadpool">
+      <UniqueIdentifier>{97735359-832B-95A6-EC32-6E02D8093097}</UniqueIdentifier>
     </Filter>
     <Filter Include="UnrealSceneImporter">
       <UniqueIdentifier>{4C139078-B874-6D86-41E2-B338AD42A445}</UniqueIdentifier>
@@ -88,25 +85,13 @@
       <Filter>AssetHandling</Filter>
     </ClInclude>
     <ClInclude Include="AudioManager.h" />
-    <ClInclude Include="BehaviourTree\ActionNode.h">
-      <Filter>BehaviourTree</Filter>
-    </ClInclude>
-    <ClInclude Include="BehaviourTree\BTNode.h">
-      <Filter>BehaviourTree</Filter>
-    </ClInclude>
-    <ClInclude Include="BehaviourTree\FallbackNode.h">
-      <Filter>BehaviourTree</Filter>
-    </ClInclude>
-    <ClInclude Include="BehaviourTree\LeafNode.h">
-      <Filter>BehaviourTree</Filter>
-    </ClInclude>
-    <ClInclude Include="BehaviourTree\SequenceNode.h">
-      <Filter>BehaviourTree</Filter>
-    </ClInclude>
     <ClInclude Include="Components\AnimatorComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
     <ClInclude Include="Components\CameraComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\CustomComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
     <ClInclude Include="Components\DebugCameraController.h">
@@ -144,8 +129,8 @@
     <ClInclude Include="Helper\Event.hpp">
       <Filter>Helper</Filter>
     </ClInclude>
-    <ClInclude Include="Rendering\WorldRenderer.h">
-      <Filter>Rendering</Filter>
+    <ClInclude Include="Scenes\CustomComponentVariables.h">
+      <Filter>Scenes</Filter>
     </ClInclude>
     <ClInclude Include="Scenes\SceneData.h">
       <Filter>Scenes</Filter>
@@ -165,6 +150,12 @@
     </ClInclude>
     <ClInclude Include="SimdJson\simdjson.h">
       <Filter>SimdJson</Filter>
+    </ClInclude>
+    <ClInclude Include="Threadpool\ThreadPool.hpp">
+      <Filter>Threadpool</Filter>
+    </ClInclude>
+    <ClInclude Include="Threadpool\ThreadSafeQueue.hpp">
+      <Filter>Threadpool</Filter>
     </ClInclude>
     <ClInclude Include="UnrealSceneImporter\UnrealSceneImporter.h">
       <Filter>UnrealSceneImporter</Filter>
@@ -220,12 +211,6 @@
       <Filter>AssetHandling</Filter>
     </ClCompile>
     <ClCompile Include="AudioManager.cpp" />
-    <ClCompile Include="BehaviourTree\FallbackNode.cpp">
-      <Filter>BehaviourTree</Filter>
-    </ClCompile>
-    <ClCompile Include="BehaviourTree\SequenceNode.cpp">
-      <Filter>BehaviourTree</Filter>
-    </ClCompile>
     <ClCompile Include="Components\AnimatorComponent.cpp">
       <Filter>Components</Filter>
     </ClCompile>
@@ -261,9 +246,6 @@
     </ClCompile>
     <ClCompile Include="EventBus.cpp" />
     <ClCompile Include="GameFrameworkLog.cpp" />
-    <ClCompile Include="Rendering\WorldRenderer.cpp">
-      <Filter>Rendering</Filter>
-    </ClCompile>
     <ClCompile Include="Scenes\SceneWorldBuilder.cpp">
       <Filter>Scenes</Filter>
     </ClCompile>

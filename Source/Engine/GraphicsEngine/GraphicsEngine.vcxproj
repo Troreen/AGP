@@ -89,7 +89,7 @@
       <PrecompiledHeaderFile>GraphicsEngine.pch.h</PrecompiledHeaderFile>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.;..;..\..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..;..\..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;$(IntDir)PrecompiledShaders;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -122,7 +122,7 @@
       <PrecompiledHeaderFile>GraphicsEngine.pch.h</PrecompiledHeaderFile>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>_RELEASE;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.;..;..\..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..;..\..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;$(IntDir)PrecompiledShaders;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -160,7 +160,7 @@
       <PrecompiledHeaderFile>GraphicsEngine.pch.h</PrecompiledHeaderFile>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>_RETAIL;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.;..;..\..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..;..\..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;$(IntDir)PrecompiledShaders;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -197,14 +197,17 @@
     <ClInclude Include="ConstantBuffers\FrameBuffer.h" />
     <ClInclude Include="ConstantBuffers\LightBuffer.h" />
     <ClInclude Include="ConstantBuffers\ObjectBuffer.h" />
+    <ClInclude Include="ConstantBuffers\TextOverlayBuffer.h" />
     <ClInclude Include="Drawers\SpriteDrawer.h" />
     <ClInclude Include="GraphicsEngine.h" />
     <ClInclude Include="GraphicsEngine.pch.h" />
+    <ClInclude Include="GraphicsRenderSettings.h" />
     <ClInclude Include="InterOp\DDSTextureLoader11.h" />
     <ClInclude Include="Materials\Material.h" />
     <ClInclude Include="Materials\MaterialHelpers.h" />
     <ClInclude Include="Materials\MaterialInterface.h" />
     <ClInclude Include="Materials\MaterialShaderIncludeHandler.h" />
+    <ClInclude Include="Objects\Animation.h" />
     <ClInclude Include="Objects\Buffer.h" />
     <ClInclude Include="Objects\Camera.h" />
     <ClInclude Include="Objects\Font.h" />
@@ -214,6 +217,10 @@
     <ClInclude Include="Objects\Shader.h" />
     <ClInclude Include="Objects\Texture.h" />
     <ClInclude Include="Objects\Vertex.h" />
+    <ClInclude Include="PostProcessing\BloomEffect.h" />
+    <ClInclude Include="PostProcessing\PostProcessCache.h" />
+    <ClInclude Include="PostProcessing\PostProcessEffect.h" />
+    <ClInclude Include="PostProcessing\SSAOEffect.h" />
     <ClInclude Include="RHI\GraphicsCommandList.h" />
     <ClInclude Include="RHI\PipelineStateObject.h" />
     <ClInclude Include="RHI\RHIShaderReflectionInfo.h" />
@@ -221,23 +228,24 @@
     <ClInclude Include="RHI\RenderHardwareInterface.h" />
     <ClInclude Include="RenderCulling.h" />
     <ClInclude Include="RenderItemRouting.h" />
+    <ClInclude Include="RenderSnapshot.h" />
     <ClInclude Include="Sprite\SpriteStructs.h" />
     <ClInclude Include="TextWidget.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ConstantBuffers\FrameBuffer.cpp" />
-    <ClCompile Include="ConstantBuffers\ObjectBuffer.cpp" />
     <ClCompile Include="Drawers\SpriteDrawer.cpp" />
     <ClCompile Include="GraphicsEngine.cpp" />
     <ClCompile Include="GraphicsEngine.pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="GraphicsRenderSettings.cpp" />
     <ClCompile Include="InterOp\DDSTextureLoader11.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Materials\Material.cpp" />
     <ClCompile Include="Materials\MaterialInterface.cpp" />
     <ClCompile Include="Materials\MaterialShaderIncludeHandler.cpp" />
+    <ClCompile Include="Objects\Animation.cpp" />
     <ClCompile Include="Objects\Buffer.cpp" />
     <ClCompile Include="Objects\Camera.cpp" />
     <ClCompile Include="Objects\Mesh.cpp" />
@@ -245,63 +253,26 @@
     <ClCompile Include="Objects\Shader.cpp" />
     <ClCompile Include="Objects\Texture.cpp" />
     <ClCompile Include="Objects\Vertex.cpp" />
+    <ClCompile Include="PostProcessing\BloomEffect.cpp" />
+    <ClCompile Include="PostProcessing\PostProcessCache.cpp" />
+    <ClCompile Include="PostProcessing\PostProcessEffect.cpp" />
+    <ClCompile Include="PostProcessing\SSAOEffect.cpp" />
     <ClCompile Include="RHI\GraphicsCommandList.cpp" />
     <ClCompile Include="RHI\PipelineStateObject.cpp" />
     <ClCompile Include="RHI\RHIShaderReflectionInfo.cpp" />
     <ClCompile Include="RHI\RenderHardwareInterface.cpp" />
+    <ClCompile Include="RenderSnapshot.cpp" />
     <ClCompile Include="TextWidget.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shaders\Internal\BRDF_LUT_PS.hlsl">
+    <FxCompile Include="Shaders\BRDF LUT_PS.hlsl">
       <ShaderType>Pixel</ShaderType>
       <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
       <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
       <ObjectFileOutput></ObjectFileOutput>
     </FxCompile>
-    <FxCompile Include="Shaders\Internal\DeferredAmbient_PS.hlsl">
-      <ShaderType>Pixel</ShaderType>
-      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
-      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
-      <ObjectFileOutput></ObjectFileOutput>
-    </FxCompile>
-    <FxCompile Include="Shaders\Internal\DeferredDirectional_PS.hlsl">
-      <ShaderType>Pixel</ShaderType>
-      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
-      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
-      <ObjectFileOutput></ObjectFileOutput>
-    </FxCompile>
-    <FxCompile Include="Shaders\Internal\DeferredPoint_PS.hlsl">
-      <ShaderType>Pixel</ShaderType>
-      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
-      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
-      <ObjectFileOutput></ObjectFileOutput>
-    </FxCompile>
-    <FxCompile Include="Shaders\Internal\DeferredSpot_PS.hlsl">
-      <ShaderType>Pixel</ShaderType>
-      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
-      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
-      <ObjectFileOutput></ObjectFileOutput>
-    </FxCompile>
-    <FxCompile Include="Shaders\Internal\FullTexture_VS.hlsl">
+    <FxCompile Include="Shaders\FullTexture_VS.hlsl">
       <ShaderType>Vertex</ShaderType>
-      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
-      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
-      <ObjectFileOutput></ObjectFileOutput>
-    </FxCompile>
-    <FxCompile Include="Shaders\Internal\PointShadow_GS.hlsl">
-      <ShaderType>Geometry</ShaderType>
-      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
-      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
-      <ObjectFileOutput></ObjectFileOutput>
-    </FxCompile>
-    <FxCompile Include="Shaders\Internal\RenderPassDebug_PS.hlsl">
-      <ShaderType>Pixel</ShaderType>
-      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
-      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
-      <ObjectFileOutput></ObjectFileOutput>
-    </FxCompile>
-    <FxCompile Include="Shaders\Internal\ScreenSpaceAO_PS.hlsl">
-      <ShaderType>Pixel</ShaderType>
       <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
       <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
       <ObjectFileOutput></ObjectFileOutput>
@@ -318,19 +289,25 @@
       <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
       <ObjectFileOutput></ObjectFileOutput>
     </FxCompile>
-    <FxCompile Include="Shaders\Internal\TextOverlay_PS.hlsl">
+    <FxCompile Include="Shaders\Material\Deferred_AmbientLight_PS.hlsl">
       <ShaderType>Pixel</ShaderType>
       <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
       <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
       <ObjectFileOutput></ObjectFileOutput>
     </FxCompile>
-    <FxCompile Include="Shaders\Internal\TextOverlay_VS.hlsl">
-      <ShaderType>Vertex</ShaderType>
+    <FxCompile Include="Shaders\Material\Deferred_DirLight_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
       <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
       <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
       <ObjectFileOutput></ObjectFileOutput>
     </FxCompile>
-    <FxCompile Include="Shaders\Internal\Tonemap_PS.hlsl">
+    <FxCompile Include="Shaders\Material\Deferred_PointLight_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
+      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
+      <ObjectFileOutput></ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shaders\Material\Deferred_SpotLight_PS.hlsl">
       <ShaderType>Pixel</ShaderType>
       <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
       <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
@@ -348,8 +325,20 @@
       <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
       <ObjectFileOutput></ObjectFileOutput>
     </FxCompile>
+    <FxCompile Include="Shaders\Material\ShadowCube_GS.hlsl">
+      <ShaderType>Geometry</ShaderType>
+      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
+      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
+      <ObjectFileOutput></ObjectFileOutput>
+    </FxCompile>
     <FxCompile Include="Shaders\Material\Surface_VS.hlsl">
       <ShaderType>Vertex</ShaderType>
+      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
+      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
+      <ObjectFileOutput></ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shaders\Material\Tonemapper_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
       <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
       <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
       <ObjectFileOutput></ObjectFileOutput>
@@ -360,20 +349,78 @@
       <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
       <ObjectFileOutput></ObjectFileOutput>
     </FxCompile>
+    <FxCompile Include="Shaders\PostProcess\Bloom_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
+      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
+      <ObjectFileOutput></ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shaders\PostProcess\GaussianBlurH_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
+      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
+      <ObjectFileOutput></ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shaders\PostProcess\GaussianBlurV_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
+      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
+      <ObjectFileOutput></ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shaders\PostProcess\Luminance_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
+      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
+      <ObjectFileOutput></ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shaders\PostProcess\Resample_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
+      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
+      <ObjectFileOutput></ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shaders\PostProcess\SSAO_BlurH_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
+      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
+      <ObjectFileOutput></ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shaders\PostProcess\SSAO_BlurV_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
+      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
+      <ObjectFileOutput></ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shaders\PostProcess\SSAO_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
+      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
+      <ObjectFileOutput></ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shaders\Text\TextOverlay_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
+      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
+      <ObjectFileOutput></ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shaders\Text\TextOverlay_VS.hlsl">
+      <ShaderType>Vertex</ShaderType>
+      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
+      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
+      <ObjectFileOutput></ObjectFileOutput>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\Internal\DeferredLighting.hlsli" />
-    <None Include="Shaders\Internal\Tonemap.hlsli" />
+    <None Include="Shaders\LUTFunctions.hlsli" />
     <None Include="Shaders\Material\Common.hlsli" />
-    <None Include="Shaders\Material\GlobalLightingTextures.hlsli" />
     <None Include="Shaders\Material\Lighting.hlsli" />
     <None Include="Shaders\Material\Material.hlsli" />
     <None Include="Shaders\Material\MaterialParameters.hlsli" />
-    <None Include="Shaders\Material\MaterialTextures.hlsli" />
-    <None Include="Shaders\Material\PBR.hlsli" />
     <None Include="Shaders\Material\PoissonDisks.hlsli" />
-    <None Include="Shaders\Material\Samplers.hlsli" />
-    <None Include="Shaders\Material\ShadowSampling.hlsli" />
+    <None Include="Shaders\Material\Tonemap.hlsli" />
+    <None Include="Shaders\PostProcess\BloomHelper.hlsli" />
+    <None Include="Shaders\PostProcess\SSAOHelper.hlsli" />
+    <None Include="Shaders\Text\TextOverlayHelper.hlsli" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

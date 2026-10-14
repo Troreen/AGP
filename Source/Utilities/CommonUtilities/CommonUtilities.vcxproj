@@ -158,6 +158,7 @@
     <ClInclude Include="AABB3D.hpp" />
     <ClInclude Include="AStar.hpp" />
     <ClInclude Include="Camera3D.hpp" />
+    <ClInclude Include="CommonUtilities.h" />
     <ClInclude Include="Dijkstra.hpp" />
     <ClInclude Include="EnumGamepadCode.h" />
     <ClInclude Include="EnumKeyCode.h" />
@@ -165,6 +166,7 @@
     <ClInclude Include="EnumPointerCode.h" />
     <ClInclude Include="Grid2D.hpp" />
     <ClInclude Include="GridRaytrace2D.hpp" />
+    <ClInclude Include="Heap.hpp" />
     <ClInclude Include="InputHandler.h" />
     <ClInclude Include="InputMapper.h" />
     <ClInclude Include="Intersection.hpp" />
@@ -176,16 +178,17 @@
     <ClInclude Include="Matrix.hpp" />
     <ClInclude Include="Matrix3x3.hpp" />
     <ClInclude Include="Matrix4x4.hpp" />
-    <ClInclude Include="NamespaceAlias.hpp" />
     <ClInclude Include="PathfindingTypes.hpp" />
     <ClInclude Include="Plane.hpp" />
     <ClInclude Include="PlaneVolume.hpp" />
     <ClInclude Include="QuadTree2D.hpp" />
     <ClInclude Include="Quaternion.hpp" />
+    <ClInclude Include="Queue.hpp" />
     <ClInclude Include="Ray.hpp" />
     <ClInclude Include="Rect2D.hpp" />
     <ClInclude Include="Rectangle.h" />
     <ClInclude Include="Sphere.hpp" />
+    <ClInclude Include="Stack.hpp" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Utility.hpp" />
     <ClInclude Include="Vector.hpp" />
