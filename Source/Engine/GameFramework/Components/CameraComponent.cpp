@@ -12,14 +12,24 @@ namespace
 	constexpr float WorldUpSelectionThreshold = 0.9f;
 }
 
-CameraComponent::CameraComponent() : myCamera(DefaultFieldOfView, DefaultNearPlane, DefaultFarPlane, CommonUtilities::Vector2u{1280, 720})
+CameraComponent::CameraComponent()
 {
+	for (size_t i = 0; i < DirectionalLightComponent::ShadowCascadeCount; ++i)
+	{
+		myCascadeSplits[i] = DefaultCascadeSplits[i];
+	}
+	myCamera = Camera(DefaultFieldOfView, DefaultNearPlane, DefaultFarPlane, myCascadeSplits, DefaultAspectRatio);
 }
 
 CameraComponent::CameraComponent(float aHorizontalFieldOfViewDegrees, float aNearPlane, float aFarPlane,
                                  const CommonUtilities::Vector2u& aResolution)
     : CameraComponent()
 {
+	for (size_t i = 0; i < DirectionalLightComponent::ShadowCascadeCount; ++i)
+	{
+		myCascadeSplits[i] = DefaultCascadeSplits[i];
+	}
+
 	if (!SetPerspective(aHorizontalFieldOfViewDegrees, aNearPlane, aFarPlane, aResolution))
 	{
 		throw std::invalid_argument("Invalid camera projection");
@@ -36,8 +46,10 @@ bool CameraComponent::SetPerspective(float aHorizontalFieldOfViewDegrees, float 
 	{
 		return false;
 	}
-	CommonUtilities::Camera3D candidate(aHorizontalFieldOfViewDegrees, aNearPlane, aFarPlane, aResolution);
-	const CommonUtilities::Matrix4f projectionMatrix = candidate.GetProjectionMatrix();
+
+	float aspectRatio = static_cast<float>(aResolution.y) / static_cast<float>(aResolution.x);
+	Camera candidate(aHorizontalFieldOfViewDegrees, aNearPlane, aFarPlane, myCascadeSplits, aspectRatio);
+	const CommonUtilities::Matrix4f& projectionMatrix = candidate.GetProjection();
 	for (int row = 1; row <= 4; ++row)
 	{
 		for (int column = 1; column <= 4; ++column)
@@ -48,54 +60,140 @@ bool CameraComponent::SetPerspective(float aHorizontalFieldOfViewDegrees, float 
 			}
 		}
 	}
+
 	myCamera = std::move(candidate);
-	myHorizontalFieldOfViewDegrees = aHorizontalFieldOfViewDegrees;
+	myHorizontalFieldOfViewRadians = aHorizontalFieldOfViewDegrees * CU::Math::DEGREES_TO_RADIANS<float>;
 	myNearPlane = aNearPlane;
 	myFarPlane = aFarPlane;
-	SyncCameraToOwner();
+	myAspectRatio = aspectRatio;
 	return true;
 }
 
 bool CameraComponent::SetResolution(const CommonUtilities::Vector2u& aResolution)
 {
-	return SetPerspective(myHorizontalFieldOfViewDegrees, myNearPlane, myFarPlane, aResolution);
+	return SetPerspective(GetFieldOfViewDegrees(), myNearPlane, myFarPlane, aResolution);
 }
 
-void CameraComponent::SyncCameraToOwner()
+const Camera& CameraComponent::GetCamera() const
 {
-	const Actor* owner = GetOwner();
-	if (owner == nullptr)
+	return myCamera;
+}
+
+CU::Matrix4f CameraComponent::GetView() const
+{
+	return GetOwner()->GetTransform().GetWorldMatrix().GetFastInverse();
+}
+
+const CU::Matrix4f& CameraComponent::GetProjection() const
+{
+	return myCamera.GetProjection();
+}
+
+const CU::Matrix4f& CameraComponent::GetProjectionByCascadeIndex(size_t aIndex) const
+{
+	return myCamera.GetProjectionByCascadeIndex(aIndex);
+}
+
+float CameraComponent::GetCascadeSplit(size_t aIndex) const
+{
+	return myCascadeSplits[aIndex];
+}
+
+std::array<CU::Vector3f, 8> CameraComponent::GetFrustumCorners() const
+{
+	return GetFrustumCorners(myNearPlane, myFarPlane);
+}
+
+std::array<CU::Vector3f, 8> CameraComponent::GetFrustumCorners(float aNearPlane, float aFarPlane) const
+{
+	const CU::Vector3f position = GetOwner()->GetTransform().GetWorldPosition();
+	const CU::Vector3f forward = GetOwner()->GetTransform().GetLocalForward();
+	const CU::Vector3f right = GetOwner()->GetTransform().GetLocalRight();
+	const CU::Vector3f up = GetOwner()->GetTransform().GetLocalUp();
+	const float tanHalfFov = std::tan(myHorizontalFieldOfViewRadians * 0.5f);
+
+	const float nearHeight = 2.0f * tanHalfFov * aNearPlane;
+	const float nearWidth = nearHeight * GetAspectRatio();
+	const float farHeight = 2.0f * tanHalfFov * aFarPlane;
+	const float farWidth = farHeight * GetAspectRatio();
+
+	const CU::Vector3f nearCenter = position + forward * aNearPlane;
+	const CU::Vector3f farCenter = position + forward * aFarPlane;
+
+	return { nearCenter - right * (nearWidth * 0.5f) + up * (nearHeight * 0.5f),
+			nearCenter + right * (nearWidth * 0.5f) + up * (nearHeight * 0.5f),
+			nearCenter + right * (nearWidth * 0.5f) - up * (nearHeight * 0.5f),
+			nearCenter - right * (nearWidth * 0.5f) - up * (nearHeight * 0.5f),
+			farCenter - right * (farWidth * 0.5f) + up * (farHeight * 0.5f),
+			farCenter + right * (farWidth * 0.5f) + up * (farHeight * 0.5f),
+			farCenter + right * (farWidth * 0.5f) - up * (farHeight * 0.5f),
+			farCenter - right * (farWidth * 0.5f) - up * (farHeight * 0.5f) };
+}
+
+void CameraComponent::LookAt(const CU::Vector3<float>& aTarget)
+{
+	const CU::Vector3<float> position = GetOwner()->GetTransform().GetWorldPosition();
+	CU::Vector3<float> forward = (aTarget - position).GetNormalized();
+	if (forward.LengthSqr() == 0.0f)
 	{
 		return;
 	}
 
-	// Build an orthonormal camera basis from the composed pose. Inherited scale
-	// affects placement, but never projection or view-axis lengths.
-	const CommonUtilities::Matrix4f worldMatrix = GetWorldMatrix();
-	const CommonUtilities::Vector3f forward = GetWorldDirection();
-	CommonUtilities::Vector3f up{worldMatrix(2, 1), worldMatrix(2, 2), worldMatrix(2, 3)};
-	CommonUtilities::Vector3f right = up.Cross(forward);
-	if (right.LengthSqr() < ParallelAxisToleranceSquared)
+	const float yaw = std::atan2(forward.x, forward.z);
+	const float pitch = -std::asin(forward.y);
+	GetOwner()->GetTransform().SetLocalRotationDegrees({ yaw * CU::Math::RADIANS_TO_DEGREES<float>, pitch * CU::Math::RADIANS_TO_DEGREES<float>, 0 });
+}
+
+CU::Ray<float> CameraComponent::ScreenPointToRay(const CU::Vector2<float>& aNormalizedScreenPos) const
+{
+	Transform& transform = GetOwner()->GetTransform();
+	const CU::Vector3<float> origin = transform.GetWorldPosition();
+
+	// TODO: If adding orthographic projection to game, re-add.
+	//if (myProjectionType == ProjectionType::Orthographic)
+	//{
+	//	const float ndcX = (aNormalizedScreenPos.x * 2.0f) - 1.0f;
+	//	const float ndcY = 1.0f - (aNormalizedScreenPos.y * 2.0f);
+
+	//	const CU::Vector3<float> right = transform.GetLocalRight();
+	//	const CU::Vector3<float> up = transform.GetLocalUp();
+
+	//	const CU::Vector3<float> offset =
+	//		right * (ndcX * (myOrthoRight - myOrthoLeft) * 0.5f) +
+	//		up * (ndcY * (myOrthoTop - myOrthoBottom) * 0.5f);
+
+	//	return CU::Ray<float>(origin + offset, transform.GetLocalForward());
+	//}
+
+	const float tanHalfFov = std::tan(myHorizontalFieldOfViewRadians * 0.5f);
+	const float ndcX = (aNormalizedScreenPos.x * 2.0f) - 1.0f;
+	const float ndcY = 1.0f - (aNormalizedScreenPos.y * 2.0f);
+
+	CU::Vector3<float> localDir(ndcX * tanHalfFov, ndcY * tanHalfFov * myAspectRatio, 1.0f);
+
+	localDir = localDir.GetNormalized();
+
+	CU::Vector3<float> worldDir = transform.GetLocalRight() * localDir.x + transform.GetLocalUp() * localDir.y + transform.GetLocalForward() * localDir.z;
+	worldDir.Normalize();
+
+	return CU::Ray<float>(origin, worldDir);
+}
+
+CU::Vector3<float> CameraComponent::WorldToScreenPoint(const CU::Vector3<float>& aWorldPos) const
+{
+	const CU::Matrix4f viewProjection = GetView() * GetProjection();
+	CU::Vector4<float> clip = CU::Vector4<float>(aWorldPos.x, aWorldPos.y, aWorldPos.z, 1.0f) * viewProjection;
+
+	if (clip.w == 0.0f)
 	{
-		const CommonUtilities::Vector3f referenceAxis = std::abs(forward.y) < WorldUpSelectionThreshold
-			? CommonUtilities::Vector3f::UnitY
-			: CommonUtilities::Vector3f::UnitX;
-		right = referenceAxis.Cross(forward);
+		return CU::Vector3<float>::Zero;
 	}
-	right.Normalize();
-	up = CU::NormalizeSafe(forward.Cross(right), CU::Vector3f::UnitY);
-	CommonUtilities::Matrix4f rigidWorldMatrix;
-	rigidWorldMatrix(1, 1) = right.x;
-	rigidWorldMatrix(1, 2) = right.y;
-	rigidWorldMatrix(1, 3) = right.z;
-	rigidWorldMatrix(2, 1) = up.x;
-	rigidWorldMatrix(2, 2) = up.y;
-	rigidWorldMatrix(2, 3) = up.z;
-	rigidWorldMatrix(3, 1) = forward.x;
-	rigidWorldMatrix(3, 2) = forward.y;
-	rigidWorldMatrix(3, 3) = forward.z;
-	rigidWorldMatrix(4, 1) = worldMatrix(4, 1);
-	rigidWorldMatrix(4, 2) = worldMatrix(4, 2);
-	rigidWorldMatrix(4, 3) = worldMatrix(4, 3);
-	myCamera.SetWorldMatrix(rigidWorldMatrix);
+
+	const float invW = 1.0f / clip.w;
+	const CU::Vector3<float> ndc(clip.x * invW, clip.y * invW, clip.z * invW);
+
+	return CU::Vector3<float>(
+		(ndc.x + 1.0f) * 0.5f,
+		(1.0f - ndc.y) * 0.5f,
+		ndc.z);
 }

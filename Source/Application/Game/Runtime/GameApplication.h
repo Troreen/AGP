@@ -9,18 +9,19 @@
 #include <Windows.h>
 
 #include "Components/CustomComponentRegistry.h"
-#include "GameFramework/Components/DebugCameraController.h"
-#include "GameFramework/Settings/EngineSettings.h"
-#include "GameFramework/Settings/InputSettingsApplier.h"
-#include "GameFramework/Settings/WindowSettings.h"
-#include "GraphicsEngine/GraphicsEngine.h"
-#include "GraphicsEngine/RHI/GraphicsCommandList.h"
 #include "InputHandler.h"
 #include "Vector2.hpp"
 #include "XInputHandler.h"
 
 #include <exception>
 #include <filesystem>
+#include <GameFramework/Components/DebugCameraController.h>
+#include <GameFramework/Settings/EngineSettings.h>
+#include <GameFramework/Settings/InputSettingsApplier.h>
+#include <GameFramework/Settings/WindowSettings.h>
+#include <GraphicsEngine/GraphicsEngine.h>
+#include <GraphicsEngine/GraphicsRenderSettings.h>
+#include <GraphicsEngine/RHI/GraphicsCommandList.h>
 #include <memory>
 #include <optional>
 #include <string>
@@ -94,8 +95,7 @@ private:
 	std::vector<unsigned> myApplicationInputListenerIds;
 
 	GraphicsCommandList myCommandList;
-	GraphicsEngine::RenderSceneSnapshot mySnapshot;
-	GraphicsEngine::RenderSettings myRenderSettings;
+	GraphicsRenderSettings myRenderSettings;
 	std::shared_ptr<TextWidget> myRenderPassNotificationWidget;
 	std::shared_ptr<FontAsset> myRenderFont;
 	float myRenderPassNotificationRemainingSeconds = 0.0f;

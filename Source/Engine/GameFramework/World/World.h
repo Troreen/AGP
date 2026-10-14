@@ -2,13 +2,13 @@
 #include "GameFramework/World/Actor.h"
 #include "Vector2.hpp"
 
+#include <GraphicsEngine/RenderSnapshot.h>
+
 class CameraComponent;
-class WorldRenderer;
 
 class World
 {
 	friend class Actor;
-	friend class WorldRenderer;
 
 public:
 	World() = default;
@@ -19,7 +19,6 @@ public:
 	Actor* SpawnActor(std::string name);
 	Actor* FindActor(const std::string& name) const;
 
-
 	bool SetActiveCamera(CameraComponent* camera);
 	CameraComponent* GetActiveCamera() const;
 	bool SetCameraResolution(const CommonUtilities::Vector2u& aResolution);
@@ -29,13 +28,20 @@ public:
 	void Update(float deltaTime);
 	void Clear();
 
+	// TODO: Would it be better to add MeshComponents and LightComponents to lists
+	//    when they are created/activated and removed when they are destroyed/deactivated?
+	RenderSnapshot& GenerateRenderSnapshot();
+
 private:
 	std::vector<Component*> CollectFrame();
 	void RemoveDestroyed();
+
 	std::vector<std::unique_ptr<Actor>> myActors;
 	CameraComponent* myCamera = nullptr;
 	bool myUpdating = false;
 	bool myClearing = false;
 
 	Actor* myDebugActor;
+
+	RenderSnapshot myWorldSnapshot;
 };

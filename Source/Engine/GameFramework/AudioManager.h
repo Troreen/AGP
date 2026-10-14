@@ -9,6 +9,7 @@ enum SoundID
 	eBlizzardAmbience,
 	eCastleAmbienceOne,
 	eCastleAmbienceTwo,
+	eCombatOne,
 	eCollectItem,
 	eCrossbowCock,
 	eHeavyRoar,

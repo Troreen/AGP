@@ -7,6 +7,8 @@
 #include "GameFramework/Settings/EngineSettings.h"
 #include "GameFramework/Coroutine/Scheduler.h"
 #include "GameFramework/Coroutine/CoroutineHandler.h"
+#include <GameFramework/Components/CameraComponent.h>
+#include <GameFramework/World/Actor.h>
 
 #include <InputMapper.h>
 
@@ -26,6 +28,7 @@ void ServiceLocator::Initialize()
 	myEngineSettings = new EngineSettings();
 	myScheduler = new Scheduler();
 	myCouroutineHandler = new CoroutineHandler();
+	mySceneCamera = new CameraComponent();
 }
 
 CommonUtilities::InputMapper& ServiceLocator::GetInputMapper()
@@ -68,6 +71,37 @@ CoroutineHandler& ServiceLocator::GetCoroutineHandler() const
 	return *myCouroutineHandler;
 }
 
+CameraComponent& ServiceLocator::GetActiveCamera() const
+{
+	return *mySceneCamera;
+}
+
+void ServiceLocator::SetActiveCamera(CameraComponent* aCamera)
+{
+	mySceneCamera = aCamera;
+}
+
+Actor* ServiceLocator::GetPlayer() const
+{
+	return myPlayer;
+}
+
+float ServiceLocator::GetDeltaTime() const
+{
+	return myDeltaTime;
+}
+
+
+void ServiceLocator::SetPlayer(Actor* aPlayer)
+{
+	myPlayer = aPlayer;
+}
+
+void ServiceLocator::SetDeltaTime(float aDeltaTime)
+{
+	myDeltaTime = aDeltaTime;
+}
+
 void ServiceLocator::KillServices()
 {
 	delete myInputMapper;
@@ -91,6 +125,8 @@ void ServiceLocator::KillServices()
 
 	delete myScheduler;
 	myScheduler = nullptr;
+
+	mySceneCamera = nullptr;
 }
 
 ServiceLocator::ServiceLocator()
@@ -102,6 +138,9 @@ ServiceLocator::ServiceLocator()
 	, myEngineSettings(nullptr)
 	, myScheduler(nullptr)
 	, myCouroutineHandler(nullptr)
+	, mySceneCamera(nullptr)
+	, myPlayer(nullptr)
+	, myDeltaTime(0)
 {
 }
 

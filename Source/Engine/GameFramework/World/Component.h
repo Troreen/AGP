@@ -10,6 +10,9 @@ class World;
 // Owned by one Actor. Owner is available after AddComponent returns.
 class Component
 {
+	friend class Actor;
+	friend class World;
+
 public:
 	virtual ~Component() = default;
 	Component() = default;
@@ -82,6 +85,4 @@ private:
 	bool myEnabled = true;
 	bool myBegun = false;
 	bool myDestroyed = false;
-	friend class Actor;
-	friend class World;
 };

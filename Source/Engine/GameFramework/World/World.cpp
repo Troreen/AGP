@@ -94,6 +94,7 @@ bool World::SetActiveCamera(CameraComponent* camera)
 		return false;
 	}
 	myCamera = camera;
+	ServiceLocator::GetInstance().SetActiveCamera(myCamera);
 	return true;
 }
 
@@ -218,7 +219,6 @@ void World::Update(float deltaTime)
 				component->Update(deltaTime);
 			}
 		}
-
 	}
 	catch (...)
 	{
@@ -243,4 +243,43 @@ void World::Clear()
 	std::vector<std::unique_ptr<Actor>> actors = std::move(myActors);
 	actors.clear();
 	myClearing = false;
+}
+
+RenderSnapshot& World::GenerateRenderSnapshot()
+{
+	myWorldSnapshot.Clear();
+
+	myWorldSnapshot.ActiveCamera = myCamera;
+
+	for (const std::unique_ptr<Actor>& actor : myActors)
+	{
+		if (!actor->IsActive())
+		{
+			continue;
+		}
+
+		for (const std::unique_ptr<Component>& component : actor->myComponents)
+		{
+			if (!component->HasBegunPlay() || !component->IsEnabled() || component->IsPendingDestroy())
+			{
+				continue;
+			}
+
+			MeshComponentBase* meshComponent = dynamic_cast<MeshComponentBase*>(component.get());
+			if (meshComponent != nullptr)
+			{
+				myWorldSnapshot.Meshes.emplace_back(meshComponent);
+				continue;
+			}
+
+			LightComponent* lightComponent = dynamic_cast<LightComponent*>(component.get());
+			if (lightComponent != nullptr)
+			{
+				myWorldSnapshot.Lights.emplace_back(lightComponent);
+				continue;
+			}
+		}
+	}
+
+	return myWorldSnapshot;
 }

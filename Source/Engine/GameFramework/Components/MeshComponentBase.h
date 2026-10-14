@@ -11,16 +11,14 @@ class MaterialAsset;
 class MeshAsset;
 class SkeletalMeshComponent;
 
-class WorldRenderer;
-
 // Connects a spatial attachment to shared mesh/material assets. Component offsets
 // compose with the owner; assets are shared by actors and render snapshots. Load and
 // configure shared assets before play; 
 // TODO: runtime asset editing needs a future safe API.
 class MeshComponentBase : public SceneComponent
 {
+	friend class GraphicsEngine;
 	friend class SkeletalMeshComponent;
-	friend class WorldRenderer;
 
 public:
 	MeshComponentBase() = default;
@@ -35,6 +33,7 @@ public:
 	// Invalid slots or empty materials leave the existing binding unchanged.
 	bool SetMaterial(unsigned aMaterialIndex, const std::shared_ptr<MaterialAsset>& aMaterial);
 	const std::shared_ptr<MaterialAsset> GetMaterial(unsigned index) const;
+	const std::vector<std::shared_ptr<MaterialAsset>> GetMaterialList() const { return myMaterials; }
 
 	unsigned GetMaterialCount() const
 	{

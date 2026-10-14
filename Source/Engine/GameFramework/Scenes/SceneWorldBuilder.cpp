@@ -217,7 +217,7 @@ void SceneWorldBuilder::CreateActorsAndComponents(World& aWorld, const std::vect
 
 					// Apply common data, then custom variables.
 					ApplyCommonComponentData(*customComponent, customComponentData->Common);
-					customComponent->ApplyCustomVariables(customComponentData->Variables);
+					customComponent->InitializeCustomVariables(customComponentData->Variables);
 					continue;
 				}
 
@@ -460,6 +460,10 @@ Component* SceneWorldBuilder::CreateComponent(Actor& anActor, const ComponentRec
 				light->SetColor(someComponentData.Color);
 				light->SetSourceColorAlpha(someComponentData.ColorAlpha);
 				light->SetIntensity(someComponentData.Intensity);
+				light->SetShadowCascadeMapSize({ 2048, 2048 }, 0);
+				light->SetShadowCascadeMapSize({ 2048, 2048 }, 1);
+				light->SetShadowCascadeMapSize({ 4096, 4096 }, 2);
+				light->SetCastShadows(true);
 				return light;
 			}
 			else if constexpr (std::is_same_v<ComponentType, PointLightData>)
@@ -470,6 +474,8 @@ Component* SceneWorldBuilder::CreateComponent(Actor& anActor, const ComponentRec
 				light->SetIntensity(someComponentData.Intensity);
 				light->SetRadius(someComponentData.Radius);
 				light->SetFalloffExponent(someComponentData.FalloffExponent);
+				light->SetShadowMapSize({ 512, 512 });
+				light->SetCastShadows(true);
 				return light;
 			}
 			else if constexpr (std::is_same_v<ComponentType, SpotLightData>)
@@ -481,6 +487,8 @@ Component* SceneWorldBuilder::CreateComponent(Actor& anActor, const ComponentRec
 				light->SetRadius(someComponentData.Radius);
 				light->SetFalloffExponent(someComponentData.FalloffExponent);
 				light->SetConeAnglesDegrees(someComponentData.InnerConeDegrees, someComponentData.OuterConeDegrees);
+				light->SetShadowMapSize({ 512, 512 });
+				light->SetCastShadows(true);
 				return light;
 			}
 			else if constexpr (std::is_same_v<ComponentType, CustomComponentData>)

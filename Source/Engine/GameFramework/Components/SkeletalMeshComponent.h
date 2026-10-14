@@ -9,7 +9,7 @@
 #include <string>
 #include <string_view>
 
-class Animation;
+struct Animation;
 class AnimatorComponent;
 
 // Per-instance animation playback and joint poses over a shared mesh/skeleton.

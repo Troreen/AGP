@@ -7,7 +7,7 @@ GameFramework contains the reusable gameplay data and object model:
 - World: World, Actor, Component and Transform ownership and lifecycle.
 - Components: scene offsets, cameras, lights and meshes.
 - Scenes: `SceneData`, property reading, and `BuildWorld`.
-- Rendering: the adapter that copies a live World into a render snapshot.
+- Rendering: `World::GenerateRenderSnapshot` gathers borrowed Component pointers for GraphicsEngine.
 - AssetHandling, audio, input and ServiceLocator: the shared engine services.
 - UnrealSceneImporter: conversion from the exported Unreal JSON format.
 

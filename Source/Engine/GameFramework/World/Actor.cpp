@@ -6,6 +6,10 @@ Actor::Actor(World& world, std::string name) : myName(std::move(name)), myWorld(
 {
 }
 
+Actor::Actor() : myWorld(nullptr)
+{
+}
+
 Actor::~Actor()
 {
 	// Reverse order keeps earlier dependencies alive through later EndPlay calls.

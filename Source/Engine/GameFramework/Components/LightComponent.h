@@ -1,9 +1,9 @@
 #pragma once
 
 #include "GameFramework/Components/SceneComponent.h"
-#include "Matrix.hpp"
-#include "Vector.hpp"
 
+#include <CommonUtilities/CommonUtilities.h>
+#include <GraphicsEngine/Objects/Texture.h>
 #include <cstdint>
 
 enum class LightType : uint32_t
@@ -19,56 +19,97 @@ enum class LightType : uint32_t
 class LightComponent : public SceneComponent
 {
 public:
-	LightType GetLightType() const;
+	virtual LightType GetLightType() const = 0;
 
-	const CU::Vector3f& GetColor() const;
-	void SetColor(const CU::Vector3f& aColor);
+	const Texture* GetShadowMap() const;
 
-	float GetIntensity() const;
-	void SetIntensity(float anIntensity);
+	const CU::Matrix4f& GetProjectionMatrix() const { return myProjectionMatrix; }
+	const CU::Vector3f& GetColor() const { return myColor; }
 
-	float GetRadius() const;
-	void SetRadius(float aRadius);
+	virtual float GetIntensity() const;
+	float GetRadius() const { return myRadius; }
 	float GetFalloffExponent() const { return myFalloffExponent; }
-	void SetFalloffExponent(float value) { myFalloffExponent = value; }
 	float GetSourceColorAlpha() const { return mySourceColorAlpha; }
+	float GetInnerCone() const { return myInnerCone; }
+	float GetOuterCone() const { return myOuterCone; }
+	bool CastShadows() const { return myCastShadows; }
+
+	void SetColor(const CU::Vector3f& aColor) { myColor = aColor; }
+	void SetShadowMapSize(const CU::Vector2u& aSize);
+
+	void SetIntensity(float anIntensity);
+	void SetRadius(float aRadius);
+	void SetFalloffExponent(float value) { myFalloffExponent = value; }
 	void SetSourceColorAlpha(float value) { mySourceColorAlpha = value; }
-
-	float GetInnerCone() const;
-	float GetOuterCone() const;
 	void SetConeAnglesDegrees(float anInnerConeDegrees, float anOuterConeDegrees);
-
-	CU::Vector3f GetWorldPosition() const;
-	CU::Vector3f GetWorldDirection() const;
+	void SetCastShadows(bool aCastShadows) { myCastShadows = aCastShadows; }
 
 protected:
-	explicit LightComponent(LightType aType);
+	virtual const CU::Matrix4f CreateProjectionMatrix() const;
 
-private:
-	LightType myType;
+	Texture myShadowMap;
+
+	CU::Matrix4f myProjectionMatrix;
 	CU::Vector3f myColor = CU::Vector3f::One;
+	CU::Vector2u myShadowMapSize;
+
 	float myIntensity = 1.0f;
 	float myRadius = 1000.0f;
 	float myFalloffExponent = 0.0f;
 	float mySourceColorAlpha = 1.0f;
 	float myInnerCone = 0.349066f;
 	float myOuterCone = 0.610865f;
+
+	bool myCastShadows = true;
 };
+
+
 
 class DirectionalLightComponent final : public LightComponent
 {
 public:
+	static constexpr unsigned ShadowCascadeCount = 3;
+
 	DirectionalLightComponent();
+
+	LightType GetLightType() const override { return LightType::Directional; }
+
+	float GetIntensity() const override;
+
+	const Texture* GetShadowCascadeMap(size_t aIndex) const;
+	void SetShadowCascadeMapSize(const CU::Vector2u& aSize, size_t aIndex);
+
+protected:
+	const CU::Matrix4f CreateProjectionMatrix() const override;
+
+private:
+	Texture myShadowCascadeMaps[ShadowCascadeCount - 1];
+
+	CU::Vector2u myShadowCascadeMapSizes[ShadowCascadeCount - 1];
 };
+
+
 
 class PointLightComponent final : public LightComponent
 {
 public:
 	PointLightComponent();
+
+	LightType GetLightType() const override { return LightType::Point; }
+
+protected:
+	const CU::Matrix4f CreateProjectionMatrix() const override;
 };
+
+
 
 class SpotLightComponent final : public LightComponent
 {
 public:
 	SpotLightComponent();
+
+	LightType GetLightType() const override { return LightType::Spot; }
+
+protected:
+	const CU::Matrix4f CreateProjectionMatrix() const override;
 };

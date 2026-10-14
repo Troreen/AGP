@@ -4,32 +4,31 @@
 
 #include "Game.h"
 #include "Components/RegisterCustomComponents.h"
-#include "GameFramework/AssetHandling/AssetRegistry.h"
-#include "GameFramework/AssetHandling/FontAsset.h"
-#include "GameFramework/AssetHandling/MaterialAsset.h"
-#include "GameFramework/AssetHandling/MeshAsset.h"
-#include "GameFramework/Coroutine/Scheduler.h"
-#include "GameFramework/AudioManager.h"
-#include "GameFramework/Animation/AnimationManager.h"
-#include "GameFramework/Components/CameraComponent.h"
-#include "GameFramework/Settings/EngineSettings.h"
-#include "GameFramework/GameFrameworkLog.h"
-#include "GameFramework/Rendering/WorldRenderer.h"
-#include "GameFramework/Scenes/SceneWorldBuilder.h"
-#include "GameFramework/ServiceLocator.h"
-#include "GameFramework/UnrealSceneImporter/UnrealSceneImporter.h"
-#include "GameFramework/World/World.h"
-#include "GraphicsEngine/TextWidget.h"
 #include "InputMapper.h"
 #include "Maths.hpp"
 #include "Assets/PrimitiveMeshBuilder.h"
 #include "StringHelpers.h"
 #include "Timer.h"
-#include <GraphicsEngine/Drawers/SpriteDrawer.h>
 
 #include <algorithm>
 #include <exception>
 #include <functional>
+#include <GameFramework/AssetHandling/AssetRegistry.h>
+#include <GameFramework/AssetHandling/FontAsset.h>
+#include <GameFramework/AssetHandling/MaterialAsset.h>
+#include <GameFramework/AssetHandling/MeshAsset.h>
+#include <GameFramework/AudioManager.h>
+#include <GameFramework/Coroutine/Scheduler.h>
+#include <GameFramework/GameFrameworkLog.h>
+#include <GameFramework/Scenes/SceneWorldBuilder.h>
+#include <GameFramework/ServiceLocator.h>
+#include <GameFramework/Settings/EngineSettings.h>
+#include <GameFramework/UnrealSceneImporter/UnrealSceneImporter.h>
+#include <GameFramework/World/World.h>
+#include <GraphicsEngine/Drawers/SpriteDrawer.h>
+#include <GraphicsEngine/PostProcessing/BloomEffect.h>
+#include <GraphicsEngine/PostProcessing/SSAOEffect.h>
+#include <GraphicsEngine/TextWidget.h>
 #include <sstream>
 #include <stdexcept>
 #include <string_view>
@@ -260,6 +259,18 @@ GraphicsEngine& GameApplication::InitializeWindowAndGraphics()
 
 	// Initialize graphics engine
 	GraphicsEngine& graphics = GraphicsEngine::Get();
+
+	std::shared_ptr<SSAOEffect> ssao = std::make_shared<SSAOEffect>();
+	ssao->GetSettings().SampleRadiusTexels = 4;
+	ssao->GetSettings().MaxDistance = 100;
+	ssao->GetSettings().MinDistance = 0.001f;
+	graphics.AddPostProcessEffect(ssao);
+
+	std::shared_ptr<BloomEffect> bloom = std::make_shared<BloomEffect>();
+	bloom->GetSettings().LuminanceThreshhold = 1.0f;
+	bloom->GetSettings().LuminanceExponent = 1.5f;
+	graphics.AddPostProcessEffect(bloom);
+
 	if (!graphics.Initialize(myMainWindowHandle, myContentRoot / myApplicationSettings.ShaderFolder) || 
 		!graphics.CreateCommandList("Game Scene", myCommandList))
 	{
@@ -341,9 +352,9 @@ void GameApplication::InitializeInputAndApplicationControls()
 		{
 			if (anEvent.inputData.isPressed)
 			{
-				const uint32_t currentPass = static_cast<uint32_t>(myRenderSettings.SelectedRenderPass);
-				constexpr uint32_t maxPass = static_cast<uint32_t>(RenderPass::Count);
-				myRenderSettings.SelectedRenderPass = static_cast<RenderPass>(currentPass == 0 ? maxPass - 1 : currentPass - 1);
+				const uint32_t currentPass = static_cast<uint32_t>(myRenderSettings.RenderPass);
+				constexpr uint32_t maxPass = static_cast<uint32_t>(RenderPassType::Count);
+				myRenderSettings.RenderPass = static_cast<RenderPassType>(currentPass == 0 ? maxPass - 1 : currentPass - 1);
 				ShowRenderPassNotification();
 			}
 		}));
@@ -351,9 +362,9 @@ void GameApplication::InitializeInputAndApplicationControls()
 		{
 			if (anEvent.inputData.isPressed)
 			{
-				const uint32_t currentPass = static_cast<uint32_t>(myRenderSettings.SelectedRenderPass);
-				constexpr uint32_t maxPass = static_cast<uint32_t>(RenderPass::Count);
-				myRenderSettings.SelectedRenderPass = static_cast<RenderPass>((currentPass + 1) % maxPass);
+				const uint32_t currentPass = static_cast<uint32_t>(myRenderSettings.RenderPass);
+				constexpr uint32_t maxPass = static_cast<uint32_t>(RenderPassType::Count);
+				myRenderSettings.RenderPass = static_cast<RenderPassType>((currentPass + 1) % maxPass);
 				ShowRenderPassNotification();
 			}
 		}));
@@ -436,11 +447,12 @@ void GameApplication::RunMainLoop(Game& aGame, GraphicsEngine& aGraphics)
 		aGame.Update(*myWorld, delta);
 		myWorld->Update(delta);
 		ServiceLocator::GetInstance().GetAudioManager().Update(delta);
-
+		ServiceLocator::GetInstance().SetDeltaTime(delta);
 		ServiceLocator::GetInstance().GetScheduler().IncreaseTimers(delta);
 		ServiceLocator::GetInstance().GetScheduler().Update();
 
 		RenderFrame(aGraphics);
+
 	}
 }
 
@@ -472,10 +484,10 @@ bool GameApplication::PrepareRenderTargetSize(GraphicsEngine& aGraphics)
 
 void GameApplication::RenderFrame(GraphicsEngine& aGraphics)
 {
-	WorldRenderer::Build(*myWorld, aGraphics, mySnapshot);
+	RenderSnapshot& worldSnapshot = myWorld->GenerateRenderSnapshot();
 
 	// Render pass notification overlay
-	if (myRenderPassNotificationWidget && myRenderPassNotificationRemainingSeconds > 0.0f)
+	if (myRenderPassNotificationWidget && myRenderPassNotificationWidget->GetOpacity() > 0)
 	{
 		const float opacity = myRenderPassNotificationRemainingSeconds >= RenderPassNotificationFadeDurationSeconds
 			? 1.0f
@@ -483,21 +495,23 @@ void GameApplication::RenderFrame(GraphicsEngine& aGraphics)
 
 		myRenderPassNotificationWidget->SetOpacity(opacity);
 
-		mySnapshot.ScreenTextItems.push_back(myRenderPassNotificationWidget);
+		worldSnapshot.ScreenTextItems.push_back(myRenderPassNotificationWidget);
 	}
 
 	myCommandList.ResetCommandList();
 
-	std::vector<SpriteDrawCall> spriteDrawCalls = SpriteDrawer::Get().GetDrawCalls();
+	SpriteDrawer& spriteDrawer = SpriteDrawer::Get();
+	std::vector<SpriteDrawCall> spriteDrawCalls = spriteDrawer.GetDrawCalls();
 
 	std::sort(spriteDrawCalls.begin(), spriteDrawCalls.end(), [](const SpriteDrawCall& A, const SpriteDrawCall& B)
 		{
 			return A.SpriteInstanceData->Depth < B.SpriteInstanceData->Depth;
 		});
 
-	mySnapshot.ScreenSpriteItems = spriteDrawCalls;
+	worldSnapshot.ScreenSpriteItems = spriteDrawCalls;
 
-	aGraphics.RenderSnapshot(myCommandList, mySnapshot, myRenderSettings);
+	aGraphics.Render(myCommandList, worldSnapshot, myRenderSettings);
+	spriteDrawer.Clear();
 	
 	if (myCommandList.FinishCommandList())
 	{
@@ -623,7 +637,7 @@ void GameApplication::ShowRenderPassNotification()
 	{
 		return;
 	}
-	myRenderPassNotificationWidget->SetText(std::string("Render Pass: ") + GraphicsEngine::RenderSettings::GetRenderPassName(myRenderSettings.SelectedRenderPass));
+	myRenderPassNotificationWidget->SetText(std::string("Render Pass: ") + GraphicsRenderSettings::GetRenderPassName(myRenderSettings.RenderPass));
 	myRenderPassNotificationWidget->SetOpacity(1.0f);
 	myRenderPassNotificationRemainingSeconds = RenderPassNotificationDurationSeconds;
 }
@@ -668,7 +682,6 @@ void GameApplication::RemoveApplicationInputListeners()
 
 void GameApplication::ReleaseRenderReferences()
 {
-	mySnapshot.Clear();
 	myRenderPassNotificationWidget.reset();
 	myRenderFont.reset();
 	myRenderPassNotificationRemainingSeconds = 0.0f;

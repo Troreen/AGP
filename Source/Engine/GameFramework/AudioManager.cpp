@@ -158,6 +158,7 @@ void AudioManager::RegisterAllEvents()
 	SoundEngine::RegisterEvent("event:/Blizzard Ambience", SoundID::eBlizzardAmbience);
 	SoundEngine::RegisterEvent("event:/Castle Ambience 1", SoundID::eCastleAmbienceOne);
 	SoundEngine::RegisterEvent("event:/Castle Ambience 2", SoundID::eCastleAmbienceTwo);
+	SoundEngine::RegisterEvent("event:/Combat One", SoundID::eCombatOne);
 	SoundEngine::RegisterEvent("event:/Collect Item", SoundID::eCollectItem);
 	SoundEngine::RegisterEvent("event:/Crossbow Cock", SoundID::eCrossbowCock);
 	SoundEngine::RegisterEvent("event:/Heavy Roar", SoundID::eHeavyRoar);
@@ -170,6 +171,7 @@ void AudioManager::RegisterAllEvents()
 	myMusicList.insert({ SoundID::eBlizzardAmbience, SoundEngine::CreateEventInstance(SoundID::eBlizzardAmbience) });
 	myMusicList.insert({ SoundID::eCastleAmbienceOne, SoundEngine::CreateEventInstance(SoundID::eCastleAmbienceOne) });
 	myMusicList.insert({ SoundID::eCastleAmbienceTwo, SoundEngine::CreateEventInstance(SoundID::eCastleAmbienceTwo) });
+	myMusicList.insert({ SoundID::eCombatOne, SoundEngine::CreateEventInstance(SoundID::eCombatOne) });
 	myMusicList.insert({ SoundID::eCollectItem, SoundEngine::CreateEventInstance(SoundID::eCollectItem) });
 	myMusicList.insert({ SoundID::eCrossbowCock, SoundEngine::CreateEventInstance(SoundID::eCrossbowCock) });
 	myMusicList.insert({ SoundID::eHeavyRoar, SoundEngine::CreateEventInstance(SoundID::eHeavyRoar) });

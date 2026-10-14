@@ -13,13 +13,16 @@
 #include "GameFramework/World/World.h"
 #include <GameFramework/Animation/AnimationManager.h>
 #include "InputMapper.h"
+#include "Player/PlayerActor.h"
+#include "Player/PlayerController.h"
+#include "Player/PlayerMovementComponent.h"
+#include "EnemyComponent.h"
 
 #include <memory>
 
 DEFINE_LOG_CATEGORY(LogGame);
 
 Game::Game() = default;
-
 Game::~Game() = default;
 
 void Game::Initialize(GameApplication& anApplication)
@@ -34,22 +37,16 @@ void Game::Initialize(GameApplication& anApplication)
 		}
 	}));
 
-	ServiceLocator::GetInstance().GetAudioManager().PlaySFX(eIntroSwell);
-
 	GAMELOG(Log, "Game ready: F4 reloads the current scene, ESC quits the game.");
 }
 
 void Game::Update([[maybe_unused]] World& aWorld, [[maybe_unused]] float aDeltaTime)
 {
-	if (!ServiceLocator::GetInstance().GetAudioManager().IsEventPlaying(eBlizzardAmbience))
+	if (!ServiceLocator::GetInstance().GetAudioManager().IsEventPlaying(eCastleAmbienceOne))
 	{
-		ServiceLocator::GetInstance().GetAudioManager().PlayMusic(eBlizzardAmbience);
+		ServiceLocator::GetInstance().GetAudioManager().PlayMusic(eCastleAmbienceOne);
 	}
 
-	if (!ServiceLocator::GetInstance().GetAudioManager().IsEventPlaying(eSlash))
-	{
-		ServiceLocator::GetInstance().GetAudioManager().PlayMusic(eSlash);
-	}
 }
 
 void Game::Shutdown()
@@ -65,7 +62,6 @@ void Game::Shutdown()
 
 void Game::ConfigureWorld(World& aWorld)
 {
-
 	// {
 	// 	Actor* playerBro = aWorld.SpawnActor("PLAYAH_BRO");
 	// 	playerBro->GetTransform().SetLocalRotationDegrees({ 0, 0, 0 });
@@ -79,6 +75,7 @@ void Game::ConfigureWorld(World& aWorld)
 	//	AnimatorComponent* animatorBro = playerBro->AddComponent<AnimatorComponent>();
 	//	animatorBro->SetMeshComponent(component);
 	//	animatorBro->SetTree("PlayerTree");
+
 
 	//	animatorBro->GetTree().SetBool("IsIdle", true);
 	//}
@@ -98,6 +95,7 @@ void Game::ConfigureWorld(World& aWorld)
 	//	animatorBro->SetTree("BroTree");
 	//	animatorBro->ConfigurePartialLayerFromJointName("RightArm");
 
+
 	//	animatorBro->GetTree().SetBool("IsIdle", true);
 	//}
 
@@ -109,12 +107,71 @@ void Game::ConfigureWorld(World& aWorld)
 
 		std::shared_ptr<TextureAsset> asset = assetRegistry.GetAsset<TextureAsset>("TgaLogo.dds");
 		component->SetSprite(asset);
-		component->SetSize({2048.0f * 0.5f, 512.0f * 0.5f});
-		component->SetPivot({1, 1});
-		component->SetPosition({0.0f, 0.0f});
-		component->SetAnchor({1.0f, 1.0f});
+		component->SetSize({ 2048.0f * 0.5f, 512.0f * 0.5f });
+		component->SetPivot({ 1, 1 });
+		component->SetPosition({ 0.0f, 0.0f });
+		component->SetAnchor({ 1.0f, 1.0f });
 		//component->SendDrawCall();
 	}
+
+	{
+		Actor* actor = aWorld.SpawnActor("Player");
+		{
+			SkeletalMeshComponent* component = actor->AddComponent<SkeletalMeshComponent>();
+			AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
+
+			std::shared_ptr<MeshAsset> asset = assetRegistry.GetAsset<MeshAsset>("SK_player.fbx");
+			component->SetMesh(asset);
+
+			AnimatorComponent* animatorBro = actor->AddComponent<AnimatorComponent>();
+			animatorBro->SetMeshComponent(component);
+			animatorBro->SetTree("PlayerTree");
+
+
+			animatorBro->GetTree().SetBool("IsIdle", true);
+		}
+		{
+			actor->AddComponent<PlayerController>();
+		}
+		{
+			actor->AddComponent<PlayerMovementComponent>();
+		}
+	}
+
+	{
+		Actor* actor = aWorld.SpawnActor("Enemy");
+		{
+			SkeletalMeshComponent* component = actor->AddComponent<SkeletalMeshComponent>();
+			AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
+
+			std::shared_ptr<MeshAsset> asset = assetRegistry.GetAsset<MeshAsset>("SK_enemy02.fbx");
+			component->SetMesh(asset);
+
+
+			AnimatorComponent* animatorBro = actor->AddComponent<AnimatorComponent>();
+			std::shared_ptr<AnimationAsset> animation = assetRegistry.GetAsset<AnimationAsset>("A_enemy02_idle.fbx");
+			animatorBro->SetMeshComponent(component);
+			animatorBro->AddAnimation("Idle", animation);
+			animatorBro->PlayAnimation("Idle", true);
+
+		}
+		{
+			actor->AddComponent<EnemyComponent>();
+		}
+
+		actor->GetTransform().SetData({ { -500, 0, 0 }, {180, 0, 0} });
+	}
+
+	//{
+	//	Actor* actor = aWorld.SpawnActor("NavmeshTest");
+	//	SkeletalMeshComponent* component = actor->AddComponent<SkeletalMeshComponent>();
+	//	actor->GetTransform().SetWorldPosition({ -100, 100, 0 });
+
+	//	AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
+
+	//	std::shared_ptr<MeshAsset> asset = assetRegistry.GetAsset<MeshAsset>("Lvl_Blockout_NavMesh.fbx");
+	//	component->SetMesh(asset);
+	//}
 
 	{ // TODO : Temporary place for debug animation
 		AnimationManager::DebugData& data = ServiceLocator::GetInstance().GetAnimationManager().GetDebugData();
@@ -125,8 +182,8 @@ void Game::ConfigureWorld(World& aWorld)
 		}
 
 		Actor* playerBro = aWorld.SpawnActor("A_Debug");
-		playerBro->GetTransform().SetLocalRotationDegrees({0, 0, 0});
-		playerBro->GetTransform().SetWorldPosition({data.Position.x, data.Position.y, data.Position.z});
+		playerBro->GetTransform().SetLocalRotationDegrees({ 0, 0, 0 });
+		playerBro->GetTransform().SetWorldPosition({ data.Position.x, data.Position.y, data.Position.z });
 
 		SkeletalMeshComponent* component = playerBro->AddComponent<SkeletalMeshComponent>();
 		AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
@@ -145,28 +202,28 @@ void Game::ConfigureWorld(World& aWorld)
 		for (AnimationManager::Variable& var : data.Variables)
 		{
 			map.BindActionToInputCode(var.Name, key);
-			key = EKeyCode(static_cast<int>(key) + 1);
 
 			map.AddEventListener(var.Name, [var, animatorBro](const CommonUtilities::InputEvent event)
-			{
-				if (!event.inputData.isPressed)
 				{
-					return;
-				}
-				if (var.Type == "Bool")
-				{
-					animatorBro->GetTree().SetBool(var.Name, !animatorBro->GetTree().GetAnimationVariable(var.Name).IsActive);
-				}
-				else
-				{
-					animatorBro->GetTree().SetTrigger(var.Name);
-				}
-			});
+					if (!event.inputData.isPressed)
+					{
+						return;
+					}
+					if (var.Type == "Bool")
+					{
+						animatorBro->GetTree().SetBool(var.Name, !animatorBro->GetTree().GetAnimationVariable(var.Name).IsActive);
+					}
+					else
+					{
+						animatorBro->GetTree().SetTrigger(var.Name);
+					}
+				});
 
-			if (key == EKeyCode(static_cast<int>(EKeyCode::NUMPAD9) + 1))
+			if (key == EKeyCode::NUMPAD9)
 			{
 				break;
 			}
+			key = EKeyCode(static_cast<int>(key) + 1);
 		}
 	} //Dont put anything below this line
 }

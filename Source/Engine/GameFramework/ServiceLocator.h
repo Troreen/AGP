@@ -12,6 +12,8 @@ class AnimationManager;
 class EngineSettings;
 class Scheduler;
 class CoroutineHandler;
+class CameraComponent;
+class Actor;
 
 class ServiceLocator
 {
@@ -34,6 +36,15 @@ public:
 	Scheduler& GetScheduler() const;
 	CoroutineHandler& GetCoroutineHandler() const;
 
+	CameraComponent& GetActiveCamera() const;
+	void SetActiveCamera(CameraComponent* aCamera);
+
+	Actor* GetPlayer() const;
+	void SetPlayer(Actor* aPlayer);
+
+	float GetDeltaTime() const;
+	void SetDeltaTime(float aDeltaTime);
+
 	void KillServices();
 
 private:
@@ -48,4 +59,8 @@ private:
 	EngineSettings* myEngineSettings;
 	Scheduler* myScheduler;
 	CoroutineHandler* myCouroutineHandler;
+	CameraComponent* mySceneCamera;
+	Actor* myPlayer;
+
+	float myDeltaTime;
 };

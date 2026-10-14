@@ -8,13 +8,16 @@
 #include <algorithm>
 
 class World;
-class WorldRenderer;
 
 // The World owns Actors; Actors own Components. Pointers are borrowed, not handles.
 // Callers must not retain them across actor/component destruction or scene replacement.
-class Actor final
+class Actor
 {
+	friend class GraphicsEngine;
+	friend class World;
+
 public:
+	Actor();
 	~Actor();
 	Actor(const Actor&) = delete;
 	Actor& operator=(const Actor&) = delete;
@@ -91,6 +94,4 @@ private:
 	size_t myNextComponentName = 0;
 	bool myActive = true;
 	bool myDestroyed = false;
-	friend class World;
-	friend class WorldRenderer;
 };

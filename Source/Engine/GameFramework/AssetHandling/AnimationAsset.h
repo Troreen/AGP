@@ -2,7 +2,7 @@
 
 #include "Asset.h"
 
-#include <GraphicsEngine/Objects/Mesh.h>
+#include <GraphicsEngine/Objects/Animation.h>
 
 class AnimationAsset : public Asset
 {

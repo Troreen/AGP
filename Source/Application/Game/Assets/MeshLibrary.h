@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GraphicsEngine/Objects/Animation.h"
 #include "GraphicsEngine/Objects/Mesh.h"
 
 #include <filesystem>
