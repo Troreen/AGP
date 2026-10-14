@@ -1,6 +1,6 @@
 {
   "Idle": {
-    "Animation": "A_Slash",
+    "Animation": "A_player_run",
     "IsLooping": true
   }
 }
