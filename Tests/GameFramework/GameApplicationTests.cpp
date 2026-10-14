@@ -7,7 +7,7 @@
 #include <crtdbg.h>
 
 #include "EnumKeyCode.h"
-#include "GraphicsEngine/GraphicsEngine.h"
+#include "GraphicsEngine/GraphicsRenderSettings.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -25,29 +25,39 @@ int RunCameraControlsTests();
 
 int RunRenderPassControlsTest()
 {
-	GraphicsEngine& graphics = GraphicsEngine::Get();
-	Check(std::string(graphics.GetRenderPassName()) == "Lit", "Render-pass test did not start on Lit");
+	GraphicsRenderSettings settings;
+	Check(std::string(GraphicsRenderSettings::GetRenderPassName(settings.RenderPass)) == "Lit", "Render-pass test did not start on Lit");
 
 	InputFixture fixture;
 	auto& input = fixture.Input;
 	input.BindActionToInputCode("PreviousRenderPass", EKeyCode::F5);
 	input.BindActionToInputCode("NextRenderPass", EKeyCode::F6);
-	const unsigned previous = input.AddEventListener("PreviousRenderPass", [&graphics](const CommonUtilities::InputEvent& event)
+	const unsigned previous = input.AddEventListener("PreviousRenderPass", [&settings](const CommonUtilities::InputEvent& event)
 	{
-		if (event.inputData.isPressed) graphics.SelectPreviousRenderPass();
+		if (event.inputData.isPressed)
+		{
+			const uint32_t currentPass = static_cast<uint32_t>(settings.RenderPass);
+			constexpr uint32_t maxPass = static_cast<uint32_t>(RenderPassType::Count);
+			settings.RenderPass = static_cast<RenderPassType>(currentPass == 0 ? maxPass - 1 : currentPass - 1);
+		}
 	});
-	const unsigned next = input.AddEventListener("NextRenderPass", [&graphics](const CommonUtilities::InputEvent& event)
+	const unsigned next = input.AddEventListener("NextRenderPass", [&settings](const CommonUtilities::InputEvent& event)
 	{
-		if (event.inputData.isPressed) graphics.SelectNextRenderPass();
+		if (event.inputData.isPressed)
+		{
+			const uint32_t currentPass = static_cast<uint32_t>(settings.RenderPass);
+			constexpr uint32_t maxPass = static_cast<uint32_t>(RenderPassType::Count);
+			settings.RenderPass = static_cast<RenderPassType>((currentPass + 1) % maxPass);
+		}
 	});
 	fixture.Key(EKeyCode::F5, true); input.Update();
-	Check(std::string(graphics.GetRenderPassName()) == "Shadows (Directional)", "F5 wrap failed");
+	Check(settings.RenderPass == RenderPassType::NormalWorld, "F5 wrap failed");
 	fixture.Key(EKeyCode::F5, false); fixture.Key(EKeyCode::F6, true); input.Update();
-	Check(std::string(graphics.GetRenderPassName()) == "Lit", "F6 advance failed");
+	Check(settings.RenderPass == RenderPassType::Light, "F6 advance failed");
 	fixture.Key(EKeyCode::F6, false); input.Update(); fixture.Key(EKeyCode::F6, true); input.Update();
-	Check(std::string(graphics.GetRenderPassName()) == "Albedo (sRGB)", "F6 next failed");
+	Check(settings.RenderPass == RenderPassType::Albedo, "F6 next failed");
 	fixture.Key(EKeyCode::F6, false); fixture.Key(EKeyCode::F5, true); input.Update();
-	Check(std::string(graphics.GetRenderPassName()) == "Lit", "F5 previous failed");
+	Check(settings.RenderPass == RenderPassType::Light, "F5 previous failed");
 	input.RemoveEventListener(previous);
 	input.RemoveEventListener(next);
 

@@ -25,23 +25,29 @@
     <ClCompile>
       <LanguageStandard>stdcpp20</LanguageStandard><ExceptionHandling>Sync</ExceptionHandling>
       <WarningLevel>Level4</WarningLevel><PreprocessorDefinitions>FBXSDK_SHARED;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)Source\Engine;$(SolutionDir)Source;$(SolutionDir)Source\Utilities;$(SolutionDir)Source\Utilities\CommonUtilities;$(SolutionDir)Source\Application\Game;$(SolutionDir)Dependencies\FMod\include;$(SolutionDir)Dependencies\TGAFBXImporter\source;$(SolutionDir)Dependencies\TGAFBXImporter\FBXSDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Source\Engine;$(SolutionDir)Source;$(SolutionDir)Source\Utilities;$(SolutionDir)Source\Utilities\CommonUtilities;$(SolutionDir)Source\Application\Game;$(SolutionDir)Dependencies\FMod\include;$(SolutionDir)Dependencies\TGAFBXImporter\include;$(SolutionDir)Dependencies\TGAFBXImporter\FBXSDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link><SubSystem>Console</SubSystem><AdditionalOptions>/IGNORE:4099 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalLibraryDirectories>$(SolutionDir)Lib\$(Configuration);$(SolutionDir)Dependencies\TGAFBXImporter\FBXSDK\lib\$(Configuration);$(SolutionDir)Dependencies\FMod\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>GraphicsEngine.lib;$(SoundEngineLibrary);libfbxsdk.lib;libxml2-md.lib;zlib-md.lib;d3d11.lib;dxguid.lib;dxgi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Lib\$(Configuration);$(SolutionDir)Dependencies\TGAFBXImporter\lib\$(Configuration);$(SolutionDir)Dependencies\FMod\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>GraphicsEngine.lib;$(SoundEngineLibrary);TGAFbx.lib;d3d11.lib;dxguid.lib;dxgi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup><ClCompile Include="GameApplicationTests.cpp" /><ClCompile Include="CameraControlsTests.cpp" />
 <ClCompile Include="..\..\Source\Application\Game\Game.cpp" />
+<ClCompile Include="..\..\Source\Application\Game\EnemyComponent.cpp" />
+<ClCompile Include="..\..\Source\Application\Game\BehaviourTree\**\*.cpp" />
+<ClCompile Include="..\..\Source\Application\Game\Player\*.cpp" />
 <ClCompile Include="..\..\Source\Application\Game\Runtime\GameApplication.cpp" />
+<ClCompile Include="..\..\Source\Application\Game\Runtime\GameWindowMessages.cpp" />
 <ClCompile Include="..\..\Source\Application\Game\Components\SpinComponent.cpp" />
 <ClCompile Include="..\..\Source\Application\Game\Assets\MeshLibrary.cpp" />
 <ClCompile Include="..\..\Source\Application\Game\Assets\PrimitiveMeshBuilder.cpp" />
-<ClCompile Include="..\..\Dependencies\TGAFBXImporter\source\Importer.cpp" />
-<ClCompile Include="..\..\Dependencies\TGAFBXImporter\source\Internals.cpp" />
-<ClCompile Include="..\..\Dependencies\TGAFBXImporter\source\TgaFbxStructs.cpp" /></ItemGroup>
+</ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Source\Engine\AISystems\AISystems.vcxproj">
+      <Project>{c7303ffc-339b-f372-7cd9-a418e882d1c7}</Project>
+      <AdditionalProperties>SolutionDir=$(MSBuildThisFileDirectory)..\..\</AdditionalProperties>
+    </ProjectReference>
     <ProjectReference Include="..\..\Source\Engine\GameFramework\GameFramework.vcxproj">
       <Project>{cd9f039d-3960-7fd3-029b-c8506e1ac4af}</Project>
       <AdditionalProperties>SolutionDir=$(MSBuildThisFileDirectory)..\..\</AdditionalProperties>

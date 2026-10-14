@@ -20,7 +20,7 @@ class SetupOrderComponent final : public CustomComponent
 public:
 	int VariableApplications = 0;
 
-	void ApplyCustomVariables(const CustomComponentVariables& someVariables) override
+	void InitializeCustomVariables(const CustomComponentVariables& someVariables) override
 	{
 		Check(GetOwner() != nullptr && !HasBegunPlay(), "Variables must be applied after attachment and before BeginPlay");
 		Check(!IsEnabled() && HasTag("SetupTag"), "Common data must be applied before custom variables");

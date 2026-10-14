@@ -13,7 +13,14 @@ struct InputFixture
     CommonUtilities::InputMapper& Input;
     int MouseX = 16000, MouseY = 16000;
 
-    InputFixture() : Input(*ServiceLocator::GetInstance().SetInputMapper(new CommonUtilities::InputMapper))
+    static CommonUtilities::InputMapper& InitializeInput()
+    {
+        ServiceLocator& services = ServiceLocator::GetInstance();
+        services.Initialize();
+        return services.GetInputMapper();
+    }
+
+    InputFixture() : Input(InitializeInput())
     {
         Input.Init(&Handler);
         Handler.UpdateEvents(WM_MOUSEMOVE, 0, MAKELPARAM(MouseX, MouseY));
