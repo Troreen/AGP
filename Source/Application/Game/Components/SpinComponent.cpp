@@ -26,7 +26,7 @@ void SpinComponent::SetDegreesPerSecond(float aDegreesPerSecond)
 	myDegreesPerSecond = aDegreesPerSecond;
 }
 
-void SpinComponent::ApplyCustomVariables(const CustomComponentVariables& someVariables)
+void SpinComponent::InitializeCustomVariables(const CustomComponentVariables& someVariables)
 {
 	const float spinSpeed = someVariables.GetOrDefault<float>("SpinSpeed", myDegreesPerSecond);
 	const std::string targetComponentName = someVariables.GetOrDefault<std::string>("TargetComponentName", myTargetComponentName);

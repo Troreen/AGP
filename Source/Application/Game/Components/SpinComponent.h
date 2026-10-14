@@ -12,7 +12,7 @@ class SpinComponent final : public CustomComponent
 public:
 	void SetTargetComponentName(const char* aComponentName);
 	void SetDegreesPerSecond(float aDegreesPerSecond);
-	void ApplyCustomVariables(const CustomComponentVariables& someVariables) override;
+	void InitializeCustomVariables(const CustomComponentVariables& someVariables) override;
 	void BeginPlay() override;
 	void Update(float deltaTime) override;
 
