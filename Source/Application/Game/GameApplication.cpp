@@ -14,7 +14,7 @@
 #include "GameFramework/Settings/EngineSettings.h"
 #include "GameFramework/GameFrameworkLog.h"
 #include "GameFramework/Rendering/WorldRenderer.h"
-#include "GameFramework/Scenes/WorldFromSceneData.h"
+#include "GameFramework/Scenes/SceneWorldBuilder.h"
 #include "GameFramework/ServiceLocator.h"
 #include "GameFramework/UnrealSceneImporter/UnrealSceneImporter.h"
 #include "GameFramework/World/World.h"
@@ -562,9 +562,9 @@ void GameApplication::ProcessPendingSceneLoad(Game& aGame)
 			fallbacks.MissingMaterial = std::make_shared<MaterialAsset>(material);
 		}
 
-		WorldFromSceneConverter converter;
-		converter.Initialize(ServiceLocator::GetInstance().GetEngineSettings().GetSettingsDirectory() / "MaterialNameConversions.json");
-		candidateWorld = converter.BuildWorldFromSceneData(scene, assets, myContentRoot / myApplicationSettings.ShaderFolder, myClientSize, fallbacks,
+		SceneWorldBuilder worldBuilder;
+		worldBuilder.Initialize(ServiceLocator::GetInstance().GetEngineSettings().GetSettingsDirectory() / "MaterialNameConversions.json");
+		candidateWorld = worldBuilder.BuildWorld(scene, assets, myContentRoot / myApplicationSettings.ShaderFolder, myClientSize, fallbacks,
 			[&aGame](Actor& anActor, const CustomComponentData& aCustomComponentData)
 			{
 				return aGame.CreateCustomComponent(anActor, aCustomComponentData);

@@ -150,7 +150,7 @@
     <ClInclude Include="Scenes\SceneData.h">
       <Filter>Scenes</Filter>
     </ClInclude>
-    <ClInclude Include="Scenes\WorldFromSceneData.h">
+    <ClInclude Include="Scenes\SceneWorldBuilder.h">
       <Filter>Scenes</Filter>
     </ClInclude>
     <ClInclude Include="ServiceLocator.h" />
@@ -264,7 +264,7 @@
     <ClCompile Include="Rendering\WorldRenderer.cpp">
       <Filter>Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="Scenes\WorldFromSceneData.cpp">
+    <ClCompile Include="Scenes\SceneWorldBuilder.cpp">
       <Filter>Scenes</Filter>
     </ClCompile>
     <ClCompile Include="ServiceLocator.cpp" />

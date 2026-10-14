@@ -1,5 +1,5 @@
 #include "InputFixture.h"
-#include "GameFramework/Scenes/WorldFromSceneData.h"
+#include "GameFramework/Scenes/SceneWorldBuilder.h"
 #include "EnumKeyCode.h"
 #include "GameFramework/Components/CameraComponent.h"
 #include "GameFramework/Components/SceneComponent.h"
@@ -243,8 +243,8 @@ void SceneConstruction()
 	unsupported.BlendMode = 99;
 	scene.Materials.push_back(unsupported);
 	AssetRegistry assets;
-	WorldFromSceneConverter converter;
-	auto world = converter.BuildWorldFromSceneData(scene, assets, "", clientSize);
+	SceneWorldBuilder worldBuilder;
+	auto world = worldBuilder.BuildWorld(scene, assets, "", clientSize);
 	Check(world->FindActor("First(1)") && world->FindActor("First(2)"), "Repeated actor names did not receive unique suffixes");
 	auto* built = world->FindActor("First");
 	auto* builtComponent = built->FindComponent("Collider");
@@ -256,7 +256,7 @@ void SceneConstruction()
 	Check(builtComponent->HasBegunPlay(), "Typed scene component lifecycle");
 	SceneData invalid; ActorRecord badA; badA.Name = "BadA"; badA.Transform.Position.x = std::numeric_limits<float>::infinity(); invalid.Actors.push_back(badA);
 	ActorRecord badB; badB.Name = "BadB"; badB.Transform.Scale.y = std::numeric_limits<float>::quiet_NaN(); invalid.Actors.push_back(badB);
-	try { converter.BuildWorldFromSceneData(invalid, assets, "", clientSize); Check(false, "Invalid candidate scene was accepted"); }
+	try { worldBuilder.BuildWorld(invalid, assets, "", clientSize); Check(false, "Invalid candidate scene was accepted"); }
 	catch (const std::runtime_error& error) { const std::string message = error.what(); Check(message.find("BadA") != std::string::npos && message.find("BadB") != std::string::npos, "Construction diagnostics were not aggregated"); }
 
 	SceneData missingAsset;
@@ -271,7 +271,7 @@ void SceneConstruction()
 	auto fallbackMesh = std::make_shared<Mesh>();
 	fallbackMesh->Initialize("FallbackMesh", {Mesh::Element{}}, {}, {});
 	SceneFallbackAssets fallbacks{std::make_shared<MeshAsset>(fallbackMesh), std::make_shared<MaterialAsset>()};
-	auto partialWorld = converter.BuildWorldFromSceneData(missingAsset, assets, "", clientSize, fallbacks);
+	auto partialWorld = worldBuilder.BuildWorld(missingAsset, assets, "", clientSize, fallbacks);
 	auto* builtMissingMesh = partialWorld->FindActor("MissingAssetActor")->GetComponent<StaticMeshComponent>();
 	Check(builtMissingMesh && builtMissingMesh->GetMesh() == fallbacks.MissingMesh &&
 	      builtMissingMesh->GetMaterial(0) == fallbacks.MissingMaterial,

@@ -23,75 +23,84 @@ namespace UnrealScene
 		return vector;
 	}
 
-	CustomComponentProperties ReadCustomProperties(simdjson::dom::object someProperties)
+	CustomTransformData ReadCustomTransform(simdjson::dom::object aTransformObject)
 	{
-		CustomComponentProperties customProperties;
-		for (const auto& property : someProperties)
+		CustomTransformData transform;
+		transform.Translation = ReadCustomVector(aTransformObject["translation"].value());
+		transform.Scale = ReadCustomVector(aTransformObject["scale3D"].value());
+		const auto rotation = aTransformObject["rotation"].value();
+		transform.Rotation = {
+			static_cast<float>(rotation["x"].get_double().value()),
+			static_cast<float>(rotation["y"].get_double().value()),
+			static_cast<float>(rotation["z"].get_double().value()),
+			static_cast<float>(rotation["w"].get_double().value())
+		};
+		if (!std::isfinite(transform.Rotation.x) || !std::isfinite(transform.Rotation.y) ||
+		    !std::isfinite(transform.Rotation.z) || !std::isfinite(transform.Rotation.w))
 		{
-			const std::string propertyName(property.key);
-			if (customProperties.Contains(propertyName))
+			throw std::invalid_argument("Transform rotation quaternion values must be finite numbers");
+		}
+		return transform;
+	}
+
+	CustomComponentVariables ReadCustomVariables(simdjson::dom::object someVariables)
+	{
+		CustomComponentVariables customVariables;
+		for (const auto& variable : someVariables)
+		{
+			const std::string variableName(variable.key);
+			if (customVariables.Contains(variableName))
 			{
-				throw std::invalid_argument("Duplicate custom property: " + propertyName);
+				throw std::invalid_argument("Duplicate custom variable: " + variableName);
 			}
-			switch (property.value.type())
+			switch (variable.value.type())
 			{
 			case simdjson::dom::element_type::INT64:
-				customProperties.Integers.emplace(propertyName, property.value.get_int64().value());
+				customVariables.IntVariables.emplace(variableName, variable.value.get_int64().value());
 				break;
 			case simdjson::dom::element_type::BOOL:
-				customProperties.Booleans.emplace(propertyName, property.value.get_bool().value());
+				customVariables.BoolVariables.emplace(variableName, variable.value.get_bool().value());
 				break;
 			case simdjson::dom::element_type::STRING:
-				customProperties.Strings.emplace(propertyName, property.value.get_string().value());
+				customVariables.StringVariables.emplace(variableName, variable.value.get_string().value());
 				break;
 			case simdjson::dom::element_type::DOUBLE:
 			{
-				const float value = static_cast<float>(property.value.get_double().value());
+				const float value = static_cast<float>(variable.value.get_double().value());
 				if (!std::isfinite(value))
 				{
-					throw std::invalid_argument(propertyName + " must be a finite float");
+					throw std::invalid_argument(variableName + " must be a finite float");
 				}
-				customProperties.Floats.emplace(propertyName, value);
+				customVariables.FloatVariables.emplace(variableName, value);
 				break;
 			}
 			case simdjson::dom::element_type::OBJECT:
 				try
 				{
-					const auto object = property.value.get_object().value();
+					const auto object = variable.value.get_object().value();
 					if (object.size() != 3)
 					{
-						throw std::invalid_argument(propertyName + " must be a vector or transform object");
+						throw std::invalid_argument("Expected a vector or transform object");
 					}
 					if (object["rotation"].error() == simdjson::SUCCESS)
 					{
-						CustomTransformData transform;
-						transform.Translation = ReadCustomVector(object["translation"].value());
-						transform.Scale = ReadCustomVector(object["scale3D"].value());
-						const auto rotation = object["rotation"].value();
-						const auto rotationAxes = ReadCustomVector(rotation);
-						transform.Rotation = {rotationAxes.x, rotationAxes.y, rotationAxes.z,
-						                      static_cast<float>(rotation["w"].get_double().value())};
-						if (!std::isfinite(transform.Rotation.w))
-						{
-							throw std::invalid_argument(propertyName);
-						}
-						customProperties.Transforms.emplace(propertyName, transform);
+						customVariables.TransformVariables.emplace(variableName, ReadCustomTransform(object));
 					}
 					else
 					{
-						customProperties.Vectors.emplace(propertyName, ReadCustomVector(property.value));
+						customVariables.VectorVariables.emplace(variableName, ReadCustomVector(variable.value));
 					}
 					break;
 				}
 				catch (const std::exception& error)
 				{
-					throw std::invalid_argument(propertyName + ": " + error.what());
+					throw std::invalid_argument(variableName + ": " + error.what());
 				}
 			default:
-				throw std::invalid_argument(propertyName + " has an unsupported custom property type");
+				throw std::invalid_argument(variableName + " has an unsupported custom variable type");
 			}
 		}
-		return customProperties;
+		return customVariables;
 	}
 
 	void ReadCommonComponent(simdjson::dom::element component, BaseComponentData& outComponent, UnrealComponentType type)
@@ -110,12 +119,12 @@ namespace UnrealScene
 					throw std::invalid_argument(outComponent.name + ": CustomType must be a nonempty string");
 				}
 				outComponent.customType = customType;
-				simdjson::dom::object properties;
-				if (component["Custom"].get(properties) != simdjson::SUCCESS)
+				simdjson::dom::object variables;
+				if (component["Custom"].get(variables) != simdjson::SUCCESS)
 				{
 					throw std::invalid_argument(outComponent.name + ": Custom must be an object");
 				}
-				outComponent.customProperties = ReadCustomProperties(properties);
+				outComponent.customVariables = ReadCustomVariables(variables);
 			}
 		}
 		for (const auto& tag : component["Tags"])
@@ -768,7 +777,7 @@ namespace
 							CustomComponentData customComponentData;
 							customComponentData.Common = common;
 							customComponentData.CustomType = baseComponentData.customType;
-							customComponentData.Properties = baseComponentData.customProperties;
+							customComponentData.Variables = baseComponentData.customVariables;
 							actor.Components.push_back(std::move(customComponentData));
 						}
 						else

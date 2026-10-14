@@ -15,7 +15,7 @@ public:
 	void Initialize(GameApplication& anApplication);
 	void Update(World& aWorld, float aDeltaTime);
 	void Shutdown();
-	Component* CreateCustomComponent(Actor& anActor, const CustomComponentData& aCustomComponentData) const;
+	CustomComponent* CreateCustomComponent(Actor& anActor, const CustomComponentData& aCustomComponentData) const;
 
 private:
 	// Keeps the FBX importer initialized while AssetRegistry loads FBX assets.

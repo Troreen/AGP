@@ -9,16 +9,14 @@
 class GameComponentRegistry
 {
 public:
-	using Creator = std::function<Component*(Actor&, const CustomComponentData&)>;
+	using Creator = std::function<CustomComponent*(Actor&, const CustomComponentData&)>;
 
 	template <class T> void Register(const std::string& aCustomType)
 	{
 		static_assert(std::is_base_of_v<CustomComponent, T>);
-		Creator aCreator = [](Actor& anActor, const CustomComponentData& aCustomComponentData) -> Component*
+		Creator aCreator = [](Actor& anActor, const CustomComponentData& aCustomComponentData) -> CustomComponent*
 		{
-			T* component = anActor.AddComponent<T>(aCustomComponentData.Common.Name);
-			component->Configure(aCustomComponentData.Properties);
-			return component;
+			return anActor.AddComponent<T>(aCustomComponentData.Common.Name);
 		};
 		const bool registered = myCreators.emplace(aCustomType, std::move(aCreator)).second;
 		if (!registered)
@@ -27,7 +25,7 @@ public:
 		}
 	}
 
-	Component* Create(Actor& anActor, const CustomComponentData& aCustomComponentData) const
+	CustomComponent* Create(Actor& anActor, const CustomComponentData& aCustomComponentData) const
 	{
 		std::string customTypeName = aCustomComponentData.CustomType;
 		if (customTypeName.ends_with("_C"))

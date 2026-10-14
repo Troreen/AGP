@@ -1,10 +1,12 @@
 #pragma once
 #include "GameFramework/World/Component.h"
 
-struct CustomComponentProperties;
+struct CustomComponentVariables;
 
 class CustomComponent : public Component
 {
 public:
-	virtual void Configure(const CustomComponentProperties& someProperties) = 0;
+	// Called after common component data is applied, before BeginPlay.
+	// Resolve references to other components in BeginPlay.
+	virtual void ApplyCustomVariables(const CustomComponentVariables& someVariables) = 0;
 };

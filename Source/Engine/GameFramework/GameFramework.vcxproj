@@ -199,7 +199,7 @@
     <ClInclude Include="Components\AnimatorComponent.h" />
     <ClInclude Include="Components\CameraComponent.h" />
     <ClInclude Include="Components\CustomComponent.h" />
-    <ClInclude Include="Scenes\CustomComponentProperties.h" />
+    <ClInclude Include="Scenes\CustomComponentVariables.h" />
     <ClInclude Include="Components\DebugCameraController.h" />
     <ClInclude Include="Components\LightComponent.h" />
     <ClInclude Include="Components\MeshComponentBase.h" />
@@ -215,7 +215,7 @@
     <ClInclude Include="Helper\Event.hpp" />
     <ClInclude Include="Rendering\WorldRenderer.h" />
     <ClInclude Include="Scenes\SceneData.h" />
-    <ClInclude Include="Scenes\WorldFromSceneData.h" />
+    <ClInclude Include="Scenes\SceneWorldBuilder.h" />
     <ClInclude Include="ServiceLocator.h" />
     <ClInclude Include="Settings\EngineSettings.h" />
     <ClInclude Include="Settings\InputSettingsApplier.h" />
@@ -259,7 +259,7 @@
     <ClCompile Include="EventBus.cpp" />
     <ClCompile Include="GameFrameworkLog.cpp" />
     <ClCompile Include="Rendering\WorldRenderer.cpp" />
-    <ClCompile Include="Scenes\WorldFromSceneData.cpp" />
+    <ClCompile Include="Scenes\SceneWorldBuilder.cpp" />
     <ClCompile Include="ServiceLocator.cpp" />
     <ClCompile Include="Settings\EngineSettings.cpp" />
     <ClCompile Include="Settings\InputSettingsApplier.cpp" />

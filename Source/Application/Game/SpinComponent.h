@@ -4,7 +4,7 @@
 #include <string>
 
 class Transform;
-struct CustomComponentProperties;
+struct CustomComponentVariables;
 
 // Continuously rotates the owning Actor or a named SceneComponent.
 class SpinComponent final : public CustomComponent
@@ -12,7 +12,7 @@ class SpinComponent final : public CustomComponent
 public:
 	void SetTargetComponentName(const char* aComponentName);
 	void SetDegreesPerSecond(float aDegreesPerSecond);
-	void Configure(const CustomComponentProperties& someProperties) override;
+	void ApplyCustomVariables(const CustomComponentVariables& someVariables) override;
 	void BeginPlay() override;
 	void Update(float deltaTime) override;
 

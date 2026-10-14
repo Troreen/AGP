@@ -26,9 +26,9 @@ Game::Game()
 
 Game::~Game() = default;
 
-Component* Game::CreateCustomComponent(Actor& anActor, const CustomComponentData& aCustomComponentData) const
+CustomComponent* Game::CreateCustomComponent(Actor& anActor, const CustomComponentData& aCustomComponentData) const
 {
-	Component* component = myComponentRegistry.Create(anActor, aCustomComponentData);
+	CustomComponent* component = myComponentRegistry.Create(anActor, aCustomComponentData);
 	if (!component)
 	{
 		GAMELOG(Warning, "Skipping unknown custom component '{}' on actor '{}': {}", aCustomComponentData.Common.Name, anActor.GetName(),

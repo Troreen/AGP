@@ -2,7 +2,7 @@
 #include "GameFramework/World/Transform.h"
 #include "Vector2.hpp"
 #include "Vector4.hpp"
-#include "GameFramework/Scenes/CustomComponentProperties.h"
+#include "GameFramework/Scenes/CustomComponentVariables.h"
 #include <cstdint>
 #include <string>
 #include <variant>
@@ -67,7 +67,7 @@ struct CustomComponentData
 {
 	ComponentData Common;
 	std::string CustomType;
-	CustomComponentProperties Properties;
+	CustomComponentVariables Variables;
 };
 
 using ComponentRecord = 

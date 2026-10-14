@@ -2,7 +2,7 @@
 
 #include "GameFramework/Components/SceneComponent.h"
 #include "GameFramework/World/Actor.h"
-#include "GameFramework/Scenes/CustomComponentProperties.h"
+#include "GameFramework/Scenes/CustomComponentVariables.h"
 
 #include <cmath>
 #include <stdexcept>
@@ -26,10 +26,10 @@ void SpinComponent::SetDegreesPerSecond(float aDegreesPerSecond)
 	myDegreesPerSecond = aDegreesPerSecond;
 }
 
-void SpinComponent::Configure(const CustomComponentProperties& someProperties)
+void SpinComponent::ApplyCustomVariables(const CustomComponentVariables& someVariables)
 {
-	const float spinSpeed = someProperties.Get<float>("SpinSpeed", myDegreesPerSecond);
-	const std::string targetComponentName = someProperties.Get<std::string>("TargetComponentName", myTargetComponentName);
+	const float spinSpeed = someVariables.GetOrDefault<float>("SpinSpeed", myDegreesPerSecond);
+	const std::string targetComponentName = someVariables.GetOrDefault<std::string>("TargetComponentName", myTargetComponentName);
 	SetDegreesPerSecond(spinSpeed);
 	SetTargetComponentName(targetComponentName.c_str());
 }
