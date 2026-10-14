@@ -1,0 +1,4 @@
+interface:
+  display_name: "AGP Feature"
+  short_description: "Run AGP features from idea through verified delivery"
+  default_prompt: "Use $agp-feature to implement my AGP feature through the full workflow."

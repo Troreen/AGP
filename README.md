@@ -36,6 +36,9 @@ code formatting conventions.
 
 ## Build
 
+For the repo-local AI development workflow (clarify, spec, tickets, implementation,
+review, retrospective), see [Docs/AgentWorkflow.md](Docs/AgentWorkflow.md).
+
 For a new Windows checkout, run `SetupWindows.bat`. It walks through the FMOD
 Studio API 2.02.05 header setup, downloads Premake if needed, and generates
 `Game.sln`. Open that solution in Visual Studio 2026 with the Desktop development
