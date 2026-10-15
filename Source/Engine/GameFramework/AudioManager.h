@@ -17,7 +17,8 @@ enum SoundID
 	ePotion,
 	eSickleSlash,
 	eSlashHit,
-	eSlash
+	eSlash,
+	eSoundCount
 };
 
 enum BusID
@@ -41,6 +42,11 @@ public:
 	void PlayMusic(const SoundID aMusicID, const bool aUninterrupted = false);
 
 	void PlaySFXAtLocation(const SoundID aMusicID, const CommonUtilities::Vector3f aPosition);
+	// Use the playback already registered for this SoundID. Scripted events sharing
+	// an ID control the same playback; independent overlapping copies are not supported.
+	// Supply a location to play from a point in the world.
+	bool PlayScriptedAudio(SoundID aSoundID, const CommonUtilities::Vector3f* aLocation = nullptr);
+	void StopScriptedAudio(SoundID aSoundID);
 
 	void StopMusic(const SoundID aMusicID, const bool anImmediately);
 	void StopAllEvents();
@@ -62,6 +68,7 @@ public:
 private:
 	void RegisterAllEvents();
 
+	// One playback per registered SoundID, including both music and sound effects.
 	std::unordered_map<SoundID, SoundEventInstanceHandle> myMusicList;
 	std::unordered_map<BusID, std::string> myBusses;
 	SoundEngine::ListenerHandle myListener;

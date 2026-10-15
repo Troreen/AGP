@@ -7,7 +7,7 @@ You have been provided a spec. This spec should have tickets associated with it,
 
 The issue tracker should have been provided to you. If not, tell the user to run `/setup-matt-pocock-skills`.
 
-The goal is the entire spec implemented on a single **integration branch**, with every ticket resolved the way the issue tracker closes work.
+The goal is the entire spec implemented on a single **integration branch**, with every ticket resolved the way the issue tracker closes work. Follow `Docs/AgentWorkflow.md`: branch names use the feature slug without a `codex/` prefix or Codex suffix. Leave code and records uncommitted and unstaged unless the user explicitly requests otherwise. Pass these constraints to every subagent; never create commits merely to enable worktree integration or a PR.
 
 The tickets are not a list of steps. They are a **task graph** with blocking relationships between them. This means there is always a **frontier** of tickets which are ready to be grabbed.
 
@@ -21,14 +21,14 @@ Communication to and from subagents should be sparse. Communicate primarily thro
 
 2. (optional) Use an **exploration subagent** to conduct any exploration required by the tickets - relevant codebase files or external documentation. Ensure the exploration subagent can save files - it should save its markdown notes in a directory outside the repo, accessible by all future subagents. This lets **implementer subagents** focus on implementation rather than exploration.
 
-3. Create the integration branch. If the issue tracker closes work through PRs, or the user asks for one, open a draft PR after the first merge in step 5 (a branch with no commits ahead of main can't open one), marked as closing the spec and tickets.
+3. Create or reuse the feature-named integration branch. Open a PR only when explicitly requested and when user-authorized commits exist to publish.
 
-4. Use **implementer subagents** to implement each ticket, each in its own worktree on its own branch. Each implementer subagent:
-   - confirms its worktree is based on the integration branch before starting, and resets onto it if not;
-   - calls the Skill tool with `tdd` to build the ticket;
-   - merges the integration branch tip into its own branch before reporting done
+4. Use **implementer subagents** for ready tickets, with disjoint file ownership in the feature checkout. Serialize overlapping edits. Isolated worktrees are optional when their dependencies are already available. Each implementer:
+   - confirms the correct starting state without resetting away existing work;
+   - reads the repo-local `tdd` skill and builds the ticket;
+   - reports scoped uncommitted changes and verification evidence, without staging or committing automatically.
 
-5. Once an **implementer subagent** completes, merge its work to the integration branch with a **merger subagent**.
+5. Integrate each implementer's reviewed changes in the feature checkout. Shared-checkout edits are already present; apply scoped diffs from isolated worktrees when necessary. Do not create commits or commit-producing merges to transfer work unless explicitly requested by the user.
 
 6. If this changes the **frontier** of available tickets, kick off more **implementer subagents** to work on the new tickets. This allows for maximum concurrency.
 
@@ -36,4 +36,4 @@ Communication to and from subagents should be sparse. Communicate primarily thro
 
 8. If a draft PR exists, mark it ready for review. Otherwise, resolve each ticket the way the issue tracker closes work, and report the integration branch.
 
-9. Clean up all **implementer subagent** worktrees.
+9. Retain any worktree containing uncommitted or unfinished work. Clean up only managed worktrees whose changes have been safely integrated and preserved. Report the uncommitted result and remaining human checks.

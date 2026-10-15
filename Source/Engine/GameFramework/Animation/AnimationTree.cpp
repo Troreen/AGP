@@ -169,6 +169,11 @@ AnimationVariable& AnimationTree::GetAnimationVariable(const std::string& aName)
 	return myAnimationVariables[aName];
 }
 
+bool AnimationTree::HasAnimationVariable(const std::string& aName) const
+{
+	return myAnimationVariables.contains(aName);
+}
+
 void AnimationTree::SetBool(const std::string& aName, const bool aValue)
 {
 	if (!myAnimationVariables.contains(aName))
@@ -228,6 +233,11 @@ void AnimationTree::Update(const float aDeltaTime)
 	//{
 	//	myAnimationPlayer->Update(aDeltaTime);
 	//}
+}
+
+void AnimationTree::PlayCurrentAnimation()
+{
+	myAnimationStates[myCurrentState].PlayAnimation();
 }
 
 void AnimationTree::PlayState(const std::string& aName) // Used when we want to transition to new state

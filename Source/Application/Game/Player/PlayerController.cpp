@@ -63,7 +63,7 @@ void PlayerController::Update(float aDeltaTime)
 		static_cast<float>(inputMousePos.y)
 	};
 
-	if (ServiceLocator::GetInstance().GetInputMapper().GetInputHandler()->IsKeyPressed(static_cast<int>(EKeyCode::MOUSELBUTTON)))
+	if (!myScriptedControlLocked && ServiceLocator::GetInstance().GetInputMapper().GetInputHandler()->IsKeyPressed(static_cast<int>(EKeyCode::MOUSELBUTTON)))
 	{
 		//TODO: Movement
 		//Send mouse pos to camera
@@ -103,4 +103,25 @@ void PlayerController::Update(float aDeltaTime)
 	Transform& transform = GetOwner()->GetTransform();
 
 	myCamera->GetOwner()->GetTransform().SetLocalPosition(transform.GetWorldPosition() + myCameraOffset);
+}
+
+void PlayerController::SetScriptedControlLocked(bool aLocked)
+{
+	myScriptedControlLocked = aLocked;
+	if (aLocked)
+	{
+		if (!myMovement)
+		{
+			myMovement = GetOwner()->GetComponent<PlayerMovementComponent>();
+		}
+		if (myMovement)
+		{
+			myMovement->StopMovement();
+		}
+	}
+}
+
+bool PlayerController::IsScriptedControlLocked() const
+{
+	return myScriptedControlLocked;
 }

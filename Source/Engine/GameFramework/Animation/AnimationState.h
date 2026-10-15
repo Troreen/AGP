@@ -49,6 +49,7 @@ private:
 	void AddTransition(const Transition aTransition);
 
 	void OnEnter();
+	void PlayAnimation();
 	void Update(const float aDeltaTime, std::vector<Transition> someGlobalTransitions = {});
 	void OnExit();
 	bool TransitionCheck(const std::vector<Transition>& someTransitions);

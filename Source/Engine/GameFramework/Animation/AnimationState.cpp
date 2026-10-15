@@ -45,7 +45,11 @@ void AnimationState::AddTransition(const Transition aTransition)
 void AnimationState::OnEnter()
 {
 	myOnEnter.Invoke();
+	PlayAnimation();
+}
 
+void AnimationState::PlayAnimation()
+{
 	if (myLayer == eAnimationLayer::BaseLayer)
 	{
 		myAnimationTree->myAnimationPlayer->PlayAnimation(myName, myIsLooping);
@@ -55,7 +59,6 @@ void AnimationState::OnEnter()
 		myAnimationTree->myAnimationPlayer->PlayPartialAnimation(myName, myIsLooping);
 
 	}
-	//myAnimationTree->myAnimationPlayer->Play(myLayer);
 }
 
 void AnimationState::Update(const float aDeltaTime, std::vector<Transition> someGlobalTransitions)

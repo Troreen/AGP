@@ -88,6 +88,34 @@ void AudioManager::StopMusic(const SoundID aMusicID, const bool anImmediately)
 	SoundEngine::StopEvent(myMusicList[aMusicID], anImmediately);
 }
 
+bool AudioManager::PlayScriptedAudio(SoundID aSoundID, const CommonUtilities::Vector3f* aLocation)
+{
+	const auto sound = myMusicList.find(aSoundID);
+	if (!myInitialized || sound == myMusicList.end())
+	{
+		return false;
+	}
+
+	// Every registered SoundID already has a playback. Use it directly.
+	if (aLocation)
+	{
+		// Convert the world position to the distance scale used by our audio setup.
+		return SoundEngine::PlayEventAtLocation(sound->second,
+			{aLocation->x * 0.001f, aLocation->y * 0.001f, aLocation->z * 0.001f});
+	}
+
+	return SoundEngine::PlayEvent(sound->second);
+}
+
+void AudioManager::StopScriptedAudio(SoundID aSoundID)
+{
+	const auto sound = myMusicList.find(aSoundID);
+	if (myInitialized && sound != myMusicList.end())
+	{
+		SoundEngine::StopEvent(sound->second, true);
+	}
+}
+
 void AudioManager::StopAllEvents()
 {
 	for (const auto& pair : myMusicList)
@@ -122,7 +150,7 @@ void AudioManager::SetEventVolume(const SoundID aSoundID, float aPercentage)
 void AudioManager::SetAudioListener(const CommonUtilities::Vector3f aPosition)
 {
 	myListenerPosition = aPosition;
-	SoundEngine::SetListenerPosition(myListener, { myListenerPosition.x * 0.001f, myListenerPosition.y * 0.001f, 0.0f });
+	SoundEngine::SetListenerPosition(myListener, { myListenerPosition.x * 0.001f, myListenerPosition.y * 0.001f, myListenerPosition.z * 0.001f });
 }
 
 const CommonUtilities::Vector3f& AudioManager::GetAudioListenerPosition() const

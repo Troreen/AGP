@@ -1,4 +1,5 @@
 #include "Components/RegisterCustomComponents.h"
+#include "Components/CustomComponentRegistry.h"
 #include "Components/SpinComponent.h"
 #include "GameFramework/UnrealSceneImporter/UnrealSceneImporter.h"
 #include "GameFramework/World/World.h"

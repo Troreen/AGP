@@ -12,11 +12,14 @@ public:
 
 	void BeginPlay() override;
 	void Update(float aDeltaTime) override;
+	void SetScriptedControlLocked(bool aLocked);
+	bool IsScriptedControlLocked() const;
 
 private:
 
 	PlayerMovementComponent* myMovement = nullptr;
 	CameraComponent* myCamera = nullptr;
+	bool myScriptedControlLocked = false;
 
 	CommonUtilities::Vector3f myCameraOffset;
 

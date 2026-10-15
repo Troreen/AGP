@@ -66,6 +66,26 @@ public:
 
 	Component* FindComponent(const std::string& name) const;
 
+	// Find every matching component.
+	// Returns a new list of borrowed pointers, not the Actor's owning container.
+	// Do not keep these pointers after their components or the Actor are destroyed.
+	template <class T> std::vector<T*> GetComponents() const
+	{
+		std::vector<T*> result;
+		for (const auto& component : myComponents)
+		{
+			if (!component->IsPendingDestroy())
+			{
+				if (auto* typed = dynamic_cast<T*>(component.get()))
+				{
+					result.push_back(typed);
+				}
+			}
+		}
+		return result;
+	}
+
+	// Find just the first matching component when only one is needed.
 	template <class T> T* GetComponent() const
 	{
 		for (const std::unique_ptr<Component>& component : myComponents)

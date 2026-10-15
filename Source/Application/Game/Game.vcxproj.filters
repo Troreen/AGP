@@ -22,6 +22,9 @@
     <Filter Include="Components">
       <UniqueIdentifier>{6B7DD516-5735-1764-C03C-F0BFAC13B254}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Components\ScriptedEvents">
+      <UniqueIdentifier>{66C82038-B35B-4299-B67D-852C93A85440}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Player">
       <UniqueIdentifier>{724E55CA-5EF0-7FA0-47AB-93F433EC06F1}</UniqueIdentifier>
     </Filter>
@@ -111,6 +114,15 @@
     <ClInclude Include="Runtime\GameWindowMessages.h">
       <Filter>Runtime</Filter>
     </ClInclude>
+    <ClInclude Include="Components\ScriptedEvents\ScriptedActionComponent.h">
+      <Filter>Components\ScriptedEvents</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\ScriptedEvents\ScriptedEventDemo.h">
+      <Filter>Components\ScriptedEvents</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\ScriptedEvents\ScriptedSequenceComponent.h">
+      <Filter>Components\ScriptedEvents</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Assets\MeshLibrary.cpp">
@@ -146,6 +158,9 @@
     <ClCompile Include="BehaviourTree\CustomNodes\ConditionNodes\BT_Condition_IsPlayerInLOS.cpp">
       <Filter>BehaviourTree\CustomNodes\ConditionNodes</Filter>
     </ClCompile>
+    <ClCompile Include="Components\RegisterCustomComponents.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
     <ClCompile Include="Components\SpinComponent.cpp">
       <Filter>Components</Filter>
     </ClCompile>
@@ -166,6 +181,15 @@
     </ClCompile>
     <ClCompile Include="Runtime\GameWindowMessages.cpp">
       <Filter>Runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\ScriptedEvents\ScriptedActionComponent.cpp">
+      <Filter>Components\ScriptedEvents</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\ScriptedEvents\ScriptedEventDemo.cpp">
+      <Filter>Components\ScriptedEvents</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\ScriptedEvents\ScriptedSequenceComponent.cpp">
+      <Filter>Components\ScriptedEvents</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

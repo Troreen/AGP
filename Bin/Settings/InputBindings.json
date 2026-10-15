@@ -12,7 +12,8 @@
     "CameraUp": { "key": "SPACE", "pointer": null, "gamepad": null },
     "CameraDown": { "key": "CONTROL", "pointer": null, "gamepad": null },
     "CameraLookDelta": { "key": null, "pointer": "MOUSE_DELTA", "gamepad": null },
-    "ReloadScene": { "key": "F4", "pointer": null, "gamepad": null }
+    "ReloadScene": { "key": "F4", "pointer": null, "gamepad": null },
+    "PlayScriptedEventDemo": { "key": "F2", "pointer": null, "gamepad": null }
   },
   "current": {
     "Quit": { "key": "ESCAPE", "pointer": null, "gamepad": null },
@@ -27,6 +28,7 @@
     "CameraUp": { "key": "SPACE", "pointer": null, "gamepad": null },
     "CameraDown": { "key": "CONTROL", "pointer": null, "gamepad": null },
     "CameraLookDelta": { "key": null, "pointer": "MOUSE_DELTA", "gamepad": null },
-    "ReloadScene": { "key": "F4", "pointer": null, "gamepad": null }
+    "ReloadScene": { "key": "F4", "pointer": null, "gamepad": null },
+    "PlayScriptedEventDemo": { "key": "F2", "pointer": null, "gamepad": null }
   }
 }

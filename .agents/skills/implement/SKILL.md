@@ -13,4 +13,4 @@ Run typechecking regularly, single test files regularly, and the full test suite
 
 Once done, call the Skill tool with "code-review" to review the work.
 
-Commit your work to the current branch.
+Leave your work uncommitted and unstaged, preserving any pre-existing staging. Commit only when the user explicitly requests a commit; invoking this skill or the full feature workflow is not commit authorization. Follow the feature-name branch naming rules in `Docs/AgentWorkflow.md`, without a `codex/` prefix or Codex suffix.

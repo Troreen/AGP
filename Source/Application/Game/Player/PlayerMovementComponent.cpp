@@ -22,7 +22,7 @@ void PlayerMovementComponent::BeginPlay()
 
 void PlayerMovementComponent::Update(float aDeltaTime)
 {
-	if (!myHasDestination)
+	if (myScriptedMovement || !myHasDestination)
 	{
 		return;
 	}
@@ -53,8 +53,28 @@ void PlayerMovementComponent::Update(float aDeltaTime)
 
 void PlayerMovementComponent::SetDestination(CommonUtilities::Vector3f aDestination)
 {
+	if (myScriptedMovement)
+	{
+		return;
+	}
 	myDestination = aDestination;
 	myHasDestination = true;
+}
+
+void PlayerMovementComponent::StopMovement()
+{
+	myDestination = { 0.0f, 0.0f, 0.0f };
+	myVelocity = { 0.0f, 0.0f, 0.0f };
+	myHasDestination = false;
+}
+
+void PlayerMovementComponent::SetScriptedMovement(bool aScripted)
+{
+	myScriptedMovement = aScripted;
+	if (aScripted)
+	{
+		StopMovement();
+	}
 }
 
 void PlayerMovementComponent::RotateTowardsTarget(CommonUtilities::Vector3f aTarget, float aDeltaTime)

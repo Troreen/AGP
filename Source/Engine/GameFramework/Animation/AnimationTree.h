@@ -42,10 +42,13 @@ public:
 	AnimationState& GetCurrentAnimationState();
 
 	AnimationVariable& GetAnimationVariable(const std::string& aName);
+	bool HasAnimationVariable(const std::string& aName) const;
 	void SetBool(const std::string& aName, const bool aValue);
 	void SetTrigger(const std::string& aName);
 
 	void PlayState(const std::string& aName);
+	// Play the current state's clip without repeating its entry events.
+	void PlayCurrentAnimation();
 
 	void SetAnimationPlayer(AnimatorComponent* aAnimationPlayer);
 	AnimatorComponent* GetAnimationPlayer();

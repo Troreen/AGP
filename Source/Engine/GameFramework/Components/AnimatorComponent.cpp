@@ -12,13 +12,13 @@ AnimatorComponent::AnimatorComponent() : myMeshComponent(nullptr), myAnimationTr
 
 void AnimatorComponent::Update(float aDeltaTime)
 {
-	if (myAnimationTree)
+	if (myAnimationTree && !myScriptedAnimationOverride)
 	{
 		myAnimationTree->Update(aDeltaTime);
 	}
 
 	const bool baseChanged = AdvancePlayback(myBaseLayer, aDeltaTime);
-	const bool partialChanged = AdvancePlayback(myPartialLayer, aDeltaTime);
+	const bool partialChanged = !myScriptedAnimationOverride && AdvancePlayback(myPartialLayer, aDeltaTime);
 	if (baseChanged || partialChanged)
 	{
 		RebuildJointTransforms();
@@ -78,7 +78,7 @@ const AnimatorComponent::PlaybackState& AnimatorComponent::GetCurrentPlayBackSta
 
 bool AnimatorComponent::PlayAnimation(const std::string& anAnimationName, bool aShouldLoop)
 {
-	if (myMeshComponent->GetMesh() == nullptr)
+	if (myScriptedAnimationOverride || !myMeshComponent || !myMeshComponent->GetMesh())
 	{
 		return false;
 	}
@@ -105,6 +105,64 @@ bool AnimatorComponent::PlayAnimation(const std::string& anAnimationName, bool a
 	return true;
 }
 
+bool AnimatorComponent::CanBeginScriptedAnimation(const std::string& anAnimationName) const
+{
+	// The mesh must be assigned and the animation registered before starting.
+	return myMeshComponent && myMeshComponent->HasMesh() && GetAnimation(anAnimationName);
+}
+
+bool AnimatorComponent::BeginScriptedAnimation(const std::string& anAnimationName, bool aShouldLoop)
+{
+	const std::shared_ptr<AnimationAsset> animation = GetAnimation(anAnimationName);
+	if (!CanBeginScriptedAnimation(anAnimationName))
+	{
+		return false;
+	}
+
+	myScriptedAnimationOverride = true;
+	myBaseLayer = {};
+	myBaseLayer.CurrentAnimation = animation;
+	myBaseLayer.AnimationName = anAnimationName;
+	myBaseLayer.Looping = aShouldLoop;
+	myBaseLayer.Active = true;
+	RebuildJointTransforms();
+	return true;
+}
+
+bool AnimatorComponent::IsScriptedAnimationPlaying() const
+{
+	return myScriptedAnimationOverride && myBaseLayer.Active;
+}
+
+void AnimatorComponent::EndScriptedAnimation()
+{
+	if (!myScriptedAnimationOverride)
+	{
+		return;
+	}
+
+	myScriptedAnimationOverride = false;
+	myBaseLayer.Active = false;
+	myPartialLayer.Active = false;
+
+	// The tree supplies normal animation again, starting its current clip from the beginning.
+	// Without a tree, keep the scripted pose until another animation is requested.
+	if (myAnimationTree)
+	{
+		myAnimationTree->PlayCurrentAnimation();
+	}
+}
+
+bool AnimatorComponent::HasAnimationTree() const
+{
+	return myAnimationTree != nullptr;
+}
+
+bool AnimatorComponent::HasAnimationVariable(const std::string& aName) const
+{
+	return myAnimationTree != nullptr && myAnimationTree->HasAnimationVariable(aName);
+}
+
 AnimationTree& AnimatorComponent::GetTree()
 {
 	return *myAnimationTree;
@@ -112,7 +170,7 @@ AnimationTree& AnimatorComponent::GetTree()
 
 bool AnimatorComponent::PlayPartialAnimation(const std::string& anAnimationName, bool aShouldLoop)
 {
-	if (myMeshComponent->GetMesh() == nullptr)
+	if (myScriptedAnimationOverride || !myMeshComponent || !myMeshComponent->GetMesh())
 	{
 		return false;
 	}
@@ -143,7 +201,7 @@ bool AnimatorComponent::ConfigurePartialLayerFromJointName(const std::string& aR
 {
 	myPartialLayerMask.fill(false);
 
-	if (myMeshComponent->GetMesh() == nullptr)
+	if (!myMeshComponent || !myMeshComponent->GetMesh())
 	{
 		return false;
 	}
@@ -269,7 +327,7 @@ const CommonUtilities::Matrix4f& AnimatorComponent::GetLocalTransformForJoint(st
 	const std::string& jointName = skeleton->Joints[aJointIndex].Name;
 
 	const PlaybackState* selectedLayer = &myBaseLayer;
-	if (myPartialLayer.Active && aJointIndex < myPartialLayerMask.size() && myPartialLayerMask[aJointIndex])
+	if (!myScriptedAnimationOverride && myPartialLayer.Active && aJointIndex < myPartialLayerMask.size() && myPartialLayerMask[aJointIndex])
 	{
 		selectedLayer = &myPartialLayer;
 	}

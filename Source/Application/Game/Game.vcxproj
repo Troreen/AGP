@@ -276,6 +276,9 @@ exit /b 0</Command>
     <ClInclude Include="Resources\targetver.h" />
     <ClInclude Include="Runtime\GameApplication.h" />
     <ClInclude Include="Runtime\GameWindowMessages.h" />
+    <ClInclude Include="Components\ScriptedEvents\ScriptedActionComponent.h" />
+    <ClInclude Include="Components\ScriptedEvents\ScriptedEventDemo.h" />
+    <ClInclude Include="Components\ScriptedEvents\ScriptedSequenceComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Assets\MeshLibrary.cpp" />
@@ -289,6 +292,7 @@ exit /b 0</Command>
     <ClCompile Include="BehaviourTree\CustomNodes\ActionNodes\BT_Action_FollowPlayer.cpp" />
     <ClCompile Include="BehaviourTree\CustomNodes\ActionNodes\BT_Action_Idle.cpp" />
     <ClCompile Include="BehaviourTree\CustomNodes\ConditionNodes\BT_Condition_IsPlayerInLOS.cpp" />
+    <ClCompile Include="Components\RegisterCustomComponents.cpp" />
     <ClCompile Include="Components\SpinComponent.cpp" />
     <ClCompile Include="EnemyComponent.cpp" />
     <ClCompile Include="Game.cpp" />
@@ -298,6 +302,9 @@ exit /b 0</Command>
     <ClCompile Include="Player\PlayerMovementComponent.cpp" />
     <ClCompile Include="Runtime\GameApplication.cpp" />
     <ClCompile Include="Runtime\GameWindowMessages.cpp" />
+    <ClCompile Include="Components\ScriptedEvents\ScriptedActionComponent.cpp" />
+    <ClCompile Include="Components\ScriptedEvents\ScriptedEventDemo.cpp" />
+    <ClCompile Include="Components\ScriptedEvents\ScriptedSequenceComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Game.ico" />

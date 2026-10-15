@@ -12,6 +12,8 @@ public:
 	void Update(float aDeltaTime) override;
 
 	void SetDestination(CommonUtilities::Vector3f aDestination);
+	void StopMovement();
+	void SetScriptedMovement(bool aScripted);
 	void RotateTowardsTarget(CommonUtilities::Vector3f aTarget, float aDeltaTime);
 
 private:
@@ -20,6 +22,7 @@ private:
 	CommonUtilities::Vector3f myVelocity;
 	float myMaxSpeed;
 	bool myHasDestination;
+	bool myScriptedMovement = false;
 	float myArrivedDistance;
 	float myTurnSpeed;
 };
