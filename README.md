@@ -80,7 +80,7 @@ is limited to ±89°. Actor hierarchies are deferred in the MVP.
 | --- | --- |
 | `Escape` | Quit the game |
 | `F1` | Toggle debug camera |
-| `F2` | Play the scripted-event demo |
+| `F2` | Play the Unreal-authored test sequence, when present in the loaded scene |
 | `F4` | Reload the current scene |
 | `F5` | Select the previous renderer debug view |
 | `F6` | Select the next renderer debug view |
@@ -102,4 +102,4 @@ The current shadow setup keeps material textures in low texture slots and binds 
 
 Directional shadows use four cascades. Spot shadows use perspective shadow maps matched to the spot light cone. Point shadows use cube depth maps sampled by direction from the light to the shaded world position.
 
-For component-based scripted events, the F2 demo, and the pending Unreal authoring setup, see [Scripted events](Docs/ScriptedEvents.md).
+For component-based scripted events, see [Scripted events](Docs/ScriptedEvents.md) and the [Unreal test guide](Docs/ScriptedEventsUnrealTestGuide.md).

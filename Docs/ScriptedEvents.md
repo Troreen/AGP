@@ -1,10 +1,10 @@
 # Scripted events
 
-A scripted event is a dedicated Actor with exactly one `ScriptedSequenceComponent` and any number of action components. Each encounter has its own Actor. Actions are reusable custom component types; an event does not need a new C++ class.
+A scripted event is a dedicated Actor with exactly one `ScriptedEventComponent` and any number of action components. Each encounter has its own Actor. Actions are reusable custom component types; an event does not need a new C++ class.
 
 ## Playing an event
 
-The coordinator exposes `Play()`, `Cancel()`, `IsRunning()`, `HasCompleted()`, and `GetLastError()`. A future trigger box can call `Play()` on it. For now, set `TriggerAction` to an existing input action name. The manual demo uses input action `PlayScriptedEventDemo` on F2, targeting the `ScriptedEventDemo` Actor.
+The coordinator exposes `Play()`, `Cancel()`, `IsRunning()`, `HasCompleted()`, and `GetLastError()`. A future trigger box can call `Play()` on it. For now, set `TriggerAction` to an existing input action name. The current input settings bind `PlayUnrealSequenceTest` to F2. An exported coordinator with that TriggerAction runs when the key is pressed; no event is created automatically in C++.
 
 `Replayable` defaults to `false`: a successfully started event can run once per scene load, including if it was later cancelled. Set it to `true` for repeated testing. An event cannot restart while running. Invalid configuration or a claim conflict rejects playback before actions start and does not consume the attempt.
 
@@ -16,9 +16,9 @@ Names and variable types must match exactly. Put each variable into its correspo
 
 | Component | Fields beyond the common action fields |
 | --- | --- |
-| `ScriptedSequenceComponent` | String `TriggerAction` (empty); bool `Replayable` (`false`). This is the coordinator, not an action. |
-| `WaitActionComponent` | Float `Duration` (`1.0` seconds). No target required. |
-| `MoveActionComponent` | String `DestinationActor`; float `Duration` (`1.0` seconds). |
+| `ScriptedEventComponent` | String `TriggerAction` (empty); bool `Replayable` (`false`). This is the coordinator, not an action. |
+| `WaitActionComponent` | Float `DurationInSeconds` (`1.0`). No target required. |
+| `MoveActionComponent` | String `DestinationActor`; float `DurationInSeconds` (`1.0`). |
 | `PlayAnimationActionComponent` | String `Animation`; bool `Loop` (`false`). |
 | `SetAnimationVariableActionComponent` | String `Variable`; bool `Trigger` (`false`); bool `Value` (`true`). |
 | `PlayAudioActionComponent` | Int `Sound` (`0`); bool `Positional` (`false`). |
@@ -69,8 +69,8 @@ Unreal is unavailable during this implementation. The editor setup and a real ed
 1. Follow the existing exported custom-component pattern used by `SpinComponent`. Create finite custom component blueprints/types with the exact `CustomType` names in the table. Set up the matching typed variable maps and defaults. Verify the exported custom type string; a Blueprint asset name alone is not proof that it matches.
 2. Place a dedicated Actor for each event. Add one coordinator and uniquely named action instances. Keep the sequence Actor active and its coordinator enabled throughout playback.
 3. Name the target Actors, animator/behavior component instances, and marker Actors clearly. Confirm target animation aliases and bool/trigger names in AGP. Prepare inactive/disabled enemy behavior through the existing scene/runtime setup before gameplay starts.
-4. Give the test coordinator `TriggerAction=PlayScriptedEventDemo` and `Replayable=true`. Export a small scene and inspect its component records against the example below. Existing scalar maps already cover all action fields; no exporter format change is required.
-5. Give the exported sequence a distinct input action when running alongside the built-in demo (or remove the demo hookup). Run AGP from its normal runtime directory, press F2, and check animation, sound, movement, camera follow, input restoration, replay, and scene replacement. Then replace test assets with the real event assets and verify each encounter independently.
+4. Give the test coordinator `TriggerAction=PlayUnrealSequenceTest` and `Replayable=true`. Export a small scene and inspect its component records against the example below. Existing scalar maps already cover all action fields; no exporter format change is required.
+5. Run AGP from its normal runtime directory and press F2 to play the exported test sequence. Follow the [Unreal test guide](ScriptedEventsUnrealTestGuide.md) for movement, replay, and scene replacement checks, plus optional checks for the remaining actions.
 
 The following is a complete custom component record within an exported Actor's `Components` array. The surrounding Actor/level records are still required. The exporter supplies the normal parent and transform values; the identity matrix below is only an example.
 
@@ -87,16 +87,16 @@ The following is a complete custom component record within an exported Actor's `
     "WaitForCompletion": true,
     "TargetActor": "Player",
     "DestinationActor": "PopcornApproach",
-    "Duration": 2.0
+    "DurationInSeconds": 2.0
   }
 }
 ```
 
-For the coordinator, use the same component envelope with `CustomType="ScriptedSequenceComponent"` and `Custom={"TriggerAction":"PlayScriptedEventDemo","Replayable":true}`. The importer reads flattened scalar values directly under `Custom`; do not put nested `StringVariables` or `FloatVariables` objects there. For hand-written JSON, keep float values such as `Duration` written as `2.0`, and ints such as `Step` and `Sound` written as `2`: the importer rejects a variable with the wrong type.
+For the coordinator, use the same component envelope with `CustomType="ScriptedEventComponent"` and `Custom={"TriggerAction":"PlayUnrealSequenceTest","Replayable":true}`. The importer reads flattened scalar values directly under `Custom`; do not put nested `StringVariables` or `FloatVariables` objects there. For hand-written JSON, keep float values such as `DurationInSeconds` written as `2.0`, and ints such as `Step` and `Sound` written as `2`: the importer rejects a variable with the wrong type.
 
-## Built-in manual check
+## Manual checks
 
-The code-configured `ScriptedEventDemo` uses existing Player/Enemy assets. Press F2: player control locks and enemy AI pauses; the player moves 200 units out over two seconds while the enemy plays its registered Idle clip and a positional Heavy Roar starts. The player returns over two seconds, then control and enemy AI are released. Press F2 again to replay. Press F4 during playback to check cleanup on scene replacement. Confirm normal click movement and camera follow after playback; Escape still exits while locked. This is a plumbing demo, not final encounter content.
+Use the [Unreal test guide](ScriptedEventsUnrealTestGuide.md) to author and export a test sequence. The built-in C++ demo has been removed. Audio and animation checks are optional follow-up work and remain unverified in the editor round trip until performed.
 
 ## Verification and extending actions
 
