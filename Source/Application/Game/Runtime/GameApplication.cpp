@@ -270,7 +270,7 @@ GraphicsEngine& GameApplication::InitializeWindowAndGraphics()
 	bloom->GetSettings().LuminanceExponent = 1.5f;
 	graphics.AddPostProcessEffect(bloom);
 
-	if (!graphics.Initialize(myMainWindowHandle, myContentRoot / myApplicationSettings.ShaderFolder) || 
+	if (!graphics.Initialize(myMainWindowHandle, myApplicationSettings.ShaderFolder) || 
 		!graphics.CreateCommandList("Game Scene", myCommandList))
 	{
 		throw std::runtime_error("Could not initialize graphics engine: ");
@@ -377,7 +377,16 @@ void GameApplication::InitializeGameSession(Game& aGame, GraphicsEngine& aGraphi
 	// Start the scene named in the settings unless the game requested one.
 	if (!myPendingScene)
 	{
-		RequestSceneLoad(myApplicationSettings.InitialScene);
+		// Check Content folder for EAP.json if it exists request that, if it doesnt exist request the initial scene.
+		const std::string eapPath = myApplicationSettings.ContentPath + "/EAP.json";
+		if (std::filesystem::exists(eapPath))
+		{
+			RequestSceneLoad("EAP.json");
+		}
+		else
+		{
+			RequestSceneLoad(myApplicationSettings.InitialScene);
+		}
 	}
 
 	myInitialWorldStarted = true;
@@ -559,7 +568,7 @@ void GameApplication::ProcessPendingSceneLoad(Game& aGame)
 		SceneFallbackAssets fallbacks;
 		// TODO: Replace the procedural cube with the dedicated missing-mesh asset.
 		fallbacks.MissingMesh = std::make_shared<MeshAsset>(PrimitiveMeshBuilder::CreateCube());
-		fallbacks.MissingShader = myContentRoot / myApplicationSettings.ShaderFolder / "_DefaultMaterial.hlsli";
+		fallbacks.MissingShader = myContentRoot / "Shaders" / "_DefaultMaterial.hlsli";
 
 		MaterialDescription matDesc;
 		matDesc.Name = "_Default Material_";
@@ -581,7 +590,7 @@ void GameApplication::ProcessPendingSceneLoad(Game& aGame)
 
 		SceneWorldBuilder worldBuilder;
 		worldBuilder.Initialize(ServiceLocator::GetInstance().GetEngineSettings().GetSettingsDirectory() / "MaterialNameConversions.json");
-		candidateWorld = worldBuilder.BuildWorld(scene, assets, myContentRoot / myApplicationSettings.ShaderFolder, myClientSize, fallbacks,
+		candidateWorld = worldBuilder.BuildWorld(scene, assets, myApplicationSettings.ShaderFolder, myClientSize, fallbacks,
 			[this](Actor& anActor, const CustomComponentData& aCustomComponentData)
 			{
 				CustomComponent* component = myComponentRegistry.Create(anActor, aCustomComponentData);

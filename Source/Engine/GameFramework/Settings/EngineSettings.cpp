@@ -471,7 +471,8 @@ namespace
 
 		if (const auto shaderFolder = ReadOptionalString(anObject, "shaderFolder", aField))
 		{
-			settings.ShaderFolder = shaderFolder.value();
+			const std::u8string utf8Path(reinterpret_cast<const char8_t*>(shaderFolder->data()), shaderFolder->size());
+			settings.ShaderFolder = std::filesystem::path(utf8Path);
 		}
 
 		if (const auto sceneFolder = ReadOptionalString(anObject, "scenesFolder", aField))
@@ -739,7 +740,9 @@ void EngineSettings::Load(const std::filesystem::path& anExecutableDirectory, co
 
 		// All sections are valid; publish them together.
 		myDefaultApplication = std::move(defaultApplication);
+		myDefaultApplication.ShaderFolder = myExecutableDirectory / myDefaultApplication.ShaderFolder;
 		myCurrentApplication = std::move(currentApplication);
+		myCurrentApplication.ShaderFolder = myExecutableDirectory / myCurrentApplication.ShaderFolder;
 		myDefaultSound = defaultSound;
 		myCurrentSound = currentSound;
 		myDefaultInput = std::move(defaultInput);

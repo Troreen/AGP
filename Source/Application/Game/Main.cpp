@@ -40,7 +40,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ int)
 
 		// Read settings before creating the window or engine services.
 		const std::filesystem::path executableDirectory = std::filesystem::path(executablePath).parent_path();
-		const std::filesystem::path settingsDirectory = executableDirectory.parent_path() / "Settings";
+		std::filesystem::path settingsDirectory = executableDirectory / "Settings";
+		if (!std::filesystem::exists(settingsDirectory))
+		{
+			settingsDirectory = executableDirectory.parent_path() / "Settings";
+		}
 		GAMELOG(Log, "Loading settings from {}", settingsDirectory.string());
 
 		EngineSettings& settings = ServiceLocator::GetInstance().GetEngineSettings();

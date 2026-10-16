@@ -8,8 +8,8 @@
       "resizable": false,
       "renderDiagnostics": true,
       "mouseLook": true,
-      "contentPath": "Content",
-      "shaderFolder" : "Shaders",
+      "contentPath": "../../Content",
+      "shaderFolder" : "EngineShaders",
       "scenesFolder" : "ExportedScenes",
       "cursorPath": "",
       "initialScene": "lvl_blockout/Lvl_Blockout_Level.json"
@@ -25,11 +25,11 @@
       "resizable": false,
       "renderDiagnostics": true,
       "mouseLook": true,
-      "contentPath": "Content",
-      "shaderFolder" : "Shaders",
+      "contentPath": "../../Content",
+      "shaderFolder" : "EngineShaders",
       "scenesFolder" : "ExportedScenes",
       "cursorPath": "",
-      "initialScene": "lvl_blockout/Lvl_Blockout_Level.json"
+      "initialScene": "lvl_verify_anim/Lvl_Verify_Anim_Level.json"
     },
     "sound": { "masterVolume": 1.0, "musicVolume": 0.35, "sfxVolume": 1.0 }
   }

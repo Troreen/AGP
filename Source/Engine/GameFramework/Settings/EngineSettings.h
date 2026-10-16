@@ -35,7 +35,7 @@ struct ApplicationSettings
 	bool EnableRenderDiagnostics = true;
 	bool EnableMouseLook = true;
 	std::filesystem::path ContentPath = "Content";
-	std::string ShaderFolder;
+	std::filesystem::path ShaderFolder;
 	std::string SceneFolder;
 	std::filesystem::path CursorPath;
 	std::string InitialScene = "Blockout";
