@@ -3,7 +3,7 @@
 #include "Vector3.hpp"
 #include <string>
 
-class ScriptedSequenceComponent;
+class ScriptedEventComponent;
 
 // One job in an event, such as moving an actor or playing a sound.
 // The sequence decides when it starts, updates it until it finishes, and cleans it up when the event ends.
@@ -61,7 +61,7 @@ protected:
 	Component* FindTargetComponent() const;
 
 private:
-	friend class ScriptedSequenceComponent;
+	friend class ScriptedEventComponent;
 	bool myStarted = false;
 	bool myFinished = false;
 };
@@ -70,7 +70,7 @@ private:
 class WaitActionComponent final : public ScriptedActionComponent
 {
 public:
-	float Duration = 1.0f;
+	float DurationInSeconds = 1.0f;
 	void InitializeCustomVariables(const CustomComponentVariables&) override;
 	bool Validate(std::string&) const override;
 	bool Start() override;
@@ -85,12 +85,12 @@ private:
 	float myElapsedSeconds = 0;
 };
 
-// Move an actor straight from its current position to a marker actor's position over Duration seconds.
+// Move an actor straight from its current position to a marker actor's position over DurationInSeconds seconds.
 class MoveActionComponent final : public ScriptedActionComponent
 {
 public:
 	std::string DestinationActor;
-	float Duration = 1.0f;
+	float DurationInSeconds = 1.0f;
 	void InitializeCustomVariables(const CustomComponentVariables&) override;
 	bool Validate(std::string&) const override;
 	bool Start() override;

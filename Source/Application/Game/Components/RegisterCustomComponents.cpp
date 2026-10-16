@@ -1,7 +1,7 @@
 #include "RegisterCustomComponents.h"
 #include "CustomComponentRegistry.h"
 #include "SpinComponent.h"
-#include "Components/ScriptedEvents/ScriptedSequenceComponent.h"
+#include "Components/ScriptedEvents/ScriptedEventComponent.h"
 #include "Components/ScriptedEvents/ScriptedActionComponent.h"
 
 void RegisterCustomComponents(CustomComponentRegistry& aRegistry)
@@ -9,7 +9,7 @@ void RegisterCustomComponents(CustomComponentRegistry& aRegistry)
 	aRegistry.Register<SpinComponent>("SpinComponent");
 
 	// --- Scripted Events ---
-	aRegistry.Register<ScriptedSequenceComponent>("ScriptedSequenceComponent");
+	aRegistry.Register<ScriptedEventComponent>("ScriptedEventComponent");
 	aRegistry.Register<WaitActionComponent>("WaitActionComponent");
 	aRegistry.Register<MoveActionComponent>("MoveActionComponent");
 	aRegistry.Register<PlayAnimationActionComponent>("PlayAnimationActionComponent");

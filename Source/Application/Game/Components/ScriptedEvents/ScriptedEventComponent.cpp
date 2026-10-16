@@ -1,4 +1,4 @@
-#include "ScriptedSequenceComponent.h"
+#include "ScriptedEventComponent.h"
 #include "ScriptedActionComponent.h"
 #include "GameFramework/Scenes/CustomComponentVariables.h"
 #include "GameFramework/World/Actor.h"
@@ -13,16 +13,16 @@ namespace
 {
 	// Remember which sequence is using each actor, so another sequence cannot take control of it halfway through.
 	// These pointers only identify actors; we never access actors through this list. EndPlay clears their reservations.
-	std::unordered_map<const Actor*, ScriptedSequenceComponent*> actorClaims;
+	std::unordered_map<const Actor*, ScriptedEventComponent*> actorClaims;
 }
 
-void ScriptedSequenceComponent::InitializeCustomVariables(const CustomComponentVariables& variables)
+void ScriptedEventComponent::InitializeCustomVariables(const CustomComponentVariables& variables)
 {
 	Replayable = variables.GetOrDefault<bool>("Replayable", false);
 	TriggerAction = variables.GetOrDefault<std::string>("TriggerAction", "");
 }
 
-void ScriptedSequenceComponent::BeginPlay()
+void ScriptedEventComponent::BeginPlay()
 {
 	if (!TriggerAction.empty())
 	{
@@ -38,7 +38,7 @@ void ScriptedSequenceComponent::BeginPlay()
 	}
 }
 
-bool ScriptedSequenceComponent::Play()
+bool ScriptedEventComponent::Play()
 {
 	// Ignore repeated triggers while running. By default, an event can only start once per scene load.
 	if (myRunning || (myPlayed && !Replayable) || !IsEnabled() || !GetOwner()->IsActive())
@@ -59,7 +59,7 @@ bool ScriptedSequenceComponent::Play()
 		return firstAction->Step < secondAction->Step;
 	});
 
-	if (GetOwner()->GetComponents<ScriptedSequenceComponent>().size() != 1)
+	if (GetOwner()->GetComponents<ScriptedEventComponent>().size() != 1)
 	{
 		myLastError = "A sequence Actor needs exactly one coordinator";
 	}
@@ -157,7 +157,7 @@ bool ScriptedSequenceComponent::Play()
 	return myRunning || myCompleted;
 }
 
-void ScriptedSequenceComponent::StartStep()
+void ScriptedEventComponent::StartStep()
 {
 	// The sorted list keeps each step's actions together. Start this group and stop at the next step number.
 	myStepEndIndex = myStepBeginIndex;
@@ -194,7 +194,7 @@ void ScriptedSequenceComponent::StartStep()
 	}
 }
 
-void ScriptedSequenceComponent::Update(float deltaTime)
+void ScriptedEventComponent::Update(float deltaTime)
 {
 	if (!myRunning)
 	{
@@ -253,7 +253,7 @@ void ScriptedSequenceComponent::Update(float deltaTime)
 	}
 }
 
-void ScriptedSequenceComponent::ReleaseClaims() noexcept
+void ScriptedEventComponent::ReleaseClaims() noexcept
 {
 	// Let other events use these actors again. Only remove reservations that still belong to this sequence.
 	for (const Actor* claimedActor : myClaimedActors)
@@ -267,7 +267,7 @@ void ScriptedSequenceComponent::ReleaseClaims() noexcept
 	myClaimedActors.clear();
 }
 
-void ScriptedSequenceComponent::Finish(bool cancelled) noexcept
+void ScriptedEventComponent::Finish(bool cancelled) noexcept
 {
 	// Give back temporary control such as movement, animation, and input locks.
 	// Positions and changes to animation variables or enabled/active settings stay as the actions left them.
@@ -286,12 +286,12 @@ void ScriptedSequenceComponent::Finish(bool cancelled) noexcept
 	myCompleted = !cancelled;
 }
 
-void ScriptedSequenceComponent::Cancel() noexcept
+void ScriptedEventComponent::Cancel() noexcept
 {
 	Finish(true);
 }
 
-void ScriptedSequenceComponent::EndPlay() noexcept
+void ScriptedEventComponent::EndPlay() noexcept
 {
 	// Unloading the scene or removing this component must also stop the event and disconnect its button listener.
 	Cancel();

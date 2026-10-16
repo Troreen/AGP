@@ -14,7 +14,8 @@
 namespace
 {
 	// A component name picks an exact animator/controller. Without a name, use the actor's first component of that type.
-	template <class ComponentType> ComponentType* FindActionTargetComponent(const ScriptedActionComponent& action)
+	template <class ComponentType> 
+	ComponentType* FindActionTargetComponent(const ScriptedActionComponent& action)
 	{
 		Actor* targetActor = action.GetWorld().FindActor(action.TargetActor);
 		if (!targetActor)
@@ -84,14 +85,14 @@ bool ScriptedActionComponent::Validate(std::string& error) const
 void WaitActionComponent::InitializeCustomVariables(const CustomComponentVariables& variables)
 {
 	ReadCommon(variables);
-	Duration = variables.GetOrDefault<float>("Duration", 1.0f);
+	DurationInSeconds = variables.GetOrDefault<float>("DurationInSeconds", 1.0f);
 }
 
 bool WaitActionComponent::Validate(std::string& error) const
 {
-	if (!ValidDuration(Duration))
+	if (!ValidDuration(DurationInSeconds))
 	{
-		return SetValidationError(error, "Invalid wait Duration");
+		return SetValidationError(error, "Invalid wait DurationInSeconds");
 	}
 	return true;
 }
@@ -106,14 +107,14 @@ bool WaitActionComponent::Tick(float deltaTime)
 {
 	// Tick returns true when the action is done. A wait simply counts seconds until its duration is reached.
 	myElapsedSeconds += deltaTime;
-	return myElapsedSeconds >= Duration;
+	return myElapsedSeconds >= DurationInSeconds;
 }
 
 void MoveActionComponent::InitializeCustomVariables(const CustomComponentVariables& variables)
 {
 	ReadCommon(variables);
 	DestinationActor = variables.GetOrDefault<std::string>("DestinationActor", "");
-	Duration = variables.GetOrDefault<float>("Duration", 1.0f);
+	DurationInSeconds = variables.GetOrDefault<float>("DurationInSeconds", 1.0f);
 }
 
 bool MoveActionComponent::Validate(std::string& error) const
@@ -122,9 +123,9 @@ bool MoveActionComponent::Validate(std::string& error) const
 	{
 		return false;
 	}
-	if (!ValidDuration(Duration))
+	if (!ValidDuration(DurationInSeconds))
 	{
-		return SetValidationError(error, "Invalid move Duration");
+		return SetValidationError(error, "Invalid move DurationInSeconds");
 	}
 	if (!GetWorld().FindActor(DestinationActor))
 	{
@@ -151,10 +152,10 @@ bool MoveActionComponent::Start()
 
 bool MoveActionComponent::Tick(float deltaTime)
 {
-	// Progress goes from 0 (start) to 1 (destination). Zero duration moves there on the first update.
+	// Progress goes from 0 (start) to 1 (destination). Zero DurationInSeconds moves there on the first update.
 	// This is a straight-line position change; it does not find a path around obstacles or turn the actor.
 	myElapsedSeconds += deltaTime;
-	const float movementProgress = Duration == 0 ? 1.0f : (std::min)(myElapsedSeconds / Duration, 1.0f);
+	const float movementProgress = DurationInSeconds == 0 ? 1.0f : (std::min)(myElapsedSeconds / DurationInSeconds, 1.0f);
 	FindTarget()->GetTransform().SetWorldPosition(myStartPosition + (myDestinationPosition - myStartPosition) * movementProgress);
 	if (movementProgress >= 1)
 	{

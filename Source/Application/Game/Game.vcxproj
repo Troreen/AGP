@@ -277,8 +277,7 @@ exit /b 0</Command>
     <ClInclude Include="Runtime\GameApplication.h" />
     <ClInclude Include="Runtime\GameWindowMessages.h" />
     <ClInclude Include="Components\ScriptedEvents\ScriptedActionComponent.h" />
-    <ClInclude Include="Components\ScriptedEvents\ScriptedEventDemo.h" />
-    <ClInclude Include="Components\ScriptedEvents\ScriptedSequenceComponent.h" />
+    <ClInclude Include="Components\ScriptedEvents\ScriptedEventComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Assets\MeshLibrary.cpp" />
@@ -303,8 +302,7 @@ exit /b 0</Command>
     <ClCompile Include="Runtime\GameApplication.cpp" />
     <ClCompile Include="Runtime\GameWindowMessages.cpp" />
     <ClCompile Include="Components\ScriptedEvents\ScriptedActionComponent.cpp" />
-    <ClCompile Include="Components\ScriptedEvents\ScriptedEventDemo.cpp" />
-    <ClCompile Include="Components\ScriptedEvents\ScriptedSequenceComponent.cpp" />
+    <ClCompile Include="Components\ScriptedEvents\ScriptedEventComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Game.ico" />

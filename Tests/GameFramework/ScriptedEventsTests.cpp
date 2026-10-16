@@ -1,5 +1,5 @@
 #include "Components/ScriptedEvents/ScriptedActionComponent.h"
-#include "Components/ScriptedEvents/ScriptedSequenceComponent.h"
+#include "Components/ScriptedEvents/ScriptedEventComponent.h"
 #include "GameFramework/World/World.h"
 #include "Components/RegisterCustomComponents.h"
 #include "Components/CustomComponentRegistry.h"
@@ -44,7 +44,7 @@ namespace
 		event.Name = "ExportedEvent";
 		CustomComponentData coordinator;
 		coordinator.Common.Name = "Sequence";
-		coordinator.CustomType = "ScriptedSequenceComponent_C";
+		coordinator.CustomType = "ScriptedEventComponent_C";
 		coordinator.Variables.BoolVariables.emplace("Replayable", true);
 		event.Components.push_back(coordinator);
 		CustomComponentData move;
@@ -69,7 +69,7 @@ namespace
 		auto world = builder.BuildWorld(scene, assets, {}, {1280, 720}, {},
 			[&registry](Actor& actor, const CustomComponentData& data) { return registry.Create(actor, data); });
 		auto* actor = world->FindActor("ExportedEvent");
-		auto* sequence = actor->GetComponent<ScriptedSequenceComponent>();
+		auto* sequence = actor->GetComponent<ScriptedEventComponent>();
 		auto* action = actor->GetComponent<MoveActionComponent>();
 		Check(sequence && sequence->Replayable && action && action->Step == 3 && action->WaitForCompletion,
 			"Registry/builder did not apply exported sequence and action variables");
@@ -82,12 +82,12 @@ namespace
 			"Exported custom fields did not drive movement");
 	}
 
-	ScriptedSequenceComponent* Sequence(World& world, const char* name)
+	ScriptedEventComponent* Sequence(World& world, const char* name)
 	{
-		return world.SpawnActor(name)->AddComponent<ScriptedSequenceComponent>("Sequence");
+		return world.SpawnActor(name)->AddComponent<ScriptedEventComponent>("Sequence");
 	}
 
-	WaitActionComponent* Wait(ScriptedSequenceComponent* sequence, const char* name, int step, float duration)
+	WaitActionComponent* Wait(ScriptedEventComponent* sequence, const char* name, int step, float duration)
 	{
 		auto* action = sequence->GetOwner()->AddComponent<WaitActionComponent>(name);
 		action->Step = step;
@@ -95,7 +95,7 @@ namespace
 		return action;
 	}
 
-	MoveActionComponent* Move(ScriptedSequenceComponent* sequence, int step, float duration)
+	MoveActionComponent* Move(ScriptedEventComponent* sequence, int step, float duration)
 	{
 		auto* action = sequence->GetOwner()->AddComponent<MoveActionComponent>("Move");
 		action->TargetActor = "Target";

@@ -17,7 +17,6 @@
 #include "Player/PlayerController.h"
 #include "Player/PlayerMovementComponent.h"
 #include "EnemyComponent.h"
-#include "Components/ScriptedEvents/ScriptedEventDemo.h"
 
 #include <memory>
 
@@ -173,8 +172,6 @@ void Game::ConfigureWorld(World& aWorld)
 	//	std::shared_ptr<MeshAsset> asset = assetRegistry.GetAsset<MeshAsset>("Lvl_Blockout_NavMesh.fbx");
 	//	component->SetMesh(asset);
 	//}
-
-	ConfigureScriptedEventDemo(aWorld);
 
 	{ // TODO : Temporary place for debug animation
 		AnimationManager::DebugData& data = ServiceLocator::GetInstance().GetAnimationManager().GetDebugData();

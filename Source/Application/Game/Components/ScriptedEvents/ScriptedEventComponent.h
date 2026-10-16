@@ -7,7 +7,7 @@ class ScriptedActionComponent;
 
 // Put one sequence component and its action components on a dedicated event actor.
 // The sequence starts each numbered step, waits where requested, then gives temporary control back when the event ends.
-class ScriptedSequenceComponent final : public CustomComponent
+class ScriptedEventComponent final : public CustomComponent
 {
 public:
 	// False allows one accepted start per scene load, even if that run is later cancelled.

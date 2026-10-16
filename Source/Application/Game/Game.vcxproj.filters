@@ -117,10 +117,7 @@
     <ClInclude Include="Components\ScriptedEvents\ScriptedActionComponent.h">
       <Filter>Components\ScriptedEvents</Filter>
     </ClInclude>
-    <ClInclude Include="Components\ScriptedEvents\ScriptedEventDemo.h">
-      <Filter>Components\ScriptedEvents</Filter>
-    </ClInclude>
-    <ClInclude Include="Components\ScriptedEvents\ScriptedSequenceComponent.h">
+    <ClInclude Include="Components\ScriptedEvents\ScriptedEventComponent.h">
       <Filter>Components\ScriptedEvents</Filter>
     </ClInclude>
   </ItemGroup>
@@ -185,10 +182,7 @@
     <ClCompile Include="Components\ScriptedEvents\ScriptedActionComponent.cpp">
       <Filter>Components\ScriptedEvents</Filter>
     </ClCompile>
-    <ClCompile Include="Components\ScriptedEvents\ScriptedEventDemo.cpp">
-      <Filter>Components\ScriptedEvents</Filter>
-    </ClCompile>
-    <ClCompile Include="Components\ScriptedEvents\ScriptedSequenceComponent.cpp">
+    <ClCompile Include="Components\ScriptedEvents\ScriptedEventComponent.cpp">
       <Filter>Components\ScriptedEvents</Filter>
     </ClCompile>
   </ItemGroup>
