@@ -374,14 +374,13 @@ void GameApplication::InitializeGameSession(Game& aGame, GraphicsEngine& aGraphi
 {
 	aGame.Initialize(*this);
 
-	// Start the scene named in the settings unless the game requested one.
+	// Prefer Content/EAP.json 
 	if (!myPendingScene)
 	{
-		// Check Content folder for EAP.json if it exists request that, if it doesnt exist request the initial scene.
-		const std::string eapPath = myApplicationSettings.ContentPath + "/EAP.json";
+		const std::filesystem::path eapPath = myContentRoot / "EAP.json";
 		if (std::filesystem::exists(eapPath))
 		{
-			RequestSceneLoad("EAP.json");
+			RequestSceneLoad(eapPath);
 		}
 		else
 		{
