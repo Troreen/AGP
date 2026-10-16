@@ -1,0 +1,137 @@
+{
+	"MasterMaterials": [
+		{
+			"Name": "MM_ShaderTest",
+			"Domain": 0,
+			"ShadingModel": 1,
+			"BlendMode": 0,
+			"BaseColor": [
+				0.5,
+				0.5,
+				0.5,
+				1
+			],
+			"Metallic": 0,
+			"Roughness": 0.5,
+			"TwoSided": false,
+			"Parameters": []
+		}
+	],
+	"Actors": [
+		{
+			"Name": "DirectionalLight",
+			"Archetype": "DirectionalLight",
+			"Transform": [
+				1.7366459261474927,
+				0,
+				-1.7983495008466288,
+				0,
+				-0,
+				2.5,
+				0,
+				0,
+				1.7983495008466288,
+				0,
+				1.7366459261474927,
+				0,
+				190,
+				-380,
+				190,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "LightComponent0",
+					"Parent": "",
+					"TypeID": 5,
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Color": [
+						1,
+						1,
+						1,
+						1
+					],
+					"Intensity": 4
+				}
+			]
+		},
+		{
+			"Name": "SM_Debug_ShaderMesh_Sphere",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				1,
+				0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				670,
+				-200,
+				20,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"Parent": "",
+					"TypeID": 1,
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "SM_Debug_ShaderMesh_Sphere",
+					"ContentPath": "/Game/Meshes/Debug/SM_Debug_ShaderMesh_Sphere.SM_Debug_ShaderMesh_Sphere",
+					"AssetImportPath": "C:/P4V/G4/Content/Meshes/Debug/SM_Debug_ShaderMesh_Sphere.fbx",
+					"Materials": [
+						{
+							"Name": "MM_ShaderTest",
+							"Parent": "Self",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		}
+	]
+}
