@@ -2,6 +2,7 @@
 #include <GameFramework/World/Actor.h>
 #include <GameFramework/Components/AnimatorComponent.h>
 #include <Maths.hpp>
+#include <GraphicsEngine/Drawers/LineDrawer.h>
 #include <iostream>
 
 PlayerMovementComponent::PlayerMovementComponent()
@@ -58,6 +59,7 @@ void PlayerMovementComponent::Update(float aDeltaTime)
 	GetOwner()->GetTransform().SetLocalPosition(position);
 
 	RotateTowardsTarget(myDestination, aDeltaTime);
+
 
 }
 

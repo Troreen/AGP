@@ -12,7 +12,6 @@ Intermediate/
 !/Bin/Settings/
 x64/
 x86/
-/Debug/
 /Release/
 
 # Common generated artifacts

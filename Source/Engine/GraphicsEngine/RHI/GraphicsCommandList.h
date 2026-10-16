@@ -30,6 +30,7 @@ public:
 
 	bool UpdateConstantBuffer(const Buffer& aConstantBuffer, const void* aBufferData, size_t aBufferDataSize) const;
 	bool UpdateDynamicVertexBuffer(const Buffer& aVertexBuffer, const Vertex* aVertices, size_t aVertexCount) const;
+	bool UpdateDynamicVertexBuffer(const Buffer& aVertexBuffer, const SimpleVertex* aVertices, size_t aVertexCount) const;
 
 	void SetVertexBuffer(const Buffer* aBuffer) const;
 	void SetIndexBuffer(const Buffer* aBuffer) const;

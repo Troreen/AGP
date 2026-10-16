@@ -187,6 +187,45 @@ bool GraphicsCommandList::UpdateDynamicVertexBuffer(const Buffer& aVertexBuffer,
 	return true;
 }
 
+bool GraphicsCommandList::UpdateDynamicVertexBuffer(const Buffer& aVertexBuffer, const SimpleVertex* aVertices, size_t aVertexCount) const
+{
+	if (!aVertexBuffer.IsValid())
+	{
+		LOG(CmdLog, Error, "Failed to update Vertex buffer! Buffer is either null!");
+		return false;
+	}
+
+	if (aVertexCount == 0)
+	{
+		LOG(CmdLog, Error, "Failed to update Vertex buffer {}! Data provided is larger than buffer capacity!", aVertexBuffer.myName);
+		return false;
+	}
+
+	if (aVertexBuffer.myType != BufferType::VertexBuffer)
+	{
+		LOG(CmdLog, Error, "Failed to update Vertex buffer! Buffer  invalid type!");
+		return false;
+	}
+
+	const size_t dataSize = sizeof(SimpleVertex) * aVertexCount;
+	if (dataSize > aVertexBuffer.mySize)
+	{
+		return false;
+	}
+
+	D3D11_MAPPED_SUBRESOURCE mappedResource = {};
+	const HRESULT result = myContext->Map(aVertexBuffer.myBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	if (FAILED(result))
+	{
+		return false;
+	}
+
+	memcpy(mappedResource.pData, aVertices, dataSize);
+	myContext->Unmap(aVertexBuffer.myBuffer.Get(), 0);
+
+	return true;
+}
+
 void GraphicsCommandList::SetVertexBuffer(const Buffer* aBuffer) const
 {
 	ensure(!IsReadyForExecution());

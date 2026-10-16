@@ -23,12 +23,16 @@
 #include "TextOverlay_PS.h"
 #include "TextOverlay_VS.h"
 #include "Tonemapper_PS.h"
+#include "Lines_PS.h"
+#include "Lines_VS.h"
 
 #include <GameFramework/AssetHandling/MaterialAsset.h>
 #include <GameFramework/AssetHandling/MeshAsset.h>
 #include <GameFramework/Components/CameraComponent.h>
 #include <GameFramework/Components/MeshComponentBase.h>
 #include <GameFramework/World/Actor.h>
+#include "Drawers/LineDrawer.h"
+#include <Maths.hpp>
 
 /*
  * GraphicsEngine handles rendering of a scene.
@@ -118,9 +122,24 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path&
 	myDefaultMaterial.SetTexture(2, myDefaultORMTexture);
 	myDefaultMaterial.SetTexture(3, myNoEmissionTexture);
 
-	myRHI.CreateColorCubeTexture("Default Environment", { 255, 255, 255, 255 }, myEnvironmentCubeTexture);
 
-	myRHI.CreateDynamicVertexBuffer("SpriteRenderer", 6, mySpriteVertexBuffer);
+	if (!myRHI.CreateColorCubeTexture("Default Environment", { 255, 255, 255, 255 }, myEnvironmentCubeTexture))
+	{
+		GELOG(Error, "Failed to create default enviroment Cube!");
+		return false;
+	}
+
+	if (!myRHI.CreateDynamicVertexBuffer("SpriteBuffer", 6, mySpriteVertexBuffer))
+	{
+		GELOG(Error, "Failed to create sprite buffer!");
+		return false;
+	}
+
+	if (!myRHI.CreateDynamicVertexBufferSimple("LineBuffer", 2048, myLineBuffer))
+	{
+		GELOG(Error, "Failed to create line buffer!");
+		return false;
+	}
 
 	return true;
 }
@@ -171,6 +190,7 @@ void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const RenderS
 	RunTonemap(inoutCommandList);
 	RenderScreenText(inoutCommandList, aSnapshot);
 	RenderScreenSprites(inoutCommandList, aSnapshot);
+	RenderLines(inoutCommandList, fb);
 }
 
 void GraphicsEngine::Present() const
@@ -566,6 +586,25 @@ bool GraphicsEngine::CreatePSOs()
 		if (!myRHI.CreatePipelineStateObject(spriteDesc, *mySpritePSO))
 		{
 			GELOG(Error, "Failed to create sprite PSO!");
+			return false;
+		}
+	}
+
+	{
+		PipelineStateDescription pipelineDesc;
+
+		pipelineDesc.Name = "LinePSO";
+		pipelineDesc.Topology = Topology::LineList;
+		pipelineDesc.VertexShader.ByteCode = INTERNAL_Lines_VS_ByteCode;
+		pipelineDesc.VertexShader.ByteCodeSize = sizeof(INTERNAL_Lines_VS_ByteCode);
+		pipelineDesc.PixelShader.ByteCode = INTERNAL_Lines_PS_ByteCode;
+		pipelineDesc.PixelShader.ByteCodeSize = sizeof(INTERNAL_Lines_PS_ByteCode);
+		pipelineDesc.InputLayoutElements = SimpleVertex::Description;
+
+		myLinePSO = std::make_unique<PipelineStateObject>();
+		if (!myRHI.CreatePipelineStateObject(pipelineDesc, *myLinePSO))
+		{
+			GELOG(Error, "Failed to create line PSO!");
 			return false;
 		}
 	}
@@ -1153,6 +1192,35 @@ void GraphicsEngine::RenderScreenSprites(GraphicsCommandList& inoutCommandList, 
 		inoutCommandList.Draw(vertexCount);
 	}
 
+	inoutCommandList.EndEvent();
+}
+
+void GraphicsEngine::RenderLines(GraphicsCommandList& inoutCommandList, const FrameBuffer& aFb)
+{
+	inoutCommandList.BeginEvent("Line Render Pass");
+
+	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::FrameBuffer, aFb, 0, PipelineStage_VertexShader | PipelineStage_PixelShader);
+
+	inoutCommandList.SetShaderResource(nullptr, 1, PipelineStage_PixelShader);
+	inoutCommandList.SetRenderTarget(&myBackBuffer, nullptr);
+	inoutCommandList.SetPipelineState(*myLinePSO);
+	const std::vector<SimpleVertex>& lines = LineDrawer::Get().GetLines();
+	{
+		if (lines.size() != 0)
+		{
+			const int vertCount = static_cast<int>(lines.size());
+			for (int i = 0; i < vertCount; i += 2)
+			{
+				int remaining = vertCount - i;
+				int numVertsToDraw = CU::Math::Min(remaining, 2);
+				inoutCommandList.UpdateDynamicVertexBuffer(myLineBuffer, lines.data() + i, numVertsToDraw * sizeof(SimpleVertex));
+				inoutCommandList.SetVertexBuffer(&myLineBuffer);
+				inoutCommandList.Draw(static_cast<unsigned>(numVertsToDraw));
+			}
+		}
+
+		LineDrawer::Get().Clear();
+	}
 	inoutCommandList.EndEvent();
 }
 

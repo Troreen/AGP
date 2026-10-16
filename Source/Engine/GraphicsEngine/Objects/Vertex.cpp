@@ -12,3 +12,9 @@ const std::vector<VertexElementDesc> Vertex::Description =
     { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT },
     { "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT }
 };
+
+const std::vector<VertexElementDesc> SimpleVertex::Description =
+{
+	{ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT },
+	{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT }
+};

@@ -104,6 +104,7 @@ private:
 	void RunTonemap(GraphicsCommandList& inoutCommandList);
 	void RenderScreenText(GraphicsCommandList& inoutCommandList, const RenderSnapshot& aSnapshot);
 	void RenderScreenSprites(GraphicsCommandList& inoutCommandList, const RenderSnapshot& aSnapshot);
+	void RenderLines(GraphicsCommandList& inoutCommandList, const FrameBuffer& aFb);
 
 	const Texture* RenderShadowCascade(GraphicsCommandList& inoutCommandList, const RenderSnapshot& aSnapshot,
 		const DirectionalLightComponent* aDirectionalLight, Light& aLight, size_t aCascadeIndex);
@@ -116,6 +117,7 @@ private:
 
 	GBuffer myGBuffer;
 	Buffer mySpriteVertexBuffer;
+	Buffer myLineBuffer;
 
 	std::unique_ptr<PipelineStateObject> myAmbientLightPSO;
 	std::unique_ptr<PipelineStateObject> myDirLightPSO;
@@ -125,6 +127,7 @@ private:
 	std::unique_ptr<PipelineStateObject> myTonemapPSO;
 	std::unique_ptr<PipelineStateObject> myTextOverlayPSO;
 	std::unique_ptr<PipelineStateObject> mySpritePSO;
+	std::unique_ptr<PipelineStateObject> myLinePSO;
 
 	RenderHardwareInterface myRHI;
 	Texture myBackBuffer;

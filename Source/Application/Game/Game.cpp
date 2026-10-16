@@ -125,6 +125,7 @@ void Game::ConfigureWorld(World& aWorld)
 	{
 		Actor* actor = aWorld.SpawnActor("Player");
 		{
+			actor->GetTransform().SetLocalPosition({0,0,0});
 			SkeletalMeshComponent* component = actor->AddComponent<SkeletalMeshComponent>();
 			AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
 

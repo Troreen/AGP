@@ -294,6 +294,38 @@ bool RenderHardwareInterface::CreateDynamicVertexBuffer(std::string_view aName, 
 	return true;
 }
 
+bool RenderHardwareInterface::CreateDynamicVertexBufferSimple(std::string_view aName, size_t aMaxVertexCount, Buffer& outBuffer) const
+{
+	if (aMaxVertexCount == 0)
+	{
+		LOG(RhiLog, Error, "Failed to create dynamic vertex buffer for {}! Max vertex count is 0", aName);
+		return false;
+	}
+
+	D3D11_BUFFER_DESC desc = {};
+	desc.Usage = D3D11_USAGE_DYNAMIC;
+	desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	desc.ByteWidth = static_cast<UINT>(sizeof(SimpleVertex) * aMaxVertexCount);
+
+	const HRESULT result = myDevice->CreateBuffer(&desc, nullptr, &outBuffer.myBuffer);
+	if (FAILED(result))
+	{
+		LOG(RhiLog, Error, "Failed to create dynamic vertex buffer for {}!", aName);
+		return false;
+	}
+
+	const std::string bufferName = std::format("{}_Dynamic_VX", aName);
+	SetObjectName(outBuffer.myBuffer, bufferName);
+
+	outBuffer.myName = aName;
+	outBuffer.mySize = desc.ByteWidth;
+	outBuffer.myStride = sizeof(SimpleVertex);
+	outBuffer.myType = BufferType::VertexBuffer;
+
+	return true;
+}
+
 bool RenderHardwareInterface::CreateIndexBuffer(std::string_view aName, const std::vector<unsigned>& aIndexList, Buffer& outBuffer) const
 {
     if (aIndexList.empty())

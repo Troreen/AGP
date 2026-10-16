@@ -404,6 +404,11 @@ namespace CommonUtilities
 		aOut << "(" << aVector.x << ", " << aVector.y << ", " << aVector.z << ")";
 		return aOut;
 	}
+	template <typename T>
+	inline Vector4<T> Vector3<T>::ToVector4(const T& aW) const
+	{
+		return Vector4<T>(x, y, z, aW);
+	}
 
 	// (dimension-changing helper implementations are located earlier in this file)
 

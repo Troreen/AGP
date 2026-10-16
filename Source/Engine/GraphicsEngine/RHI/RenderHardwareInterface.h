@@ -40,6 +40,7 @@ public:
 
     bool CreateVertexBuffer(std::string_view aName, const std::vector<Vertex>& aVertexList, Buffer& outBuffer) const;
     bool CreateDynamicVertexBuffer(std::string_view aName, size_t aMaxVertexCount, Buffer& outBuffer) const;
+    bool CreateDynamicVertexBufferSimple(std::string_view aName, size_t aMaxVertexCount, Buffer& outBuffer) const;
     bool CreateIndexBuffer(std::string_view aName, const std::vector<unsigned>& aIndexList, Buffer& outBuffer) const;
     bool CreateConstantBuffer(std::string_view aName, size_t aSize, Buffer& outBuffer) const;
 
