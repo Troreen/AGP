@@ -8,6 +8,7 @@
 #include "GameFramework/AssetHandling/TextureAsset.h"
 #include "GameFramework/Components/SkeletalMeshComponent.h"
 #include "GameFramework/Components/AnimatorComponent.h"
+#include "GameFramework/Components/CameraComponent.h"
 #include "GameFramework/Components/SpriteComponent.h"
 #include "GameFramework/ServiceLocator.h"
 #include "GameFramework/World/World.h"
@@ -40,12 +41,18 @@ void Game::Initialize(GameApplication& anApplication)
 	GAMELOG(Log, "Game ready: F4 reloads the current scene, ESC quits the game.");
 }
 
-void Game::Update([[maybe_unused]] World& aWorld, [[maybe_unused]] float aDeltaTime)
+void Game::Update(World& aWorld, [[maybe_unused]] float aDeltaTime)
 {
 	if (!ServiceLocator::GetInstance().GetAudioManager().IsEventPlaying(eMainTheme))
 	
 	{
 		ServiceLocator::GetInstance().GetAudioManager().PlayMusic(eMainTheme);
+	}
+
+	// The game chooses to listen from the active view, including the debug camera.
+	if (const CameraComponent* camera = aWorld.GetActiveCamera())
+	{
+		ServiceLocator::GetInstance().GetAudioManager().SetAudioListener(camera->GetWorldPosition());
 	}
 
 }
