@@ -16,6 +16,8 @@ x86/
 /Release/
 
 # Common generated artifacts
+__pycache__/
+*.py[cod]
 *.log
 *.idb
 *.ilk
