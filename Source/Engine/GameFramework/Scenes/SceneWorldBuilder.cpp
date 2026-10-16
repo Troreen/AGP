@@ -418,6 +418,8 @@ bool SceneWorldBuilder::ApplyMesh(Actor& anActor, MeshComponentBase& aComponent,
 		{
 			throw std::runtime_error("Material slot is invalid: " + std::to_string(materialSlot));
 		}
+		GFLOG(Verbose, "Material assignment: actor='{}', component='{}', mesh='{}', slot={}, material='{}'.",
+			anActor.GetName(), someMeshData.Common.Name, someMeshData.MeshName, materialSlot, material->GetMaterial()->GetName());
 	}
 	return true;
 }

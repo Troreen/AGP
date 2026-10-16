@@ -348,6 +348,7 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 	outMaterial.myPSO = matPSO;
 	outMaterial.myName = aDescription.Name;
 	outMaterial.myDescription = aDescription;
+	GELOG(Verbose, "Material compiled: material='{}', shader='{}'.", aDescription.Name, aDescription.MaterialShaderCode.string());
 
 	return true;
 }

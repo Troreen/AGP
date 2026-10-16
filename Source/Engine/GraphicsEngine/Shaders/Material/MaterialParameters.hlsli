@@ -16,6 +16,7 @@ struct MaterialPixelParameters
     float4 WorldPosition;
     float2 UV0;
     float3 Normal;
+    float3 VertexNormal;
     float3 Tangent;
     float3 BiNormal;
     float4 Emission;

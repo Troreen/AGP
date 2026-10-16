@@ -33,6 +33,7 @@ GBufferOutput main(VStoPS aPixel)
     parameters.WorldPosition = aPixel.WorldPosition;
     parameters.UV0 = aPixel.UV0;
     parameters.Normal = pixelNormal;
+    parameters.VertexNormal = aPixel.Normal;
     parameters.Tangent = aPixel.Tangent;
     parameters.BiNormal = aPixel.BiNormal;
     parameters.Emission = (float4)emissionMask * sampleAlbedo;

@@ -2,6 +2,28 @@
 #include "ServiceLocator.h"
 #include "Settings/EngineSettings.h"
 
+#include <iostream>
+
+namespace
+{
+	class ScopedListenerLogSilence
+	{
+	public:
+		ScopedListenerLogSilence() : myPreviousState(std::cout.rdstate())
+		{
+			std::cout.setstate(std::ios_base::failbit);
+		}
+
+		~ScopedListenerLogSilence()
+		{
+			std::cout.clear(myPreviousState);
+		}
+
+	private:
+		std::ios_base::iostate myPreviousState;
+	};
+}
+
 void AudioManager::Init()
 {
 	const std::filesystem::path bankDirectory = ServiceLocator::GetInstance().GetEngineSettings().GetExecutableDirectory() / "Audio";
@@ -150,6 +172,8 @@ void AudioManager::SetEventVolume(const SoundID aSoundID, float aPercentage)
 void AudioManager::SetAudioListener(const CommonUtilities::Vector3f aPosition)
 {
 	myListenerPosition = aPosition;
+	// The prebuilt SoundEngine listener setter prints diagnostics on every call.
+	const ScopedListenerLogSilence silence;
 	SoundEngine::SetListenerPosition(myListener, { myListenerPosition.x * 0.001f, myListenerPosition.y * 0.001f, myListenerPosition.z * 0.001f });
 }
 

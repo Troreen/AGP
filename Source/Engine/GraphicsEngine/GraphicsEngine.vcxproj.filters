@@ -28,6 +28,9 @@
     <Filter Include="Shaders\Internal">
       <UniqueIdentifier>{FBAFABEB-E7A8-CA3D-10DB-AFC2FC32AA49}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\Lines">
+      <UniqueIdentifier>{3995FA59-A555-7690-6E90-BF0DDA0FBB6C}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Shaders\Material">
       <UniqueIdentifier>{6DD8FDB3-59D1-1C06-8203-028B6E5BFC11}</UniqueIdentifier>
     </Filter>
@@ -56,6 +59,9 @@
     </ClInclude>
     <ClInclude Include="ConstantBuffers\TextOverlayBuffer.h">
       <Filter>ConstantBuffers</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawers\LineDrawer.h">
+      <Filter>Drawers</Filter>
     </ClInclude>
     <ClInclude Include="Drawers\SpriteDrawer.h">
       <Filter>Drawers</Filter>
@@ -144,6 +150,9 @@
     <ClInclude Include="TextWidget.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Drawers\LineDrawer.cpp">
+      <Filter>Drawers</Filter>
+    </ClCompile>
     <ClCompile Include="Drawers\SpriteDrawer.cpp">
       <Filter>Drawers</Filter>
     </ClCompile>
@@ -226,6 +235,12 @@
     <FxCompile Include="Shaders\Internal\Sprite_VS.hlsl">
       <Filter>Shaders\Internal</Filter>
     </FxCompile>
+    <FxCompile Include="Shaders\Lines\Lines_PS.hlsl">
+      <Filter>Shaders\Lines</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Lines\Lines_VS.hlsl">
+      <Filter>Shaders\Lines</Filter>
+    </FxCompile>
     <FxCompile Include="Shaders\Material\Deferred_AmbientLight_PS.hlsl">
       <Filter>Shaders\Material</Filter>
     </FxCompile>
@@ -289,6 +304,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\LUTFunctions.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\MM_ShaderTest.hlsli">
       <Filter>Shaders</Filter>
     </None>
     <None Include="Shaders\Material\Common.hlsli">

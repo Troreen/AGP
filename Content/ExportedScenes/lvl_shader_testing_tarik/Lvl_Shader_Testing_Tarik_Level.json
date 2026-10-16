@@ -1,7 +1,7 @@
 {
 	"MasterMaterials": [
 		{
-			"Name": "MM_ShaderTest",
+			"Name": "MM_Standard_WithSnow",
 			"Domain": 0,
 			"ShadingModel": 1,
 			"BlendMode": 0,
@@ -14,7 +14,43 @@
 			"Metallic": 0,
 			"Roughness": 0.5,
 			"TwoSided": false,
-			"Parameters": []
+			"Parameters": [
+				{
+					"Name": "Snow Tiling",
+					"Type": 0,
+					"Value": 0.10000000149011612
+				},
+				{
+					"Name": "Noise intensity",
+					"Type": 0,
+					"Value": 0.69999998807907104
+				},
+				{
+					"Name": "AlbedoMap",
+					"Type": 3,
+					"Value":
+					{
+						"Name": "T_4M_MixedMedievalBricks_BaseColor",
+						"Path": "/Game/Textures/T_4M_MixedMedievalBricks_BaseColor.T_4M_MixedMedievalBricks_BaseColor",
+						"AssetImportPath": "C:/Users/egil.wendin/egil.wendin_P5G4/Content/Textures/T_4M_MixedMedievalBricks_BaseColor.png"
+					}
+				},
+				{
+					"Name": "NormalMap",
+					"Type": 3,
+					"Value":
+					{
+						"Name": "T_4M_MixedMedievalBricks_Normal",
+						"Path": "/Game/Textures/T_4M_MixedMedievalBricks_Normal.T_4M_MixedMedievalBricks_Normal",
+						"AssetImportPath": "C:/Users/egil.wendin/egil.wendin_P5G4/Content/Textures/T_4M_MixedMedievalBricks_Normal.png"
+					}
+				},
+				{
+					"Name": "Noise Size",
+					"Type": 0,
+					"Value": 4
+				}
+			]
 		}
 	],
 	"Actors": [
@@ -125,7 +161,7 @@
 					"AssetImportPath": "C:/P4V/G4/Content/Meshes/Debug/SM_Debug_ShaderMesh_Sphere.fbx",
 					"Materials": [
 						{
-							"Name": "MM_ShaderTest",
+							"Name": "MM_Standard_WithSnow",
 							"Parent": "Self",
 							"Parameters": []
 						}
