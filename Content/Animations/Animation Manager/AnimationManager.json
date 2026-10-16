@@ -5,6 +5,10 @@
       {
         "Name": "IsIdle",
         "Type": "Bool"
+      },
+      {
+        "Name": "IsRunning",
+        "Type": "Bool"
       }
     ]
   },
@@ -24,6 +28,19 @@
         "Type": "Bool"
       },
       { 
+        "Name": "IsRunning",
+        "Type": "Bool"
+      }
+    ]
+  },
+    "Enemy02Tree": {
+    "Start state": "Idle",
+    "Variables": [
+      {
+        "Name": "IsIdle",
+        "Type": "Bool"
+      },
+      {
         "Name": "IsRunning",
         "Type": "Bool"
       }

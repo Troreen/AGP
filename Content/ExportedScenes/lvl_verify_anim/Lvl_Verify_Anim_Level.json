@@ -402,8 +402,8 @@
 			"Components": [
 				{
 					"Name": "LightComponent0",
-					"TypeID": 5,
 					"Parent": "",
+					"TypeID": 5,
 					"Tags": [],
 					"Transform": [
 						1,
@@ -451,15 +451,15 @@
 				0,
 				0,
 				0,
-				0,
+				-100,
 				1
 			],
 			"Tags": [],
 			"Components": [
 				{
 					"Name": "StaticMeshComponent0",
-					"TypeID": 1,
 					"Parent": "",
+					"TypeID": 1,
 					"Tags": [],
 					"Transform": [
 						1,
@@ -510,15 +510,15 @@
 				0,
 				800,
 				0,
-				0,
+				-100,
 				1
 			],
 			"Tags": [],
 			"Components": [
 				{
 					"Name": "StaticMeshComponent0",
-					"TypeID": 1,
 					"Parent": "",
+					"TypeID": 1,
 					"Tags": [],
 					"Transform": [
 						1,
@@ -569,15 +569,15 @@
 				0,
 				800,
 				-800,
-				0,
+				-100,
 				1
 			],
 			"Tags": [],
 			"Components": [
 				{
 					"Name": "StaticMeshComponent0",
-					"TypeID": 1,
 					"Parent": "",
+					"TypeID": 1,
 					"Tags": [],
 					"Transform": [
 						1,
@@ -628,15 +628,15 @@
 				0,
 				0,
 				-800,
-				0,
+				-100,
 				1
 			],
 			"Tags": [],
 			"Components": [
 				{
 					"Name": "StaticMeshComponent0",
-					"TypeID": 1,
 					"Parent": "",
+					"TypeID": 1,
 					"Tags": [],
 					"Transform": [
 						1,
@@ -687,15 +687,15 @@
 				0,
 				800,
 				800,
-				0,
+				-100,
 				1
 			],
 			"Tags": [],
 			"Components": [
 				{
 					"Name": "StaticMeshComponent0",
-					"TypeID": 1,
 					"Parent": "",
+					"TypeID": 1,
 					"Tags": [],
 					"Transform": [
 						1,
@@ -746,15 +746,15 @@
 				0,
 				0,
 				800,
-				0,
+				-100,
 				1
 			],
 			"Tags": [],
 			"Components": [
 				{
 					"Name": "StaticMeshComponent0",
-					"TypeID": 1,
 					"Parent": "",
+					"TypeID": 1,
 					"Tags": [],
 					"Transform": [
 						1,
@@ -805,15 +805,15 @@
 				0,
 				-800,
 				0,
-				0,
+				-100,
 				1
 			],
 			"Tags": [],
 			"Components": [
 				{
 					"Name": "StaticMeshComponent0",
-					"TypeID": 1,
 					"Parent": "",
+					"TypeID": 1,
 					"Tags": [],
 					"Transform": [
 						1,
@@ -864,15 +864,15 @@
 				0,
 				-800,
 				-800,
-				0,
+				-100,
 				1
 			],
 			"Tags": [],
 			"Components": [
 				{
 					"Name": "StaticMeshComponent0",
-					"TypeID": 1,
 					"Parent": "",
+					"TypeID": 1,
 					"Tags": [],
 					"Transform": [
 						1,
@@ -923,15 +923,15 @@
 				0,
 				-800,
 				800,
-				0,
+				-100,
 				1
 			],
 			"Tags": [],
 			"Components": [
 				{
 					"Name": "StaticMeshComponent0",
-					"TypeID": 1,
 					"Parent": "",
+					"TypeID": 1,
 					"Tags": [],
 					"Transform": [
 						1,
@@ -968,29 +968,29 @@
 			"Name": "CameraActor",
 			"Archetype": "CameraActor",
 			"Transform": [
-				0.70710678548857209,
+				0.49119764734799187,
+				-0.50865005389145512,
+				-0.70710677688452195,
 				0,
-				-0.70710677688452284,
-				0,
-				-0,
-				1,
+				0.71933980033865086,
+				0.69465837045899737,
 				0,
 				0,
-				0.70710677688452284,
+				0.49119764137111577,
+				-0.50865004770221922,
+				0.70710678548857286,
 				0,
-				0.70710678548857209,
-				0,
-				-469.95899758734686,
-				0,
-				755.98719257296648,
+				-339.95899758734686,
+				340,
+				525.98719257296648,
 				1
 			],
 			"Tags": [],
 			"Components": [
 				{
 					"Name": "SceneComponent",
-					"TypeID": 0,
 					"Parent": "",
+					"TypeID": 0,
 					"Tags": [],
 					"Transform": [
 						1,
@@ -1013,8 +1013,8 @@
 				},
 				{
 					"Name": "CameraComponent",
-					"TypeID": 11,
 					"Parent": "SceneComponent",
+					"TypeID": 11,
 					"Tags": [],
 					"Transform": [
 						1,
@@ -1056,15 +1056,44 @@
 				0,
 				10,
 				0,
-				100,
+				0,
 				1
 			],
 			"Tags": [],
 			"Components": [
 				{
-					"Name": "DefaultSceneRoot",
-					"TypeID": 0,
+					"Name": "Animator",
 					"Parent": "",
+					"TypeID": -1,
+					"CustomType": "AnimatorComponent_C",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Custom":
+					{
+						"AnimationTree": "PlayerTree"
+					}
+				},
+				{
+					"Name": "DefaultSceneRoot",
+					"Parent": "",
+					"TypeID": 0,
 					"Tags": [],
 					"Transform": [
 						1,
@@ -1087,8 +1116,8 @@
 				},
 				{
 					"Name": "SkeletalMesh",
-					"TypeID": 2,
 					"Parent": "DefaultSceneRoot",
+					"TypeID": 2,
 					"Tags": [],
 					"Transform": [
 						1,

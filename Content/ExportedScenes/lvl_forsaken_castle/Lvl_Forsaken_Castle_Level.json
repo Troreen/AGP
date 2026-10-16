@@ -218,6 +218,86 @@
 			]
 		},
 		{
+			"Name": "CameraActor5",
+			"Archetype": "CameraActor",
+			"Transform": [
+				0.4298789200212586,
+				-0.40086857813238841,
+				-0.80901699437494679,
+				0,
+				0.68199836006249748,
+				0.73135370161917113,
+				-6.106226635438361e-16,
+				0,
+				0.59167757350893369,
+				-0.55174826342640459,
+				0.58778525229247336,
+				0,
+				-1166.3700590000001,
+				1087.657676,
+				2109.5755509999999,
+				1
+			],
+			"Tags": [
+				"ActiveCamera"
+			],
+			"Components": [
+				{
+					"Name": "SceneComponent",
+					"TypeID": 0,
+					"Parent": "",
+					"Tags": [
+						"ActiveCamera"
+					],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					]
+				},
+				{
+					"Name": "CameraComponent",
+					"TypeID": 11,
+					"Parent": "SceneComponent",
+					"Tags": [
+						"ActiveCamera"
+					],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"FOV": 42
+				}
+			]
+		},
+		{
 			"Name": "SkyLight",
 			"Archetype": "SkyLight",
 			"Transform": [
@@ -39165,65 +39245,6 @@
 					"Materials": [
 						{
 							"Name": "M_Grey",
-							"Parent": "Self",
-							"Parameters": []
-						}
-					]
-				}
-			]
-		},
-		{
-			"Name": "SM_SkySphere",
-			"Archetype": "StaticMeshActor",
-			"Transform": [
-				400,
-				0,
-				0,
-				0,
-				0,
-				400,
-				0,
-				0,
-				0,
-				0,
-				400,
-				0,
-				149.99999699988075,
-				-1900.0000000000432,
-				0,
-				1
-			],
-			"Tags": [],
-			"Components": [
-				{
-					"Name": "StaticMeshComponent0",
-					"Parent": "RootComponent",
-					"TypeID": 1,
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Mesh": "SM_SkySphere",
-					"ContentPath": "/Engine/EngineSky/SM_SkySphere.SM_SkySphere",
-					"AssetImportPath": "C:/Users/Thomas.Browett/Desktop/SM_SkySphere.FBX",
-					"Materials": [
-						{
-							"Name": "M_SimpleSkyDome",
 							"Parent": "Self",
 							"Parameters": []
 						}

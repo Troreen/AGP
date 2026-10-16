@@ -1,6 +1,26 @@
 {
   "Idle": {
+    "Animation": "A_idle",
+    "IsLooping": true,
+    "Transitions":[
+      {
+        "TransitionTo": "Running",
+
+        "Variable": "IsRunning",
+        "Expected": true
+      }
+    ]
+  },
+  "Running": {
     "Animation": "A_player_run",
-    "IsLooping": true
+    "IsLooping": true,
+    "Transitions":[
+      {
+        "TransitionTo": "Idle",
+
+        "Variable": "IsRunning",
+        "Expected": false
+      }
+    ]
   }
 }
