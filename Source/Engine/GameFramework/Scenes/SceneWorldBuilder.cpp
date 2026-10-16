@@ -128,50 +128,7 @@ void SceneWorldBuilder::CreateSceneMaterials(const std::vector<MasterMaterialRec
 			instance->SetValue(roughnessName, materialData.Roughness);
 		}
 
-		for (const MaterialParameterData& parameterData : materialData.Parameters)
-		{
-			const std::string materialParameterName = parameterData.Name.starts_with("MB_") ? parameterData.Name : ("MB_" + parameterData.Name);
-
-			const float* scalar = std::get_if<float>(&parameterData.Value);
-			const CommonUtilities::Vector4f* vector = std::get_if<CommonUtilities::Vector4f>(&parameterData.Value);
-			const std::string* string = std::get_if<std::string>(&parameterData.Value);
-
-			if (scalar != nullptr)
-			{
-				instance->SetValue(materialParameterName, *scalar);
-			}
-			else if (vector != nullptr)
-			{
-				instance->SetValue(materialParameterName, *vector);
-			}
-			else if (string != nullptr)
-			{
-				std::shared_ptr<TextureAsset> texture = anAssetRegistry.GetAsset<TextureAsset>(*string);
-				if (texture != nullptr && texture->GetTexture() != nullptr)
-				{
-					if (string->ends_with("_BaseColor"))
-					{
-						instance->SetTexture(0, texture->GetTexture());
-					}
-					else if (string->ends_with("_Normal"))
-					{
-						instance->SetTexture(1, texture->GetTexture());
-					}
-					else if (string->ends_with("_OcclusionRoughnessMetallic"))
-					{
-						instance->SetTexture(2, texture->GetTexture());
-					}
-					else if (string->ends_with("_Emissive"))
-					{
-						instance->SetTexture(3, texture->GetTexture());
-					}
-					else
-					{
-						instance->SetTexture(*string, texture->GetTexture());
-					}
-				}
-			}
-		}
+		ApplyMaterialParameters(*instance, materialData.Parameters, anAssetRegistry);
 
 		std::shared_ptr<MaterialAsset> materialAsset = std::make_shared<MaterialAsset>(instance);
 		anAssetRegistry.Pin(matDesc.Name, materialAsset);
@@ -317,57 +274,74 @@ std::shared_ptr<MaterialAsset> SceneWorldBuilder::LoadMaterial(const MaterialIns
 	}
 
 	std::shared_ptr<MaterialInstance> instance = MaterialInstance::Create(someMaterialData.Name, parentMaterial->GetMaterial());
-	for (const MaterialParameterData& parameterData : someMaterialData.Parameters)
-	{
-		// TODO: Check whether we still need custom material shaders. If we only use the default shader, apply the values it supports instead of trying every Unreal parameter.
-		// Add MB_ and replace spaces for scalar and vector parameter names.
-		std::string materialParameterName = parameterData.Name.starts_with("MB_") ? parameterData.Name : "MB_" + parameterData.Name;
-		std::replace(materialParameterName.begin(), materialParameterName.end(), ' ', '_');
-
-		const float* scalar = std::get_if<float>(&parameterData.Value);
-		const CommonUtilities::Vector4f* vector = std::get_if<CommonUtilities::Vector4f>(&parameterData.Value);
-		const std::string* string = std::get_if<std::string>(&parameterData.Value);
-
-		if (scalar)
-		{
-			instance->SetValue(materialParameterName, *scalar);
-		}
-		else if (vector)
-		{
-			instance->SetValue(materialParameterName, *vector);
-		}
-		else if (string)
-		{
-			std::shared_ptr<TextureAsset> texture = anAssetRegistry.GetAsset<TextureAsset>(*string);
-			if (texture != nullptr && texture->GetTexture() != nullptr)
-			{
-				if (string->ends_with("_BaseColor"))
-				{
-					instance->SetTexture(0, texture->GetTexture());
-				}
-				else if (string->ends_with("_Normal"))
-				{
-					instance->SetTexture(1, texture->GetTexture());
-				}
-				else if (string->ends_with("_OcclusionRoughnessMetallic"))
-				{
-					instance->SetTexture(2, texture->GetTexture());
-				}
-				else if (string->ends_with("_Emissive"))
-				{
-					instance->SetTexture(3, texture->GetTexture());
-				}
-				else
-				{
-					instance->SetTexture(*string, texture->GetTexture());
-				}
-			}
-		}
-	}
+	ApplyMaterialParameters(*instance, someMaterialData.Parameters, anAssetRegistry);
 
 	material = std::make_shared<MaterialAsset>(instance);
 	anAssetRegistry.Pin(someMaterialData.Name, material);
 	return material;
+}
+
+void SceneWorldBuilder::ApplyMaterialParameters(MaterialInstance& aMaterial, const std::vector<MaterialParameterData>& someParameters, AssetRegistry& anAssetRegistry)
+{
+	for (const MaterialParameterData& parameterData : someParameters)
+	{
+		std::string parameterName = parameterData.Name;
+		std::replace(parameterName.begin(), parameterName.end(), ' ', '_');
+		const std::string valueName = parameterName.starts_with("MB_") ? parameterName : "MB_" + parameterName;
+		bool bound = false;
+		if (const float* scalar = std::get_if<float>(&parameterData.Value))
+		{
+			bound = aMaterial.SetValue(valueName, *scalar);
+		}
+		else if (const CommonUtilities::Vector4f* vector = std::get_if<CommonUtilities::Vector4f>(&parameterData.Value))
+		{
+			bound = aMaterial.SetValue(valueName, *vector);
+		}
+		else if (const std::string* textureName = std::get_if<std::string>(&parameterData.Value))
+		{
+			std::shared_ptr<TextureAsset> texture = anAssetRegistry.GetAsset<TextureAsset>(*textureName);
+			if (!texture || !texture->GetTexture())
+			{
+				GFLOG(Warning, "Material '{}' texture parameter '{}' could not load asset '{}': {}", aMaterial.GetName(), parameterData.Name, *textureName, anAssetRegistry.GetLastError());
+				continue;
+			}
+
+			// The exported parameter identifies the shader resource even when its asset is renamed.
+			bound = aMaterial.SetTexture(parameterName, texture->GetTexture());
+			if (!bound)
+			{
+				if (textureName->ends_with("_BaseColor"))
+				{
+					bound = aMaterial.SetTexture(0, texture->GetTexture());
+				}
+				else if (textureName->ends_with("_Normal"))
+				{
+					bound = aMaterial.SetTexture(1, texture->GetTexture());
+				}
+				else if (textureName->ends_with("_OcclusionRoughnessMetallic"))
+				{
+					bound = aMaterial.SetTexture(2, texture->GetTexture());
+				}
+				else if (textureName->ends_with("_Emissive"))
+				{
+					bound = aMaterial.SetTexture(3, texture->GetTexture());
+				}
+			}
+			if (!bound)
+			{
+				bound = aMaterial.SetTexture(*textureName, texture->GetTexture());
+			}
+			if (!bound)
+			{
+				GFLOG(Warning, "Material '{}' texture parameter '{}' (asset '{}') has no matching shader resource '{}', standard suffix, or legacy asset-name binding.", aMaterial.GetName(), parameterData.Name, *textureName, parameterName);
+			}
+			continue;
+		}
+		if (!bound)
+		{
+			GFLOG(Warning, "Material '{}' parameter '{}' could not bind shader value '{}'; check the MaterialBuffer name and type.", aMaterial.GetName(), parameterData.Name, valueName);
+		}
+	}
 }
 
 bool SceneWorldBuilder::ApplyMesh(Actor& anActor, MeshComponentBase& aComponent, const StaticMeshData& someMeshData, AssetRegistry& anAssetRegistry, const SceneFallbackAssets& someFallbacks)

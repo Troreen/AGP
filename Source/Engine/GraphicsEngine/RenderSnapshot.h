@@ -9,6 +9,8 @@
 
 struct RenderSnapshot
 {
+	// Elapsed scene simulation seconds, shared by camera and shadow material draws.
+	float TotalTime = 0.0f;
 	CameraComponent* ActiveCamera = nullptr;
 
 	std::vector<MeshComponentBase*> Meshes;

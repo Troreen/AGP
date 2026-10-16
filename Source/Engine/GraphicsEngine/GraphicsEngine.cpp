@@ -163,6 +163,7 @@ void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const RenderS
 	fb.CameraPosition = aSnapshot.ActiveCamera->GetOwner()->GetTransform().GetWorldPosition();
 	fb.TonemapType = static_cast<uint32_t>(aSettings.TonemapAlgorithm);
 	fb.RenderPassType = static_cast<uint32_t>(aSettings.RenderPass);
+	fb.TotalTime = aSnapshot.TotalTime;
 
 	std::vector<MeshComponentBase*> opaqueMeshes(0);
 	std::vector<MeshComponentBase*> blendedMeshes(0);
@@ -1104,6 +1105,7 @@ void GraphicsEngine::RenderScreenSprites(GraphicsCommandList& inoutCommandList, 
 
 	FrameBuffer fb;
 	fb.Projection = projection;
+	fb.TotalTime = aSnapshot.TotalTime;
 	inoutCommandList.SetRenderTarget(&myBackBuffer, nullptr);
 	inoutCommandList.SetPipelineState(*mySpritePSO);
 
@@ -1282,6 +1284,7 @@ const Texture* GraphicsEngine::RenderShadowCascade(GraphicsCommandList& inoutCom
 	FrameBuffer lightFb;
 	lightFb.View = lightView;
 	lightFb.Projection = lightProj;
+	lightFb.TotalTime = aSnapshot.TotalTime;
 	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::FrameBuffer, lightFb, 0, PipelineStage_VertexShader);
 
 	const Texture& shadowMap = *aDirectionalLight->GetShadowCascadeMap(aCascadeIndex);
@@ -1310,6 +1313,7 @@ CU::Matrix4f GraphicsEngine::RenderShadowMap(GraphicsCommandList& inoutCommandLi
 	FrameBuffer lightFb;
 	lightFb.View = aLight->GetOwner()->GetTransform().GetWorldMatrix().GetFastInverse();
 	lightFb.Projection = aLight->GetProjectionMatrix();
+	lightFb.TotalTime = aSnapshot.TotalTime;
 	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::FrameBuffer, lightFb, 0, aFrameBufferStages);
 
 	const Texture& shadowMap = *aLight->GetShadowMap();

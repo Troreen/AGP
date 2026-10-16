@@ -41,6 +41,7 @@ private:
 	CameraComponent* myCamera = nullptr;
 	bool myUpdating = false;
 	bool myClearing = false;
+	double mySimulationTime = 0.0;
 
 	Actor* myDebugActor;
 

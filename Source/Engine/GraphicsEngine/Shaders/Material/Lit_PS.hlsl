@@ -58,19 +58,17 @@ float4 main(VStoPS aPixel) : SV_TARGET
 	const float4 sampleSurface = MaterialTexture.Sample(TrilinearWrap, aPixel.UV0);
     const float3 fxMap = FxTexture.Sample(TrilinearWrap, aPixel.UV0).rgb;
 	
-    const float occlusion = sampleSurface.r;
-    const float roughness = clamp(sampleSurface.g, 0.04f, 1.0f);
-    const float metalness = sampleSurface.b;
-    
     const float emissionMask = fxMap.r;
     
     const float ssaoPixel = SSAOTexture.Sample(TrilinearClamp, aPixel.UV0).r;
 	
 	MaterialPixelParameters parameters;
     parameters.PixelColor = sampleAlbedo;
+    parameters.VertexColor = aPixel.Color;
     parameters.SurfaceValues = sampleSurface;
 	parameters.WorldPosition = aPixel.WorldPosition;
 	parameters.UV0 = aPixel.UV0;
+    parameters.UV1 = aPixel.UV1;
 	parameters.Normal = pixelNormal;
     parameters.VertexNormal = aPixel.Normal;
 	parameters.Tangent = aPixel.Tangent;
@@ -78,11 +76,15 @@ float4 main(VStoPS aPixel) : SV_TARGET
     parameters.Emission = (float4)emissionMask * sampleAlbedo;
     
 	Material_Pixel(parameters);
+
+    const float occlusion = parameters.SurfaceValues.r;
+    const float roughness = clamp(parameters.SurfaceValues.g, 0.04f, 1.0f);
+    const float metalness = parameters.SurfaceValues.b;
  
     switch (FB_RenderPassType)
     {
         case 1: // Albedo Pass
-            return float4(sampleAlbedo.rgb, 1);
+            return float4(parameters.PixelColor.rgb, 1);
         
         case 2: // Roughness Pass
             return float4(roughness, roughness, roughness, 1);
@@ -94,7 +96,7 @@ float4 main(VStoPS aPixel) : SV_TARGET
             return float4(occlusion, occlusion, occlusion, 1);
         
         case 5: // Emission
-            return float4(emissionMask, emissionMask, emissionMask, 1);
+            return float4(parameters.Emission.rgb, 1);
         
         case 6: // Ambient Occlusion Screen Space Pass
             return float4(ssaoPixel, ssaoPixel, ssaoPixel, 1);
@@ -103,7 +105,7 @@ float4 main(VStoPS aPixel) : SV_TARGET
             return float4(sampleNormal, 1, 1);
         
         case 8: // World Normal Pass
-            return DebugNormal(pixelNormal);
+            return DebugNormal(parameters.Normal);
     }
     
     uint pointLightShadowMapIndex = 0;

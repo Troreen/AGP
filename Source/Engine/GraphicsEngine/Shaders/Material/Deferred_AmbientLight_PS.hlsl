@@ -42,7 +42,7 @@ float4 main(FullTextureVertex input) : SV_TARGET
             return float4(occlusion, occlusion, occlusion, 1);
         
         case 5: // Emission
-            return float4(emissionMap.rrr, 1);
+            return float4(emissionMap.rgb, 1);
         
         case 6: // Ambient Occlusion Screen Space Pass
             return float4(ssaoPixel, ssaoPixel, ssaoPixel, 1);

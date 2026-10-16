@@ -9,6 +9,7 @@
 
 class AssetRegistry;
 class MaterialAsset;
+class MaterialInstance;
 class MeshAsset;
 class World;
 class CustomComponent;
@@ -52,6 +53,7 @@ private:
 	const ComponentData& GetCommonComponentData(const ComponentRecord& aRecord);
 	void ApplyCommonComponentData(Component& aComponent, const ComponentData& someComponentData);
 	std::shared_ptr<MaterialAsset> LoadMaterial(const MaterialInstanceData& someMaterialData, AssetRegistry& anAssetRegistry, const std::string& aComponentName);
+	void ApplyMaterialParameters(MaterialInstance& aMaterial, const std::vector<MaterialParameterData>& someParameters, AssetRegistry& anAssetRegistry);
 	bool ApplyMesh(Actor& anActor, MeshComponentBase& aComponent, const StaticMeshData& someMeshData, AssetRegistry& anAssetRegistry, const SceneFallbackAssets& someFallbacks);
 	Component* CreateComponent(Actor& anActor, const ComponentRecord& aRecord, AssetRegistry& anAssetRegistry, const SceneFallbackAssets& someFallbacks);
 

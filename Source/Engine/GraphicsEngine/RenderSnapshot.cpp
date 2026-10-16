@@ -3,6 +3,7 @@
 
 void RenderSnapshot::Clear()
 {
+	TotalTime = 0.0f;
 	ActiveCamera = nullptr;
 	Meshes.clear();
 	Lights.clear();

@@ -201,6 +201,7 @@ void World::Update(float deltaTime)
 		throw std::logic_error("World lifecycle cannot run recursively");
 	}
 	deltaTime = CU::IsFinite(deltaTime) ? CU::Clamp(deltaTime, 0.0f, MaxFrameDeltaSeconds) : 0.0f;
+	mySimulationTime += deltaTime;
 	myUpdating = true;
 	try
 	{
@@ -245,12 +246,14 @@ void World::Clear()
 	std::vector<std::unique_ptr<Actor>> actors = std::move(myActors);
 	actors.clear();
 	myActorNameCount.clear();
+	mySimulationTime = 0.0;
 	myClearing = false;
 }
 
 RenderSnapshot& World::GenerateRenderSnapshot()
 {
 	myWorldSnapshot.Clear();
+	myWorldSnapshot.TotalTime = static_cast<float>(mySimulationTime);
 
 	myWorldSnapshot.ActiveCamera = myCamera;
 
