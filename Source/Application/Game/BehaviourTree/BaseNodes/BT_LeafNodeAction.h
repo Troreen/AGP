@@ -13,9 +13,7 @@ public:
 	BT_LeafNodeAction() = delete;
 	BT_LeafNodeAction(BlackBoard* aBlackBoard) { myBlackBoard = aBlackBoard; }
 
-	virtual BT_NodeStatus Update() override { return BT_NodeStatus::Invalid; }
-
-	virtual void UpdateActorControllerData(ActorControllerData& /*outActorControllerData*/) const {}
+	virtual void UpdateActorControllerData() const {}
 	virtual CommonUtilities::Vector2<float> GetSteeringForce(const Actor& /*aActor*/) const { return CommonUtilities::Vector2<float>(); }
 	virtual void TriggerAction(Actor& /*aActor*/) const {}
 

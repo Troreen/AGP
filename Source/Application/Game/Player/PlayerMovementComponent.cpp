@@ -1,5 +1,6 @@
 #include "PlayerMovementComponent.h"
 #include <GameFramework/World/Actor.h>
+#include <GameFramework/Components/AnimatorComponent.h>
 #include <Maths.hpp>
 #include <iostream>
 
@@ -27,6 +28,11 @@ void PlayerMovementComponent::Update(float aDeltaTime)
 		return;
 	}
 
+	if (AnimatorComponent* animation = GetOwner()->GetComponent<AnimatorComponent>())
+	{
+		animation->GetTree().SetBool("IsRunning", true);
+	}
+
 	CommonUtilities::Vector3f position = GetOwner()->GetTransform().GetLocalPosition();
 
 	CommonUtilities::Vector3f direction = myDestination - position;
@@ -34,6 +40,10 @@ void PlayerMovementComponent::Update(float aDeltaTime)
 
 	if (distance <= myArrivedDistance)
 	{
+		if (AnimatorComponent* animation = GetOwner()->GetComponent<AnimatorComponent>())
+		{
+			animation->GetTree().SetBool("IsRunning", false);
+		}
 		myDestination = { 0.0f, 0.0f, 0.0f };
 		myHasDestination = false;
 		return;
@@ -81,7 +91,7 @@ void PlayerMovementComponent::RotateTowardsTarget(CommonUtilities::Vector3f aTar
 {
 	auto& transform = GetOwner()->GetTransform();
 
-	CommonUtilities::Vector3f direction = aTarget - transform.GetLocalPosition();
+	CommonUtilities::Vector3f direction = (aTarget - transform.GetLocalPosition()).GetNormalized();
 
 	direction.y = 0.0f;
 

@@ -1,11 +1,11 @@
 #pragma once
 #include "../Animation/AnimationTree.h"
 
-#include <GameFramework/World/Component.h>
+#include <GameFramework/Components/CustomComponent.h>
 #include <GameFramework/Components/SkeletalMeshComponent.h>
 
 
-class AnimatorComponent : public Component
+class AnimatorComponent : public CustomComponent
 {
 	friend class AnimationState;
 
@@ -23,6 +23,9 @@ public:
 
 	AnimatorComponent();
 
+	void InitializeCustomVariables(const CustomComponentVariables& someVariables) override;
+
+	void BeginPlay() override;
 	void Update(float aDeltaTime) override;
 
 	void SetTree(const std::string& aTree);

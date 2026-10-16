@@ -36,6 +36,7 @@ public:
 	float GetNearPlane() const { return myNearPlane; }
 	float GetFarPlane() const { return myFarPlane; }
 	float GetAspectRatio() const { return myAspectRatio; }
+	//bool GetIsDebug() const { return };
 
 	CU::Matrix4f GetView() const;
 	const CU::Matrix4f& GetProjection() const;
@@ -46,7 +47,7 @@ public:
 	std::array<CU::Vector3f, 8> GetFrustumCorners(float aNearPlane, float aFarPlane) const;
 
 	void LookAt(const CU::Vector3<float>& aTarget);
-	CU::Ray<float> ScreenPointToRay(const CU::Vector2<float>& aNormalizedScreenPos) const;
+	CU::Ray<float> ScreenPointToRay(const CU::Vector2<float>& aScreenPos, const CU::Vector2<unsigned>& aClientSize) const;
 	CU::Vector3<float> WorldToScreenPoint(const CU::Vector3<float>& aWorldPos) const;
 
 private:

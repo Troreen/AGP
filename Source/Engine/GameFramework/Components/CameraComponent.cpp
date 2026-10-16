@@ -144,7 +144,7 @@ void CameraComponent::LookAt(const CU::Vector3<float>& aTarget)
 	GetOwner()->GetTransform().SetLocalRotationDegrees({ yaw * CU::Math::RADIANS_TO_DEGREES<float>, pitch * CU::Math::RADIANS_TO_DEGREES<float>, 0 });
 }
 
-CU::Ray<float> CameraComponent::ScreenPointToRay(const CU::Vector2<float>& aNormalizedScreenPos) const
+CU::Ray<float> CameraComponent::ScreenPointToRay(const CU::Vector2<float>& aScreenPos, const CU::Vector2<unsigned>& aClientSize) const
 {
 	Transform& transform = GetOwner()->GetTransform();
 	const CU::Vector3<float> origin = transform.GetWorldPosition();
@@ -165,9 +165,15 @@ CU::Ray<float> CameraComponent::ScreenPointToRay(const CU::Vector2<float>& aNorm
 	//	return CU::Ray<float>(origin + offset, transform.GetLocalForward());
 	//}
 
+	CommonUtilities::Vector2f normalizedMousePos =
+	{
+		aScreenPos.x / static_cast<float>(aClientSize.x),
+		aScreenPos.y / static_cast<float>(aClientSize.y)
+	};
+
 	const float tanHalfFov = std::tan(myHorizontalFieldOfViewRadians * 0.5f);
-	const float ndcX = (aNormalizedScreenPos.x * 2.0f) - 1.0f;
-	const float ndcY = 1.0f - (aNormalizedScreenPos.y * 2.0f);
+	const float ndcX = (normalizedMousePos.x * 2.0f) - 1.0f;
+	const float ndcY = 1.0f - (normalizedMousePos.y * 2.0f);
 
 	CU::Vector3<float> localDir(ndcX * tanHalfFov, ndcY * tanHalfFov * myAspectRatio, 1.0f);
 

@@ -258,14 +258,16 @@ exit /b 0</Command>
     <ClInclude Include="BehaviourTree\BaseNodes\BT_SelectorNode.h" />
     <ClInclude Include="BehaviourTree\BaseNodes\BT_SequenceNode.h" />
     <ClInclude Include="BehaviourTree\BehaviourTree.h" />
+    <ClInclude Include="BehaviourTree\BehaviourTreeComponent.h" />
     <ClInclude Include="BehaviourTree\BlackBoard.h" />
     <ClInclude Include="BehaviourTree\CustomNodes\ActionNodes\BT_Action_FollowPlayer.h" />
     <ClInclude Include="BehaviourTree\CustomNodes\ActionNodes\BT_Action_Idle.h" />
     <ClInclude Include="BehaviourTree\CustomNodes\ConditionNodes\BT_Condition_IsPlayerInLOS.h" />
     <ClInclude Include="Components\CustomComponentRegistry.h" />
     <ClInclude Include="Components\RegisterCustomComponents.h" />
+    <ClInclude Include="Components\ScriptedEvents\ScriptedActionComponent.h" />
+    <ClInclude Include="Components\ScriptedEvents\ScriptedEventComponent.h" />
     <ClInclude Include="Components\SpinComponent.h" />
-    <ClInclude Include="EnemyComponent.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameLog.h" />
     <ClInclude Include="Player\PlayerActor.h" />
@@ -276,8 +278,6 @@ exit /b 0</Command>
     <ClInclude Include="Resources\targetver.h" />
     <ClInclude Include="Runtime\GameApplication.h" />
     <ClInclude Include="Runtime\GameWindowMessages.h" />
-    <ClInclude Include="Components\ScriptedEvents\ScriptedActionComponent.h" />
-    <ClInclude Include="Components\ScriptedEvents\ScriptedEventComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Assets\MeshLibrary.cpp" />
@@ -287,13 +287,15 @@ exit /b 0</Command>
     <ClCompile Include="BehaviourTree\BaseNodes\BT_SelectorNode.cpp" />
     <ClCompile Include="BehaviourTree\BaseNodes\BT_SequenceNode.cpp" />
     <ClCompile Include="BehaviourTree\BehaviourTree.cpp" />
+    <ClCompile Include="BehaviourTree\BehaviourTreeComponent.cpp" />
     <ClCompile Include="BehaviourTree\BlackBoard.cpp" />
     <ClCompile Include="BehaviourTree\CustomNodes\ActionNodes\BT_Action_FollowPlayer.cpp" />
     <ClCompile Include="BehaviourTree\CustomNodes\ActionNodes\BT_Action_Idle.cpp" />
     <ClCompile Include="BehaviourTree\CustomNodes\ConditionNodes\BT_Condition_IsPlayerInLOS.cpp" />
     <ClCompile Include="Components\RegisterCustomComponents.cpp" />
+    <ClCompile Include="Components\ScriptedEvents\ScriptedActionComponent.cpp" />
+    <ClCompile Include="Components\ScriptedEvents\ScriptedEventComponent.cpp" />
     <ClCompile Include="Components\SpinComponent.cpp" />
-    <ClCompile Include="EnemyComponent.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Player\PlayerActor.cpp" />
@@ -301,8 +303,6 @@ exit /b 0</Command>
     <ClCompile Include="Player\PlayerMovementComponent.cpp" />
     <ClCompile Include="Runtime\GameApplication.cpp" />
     <ClCompile Include="Runtime\GameWindowMessages.cpp" />
-    <ClCompile Include="Components\ScriptedEvents\ScriptedActionComponent.cpp" />
-    <ClCompile Include="Components\ScriptedEvents\ScriptedEventComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Game.ico" />

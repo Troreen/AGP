@@ -3,10 +3,7 @@
 class PlayerActor : public Actor
 {
 public:
-
 	PlayerActor();
-
 private:
-
 };
 

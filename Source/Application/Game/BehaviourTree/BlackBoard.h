@@ -3,6 +3,7 @@
 #include <unordered_map>
 
 class Actor;
+class Component;
 
 //enum class BlackBoardVariable_Bools
 //{
@@ -25,6 +26,12 @@ enum class BlackBoardVariable_Actors
 	eCount
 };
 
+enum class BlackBoardVariable_Components
+{
+	OwnerAnimation,
+	eCount
+};
+
 class BlackBoard
 {
 public:
@@ -40,6 +47,10 @@ public:
 	void SetActor(BlackBoardVariable_Actors aActorVariable, Actor* aValue);
 	Actor* GetActor(BlackBoardVariable_Actors aActorVariable);
 
+	void SetComponent(BlackBoardVariable_Components aComponentVariable, Component* aValue);
+	Component* GetComponent(BlackBoardVariable_Components aComponentVariable);
+
 private:
 	std::unordered_map<BlackBoardVariable_Actors, Actor*> myActors;
+	std::unordered_map<BlackBoardVariable_Components, Component*> myComponents;
 };

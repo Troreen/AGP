@@ -16,7 +16,7 @@
 #include "Player/PlayerActor.h"
 #include "Player/PlayerController.h"
 #include "Player/PlayerMovementComponent.h"
-#include "EnemyComponent.h"
+#include "BehaviourTree/BehaviourTreeComponent.h"
 
 #include <memory>
 
@@ -42,9 +42,10 @@ void Game::Initialize(GameApplication& anApplication)
 
 void Game::Update([[maybe_unused]] World& aWorld, [[maybe_unused]] float aDeltaTime)
 {
-	if (!ServiceLocator::GetInstance().GetAudioManager().IsEventPlaying(eCastleAmbienceOne))
+	if (!ServiceLocator::GetInstance().GetAudioManager().IsEventPlaying(eMainTheme))
+	
 	{
-		ServiceLocator::GetInstance().GetAudioManager().PlayMusic(eCastleAmbienceOne);
+		ServiceLocator::GetInstance().GetAudioManager().PlayMusic(eMainTheme);
 	}
 
 }
@@ -149,14 +150,16 @@ void Game::ConfigureWorld(World& aWorld)
 
 
 			AnimatorComponent* animatorBro = actor->AddComponent<AnimatorComponent>();
-			std::shared_ptr<AnimationAsset> animation = assetRegistry.GetAsset<AnimationAsset>("A_enemy02_idle.fbx");
+			std::shared_ptr<AnimationAsset> animationIdle = assetRegistry.GetAsset<AnimationAsset>("A_enemy02_idle.fbx");
+			std::shared_ptr<AnimationAsset> animationRun = assetRegistry.GetAsset<AnimationAsset>("A_enemy02_mainAttack.fbx");
 			animatorBro->SetMeshComponent(component);
-			animatorBro->AddAnimation("Idle", animation);
+			animatorBro->AddAnimation("Idle", animationIdle);
+			animatorBro->AddAnimation("Run", animationRun);
 			animatorBro->PlayAnimation("Idle", true);
 
 		}
 		{
-			actor->AddComponent<EnemyComponent>();
+			actor->AddComponent<BehaviourTreeComponent>();
 		}
 
 		actor->GetTransform().SetData({ { -500, 0, 0 }, {180, 0, 0} });

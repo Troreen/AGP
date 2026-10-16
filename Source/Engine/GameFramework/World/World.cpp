@@ -20,7 +20,7 @@ World::~World()
 	Clear();
 }
 
-Actor* World::SpawnActor(std::string name)
+Actor* World::SpawnActor(std::string_view name)
 {
 	if (myClearing)
 	{
@@ -28,24 +28,23 @@ Actor* World::SpawnActor(std::string name)
 	}
 	if (name.empty())
 	{
-		throw std::invalid_argument("Actor name must be nonempty: " + name);
+		throw std::invalid_argument(std::format("Actor name must be nonempty: {}", name));
 	}
 
-	unsigned counter = 1;
-	std::string finalName = name;
-	while (FindActor(finalName))
+	std::string finalName(name);
+	++myActorNameCount[finalName];
+	if (myActorNameCount[finalName] > 1)
 	{
-		finalName = name + "(" + std::to_string(counter) + ")";
-		++counter;
+		finalName += "_" + std::to_string(myActorNameCount[finalName]);
 	}
 
-	std::unique_ptr<Actor> actor(new Actor(*this, std::move(finalName)));
+	std::unique_ptr<Actor> actor = std::make_unique<Actor>(*this, std::move(finalName));
 	Actor* spawnedActor = actor.get();
 	myActors.push_back(std::move(actor));
 	return spawnedActor;
 }
 
-Actor* World::FindActor(const std::string& name) const
+Actor* World::FindActor(std::string_view name) const
 {
 	for (const auto& actor : myActors)
 	{
@@ -60,21 +59,21 @@ Actor* World::FindActor(const std::string& name) const
 bool World::SetCameraResolution(const CommonUtilities::Vector2u& aResolution)
 {
 	// Resize every camera so switching the active camera keeps the new aspect ratio.
-	for (const auto& actor : myActors)
+	for (const std::unique_ptr<Actor>& actor : myActors)
 	{
 		if (actor->IsPendingDestroy())
 		{
 			continue;
 		}
 
-		for (const auto& component : actor->myComponents)
+		for (const std::unique_ptr<Component>& component : actor->myComponents)
 		{
 			if (component->IsPendingDestroy())
 			{
 				continue;
 			}
 
-			if (auto* camera = dynamic_cast<CameraComponent*>(component.get()))
+			if (CameraComponent* camera = dynamic_cast<CameraComponent*>(component.get()))
 			{
 				if (!camera->SetResolution(aResolution))
 				{
@@ -111,27 +110,29 @@ void World::RemoveDestroyed()
 	}
 	// Detach objects before callbacks so callbacks cannot invalidate vector iteration.
 	std::vector<std::unique_ptr<Actor>> actors;
+	actors.reserve(myActors.size());
 	std::vector<std::unique_ptr<Component>> components;
-	for (auto& actor : myActors)
+	components.reserve(myActors.size());
+	for (std::unique_ptr<Actor>& actor : myActors)
 	{
 		if (actor->IsPendingDestroy())
 		{
+			--myActorNameCount[actor->GetName()];
 			actors.push_back(std::move(actor));
+			continue;
 		}
-		else
+
+		for (std::unique_ptr<Component>& component : actor->myComponents)
 		{
-			for (auto& component : actor->myComponents)
+			if (component->IsPendingDestroy())
 			{
-				if (component->IsPendingDestroy())
-				{
-					components.push_back(std::move(component));
-				}
+				components.push_back(std::move(component));
 			}
-			std::erase(actor->myComponents, nullptr);
 		}
+		std::erase(actor->myComponents, nullptr);
 	}
 	std::erase(myActors, nullptr);
-	for (auto& component : components)
+	for (std::unique_ptr<Component>& component : components)
 	{
 		if (component->myBegun)
 		{
@@ -146,6 +147,7 @@ void World::RemoveDestroyed()
 std::vector<Component*> World::CollectFrame()
 {
 	std::vector<Component*> frame;
+	frame.reserve(myActors.size());
 	for (const auto& actor : myActors)
 	{
 		if (!actor->IsPendingDestroy())
@@ -242,6 +244,7 @@ void World::Clear()
 	myCamera = nullptr;
 	std::vector<std::unique_ptr<Actor>> actors = std::move(myActors);
 	actors.clear();
+	myActorNameCount.clear();
 	myClearing = false;
 }
 

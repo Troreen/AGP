@@ -63,7 +63,7 @@ void PlayerController::Update(float aDeltaTime)
 		static_cast<float>(inputMousePos.y)
 	};
 
-	if (!myScriptedControlLocked && ServiceLocator::GetInstance().GetInputMapper().GetInputHandler()->IsKeyPressed(static_cast<int>(EKeyCode::MOUSELBUTTON)))
+	if (!myScriptedControlLocked && ServiceLocator::GetInstance().GetInputMapper().GetInputHandler()->IsKeyDown(static_cast<int>(EKeyCode::MOUSELBUTTON)))
 	{
 		//TODO: Movement
 		//Send mouse pos to camera
@@ -75,12 +75,7 @@ void PlayerController::Update(float aDeltaTime)
 
 		const CommonUtilities::Vector2u& clientSize = GraphicsEngine::Get().GetClientSize();
 
-		CommonUtilities::Vector2f normalizedMousePos =
-		{
-			mousePos.x / static_cast<float>(clientSize.x),
-			mousePos.y / static_cast<float>(clientSize.y)
-		};
-		CommonUtilities::Ray<float> ray = myCamera->ScreenPointToRay(normalizedMousePos);
+		CommonUtilities::Ray<float> ray = myCamera->ScreenPointToRay(mousePos, clientSize);
 
 		CommonUtilities::Vector3f outIntersection;
 

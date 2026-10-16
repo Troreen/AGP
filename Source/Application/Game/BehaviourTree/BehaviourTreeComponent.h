@@ -1,5 +1,5 @@
 #pragma once
-#include <GameFramework/World/Component.h>
+#include <GameFramework/Components/CustomComponent.h>
 
 #include <BehaviourTree/BehaviourTree.h>
 #include <BehaviourTree/BaseNodes/BT_LeafNodeAction.h>
@@ -10,14 +10,16 @@
 #include <BehaviourTree/BaseNodes/BT_SelectorNode.h>
 #include <BehaviourTree/BaseNodes/BT_SequenceNode.h>
 
-class EnemyComponent : public Component
+class BehaviourTreeComponent : public CustomComponent
 {
 public:
 
-	EnemyComponent();
+	BehaviourTreeComponent();
 
 	void SetBehaviourTree(BehaviourTree* aBehaviourTree);
 	void SetActionNode(BT_LeafNodeAction* aActionNode);
+
+	void InitializeCustomVariables(const CustomComponentVariables& someVariables) override;
 
 	void BeginPlay() override;
 	void Update(float aDeltaTime) override;
@@ -25,7 +27,9 @@ public:
 private:
 
 	void PreUpdate();
-	void UpdateComponent();
+	void UpdateTree();
+	void UpdateData();
+	void UpdateMovement();
 	//void AddSteeringForce();
 	//void TriggerAction();
 

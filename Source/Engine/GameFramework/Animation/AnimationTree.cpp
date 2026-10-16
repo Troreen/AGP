@@ -261,6 +261,11 @@ void AnimationTree::SetAnimationPlayer(AnimatorComponent* aAnimationPlayer)
 {
 	myAnimationPlayer = aAnimationPlayer;
 
+	if (myAnimationPlayer == nullptr)
+	{
+		return;
+	}
+
 	for (auto& state : myAnimationStates)
 	{
 		state.myAnimationTree = this;

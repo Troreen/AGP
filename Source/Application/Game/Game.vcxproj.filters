@@ -23,7 +23,7 @@
       <UniqueIdentifier>{6B7DD516-5735-1764-C03C-F0BFAC13B254}</UniqueIdentifier>
     </Filter>
     <Filter Include="Components\ScriptedEvents">
-      <UniqueIdentifier>{66C82038-B35B-4299-B67D-852C93A85440}</UniqueIdentifier>
+      <UniqueIdentifier>{ED1041C7-59D3-7451-A283-03DE0E854D2F}</UniqueIdentifier>
     </Filter>
     <Filter Include="Player">
       <UniqueIdentifier>{724E55CA-5EF0-7FA0-47AB-93F433EC06F1}</UniqueIdentifier>
@@ -66,6 +66,9 @@
     <ClInclude Include="BehaviourTree\BehaviourTree.h">
       <Filter>BehaviourTree</Filter>
     </ClInclude>
+    <ClInclude Include="BehaviourTree\BehaviourTreeComponent.h">
+      <Filter>BehaviourTree</Filter>
+    </ClInclude>
     <ClInclude Include="BehaviourTree\BlackBoard.h">
       <Filter>BehaviourTree</Filter>
     </ClInclude>
@@ -84,10 +87,15 @@
     <ClInclude Include="Components\RegisterCustomComponents.h">
       <Filter>Components</Filter>
     </ClInclude>
+    <ClInclude Include="Components\ScriptedEvents\ScriptedActionComponent.h">
+      <Filter>Components\ScriptedEvents</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\ScriptedEvents\ScriptedEventComponent.h">
+      <Filter>Components\ScriptedEvents</Filter>
+    </ClInclude>
     <ClInclude Include="Components\SpinComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
-    <ClInclude Include="EnemyComponent.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameLog.h" />
     <ClInclude Include="Player\PlayerActor.h">
@@ -114,12 +122,6 @@
     <ClInclude Include="Runtime\GameWindowMessages.h">
       <Filter>Runtime</Filter>
     </ClInclude>
-    <ClInclude Include="Components\ScriptedEvents\ScriptedActionComponent.h">
-      <Filter>Components\ScriptedEvents</Filter>
-    </ClInclude>
-    <ClInclude Include="Components\ScriptedEvents\ScriptedEventComponent.h">
-      <Filter>Components\ScriptedEvents</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Assets\MeshLibrary.cpp">
@@ -143,6 +145,9 @@
     <ClCompile Include="BehaviourTree\BehaviourTree.cpp">
       <Filter>BehaviourTree</Filter>
     </ClCompile>
+    <ClCompile Include="BehaviourTree\BehaviourTreeComponent.cpp">
+      <Filter>BehaviourTree</Filter>
+    </ClCompile>
     <ClCompile Include="BehaviourTree\BlackBoard.cpp">
       <Filter>BehaviourTree</Filter>
     </ClCompile>
@@ -158,10 +163,15 @@
     <ClCompile Include="Components\RegisterCustomComponents.cpp">
       <Filter>Components</Filter>
     </ClCompile>
+    <ClCompile Include="Components\ScriptedEvents\ScriptedActionComponent.cpp">
+      <Filter>Components\ScriptedEvents</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\ScriptedEvents\ScriptedEventComponent.cpp">
+      <Filter>Components\ScriptedEvents</Filter>
+    </ClCompile>
     <ClCompile Include="Components\SpinComponent.cpp">
       <Filter>Components</Filter>
     </ClCompile>
-    <ClCompile Include="EnemyComponent.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Player\PlayerActor.cpp">
@@ -178,12 +188,6 @@
     </ClCompile>
     <ClCompile Include="Runtime\GameWindowMessages.cpp">
       <Filter>Runtime</Filter>
-    </ClCompile>
-    <ClCompile Include="Components\ScriptedEvents\ScriptedActionComponent.cpp">
-      <Filter>Components\ScriptedEvents</Filter>
-    </ClCompile>
-    <ClCompile Include="Components\ScriptedEvents\ScriptedEventComponent.cpp">
-      <Filter>Components\ScriptedEvents</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

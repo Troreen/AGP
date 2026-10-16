@@ -3,10 +3,14 @@
 #include "SpinComponent.h"
 #include "Components/ScriptedEvents/ScriptedEventComponent.h"
 #include "Components/ScriptedEvents/ScriptedActionComponent.h"
+#include <GameFramework/Components/AnimatorComponent.h>
+#include <Application/Game/BehaviourTree/BehaviourTreeComponent.h>
 
 void RegisterCustomComponents(CustomComponentRegistry& aRegistry)
 {
 	aRegistry.Register<SpinComponent>("SpinComponent");
+	aRegistry.Register<AnimatorComponent>("AnimatorComponent");
+	aRegistry.Register<BehaviourTreeComponent>("BehaviourTreeComponent");
 
 	// --- Scripted Events ---
 	aRegistry.Register<ScriptedEventComponent>("ScriptedEventComponent");

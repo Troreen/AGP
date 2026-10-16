@@ -9,10 +9,21 @@ BT_NodeStatus BT_Node::Tick()
 {
 	if (myStatus != BT_NodeStatus::Running)
 	{
-		Init();
+		OnEnter();
 	}
 
 	myStatus = Update();
 
+	if (myStatus != BT_NodeStatus::Running)
+	{
+		OnExit();
+	}
+
 	return myStatus;
+}
+
+void BT_Node::EarlyExit()
+{
+	myStatus = BT_NodeStatus::EarlyExit;
+	OnExit();
 }

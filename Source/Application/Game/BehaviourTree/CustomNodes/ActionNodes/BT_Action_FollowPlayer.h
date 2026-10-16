@@ -8,7 +8,10 @@ public:
 	BT_Action_FollowPlayer() = delete;
 	BT_Action_FollowPlayer(BlackBoard* aBlackBoard);
 
+	void OnEnter() override;
+
 	BT_NodeStatus Update() override;
+	void UpdateActorControllerData() const override;
 
 private:
 };

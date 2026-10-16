@@ -20,6 +20,7 @@ public:
 	Actor();
 	~Actor();
 	Actor(const Actor&) = delete;
+	Actor(World& world, std::string name);
 	Actor& operator=(const Actor&) = delete;
 
 	const std::string& GetName() const { return myName; }
@@ -103,7 +104,6 @@ public:
 	}
 
 private:
-	Actor(World& world, std::string name);
 	void Attach(std::unique_ptr<Component> component, std::string name);
 	std::string myName;
 	std::string myArchetype;

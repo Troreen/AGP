@@ -16,8 +16,8 @@ public:
 	~World();
 	World(const World&) = delete;
 	World& operator=(const World&) = delete;
-	Actor* SpawnActor(std::string name);
-	Actor* FindActor(const std::string& name) const;
+	Actor* SpawnActor(std::string_view name);
+	Actor* FindActor(std::string_view name) const;
 
 	bool SetActiveCamera(CameraComponent* camera);
 	CameraComponent* GetActiveCamera() const;
@@ -37,6 +37,7 @@ private:
 	void RemoveDestroyed();
 
 	std::vector<std::unique_ptr<Actor>> myActors;
+	std::unordered_map<std::string, size_t> myActorNameCount;
 	CameraComponent* myCamera = nullptr;
 	bool myUpdating = false;
 	bool myClearing = false;

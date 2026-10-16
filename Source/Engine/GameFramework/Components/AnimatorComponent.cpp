@@ -4,10 +4,26 @@
 
 #include <GameFramework/ServiceLocator.h>
 #include <GameFramework/AssetHandling/MeshAsset.h>
+#include <GameFramework/Scenes/CustomComponentVariables.h>
 
 AnimatorComponent::AnimatorComponent() : myMeshComponent(nullptr), myAnimationTree(nullptr)
 {
 	myAnimations;
+}
+
+void AnimatorComponent::InitializeCustomVariables(const CustomComponentVariables& someVariables)
+{
+	SetTree(someVariables.StringVariables.at("AnimationTree"));
+}
+
+void AnimatorComponent::BeginPlay()
+{
+	if (myAnimationTree == nullptr)
+	{
+		return;
+	}
+	myAnimationTree->SetAnimationPlayer(this);
+	myAnimationTree->InitTree();
 }
 
 void AnimatorComponent::Update(float aDeltaTime)
@@ -43,9 +59,6 @@ void AnimatorComponent::SetTree(const std::string& aTree)
 		delete myAnimationTree;
 	}
 	myAnimationTree = new AnimationTree(ServiceLocator::GetInstance().GetAnimationManager().GetAnimationTree(aTree));
-
-	myAnimationTree->SetAnimationPlayer(this);
-	myAnimationTree->InitTree();
 }
 void AnimatorComponent::SetMeshComponent(SkeletalMeshComponent* aMeshComponent)
 {
