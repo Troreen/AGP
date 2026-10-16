@@ -47,16 +47,6 @@ bool SceneWorldBuilder::Initialize(const std::filesystem::path& aNameConversions
 		myUnrealDataNameToMaterialParameterName[unrealName] = materialName;
 	}
 
-	simdjson::dom::object textureNames = root["TextureParameterNamesToSlot"];
-	for (auto it = textureNames.begin(); it != textureNames.end(); ++it)
-	{
-		simdjson::dom::key_value_pair itValue = *it;
-		const std::string unrealName = std::string(itValue.key);
-		const unsigned textureSlot = static_cast<unsigned>(itValue.value.get_uint64().value());
-
-		myUnrealParameterNameToTextureSlot[unrealName] = textureSlot;
-	}
-
 	return true;
 }
 
@@ -154,12 +144,31 @@ void SceneWorldBuilder::CreateSceneMaterials(const std::vector<MasterMaterialRec
 			{
 				instance->SetValue(materialParameterName, *vector);
 			}
-			else if (string != nullptr && myUnrealParameterNameToTextureSlot.contains(parameterData.Name))
+			else if (string != nullptr)
 			{
 				std::shared_ptr<TextureAsset> texture = anAssetRegistry.GetAsset<TextureAsset>(*string);
 				if (texture != nullptr && texture->GetTexture() != nullptr)
 				{
-					instance->SetTexture(myUnrealParameterNameToTextureSlot[parameterData.Name], texture->GetTexture());
+					if (string->ends_with("_BaseColor"))
+					{
+						instance->SetTexture(0, texture->GetTexture());
+					}
+					else if (string->ends_with("_Normal"))
+					{
+						instance->SetTexture(1, texture->GetTexture());
+					}
+					else if (string->ends_with("_OcclusionRoughnessMetallic"))
+					{
+						instance->SetTexture(2, texture->GetTexture());
+					}
+					else if (string->ends_with("_Emissive"))
+					{
+						instance->SetTexture(3, texture->GetTexture());
+					}
+					else
+					{
+						instance->SetTexture(*string, texture->GetTexture());
+					}
 				}
 			}
 		}
@@ -327,12 +336,31 @@ std::shared_ptr<MaterialAsset> SceneWorldBuilder::LoadMaterial(const MaterialIns
 		{
 			instance->SetValue(materialParameterName, *vector);
 		}
-		else if (string && myUnrealParameterNameToTextureSlot.contains(parameterData.Name))
+		else if (string)
 		{
 			std::shared_ptr<TextureAsset> texture = anAssetRegistry.GetAsset<TextureAsset>(*string);
-			if (texture && texture->GetTexture())
+			if (texture != nullptr && texture->GetTexture() != nullptr)
 			{
-				instance->SetTexture(myUnrealParameterNameToTextureSlot[parameterData.Name], texture->GetTexture());
+				if (string->ends_with("_BaseColor"))
+				{
+					instance->SetTexture(0, texture->GetTexture());
+				}
+				else if (string->ends_with("_Normal"))
+				{
+					instance->SetTexture(1, texture->GetTexture());
+				}
+				else if (string->ends_with("_OcclusionRoughnessMetallic"))
+				{
+					instance->SetTexture(2, texture->GetTexture());
+				}
+				else if (string->ends_with("_Emissive"))
+				{
+					instance->SetTexture(3, texture->GetTexture());
+				}
+				else
+				{
+					instance->SetTexture(*string, texture->GetTexture());
+				}
 			}
 		}
 	}
@@ -460,8 +488,8 @@ Component* SceneWorldBuilder::CreateComponent(Actor& anActor, const ComponentRec
 				light->SetColor(someComponentData.Color);
 				light->SetSourceColorAlpha(someComponentData.ColorAlpha);
 				light->SetIntensity(someComponentData.Intensity);
-				light->SetShadowCascadeMapSize({ 2048, 2048 }, 0);
-				light->SetShadowCascadeMapSize({ 2048, 2048 }, 1);
+				light->SetShadowCascadeMapSize({ 4096, 4096 }, 0);
+				light->SetShadowCascadeMapSize({ 4096, 4096 }, 1);
 				light->SetShadowCascadeMapSize({ 4096, 4096 }, 2);
 				light->SetCastShadows(true);
 				return light;

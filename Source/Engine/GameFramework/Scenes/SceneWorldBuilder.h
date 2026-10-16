@@ -56,5 +56,4 @@ private:
 	Component* CreateComponent(Actor& anActor, const ComponentRecord& aRecord, AssetRegistry& anAssetRegistry, const SceneFallbackAssets& someFallbacks);
 
 	std::unordered_map<std::string, std::string> myUnrealDataNameToMaterialParameterName;
-	std::unordered_map<std::string, unsigned> myUnrealParameterNameToTextureSlot;
 };

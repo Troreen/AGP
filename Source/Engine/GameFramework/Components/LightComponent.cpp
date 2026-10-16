@@ -78,7 +78,7 @@ DirectionalLightComponent::DirectionalLightComponent()
 
 float DirectionalLightComponent::GetIntensity() const
 {
-	return myIntensity / 100000;
+	return myIntensity;
 }
 
 const Texture* DirectionalLightComponent::GetShadowCascadeMap(size_t aIndex) const

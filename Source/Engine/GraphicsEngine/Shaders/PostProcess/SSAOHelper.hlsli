@@ -6,10 +6,9 @@
 
 cbuffer SSAOBuffer : register(b5)
 {
-    float SB_SampleRadiusTexels;
-    float SB_MaxDistance;
-    float SB_MinDistance;
-    float __SB_padding;
+    float SB_SamplingRadius = 0.5f;
+    float SB_SamplingBias = 0.025f;
+    float2 __SB_padding;
 }
 
 static const float gWeights[11] =

@@ -66,7 +66,7 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path&
 	defaultMatDesc.Name = "Default";
 	defaultMatDesc.BlendMode = BlendMode::Opaque;
 	defaultMatDesc.Domain = MaterialDomain::Surface;
-	defaultMatDesc.ShadingModel = ShadingModel::Lit;
+	defaultMatDesc.ShadingModel = ShadingModel::Unlit;
 	defaultMatDesc.MaterialShaderCode = aShaderRoot / "Material" / "Material.hlsli";
 	if (!CreateMaterial(defaultMatDesc, myDefaultMaterial))
 	{
@@ -500,7 +500,7 @@ bool GraphicsEngine::CreatePSOs()
 		PipelineStateDescription shadowPSODesc = {};
 		shadowPSODesc.Name = "ShadowPSO";
 		shadowPSODesc.FillMode = RasterizerState::FillSolid;
-		shadowPSODesc.CullMode = RasterizerCullMode::Front;
+		shadowPSODesc.CullMode = RasterizerCullMode::Back;
 		shadowPSODesc.GeometryShader.ByteCode = INTERNAL_ShadowCube_GS_ByteCode;
 		shadowPSODesc.GeometryShader.ByteCodeSize = sizeof(INTERNAL_ShadowCube_GS_ByteCode);
 
@@ -1195,10 +1195,9 @@ const Texture* GraphicsEngine::RenderShadowCascade(GraphicsCommandList& inoutCom
 	}
 	radius = std::ceil(radius);
 
-	constexpr float shadowMapSizes[3] = { 2048, 2048, 4096 };
 	const CU::Vector3f up = CU::Vector3f(0, 1, 0);
 
-	float texelsPerUnit = shadowMapSizes[aCascadeIndex] / (radius * 2.0f);
+	float texelsPerUnit = aDirectionalLight->GetShadowCascadeMap(aCascadeIndex)->GetWidth() / (radius * 2.0f);
 	CU::Matrix4f lightView = CU::Matrix4f::LookAt(center - aLight.Direction * radius, center, up);
 
 	CU::Vector4f shadowOrigin = CU::Vector4f(0, 0, 0, 1) * lightView;

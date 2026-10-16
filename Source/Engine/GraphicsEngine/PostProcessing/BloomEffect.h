@@ -30,5 +30,7 @@ private:
     std::unique_ptr<PipelineStateObject> myGaussianBlurVPSO;
     std::unique_ptr<PipelineStateObject> myBloomPSO;
 
+	std::vector<Texture> myResizeTextures;
+
     Settings mySettings;
 };

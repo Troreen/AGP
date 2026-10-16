@@ -340,8 +340,8 @@ uint GetSpotLightShadowMapWidth(uint aIndex, uint aMipLevel)
 	return shadowWidth;
 }
 
-static const float factor = 0.00001f;
-static const float minBias = 0.00002f;
+static const float factor = 0.002f;
+static const float minBias = 0.0002f;
 static const float maxBias = 0.01f;
 
 int GetDirectionalCascadeIndex(float aViewDepth)
@@ -371,31 +371,31 @@ float GetDirectionalLightShadow(uint aLightIndex, float4 aPixelWorldPosition, fl
         const float3 convertedPos = lightSpacePos.xyz / lightSpacePos.w;
         const float2 shadowUV = convertedPos.xy;
 		
-        float2 dU_dXY = float2(ddx_fine(lightSpacePos.x), ddy_fine(lightSpacePos.x));
-        float2 dV_dXY = float2(ddx_fine(lightSpacePos.y), ddy_fine(lightSpacePos.y));
-        float2 dz_dXY = float2(ddx_fine(lightSpacePos.z), ddy_fine(lightSpacePos.z));
+        //float2 dU_dXY = float2(ddx_fine(lightSpacePos.x), ddy_fine(lightSpacePos.x));
+        //float2 dV_dXY = float2(ddx_fine(lightSpacePos.y), ddy_fine(lightSpacePos.y));
+        //float2 dz_dXY = float2(ddx_fine(lightSpacePos.z), ddy_fine(lightSpacePos.z));
 		
-        float detJ = dU_dXY.x * dV_dXY.y - dV_dXY.x * dU_dXY.y;
+        //float detJ = dU_dXY.x * dV_dXY.y - dV_dXY.x * dU_dXY.y;
 		
-        float2 dz_dUV = 0;
+        //float2 dz_dUV = 0;
 
-        if (detJ != 0)
-        {
-            dz_dUV.x = dot(float2(dV_dXY.y, -dV_dXY.x), dz_dXY) * rcp(detJ);
-            dz_dUV.y = dot(float2(-dU_dXY.y, dU_dXY.x), dz_dXY) * rcp(detJ);
-        }
+        //if (detJ != 0)
+        //{
+        //    dz_dUV.x = dot(float2(dV_dXY.y, -dV_dXY.x), dz_dXY) * rcp(detJ);
+        //    dz_dUV.y = dot(float2(-dU_dXY.y, dU_dXY.x), dz_dXY) * rcp(detJ);
+        //}
 		
-        float2 distanceToTexelCenterUV = 0.5 - frac(lightSpacePos.xy * shadowWidth);
-        distanceToTexelCenterUV *= rcp(float(shadowWidth));
+        //float2 distanceToTexelCenterUV = 0.5 - frac(lightSpacePos.xy * shadowWidth);
+        //distanceToTexelCenterUV *= rcp(float(shadowWidth));
 
-        float slopeBias = min(0, dot(distanceToTexelCenterUV, dz_dUV));
+        //float slopeBias = min(0, dot(distanceToTexelCenterUV, dz_dUV));
 		
-        const float p = floor((convertedPos.z + slopeBias) * 65535) / 65535;
-			
+        //const float p = floor((convertedPos.z + slopeBias) * 65535) / 65535;
+        const float p = convertedPos.z;
+		
         const float shadowTexelSize = 1.0f / shadowWidth;
 			
-        const float3 lightDir = normalize(LB_Lights[aLightIndex].Position - aPixelWorldPosition.xyz);
-        const float shadowBias = clamp(factor * (1.0f - dot(aPixelNormal, lightDir)), minBias, maxBias);
+        const float shadowBias = clamp(factor * (1.0f - dot(aPixelNormal, -LB_Lights[aLightIndex].Direction)), minBias, maxBias);
         for (int i = 0; i < 16; ++i)
         {
             const float2 offset = poissonDisk16[i] * shadowTexelSize;

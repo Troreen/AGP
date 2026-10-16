@@ -261,13 +261,12 @@ GraphicsEngine& GameApplication::InitializeWindowAndGraphics()
 	GraphicsEngine& graphics = GraphicsEngine::Get();
 
 	std::shared_ptr<SSAOEffect> ssao = std::make_shared<SSAOEffect>();
-	ssao->GetSettings().SampleRadiusTexels = 4;
-	ssao->GetSettings().MaxDistance = 100;
-	ssao->GetSettings().MinDistance = 0.001f;
+	ssao->GetSettings().SamplingRadius = 150.0f;
+	ssao->GetSettings().SamplingBias = 5.0f;
 	graphics.AddPostProcessEffect(ssao);
 
 	std::shared_ptr<BloomEffect> bloom = std::make_shared<BloomEffect>();
-	bloom->GetSettings().LuminanceThreshhold = 1.0f;
+	bloom->GetSettings().LuminanceThreshhold = 1.3f;
 	bloom->GetSettings().LuminanceExponent = 1.5f;
 	graphics.AddPostProcessEffect(bloom);
 

@@ -84,6 +84,24 @@ bool SSAOEffect::Initialize(const RenderHardwareInterface& aRHI)
 		return false;
 	}
 
+	myResizeTextures.resize(4);
+	unsigned int divisor = 1;
+
+	for (size_t i = 0; i < 4; ++i)
+	{
+		const std::string name = "Resize Texture " + std::to_string(i);
+		const unsigned int width = clientSize.x / divisor;
+		const unsigned int height = clientSize.y / divisor;
+
+		if (!aRHI.CreateTexture(name, width, height, 1, ResourceFormat::R16G16B16A16_FLOAT, ResourceBindFlag_RenderTarget | ResourceBindFlag_ShaderResource, myResizeTextures[i]))
+		{
+			GELOG(Error, "Failed to create Scene Resize texture!");
+			return false;
+		}
+
+		divisor *= divisor < 4 ? 2 : 1;
+	}
+
 	return true;
 }
 
@@ -96,7 +114,7 @@ void SSAOEffect::RunPreLight(GraphicsCommandList& inoutCommandList, PostProcessC
 {
 	inoutCommandList.BeginEvent("SSAO");
 
-	const Texture* ssaoBuffer = &inoutCache.resizeTextures[0];
+	const Texture* ssaoBuffer = &myResizeTextures[0];
 	inoutCommandList.SetRenderTarget(&ssaoBuffer, 1, nullptr);
 
 	inoutCommandList.SetPipelineState(*myGenerateSSAOPSO);
@@ -106,10 +124,10 @@ void SSAOEffect::RunPreLight(GraphicsCommandList& inoutCommandList, PostProcessC
 
 	const Texture* resource = nullptr;
 	const Texture* target = nullptr;
-	for (size_t i = 1; i < inoutCache.resizeTextures.size(); ++i)
+	for (size_t i = 1; i < myResizeTextures.size(); ++i)
 	{
-		resource = &inoutCache.resizeTextures[i - 1];
-		target = &inoutCache.resizeTextures[i];
+		resource = &myResizeTextures[i - 1];
+		target = &myResizeTextures[i];
 
 		inoutCommandList.SetRenderTarget(&target, 1, nullptr);
 		inoutCommandList.SetShaderResources(&resource, 1, 0, PipelineStage_PixelShader);
@@ -120,8 +138,8 @@ void SSAOEffect::RunPreLight(GraphicsCommandList& inoutCommandList, PostProcessC
 	inoutCommandList.SetPipelineState(*mySSAOBlurHPSO);
 	inoutCommandList.Draw(4);
 
-	resource = &inoutCache.resizeTextures[inoutCache.resizeTextures.size() - 1];
-	target = &inoutCache.resizeTextures[inoutCache.resizeTextures.size() - 2];
+	resource = &myResizeTextures[myResizeTextures.size() - 1];
+	target = &myResizeTextures[myResizeTextures.size() - 2];
 	inoutCommandList.SetRenderTarget(nullptr, 0, nullptr);
 	inoutCommandList.SetShaderResources(&resource, 1, 0, PipelineStage_PixelShader);
 	inoutCommandList.SetRenderTarget(&target, 1, nullptr);
@@ -129,10 +147,10 @@ void SSAOEffect::RunPreLight(GraphicsCommandList& inoutCommandList, PostProcessC
 	inoutCommandList.Draw(4);
 
 	inoutCommandList.SetPipelineState(*inoutCache.resamplePSO);
-	for (int i = static_cast<int>(inoutCache.resizeTextures.size()) - 3; i >= 0; --i)
+	for (int i = static_cast<int>(myResizeTextures.size()) - 3; i >= 0; --i)
 	{
-		resource = &inoutCache.resizeTextures[i + 1];
-		target = &inoutCache.resizeTextures[i];
+		resource = &myResizeTextures[i + 1];
+		target = &myResizeTextures[i];
 
 		inoutCommandList.SetRenderTarget(&target, 1, nullptr);
 		inoutCommandList.SetShaderResources(&resource, 1, 0, PipelineStage_PixelShader);

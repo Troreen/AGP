@@ -94,6 +94,25 @@ bool BloomEffect::Initialize(const RenderHardwareInterface& aRHI)
 		}
 	}
 
+	const CommonUtilities::Vector2u clientSize = aRHI.GetClientSize();
+	myResizeTextures.resize(4);
+	unsigned int divisor = 1;
+
+	for (size_t i = 0; i < 4; ++i)
+	{
+		const std::string name = "Resize Texture " + std::to_string(i);
+		const unsigned int width = clientSize.x / divisor;
+		const unsigned int height = clientSize.y / divisor;
+
+		if (!aRHI.CreateTexture(name, width, height, 1, ResourceFormat::R16G16B16A16_FLOAT, ResourceBindFlag_RenderTarget | ResourceBindFlag_ShaderResource, myResizeTextures[i]))
+		{
+			GELOG(Error, "Failed to create Scene Resize texture!");
+			return false;
+		}
+
+		divisor *= divisor < 4 ? 2 : 1;
+	}
+
 	return true;
 }
 
@@ -106,7 +125,7 @@ void BloomEffect::RunPostLight(GraphicsCommandList& inoutCommandList, PostProces
 {
 	inoutCommandList.BeginEvent("Bloom");
 
-	const Texture* sceneLuminance = &inoutCache.resizeTextures[0];
+	const Texture* sceneLuminance = &myResizeTextures[0];
 	inoutCommandList.SetRenderTarget(&sceneLuminance, 1, nullptr);
 	inoutCommandList.SetShaderResources(&aBackBuffer, 1, 0, PipelineStage_PixelShader);
 
@@ -117,10 +136,10 @@ void BloomEffect::RunPostLight(GraphicsCommandList& inoutCommandList, PostProces
 
 	const Texture* resource = nullptr;
 	const Texture* target = nullptr;
-	for (size_t i = 1; i < inoutCache.resizeTextures.size(); ++i)
+	for (size_t i = 1; i < myResizeTextures.size(); ++i)
 	{
-		resource = &inoutCache.resizeTextures[i - 1];
-		target = &inoutCache.resizeTextures[i];
+		resource = &myResizeTextures[i - 1];
+		target = &myResizeTextures[i];
 
 		inoutCommandList.SetRenderTarget(&target, 1, nullptr);
 		inoutCommandList.SetShaderResources(&resource, 1, 0, PipelineStage_PixelShader);
@@ -136,10 +155,10 @@ void BloomEffect::RunPostLight(GraphicsCommandList& inoutCommandList, PostProces
 	Blur(inoutCommandList, inoutCache, *myGaussianBlurVPSO, 0);
 
 	inoutCommandList.SetPipelineState(*inoutCache.resamplePSO);
-	for (int i = static_cast<int>(inoutCache.resizeTextures.size()) - 3; i >= 0; --i)
+	for (int i = static_cast<int>(myResizeTextures.size()) - 3; i >= 0; --i)
 	{
-		resource = &inoutCache.resizeTextures[i + 1];
-		target = &inoutCache.resizeTextures[i];
+		resource = &myResizeTextures[i + 1];
+		target = &myResizeTextures[i];
 
 		inoutCommandList.SetRenderTarget(&target, 1, nullptr);
 		inoutCommandList.SetShaderResources(&resource, 1, 0, PipelineStage_PixelShader);
@@ -157,8 +176,8 @@ void BloomEffect::RunPostLight(GraphicsCommandList& inoutCommandList, PostProces
 
 void BloomEffect::Blur(GraphicsCommandList& inoutCommandList, PostProcessCache& inoutCache, const PipelineStateObject& aBlurPSO, int aCurrentSlot)
 {
-	const Texture* resource = &inoutCache.resizeTextures[inoutCache.resizeTextures.size() - 1 - aCurrentSlot];
-	const Texture* target = &inoutCache.resizeTextures[inoutCache.resizeTextures.size() - 2 + aCurrentSlot];
+	const Texture* resource = &myResizeTextures[myResizeTextures.size() - 1 - aCurrentSlot];
+	const Texture* target = &myResizeTextures[myResizeTextures.size() - 2 + aCurrentSlot];
 	inoutCommandList.SetRenderTarget(nullptr, 0, nullptr);
 	inoutCommandList.SetShaderResources(&resource, 1, 0, PipelineStage_PixelShader);
 	inoutCommandList.SetRenderTarget(&target, 1, nullptr);

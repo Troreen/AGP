@@ -9,8 +9,6 @@ class PostProcessCache
 public:
     std::unique_ptr<PipelineStateObject> resamplePSO;
 
-    std::vector<Texture> resizeTextures;
-
 public:
     bool Initialize(const RenderHardwareInterface& aRHI);
 };

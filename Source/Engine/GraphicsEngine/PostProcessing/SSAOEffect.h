@@ -7,10 +7,9 @@ class SSAOEffect : public PostProcessEffect
 public:
     struct Settings
     {
-		float SampleRadiusTexels = 4;
-		float MaxDistance = 100;
-		float MinDistance = 0.001f;
-		float __padding = 0;
+		float SamplingRadius = 0.5f;
+		float SamplingBias = 0.025f;
+		CommonUtilities::Vector2f __padding;
     };
 
     ~SSAOEffect() override;
@@ -27,6 +26,8 @@ private:
     std::unique_ptr<PipelineStateObject> myGenerateSSAOPSO;
     std::unique_ptr<PipelineStateObject> mySSAOBlurHPSO;
     std::unique_ptr<PipelineStateObject> mySSAOBlurVPSO;
+
+	std::vector<Texture> myResizeTextures;
 
     Texture mySSAOBuffer;
 

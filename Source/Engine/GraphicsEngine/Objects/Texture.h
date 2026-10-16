@@ -18,6 +18,9 @@ public:
 
 	std::string_view GetName() const { return myName; }
 
+	float GetWidth() const { return myViewport.Width; }
+	float GetHeight() const { return myViewport.Height; }
+
 private:
 
 	std::string myName;
