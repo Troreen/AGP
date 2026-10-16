@@ -388,8 +388,6 @@ void GameApplication::InitializeGameSession(Game& aGame, GraphicsEngine& aGraphi
 		}
 	}
 
-	myInitialWorldStarted = true;
-	
 	ShowWindow(myMainWindowHandle, SW_SHOW);
 	SetForegroundWindow(myMainWindowHandle);
 	aGraphics.Present();
@@ -611,7 +609,7 @@ void GameApplication::ProcessPendingSceneLoad(Game& aGame)
 		// Keep the current world if a later scene load fails.
 		// An initial load must succeed because there is no current world.
 		LOG(LogGameFramework, Error, "Scene '{}': {}", sceneName, error.what());
-		if (!myInitialWorldStarted)
+		if (!myWorld)
 		{
 			throw;
 		}

@@ -83,7 +83,6 @@ private:
 	bool myQuitRequested = false;
 	bool myAcceptSceneRequests = true;
 	bool myGameInitializationStarted = false;
-	bool myInitialWorldStarted = false;
 
 	HWND myMainWindowHandle = nullptr;
 	std::wstring myWindowClassName;
