@@ -599,6 +599,23 @@ void GameApplication::ProcessPendingSceneLoad(Game& aGame)
 				return component;
 			});
 		aGame.ConfigureWorld(*candidateWorld);
+
+		// Load the environment after building the scene. If building fails,
+		// we keep the old scene and its lighting.
+		const bool usesTestEnvironment = scenePath ==
+			myContentRoot / myApplicationSettings.SceneFolder / "lvl_shader_testing_tarik/Lvl_Shader_Testing_Tarik_Level.json"
+			|| scenePath == myContentRoot / "EAP.json";
+		if (usesTestEnvironment)
+		{
+			if (!GraphicsEngine::Get().SetEnvironmentMap(myContentRoot / "Textures" / "snowy_hillside_02_cube.dds", true))
+			{
+				throw std::runtime_error("Could not load the shader scene's hillside environment.");
+			}
+		}
+		else
+		{
+			GraphicsEngine::Get().ResetEnvironmentMap();
+		}
 	}
 	catch (const std::bad_alloc&)
 	{

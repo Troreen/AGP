@@ -241,6 +241,9 @@
     <FxCompile Include="Shaders\Lines\Lines_VS.hlsl">
       <Filter>Shaders\Lines</Filter>
     </FxCompile>
+    <FxCompile Include="Shaders\Material\Skybox_PS.hlsl">
+      <Filter>Shaders\Material</Filter>
+    </FxCompile>
     <FxCompile Include="Shaders\Material\Deferred_AmbientLight_PS.hlsl">
       <Filter>Shaders\Material</Filter>
     </FxCompile>

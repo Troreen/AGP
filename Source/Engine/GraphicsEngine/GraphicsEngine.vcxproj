@@ -303,6 +303,12 @@
       <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
       <ObjectFileOutput></ObjectFileOutput>
     </FxCompile>
+    <FxCompile Include="Shaders\Material\Skybox_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
+      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
+      <ObjectFileOutput></ObjectFileOutput>
+    </FxCompile>
     <FxCompile Include="Shaders\Material\Deferred_AmbientLight_PS.hlsl">
       <ShaderType>Pixel</ShaderType>
       <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
