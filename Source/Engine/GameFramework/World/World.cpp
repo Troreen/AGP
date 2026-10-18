@@ -1,4 +1,7 @@
 #include "GameFramework/World/World.h"
+#include "GameFramework/Collision/CollisionSystem.h"
+#include "GameFramework/Components/ColliderComponent.h"
+#include <limits>
 #include "GameFramework/Components/CameraComponent.h"
 #include "Maths.hpp"
 #include <algorithm>
@@ -13,6 +16,35 @@
 namespace
 {
 	constexpr float MaxFrameDeltaSeconds = 0.25f;
+}
+
+World::World() : myCollisionSystem(std::make_unique<CollisionSystem>())
+{
+}
+
+std::uint64_t World::AllocateColliderId()
+{
+	if (myNextColliderId == (std::numeric_limits<std::uint64_t>::max)())
+	{
+		throw std::overflow_error("Collider IDs exhausted");
+	}
+	return myNextColliderId++;
+}
+
+ColliderComponent* World::FindCollider(std::uint64_t id) const
+{
+	for (const auto& actor : myActors)
+	{
+		if (actor->IsPendingDestroy())
+		{
+			continue;
+		}
+		if (auto* collider = actor->GetComponent<ColliderComponent>(); collider && collider->GetColliderId() == id)
+		{
+			return collider;
+		}
+	}
+	return nullptr;
 }
 
 World::~World()
@@ -221,6 +253,20 @@ void World::Update(float deltaTime)
 				component->Update(deltaTime);
 			}
 		}
+		myCollisionSystem->Update(*this, frame);
+
+		// Draw after gameplay and overlap callbacks have finished moving volumes.
+		// Disabled colliders can still draw; inactive or destroyed objects cannot.
+		for (Component* component : frame)
+		{
+			if (component->HasBegunPlay() && !component->IsPendingDestroy() && component->GetOwner()->IsActive())
+			{
+				if (auto* collider = dynamic_cast<ColliderComponent*>(component))
+				{
+					collider->DrawDebug();
+				}
+			}
+		}
 	}
 	catch (...)
 	{
@@ -241,6 +287,7 @@ void World::Clear()
 		return;
 	}
 	myClearing = true;
+	myCollisionSystem->Clear();
 	myCamera = nullptr;
 	std::vector<std::unique_ptr<Actor>> actors = std::move(myActors);
 	actors.clear();

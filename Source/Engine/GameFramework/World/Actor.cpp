@@ -1,5 +1,6 @@
 #include "GameFramework/World/Actor.h"
 #include "GameFramework/World/World.h"
+#include "GameFramework/Components/ColliderComponent.h"
 #include <stdexcept>
 
 Actor::Actor(World& world, std::string name) : myName(std::move(name)), myWorld(&world)
@@ -31,6 +32,14 @@ void Actor::Attach(std::unique_ptr<Component> component, std::string name)
 	if (name.empty() || FindComponent(name))
 	{
 		throw std::invalid_argument("Component name must be nonempty and unique: " + name);
+	}
+	if (auto* collider = dynamic_cast<ColliderComponent*>(component.get()))
+	{
+		if (GetComponent<ColliderComponent>())
+		{
+			throw std::invalid_argument("An Actor can own only one collider");
+		}
+		collider->myColliderId = myWorld->AllocateColliderId();
 	}
 	component->myOwner = this;
 	component->myName = std::move(name);

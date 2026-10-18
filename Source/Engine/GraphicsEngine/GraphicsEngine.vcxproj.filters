@@ -319,4 +319,12 @@
       <Filter>Shaders\Text</Filter>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders\Lines\Lines_PS.hlsl"><Filter>Shaders</Filter></FxCompile>
+    <FxCompile Include="Shaders\Lines\Lines_VS.hlsl"><Filter>Shaders</Filter></FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Drawers\LineDrawer.h"><Filter>Drawers</Filter></ClInclude>
+    <ClCompile Include="Drawers\LineDrawer.cpp"><Filter>Drawers</Filter></ClCompile>
+  </ItemGroup>
 </Project>

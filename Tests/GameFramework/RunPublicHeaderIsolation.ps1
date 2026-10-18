@@ -1,6 +1,7 @@
 param(
     [ValidateSet('Debug','Release')][string]$Configuration = 'Debug',
-    [string]$MSBuild = 'C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\MSBuild.exe'
+    [string]$MSBuild = 'C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\MSBuild.exe',
+    [switch]$CollisionOnly
 )
 $ErrorActionPreference = 'Stop'
 $repository = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..'))
@@ -8,12 +9,19 @@ $sourceRoot = Join-Path $repository 'Source\Engine'
 $frameworkRoot = Join-Path $sourceRoot 'GameFramework'
 $utilitiesRoot = Join-Path $repository 'Source\Utilities\CommonUtilities'
 $output = Join-Path $repository "Intermediate\PublicHeaderIsolation\$Configuration"
+if ($CollisionOnly) { $output = Join-Path $repository "Intermediate\CollisionHeaderIsolation\$Configuration" }
 New-Item -ItemType Directory -Force -Path $output | Out-Null
-$apiFolders = @('World', 'Components', 'Scenes') | ForEach-Object { Join-Path $frameworkRoot $_ }
+$apiFolders = @('World', 'Components', 'Scenes', 'Collision') | ForEach-Object { Join-Path $frameworkRoot $_ }
 $headers = @(Get-ChildItem -LiteralPath $apiFolders -Recurse -Filter '*.h' | Sort-Object FullName)
+if ($CollisionOnly) {
+    $headers = @(Get-Item (Join-Path $frameworkRoot 'Components\ColliderComponent.h')) +
+        @(Get-ChildItem -LiteralPath (Join-Path $frameworkRoot 'Collision') -Filter '*.h')
+}
 if ($headers.Count -eq 0) { throw 'No public headers found.' }
 $items = foreach ($header in $headers) {
-    $relative = [IO.Path]::GetRelativePath($sourceRoot, $header.FullName).Replace('\','/')
+    $prefix = $sourceRoot.TrimEnd('\') + '\'
+    if (!$header.FullName.StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase)) { throw 'Header is outside the source root.' }
+    $relative = $header.FullName.Substring($prefix.Length).Replace('\','/')
     $source = Join-Path $output ($relative.Replace('/','_') + '.cpp')
     [IO.File]::WriteAllText($source, "#include <$relative>`r`n")
     '<ClCompile Include="' + [Security.SecurityElement]::Escape($source) + '" />'

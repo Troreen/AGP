@@ -54,7 +54,7 @@ namespace
 		move.Variables.BoolVariables.emplace("WaitForCompletion", true);
 		move.Variables.StringVariables.emplace("TargetActor", "Target");
 		move.Variables.StringVariables.emplace("DestinationActor", "Marker");
-		move.Variables.FloatVariables.emplace("Duration", 0.5f);
+		move.Variables.FloatVariables.emplace("DurationInSeconds", 0.5f);
 		event.Components.push_back(move);
 		scene.Actors.push_back(event);
 		ActorRecord target;
@@ -73,7 +73,7 @@ namespace
 		auto* action = actor->GetComponent<MoveActionComponent>();
 		Check(sequence && sequence->Replayable && action && action->Step == 3 && action->WaitForCompletion,
 			"Registry/builder did not apply exported sequence and action variables");
-		Check(action->TargetActor == "Target" && action->DestinationActor == "Marker" && action->Duration == 0.5f,
+		Check(action->TargetActor == "Target" && action->DestinationActor == "Marker" && action->DurationInSeconds == 0.5f,
 			"Exported action references or duration changed");
 		world->BeginPlay();
 		Check(sequence->Play(), "Sequence built through custom export records did not start");
@@ -91,7 +91,7 @@ namespace
 	{
 		auto* action = sequence->GetOwner()->AddComponent<WaitActionComponent>(name);
 		action->Step = step;
-		action->Duration = duration;
+		action->DurationInSeconds = duration;
 		return action;
 	}
 
@@ -101,7 +101,7 @@ namespace
 		action->TargetActor = "Target";
 		action->DestinationActor = "Marker";
 		action->Step = step;
-		action->Duration = duration;
+		action->DurationInSeconds = duration;
 		return action;
 	}
 

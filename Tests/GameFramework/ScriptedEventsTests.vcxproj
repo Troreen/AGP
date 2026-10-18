@@ -34,6 +34,7 @@
   </ItemDefinitionGroup>
   <ItemGroup><ClCompile Include="ScriptedEventsTests.cpp" /><ClCompile Include="..\..\Source\Application\Game\Components\RegisterCustomComponents.cpp" />
 <ClCompile Include="..\..\Source\Application\Game\Components\SpinComponent.cpp" /><ClCompile Include="..\..\Source\Application\Game\Components\ScriptedEvents\ScriptedActionComponent.cpp" /><ClCompile Include="..\..\Source\Application\Game\Components\ScriptedEvents\ScriptedEventComponent.cpp" /><ClCompile Include="..\..\Source\Application\Game\Player\PlayerController.cpp" /><ClCompile Include="..\..\Source\Application\Game\Player\PlayerMovementComponent.cpp" /></ItemGroup>
+  <ItemGroup><ClCompile Include="..\..\Source\Application\Game\BehaviourTree\**\*.cpp" /></ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Source\Engine\GameFramework\GameFramework.vcxproj">
       <Project>{cd9f039d-3960-7fd3-029b-c8506e1ac4af}</Project>

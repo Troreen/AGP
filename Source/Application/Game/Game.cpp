@@ -18,10 +18,30 @@
 #include "Player/PlayerController.h"
 #include "Player/PlayerMovementComponent.h"
 #include "BehaviourTree/BehaviourTreeComponent.h"
+#include "Components/CollisionDemoComponent.h"
+#include "GameFramework/Components/ColliderComponent.h"
 
 #include <memory>
 
 DEFINE_LOG_CATEGORY(LogGame);
+
+namespace
+{
+	// Temporary debug setup for trying collision overlaps. Leave it off during normal play.
+	constexpr bool EnableCollisionDemo = false;
+
+	// Give each debug sphere its own Actor so the demo can position it independently.
+	ColliderComponent* SpawnDebugCollisionSphere(World& world, const char* actorName, float sphereRadius, unsigned collisionLayer)
+	{
+		Actor* sphereActor = world.SpawnActor(actorName);
+		auto* sphereCollider = sphereActor->AddComponent<ColliderComponent>("Collider");
+		sphereCollider->SetSphereRadius(sphereRadius);
+		sphereCollider->SetLayer(collisionLayer);
+		sphereCollider->SetMask(1u << 0);
+
+		return sphereCollider;
+	}
+}
 
 Game::Game() = default;
 Game::~Game() = default;
@@ -183,6 +203,25 @@ void Game::ConfigureWorld(World& aWorld)
 	//	std::shared_ptr<MeshAsset> asset = assetRegistry.GetAsset<MeshAsset>("Lvl_Blockout_NavMesh.fbx");
 	//	component->SetMesh(asset);
 	//}
+
+	if (EnableCollisionDemo)
+	{
+		// Debug code: build a small test scene to watch overlap events, separate from normal gameplay.
+		ColliderComponent* movingSphere = SpawnDebugCollisionSphere(aWorld, "CollisionDemoMoving", 40.0f, 0);
+		movingSphere->SetMask(1u << 1);
+
+		ColliderComponent* fixedSphere = SpawnDebugCollisionSphere(aWorld, "CollisionDemoSphere", 60.0f, 1);
+		ColliderComponent* filteredSphere = SpawnDebugCollisionSphere(aWorld, "CollisionDemoFiltered", 50.0f, 2);
+
+		Actor* boxActor = aWorld.SpawnActor("CollisionDemoBox");
+		boxActor->GetTransform().SetLocalRotationDegrees(35.0f, 0, 0);
+		auto* box = boxActor->AddComponent<ColliderComponent>("Collider");
+		box->SetBoxHalfExtents({60, 60, 60});
+		box->SetLayer(1);
+		box->SetMask(1u << 0);
+		aWorld.SpawnActor("CollisionDemo")->AddComponent<CollisionDemoComponent>("Demo",
+			movingSphere->GetColliderId(), fixedSphere->GetColliderId(), box->GetColliderId(), filteredSphere->GetColliderId());
+	}
 
 	{ // TODO : Temporary place for debug animation
 		AnimationManager::DebugData& data = ServiceLocator::GetInstance().GetAnimationManager().GetDebugData();

@@ -284,4 +284,4 @@
       <Filter>World</Filter>
     </ClCompile>
   </ItemGroup>
-</Project>
+<ItemGroup><ClInclude Include="Components\ColliderComponent.h"><Filter>Components</Filter></ClInclude><ClInclude Include="Collision\CollisionSystem.h" /><ClInclude Include="Collision\CollisionOverlapEvent.h" /><ClCompile Include="Components\ColliderComponent.cpp"><Filter>Components</Filter></ClCompile><ClCompile Include="Collision\CollisionSystem.cpp" /></ItemGroup></Project>

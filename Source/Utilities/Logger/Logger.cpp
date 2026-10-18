@@ -80,8 +80,10 @@ Logger::~Logger()
 
 std::string Logger::Timestamp(bool aIncludeDate /*= false*/) const
 {
-	static std::string dateFormat = "%Y-%m-%d %H:%M:%S";
-	static std::string noDateFormat = "%H:%M:%S";
+	// The worker may first format a timestamp while static shutdown joins it.
+	// Literal formats need no lazy initialization or destruction on that thread.
+	constexpr const char* dateFormat = "%Y-%m-%d %H:%M:%S";
+	constexpr const char* noDateFormat = "%H:%M:%S";
 
 	const std::chrono::time_point now = std::chrono::system_clock::now();
 	const std::time_t time = std::chrono::system_clock::to_time_t(now);
@@ -90,7 +92,7 @@ std::string Logger::Timestamp(bool aIncludeDate /*= false*/) const
 	localtime_s(&timeInfo, &time);
 
 	char buffer[20]{};
-	strftime(buffer, 20, aIncludeDate ? dateFormat.c_str() : noDateFormat.c_str(), &timeInfo);
+	strftime(buffer, 20, aIncludeDate ? dateFormat : noDateFormat, &timeInfo);
 	return buffer;
 }
 

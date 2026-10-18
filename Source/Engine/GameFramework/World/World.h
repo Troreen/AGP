@@ -1,23 +1,27 @@
 #pragma once
 #include "GameFramework/World/Actor.h"
 #include "Vector2.hpp"
+#include <cstdint>
 
 #include <GraphicsEngine/RenderSnapshot.h>
 
 class CameraComponent;
+class ColliderComponent;
+class CollisionSystem;
 
 class World
 {
 	friend class Actor;
 
 public:
-	World() = default;
+	World();
 
 	~World();
 	World(const World&) = delete;
 	World& operator=(const World&) = delete;
 	Actor* SpawnActor(std::string_view name);
 	Actor* FindActor(std::string_view name) const;
+	ColliderComponent* FindCollider(std::uint64_t id) const;
 
 	bool SetActiveCamera(CameraComponent* camera);
 	CameraComponent* GetActiveCamera() const;
@@ -35,6 +39,9 @@ public:
 private:
 	std::vector<Component*> CollectFrame();
 	void RemoveDestroyed();
+	std::uint64_t AllocateColliderId();
+	std::uint64_t myNextColliderId = 1;
+	std::unique_ptr<CollisionSystem> myCollisionSystem;
 
 	std::vector<std::unique_ptr<Actor>> myActors;
 	std::unordered_map<std::string, size_t> myActorNameCount;

@@ -287,4 +287,11 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <ItemGroup>
+    <ClInclude Include="Components\ColliderComponent.h" />
+    <ClInclude Include="Collision\CollisionSystem.h" />
+    <ClInclude Include="Collision\CollisionOverlapEvent.h" />
+    <ClCompile Include="Components\ColliderComponent.cpp" />
+    <ClCompile Include="Collision\CollisionSystem.cpp" />
+  </ItemGroup>
 </Project>

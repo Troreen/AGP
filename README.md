@@ -103,3 +103,6 @@ The current shadow setup keeps material textures in low texture slots and binds 
 Directional shadows use four cascades. Spot shadows use perspective shadow maps matched to the spot light cone. Point shadows use cube depth maps sampled by direction from the light to the shaded world position.
 
 For component-based scripted events, see [Scripted events](Docs/ScriptedEvents.md) and the [Unreal test guide](Docs/ScriptedEventsUnrealTestGuide.md).
+
+For code-spawned sphere/box overlap events and the opt-in runtime demonstration,
+see [Collision detection](Docs/CollisionDetection.md).
