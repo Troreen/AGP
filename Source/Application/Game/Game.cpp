@@ -70,10 +70,11 @@ void Game::Update(World& aWorld, [[maybe_unused]] float aDeltaTime)
 	}
 
 	// The game chooses to listen from the active view, including the debug camera.
-	if (const CameraComponent* camera = aWorld.GetActiveCamera())
-	{
-		ServiceLocator::GetInstance().GetAudioManager().SetAudioListener(camera->GetWorldPosition());
-	}
+	// Commenting this out becasue it spams the log with info about listener position
+	// if (const CameraComponent* camera = aWorld.GetActiveCamera())
+	// {
+	// 	ServiceLocator::GetInstance().GetAudioManager().SetAudioListener(camera->GetWorldPosition());
+	// }
 
 }
 
