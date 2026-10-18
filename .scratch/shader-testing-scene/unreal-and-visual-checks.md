@@ -2,12 +2,12 @@
 
 Status: pending source-scene access and user review.
 
-The Unreal project/exporter is outside this checkout. The current exported shader scene still contains its original single test mesh and directional-light intensity 4. The engine changes do not override this authoring value or inject reference geometry.
+The Unreal project/exporter is outside this checkout. The current exported shader scene still contains its original single test mesh and directional-light intensity 2 (locally tuned and accepted). The engine changes do not override this authoring value or inject reference geometry.
 
 ## Author in Unreal
 1. Open the source shader-testing level corresponding to `lvl_shader_testing_tarik/Lvl_Shader_Testing_Tarik_Level.json`.
 2. Keep the existing test mesh/material. Add a matte gray floor and two separate reference spheres: matte gray dielectric and polished metal. Keep them beside the test mesh without overlap; leave room for camera inspection. Reference materials must use the standard material path, not the snow shader.
-3. Set the directional light intensity from 4 to 1 as the starting balance. Preserve authoring of direction/color in Unreal.
+3. Set the Unreal directional light intensity to 2 to match the locally tuned and accepted export. Preserve authoring of direction/color in Unreal.
 4. Export the scene and required meshes/materials through the normal exporter. No Sky Light data or environment component is needed; the engine selects the fixed hillside for this scene path.
 5. Reload with F4 and review positions, shadows, brightness, reflections and reference materials with the user. Final values remain subject to that visual review.
 

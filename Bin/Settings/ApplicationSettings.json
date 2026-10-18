@@ -3,34 +3,48 @@
     "application": {
       "title": "TM Game",
       "windowClassName": "Turkish Motors Game",
-      "windowedResolution": { "width": 1920, "height": 1080 },
+      "windowedResolution": {
+        "width": 1920,
+        "height": 1080
+      },
       "windowMode": "borderless",
       "resizable": false,
       "renderDiagnostics": true,
       "mouseLook": true,
       "contentPath": "../../Content",
-      "shaderFolder" : "EngineShaders",
-      "scenesFolder" : "ExportedScenes",
+      "shaderFolder": "EngineShaders",
+      "scenesFolder": "ExportedScenes",
       "cursorPath": "",
       "initialScene": "lvl_blockout/Lvl_Blockout_Level.json"
     },
-    "sound": { "masterVolume": 1.0, "musicVolume": 0.35, "sfxVolume": 1.0 }
+    "sound": {
+      "masterVolume": 1.0,
+      "musicVolume": 0.35,
+      "sfxVolume": 1.0
+    }
   },
   "current": {
     "application": {
       "title": "TM Game",
       "windowClassName": "Turkish Motors Game",
-      "windowedResolution": { "width": 1920, "height": 1080 },
+      "windowedResolution": {
+        "width": 1280,
+        "height": 720
+      },
       "windowMode": "borderless",
       "resizable": false,
       "renderDiagnostics": true,
       "mouseLook": true,
       "contentPath": "../../Content",
-      "shaderFolder" : "EngineShaders",
-      "scenesFolder" : "ExportedScenes",
+      "shaderFolder": "EngineShaders",
+      "scenesFolder": "ExportedScenes",
       "cursorPath": "",
       "initialScene": "lvl_shader_testing_tarik/Lvl_Shader_Testing_Tarik_Level.json"
     },
-    "sound": { "masterVolume": 1.0, "musicVolume": 0.35, "sfxVolume": 1.0 }
+    "sound": {
+      "masterVolume": 1.0,
+      "musicVolume": 0.35,
+      "sfxVolume": 1.0
+    }
   }
 }

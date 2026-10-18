@@ -5,7 +5,7 @@ Status: in-progress
 The shader-testing scene has no useful environment reflections/background and its directional light feels too strong. Manual characters clutter testing.
 
 ## Solution
-Use the existing snowy hillside HDRI as a fixed environment and skybox in the shader scene and export-and-play. Keep the current mip-based approximation and tonemapper. Author a gray floor and matte gray/polished metal reference spheres in Unreal. Start the Unreal directional light at intensity 1 and obtain user visual acceptance.
+Use the existing snowy hillside HDRI as a fixed environment and skybox in the shader scene and export-and-play. Keep the current mip-based approximation and tonemapper. Author a gray floor and matte gray/polished metal reference spheres in Unreal. Use directional-light intensity 2, accepted by the user after comparison with bloom off and on. The local exported scene is updated; carry this value back into Unreal when source access is available.
 
 ## Implementation Decisions
 - Comment out complete Player, Enemy, and optional A_Debug setup blocks globally; preserve the code.
