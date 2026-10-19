@@ -16,6 +16,9 @@ class ColliderComponent : public SceneComponent
 	friend class World;
 
 public:
+	// Enables collider outlines for every collider in the process. Intended for debug visualization.
+	static void SetAllDebugDrawEnabled(bool enabled);
+
 	bool SetSphereRadius(float radius);
 	bool SetBoxHalfExtents(const CommonUtilities::Vector3f& halfExtents);
 	bool SetLayer(unsigned int layer);
@@ -85,6 +88,7 @@ public:
 private:
 	void DrawDebug() const;
 
+	static bool ourAllDebugDrawEnabled;
 	bool myDebugDrawEnabled = false;
 	CommonUtilities::Vector4f myDebugColor{0, 1, 0, 1};
 	CommonUtilities::Vector4f myDebugDisabledColor{0.4f, 0.4f, 0.4f, 1};

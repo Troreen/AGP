@@ -5,6 +5,13 @@
 #include <cmath>
 #include <numbers>
 
+bool ColliderComponent::ourAllDebugDrawEnabled = false;
+
+void ColliderComponent::SetAllDebugDrawEnabled(bool enabled)
+{
+	ourAllDebugDrawEnabled = enabled;
+}
+
 bool ColliderComponent::SetSphereRadius(float radius)
 {
 	if (!std::isfinite(radius) || radius <= 0)
@@ -46,7 +53,7 @@ bool ColliderComponent::SetMask(std::uint32_t mask)
 
 void ColliderComponent::DrawDebug() const
 {
-	if (!myDebugDrawEnabled)
+	if (!myDebugDrawEnabled && !ourAllDebugDrawEnabled)
 	{
 		return;
 	}

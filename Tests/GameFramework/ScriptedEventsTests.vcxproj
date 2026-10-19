@@ -33,7 +33,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup><ClCompile Include="ScriptedEventsTests.cpp" /><ClCompile Include="..\..\Source\Application\Game\Components\RegisterCustomComponents.cpp" />
-<ClCompile Include="..\..\Source\Application\Game\Components\SpinComponent.cpp" /><ClCompile Include="..\..\Source\Application\Game\Components\ScriptedEvents\ScriptedActionComponent.cpp" /><ClCompile Include="..\..\Source\Application\Game\Components\ScriptedEvents\ScriptedEventComponent.cpp" /><ClCompile Include="..\..\Source\Application\Game\Player\PlayerController.cpp" /><ClCompile Include="..\..\Source\Application\Game\Player\PlayerMovementComponent.cpp" /></ItemGroup>
+<ClCompile Include="..\..\Source\Application\Game\Components\SpinComponent.cpp" /><ClCompile Include="..\..\Source\Application\Game\Components\ScriptedEvents\ScriptedActionComponent.cpp" /><ClCompile Include="..\..\Source\Application\Game\Components\ScriptedEvents\ScriptedEventComponent.cpp" /><ClCompile Include="..\..\Source\Application\Game\Components\ScriptedEvents\CollisionScriptTriggerComponent.cpp" /><ClCompile Include="..\..\Source\Application\Game\Player\PlayerController.cpp" /><ClCompile Include="..\..\Source\Application\Game\Player\PlayerMovementComponent.cpp" /></ItemGroup>
   <ItemGroup><ClCompile Include="..\..\Source\Application\Game\BehaviourTree\**\*.cpp" /></ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Source\Engine\GameFramework\GameFramework.vcxproj">

@@ -40,7 +40,7 @@
 <ClCompile Include="..\..\Source\Application\Game\Player\*.cpp" />
 <ClCompile Include="..\..\Source\Application\Game\Runtime\GameApplication.cpp" />
 <ClCompile Include="..\..\Source\Application\Game\Runtime\GameWindowMessages.cpp" />
-<ClCompile Include="..\..\Source\Application\Game\Components\RegisterCustomComponents.cpp" />
+<ClCompile Include="..\..\Source\Application\Game\Components\RegisterCustomComponents.cpp" /><ClCompile Include="..\..\Source\Application\Game\Components\ScriptedEvents\CollisionScriptTriggerComponent.cpp" />
 <ClCompile Include="..\..\Source\Application\Game\Components\SpinComponent.cpp" />
 <ClCompile Include="..\..\Source\Application\Game\Assets\MeshLibrary.cpp" />
 <ClCompile Include="..\..\Source\Application\Game\Assets\PrimitiveMeshBuilder.cpp" />

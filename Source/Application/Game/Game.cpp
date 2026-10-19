@@ -91,6 +91,12 @@ void Game::Shutdown()
 
 void Game::ConfigureWorld(World& aWorld)
 {
+#if _DEBUG
+	ColliderComponent::SetAllDebugDrawEnabled(true);
+#else
+	ColliderComponent::SetAllDebugDrawEnabled(false);
+#endif
+
 	// {
 	// 	Actor* playerBro = aWorld.SpawnActor("PLAYAH_BRO");
 	// 	playerBro->GetTransform().SetLocalRotationDegrees({ 0, 0, 0 });

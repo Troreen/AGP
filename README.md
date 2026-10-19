@@ -106,3 +106,5 @@ For component-based scripted events, see [Scripted events](Docs/ScriptedEvents.m
 
 For code-spawned sphere/box overlap events and the opt-in runtime demonstration,
 see [Collision detection](Docs/CollisionDetection.md).
+For collision-triggered scripted sequences and the remaining Unreal authoring work,
+see [Collision-triggered scripted events](Docs/ScriptedEventCollisionTriggers.md).

@@ -93,6 +93,9 @@
     <ClInclude Include="Components\ScriptedEvents\ScriptedEventComponent.h">
       <Filter>Components\ScriptedEvents</Filter>
     </ClInclude>
+    <ClInclude Include="Components\ScriptedEvents\CollisionScriptTriggerComponent.h">
+      <Filter>Components\ScriptedEvents</Filter>
+    </ClInclude>
     <ClInclude Include="Components\SpinComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
@@ -170,6 +173,9 @@
       <Filter>Components\ScriptedEvents</Filter>
     </ClCompile>
     <ClCompile Include="Components\ScriptedEvents\ScriptedEventComponent.cpp">
+      <Filter>Components\ScriptedEvents</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\ScriptedEvents\CollisionScriptTriggerComponent.cpp">
       <Filter>Components\ScriptedEvents</Filter>
     </ClCompile>
     <ClCompile Include="Components\SpinComponent.cpp">
