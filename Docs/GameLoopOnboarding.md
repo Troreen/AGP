@@ -8,7 +8,7 @@ Open [GameApplication.cpp](../Source/Application/Game/Runtime/GameApplication.cp
 
 ## How a level becomes a World
 
-In `InitializeGameSession`, we first call `Game::Initialize`. Right now, that registers the scene-reload listener and plays the intro sound. It can also request a starting scene. If it doesn't, the application uses `initialScene` from [ApplicationSettings.json](../Bin/Settings/ApplicationSettings.json).
+In `InitializeGameSession`, we first call `Game::Initialize`. Right now, that registers the scene-reload listener. It can also request a starting scene. If it doesn't, the application uses `initialScene` from [ApplicationSettings.json](../Bin/Settings/ApplicationSettings.json).
 
 Next, open `ProcessPendingSceneLoad`. Follow these calls:
 
@@ -45,7 +45,7 @@ We don't add a call here for every new gameplay class. Attach a Component to an 
 
 ## Follow a real Component
 
-Open [Game.cpp](../Source/Application/Game/Game.cpp) at `ConfigureWorld`. The rotation example looks like this:
+For a small behavior example, open [SpinComponent.cpp](../Source/Application/Game/Components/SpinComponent.cpp). To attach it manually in `Game::ConfigureWorld`, you could add:
 
 ```cpp
 if (Actor* actor = aWorld.FindActor("OrientationGizmos_TGE"))
@@ -55,7 +55,7 @@ if (Actor* actor = aWorld.FindActor("OrientationGizmos_TGE"))
 }
 ```
 
-The level supplies the Actor and its mesh. We find that Actor by its exported name, attach our behavior, and set its speed before it starts. If the Actor isn't in this level, the block is skipped.
+This example assumes the level supplies an Actor named `OrientationGizmos_TGE` and its mesh. It is not built into the current Game setup. We find that Actor by its exported name, attach our behavior, and set its speed before it starts. If the Actor isn't in this level, the block is skipped.
 
 `SpinComponent` is the C++ type. `WalkthroughRotator` is the name of this particular Component on the Actor. Component names must be nonempty and unique on their Actor.
 
@@ -85,7 +85,7 @@ Open [Actor.h](../Source/Engine/GameFramework/World/Actor.h) and [Component.h](.
 
 An Actor has a transform, but spawning one doesn't make it visible. It needs something like a mesh Component for that. Existing mesh, animation, camera, and light Components are under [GameFramework/Components](../Source/Engine/GameFramework/Components/).
 
-Use `Component` for behavior. Use `SceneComponent` when the Component also needs its own transform relative to the Actor. `SpinComponent` changes an existing transform, so it only needs `Component`.
+Use `Component` for behavior, or `CustomComponent` when it also reads exported custom variables. `SpinComponent` derives from `CustomComponent`. Use `SceneComponent` when the Component needs its own transform relative to the Actor.
 
 The owner is assigned when the Component is attached. Don't try to use `GetOwner()` in its constructor.
 
@@ -101,24 +101,26 @@ The World owns Actors, and Actors own Components. The pointers these APIs return
 
 Calling `Destroy()` marks an Actor or Component for removal and stops its normal updates immediately. The World frees it during cleanup. Gameplay should request destruction and let the World handle the lifecycle; don't call `World::Clear`, `BeginPlay`, or `Update` yourself.
 
-## Where ConfigureWorld fits for now
+## Imported custom components and ConfigureWorld
 
-Today, `ConfigureWorld` is where we manually attach game Components and spawn test Actors. The rotator above is one example. It lets us try behavior before we can create it from the level export.
+`ConfigureWorld` is where we attach code-only behavior and spawn Actors before a candidate World begins play. The optional rotator snippet above is one example.
 
-We want the level JSON to say which Components an Actor has and how they're configured. Built-in scene Components already come through the importer and builder. Custom exported Components currently become placeholders; we still need their type and settings to reach a game-owned Component factory.
+Exported custom Components already go through the game-owned [CustomComponentRegistry](../Source/Application/Game/Components/CustomComponentRegistry.h). Add each supported C++ type in [RegisterCustomComponents.cpp](../Source/Application/Game/Components/RegisterCustomComponents.cpp). The registry matches the exported class name, accepting Unreal's `_C` suffix; unknown custom types are skipped.
 
-With that factory in place, the loading path should be:
+The loading path is:
 
 ```text
-Read level JSON
-    -> create Actors and Components through factories
-    -> apply properties and resolve references
+Read level JSON into SceneData
+    -> builder creates Actors and built-in Components
+    -> registry creates registered custom Components
+    -> builder applies common data and InitializeCustomVariables
+    -> Game.ConfigureWorld adds code-only setup
     -> BeginPlay
 ```
 
-The game registers which C++ class to create for each exported gameplay type. The builder uses those registrations without needing to know every game class itself. We still need to inspect a real custom export before deciding on its fields.
+`InitializeCustomVariables` reads configuration after attachment and common data (including enabled state and tags) have been applied. Other Components may still be under construction, so resolve sibling and Actor references in `BeginPlay`, after scene construction. Direct `Actor::AddComponent` calls do not invoke `InitializeCustomVariables`; configure those Components explicitly.
 
-Move the manual attachments into that data as we add support. Test Actors can live in a test level, or be removed when they're no longer needed. Once `ConfigureWorld` is empty, we can remove the method and its call. There's no reason to keep it just in case; if we later need another hook, we can add one for that actual problem.
+Move level-authored behavior into exported data to avoid duplicate manual attachments. See the [Unreal scripted-event guide](ScriptedEventsUnrealTestGuide.md) for the authoring pattern and [collision next steps](ScriptedEventCollisionTriggers.md) for the shape-import work still needed.
 
 ## Input and changing levels
 

@@ -6,10 +6,10 @@ most renderer details.
 ## The whole path
 
 ```text
-Main constructs Game and GameApplication
+Main initializes services, then constructs Game and GameApplication
     -> GameApplication starts the window and engine services
-    -> Game requests the initial SceneId
-    -> GameApplication selects a file; UnrealSceneImporter creates SceneData
+    -> GameApplication takes the initial scene path from settings or a Game request
+    -> UnrealSceneImporter creates SceneData
     -> BuildWorld builds a candidate World
     -> Game adds project-specific behavior
     -> GameApplication commits the World and calls BeginPlay
@@ -30,8 +30,7 @@ GameApplication is the coordinator for one run. It owns the window, low-level in
 handlers, frame loop, current World, scene-request state, and per-run rendering
 state. It calls Game at the few points where project behavior belongs:
 
-- `Initialize(GameApplication&)` initializes the Game-owned MeshLibrary, registers
-  game controls, and requests the first scene.
+- `Initialize(GameApplication&)` registers game controls and can request a scene.
 - `ConfigureWorld(World&)` adds code-only behavior before a new World starts.
 - `Update(World&, float)` handles per-frame game requests.
 - `Shutdown()` releases game listeners and game-owned session work.
@@ -42,14 +41,11 @@ or rendering update again.
 
 ### Game
 
-`Game` contains behavior specific to this project: the initial scene choice,
-reload input, the demo chest controls, music, and additions made in
+`Game` contains behavior specific to this project: reload input, music, and additions made in
 `ConfigureWorld`. It borrows the runtime during initialization so its F4 callback
 can request a reload. It does not own the World or the services.
 
-Game owns one MeshLibrary for its code-configured skeletal demo. It initializes
-the library once from AssetRegistry's Content root and reuses it when configuring
-new Worlds.
+Game owns one MeshLibrary that keeps the FBX importer initialized while assets load.
 
 Scene requests are queued. They are never performed in the middle of input or a
 World update. `RequestSceneLoad` keeps the latest request until the next safe
@@ -57,8 +53,9 @@ boundary; `ReloadCurrentScene` requests the last scene that committed.
 
 ### Scene loading and SceneData
 
-GameApplication maps the game-local `SceneId` to an exported JSON file and calls
-`UnrealSceneImporter`. It supplies fallback assets when building the World.
+GameApplication resolves the requested scene path under the configured Content
+scene folder and calls `UnrealSceneImporter`. It supplies fallback assets when
+building the World.
 
 The result is `SceneData`: plain Actor and Component records, not live objects.
 `BuildWorld` turns those records into a candidate World. Keeping this
@@ -89,20 +86,22 @@ later receives one matching `EndPlay` when it is removed or the World is cleared
 
 ### Services and the runtime
 
-`ServiceLocator` is both the shared access point and the owner of three services:
+`ServiceLocator` is the shared access point and owner of engine services, including:
 
 - InputMapper translates device state into named actions.
 - AudioManager controls sound and music.
 - AssetRegistry finds and loads Content assets.
+- EventBus delivers typed gameplay events, including collision overlaps.
+- EngineSettings, AnimationManager, and coroutine services support runtime systems.
 
-GameApplication creates these services and gives ownership to ServiceLocator. It then
-coordinates their use. The distinction matters: GameApplication owns the run and
-ordering; ServiceLocator owns the service objects and deletes them.
+Main calls `ServiceLocator::Initialize` and initializes settings, assets,
+animation, and audio before starting GameApplication. GameApplication coordinates
+the run and cleanup; ServiceLocator owns the service objects.
 
 InputMapper borrows `InputHandler` and `XInputHandler` from GameApplication. During
 shutdown, Game removes its listeners first, the World is cleared so Components
 can remove theirs, runtime listeners are removed, and only then does
-ServiceLocator delete InputMapper, AudioManager, and AssetRegistry.
+ServiceLocator cleans up services.
 
 GraphicsEngine remains a process singleton. GameApplication initializes and drives it
 but does not own its storage. `World::GenerateRenderSnapshot` gathers borrowed
@@ -111,15 +110,12 @@ camera, mesh, and light Component pointers for `GraphicsEngine::Render`.
 ## Following startup to BeginPlay
 
 1. Windows enters `wWinMain`.
-2. Main constructs Game and GameApplication and calls `application.Run(game)`.
-3. GameApplication creates the window, initializes graphics, and installs the three
-   ServiceLocator-owned services.
+2. Main initializes services, constructs Game and GameApplication, and calls `application.Run(game)`.
+3. GameApplication creates the window and initializes graphics.
 4. Runtime input is connected. Escape, debug camera, and render-view controls are
    registered by GameApplication.
-5. GameApplication calls `Game::Initialize`. Game initializes its MeshLibrary from
-   the configured Content root, registers F4/F7/F8, starts music, and requests the
-   Blockout scene.
-6. The runtime captures that request, selects its exported file, and calls
+5. GameApplication calls `Game::Initialize`, which registers F4 reload.
+6. The runtime takes a Game-requested scene or the `initialScene` setting and calls
    `UnrealSceneImporter` to produce SceneData.
 7. `BuildWorld` creates Actors and Components in a candidate World.
 8. `Game::ConfigureWorld` adds project-only behavior.

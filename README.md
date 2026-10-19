@@ -21,17 +21,16 @@ C++20 / DirectX 11 graphics programming project for the AGP assignments. The cur
 Start with the [game loop and gameplay guide](Docs/GameLoopOnboarding.md)
 for frame order and examples of adding game behavior. The
 [plain-language engine architecture](Docs/EngineArchitectureBasics.md)
-covers gameplay, scenes, assets, and the path to `BeginPlay`. The more detailed
-[engine map](Docs/Architecture.md) covers renderer flow, threading, snapshots, and
-code formatting conventions.
+covers gameplay, scenes, assets, and the path to `BeginPlay`. The
+[framework reference](Docs/GameFrameworkMVP.md) describes runtime interfaces and ownership.
 
-- `AGP.sln` - Visual Studio solution.
+- `Game.sln` - Visual Studio solution.
 - `Source/Application/Game` - demo application, scene setup, controls, materials, primitive mesh generation.
 - `Source/Engine/GraphicsEngine` - renderer, RHI, shader/material pipeline, shadow rendering.
 - `Source/Engine/GameFramework` - actors, components, world, camera, lights, mesh components.
 - `Source/Utilities` - logging, camera controller, string helpers, common utilities glue.
-- `CommonUtilities/include` - math, input, timer, and utility types.
-- `Assets` - runtime meshes, animations, textures, and copied shader files.
+- `Source/Utilities/CommonUtilities` - math, input, timer, and utility types.
+- `Content` - runtime scenes, meshes, animations, and textures; paths are resolved from the executable.
 - `assignment_4_2_shadow_mapping_translation_and_md.md` - assignment notes and translated lecture guidance.
 
 ## Build
@@ -50,8 +49,8 @@ its working directory. Run `Bin/Debug/Game.exe` or
 `Game.exe`, and the game loads them from there. The debug build opens a log console.
 
 `Main.cpp` constructs the concrete `Game` and `GameApplication`, then calls
-`application.Run(game)`. Game selects the initial scene and registers its gameplay
-controls. `GameApplication` owns the window, frame loop, current World, and scene
+`application.Run(game)`. Game registers its gameplay listeners; application settings
+select the initial scene unless Game requests another. `GameApplication` owns the window, frame loop, current World, and scene
 requests. It selects an exported scene file, asks `UnrealSceneImporter` for
 `SceneData`, then passes that data to `BuildWorld`.
 Start with [the MVP guide](Docs/GameFrameworkMVP.md), then Game.cpp and
@@ -84,12 +83,8 @@ is limited to ±89°. Actor hierarchies are deferred in the MVP.
 | `F4` | Reload the current scene |
 | `F5` | Select the previous renderer debug view |
 | `F6` | Select the next renderer debug view |
-| `F7` | Spawn/destroy an extra chest |
-| `F8` | Attach a smaller, self-spinning child chest that orbits the extra chest |
 
-Gameplay now runs synchronously. Renderer comparison switches include
-`AGP_DISABLE_PARALLEL_SHADOWS` and the switches documented in
-[EngineOptimisations](Docs/EngineOptimisations.md). No performance improvement is
+Gameplay runs synchronously. No performance improvement is
 claimed by the framework API changes. Shadow bias setters remain renderer tooling;
 there are no sample F5–F11 bias key bindings.
 ## Shadow Mapping Notes

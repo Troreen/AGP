@@ -1,0 +1,1 @@
+PASS: scripted sequence ordering, movement, persistence, claims, replay and destruction

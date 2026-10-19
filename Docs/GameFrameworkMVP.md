@@ -40,13 +40,11 @@ ServiceLocator
 ```
 
 GameApplication owns and coordinates one run. Game owns project-specific choices and
-behavior. ServiceLocator owns the shared service objects; GameApplication creates,
-updates, and shuts them down in the required order. GraphicsEngine remains a
+behavior. Main initializes the ServiceLocator-owned services; GameApplication
+coordinates their updates and shutdown. GraphicsEngine remains a
 process singleton that GameApplication drives without owning.
 
-Game also owns one MeshLibrary for its code-configured skeletal demo. It
-initializes that library from AssetRegistry's Content root and reuses it whenever
-a new World is configured.
+Game also owns a MeshLibrary to keep the FBX importer initialized while assets load.
 
 Game is concrete. Its runtime-facing methods have only the dependencies they use:
 
@@ -69,7 +67,7 @@ GameApplication exposes three operations to Main and Game:
 
 ```cpp
 int Run(Game& game);
-bool RequestSceneLoad(SceneId sceneId);
+bool RequestSceneLoad(const std::filesystem::path& scene);
 bool ReloadCurrentScene();
 ```
 
@@ -79,9 +77,9 @@ request was accepted.
 
 ## Startup and one frame
 
-Startup creates the window and graphics state, installs AssetRegistry,
-AudioManager, and InputMapper in ServiceLocator, connects input, and registers
-runtime controls. GameApplication then calls Game initialization and consumes the
+Main initializes services, settings, assets, animation, and audio. GameApplication
+creates the window and graphics state, connects input, and registers runtime
+controls. It then calls Game initialization and consumes the
 required initial scene request before showing the window.
 
 Each frame stays on the application thread:
@@ -106,14 +104,14 @@ private quit state. Game and Components cannot request process exit.
 
 ## Scene loading
 
-Game calls `RequestSceneLoad(SceneId)` or `ReloadCurrentScene()`. Requests are
+Game calls `RequestSceneLoad(scenePath)` or `ReloadCurrentScene()`. Requests are
 last-write-wins until the next frame boundary. The runtime captures and clears the
 request before it starts loading, so a newer request made during activation stays
 queued for the following boundary.
 
 ```text
-SceneId
--> GameApplication selects the scene file
+scene path relative to the configured scenes folder
+-> GameApplication resolves the scene file
 -> UnrealSceneImporter
 -> SceneData
 -> BuildWorld
@@ -125,7 +123,9 @@ SceneId
 
 Scene selection and material fallback are application concerns. Import conversion
 stops at SceneData. The builder owns the fixed mapping from SceneData variants to
-live component types.
+live built-in component types. Registered custom types are created through the
+game-owned CustomComponentRegistry; the builder applies common data and custom
+variables before BeginPlay.
 
 A failed later load leaves the running World unchanged and consumes that attempt.
 It is retried only after another explicit request. A failed initial load is fatal.
@@ -148,13 +148,15 @@ An exception after World commit is fatal because there is no rollback layer.
 
 Actor names are unique within a World and Component names are unique within an
 Actor. Components can find dependencies by name or type during BeginPlay or
-Update. There is no Actor hierarchy, reflection, event bus, physics, streaming,
-or general dependency-injection layer.
+Update. A shared EventBus delivers collision overlap events. There is no Actor
+hierarchy, general reflection, blocking physics, streaming, or general
+dependency-injection layer.
 
 ## Input and cleanup
 
 Runtime-wide bindings such as Escape, debug camera, and renderer views are
-installed by GameApplication. Game installs F4/F7/F8 because it owns those actions.
+loaded from InputBindings.json. GameApplication installs runtime listeners, and
+Game listens for F4 reload.
 Components listen to named actions and remove their listeners during EndPlay.
 
 Shutdown keeps InputMapper alive until every borrower can unregister:

@@ -6,19 +6,19 @@ reaches Game and Components.
 ## Ownership
 
 `ServiceLocator` is the engine's shared service owner and access point. During
-startup, GameApplication gives it three heap-allocated services:
+startup, Main calls `ServiceLocator::Initialize` to create services including:
 
 - `InputMapper`, which turns device input into named actions.
 - `AudioManager`, which controls sound and music.
 - `AssetRegistry`, which finds and loads Content assets.
+- `EventBus`, `AnimationManager`, `EngineSettings`, and coroutine services.
 
 ServiceLocator owns those objects after they are installed. `KillServices`
-deletes InputMapper, AudioManager, and AssetRegistry and clears their pointers.
+deletes the owned services it manages and clears their pointers.
 There is no second owner for these services.
 
-GameApplication is the run coordinator. It creates the services, updates input and
-audio, and chooses when shutdown occurs, but it does not own their storage after
-registration.
+GameApplication coordinates input/audio updates and shutdown, but ServiceLocator
+owns their storage.
 
 ```text
 GameApplication
@@ -37,12 +37,11 @@ InputMapper.
 
 ## Startup
 
-GameApplication starts the services in this order:
+Startup follows this order:
 
-1. Create AssetRegistry, give it to ServiceLocator, and initialize it with the
-   executable-relative Content folder.
-2. Create AudioManager, give it to ServiceLocator, and initialize audio.
-3. Create InputMapper and give it to ServiceLocator.
+1. Main calls `ServiceLocator::Initialize` to allocate services.
+2. Main loads settings and initializes assets with the executable-relative Content folder.
+3. Main initializes animation and audio, then starts GameApplication.
 4. Connect InputMapper to the runtime-owned InputHandler and XInputHandler.
 5. Install runtime-wide bindings and listeners.
 6. Call `Game::Initialize`, which installs game-owned bindings and listeners.
@@ -73,7 +72,7 @@ World update performs the larger operation afterward.
 
 Bindings belong with the system that defines the action.
 
-GameApplication installs these runtime controls:
+GameApplication listens to these runtime controls; InputBindings.json supplies their bindings:
 
 | Physical input | Named action | Result |
 | --- | --- | --- |
@@ -86,9 +85,8 @@ GameApplication installs these runtime controls:
 | A / D | `CameraLeft` / `CameraRight` | Move the debug camera |
 | Space / Control | `CameraUp` / `CameraDown` | Move the debug camera vertically |
 
-Game installs F4 scene reload and the F7/F8 demo chest controls because those are
-project behavior. Components listen to action names; they do not assign global
-keys.
+Game listens for F4 scene reload because that is project behavior. Key bindings
+come from InputBindings.json. Components listen to action names.
 
 Escape is deliberately handled by GameApplication. The Escape callback and
 `WM_QUIT` set the same internal state. After `InputMapper::Update`, GameApplication
@@ -115,7 +113,7 @@ Shutdown follows the borrowing relationships:
 2. GameApplication clears the World, which runs Component EndPlay.
 3. GameApplication removes its own listeners and releases mouse capture.
 4. It clears render references that can retain assets.
-5. ServiceLocator deletes InputMapper, AudioManager, and AssetRegistry.
+5. ServiceLocator releases input, audio, events, assets, animation, settings, and scheduler services.
 6. GameApplication destroys the window and its remaining state.
 
 The same order is attempted after exceptions. Cleanup continues through later
@@ -123,8 +121,8 @@ phases even if an earlier phase reports an error.
 
 ## Rules to remember
 
-- Give ServiceLocator heap-allocated services because it takes ownership.
-- Do not delete a service after giving it to ServiceLocator.
+- Main calls `ServiceLocator::Initialize` once before using services.
+- Do not delete services owned by ServiceLocator.
 - Do not keep a service pointer after replacement or `KillServices`.
 - Install each global binding once in the runtime or Game that owns the action.
 - Remove every listener before its callback target is destroyed.
