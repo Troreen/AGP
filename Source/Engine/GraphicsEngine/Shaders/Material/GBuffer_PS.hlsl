@@ -34,6 +34,7 @@ GBufferOutput main(VStoPS aPixel)
     parameters.WorldPosition = aPixel.WorldPosition;
     parameters.UV0 = aPixel.UV0;
     parameters.UV1 = aPixel.UV1;
+    parameters.ScreenPosition = aPixel.Position.xy;
     parameters.Normal = pixelNormal;
     parameters.VertexNormal = aPixel.Normal;
     parameters.Tangent = aPixel.Tangent;

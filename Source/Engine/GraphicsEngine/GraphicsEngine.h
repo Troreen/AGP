@@ -95,7 +95,8 @@ private:
 	bool GenerateLUT();
 
 	void ResetPipeline(GraphicsCommandList& inoutCommandList);
-	std::vector<Light> SetupLights(GraphicsCommandList& inoutCommandList, const RenderSnapshot& aSnapshot);
+	std::vector<Light> SetupLights(GraphicsCommandList& inoutCommandList, const RenderSnapshot& aSnapshot,
+		CU::Vector3f& outSunDirectionToLight);
 	void SortMeshObjects(const RenderSnapshot& aSnapshot, const CU::Vector3f& aCameraPosition, MeshList& outOpaqueMeshes, MeshList& outBlendedMeshes);
 	const Texture** CreateDeferredTextures(GraphicsCommandList& inoutCommandList, const FrameBuffer& aFb, const MeshList aOpaqueMeshes);
 	void RunPreLightPostProcess(GraphicsCommandList& inoutCommandList, const Texture** aGBuffer, const GraphicsRenderSettings& aSettings);

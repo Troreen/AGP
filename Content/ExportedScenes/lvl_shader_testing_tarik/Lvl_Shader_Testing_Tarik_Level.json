@@ -67,6 +67,75 @@
 			"Roughness": 0.5,
 			"TwoSided": false,
 			"Parameters": []
+		},
+		{
+			"Name": "MM_BrownRock08",
+			"Domain": 0,
+			"ShadingModel": 1,
+			"BlendMode": 0,
+			"BaseColor": [
+				1,
+				1,
+				1,
+				1
+			],
+			"Metallic": 1,
+			"Roughness": 1,
+			"TwoSided": false,
+			"Parameters": [
+				{
+					"Name": "Tiling",
+					"Type": 0,
+					"Value": 1
+				},
+				{
+					"Name": "SnowAmount",
+					"Type": 0,
+					"Value": 1
+				},
+				{
+					"Name": "SnowRoughness",
+					"Type": 0,
+					"Value": 0.85
+				},
+				{
+					"Name": "SnowFlatness",
+					"Type": 0,
+					"Value": 1
+				},
+				{
+					"Name": "SnowColor",
+					"Type": 1,
+					"Value": [0.95, 0.97, 1, 1]
+				},
+				{
+					"Name": "AlbedoTexture",
+					"Type": 3,
+					"Value": {
+						"Name": "BrownRock08_2K_BaseColor",
+						"Path": "/Game/Textures/BrownRock08/BrownRock08_2K_BaseColor.BrownRock08_2K_BaseColor",
+						"AssetImportPath": "Content/Textures/BrownRock08/BrownRock08_2K_BaseColor.dds"
+					}
+				},
+				{
+					"Name": "NormalTexture",
+					"Type": 3,
+					"Value": {
+						"Name": "BrownRock08_2K_Normal",
+						"Path": "/Game/Textures/BrownRock08/BrownRock08_2K_Normal.BrownRock08_2K_Normal",
+						"AssetImportPath": "Content/Textures/BrownRock08/BrownRock08_2K_Normal.dds"
+					}
+				},
+				{
+					"Name": "MaterialTexture",
+					"Type": 3,
+					"Value": {
+						"Name": "BrownRock08_2K_OcclusionRoughnessMetallic",
+						"Path": "/Game/Textures/BrownRock08/BrownRock08_2K_OcclusionRoughnessMetallic.BrownRock08_2K_OcclusionRoughnessMetallic",
+						"AssetImportPath": "Content/Textures/BrownRock08/BrownRock08_2K_OcclusionRoughnessMetallic.dds"
+					}
+				}
+			]
 		}
 	],
 	"Actors": [
@@ -178,6 +247,65 @@
 					"Materials": [
 						{
 							"Name": "MM_Standard_WithSnow",
+							"Parent": "Self",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "BrownRock08_TestSphere",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				1,
+				0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				410,
+				-200,
+				20,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"Parent": "",
+					"TypeID": 1,
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "SM_Debug_ShaderMesh_Sphere",
+					"ContentPath": "/Game/Meshes/Debug/SM_Debug_ShaderMesh_Sphere.SM_Debug_ShaderMesh_Sphere",
+					"AssetImportPath": "C:/P4V/G4/Content/Meshes/Debug/SM_Debug_ShaderMesh_Sphere.fbx",
+					"Materials": [
+						{
+							"Name": "MM_BrownRock08",
 							"Parent": "Self",
 							"Parameters": []
 						}

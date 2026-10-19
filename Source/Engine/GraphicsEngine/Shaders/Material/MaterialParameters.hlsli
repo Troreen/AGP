@@ -17,6 +17,8 @@ struct MaterialPixelParameters
     float4 WorldPosition;
     float2 UV0;
     float2 UV1;
+    // Position on the render target in pixels, measured from its top-left corner.
+    float2 ScreenPosition;
     float3 Normal;
     float3 VertexNormal;
     float3 Tangent;

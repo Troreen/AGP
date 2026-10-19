@@ -172,7 +172,7 @@ void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const RenderS
 	std::vector<MeshComponentBase*> blendedMeshes(0);
 	SortMeshObjects(aSnapshot, fb.CameraPosition, opaqueMeshes, blendedMeshes);
 
-	std::vector<Light> lights = SetupLights(inoutCommandList, aSnapshot);
+	std::vector<Light> lights = SetupLights(inoutCommandList, aSnapshot, fb.SunDirectionToLight);
 	const Texture** gBuffer = CreateDeferredTextures(inoutCommandList, fb, opaqueMeshes);
 
 	inoutCommandList.EndEvent(); // Render Setup
@@ -769,9 +769,12 @@ void GraphicsEngine::ResetPipeline(GraphicsCommandList& inoutCommandList)
 	inoutCommandList.EndEvent(); // Reset Pipeline
 }
 
-std::vector<Light> GraphicsEngine::SetupLights(GraphicsCommandList& inoutCommandList, const RenderSnapshot& aSnapshot)
+std::vector<Light> GraphicsEngine::SetupLights(GraphicsCommandList& inoutCommandList, const RenderSnapshot& aSnapshot,
+	CU::Vector3f& outSunDirectionToLight)
 {
 	inoutCommandList.BeginEvent("Setup Lights");
+	// Clear last frame's direction if the sun was removed or switched off.
+	outSunDirectionToLight = { 0, 0, 0 };
 
 	std::vector<Light> lights;
 	LightBuffer lb;
@@ -797,6 +800,14 @@ std::vector<Light> GraphicsEngine::SetupLights(GraphicsCommandList& inoutCommand
 		light.OuterCone = lightComponent->GetOuterCone();
 		light.Radius = lightComponent->GetRadius();
 		light.CastShadows = lightComponent->CastShadows();
+
+		// The scene has at most one sun. Capture it while preparing the lights,
+		// so materials need no second search and still follow changes each frame.
+		if (lightComponent->GetLightType() == LightType::Directional && light.Intensity > 0.0f)
+		{
+			// Rays travel away from the sun; materials need the opposite direction.
+			outSunDirectionToLight = -light.Direction.GetNormalized();
+		}
 
 		if (lightComponent->CastShadows())
 		{
