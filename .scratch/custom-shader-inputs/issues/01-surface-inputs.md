@@ -15,7 +15,7 @@ Compile shaders/build; inspect shader test scene for metallic/roughness changes 
 
 ## Implementation
 - Engine forward lighting reads AO/roughness/metalness after Material_Pixel; GBuffer stores the modified packed surface values.
-- Forward debug albedo/normal/emission and deferred debug emission now use final material outputs.
+- Forward debug albedo/normal use final material outputs. User correction (2026-10-20): forward/deferred emission previews retain the raw red-channel mask as grayscale.
 - Added independent VertexColor and UV1 to engine pixel parameters and initialized all three callers. Legacy Content callers now initialize VertexColor and SurfaceValues and consume modified surface values.
 
 ## Evidence

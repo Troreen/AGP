@@ -96,7 +96,7 @@ float4 main(VStoPS aPixel) : SV_TARGET
             return float4(occlusion, occlusion, occlusion, 1);
         
         case 5: // Emission
-            return float4(parameters.Emission.rgb, 1);
+            return float4(emissionMask, emissionMask, emissionMask, 1);
         
         case 6: // Ambient Occlusion Screen Space Pass
             return float4(ssaoPixel, ssaoPixel, ssaoPixel, 1);

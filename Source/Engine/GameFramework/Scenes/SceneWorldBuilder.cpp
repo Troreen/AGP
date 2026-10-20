@@ -306,34 +306,29 @@ void SceneWorldBuilder::ApplyMaterialParameters(MaterialInstance& aMaterial, con
 				continue;
 			}
 
-			// The exported parameter identifies the shader resource even when its asset is renamed.
-			bound = aMaterial.SetTexture(parameterName, texture->GetTexture());
-			if (!bound)
+			if (textureName->ends_with("_BaseColor"))
 			{
-				if (textureName->ends_with("_BaseColor"))
-				{
-					bound = aMaterial.SetTexture(0, texture->GetTexture());
-				}
-				else if (textureName->ends_with("_Normal"))
-				{
-					bound = aMaterial.SetTexture(1, texture->GetTexture());
-				}
-				else if (textureName->ends_with("_OcclusionRoughnessMetallic"))
-				{
-					bound = aMaterial.SetTexture(2, texture->GetTexture());
-				}
-				else if (textureName->ends_with("_Emissive"))
-				{
-					bound = aMaterial.SetTexture(3, texture->GetTexture());
-				}
+				bound = aMaterial.SetTexture(0, texture->GetTexture());
 			}
-			if (!bound)
+			else if (textureName->ends_with("_Normal"))
+			{
+				bound = aMaterial.SetTexture(1, texture->GetTexture());
+			}
+			else if (textureName->ends_with("_OcclusionRoughnessMetallic"))
+			{
+				bound = aMaterial.SetTexture(2, texture->GetTexture());
+			}
+			else if (textureName->ends_with("_Emissive"))
+			{
+				bound = aMaterial.SetTexture(3, texture->GetTexture());
+			}
+			else
 			{
 				bound = aMaterial.SetTexture(*textureName, texture->GetTexture());
 			}
 			if (!bound)
 			{
-				GFLOG(Warning, "Material '{}' texture parameter '{}' (asset '{}') has no matching shader resource '{}', standard suffix, or legacy asset-name binding.", aMaterial.GetName(), parameterData.Name, *textureName, parameterName);
+				GFLOG(Warning, "Material '{}' texture parameter '{}' could not bind asset '{}'; use a standard texture suffix or match the shader resource name.", aMaterial.GetName(), parameterData.Name, *textureName);
 			}
 			continue;
 		}

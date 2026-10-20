@@ -14,14 +14,17 @@ adds `MB_` if absent and replaces spaces with underscores, for both master
 materials and instances. For example, Unreal `Snow Amount` binds to
 `float MB_Snow_Amount`, and `Tint Color` binds to `float4 MB_Tint_Color`.
 
-Declare custom textures in available material slots (`t4` through `t15`). Exported
-texture parameter `Noise Map` binds to a declared `Texture2D Noise_Map`, regardless
-of the texture asset name. Texture names use space replacement without adding
-`MB_`. Reflection must retain the resource, so sample it in the shader.
-If no exported parameter-name binding exists, the importer preserves standard
-asset suffix mapping (`_BaseColor`, `_Normal`, `_OcclusionRoughnessMetallic`,
-`_Emissive`) and then legacy resource lookup by asset name. Failed bindings log a
-warning with the material and parameter names.
+Declare custom textures in available material slots (`t4` through `t15`). Standard
+texture asset suffixes select fixed slots: `_BaseColor` selects t0, `_Normal` t1,
+`_OcclusionRoughnessMetallic` t2, and `_Emissive` t3. For other assets, the shader
+resource name must match the texture asset name exactly. For example, asset
+`Noise_Map` binds to `Texture2D Noise_Map`. Exported texture parameter names do not
+select resources. Renaming an asset requires updating the matching shader name;
+there is no rename compatibility lookup. Reflection must retain the resource, so
+sample it in the shader. Failed bindings log a warning.
+
+See [Unreal-to-AGP material naming](UnrealAGPMaterialNaming.md) for input mappings
+and the differences from Unreal's material interface.
 
 ## Pixel inputs and outputs
 
@@ -34,8 +37,9 @@ warning with the material and parameter names.
 - `SurfaceValues.rgb`: sampled AO, roughness, metallic. Changes made in the hook
   feed both deferred and forward lighting. Lighting keeps its existing roughness
   clamp. Debug views show final surface values.
-- `PixelColor`, `Normal`, `Emission`: existing editable material outputs. Color,
-  world-normal and emission debug views now show the custom output.
+- `PixelColor`, `Normal`, `Emission`: existing editable material outputs. Color
+  and world-normal debug views show the custom output. The emission debug view
+  shows the raw red-channel FX texture mask as grayscale in both engine paths.
 
 `FB_TotalTime` is elapsed scene simulation time in seconds, available in both
 hooks through `Common.hlsli`. It advances with the world's sanitized update delta,

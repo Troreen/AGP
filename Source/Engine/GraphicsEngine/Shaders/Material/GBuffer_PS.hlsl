@@ -55,7 +55,16 @@ GBufferOutput main(VStoPS aPixel)
             break;
     }
     result.SurfaceTexture = float4(parameters.SurfaceValues.rgb, 0);
-    result.Emission = parameters.Emission;
+    switch (FB_RenderPassType)
+    {
+        case 5:
+            result.Emission = float4(emissionMask, emissionMask, emissionMask, 1);
+            break;
+
+        default:
+            result.Emission = parameters.Emission;
+            break;
+    }
     result.WorldPosition = parameters.WorldPosition;
     
     return result;

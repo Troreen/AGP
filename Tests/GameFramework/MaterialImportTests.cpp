@@ -38,8 +38,8 @@ namespace
 		auto instanceNoise = std::make_shared<Texture>();
 		auto normal = std::make_shared<Texture>();
 		auto legacy = std::make_shared<Texture>();
-		assets.Pin("Renamed_BaseColor", std::make_shared<TextureAsset>(masterNoise));
-		assets.Pin("Different_Normal", std::make_shared<TextureAsset>(instanceNoise));
+		assets.Pin("Noise_Map", std::make_shared<TextureAsset>(masterNoise));
+		assets.Pin("Instance_BaseColor", std::make_shared<TextureAsset>(instanceNoise));
 		assets.Pin("Fallback_Normal", std::make_shared<TextureAsset>(normal));
 		assets.Pin("LegacyNoise", std::make_shared<TextureAsset>(legacy));
 		auto mesh = std::make_shared<Mesh>();
@@ -51,7 +51,7 @@ namespace
 		master.Parameters = {
 			{"Glow Amount", 0.25f},
 			{"MB_Tint Color", CommonUtilities::Vector4f{1, 2, 3, 4}},
-			{"Noise Map", std::string("Renamed_BaseColor")},
+			{"Noise Map", std::string("Noise_Map")},
 			{"Unmatched Normal Parameter", std::string("Fallback_Normal")},
 			{"Old Export Name", std::string("LegacyNoise")}
 		};
@@ -61,7 +61,7 @@ namespace
 		instance.Parameters = {
 			{"MB_Glow Amount", 0.75f},
 			{"Tint Color", CommonUtilities::Vector4f{4, 3, 2, 1}},
-			{"Noise Map", std::string("Different_Normal")}
+			{"Noise Map", std::string("Instance_BaseColor")}
 		};
 		StaticMeshData component;
 		component.Common.Name = "Mesh";
@@ -90,9 +90,11 @@ namespace
 		Check(ReadParameter<CommonUtilities::Vector4f>(instanceMaterial, "MB_Tint_Color").w == 1,
 			"Instance vector parameter normalization differs from master");
 		Check(masterMaterial.GetTexture("Noise_Map") == masterNoise,
-			"Exported parameter name did not override the renamed asset's standard suffix");
-		Check(instanceMaterial.GetTexture("Noise_Map") == instanceNoise,
-			"Instance texture override did not bind by exported parameter name");
+			"Custom texture did not bind by asset name");
+		Check(instanceMaterial.GetTexture(0) == instanceNoise,
+			"Standard BaseColor suffix did not select the albedo slot");
+		Check(instanceMaterial.GetTexture("Noise_Map") == masterNoise,
+			"Exported parameter name unexpectedly overrode asset-name binding");
 		Check(instanceMaterial.GetTexture(1) == normal,
 			"Standard normal suffix fallback was lost or incorrectly overwritten");
 		Check(instanceMaterial.GetTexture("LegacyNoise") == legacy,
