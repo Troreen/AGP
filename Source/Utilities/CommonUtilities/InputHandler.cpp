@@ -209,8 +209,11 @@ namespace CommonUtilities
 
 	void InputHandler::CenterMouse()
 	{
-		RECT clientRect;
-		GetClientRect(myWindowHandle, &clientRect);
+		RECT clientRect{};
+		if (!myWindowHandle || !GetClientRect(myWindowHandle, &clientRect))
+		{
+			return;
+		}
 
 		POINT center
 		{

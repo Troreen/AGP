@@ -47,7 +47,9 @@ public:
 	void Render(GraphicsCommandList& inoutCommandList, const RenderSnapshot& aSnapshot, const GraphicsRenderSettings& aSettings);
 	void Present() const;
 
-	bool SetEnvironmentMap(const std::filesystem::path& aCubeTexturePath);
+	// Keeps the old environment if loading fails.
+	bool SetEnvironmentMap(const std::filesystem::path& aCubeTexturePath, bool aShowSkybox = false);
+	void ResetEnvironmentMap();
 	void AddPostProcessEffect(const std::shared_ptr<PostProcessEffect>& aEffect);
 	void RemovePostProcessEffect(const std::shared_ptr<PostProcessEffect>& aEffect);
 
@@ -93,12 +95,14 @@ private:
 	bool GenerateLUT();
 
 	void ResetPipeline(GraphicsCommandList& inoutCommandList);
-	std::vector<Light> SetupLights(GraphicsCommandList& inoutCommandList, const RenderSnapshot& aSnapshot);
+	std::vector<Light> SetupLights(GraphicsCommandList& inoutCommandList, const RenderSnapshot& aSnapshot,
+		CU::Vector3f& outSunDirectionToLight);
 	void SortMeshObjects(const RenderSnapshot& aSnapshot, const CU::Vector3f& aCameraPosition, MeshList& outOpaqueMeshes, MeshList& outBlendedMeshes);
 	const Texture** CreateDeferredTextures(GraphicsCommandList& inoutCommandList, const FrameBuffer& aFb, const MeshList aOpaqueMeshes);
 	void RunPreLightPostProcess(GraphicsCommandList& inoutCommandList, const Texture** aGBuffer, const GraphicsRenderSettings& aSettings);
 	void RenderDeferredLight(GraphicsCommandList& inoutCommandList, const GraphicsRenderSettings& aSettings, const Texture** aGBuffer,
 		LightBuffer& aLb, const std::vector<Light>& aLights);
+	void RenderSkybox(GraphicsCommandList& inoutCommandList, const GraphicsRenderSettings& aSettings);
 	void RenderBlendedObjects(GraphicsCommandList& inoutCommandList, const MeshList aBlendedMeshes, LightBuffer& aLb, const std::vector<Light>& aLights);
 	void RunPostLightPostProcess(GraphicsCommandList& inoutCommandList, const GraphicsRenderSettings& aSettings);
 	void RunTonemap(GraphicsCommandList& inoutCommandList);
@@ -119,6 +123,7 @@ private:
 	Buffer mySpriteVertexBuffer;
 	Buffer myLineBuffer;
 
+	std::unique_ptr<PipelineStateObject> mySkyboxPSO;
 	std::unique_ptr<PipelineStateObject> myAmbientLightPSO;
 	std::unique_ptr<PipelineStateObject> myDirLightPSO;
 	std::unique_ptr<PipelineStateObject> myPointLightPSO;
@@ -135,6 +140,8 @@ private:
 	Texture myHDRBuffer;
 	Texture myLut;
 	Texture myEnvironmentCubeTexture;
+	Texture myDefaultEnvironmentCubeTexture;
+	bool myShowSkybox = false;
 
 	std::shared_ptr<Texture> myPlainWhiteTexture;
 	std::shared_ptr<Texture> myFlatNormalTexture;

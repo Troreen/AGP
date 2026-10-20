@@ -12,6 +12,8 @@ float4 main(VStoPS aPixel) : SV_TARGET
 
     MaterialPixelParameters parameters;
     parameters.PixelColor = albedo;
+    parameters.VertexColor = aPixel.Color;
+    parameters.SurfaceValues = MaterialTexture.Sample(TrilinearWrap, aPixel.UV0);
     parameters.WorldPosition = aPixel.WorldPosition;
     parameters.UV0 = aPixel.UV0;
     parameters.UV1 = aPixel.UV1;
@@ -20,7 +22,7 @@ float4 main(VStoPS aPixel) : SV_TARGET
     parameters.Binormal = aPixel.Binormal;
     Material_Pixel(parameters);
 
-    const float3 materialMap = MaterialTexture.Sample(TrilinearWrap, parameters.UV0).rgb;
+    const float3 materialMap = parameters.SurfaceValues.rgb;
     const float ambientOcclusion = saturate(materialMap.r);
     const float roughness = clamp(materialMap.g, MIN_PBR_ROUGHNESS, 1.0f);
     const float metalness = saturate(materialMap.b);

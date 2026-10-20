@@ -29,10 +29,14 @@ GBufferOutput main(VStoPS aPixel)
 	
     MaterialPixelParameters parameters;
     parameters.PixelColor = sampleAlbedo;
+    parameters.VertexColor = aPixel.Color;
     parameters.SurfaceValues = sampleSurface;
     parameters.WorldPosition = aPixel.WorldPosition;
     parameters.UV0 = aPixel.UV0;
+    parameters.UV1 = aPixel.UV1;
+    parameters.ScreenPosition = aPixel.Position.xy;
     parameters.Normal = pixelNormal;
+    parameters.VertexNormal = aPixel.Normal;
     parameters.Tangent = aPixel.Tangent;
     parameters.BiNormal = aPixel.BiNormal;
     parameters.Emission = (float4)emissionMask * sampleAlbedo;
@@ -51,13 +55,13 @@ GBufferOutput main(VStoPS aPixel)
             result.WorldNormalDepth = float4(parameters.Normal, aPixel.ViewDepth);
             break;
     }
-    result.SurfaceTexture = float4(sampleSurface.rgb, 0);
+    result.SurfaceTexture = float4(parameters.SurfaceValues.rgb, 0);
     switch (FB_RenderPassType)
     {
         case 5:
             result.Emission = float4(emissionMask, emissionMask, emissionMask, 1);
             break;
-        
+
         default:
             result.Emission = parameters.Emission;
             break;

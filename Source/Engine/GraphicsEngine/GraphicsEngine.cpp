@@ -17,6 +17,7 @@
 #include "Deferred_PointLight_PS.h"
 #include "Deferred_SpotLight_PS.h"
 #include "FullTexture_VS.h"
+#include "Skybox_PS.h"
 #include "ShadowCube_GS.h"
 #include "Sprite_PS.h"
 #include "Sprite_VS.h"
@@ -129,6 +130,8 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path&
 		return false;
 	}
 
+	myDefaultEnvironmentCubeTexture = myEnvironmentCubeTexture;
+
 	if (!myRHI.CreateDynamicVertexBuffer("SpriteBuffer", 6, mySpriteVertexBuffer))
 	{
 		GELOG(Error, "Failed to create sprite buffer!");
@@ -163,12 +166,13 @@ void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const RenderS
 	fb.CameraPosition = aSnapshot.ActiveCamera->GetOwner()->GetTransform().GetWorldPosition();
 	fb.TonemapType = static_cast<uint32_t>(aSettings.TonemapAlgorithm);
 	fb.RenderPassType = static_cast<uint32_t>(aSettings.RenderPass);
+	fb.TotalTime = aSnapshot.TotalTime;
 
 	std::vector<MeshComponentBase*> opaqueMeshes(0);
 	std::vector<MeshComponentBase*> blendedMeshes(0);
 	SortMeshObjects(aSnapshot, fb.CameraPosition, opaqueMeshes, blendedMeshes);
 
-	std::vector<Light> lights = SetupLights(inoutCommandList, aSnapshot);
+	std::vector<Light> lights = SetupLights(inoutCommandList, aSnapshot, fb.SunDirectionToLight);
 	const Texture** gBuffer = CreateDeferredTextures(inoutCommandList, fb, opaqueMeshes);
 
 	inoutCommandList.EndEvent(); // Render Setup
@@ -183,6 +187,7 @@ void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const RenderS
 	lb.CascadeSplits.y = aSnapshot.ActiveCamera->GetCascadeSplit(1);
 	lb.CascadeSplits.z = aSnapshot.ActiveCamera->GetCascadeSplit(2);
 	RenderDeferredLight(inoutCommandList, aSettings, gBuffer, lb, lights);
+	RenderSkybox(inoutCommandList, aSettings);
 	RenderBlendedObjects(inoutCommandList, blendedMeshes, lb, lights);
 	inoutCommandList.EndEvent(); // Finalize Render
 
@@ -198,15 +203,25 @@ void GraphicsEngine::Present() const
 	myRHI.Present();
 }
 
-bool GraphicsEngine::SetEnvironmentMap(const std::filesystem::path& aCubeTexturePath)
+bool GraphicsEngine::SetEnvironmentMap(const std::filesystem::path& aCubeTexturePath, bool aShowSkybox)
 {
-	if (!LoadTexture(aCubeTexturePath, myEnvironmentCubeTexture))
+	Texture environmentCube;
+	if (!LoadTexture(aCubeTexturePath, environmentCube))
 	{
 		GELOG(Error, "Failed to load environment cube map {}!", aCubeTexturePath.string());
 		return false;
 	}
 
+	// Keep the old environment if the new cubemap fails to load.
+	myEnvironmentCubeTexture = environmentCube;
+	myShowSkybox = aShowSkybox;
 	return true;
+}
+
+void GraphicsEngine::ResetEnvironmentMap()
+{
+	myEnvironmentCubeTexture = myDefaultEnvironmentCubeTexture;
+	myShowSkybox = false;
 }
 
 void GraphicsEngine::AddPostProcessEffect(const std::shared_ptr<PostProcessEffect>& aEffect)
@@ -348,6 +363,7 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 	outMaterial.myPSO = matPSO;
 	outMaterial.myName = aDescription.Name;
 	outMaterial.myDescription = aDescription;
+	GELOG(Verbose, "Material compiled: material='{}', shader='{}'.", aDescription.Name, aDescription.MaterialShaderCode.string());
 
 	return true;
 }
@@ -444,6 +460,23 @@ GraphicsEngine::~GraphicsEngine() = default;
 
 bool GraphicsEngine::CreatePSOs()
 {
+	{
+		PipelineStateDescription skyboxDescription;
+		skyboxDescription.Name = "SkyboxPSO";
+		skyboxDescription.VertexShader.ByteCode = INTERNAL_FullTexture_VS_ByteCode;
+		skyboxDescription.VertexShader.ByteCodeSize = sizeof(INTERNAL_FullTexture_VS_ByteCode);
+		skyboxDescription.PixelShader.ByteCode = INTERNAL_Skybox_PS_ByteCode;
+		skyboxDescription.PixelShader.ByteCodeSize = sizeof(INTERNAL_Skybox_PS_ByteCode);
+		skyboxDescription.Topology = Topology::TriangleStrip;
+
+		mySkyboxPSO = std::make_unique<PipelineStateObject>();
+		if (!myRHI.CreatePipelineStateObject(skyboxDescription, *mySkyboxPSO))
+		{
+			GELOG(Error, "Failed to create skybox PSO!");
+			return false;
+		}
+	}
+
 	{
 		PipelineStateDescription defferedAmbientLightDesc;
 		defferedAmbientLightDesc.Name = "DefferedAmbientLightPSO";
@@ -736,9 +769,12 @@ void GraphicsEngine::ResetPipeline(GraphicsCommandList& inoutCommandList)
 	inoutCommandList.EndEvent(); // Reset Pipeline
 }
 
-std::vector<Light> GraphicsEngine::SetupLights(GraphicsCommandList& inoutCommandList, const RenderSnapshot& aSnapshot)
+std::vector<Light> GraphicsEngine::SetupLights(GraphicsCommandList& inoutCommandList, const RenderSnapshot& aSnapshot,
+	CU::Vector3f& outSunDirectionToLight)
 {
 	inoutCommandList.BeginEvent("Setup Lights");
+	// Clear last frame's direction if the sun was removed or switched off.
+	outSunDirectionToLight = { 0, 0, 0 };
 
 	std::vector<Light> lights;
 	LightBuffer lb;
@@ -764,6 +800,14 @@ std::vector<Light> GraphicsEngine::SetupLights(GraphicsCommandList& inoutCommand
 		light.OuterCone = lightComponent->GetOuterCone();
 		light.Radius = lightComponent->GetRadius();
 		light.CastShadows = lightComponent->CastShadows();
+
+		// The scene has at most one sun. Capture it while preparing the lights,
+		// so materials need no second search and still follow changes each frame.
+		if (lightComponent->GetLightType() == LightType::Directional && light.Intensity > 0.0f)
+		{
+			// Rays travel away from the sun; materials need the opposite direction.
+			outSunDirectionToLight = -light.Direction.GetNormalized();
+		}
 
 		if (lightComponent->CastShadows())
 		{
@@ -970,6 +1014,25 @@ void GraphicsEngine::RenderDeferredLight(GraphicsCommandList& inoutCommandList, 
 	inoutCommandList.EndEvent(); // Render Deferred Light
 }
 
+void GraphicsEngine::RenderSkybox(GraphicsCommandList& inoutCommandList, const GraphicsRenderSettings& aSettings)
+{
+	if (!myShowSkybox || aSettings.RenderPass != RenderPassType::Light)
+	{
+		return;
+	}
+
+	inoutCommandList.BeginEvent("Render Skybox");
+	// Read depth to find the background pixels. The skybox leaves depth
+	// unchanged, so transparent meshes can still use it.
+	inoutCommandList.SetRenderTarget(&myHDRBuffer, nullptr);
+	const Texture* depthTexture = &myDepthBuffer;
+	inoutCommandList.SetShaderResources(&depthTexture, 1, 0, PipelineStage_PixelShader);
+	inoutCommandList.SetPipelineState(*mySkyboxPSO);
+	inoutCommandList.Draw(4);
+	inoutCommandList.SetShaderResource(nullptr, 0, PipelineStage_PixelShader);
+	inoutCommandList.EndEvent();
+}
+
 void GraphicsEngine::RenderBlendedObjects(GraphicsCommandList& inoutCommandList, const MeshList aBlendedMeshes,
 	LightBuffer& aLb, const std::vector<Light>& aLights)
 {
@@ -1103,6 +1166,7 @@ void GraphicsEngine::RenderScreenSprites(GraphicsCommandList& inoutCommandList, 
 
 	FrameBuffer fb;
 	fb.Projection = projection;
+	fb.TotalTime = aSnapshot.TotalTime;
 	inoutCommandList.SetRenderTarget(&myBackBuffer, nullptr);
 	inoutCommandList.SetPipelineState(*mySpritePSO);
 
@@ -1281,6 +1345,7 @@ const Texture* GraphicsEngine::RenderShadowCascade(GraphicsCommandList& inoutCom
 	FrameBuffer lightFb;
 	lightFb.View = lightView;
 	lightFb.Projection = lightProj;
+	lightFb.TotalTime = aSnapshot.TotalTime;
 	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::FrameBuffer, lightFb, 0, PipelineStage_VertexShader);
 
 	const Texture& shadowMap = *aDirectionalLight->GetShadowCascadeMap(aCascadeIndex);
@@ -1309,6 +1374,7 @@ CU::Matrix4f GraphicsEngine::RenderShadowMap(GraphicsCommandList& inoutCommandLi
 	FrameBuffer lightFb;
 	lightFb.View = aLight->GetOwner()->GetTransform().GetWorldMatrix().GetFastInverse();
 	lightFb.Projection = aLight->GetProjectionMatrix();
+	lightFb.TotalTime = aSnapshot.TotalTime;
 	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::FrameBuffer, lightFb, 0, aFrameBufferStages);
 
 	const Texture& shadowMap = *aLight->GetShadowMap();

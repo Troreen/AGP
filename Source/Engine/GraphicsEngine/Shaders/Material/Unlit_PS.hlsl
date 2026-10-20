@@ -15,10 +15,14 @@ float4 main(VStoPS aPixel) : SV_TARGET
 	
     MaterialPixelParameters parameters;
     parameters.PixelColor = aPixel.Color * sampleAlbedo;
+    parameters.VertexColor = aPixel.Color;
     parameters.SurfaceValues = float4(0, 0, 0, 0);
     parameters.WorldPosition = aPixel.WorldPosition;
     parameters.UV0 = aPixel.UV0;
+    parameters.UV1 = aPixel.UV1;
+    parameters.ScreenPosition = aPixel.Position.xy;
     parameters.Normal = aPixel.Normal;
+    parameters.VertexNormal = aPixel.Normal;
     parameters.Tangent = aPixel.Tangent;
     parameters.BiNormal = aPixel.BiNormal;
     parameters.Emission = float4(0, 0, 0, 0);

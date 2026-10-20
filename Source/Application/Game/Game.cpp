@@ -130,57 +130,58 @@ void Game::ConfigureWorld(World& aWorld)
 		//component->SendDrawCall();
 	}
 
-	{
-		Actor* actor = aWorld.SpawnActor("Player");
-		{
-			actor->GetTransform().SetLocalPosition({0,0,0});
-			SkeletalMeshComponent* component = actor->AddComponent<SkeletalMeshComponent>();
-			AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
-
-			std::shared_ptr<MeshAsset> asset = assetRegistry.GetAsset<MeshAsset>("SK_player.fbx");
-			component->SetMesh(asset);
-
-			AnimatorComponent* animatorBro = actor->AddComponent<AnimatorComponent>();
-			animatorBro->SetMeshComponent(component);
-			animatorBro->SetTree("PlayerTree");
-
-
-			animatorBro->GetTree().SetBool("IsIdle", true);
-		}
-		{
-			actor->AddComponent<PlayerController>();
-		}
-		{
-			actor->AddComponent<PlayerMovementComponent>();
-		}
-	}
-
-	{
-		Actor* actor = aWorld.SpawnActor("Enemy");
-		{
-			SkeletalMeshComponent* component = actor->AddComponent<SkeletalMeshComponent>();
-			AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
-
-			std::shared_ptr<MeshAsset> asset = assetRegistry.GetAsset<MeshAsset>("SK_enemy02.fbx");
-			component->SetMesh(asset);
-
-
-			AnimatorComponent* animatorBro = actor->AddComponent<AnimatorComponent>();
-			std::shared_ptr<AnimationAsset> animationIdle = assetRegistry.GetAsset<AnimationAsset>("A_enemy02_idle.fbx");
-			std::shared_ptr<AnimationAsset> animationRun = assetRegistry.GetAsset<AnimationAsset>("A_enemy02_mainAttack.fbx");
-			animatorBro->SetMeshComponent(component);
-			animatorBro->AddAnimation("Idle", animationIdle);
-			animatorBro->AddAnimation("Run", animationRun);
-			animatorBro->PlayAnimation("Idle", true);
-
-		}
-		{
-			actor->AddComponent<BehaviourTreeComponent>();
-		}
-
-		actor->GetTransform().SetData({ { -500, 0, 0 }, {180, 0, 0} });
-	}
-
+	// Disabled for shader testing.
+	//{
+	//	Actor* actor = aWorld.SpawnActor("Player");
+	//	{
+	//		actor->GetTransform().SetLocalPosition({0,0,0});
+	//		SkeletalMeshComponent* component = actor->AddComponent<SkeletalMeshComponent>();
+	//		AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
+//
+	//		std::shared_ptr<MeshAsset> asset = assetRegistry.GetAsset<MeshAsset>("SK_player.fbx");
+	//		component->SetMesh(asset);
+//
+	//		AnimatorComponent* animatorBro = actor->AddComponent<AnimatorComponent>();
+	//		animatorBro->SetMeshComponent(component);
+	//		animatorBro->SetTree("PlayerTree");
+//
+//
+	//		animatorBro->GetTree().SetBool("IsIdle", true);
+	//	}
+	//	{
+	//		actor->AddComponent<PlayerController>();
+	//	}
+	//	{
+	//		actor->AddComponent<PlayerMovementComponent>();
+	//	}
+	//}
+//
+	//{
+	//	Actor* actor = aWorld.SpawnActor("Enemy");
+	//	{
+	//		SkeletalMeshComponent* component = actor->AddComponent<SkeletalMeshComponent>();
+	//		AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
+//
+	//		std::shared_ptr<MeshAsset> asset = assetRegistry.GetAsset<MeshAsset>("SK_enemy02.fbx");
+	//		component->SetMesh(asset);
+//
+//
+	//		AnimatorComponent* animatorBro = actor->AddComponent<AnimatorComponent>();
+	//		std::shared_ptr<AnimationAsset> animationIdle = assetRegistry.GetAsset<AnimationAsset>("A_enemy02_idle.fbx");
+	//		std::shared_ptr<AnimationAsset> animationRun = assetRegistry.GetAsset<AnimationAsset>("A_enemy02_mainAttack.fbx");
+	//		animatorBro->SetMeshComponent(component);
+	//		animatorBro->AddAnimation("Idle", animationIdle);
+	//		animatorBro->AddAnimation("Run", animationRun);
+	//		animatorBro->PlayAnimation("Idle", true);
+//
+	//	}
+	//	{
+	//		actor->AddComponent<BehaviourTreeComponent>();
+	//	}
+//
+	//	actor->GetTransform().SetData({ { -500, 0, 0 }, {180, 0, 0} });
+	//}
+//
 	//{
 	//	Actor* actor = aWorld.SpawnActor("NavmeshTest");
 	//	SkeletalMeshComponent* component = actor->AddComponent<SkeletalMeshComponent>();
@@ -192,57 +193,58 @@ void Game::ConfigureWorld(World& aWorld)
 	//	component->SetMesh(asset);
 	//}
 
-	{ // TODO : Temporary place for debug animation
-		AnimationManager::DebugData& data = ServiceLocator::GetInstance().GetAnimationManager().GetDebugData();
-
-		if (!data.Enabled)
-		{
-			return;
-		}
-
-		Actor* playerBro = aWorld.SpawnActor("A_Debug");
-		playerBro->GetTransform().SetLocalRotationDegrees({ 0, 0, 0 });
-		playerBro->GetTransform().SetWorldPosition({ data.Position.x, data.Position.y, data.Position.z });
-
-		SkeletalMeshComponent* component = playerBro->AddComponent<SkeletalMeshComponent>();
-		AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
-		std::shared_ptr<MeshAsset> meshAsset = assetRegistry.GetAsset<MeshAsset>(data.Mesh);
-		component->SetMesh(meshAsset);
-
-		AnimatorComponent* animatorBro = playerBro->AddComponent<AnimatorComponent>();
-		animatorBro->SetMeshComponent(component);
-		animatorBro->SetTree(data.Tree);
-
-		animatorBro->GetTree().SetBool("IsIdle", true);
-
-		CommonUtilities::InputMapper& map = ServiceLocator::GetInstance().GetInputMapper();
-
-		EKeyCode key = EKeyCode::NUMPAD0;
-		for (AnimationManager::Variable& var : data.Variables)
-		{
-			map.BindActionToInputCode(var.Name, key);
-
-			map.AddEventListener(var.Name, [var, animatorBro](const CommonUtilities::InputEvent event)
-				{
-					if (!event.inputData.isPressed)
-					{
-						return;
-					}
-					if (var.Type == "Bool")
-					{
-						animatorBro->GetTree().SetBool(var.Name, !animatorBro->GetTree().GetAnimationVariable(var.Name).IsActive);
-					}
-					else
-					{
-						animatorBro->GetTree().SetTrigger(var.Name);
-					}
-				});
-
-			if (key == EKeyCode::NUMPAD9)
-			{
-				break;
-			}
-			key = EKeyCode(static_cast<int>(key) + 1);
-		}
-	} //Dont put anything below this line
+	// Disabled for shader testing.
+	//{ // TODO : Temporary place for debug animation
+	//	AnimationManager::DebugData& data = ServiceLocator::GetInstance().GetAnimationManager().GetDebugData();
+//
+	//	if (!data.Enabled)
+	//	{
+	//		return;
+	//	}
+//
+	//	Actor* playerBro = aWorld.SpawnActor("A_Debug");
+	//	playerBro->GetTransform().SetLocalRotationDegrees({ 0, 0, 0 });
+	//	playerBro->GetTransform().SetWorldPosition({ data.Position.x, data.Position.y, data.Position.z });
+//
+	//	SkeletalMeshComponent* component = playerBro->AddComponent<SkeletalMeshComponent>();
+	//	AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
+	//	std::shared_ptr<MeshAsset> meshAsset = assetRegistry.GetAsset<MeshAsset>(data.Mesh);
+	//	component->SetMesh(meshAsset);
+//
+	//	AnimatorComponent* animatorBro = playerBro->AddComponent<AnimatorComponent>();
+	//	animatorBro->SetMeshComponent(component);
+	//	animatorBro->SetTree(data.Tree);
+//
+	//	animatorBro->GetTree().SetBool("IsIdle", true);
+//
+	//	CommonUtilities::InputMapper& map = ServiceLocator::GetInstance().GetInputMapper();
+//
+	//	EKeyCode key = EKeyCode::NUMPAD0;
+	//	for (AnimationManager::Variable& var : data.Variables)
+	//	{
+	//		map.BindActionToInputCode(var.Name, key);
+//
+	//		map.AddEventListener(var.Name, [var, animatorBro](const CommonUtilities::InputEvent event)
+	//			{
+	//				if (!event.inputData.isPressed)
+	//				{
+	//					return;
+	//				}
+	//				if (var.Type == "Bool")
+	//				{
+	//					animatorBro->GetTree().SetBool(var.Name, !animatorBro->GetTree().GetAnimationVariable(var.Name).IsActive);
+	//				}
+	//				else
+	//				{
+	//					animatorBro->GetTree().SetTrigger(var.Name);
+	//				}
+	//			});
+//
+	//		if (key == EKeyCode::NUMPAD9)
+	//		{
+	//			break;
+	//		}
+	//		key = EKeyCode(static_cast<int>(key) + 1);
+	//	}
+	//} //Dont put anything below this line
 }

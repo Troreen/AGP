@@ -1,7 +1,7 @@
 {
 	"MasterMaterials": [
 		{
-			"Name": "MM_ShaderTest",
+			"Name": "MM_Standard_WithSnow",
 			"Domain": 0,
 			"ShadingModel": 1,
 			"BlendMode": 0,
@@ -9,6 +9,58 @@
 				0.5,
 				0.5,
 				0.5,
+				1
+			],
+			"Metallic": 0,
+			"Roughness": 0.5,
+			"TwoSided": false,
+			"Parameters": [
+				{
+					"Name": "Snow Tiling",
+					"Type": 0,
+					"Value": 0.10000000149011612
+				},
+				{
+					"Name": "Noise intensity",
+					"Type": 0,
+					"Value": 0.69999998807907104
+				},
+				{
+					"Name": "AlbedoMap",
+					"Type": 3,
+					"Value":
+					{
+						"Name": "T_4M_MixedMedievalBricks_BaseColor",
+						"Path": "/Game/Textures/T_4M_MixedMedievalBricks_BaseColor.T_4M_MixedMedievalBricks_BaseColor",
+						"AssetImportPath": "C:/Users/egil.wendin/egil.wendin_P5G4/Content/Textures/T_4M_MixedMedievalBricks_BaseColor.png"
+					}
+				},
+				{
+					"Name": "NormalMap",
+					"Type": 3,
+					"Value":
+					{
+						"Name": "T_4M_MixedMedievalBricks_Normal",
+						"Path": "/Game/Textures/T_4M_MixedMedievalBricks_Normal.T_4M_MixedMedievalBricks_Normal",
+						"AssetImportPath": "C:/Users/egil.wendin/egil.wendin_P5G4/Content/Textures/T_4M_MixedMedievalBricks_Normal.png"
+					}
+				},
+				{
+					"Name": "Noise Size",
+					"Type": 0,
+					"Value": 4
+				}
+			]
+		},
+		{
+			"Name": "M_ShaderTestGround",
+			"Domain": 0,
+			"ShadingModel": 1,
+			"BlendMode": 0,
+			"BaseColor": [
+				0.18,
+				0.18,
+				0.18,
 				1
 			],
 			"Metallic": 0,
@@ -70,7 +122,7 @@
 						1,
 						1
 					],
-					"Intensity": 4
+					"Intensity": 2
 				}
 			]
 		},
@@ -125,7 +177,66 @@
 					"AssetImportPath": "C:/P4V/G4/Content/Meshes/Debug/SM_Debug_ShaderMesh_Sphere.fbx",
 					"Materials": [
 						{
-							"Name": "MM_ShaderTest",
+							"Name": "MM_Standard_WithSnow",
+							"Parent": "Self",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "ShaderTestGround",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				10,
+				0,
+				0,
+				0,
+				0,
+				10,
+				0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				670,
+				-200,
+				-80,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"Parent": "",
+					"TypeID": 1,
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "SM_Plane",
+					"ContentPath": "/Game/Meshes/Debug/SM_Plane.SM_Plane",
+					"AssetImportPath": "Content/Meshes/Debug/SM_Plane.fbx",
+					"Materials": [
+						{
+							"Name": "M_ShaderTestGround",
 							"Parent": "Self",
 							"Parameters": []
 						}

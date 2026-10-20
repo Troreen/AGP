@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -198,8 +198,8 @@
     <ClInclude Include="ConstantBuffers\LightBuffer.h" />
     <ClInclude Include="ConstantBuffers\ObjectBuffer.h" />
     <ClInclude Include="ConstantBuffers\TextOverlayBuffer.h" />
-    <ClInclude Include="Drawers\SpriteDrawer.h" />
     <ClInclude Include="Drawers\LineDrawer.h" />
+    <ClInclude Include="Drawers\SpriteDrawer.h" />
     <ClInclude Include="GraphicsEngine.h" />
     <ClInclude Include="GraphicsEngine.pch.h" />
     <ClInclude Include="GraphicsRenderSettings.h" />
@@ -234,8 +234,8 @@
     <ClInclude Include="TextWidget.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Drawers\SpriteDrawer.cpp" />
     <ClCompile Include="Drawers\LineDrawer.cpp" />
+    <ClCompile Include="Drawers\SpriteDrawer.cpp" />
     <ClCompile Include="GraphicsEngine.cpp" />
     <ClCompile Include="GraphicsEngine.pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
@@ -299,6 +299,12 @@
     </FxCompile>
     <FxCompile Include="Shaders\Internal\Sprite_VS.hlsl">
       <ShaderType>Vertex</ShaderType>
+      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
+      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
+      <ObjectFileOutput></ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shaders\Material\Skybox_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
       <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
       <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
       <ObjectFileOutput></ObjectFileOutput>
@@ -426,10 +432,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\LUTFunctions.hlsli" />
+    <None Include="Shaders\MM_ShaderTest.hlsli" />
+    <None Include="Shaders\SparklingSnow.hlsli" />
     <None Include="Shaders\Material\Common.hlsli" />
     <None Include="Shaders\Material\Lighting.hlsli" />
     <None Include="Shaders\Material\Material.hlsli" />
     <None Include="Shaders\Material\MaterialParameters.hlsli" />
+    <None Include="Shaders\Material\MaterialUtilities.hlsli" />
+    <None Include="Shaders\Material\Normal.hlsli" />
     <None Include="Shaders\Material\PoissonDisks.hlsli" />
     <None Include="Shaders\Material\Tonemap.hlsli" />
     <None Include="Shaders\PostProcess\BloomHelper.hlsli" />

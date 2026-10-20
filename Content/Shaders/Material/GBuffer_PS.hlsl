@@ -22,6 +22,8 @@ GBufferOutput main(VStoPS aPixel)
 
     MaterialPixelParameters parameters;
     parameters.PixelColor = albedo;
+    parameters.VertexColor = aPixel.Color;
+    parameters.SurfaceValues = MaterialTexture.Sample(TrilinearWrap, aPixel.UV0);
     parameters.WorldPosition = aPixel.WorldPosition;
     parameters.UV0 = aPixel.UV0;
     parameters.UV1 = aPixel.UV1;
@@ -33,7 +35,7 @@ GBufferOutput main(VStoPS aPixel)
     GBufferOutput output;
     output.Albedo = float4(saturate(parameters.PixelColor.rgb), parameters.PixelColor.a);
     output.PixelNormal = float4(normalize(parameters.Normal), 0.0f);
-    output.Surface = float4(MaterialTexture.Sample(TrilinearWrap, parameters.UV0).rgb, 0.0f);
+    output.Surface = float4(parameters.SurfaceValues.rgb, 0.0f);
     // Emission is reserved for bloom and other post-process effects. Materials
     // do not expose emission yet, so initialize the future-facing buffer to 0.
     output.Emission = 0.0f;
