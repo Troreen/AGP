@@ -10,16 +10,11 @@
     <ClInclude Include="Pathfinding\AStar.h">
       <Filter>Pathfinding</Filter>
     </ClInclude>
-    <ClInclude Include="Pathfinding\Dijkstra.h">
-      <Filter>Pathfinding</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Pathfinding\AStar.cpp">
       <Filter>Pathfinding</Filter>
     </ClCompile>
-    <ClCompile Include="Pathfinding\Dijkstra.cpp">
-      <Filter>Pathfinding</Filter>
-    </ClCompile>
+    <ClCompile Include="Pathfinder.cpp" />
   </ItemGroup>
 </Project>

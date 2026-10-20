@@ -13,10 +13,12 @@
 #include <algorithm>
 #include <exception>
 #include <functional>
+#include <AISystems/Pathfinder.hpp>
 #include <GameFramework/AssetHandling/AssetRegistry.h>
 #include <GameFramework/AssetHandling/FontAsset.h>
 #include <GameFramework/AssetHandling/MaterialAsset.h>
 #include <GameFramework/AssetHandling/MeshAsset.h>
+#include <GameFramework/AssetHandling/NavMeshAsset.h>
 #include <GameFramework/AudioManager.h>
 #include <GameFramework/Coroutine/Scheduler.h>
 #include <GameFramework/GameFrameworkLog.h>
@@ -536,6 +538,7 @@ void GameApplication::ProcessPendingSceneLoad(Game& aGame)
 	std::filesystem::path scenePath = myContentRoot / myApplicationSettings.SceneFolder / requestedScene;
 	
 	std::unique_ptr<World> candidateWorld;
+
 	try
 	{
 		if (!std::filesystem::exists(scenePath))
@@ -628,6 +631,16 @@ void GameApplication::ProcessPendingSceneLoad(Game& aGame)
 	myWorld = std::move(candidateWorld);
 	myCurrentScene = requestedScene;
 
+	{
+		// Load navigation mesh for the new world.
+		std::shared_ptr<NavMeshAsset> navMesh = ServiceLocator::GetInstance().GetAssetRegistry().GetAsset<NavMeshAsset>(sceneName + ".nav");
+
+		if (navMesh)
+		{
+			ServiceLocator::GetInstance().GetPathFinder().Init(navMesh->MoveVertexIndices(), navMesh->MoveVertices());
+		}
+	}
+
 	// Select a debug camera if the scene did not provide an active camera.
 	myToggleDebugCameraRequested = false;
 	myDebugCamera.Reset();
@@ -676,6 +689,8 @@ void GameApplication::ClearWorld()
 		myWorld->Clear();
 		myWorld.reset();
 	}
+
+	ServiceLocator::GetInstance().GetPathFinder().Clear();
 }
 
 void GameApplication::RemoveApplicationInputListeners()

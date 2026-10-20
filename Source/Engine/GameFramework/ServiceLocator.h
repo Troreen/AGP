@@ -5,6 +5,7 @@ namespace CommonUtilities
 	class InputMapper;
 }
 
+class Pathfinder;
 class AudioManager;
 class EventBus;
 class AssetRegistry;
@@ -28,6 +29,7 @@ public:
 	void Initialize();
 
 	CommonUtilities::InputMapper& GetInputMapper();
+	Pathfinder& GetPathFinder() const;
 	AudioManager& GetAudioManager() const;
 	EventBus& GetEventBus() const;
 	AssetRegistry& GetAssetRegistry() const;
@@ -52,6 +54,7 @@ private:
 	~ServiceLocator();
 
 	CommonUtilities::InputMapper* myInputMapper;
+	Pathfinder* myPathFinder;
 	AudioManager* myAudioManager;
 	EventBus* myEventBus;
 	AssetRegistry* myAssetRegistry;

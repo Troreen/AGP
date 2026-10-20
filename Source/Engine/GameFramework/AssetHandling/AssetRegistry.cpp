@@ -4,6 +4,7 @@
 #include "GameFramework/AssetHandling/FontAsset.h"
 #include "GameFramework/AssetHandling/MaterialAsset.h"
 #include "GameFramework/AssetHandling/MeshAsset.h"
+#include "GameFramework/AssetHandling/NavMeshAsset.h"
 #include "GameFramework/AssetHandling/TextureAsset.h"
 
 #include <algorithm>
@@ -24,6 +25,7 @@ AssetRegistry::AssetRegistry()
 {
 	RegisterAssetType<AnimationAsset>({ ".fbx" });
 	RegisterAssetType<MeshAsset>({ ".fbx" });
+	RegisterAssetType<NavMeshAsset>({ ".nav" });
 	RegisterAssetType<TextureAsset>({ ".dds" });
 	RegisterAssetType<FontAsset>({ ".font.json" });
 }
@@ -71,8 +73,16 @@ void AssetRegistry::Initialize(const std::filesystem::path& contentRoot)
 		{
 			continue;
 		}
-
+		
 		const std::string assetName = GetFullAssetName(path);
+
+		std::cout << assetName << std::endl;
+
+		if (assetName == "lvl_blockout_level.nav")
+		{
+			__debugbreak();
+		}
+
 		std::string alias = Lower(path.filename().generic_string());
 		alias = alias.substr(0, alias.size() - lowerExtension.size());
 

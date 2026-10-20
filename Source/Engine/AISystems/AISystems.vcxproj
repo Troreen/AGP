@@ -180,11 +180,10 @@
   <ItemGroup>
     <ClInclude Include="Pathfinder.hpp" />
     <ClInclude Include="Pathfinding\AStar.h" />
-    <ClInclude Include="Pathfinding\Dijkstra.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Pathfinding\AStar.cpp" />
-    <ClCompile Include="Pathfinding\Dijkstra.cpp" />
+    <ClCompile Include="Pathfinder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GraphicsEngine\GraphicsEngine.vcxproj">

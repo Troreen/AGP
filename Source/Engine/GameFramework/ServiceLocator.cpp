@@ -9,6 +9,7 @@
 #include "GameFramework/Coroutine/CoroutineHandler.h"
 #include <GameFramework/Components/CameraComponent.h>
 #include <GameFramework/World/Actor.h>
+#include <AISystems/Pathfinder.hpp>
 
 #include <InputMapper.h>
 
@@ -22,6 +23,7 @@ void ServiceLocator::Initialize()
 {
 	myInputMapper = new CommonUtilities::InputMapper();
 	myAudioManager = new AudioManager();
+	myPathFinder = new Pathfinder();
 	myEventBus = new EventBus();
 	myAssetRegistry = new AssetRegistry();
 	myAnimationManager = new AnimationManager();
@@ -29,11 +31,17 @@ void ServiceLocator::Initialize()
 	myScheduler = new Scheduler();
 	myCouroutineHandler = new CoroutineHandler();
 	mySceneCamera = new CameraComponent();
+	
 }
 
 CommonUtilities::InputMapper& ServiceLocator::GetInputMapper()
 {
 	return *myInputMapper;
+}
+
+Pathfinder& ServiceLocator::GetPathFinder() const
+{
+	return *myPathFinder;
 }
 
 AudioManager& ServiceLocator::GetAudioManager() const
@@ -110,6 +118,9 @@ void ServiceLocator::KillServices()
 	delete myAudioManager;
 	myAudioManager = nullptr;
 
+	delete myPathFinder;
+	myPathFinder = nullptr;
+
 	delete myEventBus;
 	myEventBus = nullptr;
 
@@ -132,6 +143,7 @@ void ServiceLocator::KillServices()
 ServiceLocator::ServiceLocator()
 	: myInputMapper(nullptr)
 	, myAudioManager(nullptr)
+	, myPathFinder(nullptr)
 	, myEventBus(nullptr)
 	, myAssetRegistry(nullptr)
 	, myAnimationManager(nullptr)
