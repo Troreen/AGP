@@ -600,10 +600,6 @@ namespace
 	{
 		switch (type)
 		{
-			case UnrealComponentType::Box:
-				return PlaceholderComponentType::Box;
-			case UnrealComponentType::Sphere:
-				return PlaceholderComponentType::Sphere;
 			case UnrealComponentType::Capsule:
 				return PlaceholderComponentType::Capsule;
 			case UnrealComponentType::SpringArm:
@@ -822,15 +818,7 @@ namespace
 							PlaceholderComponentData placeholder;
 							placeholder.Common = common;
 							placeholder.Type = ConvertPlaceholderType(baseComponentData.typeID);
-							if constexpr (std::is_same_v<SourceType, UnrealScene::BoxComponentData>)
-							{
-								placeholder.Properties = BoxPlaceholderData{ imported.boundsMaxima * UnrealUnitScale };
-							}
-							else if constexpr (std::is_same_v<SourceType, UnrealScene::BaseSphericalComponentData>)
-							{
-								placeholder.Properties = SpherePlaceholderData{ imported.radius * UnrealUnitScale };
-							}
-							else if constexpr (std::is_same_v<SourceType, UnrealScene::CapsuleComponentData>)
+							if constexpr (std::is_same_v<SourceType, UnrealScene::CapsuleComponentData>)
 							{
 								placeholder.Properties = CapsulePlaceholderData{
 									imported.radius * UnrealUnitScale, imported.halfHeight * UnrealUnitScale };
