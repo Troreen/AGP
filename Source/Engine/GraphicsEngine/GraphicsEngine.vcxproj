@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -303,6 +303,12 @@
       <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
       <ObjectFileOutput></ObjectFileOutput>
     </FxCompile>
+    <FxCompile Include="Shaders\Material\Skybox_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
+      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
+      <ObjectFileOutput></ObjectFileOutput>
+    </FxCompile>
     <FxCompile Include="Shaders\Material\Deferred_AmbientLight_PS.hlsl">
       <ShaderType>Pixel</ShaderType>
       <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
@@ -427,10 +433,13 @@
   <ItemGroup>
     <None Include="Shaders\LUTFunctions.hlsli" />
     <None Include="Shaders\MM_ShaderTest.hlsli" />
+    <None Include="Shaders\SparklingSnow.hlsli" />
     <None Include="Shaders\Material\Common.hlsli" />
     <None Include="Shaders\Material\Lighting.hlsli" />
     <None Include="Shaders\Material\Material.hlsli" />
     <None Include="Shaders\Material\MaterialParameters.hlsli" />
+    <None Include="Shaders\Material\MaterialUtilities.hlsli" />
+    <None Include="Shaders\Material\Normal.hlsli" />
     <None Include="Shaders\Material\PoissonDisks.hlsli" />
     <None Include="Shaders\Material\Tonemap.hlsli" />
     <None Include="Shaders\PostProcess\BloomHelper.hlsli" />

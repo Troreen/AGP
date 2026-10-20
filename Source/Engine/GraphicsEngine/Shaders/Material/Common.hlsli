@@ -29,6 +29,9 @@ cbuffer FrameBuffer : register(b0)
     uint FB_TonemapType;
     uint FB_RenderPassType;
     float2 __FB_padding;
+    // The C++ frame buffer has the same extra row. Zero means the scene has no active sun.
+    float3 FB_SunDirectionToLight;
+    float __FB_SunPadding;
 }
 
 cbuffer ObjectBuffer : register(b1)

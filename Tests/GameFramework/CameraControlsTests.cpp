@@ -128,6 +128,17 @@ namespace
 		authored.ExpectLocal(40, -25, "Authored aim without input");
 	}
 
+	void CenteringWithoutWindowIsIgnored()
+	{
+		InputFixture fixture;
+		fixture.Move(12, -7);
+		fixture.Handler.CenterMouse();
+		fixture.Move(3, 4);
+		fixture.Handler.UpdateInput();
+		const auto delta = fixture.Handler.GetMouseDelta();
+		Expect(delta.x == 15 && delta.y == -3, "Centering without a window changed pending mouse movement");
+	}
+
 	void FrameTimeSpin()
 	{
 		InputFixture native;
@@ -162,6 +173,7 @@ int RunCameraControlsTests()
 		CardinalYawPitch();
 		MixedInputAndClamp();
 		StartupAim();
+		CenteringWithoutWindowIsIgnored();
 		FrameTimeSpin();
 		std::cout << "PASS: debug-camera controls and automatic frame-time chest spin\n";
 		return 0;

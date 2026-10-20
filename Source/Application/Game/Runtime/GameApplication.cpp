@@ -599,6 +599,10 @@ void GameApplication::ProcessPendingSceneLoad(Game& aGame)
 				return component;
 			});
 		aGame.ConfigureWorld(*candidateWorld);
+
+		// TODO: Add a scene-configurable HDRI skybox instead of the hardcoded test cubemap.
+		// GraphicsEngine::Get().SetEnvironmentMap(myContentRoot / "Textures" / "snowy_hillside_02_cube.dds", true);
+		GraphicsEngine::Get().ResetEnvironmentMap();
 	}
 	catch (const std::bad_alloc&)
 	{
