@@ -44,7 +44,7 @@ collider->SetDebugDisabledColor({0.4f, 0.4f, 0.4f, 1}); // Default gray.
 ```
 
 World automatically queues sphere rings or box edges after normal updates and
-overlap callbacks, using the collider's current composed transform. Disabled
+collision callbacks, using the collider's current composed transform. Disabled
 colliders use the disabled color; inactive Actors and destroyed colliders do not
 draw. Colors and the toggle have matching getters. Outlines show authored geometry;
 an unsupported transform can still be outlined while detection excludes it.
@@ -52,42 +52,54 @@ The renderer clears these temporary lines each rendered frame.
 
 ## Subscribe from gameplay
 
-Include `GameFramework/Collision/CollisionOverlapEvent.h`,
-`GameFramework/EventBus.hpp`, and `GameFramework/ServiceLocator.h`. A gameplay
-Component retains its collider ID and the returned subscription token as a
-`std::uint32_t` member (include `<cstdint>` in that Component's header):
+Include `GameFramework/Components/ColliderComponent.h`. Register directly on
+the collider you want to observe. Keep the returned `CollisionSubscription` as a
+member of your listening Component:
 
 ```cpp
 void DetectionListener::BeginPlay()
 {
-    myListenerId = ServiceLocator::GetInstance().GetEventBus()
-        .AddEventListener<CollisionOverlapEvent>([this](const CollisionOverlapEvent& event)
-        {
-            if (event.SourceWorld != &GetWorld() ||
-                (event.FirstColliderId != myColliderId && event.SecondColliderId != myColliderId))
-            {
-                return;
-            }
-            // React to event.Phase: Enter, Stay, or Exit.
-        });
+    auto* collider = GetOwner()->GetComponent<ColliderComponent>();
+    myEnterSubscription = collider->OnEnter(this, &DetectionListener::OnEnter);
+}
+
+void DetectionListener::OnEnter(const Collision& collision)
+{
+    if (Actor* other = collision.OtherActor())
+    {
+        // Apply your gameplay rules to the entering Actor.
+    }
 }
 
 void DetectionListener::EndPlay() noexcept
 {
-    ServiceLocator::GetInstance().GetEventBus().RemoveEventListener(myListenerId);
+    myEnterSubscription.Reset();
 }
 ```
 
+`OnStay` and `OnExit` use the same signature. Lambdas are also supported:
+`myEnterSubscription = collider->OnEnter([this](const Collision& collision) { /* gameplay */ });`.
+Member-function receivers must be Components; callbacks skip receivers that have
+not begun play, are disabled, or have inactive/destroyed owners. Keep each
+subscription on its receiver and call `Reset()` in `EndPlay`. Destroying or replacing
+a subscription also disconnects it. Lambda captures must live as long as their subscription.
+
+`collision.OtherCollider()` and `collision.OtherActor()` look up the other participant;
+either can return null after destruction. `OtherColliderId` remains available even
+when lookup returns null. `Phase` identifies Enter, Stay, or Exit when sharing one
+handler. The collision and returned pointers are borrowed for the callback only.
+
+Callbacks run on both surviving colliders. New subscriptions wait until the next
+notification on that collider; disconnecting skips a callback that has not run yet.
 The runnable example is `Components/CollisionDemoComponent` in the Game project.
-It subscribes in BeginPlay, checks both the World and moving collider ID, and
-unsubscribes in EndPlay. Scene replacement uses the same cleanup path.
+It stores three subscriptions and resets them in EndPlay, including on scene replacement.
 
 ## Timing and lifetime
 
 Detection follows normal Component updates using the World's frozen frame
 membership. Components added during callbacks or updates wait for the next
-eligible frame. Touching counts as overlap. One unordered pair produces Enter
-on its first sampled overlap, Stay on later overlapping updates, and Exit after
+eligible frame. Touching counts as collision. One unordered pair produces Enter
+on its first sampled collision, Stay on later overlapping updates, and Exit after
 separation or loss of participation. Enter and Stay never both occur for the
 same pair in one update.
 
@@ -103,8 +115,10 @@ null. Never retain lookup pointers across destruction or scene replacement.
 `SourceWorld` is borrowed for synchronous delivery. IDs belong to that World,
 are nonzero, and are not reused during its lifetime, including after Clear.
 
-The integration uses the existing EventBus unchanged. Subscriptions belong to the
-listening Component: add them in BeginPlay and remove them in EndPlay.
+The existing `CollisionOverlapEvent` EventBus API remains available for diagnostics
+and listeners that need every pair. Collider callbacks run before that pair's
+EventBus event. Gameplay normally uses the collider callback API above, which
+handles World filtering and pair IDs internally.
 
 Detection samples frames. A fast volume may cross another entirely between
 updates without an event. Direct queries, capsules, compound colliders, blocking,
@@ -127,7 +141,7 @@ and physical resolution are outside this version.
 4. Compare outlines and Debug console messages with the table below. The moving
    ID must appear with the fixed sphere and box, never with the filtered ID.
    Stay is delivered every overlapping frame but logged once per pair entry.
-5. Press the existing F4 reload action during an overlap. Expect one
+5. Press the existing F4 reload action during a collision. Expect one
    `Collision demo EndPlay: listener removed.` message, a fresh start, and one
    set of phase logs. Clear emits no old-world Exit events. Repeat the run to
    check that old listeners do not accumulate.

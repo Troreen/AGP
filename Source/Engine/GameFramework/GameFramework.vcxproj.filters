@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Animation">
@@ -284,4 +284,14 @@
       <Filter>World</Filter>
     </ClCompile>
   </ItemGroup>
-<ItemGroup><ClInclude Include="Components\ColliderComponent.h"><Filter>Components</Filter></ClInclude><ClInclude Include="Collision\CollisionSystem.h" /><ClInclude Include="Collision\CollisionOverlapEvent.h" /><ClCompile Include="Components\ColliderComponent.cpp"><Filter>Components</Filter></ClCompile><ClCompile Include="Collision\CollisionSystem.cpp" /></ItemGroup></Project>
+<ItemGroup><ClInclude Include="Components\ColliderComponent.h"><Filter>Components</Filter></ClInclude><ClInclude Include="Collision\CollisionSystem.h" /><ClInclude Include="Collision\CollisionOverlapEvent.h" /><ClCompile Include="Components\ColliderComponent.cpp"><Filter>Components</Filter></ClCompile><ClCompile Include="Collision\CollisionSystem.cpp" /></ItemGroup>
+  <ItemGroup>
+    <Filter Include="Collision" />
+    <ClInclude Include="Collision\CollisionSubscription.h">
+      <Filter>Collision</Filter>
+    </ClInclude>
+    <ClCompile Include="Collision\CollisionSubscription.cpp">
+      <Filter>Collision</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

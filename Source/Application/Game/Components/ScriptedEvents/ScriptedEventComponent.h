@@ -12,7 +12,7 @@ class ScriptedEventComponent final : public CustomComponent
 public:
 	// False allows one accepted start per scene load, even if that run is later cancelled.
 	bool Replayable = false;
-	// Optional input action for manual testing. Other callers, such as future trigger boxes, can use Play() directly.
+	// Optional input action for manual testing. Collision triggers call Play() directly.
 	std::string TriggerAction;
 	void InitializeCustomVariables(const CustomComponentVariables& variables) override;
 	void BeginPlay() override;

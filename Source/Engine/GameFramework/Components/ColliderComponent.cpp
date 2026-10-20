@@ -1,11 +1,81 @@
 #include "GameFramework/Components/ColliderComponent.h"
 #include "Maths.hpp"
 #include "GraphicsEngine/Drawers/LineDrawer.h"
+#include "GameFramework/World/World.h"
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <numbers>
 
 bool ColliderComponent::ourAllDebugDrawEnabled = false;
+
+ColliderComponent* Collision::OtherCollider() const
+{
+	return SourceWorld ? SourceWorld->FindCollider(OtherColliderId) : nullptr;
+}
+
+Actor* Collision::OtherActor() const
+{
+	auto* otherCollider = OtherCollider();
+	return otherCollider ? otherCollider->GetOwner() : nullptr;
+}
+
+bool ColliderComponent::CanReceiveCollision(const Component* listeningComponent)
+{
+	// Memory may still exist after destruction is requested. Only call Components that can still take part in gameplay.
+	return listeningComponent && listeningComponent->HasBegunPlay() && listeningComponent->IsEnabled() && listeningComponent->GetOwner() &&
+	       listeningComponent->GetOwner()->IsActive();
+}
+
+CollisionSubscription ColliderComponent::Subscribe(CollisionOverlapPhase collisionPhase,
+                                                   std::function<void(const Collision&)> collisionCallback)
+{
+	std::erase_if(myCollisionSubscriptions, [](const auto& collisionSubscription)
+	{
+		return collisionSubscription.expired();
+	});
+	auto collisionSubscription = std::make_shared<CollisionSubscription::Subscription>();
+	collisionSubscription->Callback = std::move(collisionCallback);
+	collisionSubscription->Phase = collisionPhase;
+	myCollisionSubscriptions.push_back(collisionSubscription);
+	return CollisionSubscription(std::move(collisionSubscription));
+}
+
+CollisionSubscription ColliderComponent::OnEnter(std::function<void(const Collision&)> collisionCallback)
+{
+	return Subscribe(CollisionOverlapPhase::Enter, std::move(collisionCallback));
+}
+
+CollisionSubscription ColliderComponent::OnStay(std::function<void(const Collision&)> collisionCallback)
+{
+	return Subscribe(CollisionOverlapPhase::Stay, std::move(collisionCallback));
+}
+
+CollisionSubscription ColliderComponent::OnExit(std::function<void(const Collision&)> collisionCallback)
+{
+	return Subscribe(CollisionOverlapPhase::Exit, std::move(collisionCallback));
+}
+
+void ColliderComponent::DispatchCollision(const Collision& collision)
+{
+	std::erase_if(myCollisionSubscriptions, [](const auto& collisionSubscription)
+	{
+		return collisionSubscription.expired();
+	});
+	// Work through a copy of the list. A callback can then add listeners without changing the list we are walking.
+	// Added listeners start with the next notification on this collider.
+	const auto subscriptionsForThisCollision = myCollisionSubscriptions;
+	for (const auto& weakCollisionSubscription : subscriptionsForThisCollision)
+	{
+		auto collisionSubscription = weakCollisionSubscription.lock();
+		// An earlier callback may have disconnected this listener during dispatch.
+		if (collisionSubscription && collisionSubscription->Connected && collisionSubscription->Phase == collision.Phase &&
+		    collisionSubscription->Callback)
+		{
+			collisionSubscription->Callback(collision);
+		}
+	}
+}
 
 void ColliderComponent::SetAllDebugDrawEnabled(bool enabled)
 {

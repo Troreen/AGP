@@ -54,6 +54,180 @@ namespace
 		return actor->AddComponent<ColliderComponent>("Collider");
 	}
 
+	struct CollisionListener : Component
+	{
+		CollisionSubscription Subscription;
+		int Calls = 0;
+		Actor* LastActor = nullptr;
+
+		void OnCollision(const Collision& collision)
+		{
+			++Calls;
+			LastActor = collision.OtherActor();
+		}
+	};
+
+	void ColliderCallbacks()
+	{
+		World world;
+		auto* first = Sphere(world);
+		auto* second = Sphere(world);
+		second->SetBoxHalfExtents({1, 1, 1});
+		auto* listener = first->GetOwner()->AddComponent<CollisionListener>("Listener");
+		listener->Subscription = first->OnEnter(listener, &CollisionListener::OnCollision);
+		std::vector<CollisionOverlapPhase> phases;
+		auto stay = first->OnStay([&](const Collision& collision)
+		{
+			phases.push_back(collision.Phase);
+		});
+		auto exit = first->OnExit([&](const Collision& collision)
+		{
+			phases.push_back(collision.Phase);
+			Check(collision.OtherCollider() == nullptr && collision.OtherActor() == nullptr,
+			      "Destroyed collision participant resolves to null");
+		});
+		int reverseCalls = 0;
+		auto reverse = second->OnEnter([&](const Collision& collision)
+		{
+			++reverseCalls;
+			Check(collision.OtherCollider() == first, "Each side sees the opposite collider");
+		});
+		World unrelatedWorld;
+		Sphere(unrelatedWorld);
+		Sphere(unrelatedWorld);
+		unrelatedWorld.Update(0);
+		Check(listener->Calls == 0, "Callbacks are local to their World");
+		world.Update(0);
+		Check(listener->Calls == 1 && listener->LastActor == second->GetOwner() && reverseCalls == 1,
+		      "Sphere and box support member and lambda callbacks on both sides");
+		world.Update(0);
+		second->GetOwner()->Destroy();
+		world.Update(0);
+		Check(phases == std::vector{CollisionOverlapPhase::Stay, CollisionOverlapPhase::Exit},
+		      "Stay and Exit callbacks are phase filtered");
+		world.Clear();
+		stay.Reset();
+		exit.Reset();
+		reverse.Reset();
+	}
+
+	void CallbackSubscriptionLifetime()
+	{
+		World world;
+		auto* first = Sphere(world);
+		auto* second = Sphere(world);
+		int disconnectedCalls = 0;
+		CollisionSubscription later;
+		CollisionSubscription added;
+		int addedCalls = 0;
+		auto enter = first->OnEnter([&](const Collision&)
+		{
+			later.Reset();
+			added = first->OnEnter([&](const Collision&)
+			{
+				++addedCalls;
+			});
+		});
+		later = first->OnEnter([&](const Collision&)
+		{
+			++disconnectedCalls;
+		});
+		{
+			auto temporary = first->OnEnter([&](const Collision&)
+			{
+				++disconnectedCalls;
+			});
+		}
+		world.Update(0);
+		Check(disconnectedCalls == 0 && addedCalls == 0,
+		      "Disconnect skips pending callbacks; new callbacks wait for the next notification");
+		enter.Reset();
+		CollisionSubscription moved = std::move(added);
+		second->SetEnabled(false);
+		world.Update(0);
+		second->SetEnabled(true);
+		world.Update(0);
+		Check(addedCalls == 1, "Moving a subscription retains its callback");
+		moved = first->OnStay([&](const Collision&)
+		{
+			++disconnectedCalls;
+		});
+		world.Update(0);
+		Check(disconnectedCalls == 1, "Replacing a subscription binds the new callback");
+		moved.Reset();
+		world.Update(0);
+		Check(disconnectedCalls == 1, "Reset stops later delivery");
+	}
+
+	void CallbackParticipantDestruction()
+	{
+		World world;
+		auto* first = Sphere(world);
+		auto* second = Sphere(world);
+		auto* third = Sphere(world);
+		const ColliderId secondId = second->GetColliderId();
+		int destroyedSideCalls = 0;
+		int missingOtherCalls = 0;
+		auto destroy = first->OnEnter([&](const Collision& collision)
+		{
+			if (collision.OtherColliderId == secondId)
+			{
+				second->GetOwner()->Destroy();
+			}
+		});
+		auto destroyedSide = second->OnEnter([&](const Collision&)
+		{
+			++destroyedSideCalls;
+		});
+		auto survivingSide = third->OnEnter([&](const Collision& collision)
+		{
+			if (collision.OtherColliderId == secondId)
+			{
+				Check(collision.OtherActor() == nullptr, "Later callbacks resolve pending destruction to null");
+				++missingOtherCalls;
+			}
+		});
+		world.Update(0);
+		Check(destroyedSideCalls == 0 && missingOtherCalls == 1,
+		      "Frozen batch reaches surviving colliders without calling destroyed colliders");
+	}
+
+	void CallbackReceiverLifetime()
+	{
+		World world;
+		auto* first = Sphere(world);
+		Sphere(world);
+		auto* receiver = world.SpawnActor("Receiver")->AddComponent<CollisionListener>("Listener");
+		receiver->Subscription = first->OnStay(receiver, &CollisionListener::OnCollision);
+		world.Update(0);
+		world.Update(0);
+		Check(receiver->Calls == 1, "Active member receiver gets Stay");
+		receiver->SetEnabled(false);
+		world.Update(0);
+		Check(receiver->Calls == 1, "Disabled receiver gets no callback");
+		receiver->SetEnabled(true);
+		receiver->GetOwner()->SetActive(false);
+		world.Update(0);
+		Check(receiver->Calls == 1, "Inactive receiver gets no callback");
+		receiver->GetOwner()->SetActive(true);
+		world.Update(0);
+		Check(receiver->Calls == 2, "Reactivated receiver resumes callbacks");
+		auto killer = first->OnStay([&](const Collision&)
+		{
+			receiver->Destroy();
+		});
+		// Rebind after the killer so pending destruction is checked during the same batch.
+		receiver->Subscription = first->OnStay(receiver, &CollisionListener::OnCollision);
+		world.Update(0);
+		Check(receiver->Calls == 2, "Destroyed receiver skips the later callback in this batch");
+		killer.Reset();
+		world.Update(0);
+		world.Clear();
+		first = Sphere(world);
+		Sphere(world);
+		world.Update(0);
+	}
+
 	void SpherePhases()
 	{
 		World world;
@@ -345,7 +519,7 @@ namespace
 		first->SetBoxHalfExtents({1, 1, 1});
 		second->SetBoxHalfExtents({1, 1, 1});
 		world.Update(0);
-		Check(events.Values.size() == 1 && events.Values[0].Phase == CollisionOverlapPhase::Enter, "Box faces touching overlap");
+		Check(events.Values.size() == 1 && events.Values[0].Phase == CollisionOverlapPhase::Enter, "Box faces touching collision");
 		second->GetOwner()->GetTransform().SetLocalPosition({2, 2, 2});
 		world.Update(0);
 		Check(events.Values.back().Phase == CollisionOverlapPhase::Stay, "Box corner touching overlaps");
@@ -364,7 +538,7 @@ namespace
 		auto* sphere = Sphere(world, {1.4f, 0, 1.4f});
 		sphere->SetSphereRadius(0.1f);
 		world.Update(0);
-		Check(events.Values.empty(), "Rotated box enclosing AABB does not establish sphere overlap");
+		Check(events.Values.empty(), "Rotated box enclosing AABB does not establish sphere collision");
 		sphere->GetOwner()->GetTransform().SetLocalPosition({1.4f, 0, -1.4f});
 		world.Update(0);
 		Check(events.Values.size() == 1, "Sphere reaches long oriented box end");
@@ -383,7 +557,7 @@ namespace
 		Check(events.Values.empty(), "Parallel thin boxes separate despite overlapping enclosing AABBs");
 		other->GetOwner()->GetTransform().SetLocalPosition({1, 0, -1});
 		world.Update(0);
-		Check(events.Values.size() == 1, "Parallel yaw boxes overlap along their length");
+		Check(events.Values.size() == 1, "Parallel yaw boxes collision along their length");
 		other->GetTransform().SetLocalRotationDegrees(-45, 0, 0);
 		other->GetOwner()->GetTransform().SetLocalPosition({0, 0, 0});
 		world.Update(0);
@@ -413,7 +587,7 @@ namespace
 		Check(events.Values.empty(), "Separated initial spheres");
 		changing->SetBoxHalfExtents({2, 1, 1});
 		world.Update(0);
-		Check(events.Values.size() == 1 && events.Values[0].Phase == CollisionOverlapPhase::Enter, "Enabled shape change creates overlap");
+		Check(events.Values.size() == 1 && events.Values[0].Phase == CollisionOverlapPhase::Enter, "Enabled shape change creates collision");
 		Check(!changing->SetBoxHalfExtents({0, 1, 1}) && !changing->SetBoxHalfExtents({1, -1, 1}) &&
 		          !changing->SetBoxHalfExtents({1, 1, std::numeric_limits<float>::quiet_NaN()}) &&
 		          changing->GetShape() == ColliderShape::Box && changing->GetBoxHalfExtents().x == 2,
@@ -545,6 +719,10 @@ int main()
 	try
 	{
 		ServiceLocator::GetInstance().Initialize();
+		ColliderCallbacks();
+		CallbackSubscriptionLifetime();
+		CallbackParticipantDestruction();
+		CallbackReceiverLifetime();
 		SpherePhases();
 		Filtering();
 		Lifetime();

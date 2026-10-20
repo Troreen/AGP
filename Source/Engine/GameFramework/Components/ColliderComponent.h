@@ -1,7 +1,11 @@
 #pragma once
 #include "GameFramework/Components/SceneComponent.h"
-#include "GameFramework/Collision/CollisionOverlapEvent.h"
+#include "GameFramework/Collision/CollisionSubscription.h"
 #include "Vector4.hpp"
+#include <functional>
+#include <memory>
+#include <utility>
+#include <vector>
 
 enum class ColliderShape
 {
@@ -9,13 +13,39 @@ enum class ColliderShape
 	Box
 };
 
-// Nonblocking geometry. Gameplay supplies meaning through overlap subscriptions.
+// Detects when shapes overlap without stopping their movement.
 class ColliderComponent : public SceneComponent
 {
 	friend class Actor;
 	friend class World;
+	friend class CollisionSystem;
 
 public:
+	// [[nodiscard]] reminds the caller to store the returned subscription; otherwise listening stops immediately.
+	[[nodiscard]] CollisionSubscription OnEnter(std::function<void(const Collision&)> collisionCallback);
+	[[nodiscard]] CollisionSubscription OnStay(std::function<void(const Collision&)> collisionCallback);
+	[[nodiscard]] CollisionSubscription OnExit(std::function<void(const Collision&)> collisionCallback);
+
+	// Keep the subscription on the receiving Component so its destruction stops listening.
+	// Example: mySubscription = hitbox->OnEnter(this, &CombatComponent::OnHit);
+	template <class TComponent>
+	[[nodiscard]] CollisionSubscription OnEnter(TComponent* listeningComponent, void (TComponent::*receiverMethod)(const Collision&))
+	{
+		return OnEnter(BindReceiver(listeningComponent, receiverMethod));
+	}
+
+	template <class TComponent>
+	[[nodiscard]] CollisionSubscription OnStay(TComponent* listeningComponent, void (TComponent::*receiverMethod)(const Collision&))
+	{
+		return OnStay(BindReceiver(listeningComponent, receiverMethod));
+	}
+
+	template <class TComponent>
+	[[nodiscard]] CollisionSubscription OnExit(TComponent* listeningComponent, void (TComponent::*receiverMethod)(const Collision&))
+	{
+		return OnExit(BindReceiver(listeningComponent, receiverMethod));
+	}
+
 	// Enables collider outlines for every collider in the process. Intended for debug visualization.
 	static void SetAllDebugDrawEnabled(bool enabled);
 
@@ -86,6 +116,24 @@ public:
 	}
 
 private:
+	template <class TComponent>
+	static std::function<void(const Collision&)> BindReceiver(TComponent* listeningComponent, void (TComponent::*receiverMethod)(const Collision&))
+	{
+		return [listeningComponent, receiverMethod](const Collision& collision)
+		{
+			if (receiverMethod && CanReceiveCollision(listeningComponent))
+			{
+				(listeningComponent->*receiverMethod)(collision);
+			}
+		};
+	}
+
+	static bool CanReceiveCollision(const Component* listeningComponent);
+	CollisionSubscription Subscribe(CollisionOverlapPhase collisionPhase, std::function<void(const Collision&)> collisionCallback);
+	void DispatchCollision(const Collision& collision);
+	// The returned subscription owns the registration; the collider must not extend its lifetime.
+	std::vector<std::weak_ptr<CollisionSubscription::Subscription>> myCollisionSubscriptions;
+
 	void DrawDebug() const;
 
 	static bool ourAllDebugDrawEnabled;

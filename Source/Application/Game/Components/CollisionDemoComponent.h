@@ -1,5 +1,5 @@
 #pragma once
-#include "GameFramework/Collision/CollisionOverlapEvent.h"
+#include "GameFramework/Components/ColliderComponent.h"
 #include "GameFramework/World/Component.h"
 #include "Vector3.hpp"
 
@@ -17,12 +17,14 @@ public:
 	void EndPlay() noexcept override;
 
 private:
-	void OnOverlap(const CollisionOverlapEvent& anEvent);
+	void OnCollision(const Collision& collision);
 	ColliderId myMovingSphereId;
 	ColliderId myStationarySphereId;
 	ColliderId myStationaryBoxId;
 	ColliderId myFilteredSphereId;
-	std::uint32_t myListenerId = 0;
+	CollisionSubscription myEnterSubscription;
+	CollisionSubscription myStaySubscription;
+	CollisionSubscription myExitSubscription;
 	CommonUtilities::Vector3f myCenter{};
 	CommonUtilities::Vector3f myRight{1, 0, 0};
 	float myElapsedTime = 0;

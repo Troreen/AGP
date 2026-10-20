@@ -1,7 +1,7 @@
 #pragma once
 
 #include "GameFramework/Components/CustomComponent.h"
-#include "GameFramework/Collision/CollisionOverlapEvent.h"
+#include "GameFramework/Components/ColliderComponent.h"
 
 #include <string>
 
@@ -14,10 +14,8 @@ public:
 	void EndPlay() noexcept override;
 
 private:
-	void OnOverlap(const CollisionOverlapEvent& event);
+	void OnEnter(const Collision& collision);
 
 	std::string myEnteringActor;
-	ColliderId myColliderId = 0;
-	unsigned myListenerId = 0;
-	bool myListening = false;
+	CollisionSubscription myCollisionSubscription;
 };

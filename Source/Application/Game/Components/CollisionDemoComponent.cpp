@@ -3,8 +3,6 @@
 #include "GameLog.h"
 #include "GameFramework/Components/CameraComponent.h"
 #include "GameFramework/Components/ColliderComponent.h"
-#include "GameFramework/EventBus.hpp"
-#include "GameFramework/ServiceLocator.h"
 #include "GameFramework/World/World.h"
 #include "Maths.hpp"
 
@@ -41,8 +39,12 @@ void CollisionDemoComponent::BeginPlay()
 				ids[index] == myFilteredSphereId ? CU::Vector4f{1, 0, 1, 1} : CU::Vector4f{1, 1, 0, 1});
 		}
 	}
-	myListenerId = ServiceLocator::GetInstance().GetEventBus().AddEventListener<CollisionOverlapEvent>(
-		[this](const CollisionOverlapEvent& anEvent) { OnOverlap(anEvent); });
+	if (auto* moving = GetWorld().FindCollider(myMovingSphereId))
+	{
+		myEnterSubscription = moving->OnEnter(this, &CollisionDemoComponent::OnCollision);
+		myStaySubscription = moving->OnStay(this, &CollisionDemoComponent::OnCollision);
+		myExitSubscription = moving->OnExit(this, &CollisionDemoComponent::OnCollision);
+	}
 	GAMELOG(Log, "Collision demo: cyan moving sphere; yellow fixed sphere/box; magenta filtered sphere. F4 restarts.");
 	GAMELOG(Log, "Collision demo IDs: moving={}, fixed={}, box={}, filtered={} (filtered ID must never produce an event).",
 		myMovingSphereId, myStationarySphereId, myStationaryBoxId, myFilteredSphereId);
@@ -97,36 +99,32 @@ void CollisionDemoComponent::Update(float aDeltaTime)
 
 }
 
-void CollisionDemoComponent::OnOverlap(const CollisionOverlapEvent& anEvent)
+void CollisionDemoComponent::OnCollision(const Collision& collision)
 {
-	if (anEvent.SourceWorld != &GetWorld() ||
-		(anEvent.FirstColliderId != myMovingSphereId && anEvent.SecondColliderId != myMovingSphereId))
-	{
-		return;
-	}
-	const ColliderId otherId = anEvent.FirstColliderId == myMovingSphereId ? anEvent.SecondColliderId : anEvent.FirstColliderId;
-	const char* phase = "Enter";
-	if (anEvent.Phase == CollisionOverlapPhase::Stay)
+	const ColliderId otherColliderId = collision.OtherColliderId;
+	const char* phaseName = "Enter";
+	if (collision.Phase == CollisionOverlapPhase::Stay)
 	{
 		// One Stay log per entry keeps the console readable; delivery still happens every frame.
-		if (!myReportedStayIds.insert(otherId).second)
+		if (!myReportedStayIds.insert(otherColliderId).second)
 		{
 			return;
 		}
-		phase = "Stay";
+		phaseName = "Stay";
 	}
-	else if (anEvent.Phase == CollisionOverlapPhase::Exit)
+	else if (collision.Phase == CollisionOverlapPhase::Exit)
 	{
-		myReportedStayIds.erase(otherId);
-		phase = "Exit";
+		myReportedStayIds.erase(otherColliderId);
+		phaseName = "Exit";
 	}
 	GAMELOG(Log, "Collision demo {:.2f}s: {} moving={} other={} (other alive={}).", myElapsedTime,
-		phase, myMovingSphereId, otherId, GetWorld().FindCollider(otherId) != nullptr);
+		phaseName, myMovingSphereId, otherColliderId, GetWorld().FindCollider(otherColliderId) != nullptr);
 }
 
 void CollisionDemoComponent::EndPlay() noexcept
 {
-	ServiceLocator::GetInstance().GetEventBus().RemoveEventListener(myListenerId);
-	myListenerId = 0;
+	myEnterSubscription.Reset();
+	myStaySubscription.Reset();
+	myExitSubscription.Reset();
 	GAMELOG(Log, "Collision demo EndPlay: listener removed.");
 }

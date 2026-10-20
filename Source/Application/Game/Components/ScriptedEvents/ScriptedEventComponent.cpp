@@ -26,7 +26,6 @@ void ScriptedEventComponent::BeginPlay()
 {
 	if (!TriggerAction.empty())
 	{
-		// TODO: Use a button to test events for now. A future trigger box can call Play() directly.
 		myTriggerListener = ServiceLocator::GetInstance().GetInputMapper().AddEventListener(TriggerAction, [this](const CommonUtilities::InputEvent& event)
 		{
 			if (event.inputData.isPressed)
