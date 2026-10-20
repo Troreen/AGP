@@ -284,14 +284,8 @@
       <Filter>World</Filter>
     </ClCompile>
   </ItemGroup>
-<ItemGroup><ClInclude Include="Components\ColliderComponent.h"><Filter>Components</Filter></ClInclude><ClInclude Include="Collision\CollisionSystem.h" /><ClInclude Include="Collision\CollisionOverlapEvent.h" /><ClCompile Include="Components\ColliderComponent.cpp"><Filter>Components</Filter></ClCompile><ClCompile Include="Collision\CollisionSystem.cpp" /></ItemGroup>
+<ItemGroup><ClInclude Include="Components\ColliderComponent.h"><Filter>Components</Filter></ClInclude><ClInclude Include="Collision\CollisionSystem.h" /><ClInclude Include="Collision\CollisionOverlapEvent.h" /><ClInclude Include="Collision\CollisionLayers.h" /><ClCompile Include="Components\ColliderComponent.cpp"><Filter>Components</Filter></ClCompile><ClCompile Include="Collision\CollisionSystem.cpp" /></ItemGroup>
   <ItemGroup>
     <Filter Include="Collision" />
-    <ClInclude Include="Collision\CollisionSubscription.h">
-      <Filter>Collision</Filter>
-    </ClInclude>
-    <ClCompile Include="Collision\CollisionSubscription.cpp">
-      <Filter>Collision</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>

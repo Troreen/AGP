@@ -13,7 +13,7 @@
 #include "GameFramework/Animation/AnimationManager.h"
 #include "GameFramework/ServiceLocator.h"
 #include "GameFramework/UnrealSceneImporter/UnrealSceneImporter.h"
-#include "GameCollisionLayers.h"
+#include "GameFramework/Collision/CollisionLayers.h"
 #include <chrono>
 #include <cmath>
 #include <filesystem>
@@ -84,7 +84,9 @@ namespace
 		auto* collider = actor->AddComponent<ColliderComponent>("TriggerCollider");
 		collider->SetSphereRadius(5.0f);
 		auto* player = world->FindActor("Player");
-		player->AddComponent<ColliderComponent>("Collider")->SetSphereRadius(1.0f);
+		auto* playerCollider = player->AddComponent<ColliderComponent>("Collider");
+		playerCollider->SetSphereRadius(1.0f);
+		playerCollider->SetLayer(CollisionLayer::Player);
 		Check(sequence && sequence->Replayable && sequence->TriggerCollider == "TriggerCollider" && action && action->Step == 3 && action->WaitForCompletion,
 			"Registry/builder did not apply exported sequence and action variables");
 		Check(action->TargetActor == "Target" && action->DestinationActor == "Marker" && action->DurationInSeconds == 0.5f,
@@ -105,7 +107,7 @@ namespace
 		// Frozen subset of the real component-test re-export using TriggerCollider.
 		// Geometry, coordinator settings and the retained Wait action are unchanged.
 		// This checks import and activation, not the full sequence, rendering or audio.
-		UnrealSceneImporter importer(GameCollisionLayers::Names());
+		UnrealSceneImporter importer;
 		auto imported = importer.ImportScene("Tests/GameFramework/AuthoredCollisionTriggerScene.json");
 		Check(bool(imported), "Authored collision trigger fixture did not import cleanly");
 		auto& services = ServiceLocator::GetInstance();
@@ -122,23 +124,24 @@ namespace
 		auto* box = eventActor->GetComponent<ColliderComponent>();
 		auto* wait = eventActor->GetComponent<WaitActionComponent>();
 		Check(sequence && box && wait && sequence->TriggerCollider == "TriggerBox", "Authored trigger components were not built");
-		Check(box->GetLayer() == GameCollisionLayers::Trigger && box->GetMask() == (1u << GameCollisionLayers::Player),
-			"Authored TriggerBox layer tags were not applied");
 		Check(sequence->Replayable, "Authored replayable coordinator changed");
 
 		auto* player = world->SpawnActor("Player");
 		auto* playerCollider = player->AddComponent<ColliderComponent>("Collider");
 		playerCollider->SetSphereRadius(60.0f);
 		playerCollider->GetTransform().SetLocalPosition({0, 90, 0});
-		playerCollider->SetLayer(GameCollisionLayers::Player);
-		playerCollider->SetMask(1u << GameCollisionLayers::Trigger);
+		playerCollider->SetLayer(CollisionLayer::Player);
+		playerCollider->SetOverlapsWith({CollisionLayer::Trigger});
 		auto* enemy = world->SpawnActor("Enemy");
 		enemy->GetTransform().SetWorldPosition({-130, 254, -1560});
 		auto* enemyCollider = enemy->AddComponent<ColliderComponent>("Collider");
 		enemyCollider->SetSphereRadius(60.0f);
-		enemyCollider->SetLayer(GameCollisionLayers::Enemy);
-		enemyCollider->SetMask(1u << GameCollisionLayers::Trigger);
+		enemyCollider->SetLayer(CollisionLayer::Enemy);
+		enemyCollider->SetOverlapsWith({CollisionLayer::Trigger});
 		world->BeginPlay();
+		Check(box->GetLayer() == CollisionLayer::Trigger &&
+		      box->GetMask() == (1u << static_cast<unsigned int>(CollisionLayer::Player)),
+			"Sequence did not configure its player trigger in BeginPlay");
 		world->Update(0.0f);
 		Check(!sequence->IsRunning() && !sequence->HasCompleted() && box->IsEnabled(),
 			"Enemy or distant Player activated the authored trigger");
@@ -386,6 +389,7 @@ namespace
 			auto* player = world.SpawnActor("Player");
 			auto* playerCollider = player->AddComponent<ColliderComponent>("Collider");
 			playerCollider->SetSphereRadius(1.0f);
+			playerCollider->SetLayer(CollisionLayer::Player);
 			auto* volume = world.SpawnActor("EncounterVolume");
 			auto* volumeCollider = volume->AddComponent<ColliderComponent>("Collider");
 			volumeCollider->SetBoxHalfExtents({4, 4, 4});
@@ -405,12 +409,14 @@ namespace
 			Check(sequence->HasCompleted(), "Immediate sequence action did not complete");
 			world.Update(0.0f); // The consumed collider cannot produce a second activation.
 			Check(!volumeCollider->IsEnabled() && sequence->HasCompleted(), "A later overlap pass reactivated the consumed trigger");
-			world.Clear(); // EndPlay removes the subscription while the EventBus is alive.
+			world.Clear(); // Collision methods need no registration to clean up on scene replacement.
 		}
 		{
 			World replacement;
 			auto* player = replacement.SpawnActor("Player");
-			player->AddComponent<ColliderComponent>("Collider")->SetSphereRadius(1.0f);
+			auto* playerCollider = player->AddComponent<ColliderComponent>("Collider");
+			playerCollider->SetSphereRadius(1.0f);
+			playerCollider->SetLayer(CollisionLayer::Player);
 			auto* volume = replacement.SpawnActor("EncounterVolume");
 			auto* collider = volume->AddComponent<ColliderComponent>("Collider");
 			collider->SetBoxHalfExtents({4, 4, 4});
@@ -440,6 +446,7 @@ namespace
 			auto* player = world.SpawnActor("Player");
 			auto* playerCollider = player->AddComponent<ColliderComponent>("Collider");
 			playerCollider->SetSphereRadius(1.0f);
+			playerCollider->SetLayer(CollisionLayer::Player);
 			player->GetTransform().SetWorldPosition({20, 0, 0});
 			auto* volume = world.SpawnActor("RetryVolume");
 			auto* volumeCollider = volume->AddComponent<ColliderComponent>("Collider");
@@ -476,20 +483,18 @@ namespace
 			auto* unrelated = world.SpawnActor("Unrelated");
 			auto* unrelatedCollider = unrelated->AddComponent<ColliderComponent>("Collider");
 			unrelatedCollider->SetSphereRadius(1.0f);
-			unrelatedCollider->SetLayer(GameCollisionLayers::Enemy);
-			unrelatedCollider->SetMask(1u << GameCollisionLayers::Trigger);
+			unrelatedCollider->SetLayer(CollisionLayer::Enemy);
+			unrelatedCollider->SetOverlapsWith({CollisionLayer::Trigger});
 			// Admission depends on layers, so an Actor need not be named Player.
 			auto* player = world.SpawnActor("AllowedVisitor");
 			player->GetTransform().SetWorldPosition({20, 0, 0});
 			auto* playerCollider = player->AddComponent<ColliderComponent>("Collider");
 			playerCollider->SetSphereRadius(1.0f);
-			playerCollider->SetLayer(GameCollisionLayers::Player);
-			playerCollider->SetMask(1u << GameCollisionLayers::Trigger);
+			playerCollider->SetLayer(CollisionLayer::Player);
+			playerCollider->SetOverlapsWith({CollisionLayer::Trigger});
 			auto* volume = world.SpawnActor("FilteredVolume");
 			auto* collider = volume->AddComponent<ColliderComponent>("Collider");
 			collider->SetBoxHalfExtents({4, 4, 4});
-			collider->SetLayer(GameCollisionLayers::Trigger);
-			collider->SetMask(1u << GameCollisionLayers::Player);
 			auto* sequence = volume->AddComponent<ScriptedEventComponent>("Sequence");
 			sequence->TriggerCollider = "Collider";
 			auto* action = volume->AddComponent<SetActorActiveActionComponent>("Reveal");
@@ -527,7 +532,7 @@ namespace
 			world.BeginPlay();
 			world.Update(0.0f);
 			Check(!sequence->IsRunning() && unusedCollider->IsEnabled(),
-				"Blank or invalid TriggerCollider subscribed to another collider");
+				"Blank or invalid TriggerCollider activated from another collider");
 			if (sequence->TriggerCollider.empty())
 			{
 				Check(sequence->GetLastError().empty(), "Optional blank TriggerCollider produced a diagnostic");

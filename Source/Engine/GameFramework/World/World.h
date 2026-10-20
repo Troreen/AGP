@@ -39,8 +39,7 @@ public:
 private:
 	std::vector<Component*> CollectFrame();
 	void RemoveDestroyed();
-	std::uint64_t AllocateColliderId();
-	std::uint64_t myNextColliderId = 1;
+	void RegisterCollider(Component& component);
 	std::unique_ptr<CollisionSystem> myCollisionSystem;
 
 	std::vector<std::unique_ptr<Actor>> myActors;

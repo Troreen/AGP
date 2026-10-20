@@ -5,18 +5,21 @@
 #include <vector>
 
 class Component;
+class ColliderComponent;
 
-// Owned by World. Pair state stores identities, never borrowed component pointers.
 class CollisionSystem
 {
 public:
+	void RegisterCollider(ColliderComponent& collider);
 	void Update(World& world, const std::vector<Component*>& frame);
 
+	// Called by World::Clear to forget overlaps without sending Exit events.
 	void Clear()
 	{
 		myPairs.clear();
 	}
 
 private:
+	ColliderId myNextColliderId = 1;
 	std::set<std::pair<ColliderId, ColliderId>> myPairs;
 };

@@ -12,7 +12,6 @@
 #include <stdexcept>
 #include <vector>
 #include <functional>
-#include <limits>
 
 namespace
 {
@@ -56,110 +55,94 @@ namespace
 
 	struct CollisionListener : Component
 	{
-		CollisionSubscription Subscription;
-		int Calls = 0;
+		int Enters = 0;
+		int Stays = 0;
+		int Exits = 0;
 		Actor* LastActor = nullptr;
+		std::function<void(const Collision&)> EnterAction;
+		std::function<void(const Collision&)> StayAction;
+		std::function<void(const Collision&)> ExitAction;
 
-		void OnCollision(const Collision& collision)
+		void OnCollisionEnter(const Collision& collision) override
 		{
-			++Calls;
+			++Enters;
 			LastActor = collision.OtherActor();
+			if (EnterAction) { EnterAction(collision); }
+		}
+		void OnCollisionStay(const Collision& collision) override
+		{
+			++Stays;
+			LastActor = collision.OtherActor();
+			if (StayAction) { StayAction(collision); }
+		}
+		void OnCollisionExit(const Collision& collision) override
+		{
+			++Exits;
+			LastActor = collision.OtherActor();
+			if (ExitAction) { ExitAction(collision); }
 		}
 	};
 
-	void ColliderCallbacks()
+	void ComponentCollisionCallbacks()
 	{
 		World world;
 		auto* first = Sphere(world);
 		auto* second = Sphere(world);
 		second->SetBoxHalfExtents({1, 1, 1});
 		auto* listener = first->GetOwner()->AddComponent<CollisionListener>("Listener");
-		listener->Subscription = first->OnEnter(listener, &CollisionListener::OnCollision);
-		std::vector<CollisionOverlapPhase> phases;
-		auto stay = first->OnStay([&](const Collision& collision)
+		auto* anotherListener = first->GetOwner()->AddComponent<CollisionListener>("AnotherListener");
+		auto* reverse = second->GetOwner()->AddComponent<CollisionListener>("Reverse");
+		reverse->EnterAction = [&](const Collision& collision)
 		{
-			phases.push_back(collision.Phase);
-		});
-		auto exit = first->OnExit([&](const Collision& collision)
+			Check(collision.OtherCollider() == first, "Each side sees the opposite collider");
+		};
+		listener->ExitAction = [](const Collision& collision)
 		{
-			phases.push_back(collision.Phase);
 			Check(collision.OtherCollider() == nullptr && collision.OtherActor() == nullptr,
 			      "Destroyed collision participant resolves to null");
-		});
-		int reverseCalls = 0;
-		auto reverse = second->OnEnter([&](const Collision& collision)
-		{
-			++reverseCalls;
-			Check(collision.OtherCollider() == first, "Each side sees the opposite collider");
-		});
+		};
 		World unrelatedWorld;
 		Sphere(unrelatedWorld);
 		Sphere(unrelatedWorld);
 		unrelatedWorld.Update(0);
-		Check(listener->Calls == 0, "Callbacks are local to their World");
+		Check(listener->Enters == 0, "Collision methods are local to their World");
 		world.Update(0);
-		Check(listener->Calls == 1 && listener->LastActor == second->GetOwner() && reverseCalls == 1,
-		      "Sphere and box support member and lambda callbacks on both sides");
+		Check(listener->Enters == 1 && anotherListener->Enters == 1 &&
+		      listener->LastActor == second->GetOwner() && reverse->Enters == 1,
+		      "Every eligible Component on both colliding Actors receives Enter without registration");
 		world.Update(0);
 		second->GetOwner()->Destroy();
 		world.Update(0);
-		Check(phases == std::vector{CollisionOverlapPhase::Stay, CollisionOverlapPhase::Exit},
-		      "Stay and Exit callbacks are phase filtered");
+		Check(listener->Stays == 1 && listener->Exits == 1, "Component methods receive Stay and Exit");
 		world.Clear();
-		stay.Reset();
-		exit.Reset();
-		reverse.Reset();
 	}
 
-	void CallbackSubscriptionLifetime()
+	void CollisionComponentMembership()
 	{
 		World world;
 		auto* first = Sphere(world);
-		auto* second = Sphere(world);
-		int disconnectedCalls = 0;
-		CollisionSubscription later;
-		CollisionSubscription added;
-		int addedCalls = 0;
-		auto enter = first->OnEnter([&](const Collision&)
+		Sphere(world);
+		auto* earlier = first->GetOwner()->AddComponent<CollisionListener>("Earlier");
+		auto* later = first->GetOwner()->AddComponent<CollisionListener>("Later");
+		auto* unrelated = world.SpawnActor("Unrelated")->AddComponent<CollisionListener>("UnrelatedListener");
+		CollisionListener* added = nullptr;
+		earlier->EnterAction = [&](const Collision&)
 		{
-			later.Reset();
-			added = first->OnEnter([&](const Collision&)
-			{
-				++addedCalls;
-			});
-		});
-		later = first->OnEnter([&](const Collision&)
-		{
-			++disconnectedCalls;
-		});
-		{
-			auto temporary = first->OnEnter([&](const Collision&)
-			{
-				++disconnectedCalls;
-			});
-		}
+			later->SetEnabled(false);
+			added = first->GetOwner()->AddComponent<CollisionListener>("AddedDuringEnter");
+		};
 		world.Update(0);
-		Check(disconnectedCalls == 0 && addedCalls == 0,
-		      "Disconnect skips pending callbacks; new callbacks wait for the next notification");
-		enter.Reset();
-		CollisionSubscription moved = std::move(added);
-		second->SetEnabled(false);
+		Check(later->Enters == 0 && added && !added->HasBegunPlay() && added->Enters == 0,
+		      "Disabled Components skip pending delivery; newly added Components wait for the next frame");
+		earlier->SetEnabled(false);
+		later->SetEnabled(true);
 		world.Update(0);
-		second->SetEnabled(true);
-		world.Update(0);
-		Check(addedCalls == 1, "Moving a subscription retains its callback");
-		moved = first->OnStay([&](const Collision&)
-		{
-			++disconnectedCalls;
-		});
-		world.Update(0);
-		Check(disconnectedCalls == 1, "Replacing a subscription binds the new callback");
-		moved.Reset();
-		world.Update(0);
-		Check(disconnectedCalls == 1, "Reset stops later delivery");
+		Check(later->Stays == 1 && added->HasBegunPlay() && added->Stays == 1 && earlier->Stays == 0,
+		      "Eligible Components resume on the next phase after BeginPlay");
+		Check(unrelated->Enters == 0 && unrelated->Stays == 0, "Components on noncolliding Actors receive nothing");
 	}
 
-	void CallbackParticipantDestruction()
+	void CollisionParticipantDestruction()
 	{
 		World world;
 		auto* first = Sphere(world);
@@ -168,64 +151,92 @@ namespace
 		const ColliderId secondId = second->GetColliderId();
 		int destroyedSideCalls = 0;
 		int missingOtherCalls = 0;
-		auto destroy = first->OnEnter([&](const Collision& collision)
+		first->GetOwner()->AddComponent<CollisionListener>("DestroyOther")->EnterAction = [&](const Collision& collision)
 		{
 			if (collision.OtherColliderId == secondId)
 			{
 				second->GetOwner()->Destroy();
 			}
-		});
-		auto destroyedSide = second->OnEnter([&](const Collision&)
+		};
+		second->GetOwner()->AddComponent<CollisionListener>("DestroyedSide")->EnterAction = [&](const Collision&)
 		{
 			++destroyedSideCalls;
-		});
-		auto survivingSide = third->OnEnter([&](const Collision& collision)
+		};
+		third->GetOwner()->AddComponent<CollisionListener>("SurvivingSide")->EnterAction = [&](const Collision& collision)
 		{
 			if (collision.OtherColliderId == secondId)
 			{
-				Check(collision.OtherActor() == nullptr, "Later callbacks resolve pending destruction to null");
+				Check(collision.OtherActor() == nullptr, "Later handlers resolve pending destruction to null");
 				++missingOtherCalls;
 			}
-		});
+		};
 		world.Update(0);
 		Check(destroyedSideCalls == 0 && missingOtherCalls == 1,
-		      "Frozen batch reaches surviving colliders without calling destroyed colliders");
+		      "Frozen batch reaches surviving Actors without calling destroyed Actors");
 	}
 
-	void CallbackReceiverLifetime()
+	void CollisionReceiverLifetime()
 	{
 		World world;
 		auto* first = Sphere(world);
 		Sphere(world);
-		auto* receiver = world.SpawnActor("Receiver")->AddComponent<CollisionListener>("Listener");
-		receiver->Subscription = first->OnStay(receiver, &CollisionListener::OnCollision);
+		auto* killer = first->GetOwner()->AddComponent<CollisionListener>("Killer");
+		auto* receiver = first->GetOwner()->AddComponent<CollisionListener>("Receiver");
 		world.Update(0);
 		world.Update(0);
-		Check(receiver->Calls == 1, "Active member receiver gets Stay");
+		Check(receiver->Enters == 1 && receiver->Stays == 1, "Active Component receives collision methods");
 		receiver->SetEnabled(false);
 		world.Update(0);
-		Check(receiver->Calls == 1, "Disabled receiver gets no callback");
+		Check(receiver->Stays == 1, "Disabled Component receives nothing");
 		receiver->SetEnabled(true);
-		receiver->GetOwner()->SetActive(false);
+		first->GetOwner()->SetActive(false);
 		world.Update(0);
-		Check(receiver->Calls == 1, "Inactive receiver gets no callback");
-		receiver->GetOwner()->SetActive(true);
+		Check(receiver->Exits == 0 && receiver->Stays == 1, "Inactive Actor receives nothing");
+		first->GetOwner()->SetActive(true);
 		world.Update(0);
-		Check(receiver->Calls == 2, "Reactivated receiver resumes callbacks");
-		auto killer = first->OnStay([&](const Collision&)
-		{
-			receiver->Destroy();
-		});
-		// Rebind after the killer so pending destruction is checked during the same batch.
-		receiver->Subscription = first->OnStay(receiver, &CollisionListener::OnCollision);
+		Check(receiver->Enters == 2, "Reactivated Actor receives a fresh Enter");
+		killer->StayAction = [&](const Collision&) { receiver->Destroy(); };
 		world.Update(0);
-		Check(receiver->Calls == 2, "Destroyed receiver skips the later callback in this batch");
-		killer.Reset();
-		world.Update(0);
+		Check(receiver->Stays == 1, "Destroyed Component skips later delivery in the same batch");
+		killer->StayAction = {};
+		world.Update(0); // Frees the receiver. No registration can still refer to it.
 		world.Clear();
 		first = Sphere(world);
 		Sphere(world);
+		auto* replacement = first->GetOwner()->AddComponent<CollisionListener>("Replacement");
 		world.Update(0);
+		Check(replacement->Enters == 1, "Cleared World starts fresh with no listener cleanup");
+	}
+
+	void CollisionColliderDestruction()
+	{
+		World world;
+		auto* first = Sphere(world);
+		auto* second = Sphere(world);
+		auto* destroyer = first->GetOwner()->AddComponent<CollisionListener>("DestroyCollider");
+		auto* later = first->GetOwner()->AddComponent<CollisionListener>("Later");
+		auto* opposite = second->GetOwner()->AddComponent<CollisionListener>("Opposite");
+		destroyer->EnterAction = [&](const Collision&) { first->Destroy(); };
+		world.Update(0);
+		Check(destroyer->Enters == 1 && later->Enters == 0 && opposite->Enters == 1 && opposite->LastActor == nullptr,
+		      "Destroying the collider stops its Actor's remaining handlers while the opposite Actor resolves it to null");
+		world.Update(0);
+		Check(later->Exits == 0 && opposite->Exits == 1, "Only the surviving collider's Actor receives removal Exit");
+	}
+
+	void CollisionHandlerExceptionRecovery()
+	{
+		World world;
+		auto* first = Sphere(world);
+		Sphere(world);
+		auto* receiver = first->GetOwner()->AddComponent<CollisionListener>("ThrowsOnEnter");
+		receiver->EnterAction = [](const Collision&) { throw std::runtime_error("Expected collision handler failure"); };
+		bool caught = false;
+		try { world.Update(0); }
+		catch (const std::runtime_error&) { caught = true; }
+		Check(caught, "Component collision exception reaches the caller");
+		world.Update(0);
+		Check(receiver->Enters == 1 && receiver->Stays == 1, "World can update again after a collision handler throws");
 	}
 
 	void SpherePhases()
@@ -253,23 +264,38 @@ namespace
 		Events events(world);
 		auto* first = Sphere(world);
 		auto* second = Sphere(world);
-		Check(first->GetLayer() == 0 && first->GetMask() == UINT32_MAX, "Neutral filter defaults");
-		Check(second->SetLayer(31) && !second->SetLayer(32) && second->GetLayer() == 31, "Layer range preserves valid state");
+		const auto highestLayer = static_cast<CollisionLayer>(31);
+		const auto outOfRangeLayer = static_cast<CollisionLayer>(32);
+		Check(first->GetLayer() == CollisionLayer::Default && first->GetMask() == UINT32_MAX, "Neutral filter defaults");
+		Check(second->SetLayer(highestLayer) && !second->SetLayer(outOfRangeLayer) && second->GetLayer() == highestLayer, "Layer range preserves valid state");
 		world.Update(0);
 		Check(events.Values.size() == 1, "Default masks include layer31");
-		first->SetMask(1);
+		first->SetOverlapsWith({CollisionLayer::Default});
 		world.Update(0);
 		Check(events.Values.back().Phase == CollisionOverlapPhase::Exit, "One-sided rejection exits");
-		first->SetMask(std::uint32_t{1} << 31);
-		second->SetMask(1);
+		first->SetOverlapsWith({highestLayer});
+		second->SetOverlapsWith({CollisionLayer::Default});
 		world.Update(0);
 		Check(events.Values.back().Phase == CollisionOverlapPhase::Enter, "Bilateral masks reenter");
-		second->SetMask(0);
+		second->SetOverlapsWithNone();
 		world.Update(0);
 		Check(events.Values.back().Phase == CollisionOverlapPhase::Exit, "Zero mask exits");
 		events.Values.clear();
 		world.Update(0);
 		Check(events.Values.empty(), "Exited pairs do not repeat Exit");
+
+		Check(first->SetOverlapsWith({CollisionLayer::Default, highestLayer, highestLayer}), "Multiple accepted layers allow duplicates and layer31");
+		Check(!first->SetOverlapsWith({CollisionLayer::Player, outOfRangeLayer}) && first->GetMask() == ((std::uint32_t{1} << 31) | 1u),
+		      "Invalid list preserves the previous filter without applying its valid prefix");
+		second->SetOverlapsWithAll();
+		world.Update(0);
+		Check(events.Values.size() == 1 && events.Values.back().Phase == CollisionOverlapPhase::Enter,
+		      "All-layer filter accepts the other collider");
+		Check(first->SetOverlapsWith({CollisionLayer::Default}), "Accepted layer list replaces previous layers");
+		world.Update(0);
+		Check(events.Values.back().Phase == CollisionOverlapPhase::Exit, "Replacement list removes previous layer31");
+		Check(first->SetOverlapsWith({}), "Empty accepted layer list is valid");
+		Check(first->GetMask() == 0, "Empty list accepts no layers");
 	}
 
 	void Lifetime()
@@ -467,29 +493,6 @@ namespace
 		Check(deliveries == 1, "World Clear calls EndPlay and removes old listener");
 	}
 
-	void InvalidSphereConfigurationAndTransforms()
-	{
-		World world;
-		Events events(world);
-		auto* first = Sphere(world);
-		Sphere(world);
-		Check(!first->SetSphereRadius(0) && !first->SetSphereRadius(-1) &&
-		          !first->SetSphereRadius(std::numeric_limits<float>::infinity()) && first->GetSphereRadius() == 1,
-		      "Invalid sphere dimensions preserve valid value");
-		world.Update(0);
-		first->GetTransform().SetLocalScale({1, 2, 1});
-		world.Update(0);
-		Check(events.Values.back().Phase == CollisionOverlapPhase::Exit, "Nonuniform sphere excluded");
-		first->GetTransform().SetLocalScale({1, 1, 1});
-		world.Update(0);
-		CommonUtilities::Matrix4f reflection;
-		reflection(1, 1) = -1;
-		first->GetOwner()->GetTransform().SetMatrix(reflection);
-		first->GetTransform().SetMatrix(reflection);
-		world.Update(0);
-		Check(events.Values.back().Phase == CollisionOverlapPhase::Exit, "Source reflections excluded even when final reflections cancel");
-	}
-
 	void SphereBoxPhases()
 	{
 		for (bool boxFirst : {true, false})
@@ -499,7 +502,7 @@ namespace
 			auto* first = Sphere(world);
 			auto* second = Sphere(world, {2, 0, 0});
 			auto* box = boxFirst ? first : second;
-			Check(box->SetBoxHalfExtents({1, 1, 1}), "Box dimensions accepted");
+			box->SetBoxHalfExtents({1, 1, 1});
 			world.Update(0);
 			world.Update(0);
 			second->GetTransform().SetLocalPosition({0.1f, 0, 0});
@@ -576,9 +579,6 @@ namespace
 		Sphere(world, {10, 0, -5});
 		world.Update(0);
 		Check(events.Values.size() == 1, "Actor-relative offset yaw and positive nonuniform box scaling compose");
-		box->GetTransform().SetLocalRotationDegrees(45, 0, 0);
-		world.Update(0);
-		Check(events.Values.back().Phase == CollisionOverlapPhase::Exit, "Composed nonuniform-scale shear excluded");
 		world.Clear();
 		events.Values.clear();
 		auto* changing = Sphere(world);
@@ -588,52 +588,9 @@ namespace
 		changing->SetBoxHalfExtents({2, 1, 1});
 		world.Update(0);
 		Check(events.Values.size() == 1 && events.Values[0].Phase == CollisionOverlapPhase::Enter, "Enabled shape change creates collision");
-		Check(!changing->SetBoxHalfExtents({0, 1, 1}) && !changing->SetBoxHalfExtents({1, -1, 1}) &&
-		          !changing->SetBoxHalfExtents({1, 1, std::numeric_limits<float>::quiet_NaN()}) &&
-		          changing->GetShape() == ColliderShape::Box && changing->GetBoxHalfExtents().x == 2,
-		      "Invalid box dimensions preserve shape and size");
 		changing->SetSphereRadius(1);
 		world.Update(0);
 		Check(events.Values.back().Phase == CollisionOverlapPhase::Exit, "Sphere setter switches shape back");
-	}
-
-	void UnsupportedBoxTransforms()
-	{
-		World world;
-		Events events(world);
-		auto* box = Sphere(world);
-		box->SetBoxHalfExtents({1, 1, 1});
-		Sphere(world);
-		world.Update(0);
-		const auto checkExcluded = [&](const CommonUtilities::Matrix4f& matrix, const char* message)
-		{
-			box->GetTransform().SetMatrix(matrix);
-			world.Update(0);
-			Check(events.Values.back().Phase == CollisionOverlapPhase::Exit, message);
-			box->GetTransform().SetMatrix(CommonUtilities::Matrix4f{});
-			world.Update(0);
-			Check(events.Values.back().Phase == CollisionOverlapPhase::Enter, "Restored geometry reenters");
-		};
-		Transform tilted;
-		tilted.SetLocalRotationDegrees(0, 15, 0);
-		checkExcluded(tilted.GetLocalMatrix(), "Pitch excluded");
-		tilted.SetLocalRotationDegrees(0, 0, 15);
-		checkExcluded(tilted.GetLocalMatrix(), "Roll excluded");
-		CommonUtilities::Matrix4f matrix;
-		matrix(1, 3) = 0.4f;
-		checkExcluded(matrix, "Raw shear excluded");
-		matrix = CommonUtilities::Matrix4f{};
-		matrix(1, 1) = -1;
-		checkExcluded(matrix, "Raw reflection excluded");
-		matrix = CommonUtilities::Matrix4f{};
-		matrix(1, 4) = 0.2f;
-		checkExcluded(matrix, "Nonaffine transform excluded");
-		matrix = CommonUtilities::Matrix4f{};
-		matrix(4, 1) = std::numeric_limits<float>::infinity();
-		checkExcluded(matrix, "Nonfinite transform excluded");
-		matrix = CommonUtilities::Matrix4f{};
-		matrix(2, 2) = 0;
-		checkExcluded(matrix, "Zero scale excluded");
 	}
 
 	void DebugDrawing()
@@ -703,14 +660,15 @@ namespace
 		World world;
 		Events events(world);
 		auto* first = Sphere(world);
-		Sphere(world);
-		first->GetTransform().SetLocalScale({-1, 1, 1});
-		world.Update(0);
-		Check(events.Values.empty(), "Reflected source matrix excluded");
-		first->GetTransform().SetMatrix(CommonUtilities::Matrix4f{});
+		Sphere(world, {2.5f, 0, 0});
+		first->GetTransform().SetLocalScale({2, 2, 2});
 		world.Update(0);
 		Check(events.Values.size() == 1 && events.Values[0].Phase == CollisionOverlapPhase::Enter,
-		      "Valid current matrix overrides stale authored scale");
+		      "Uniformly scaled sphere reaches the other collider");
+		first->GetTransform().SetMatrix(CommonUtilities::Matrix4f{});
+		world.Update(0);
+		Check(events.Values.size() == 2 && events.Values[1].Phase == CollisionOverlapPhase::Exit,
+		      "Current matrix overrides the previously authored scale");
 	}
 }
 
@@ -722,22 +680,22 @@ int main()
 	{
 		ServiceLocator::GetInstance().Initialize();
 		RunCollisionImportTests();
-		ColliderCallbacks();
-		CallbackSubscriptionLifetime();
-		CallbackParticipantDestruction();
-		CallbackReceiverLifetime();
+		ComponentCollisionCallbacks();
+		CollisionComponentMembership();
+		CollisionParticipantDestruction();
+		CollisionReceiverLifetime();
+		CollisionColliderDestruction();
+		CollisionHandlerExceptionRecovery();
 		SpherePhases();
 		Filtering();
 		Lifetime();
 		FrozenMembershipAndCurrentTransforms();
 		CallbackBatchAndExceptionRecovery();
 		SubscriptionLifetime();
-		InvalidSphereConfigurationAndTransforms();
 		SphereBoxPhases();
 		BoxBoxTouching();
 		OrientedGeometry();
 		BoxScaleOffsetAndShapeChanges();
-		UnsupportedBoxTransforms();
 		RawMatrixOverridesAuthoredScale();
 		DebugDrawing();
 		ServiceLocator::GetInstance().KillServices();

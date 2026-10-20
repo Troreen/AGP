@@ -493,28 +493,16 @@ Component* SceneWorldBuilder::CreateComponent(Actor& anActor, const ComponentRec
 			}
 			else if constexpr (std::is_same_v<ComponentType, ColliderData>)
 			{
+				// Turn the imported shape settings into a live Component owned by this Actor.
 				auto* collider = anActor.AddComponent<ColliderComponent>(commonData.Name);
-				const bool validShape = std::visit([&](const auto& shape)
+				if (const auto* sphere = std::get_if<SphereColliderShape>(&someComponentData.Shape))
 				{
-					using ShapeType = std::decay_t<decltype(shape)>;
-					if constexpr (std::is_same_v<ShapeType, SphereColliderShape>)
-					{
-						return collider->SetSphereRadius(shape.Radius);
-					}
-					else
-					{
-						return collider->SetBoxHalfExtents(shape.HalfExtents);
-					}
-				}, someComponentData.Shape);
-				if (!validShape)
-				{
-					throw std::runtime_error("Invalid collider dimensions");
+					collider->SetSphereRadius(sphere->Radius);
 				}
-				if (!collider->SetLayer(someComponentData.Layer))
+				else
 				{
-					throw std::runtime_error("Invalid collider layer");
+					collider->SetBoxHalfExtents(std::get<BoxColliderShape>(someComponentData.Shape).HalfExtents);
 				}
-				collider->SetMask(someComponentData.Mask);
 				return collider;
 			}
 			else if constexpr (std::is_same_v<ComponentType, CustomComponentData>)

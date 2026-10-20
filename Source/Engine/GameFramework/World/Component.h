@@ -6,6 +6,7 @@
 
 class Actor;
 class World;
+struct Collision;
 
 // Owned by one Actor. Owner is available after AddComponent returns.
 class Component
@@ -24,6 +25,21 @@ public:
 	}
 
 	virtual void Update(float)
+	{
+	}
+
+	// Override the phases this Component needs. The World calls them after normal updates
+	// when this Actor's collider overlaps another: Enter once, Stay while overlapping, then Exit.
+	// Only enabled Components on active Actors receive these calls. No registration is needed.
+	virtual void OnCollisionEnter(const Collision&)
+	{
+	}
+
+	virtual void OnCollisionStay(const Collision&)
+	{
+	}
+
+	virtual void OnCollisionExit(const Collision&)
 	{
 	}
 

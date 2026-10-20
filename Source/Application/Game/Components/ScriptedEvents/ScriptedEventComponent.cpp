@@ -1,5 +1,6 @@
 #include "ScriptedEventComponent.h"
 #include "ScriptedActionComponent.h"
+#include "GameFramework/Collision/CollisionLayers.h"
 #include "GameFramework/Components/ColliderComponent.h"
 #include "GameFramework/GameFrameworkLog.h"
 #include "GameFramework/Scenes/CustomComponentVariables.h"
@@ -27,12 +28,14 @@ void ScriptedEventComponent::InitializeCustomVariables(const CustomComponentVari
 
 void ScriptedEventComponent::BeginPlay()
 {
+	// A named collider lets Player entry start this sequence. Leave the name blank for manual playback.
 	if (!TriggerCollider.empty())
 	{
 		auto* collider = dynamic_cast<ColliderComponent*>(GetOwner()->FindComponent(TriggerCollider));
 		if (collider)
 		{
-			myCollisionSubscription = collider->OnEnter(this, &ScriptedEventComponent::OnTriggerEnter);
+			collider->SetLayer(CollisionLayer::Trigger);
+			collider->SetOverlapsWith({CollisionLayer::Player});
 		}
 		else
 		{
@@ -53,7 +56,7 @@ void ScriptedEventComponent::BeginPlay()
 	}
 }
 
-void ScriptedEventComponent::OnTriggerEnter(const Collision& collision)
+void ScriptedEventComponent::OnCollisionEnter(const Collision& collision)
 {
 	auto* collider = dynamic_cast<ColliderComponent*>(GetOwner()->FindComponent(TriggerCollider));
 	auto* enteringCollider = collision.OtherCollider();
@@ -62,6 +65,7 @@ void ScriptedEventComponent::OnTriggerEnter(const Collision& collision)
 	{
 		return;
 	}
+
 	if (Play())
 	{
 		collider->SetEnabled(false);
@@ -325,7 +329,6 @@ void ScriptedEventComponent::Cancel() noexcept
 
 void ScriptedEventComponent::EndPlay() noexcept
 {
-	myCollisionSubscription.Reset();
 	// Unloading the scene or removing this component must also stop the event and disconnect its button listener.
 	Cancel();
 	if (myListeningForTrigger)

@@ -1,11 +1,10 @@
 #pragma once
 #include "GameFramework/Components/SceneComponent.h"
-#include "GameFramework/Collision/CollisionSubscription.h"
+#include "GameFramework/Collision/CollisionOverlapEvent.h"
+#include "GameFramework/Collision/CollisionLayers.h"
 #include "Vector4.hpp"
-#include <functional>
-#include <memory>
-#include <utility>
-#include <vector>
+#include <cstdint>
+#include <initializer_list>
 
 enum class ColliderShape
 {
@@ -16,43 +15,27 @@ enum class ColliderShape
 // Detects when shapes overlap without stopping their movement.
 class ColliderComponent : public SceneComponent
 {
-	friend class Actor;
 	friend class World;
 	friend class CollisionSystem;
 
 public:
-	// [[nodiscard]] reminds the caller to store the returned subscription; otherwise listening stops immediately.
-	[[nodiscard]] CollisionSubscription OnEnter(std::function<void(const Collision&)> collisionCallback);
-	[[nodiscard]] CollisionSubscription OnStay(std::function<void(const Collision&)> collisionCallback);
-	[[nodiscard]] CollisionSubscription OnExit(std::function<void(const Collision&)> collisionCallback);
-
-	// Keep the subscription on the receiving Component so its destruction stops listening.
-	// Example: mySubscription = hitbox->OnEnter(this, &CombatComponent::OnHit);
-	template <class TComponent>
-	[[nodiscard]] CollisionSubscription OnEnter(TComponent* listeningComponent, void (TComponent::*receiverMethod)(const Collision&))
-	{
-		return OnEnter(BindReceiver(listeningComponent, receiverMethod));
-	}
-
-	template <class TComponent>
-	[[nodiscard]] CollisionSubscription OnStay(TComponent* listeningComponent, void (TComponent::*receiverMethod)(const Collision&))
-	{
-		return OnStay(BindReceiver(listeningComponent, receiverMethod));
-	}
-
-	template <class TComponent>
-	[[nodiscard]] CollisionSubscription OnExit(TComponent* listeningComponent, void (TComponent::*receiverMethod)(const Collision&))
-	{
-		return OnExit(BindReceiver(listeningComponent, receiverMethod));
-	}
-
 	// Enables collider outlines for every collider in the process. Intended for debug visualization.
 	static void SetAllDebugDrawEnabled(bool enabled);
 
-	bool SetSphereRadius(float radius);
-	bool SetBoxHalfExtents(const CommonUtilities::Vector3f& halfExtents);
-	bool SetLayer(unsigned int layer);
-	bool SetMask(std::uint32_t mask);
+	// Setting dimensions also selects the shape. Supply a positive radius or positive box half-extents.
+	void SetSphereRadius(float radius);
+	void SetBoxHalfExtents(const CommonUtilities::Vector3f& halfExtents);
+	// The layer says what this collider is; the accepted layers say what it can overlap.
+	bool SetLayer(CollisionLayer layer);
+
+	// Replaces the accepted layers. Both colliders must accept each other's layer.
+	bool SetOverlapsWith(std::initializer_list<CollisionLayer> layers);
+
+	void SetOverlapsWithAll();
+	void SetOverlapsWithNone();
+
+	// Raw mask access. Gameplay can use SetOverlapsWith.
+	void SetMask(std::uint32_t mask);
 
 	// Drawing is independent of collision participation, so disabled volumes remain visible.
 	void SetDebugDrawEnabled(bool enabled)
@@ -95,7 +78,7 @@ public:
 		return myBoxHalfExtents;
 	}
 
-	unsigned int GetLayer() const
+	CollisionLayer GetLayer() const
 	{
 		return myLayer;
 	}
@@ -116,24 +99,6 @@ public:
 	}
 
 private:
-	template <class TComponent>
-	static std::function<void(const Collision&)> BindReceiver(TComponent* listeningComponent, void (TComponent::*receiverMethod)(const Collision&))
-	{
-		return [listeningComponent, receiverMethod](const Collision& collision)
-		{
-			if (receiverMethod && CanReceiveCollision(listeningComponent))
-			{
-				(listeningComponent->*receiverMethod)(collision);
-			}
-		};
-	}
-
-	static bool CanReceiveCollision(const Component* listeningComponent);
-	CollisionSubscription Subscribe(CollisionOverlapPhase collisionPhase, std::function<void(const Collision&)> collisionCallback);
-	void DispatchCollision(const Collision& collision);
-	// The returned subscription owns the registration; the collider must not extend its lifetime.
-	std::vector<std::weak_ptr<CollisionSubscription::Subscription>> myCollisionSubscriptions;
-
 	void DrawDebug() const;
 
 	static bool ourAllDebugDrawEnabled;
@@ -144,6 +109,6 @@ private:
 	float mySphereRadius = 1.0f;
 	CommonUtilities::Vector3f myBoxHalfExtents{1, 1, 1};
 	ColliderShape myShape = ColliderShape::Sphere;
-	unsigned int myLayer = 0;
+	CollisionLayer myLayer = CollisionLayer::Default;
 	std::uint32_t myMask = UINT32_MAX;
 };

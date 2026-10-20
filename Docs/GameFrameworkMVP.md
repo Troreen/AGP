@@ -138,6 +138,10 @@ An exception after World commit is fatal because there is no rollback layer.
   its Actor.
 - `BeginPlay` runs once for Components present when the World starts.
 - Enabled Components on active Actors update in insertion order.
+- After updates, Components on colliding Actors receive `OnCollisionEnter`,
+  `OnCollisionStay`, or `OnCollisionExit`. Override these methods as needed;
+  no registration is required. Disabled or destroyed Components and inactive
+  Actors receive no collision methods.
 - Additions made during Component callbacks begin updating at the next World
   update. Additions made by Game before `World::Update` are available that frame.
 - Destroy marks an object immediately; storage is released at an update boundary
@@ -148,7 +152,9 @@ An exception after World commit is fatal because there is no rollback layer.
 
 Actor names are unique within a World and Component names are unique within an
 Actor. Components can find dependencies by name or type during BeginPlay or
-Update. A shared EventBus delivers collision overlap events. There is no Actor
+Update. A shared EventBus also delivers collision overlap events for diagnostics
+and observers that need every pair. See [collision detection](CollisionDetection.md)
+for Component collision methods and lifetime rules. There is no Actor
 hierarchy, general reflection, blocking physics, streaming, or general
 dependency-injection layer.
 

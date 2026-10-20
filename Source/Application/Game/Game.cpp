@@ -1,7 +1,7 @@
 #include "Game.h"
 #include "Runtime/GameApplication.h"
 #include "GameLog.h"
-#include "GameCollisionLayers.h"
+#include "GameFramework/Collision/CollisionLayers.h"
 #include "GameFramework/AudioManager.h"
 #include "GameFramework/AssetHandling/AssetRegistry.h"
 #include "GameFramework/AssetHandling/AnimationAsset.h"
@@ -148,8 +148,8 @@ void Game::ConfigureWorld(World& aWorld)
 		auto* collider = actor->AddComponent<ColliderComponent>("Collider");
 		collider->SetSphereRadius(60.0f);
 		collider->GetTransform().SetLocalPosition({0, 90, 0});
-		collider->SetLayer(GameCollisionLayers::Player);
-		collider->SetMask(1u << GameCollisionLayers::Trigger);
+		collider->SetLayer(CollisionLayer::Player);
+		collider->SetOverlapsWith({CollisionLayer::Trigger});
 	}
 //
 	//{

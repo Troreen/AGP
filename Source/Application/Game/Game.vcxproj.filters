@@ -97,7 +97,6 @@
       <Filter>Components</Filter>
     </ClInclude>
     <ClInclude Include="Game.h" />
-    <ClInclude Include="GameCollisionLayers.h" />
     <ClInclude Include="GameLog.h" />
     <ClInclude Include="Player\PlayerActor.h">
       <Filter>Player</Filter>

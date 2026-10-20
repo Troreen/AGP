@@ -10,6 +10,15 @@
 
 namespace
 {
+	struct CollisionCounter : Component
+	{
+		CollisionCounter(int& enters, int& exits) : Enters(enters), Exits(exits) {}
+		void OnCollisionEnter(const Collision&) override { ++Enters; }
+		void OnCollisionExit(const Collision&) override { ++Exits; }
+		int& Enters;
+		int& Exits;
+	};
+
 	// Synthetic input isolates unsupported export cases; it is not evidence from Unreal.
 	class SyntheticSceneFile
 	{
@@ -62,12 +71,11 @@ namespace
 		CheckImport(actor != nullptr, "Exported trigger Actor exists");
 		auto* box = actor->GetComponent<ColliderComponent>();
 		CheckImport(box != nullptr, "Exported TriggerBox becomes a working ColliderComponent");
-		CheckImport(box->IsEnabled() && box->GetLayer() == 0 && box->GetMask() == UINT32_MAX,
+		CheckImport(box->IsEnabled() && box->GetLayer() == CollisionLayer::Default && box->GetMask() == UINT32_MAX,
 		            "Untagged exported shapes keep enabled layer-zero all-layer defaults");
 		int enters = 0;
 		int exits = 0;
-		auto enter = box->OnEnter([&](const Collision&) { ++enters; });
-		auto exit = box->OnExit([&](const Collision&) { ++exits; });
+		box->GetOwner()->AddComponent<CollisionCounter>("Counter", enters, exits);
 		Actor* probe = world->SpawnActor("Probe");
 		probe->AddComponent<ColliderComponent>("ProbeSphere");
 		// Unreal's authored box center is (-130,254,-1560) after axis conversion.
@@ -94,8 +102,7 @@ namespace
 		CheckImport(collider != nullptr, "Exported sphere becomes a working ColliderComponent");
 		int enters = 0;
 		int exits = 0;
-		auto enter = collider->OnEnter([&](const Collision&) { ++enters; });
-		auto exit = collider->OnExit([&](const Collision&) { ++exits; });
+		collider->GetOwner()->AddComponent<CollisionCounter>("Counter", enters, exits);
 		Actor* probe = world->SpawnActor("Probe");
 		probe->AddComponent<ColliderComponent>("ProbeSphere");
 		probe->GetTransform().SetWorldPosition({17, 20, 30});
@@ -106,52 +113,38 @@ namespace
 		CheckImport(exits == 1, "Root sphere scale is applied once");
 	}
 
-	void TaggedTriggerFiltering()
+	void CodeConfiguredTriggerFiltering()
 	{
 		SyntheticSceneFile file(SyntheticActor(
 		    R"({"Name":"Trigger","Parent":"","TypeID":6,"Tags":["CollisionLayer=Trigger","CollisionMask=Player|Enemy"],"Transform":[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],"Bounds":{"x":2,"y":2,"z":2}})"));
-		UnrealSceneImporter importer({{"Player", 1}, {"Trigger", 2}, {"Enemy", 3}});
+		UnrealSceneImporter importer;
 		auto imported = importer.ImportScene(file.Path);
-		CheckImport(imported.Data.has_value() && imported.Diagnostics.empty(), "Named collision tags import");
+		CheckImport(imported.Data.has_value() && imported.Diagnostics.empty(), "Collision tags are retained as ordinary component tags");
 		AssetRegistry assets;
 		SceneWorldBuilder builder;
 		auto world = builder.BuildWorld(*imported.Data, assets, {}, {1280, 720});
 		auto* trigger = world->FindActor("SyntheticActor")->GetComponent<ColliderComponent>();
-		CheckImport(trigger != nullptr && trigger->GetLayer() == 2 && trigger->GetMask() == ((1u << 1) | (1u << 3)),
-		            "Shape tags configure the injected gameplay layer names");
+		CheckImport(trigger != nullptr && trigger->GetLayer() == CollisionLayer::Default && trigger->GetMask() == UINT32_MAX,
+		            "Importer leaves filtering at defaults even when collision tags are present");
+		trigger->SetLayer(CollisionLayer::Trigger);
+		trigger->SetOverlapsWith({CollisionLayer::Player, CollisionLayer::Enemy});
 		int enters = 0;
 		int exits = 0;
-		auto enter = trigger->OnEnter([&](const Collision&) { ++enters; });
-		auto exit = trigger->OnExit([&](const Collision&) { ++exits; });
+		trigger->GetOwner()->AddComponent<CollisionCounter>("Counter", enters, exits);
 		auto* probe = world->SpawnActor("Probe")->AddComponent<ColliderComponent>("ProbeSphere");
-		probe->SetLayer(1);
-		probe->SetMask(1u << 3);
+		probe->SetLayer(CollisionLayer::Player);
+		probe->SetOverlapsWith({CollisionLayer::Enemy});
 		world->Update(0);
 		CheckImport(enters == 0, "Trigger accepting Player is insufficient when Player rejects Trigger");
-		probe->SetMask(1u << 2);
+		probe->SetOverlapsWith({CollisionLayer::Trigger});
 		world->Update(0);
 		CheckImport(enters == 1, "Mutually accepted Player enters imported Trigger");
-		probe->SetLayer(0);
+		probe->SetLayer(CollisionLayer::Default);
 		world->Update(0);
 		CheckImport(exits == 1, "Trigger mask excludes an unlisted layer");
-		probe->SetLayer(3);
+		probe->SetLayer(CollisionLayer::Enemy);
 		world->Update(0);
-		CheckImport(enters == 2, "Pipe-delimited Enemy also enters imported Trigger");
-	}
-
-	void InvalidAuthoredDimensions()
-	{
-		UnrealSceneImporter importer;
-		for (const auto& shape : {
-		         R"({"Name":"InvalidBox","Parent":"","TypeID":6,"Tags":[],"Transform":[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],"Bounds":{"x":0,"y":2,"z":2}})",
-		         R"({"Name":"InvalidSphere","Parent":"","TypeID":7,"Tags":[],"Transform":[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],"Radius":-1})"})
-		{
-			SyntheticSceneFile file(SyntheticActor(shape));
-			auto imported = importer.ImportScene(file.Path);
-			CheckImport(!imported.Data && !imported.Diagnostics.empty(), "Invalid authored shape dimensions reject the scene with diagnostics");
-			CheckImport(imported.Diagnostics.front().Context.find("Invalid") != std::string::npos,
-			            "Invalid dimensions diagnostic identifies its shape component");
-		}
+		CheckImport(enters == 2, "Code-configured mask also accepts Enemy");
 	}
 
 	void UnsupportedShapeLayouts()
@@ -161,56 +154,27 @@ namespace
 		const std::string root = R"({"Name":"Root","Parent":"","TypeID":0,"Tags":[],"Transform":[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]})";
 		const std::string nested = R"({"Name":"Middle","Parent":"Root","TypeID":0,"Tags":[],"Transform":[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]},{"Name":"NestedBox","Parent":"Middle","TypeID":6,"Tags":[],"Transform":[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],"Bounds":{"x":2,"y":2,"z":2}})";
 		UnrealSceneImporter importer;
-		for (const auto& components : {root + "," + box + "," + sphere, root + "," + nested})
-		{
-			SyntheticSceneFile file(SyntheticActor(components));
-			auto imported = importer.ImportScene(file.Path);
-			CheckImport(!imported.Data && !imported.Diagnostics.empty(),
-			            "Multiple supported shapes and nested shape attachments reject the scene");
-			CheckImport(imported.Diagnostics.front().Context.find("SyntheticActor") != std::string::npos,
-			            "Unsupported collider layout diagnostic identifies its Actor");
-		}
-	}
-
-	void CollisionTagDiagnostics()
-	{
-		UnrealSceneImporter importer({{"Player", 1}, {"Trigger", 2}, {"Enemy", 3}});
-		for (const std::string tags : {
-		         R"("CollisionLayer=Unknown")", R"("CollisionLayer=Default")",
-		         R"("CollisionMask=Unknown")", R"("CollisionLayer=Player","CollisionLayer=Enemy")",
-		         R"("CollisionMask=Player","CollisionMask=Enemy")", R"("CollisionLayer=")",
-		         R"("CollisionMask=Player|")", R"("CollisionMask=Player||Enemy")",
-		         R"("CollisionMask=Player| Enemy")", R"("CollisionLayer")", R"("CollisionMask")"})
-		{
-			SyntheticSceneFile file(SyntheticActor(
-			    R"({"Name":"TaggedSphere","Parent":"","TypeID":7,"Tags":[)" + tags +
-			    R"(],"Transform":[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],"Radius":2})"));
-			auto imported = importer.ImportScene(file.Path);
-			CheckImport(!imported.Data && !imported.Diagnostics.empty(), "Unknown duplicate and malformed collision tags reject the scene");
-			const auto& diagnostic = imported.Diagnostics.front();
-			CheckImport(diagnostic.Context.find("TaggedSphere") != std::string::npos &&
-			                diagnostic.Message.find("Collision") != std::string::npos,
-			            "Collision tag diagnostic identifies its component and setting");
-		}
-	}
-
-	void ExplicitEmptyMask()
-	{
-		SyntheticSceneFile file(SyntheticActor(
-		    R"({"Name":"SilentSphere","Parent":"","TypeID":7,"Tags":["CollisionMask="],"Transform":[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],"Radius":2})"));
-		UnrealSceneImporter importer;
-		auto imported = importer.ImportScene(file.Path);
-		CheckImport(imported.Data.has_value() && imported.Diagnostics.empty(), "Explicit empty mask imports as accepting no layers");
+		SyntheticSceneFile multipleShapes(SyntheticActor(root + "," + box + "," + sphere));
+		auto imported = importer.ImportScene(multipleShapes.Path);
+		CheckImport(imported.Data.has_value(), "Importer leaves the one-collider rule to Actor attachment");
 		AssetRegistry assets;
 		SceneWorldBuilder builder;
-		auto world = builder.BuildWorld(*imported.Data, assets, {}, {1280, 720});
-		auto* collider = world->FindActor("SyntheticActor")->GetComponent<ColliderComponent>();
-		CheckImport(collider && collider->GetMask() == 0, "Empty mask differs from absent all-layer mask");
-		int enters = 0;
-		auto enter = collider->OnEnter([&](const Collision&) { ++enters; });
-		world->SpawnActor("Probe")->AddComponent<ColliderComponent>("ProbeSphere");
-		world->Update(0);
-		CheckImport(enters == 0, "Explicit empty mask suppresses overlaps");
+		bool rejected = false;
+		try
+		{
+			builder.BuildWorld(*imported.Data, assets, {}, {1280, 720});
+		}
+		catch (const std::runtime_error& error)
+		{
+			rejected = std::string(error.what()).find("An Actor can own only one collider") != std::string::npos;
+		}
+		CheckImport(rejected, "Actor attachment rejects multiple colliders during scene construction");
+
+		SyntheticSceneFile nestedShape(SyntheticActor(root + "," + nested));
+		imported = importer.ImportScene(nestedShape.Path);
+		CheckImport(!imported.Data && !imported.Diagnostics.empty(), "Nested shape attachments reject the scene during import");
+		CheckImport(imported.Diagnostics.front().Context.find("SyntheticActor") != std::string::npos,
+		            "Unsupported collider layout diagnostic identifies its Actor");
 	}
 
 	void CapsuleRemainsPlaceholder()
@@ -230,7 +194,7 @@ namespace
 
 	void FullComponentSceneImports()
 	{
-		UnrealSceneImporter importer({{"Player", 1}, {"Trigger", 2}, {"Enemy", 3}});
+		UnrealSceneImporter importer;
 		auto imported = importer.ImportScene("Content/ExportedScenes/lvl_component_test/Lvl_Component_Test_Level.json");
 		CheckImport(imported.Data.has_value() && imported.Diagnostics.empty(), "Full current component test scene imports without graphics resources");
 	}
@@ -253,8 +217,7 @@ namespace
 		CheckImport(box != nullptr, "Yawed box becomes a working ColliderComponent");
 		int enters = 0;
 		int exits = 0;
-		auto enter = box->OnEnter([&](const Collision&) { ++enters; });
-		auto exit = box->OnExit([&](const Collision&) { ++exits; });
+		box->GetOwner()->AddComponent<CollisionCounter>("Counter", enters, exits);
 		auto* probe = world->SpawnActor("Probe");
 		probe->AddComponent<ColliderComponent>("ProbeSphere")->SetSphereRadius(0.1f);
 		// After conversion and yaw the box has world half-extents (4,2,1), centered at (10,20,30).
@@ -271,11 +234,8 @@ void RunCollisionImportTests()
 {
 	AuthoredTriggerBox();
 	SyntheticRootSphere();
-	TaggedTriggerFiltering();
-	InvalidAuthoredDimensions();
+	CodeConfiguredTriggerFiltering();
 	UnsupportedShapeLayouts();
-	CollisionTagDiagnostics();
-	ExplicitEmptyMask();
 	CapsuleRemainsPlaceholder();
 	FullComponentSceneImports();
 	SyntheticYawedUnequalBox();

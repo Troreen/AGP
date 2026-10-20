@@ -99,7 +99,7 @@ Directional shadows use four cascades. Spot shadows use perspective shadow maps 
 
 For component-based scripted events, see [Scripted events](Docs/ScriptedEvents.md) and the [Unreal test guide](Docs/ScriptedEventsUnrealTestGuide.md).
 
-For sphere/box overlap events and collider callbacks,
+For sphere/box overlaps and Component collision methods,
 see [Collision detection](Docs/CollisionDetection.md).
 For collision-triggered scripted sequences and the remaining Unreal authoring work,
 see [Collision-triggered scripted events](Docs/ScriptedEventCollisionTriggers.md).

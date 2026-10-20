@@ -55,8 +55,6 @@ struct ColliderData
 {
 	ComponentData Common;
 	std::variant<SphereColliderShape, BoxColliderShape> Shape;
-	unsigned int Layer = 0;
-	std::uint32_t Mask = UINT32_MAX;
 };
 
 enum class PlaceholderComponentType { Box, Sphere, Capsule, SpringArm, Custom };

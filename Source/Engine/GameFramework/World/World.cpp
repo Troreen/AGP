@@ -1,7 +1,6 @@
 #include "GameFramework/World/World.h"
 #include "GameFramework/Collision/CollisionSystem.h"
 #include "GameFramework/Components/ColliderComponent.h"
-#include <limits>
 #include "GameFramework/Components/CameraComponent.h"
 #include "Maths.hpp"
 #include <algorithm>
@@ -22,17 +21,17 @@ World::World() : myCollisionSystem(std::make_unique<CollisionSystem>())
 {
 }
 
-std::uint64_t World::AllocateColliderId()
+void World::RegisterCollider(Component& component)
 {
-	if (myNextColliderId == (std::numeric_limits<std::uint64_t>::max)())
+	if (auto* collider = dynamic_cast<ColliderComponent*>(&component))
 	{
-		throw std::overflow_error("Collider IDs exhausted");
+		myCollisionSystem->RegisterCollider(*collider);
 	}
-	return myNextColliderId++;
 }
 
 ColliderComponent* World::FindCollider(std::uint64_t id) const
 {
+	// Disabled colliders are still findable. Destroyed Actors and Components are treated as already gone.
 	for (const auto& actor : myActors)
 	{
 		if (actor->IsPendingDestroy())

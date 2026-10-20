@@ -14,7 +14,6 @@
 #include <exception>
 #include <functional>
 #include <AISystems/Pathfinder.hpp>
-#include "GameCollisionLayers.h"
 #include <GameFramework/AssetHandling/AssetRegistry.h>
 #include <GameFramework/AssetHandling/FontAsset.h>
 #include <GameFramework/AssetHandling/MaterialAsset.h>
@@ -552,7 +551,7 @@ void GameApplication::ProcessPendingSceneLoad(Game& aGame)
 
 		// Build and configure a replacemet before changing the running world.
 		AssetRegistry& assets = ServiceLocator::GetInstance().GetAssetRegistry();
-		UnrealImportResult importResult = UnrealSceneImporter{GameCollisionLayers::Names()}.ImportScene(scenePath);
+		UnrealImportResult importResult = UnrealSceneImporter{}.ImportScene(scenePath);
 		if (!importResult)
 		{
 			std::ostringstream message;

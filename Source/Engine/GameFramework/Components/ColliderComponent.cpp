@@ -11,7 +11,7 @@ bool ColliderComponent::ourAllDebugDrawEnabled = false;
 
 ColliderComponent* Collision::OtherCollider() const
 {
-	return SourceWorld ? SourceWorld->FindCollider(OtherColliderId) : nullptr;
+	return SourceWorld->FindCollider(OtherColliderId);
 }
 
 Actor* Collision::OtherActor() const
@@ -20,93 +20,26 @@ Actor* Collision::OtherActor() const
 	return otherCollider ? otherCollider->GetOwner() : nullptr;
 }
 
-bool ColliderComponent::CanReceiveCollision(const Component* listeningComponent)
-{
-	// Memory may still exist after destruction is requested. Only call Components that can still take part in gameplay.
-	return listeningComponent && listeningComponent->HasBegunPlay() && listeningComponent->IsEnabled() && listeningComponent->GetOwner() &&
-	       listeningComponent->GetOwner()->IsActive();
-}
-
-CollisionSubscription ColliderComponent::Subscribe(CollisionOverlapPhase collisionPhase, std::function<void(const Collision&)> collisionCallback)
-{
-	std::erase_if(myCollisionSubscriptions, [](const auto& collisionSubscription)
-	{
-		return collisionSubscription.expired();
-	});
-	auto collisionSubscription = std::make_shared<CollisionSubscription::Subscription>();
-	collisionSubscription->Callback = std::move(collisionCallback);
-	collisionSubscription->Phase = collisionPhase;
-	myCollisionSubscriptions.push_back(collisionSubscription);
-	return CollisionSubscription(std::move(collisionSubscription));
-}
-
-CollisionSubscription ColliderComponent::OnEnter(std::function<void(const Collision&)> collisionCallback)
-{
-	return Subscribe(CollisionOverlapPhase::Enter, std::move(collisionCallback));
-}
-
-CollisionSubscription ColliderComponent::OnStay(std::function<void(const Collision&)> collisionCallback)
-{
-	return Subscribe(CollisionOverlapPhase::Stay, std::move(collisionCallback));
-}
-
-CollisionSubscription ColliderComponent::OnExit(std::function<void(const Collision&)> collisionCallback)
-{
-	return Subscribe(CollisionOverlapPhase::Exit, std::move(collisionCallback));
-}
-
-void ColliderComponent::DispatchCollision(const Collision& collision)
-{
-	std::erase_if(myCollisionSubscriptions, [](const auto& collisionSubscription)
-	{
-		return collisionSubscription.expired();
-	});
-	// Work through a copy of the list. A callback can then add listeners without changing the list we are walking.
-	// Added listeners start with the next notification on this collider.
-	const auto subscriptionsForThisCollision = myCollisionSubscriptions;
-	for (const auto& weakCollisionSubscription : subscriptionsForThisCollision)
-	{
-		auto collisionSubscription = weakCollisionSubscription.lock();
-		// An earlier callback may have disconnected this listener during dispatch.
-		if (collisionSubscription && collisionSubscription->Connected && collisionSubscription->Phase == collision.Phase &&
-		    collisionSubscription->Callback)
-		{
-			collisionSubscription->Callback(collision);
-		}
-	}
-}
-
 void ColliderComponent::SetAllDebugDrawEnabled(bool enabled)
 {
 	ourAllDebugDrawEnabled = enabled;
 }
 
-bool ColliderComponent::SetSphereRadius(float radius)
+void ColliderComponent::SetSphereRadius(float radius)
 {
-	if (!std::isfinite(radius) || radius <= 0)
-	{
-		return false;
-	}
 	mySphereRadius = radius;
 	myShape = ColliderShape::Sphere;
-	return true;
 }
 
-bool ColliderComponent::SetBoxHalfExtents(const CommonUtilities::Vector3f& halfExtents)
+void ColliderComponent::SetBoxHalfExtents(const CommonUtilities::Vector3f& halfExtents)
 {
-	if (!std::isfinite(halfExtents.x) || !std::isfinite(halfExtents.y) || !std::isfinite(halfExtents.z) || halfExtents.x <= 0 ||
-	    halfExtents.y <= 0 || halfExtents.z <= 0)
-	{
-		return false;
-	}
 	myBoxHalfExtents = halfExtents;
 	myShape = ColliderShape::Box;
-	return true;
 }
 
-bool ColliderComponent::SetLayer(unsigned int layer)
+bool ColliderComponent::SetLayer(CollisionLayer layer)
 {
-	if (layer > 31)
+	if (static_cast<unsigned int>(layer) > 31)
 	{
 		return false;
 	}
@@ -114,10 +47,36 @@ bool ColliderComponent::SetLayer(unsigned int layer)
 	return true;
 }
 
-bool ColliderComponent::SetMask(std::uint32_t mask)
+bool ColliderComponent::SetOverlapsWith(std::initializer_list<CollisionLayer> layers)
 {
+	std::uint32_t mask = 0;
+	for (CollisionLayer layer : layers)
+	{
+		const auto layerNumber = static_cast<unsigned int>(layer);
+		if (layerNumber > 31)
+		{
+			return false;
+		}
+		mask |= std::uint32_t{1} << layerNumber;
+	}
+
 	myMask = mask;
 	return true;
+}
+
+void ColliderComponent::SetOverlapsWithAll()
+{
+	myMask = UINT32_MAX;
+}
+
+void ColliderComponent::SetOverlapsWithNone()
+{
+	myMask = 0;
+}
+
+void ColliderComponent::SetMask(std::uint32_t mask)
+{
+	myMask = mask;
 }
 
 void ColliderComponent::DrawDebug() const
@@ -126,6 +85,7 @@ void ColliderComponent::DrawDebug() const
 	{
 		return;
 	}
+	// Disabled colliders still show their outline so consumed triggers remain visible while debugging.
 	const CommonUtilities::Vector4f& color = IsEnabled() ? myDebugColor : myDebugDisabledColor;
 
 	// Transform local outlines with the same composed matrix used for detection.
@@ -156,6 +116,7 @@ void ColliderComponent::DrawDebug() const
 		return;
 	}
 
+	// Each bit chooses the positive or negative side of one axis, giving all eight box corners.
 	const CU::Vector3f halfExtents = GetBoxHalfExtents();
 	std::array<CU::Vector3f, 8> corners;
 	for (unsigned corner = 0; corner < corners.size(); ++corner)
@@ -164,6 +125,7 @@ void ColliderComponent::DrawDebug() const
 			(corner & 2) ? halfExtents.y : -halfExtents.y,
 			(corner & 4) ? halfExtents.z : -halfExtents.z};
 	}
+	// Connect corners that differ on one axis. Starting on the negative side draws each edge once.
 	for (unsigned corner = 0; corner < corners.size(); ++corner)
 	{
 		for (unsigned axisBit : {1u, 2u, 4u})

@@ -260,7 +260,6 @@ exit /b 0</Command>
     <ClInclude Include="Components\ScriptedEvents\ScriptedEventComponent.h" />
     <ClInclude Include="Components\SpinComponent.h" />
     <ClInclude Include="Game.h" />
-    <ClInclude Include="GameCollisionLayers.h" />
     <ClInclude Include="GameLog.h" />
     <ClInclude Include="Player\PlayerActor.h" />
     <ClInclude Include="Player\PlayerController.h" />

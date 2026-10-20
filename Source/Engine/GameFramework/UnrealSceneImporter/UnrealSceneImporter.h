@@ -4,7 +4,6 @@
 #include <optional>
 #include <string>
 #include <vector>
-#include <unordered_map>
 
 struct ImportDiagnostic
 {
@@ -26,9 +25,5 @@ struct UnrealImportResult
 class UnrealSceneImporter
 {
 public:
-	explicit UnrealSceneImporter(std::unordered_map<std::string, unsigned int> collisionLayers = {});
 	UnrealImportResult ImportScene(const std::filesystem::path& jsonPath) const;
-
-private:
-	std::unordered_map<std::string, unsigned int> myCollisionLayers;
 };

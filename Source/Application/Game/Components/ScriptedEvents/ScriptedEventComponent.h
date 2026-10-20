@@ -1,13 +1,10 @@
 #pragma once
 #include "GameFramework/Components/CustomComponent.h"
-#include "GameFramework/Collision/CollisionSubscription.h"
 #include <string>
 #include <vector>
 
 class ScriptedActionComponent;
 
-// Put one sequence component and its action components on a dedicated event actor.
-// The sequence starts each numbered step, waits where requested, then gives temporary control back when the event ends.
 class ScriptedEventComponent final : public CustomComponent
 {
 public:
@@ -20,6 +17,7 @@ public:
 	void InitializeCustomVariables(const CustomComponentVariables& variables) override;
 	void BeginPlay() override;
 	void Update(float deltaTime) override;
+	void OnCollisionEnter(const Collision& collision) override;
 	void EndPlay() noexcept override;
 	bool Play();
 	void Cancel() noexcept;
@@ -31,8 +29,6 @@ public:
 	const std::string& GetLastError() const { return myLastError; }
 
 private:
-	void OnTriggerEnter(const Collision& collision);
-	CollisionSubscription myCollisionSubscription;
 	void ReleaseClaims() noexcept;
 	void Finish(bool cancelled) noexcept;
 	void StartStep();
