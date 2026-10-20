@@ -714,11 +714,14 @@ namespace
 	}
 }
 
+void RunCollisionImportTests();
+
 int main()
 {
 	try
 	{
 		ServiceLocator::GetInstance().Initialize();
+		RunCollisionImportTests();
 		ColliderCallbacks();
 		CallbackSubscriptionLifetime();
 		CallbackParticipantDestruction();

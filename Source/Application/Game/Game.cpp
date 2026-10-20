@@ -1,6 +1,7 @@
 #include "Game.h"
 #include "Runtime/GameApplication.h"
 #include "GameLog.h"
+#include "GameCollisionLayers.h"
 #include "GameFramework/AudioManager.h"
 #include "GameFramework/AssetHandling/AssetRegistry.h"
 #include "GameFramework/AssetHandling/AnimationAsset.h"
@@ -130,31 +131,26 @@ void Game::ConfigureWorld(World& aWorld)
 		//component->SendDrawCall();
 	}
 
-	// Disabled for shader testing.
-	//{
-	//	Actor* actor = aWorld.SpawnActor("Player");
-	//	{
-	//		actor->GetTransform().SetLocalPosition({0,0,0});
-	//		SkeletalMeshComponent* component = actor->AddComponent<SkeletalMeshComponent>();
-	//		AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
-//
-	//		std::shared_ptr<MeshAsset> asset = assetRegistry.GetAsset<MeshAsset>("SK_player.fbx");
-	//		component->SetMesh(asset);
-//
-	//		AnimatorComponent* animatorBro = actor->AddComponent<AnimatorComponent>();
-	//		animatorBro->SetMeshComponent(component);
-	//		animatorBro->SetTree("PlayerTree");
-//
-//
-	//		animatorBro->GetTree().SetBool("IsIdle", true);
-	//	}
-	//	{
-	//		actor->AddComponent<PlayerController>();
-	//	}
-	//	{
-	//		actor->AddComponent<PlayerMovementComponent>();
-	//	}
-	//}
+	{
+		Actor* actor = aWorld.SpawnActor("Player");
+		actor->GetTransform().SetLocalPosition({0, 0, 0});
+		auto* mesh = actor->AddComponent<SkeletalMeshComponent>();
+		AssetRegistry& assets = ServiceLocator::GetInstance().GetAssetRegistry();
+		mesh->SetMesh(assets.GetAsset<MeshAsset>("SK_player.fbx"));
+		auto* animator = actor->AddComponent<AnimatorComponent>();
+		animator->SetMeshComponent(mesh);
+		animator->SetTree("PlayerTree");
+		animator->GetTree().SetBool("IsIdle", true);
+		actor->AddComponent<PlayerController>();
+		actor->AddComponent<PlayerMovementComponent>();
+
+		// Body-only overlap approximation; equipment is outside this sphere.
+		auto* collider = actor->AddComponent<ColliderComponent>("Collider");
+		collider->SetSphereRadius(60.0f);
+		collider->GetTransform().SetLocalPosition({0, 90, 0});
+		collider->SetLayer(GameCollisionLayers::Player);
+		collider->SetMask(1u << GameCollisionLayers::Trigger);
+	}
 //
 	//{
 	//	Actor* actor = aWorld.SpawnActor("Enemy");

@@ -1,0 +1,91 @@
+{
+    "Actors":  [
+                   {
+                       "Name":  "SE_WorkflowTest",
+                       "Archetype":  "BP_SE_WorkflowTest_C",
+                       "Transform":  [
+                                         1,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         1,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         1,
+                                         0,
+                                         -1560,
+                                         -130,
+                                         0,
+                                         1
+                                     ],
+                       "Tags":  [
+
+                                ],
+                       "Components":  [
+                                          {
+                                              "Name":  "TriggerBox",
+                                              "Parent":  "DefaultSceneRoot",
+                                              "TypeID":  6,
+                                              "Tags":  [
+
+                                                       ],
+                                              "Transform":  [
+                                                                8.7649998040869832,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                8.7649998040869832,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                8.7649998040869832,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                254,
+                                                                1
+                                                            ],
+                                              "Bounds":  {
+                                                             "x":  32,
+                                                             "y":  32,
+                                                             "z":  32
+                                                         }
+                                          },
+                                          {
+                                              "Name":  "DefaultSceneRoot",
+                                              "Parent":  "",
+                                              "TypeID":  0,
+                                              "Tags":  [
+
+                                                       ],
+                                              "Transform":  [
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1
+                                                            ]
+                                          }
+                                      ]
+                   }
+               ],
+    "MasterMaterials":  [
+
+                        ]
+}

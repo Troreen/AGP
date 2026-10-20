@@ -2,7 +2,8 @@
 
 Collision detects nonblocking overlaps between spheres and yaw-rotated boxes.
 Gameplay decides what Enter, Stay, and Exit mean. There is no movement response,
-combat rule, importer integration, or continuous/swept detection in this version.
+combat rule or continuous/swept detection in this version. The Unreal scene importer
+supports exported box and sphere components.
 
 ## Spawn and configure
 
@@ -30,6 +31,45 @@ Unsupported transforms are diagnosed and excluded from detection for that pass.
 Layers are numbered 0–31. The default is layer 0 with every mask bit enabled.
 Both masks must accept the other collider's layer. A zero mask accepts nothing.
 Layer meanings belong to gameplay. All layer combinations remain nonblocking.
+
+## Import shapes from Unreal
+
+Use a Box Collision or Sphere Collision component. The existing exporter provides
+box `Bounds` (half-extents), sphere `Radius`, component `Transform`, and `Tags`.
+AGP creates a `ColliderComponent` from that data without changing the exporter.
+Dimensions remain local; the Actor and component transforms apply scale once.
+The shape can be the Actor root or attach directly to its root. Deeper attachment
+chains, multiple supported shapes on one Actor, and invalid dimensions produce
+import errors. Capsule components remain placeholders.
+
+Use the shape component's Tags to choose filtering:
+
+```text
+CollisionLayer=Trigger
+CollisionMask=Player
+```
+
+The game supplies these exact, case-sensitive names to the importer:
+
+| Name | Layer |
+| --- | --- |
+| Player | 1 |
+| Trigger | 2 |
+| Enemy | 3 |
+
+Separate several mask names with `|`, for example
+`CollisionMask=Player|Enemy`. `CollisionMask=` explicitly accepts nothing.
+Each setting can appear once. Unknown names, duplicate settings, and malformed
+settings produce import errors.
+
+Missing tags preserve the existing defaults: enabled, layer 0, all mask bits set.
+Layer 0 has no authoring name in this increment. Both masks must still accept the
+other collider's layer: a Player that must enter a Trigger needs Trigger in its
+mask, and the Trigger needs Player in its mask.
+
+The exporter does not supply Unreal Collision Enabled, Generate Overlap Events,
+Object Type, or response tables. AGP does not read those settings or infer blocking
+behavior from them. Additional authoring settings are deferred.
 
 ## Debug outlines
 
@@ -91,7 +131,8 @@ handler. The collision and returned pointers are borrowed for the callback only.
 
 Callbacks run on both surviving colliders. New subscriptions wait until the next
 notification on that collider; disconnecting skips a callback that has not run yet.
-The gameplay example is `CollisionScriptTriggerComponent`: it stores an Enter
+The gameplay example is `ScriptedEventComponent`: its optional `TriggerCollider`
+names a collider on the same Actor. It stores an Enter
 subscription and resets it in EndPlay, including on scene replacement.
 
 ## Timing and lifetime
@@ -127,11 +168,15 @@ and physical resolution are outside this version.
 ## Verify in a scene
 
 Debug Game builds enable outlines for all scene colliders. The optional code-spawned
-demonstration has been removed. Imported Unreal shapes still become placeholders;
-the collider import work is the next slice.
+demonstration has been removed. Imported boxes and spheres now become runtime
+colliders. `Game.cpp` creates Player with a radius-60 sphere offset 90 units up,
+on the Player layer with a mask accepting Trigger. This is a body approximation
+that needs visual confirmation against the character.
 
 See [the Unreal collision handoff](ScriptedEventCollisionTriggers.md) for the
 authoring and round-trip checks. Verify placement, entry, activation, disabled gray
-outlines, and F4 reload in Game once that path exists. Automated collision tests
+outlines, and F4 reload in Game. The user verified automatic box-entry activation,
+gray consumption and F4 reset after a real component-test export. Exact Player
+body fit and real exported sphere alignment remain open. Automated collision tests
 exercise overlap phases, filtering, transforms, and lifetime behavior; they do not
 prove visual appearance or Unreal export correctness.

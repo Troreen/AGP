@@ -1,118 +1,6 @@
 {
 	"MasterMaterials": [
 		{
-			"Name": "M_ProcGrid",
-			"Domain": 0,
-			"ShadingModel": 1,
-			"BlendMode": 0,
-			"BaseColor": [
-				0.5,
-				0.5,
-				0.5,
-				1
-			],
-			"Metallic": 0,
-			"Roughness": 0.5,
-			"TwoSided": false,
-			"Parameters": [
-				{
-					"Name": "Line Colour",
-					"Type": 1,
-					"Value": [
-						0.33854201436042786,
-						0.33854201436042786,
-						0.33854201436042786,
-						0
-					]
-				},
-				{
-					"Name": "Checker Rough 2",
-					"Type": 0,
-					"Value": 0.64999997615814209
-				},
-				{
-					"Name": "Sea Level Base",
-					"Type": 0,
-					"Value": 1203.732666015625
-				},
-				{
-					"Name": "Fade",
-					"Type": 0,
-					"Value": 265.96734619140625
-				},
-				{
-					"Name": "Tile Scale",
-					"Type": 0,
-					"Value": 100
-				},
-				{
-					"Name": "Checker Colour 1",
-					"Type": 1,
-					"Value": [
-						0.29166701436042786,
-						0.29166701436042786,
-						0.29166701436042786,
-						0
-					]
-				},
-				{
-					"Name": "Checker Colour 2",
-					"Type": 1,
-					"Value": [
-						0.23958300054073334,
-						0.23958300054073334,
-						0.23958300054073334,
-						0
-					]
-				},
-				{
-					"Name": "Checker Rough 1",
-					"Type": 0,
-					"Value": 0.5
-				},
-				{
-					"Name": "Side Parameters",
-					"Type": 1,
-					"Value": [
-						1.0402120351791382,
-						28.152517318725586,
-						0.30000001192092896,
-						0
-					]
-				},
-				{
-					"Name": "Water Colour",
-					"Type": 1,
-					"Value": [
-						0.18680499494075775,
-						0.49003198742866516,
-						0.70833301544189453,
-						0
-					]
-				},
-				{
-					"Name": "ObjectAligned",
-					"Type": 8,
-					"Value": false
-				},
-				{
-					"Name": "Tri-Planar (Or Uni-Planar)",
-					"Type": 8,
-					"Value": false
-				},
-				{
-					"Name": "Enable Side Tint",
-					"Type": 8,
-					"Value": true
-				},
-				{
-					"Name": "Water Level Tint",
-					"Type": 8,
-					"Value": true
-				}
-			]
-		},
-		{
 			"Name": "MatineeCam_mat",
 			"Domain": 0,
 			"ShadingModel": 1,
@@ -127,6 +15,196 @@
 			"Roughness": 0.5,
 			"TwoSided": false,
 			"Parameters": []
+		},
+		{
+			"Name": "MM_Standard",
+			"Domain": 0,
+			"ShadingModel": 1,
+			"BlendMode": 0,
+			"BaseColor": [
+				0.5,
+				0.5,
+				0.5,
+				1
+			],
+			"Metallic": 0,
+			"Roughness": 0.5,
+			"TwoSided": false,
+			"Parameters": [
+				{
+					"Name": "AlbedoMap",
+					"Type": 3,
+					"Value":
+					{
+						"Name": "T_4M_Trimsheet_Wood_BaseColor",
+						"Path": "/Game/Textures/T_4M_Trimsheet_Wood_BaseColor.T_4M_Trimsheet_Wood_BaseColor",
+						"AssetImportPath": "C:/Users/egil.wendin/egil.wendin_P5G4/Content/Textures/T_4M_Trimsheet_Wood_BaseColor.png"
+					}
+				},
+				{
+					"Name": "ORMMap",
+					"Type": 3,
+					"Value":
+					{
+						"Name": "T_4M_Trimsheet_Wood_OcclusionRoughnessMetallic",
+						"Path": "/Game/Textures/T_4M_Trimsheet_Wood_OcclusionRoughnessMetallic.T_4M_Trimsheet_Wood_OcclusionRoughnessMetallic",
+						"AssetImportPath": "C:/Users/egil.wendin/egil.wendin_P5G4/Content/Textures/T_4M_Trimsheet_Wood_OcclusionRoughnessMetallic.png"
+					}
+				},
+				{
+					"Name": "NormalMap",
+					"Type": 3,
+					"Value":
+					{
+						"Name": "T_4M_Trimsheet_Wood_Normal",
+						"Path": "/Game/Textures/T_4M_Trimsheet_Wood_Normal.T_4M_Trimsheet_Wood_Normal",
+						"AssetImportPath": "C:/Users/egil.wendin/egil.wendin_P5G4/Content/Textures/T_4M_Trimsheet_Wood_Normal.png"
+					}
+				},
+				{
+					"Name": "Tiling",
+					"Type": 0,
+					"Value": 1
+				}
+			]
+		},
+		{
+			"Name": "WorldGridMaterial",
+			"Domain": 0,
+			"ShadingModel": 1,
+			"BlendMode": 0,
+			"BaseColor": [
+				0.50196081399917603,
+				0.50196081399917603,
+				0.50196081399917603,
+				1
+			],
+			"Metallic": 0,
+			"Roughness": 0.42379999160766602,
+			"TwoSided": false,
+			"Parameters": []
+		},
+		{
+			"Name": "M_PrototypeGrid",
+			"Domain": 0,
+			"ShadingModel": 1,
+			"BlendMode": 0,
+			"BaseColor": [
+				0.50196081399917603,
+				0.50196081399917603,
+				0.50196081399917603,
+				1
+			],
+			"Metallic": 0,
+			"Roughness": 0.5,
+			"TwoSided": false,
+			"Parameters": [
+				{
+					"Name": "TopSurfaceColor",
+					"Type": 1,
+					"Value": [
+						0.048000000417232513,
+						0.048000000417232513,
+						0.048000000417232513,
+						1
+					]
+				},
+				{
+					"Name": "Grid Size",
+					"Type": 0,
+					"Value": 100
+				},
+				{
+					"Name": "Sub Grid Number",
+					"Type": 0,
+					"Value": 5
+				},
+				{
+					"Name": "CircleSize",
+					"Type": 0,
+					"Value": 100
+				},
+				{
+					"Name": "SurfaceColor",
+					"Type": 1,
+					"Value": [
+						0.18000000715255737,
+						0.18000000715255737,
+						0.18000000715255737,
+						1
+					]
+				},
+				{
+					"Name": "TopGridColor",
+					"Type": 1,
+					"Value": [
+						0.16770799458026886,
+						0.16770799458026886,
+						0.16770799458026886,
+						1
+					]
+				},
+				{
+					"Name": "GridColor",
+					"Type": 1,
+					"Value": [
+						0,
+						0,
+						0,
+						1
+					]
+				},
+				{
+					"Name": "Roughness",
+					"Type": 0,
+					"Value": 1
+				},
+				{
+					"Name": "TopSubGridGridColor",
+					"Type": 1,
+					"Value": [
+						0.16770799458026886,
+						0.16770799458026886,
+						0.16770799458026886,
+						1
+					]
+				},
+				{
+					"Name": "SubGridColor",
+					"Type": 1,
+					"Value": [
+						0,
+						0,
+						0,
+						1
+					]
+				},
+				{
+					"Name": "Line Dimensions",
+					"Type": 1,
+					"Value": [
+						0.021838000044226646,
+						0.0013470000121742487,
+						0.5,
+						0
+					]
+				},
+				{
+					"Name": "TopSurfaceColor",
+					"Type": 8,
+					"Value": false
+				},
+				{
+					"Name": "ObjectAligned",
+					"Type": 8,
+					"Value": false
+				},
+				{
+					"Name": "Grid",
+					"Type": 8,
+					"Value": true
+				}
+			]
 		}
 	],
 	"Actors": [
@@ -182,301 +260,7 @@
 						1,
 						1
 					],
-					"Intensity": 68.170845031738281
-				}
-			]
-		},
-		{
-			"Name": "Floor",
-			"Archetype": "StaticMeshActor",
-			"Transform": [
-				8,
-				0,
-				0,
-				0,
-				0,
-				8,
-				0,
-				0,
-				0,
-				0,
-				8,
-				0,
-				0,
-				0,
-				-0.5,
-				1
-			],
-			"Tags": [],
-			"Components": [
-				{
-					"Name": "StaticMeshComponent0",
-					"Parent": "",
-					"TypeID": 1,
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Mesh": "SM_Template_Map_Floor",
-					"ContentPath": "/Engine/MapTemplates/SM_Template_Map_Floor.SM_Template_Map_Floor",
-					"AssetImportPath": "C:/Users/Warren.Marshall/Desktop/SM_Template_Map_Floor.FBX",
-					"Materials": [
-						{
-							"Name": "MI_ProcGrid",
-							"Parent": "M_ProcGrid",
-							"Parameters": [
-								{
-									"Name": "Line Colour",
-									"Type": 1,
-									"Value": [
-										0.33854201436042786,
-										0.33854201436042786,
-										0.33854201436042786,
-										0
-									]
-								},
-								{
-									"Name": "Checker Rough 2",
-									"Type": 0,
-									"Value": 0.64999997615814209
-								},
-								{
-									"Name": "Sea Level Base",
-									"Type": 0,
-									"Value": 1203.732666015625
-								},
-								{
-									"Name": "Fade",
-									"Type": 0,
-									"Value": 265.96734619140625
-								},
-								{
-									"Name": "Tile Scale",
-									"Type": 0,
-									"Value": 100
-								},
-								{
-									"Name": "Checker Colour 1",
-									"Type": 1,
-									"Value": [
-										0.18000000715255737,
-										0.18000000715255737,
-										0.18000000715255737,
-										0
-									]
-								},
-								{
-									"Name": "Checker Colour 2",
-									"Type": 1,
-									"Value": [
-										0.23000000417232513,
-										0.23000000417232513,
-										0.23000000417232513,
-										0
-									]
-								},
-								{
-									"Name": "Checker Rough 1",
-									"Type": 0,
-									"Value": 0.5
-								},
-								{
-									"Name": "Side Parameters",
-									"Type": 1,
-									"Value": [
-										1.0402120351791382,
-										28.152517318725586,
-										0.30000001192092896,
-										0
-									]
-								},
-								{
-									"Name": "Water Colour",
-									"Type": 1,
-									"Value": [
-										0.18680499494075775,
-										0.49003198742866516,
-										0.70833301544189453,
-										0
-									]
-								},
-								{
-									"Name": "ObjectAligned",
-									"Type": 8,
-									"Value": true
-								},
-								{
-									"Name": "Tri-Planar (Or Uni-Planar)",
-									"Type": 8,
-									"Value": true
-								},
-								{
-									"Name": "Enable Side Tint",
-									"Type": 8,
-									"Value": false
-								},
-								{
-									"Name": "Water Level Tint",
-									"Type": 8,
-									"Value": false
-								}
-							]
-						}
-					]
-				},
-				{
-					"Name": "SpinComponent",
-					"Parent": "",
-					"TypeID": -1,
-					"CustomType": "SpinComponent_C",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Custom":
-					{
-						"SpinSpeed": 25.00001,
-						"TargetComponentName": "",
-						"BoolProbe": true,
-						"IntProbe": 7,
-						"VectorProbe":
-						{
-							"x": 1,
-							"y": 2,
-							"z": 3
-						},
-						"TransformProbe":
-						{
-							"rotation":
-							{
-								"x": 0,
-								"y": -0,
-								"z": 0.70710678118654768,
-								"w": 0.70710678118654746
-							},
-							"translation":
-							{
-								"x": 10,
-								"y": 20,
-								"z": 30
-							},
-							"scale3D":
-							{
-								"x": 1,
-								"y": 2,
-								"z": 3
-							}
-						}
-					}
-				},
-				{
-					"Name": "CustomComponentBase",
-					"Parent": "",
-					"TypeID": -1,
-					"CustomType": "CustomComponentBase_C",
-					"Properties": [
-						{
-							"Name": "UberGraphFrame",
-							"Type": "FPointerToUberGraphFrame",
-							"Value":
-							{
-							}
-						},
-						{
-							"Name": "FloatVariables",
-							"Type": "TMap",
-							"Value":
-							{
-							}
-						},
-						{
-							"Name": "BoolVariables",
-							"Type": "TMap",
-							"Value":
-							{
-							}
-						},
-						{
-							"Name": "StringVariables",
-							"Type": "TMap",
-							"Value":
-							{
-							}
-						},
-						{
-							"Name": "IntVariables",
-							"Type": "TMap",
-							"Value":
-							{
-							}
-						},
-						{
-							"Name": "VectorVariables",
-							"Type": "TMap",
-							"Value":
-							{
-							}
-						},
-						{
-							"Name": "TransformVariables",
-							"Type": "TMap",
-							"Value":
-							{
-							}
-						}
-					],
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Custom":
-					{
-					}
+					"Intensity": 2
 				}
 			]
 		},
@@ -484,21 +268,21 @@
 			"Name": "CameraActor",
 			"Archetype": "CameraActor",
 			"Transform": [
-				1,
+				0.83643270748653831,
+				-0.025346445681410416,
+				-0.54748322671846161,
 				0,
+				0.030289126711075282,
+				0.99954117914325091,
+				1.0751051264523692e-10,
 				0,
+				0.54723202999259779,
+				-0.016582788916189146,
+				0.83681665641999603,
 				0,
+				-1450,
 				0,
-				1,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				-1010,
-				540,
-				440,
+				1150,
 				1
 			],
 			"Tags": [],
@@ -551,6 +335,994 @@
 						1
 					],
 					"FOV": 90
+				}
+			]
+		},
+		{
+			"Name": "SE_TestObject",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				1,
+				0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				300,
+				-200,
+				0,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"Parent": "",
+					"TypeID": 1,
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "SM_Berral",
+					"ContentPath": "/Game/Meshes/Props/Diorama/SM_Berral.SM_Berral",
+					"AssetImportPath": "D:/TGA Files/SG25 TVÅAN/P5 Related/P5_G4_KnightHeart/Content/Meshes/Props/Diarama/SM_Berral.fbx",
+					"Materials": [
+						{
+							"Name": "MI_Trimsheet_Wood",
+							"Parent": "MM_Standard",
+							"Parameters": [
+								{
+									"Name": "AlbedoMap",
+									"Type": 3,
+									"Value":
+									{
+										"Name": "T_4M_Trimsheet_Wood_BaseColor",
+										"Path": "/Game/Textures/T_4M_Trimsheet_Wood_BaseColor.T_4M_Trimsheet_Wood_BaseColor",
+										"AssetImportPath": "C:/Users/egil.wendin/egil.wendin_P5G4/Content/Textures/T_4M_Trimsheet_Wood_BaseColor.png"
+									}
+								},
+								{
+									"Name": "ORMMap",
+									"Type": 3,
+									"Value":
+									{
+										"Name": "T_4M_Trimsheet_Wood_OcclusionRoughnessMetallic",
+										"Path": "/Game/Textures/T_4M_Trimsheet_Wood_OcclusionRoughnessMetallic.T_4M_Trimsheet_Wood_OcclusionRoughnessMetallic",
+										"AssetImportPath": "C:/Users/egil.wendin/egil.wendin_P5G4/Content/Textures/T_4M_Trimsheet_Wood_OcclusionRoughnessMetallic.png"
+									}
+								},
+								{
+									"Name": "NormalMap",
+									"Type": 3,
+									"Value":
+									{
+										"Name": "T_4M_Trimsheet_Wood_Normal",
+										"Path": "/Game/Textures/T_4M_Trimsheet_Wood_Normal.T_4M_Trimsheet_Wood_Normal",
+										"AssetImportPath": "C:/Users/egil.wendin/egil.wendin_P5G4/Content/Textures/T_4M_Trimsheet_Wood_Normal.png"
+									}
+								},
+								{
+									"Name": "Tiling",
+									"Type": 0,
+									"Value": 1
+								}
+							]
+						},
+						{
+							"Name": "WorldGridMaterial",
+							"Parent": "Self",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "SE_Start",
+			"Archetype": "TargetPoint",
+			"Transform": [
+				1,
+				0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				300,
+				-200,
+				0,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "SceneComp",
+					"Parent": "",
+					"TypeID": 0,
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					]
+				}
+			]
+		},
+		{
+			"Name": "SE_End",
+			"Archetype": "TargetPoint",
+			"Transform": [
+				1,
+				0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				300,
+				550,
+				0,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "SceneComp",
+					"Parent": "",
+					"TypeID": 0,
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					]
+				}
+			]
+		},
+		{
+			"Name": "SE_WorkflowTest",
+			"Archetype": "BP_SE_WorkflowTest_C",
+			"Transform": [
+				1,
+				0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				-1560,
+				-130,
+				0,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "TriggerBox",
+					"Parent": "DefaultSceneRoot",
+					"TypeID": 6,
+					"Tags": [
+						"CollisionLayer=Trigger",
+						"CollisionMask=Player"
+					],
+					"Transform": [
+						8.7649998040869832,
+						0,
+						0,
+						0,
+						0,
+						8.7649998040869832,
+						0,
+						0,
+						0,
+						0,
+						8.7649998040869832,
+						0,
+						0,
+						0,
+						254,
+						1
+					],
+					"Bounds":
+					{
+						"x": 32,
+						"y": 32,
+						"z": 32
+					}
+				},
+				{
+					"Name": "DefaultSceneRoot",
+					"Parent": "",
+					"TypeID": 0,
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					]
+				},
+				{
+					"Name": "ScriptedEventSequence",
+					"Parent": "",
+					"TypeID": -1,
+					"CustomType": "ScriptedEventComponent_C",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Custom":
+					{
+						"TriggerAction": "PlayUnrealSequenceTest",
+						"TriggerCollider": "TriggerBox",
+						"Replayable": true
+					}
+				},
+				{
+					"Name": "MoveOut",
+					"Parent": "",
+					"TypeID": -1,
+					"CustomType": "MoveActionComponent_C",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Custom":
+					{
+						"DurationInSeconds": 3.0000100000000001,
+						"TargetActor": "SE_TestObject",
+						"TargetComponent": "",
+						"DestinationActor": "SE_End",
+						"WaitForCompletion": true,
+						"Step": 3
+					}
+				},
+				{
+					"Name": "PauseAtEnd",
+					"Parent": "",
+					"TypeID": -1,
+					"CustomType": "WaitActionComponent_C",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Custom":
+					{
+						"DurationInSeconds": 2.0000100000000001,
+						"TargetActor": "",
+						"TargetComponent": "",
+						"WaitForCompletion": true,
+						"Step": 4
+					}
+				},
+				{
+					"Name": "HideObject",
+					"Parent": "",
+					"TypeID": -1,
+					"CustomType": "SetActorActiveActionComponent_C",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Custom":
+					{
+						"TargetActor": "SE_TestObject",
+						"TargetComponent": "",
+						"WaitForCompletion": true,
+						"Active": false,
+						"Step": 5
+					}
+				},
+				{
+					"Name": "PauseHidden",
+					"Parent": "",
+					"TypeID": -1,
+					"CustomType": "WaitActionComponent_C",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Custom":
+					{
+						"DurationInSeconds": 2.0000100000000001,
+						"TargetActor": "",
+						"TargetComponent": "",
+						"WaitForCompletion": true,
+						"Step": 6
+					}
+				},
+				{
+					"Name": "ShowObject",
+					"Parent": "",
+					"TypeID": -1,
+					"CustomType": "SetActorActiveActionComponent_C",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Custom":
+					{
+						"TargetActor": "SE_TestObject",
+						"TargetComponent": "",
+						"WaitForCompletion": true,
+						"Active": true,
+						"Step": 7
+					}
+				},
+				{
+					"Name": "MoveBack",
+					"Parent": "",
+					"TypeID": -1,
+					"CustomType": "MoveActionComponent_C",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Custom":
+					{
+						"DurationInSeconds": 3.0000100000000001,
+						"TargetActor": "SE_TestObject",
+						"TargetComponent": "",
+						"DestinationActor": "SE_Start",
+						"WaitForCompletion": true,
+						"Step": 8
+					}
+				},
+				{
+					"Name": "LockPlayer",
+					"Parent": "",
+					"TypeID": -1,
+					"CustomType": "LockControlActionComponent_C",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Custom":
+					{
+						"TargetActor": "Player",
+						"TargetComponent": "",
+						"WaitForCompletion": true,
+						"Step": 0
+					}
+				},
+				{
+					"Name": "PauseSpin",
+					"Parent": "",
+					"TypeID": -1,
+					"CustomType": "SetComponentEnabledActionComponent_C",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Custom":
+					{
+						"TargetActor": "SE_Spinner",
+						"TargetComponent": "TestSpin",
+						"WaitForCompletion": true,
+						"Enabled": false,
+						"Step": 1
+					}
+				},
+				{
+					"Name": "ObserveStoppedSpin",
+					"Parent": "",
+					"TypeID": -1,
+					"CustomType": "WaitActionComponent_C",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Custom":
+					{
+						"DurationInSeconds": 2.0000100000000001,
+						"TargetActor": "",
+						"TargetComponent": "",
+						"WaitForCompletion": true,
+						"Step": 1
+					}
+				},
+				{
+					"Name": "AudioBeforeMove",
+					"Parent": "",
+					"TypeID": -1,
+					"CustomType": "PlayAudioActionComponent_C",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Custom":
+					{
+						"TargetActor": "",
+						"TargetComponent": "",
+						"WaitForCompletion": true,
+						"Positional": false,
+						"Step": 2,
+						"Sound": 5
+					}
+				},
+				{
+					"Name": "RoarAtObject",
+					"Parent": "",
+					"TypeID": -1,
+					"CustomType": "PlayAudioActionComponent_C",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Custom":
+					{
+						"TargetActor": "SE_TestObject",
+						"TargetComponent": "",
+						"WaitForCompletion": false,
+						"Positional": true,
+						"Step": 3,
+						"Sound": 7
+					}
+				},
+				{
+					"Name": "ResumeSpin",
+					"Parent": "",
+					"TypeID": -1,
+					"CustomType": "SetComponentEnabledActionComponent_C",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Custom":
+					{
+						"TargetActor": "SE_Spinner",
+						"TargetComponent": "TestSpin",
+						"WaitForCompletion": true,
+						"Enabled": true,
+						"Step": 9
+					}
+				},
+				{
+					"Name": "UnlockPlayer",
+					"Parent": "",
+					"TypeID": -1,
+					"CustomType": "UnlockControlActionComponent_C",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Custom":
+					{
+						"TargetActor": "Player",
+						"TargetComponent": "",
+						"WaitForCompletion": true,
+						"Step": 10
+					}
+				},
+				{
+					"Name": "ObserveHandoff",
+					"Parent": "",
+					"TypeID": -1,
+					"CustomType": "WaitActionComponent_C",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Custom":
+					{
+						"DurationInSeconds": 4.0000099999999996,
+						"TargetActor": "",
+						"TargetComponent": "",
+						"WaitForCompletion": true,
+						"Step": 11
+					}
+				}
+			]
+		},
+		{
+			"Name": "SE_Spinner",
+			"Archetype": "BP_SE_Spinner_C",
+			"Transform": [
+				1,
+				0,
+				0,
+				0,
+				0,
+				0.59999999999999998,
+				0,
+				0,
+				0,
+				0,
+				1.3999999999999999,
+				0,
+				300,
+				-650,
+				0,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "DefaultSceneRoot",
+					"Parent": "",
+					"TypeID": 0,
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					]
+				},
+				{
+					"Name": "SpinnerMesh",
+					"Parent": "DefaultSceneRoot",
+					"TypeID": 1,
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "SM_Berral",
+					"ContentPath": "/Game/Meshes/Props/Diorama/SM_Berral.SM_Berral",
+					"AssetImportPath": "D:/TGA Files/SG25 TVÅAN/P5 Related/P5_G4_KnightHeart/Content/Meshes/Props/Diarama/SM_Berral.fbx",
+					"Materials": [
+						{
+							"Name": "MI_Trimsheet_Wood",
+							"Parent": "MM_Standard",
+							"Parameters": [
+								{
+									"Name": "AlbedoMap",
+									"Type": 3,
+									"Value":
+									{
+										"Name": "T_4M_Trimsheet_Wood_BaseColor",
+										"Path": "/Game/Textures/T_4M_Trimsheet_Wood_BaseColor.T_4M_Trimsheet_Wood_BaseColor",
+										"AssetImportPath": "C:/Users/egil.wendin/egil.wendin_P5G4/Content/Textures/T_4M_Trimsheet_Wood_BaseColor.png"
+									}
+								},
+								{
+									"Name": "ORMMap",
+									"Type": 3,
+									"Value":
+									{
+										"Name": "T_4M_Trimsheet_Wood_OcclusionRoughnessMetallic",
+										"Path": "/Game/Textures/T_4M_Trimsheet_Wood_OcclusionRoughnessMetallic.T_4M_Trimsheet_Wood_OcclusionRoughnessMetallic",
+										"AssetImportPath": "C:/Users/egil.wendin/egil.wendin_P5G4/Content/Textures/T_4M_Trimsheet_Wood_OcclusionRoughnessMetallic.png"
+									}
+								},
+								{
+									"Name": "NormalMap",
+									"Type": 3,
+									"Value":
+									{
+										"Name": "T_4M_Trimsheet_Wood_Normal",
+										"Path": "/Game/Textures/T_4M_Trimsheet_Wood_Normal.T_4M_Trimsheet_Wood_Normal",
+										"AssetImportPath": "C:/Users/egil.wendin/egil.wendin_P5G4/Content/Textures/T_4M_Trimsheet_Wood_Normal.png"
+									}
+								},
+								{
+									"Name": "Tiling",
+									"Type": 0,
+									"Value": 1
+								}
+							]
+						},
+						{
+							"Name": "WorldGridMaterial",
+							"Parent": "Self",
+							"Parameters": []
+						}
+					]
+				},
+				{
+					"Name": "TestSpin",
+					"Parent": "",
+					"TypeID": -1,
+					"CustomType": "SpinComponent_C",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Custom":
+					{
+						"SpinSpeed": 90.000010000000003,
+						"TargetComponentName": ""
+					}
+				}
+			]
+		},
+		{
+			"Name": "SM_Plane",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				1000,
+				0,
+				0,
+				0,
+				0,
+				1000,
+				0,
+				0,
+				0,
+				0,
+				1000,
+				0,
+				0,
+				0,
+				-30,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"Parent": "",
+					"TypeID": 1,
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "SM_Plane",
+					"ContentPath": "/Game/Meshes/Debug/SM_Plane.SM_Plane",
+					"AssetImportPath": "C:/Users/egil.wendin/egil.wendin_P5G4/Content/Meshes/Debug/SM_Plane.fbx",
+					"Materials": [
+						{
+							"Name": "M_PrototypeGrid",
+							"Parent": "Self",
+							"Parameters": []
+						}
+					]
 				}
 			]
 		}

@@ -1,5 +1,7 @@
 #include "ScriptedEventComponent.h"
 #include "ScriptedActionComponent.h"
+#include "GameFramework/Components/ColliderComponent.h"
+#include "GameFramework/GameFrameworkLog.h"
 #include "GameFramework/Scenes/CustomComponentVariables.h"
 #include "GameFramework/World/Actor.h"
 #include "GameFramework/World/World.h"
@@ -20,10 +22,24 @@ void ScriptedEventComponent::InitializeCustomVariables(const CustomComponentVari
 {
 	Replayable = variables.GetOrDefault<bool>("Replayable", false);
 	TriggerAction = variables.GetOrDefault<std::string>("TriggerAction", "");
+	TriggerCollider = variables.GetOrDefault<std::string>("TriggerCollider", "");
 }
 
 void ScriptedEventComponent::BeginPlay()
 {
+	if (!TriggerCollider.empty())
+	{
+		auto* collider = dynamic_cast<ColliderComponent*>(GetOwner()->FindComponent(TriggerCollider));
+		if (collider)
+		{
+			myCollisionSubscription = collider->OnEnter(this, &ScriptedEventComponent::OnTriggerEnter);
+		}
+		else
+		{
+			myLastError = "TriggerCollider does not name a ColliderComponent on this Actor: " + TriggerCollider;
+			std::cerr << "Sequence '" << GetOwner()->GetName() << "': " << myLastError << '\n';
+		}
+	}
 	if (!TriggerAction.empty())
 	{
 		myTriggerListener = ServiceLocator::GetInstance().GetInputMapper().AddEventListener(TriggerAction, [this](const CommonUtilities::InputEvent& event)
@@ -34,6 +50,23 @@ void ScriptedEventComponent::BeginPlay()
 			}
 		});
 		myListeningForTrigger = true;
+	}
+}
+
+void ScriptedEventComponent::OnTriggerEnter(const Collision& collision)
+{
+	auto* collider = dynamic_cast<ColliderComponent*>(GetOwner()->FindComponent(TriggerCollider));
+	auto* enteringCollider = collision.OtherCollider();
+	if (!collider || !collider->IsEnabled() || !enteringCollider || !enteringCollider->IsEnabled() ||
+		!enteringCollider->GetOwner()->IsActive())
+	{
+		return;
+	}
+	if (Play())
+	{
+		collider->SetEnabled(false);
+		LOG(LogGameFramework, Log, "Collision scripted event '{}' started when Actor '{}' entered.",
+			GetOwner()->GetName(), enteringCollider->GetOwner()->GetName());
 	}
 }
 
@@ -292,6 +325,7 @@ void ScriptedEventComponent::Cancel() noexcept
 
 void ScriptedEventComponent::EndPlay() noexcept
 {
+	myCollisionSubscription.Reset();
 	// Unloading the scene or removing this component must also stop the event and disconnect its button listener.
 	Cancel();
 	if (myListeningForTrigger)

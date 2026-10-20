@@ -487,12 +487,15 @@ namespace UnrealScene
 
 						ReadCommonComponent(component, componentData, UnrealComponentType::Box);
 
-						CommonUtilities::Vector3f bounds;
-						const auto& array = component["Bounds"].get_array().value();
-						bounds.x = static_cast<float>(array.at(1).get_double().value());
-						bounds.y = static_cast<float>(array.at(2).get_double().value());
-						bounds.z = static_cast<float>(array.at(0).get_double().value());
-						componentData.boundsMaxima = bounds;
+						try
+						{
+							const auto bounds = ReadCustomVector(component["Bounds"].value());
+							componentData.boundsMaxima = {bounds.y, bounds.z, bounds.x};
+						}
+						catch (const std::exception& error)
+						{
+							throw std::invalid_argument(componentData.name + ": invalid Bounds: " + error.what());
+						}
 
 						actorData.components.push_back(std::move(componentData));
 					}
@@ -616,7 +619,88 @@ namespace
 		std::vector<ImportDiagnostic> Diagnostics;
 	};
 
-	RuntimeConversionResult ConvertRuntimeScene(const UnrealScene::UnrealSceneData& source)
+	void ValidateColliderDimensions(const ColliderData& collider)
+	{
+		std::visit([](const auto& shape)
+		{
+			using ShapeType = std::decay_t<decltype(shape)>;
+			if constexpr (std::is_same_v<ShapeType, SphereColliderShape>)
+			{
+				if (!std::isfinite(shape.Radius) || shape.Radius <= 0)
+				{
+					throw std::invalid_argument("Sphere Radius must be finite and positive");
+				}
+			}
+			else if (!std::isfinite(shape.HalfExtents.x) || !std::isfinite(shape.HalfExtents.y) ||
+			         !std::isfinite(shape.HalfExtents.z) || shape.HalfExtents.x <= 0 || shape.HalfExtents.y <= 0 || shape.HalfExtents.z <= 0)
+			{
+				throw std::invalid_argument("Box Bounds must be finite and positive");
+			}
+		}, collider.Shape);
+	}
+
+	void ApplyColliderTags(ColliderData& collider, const std::unordered_map<std::string, unsigned int>& layerNames)
+	{
+		bool hasLayer = false;
+		bool hasMask = false;
+		const auto resolveLayer = [&](const std::string& name, const std::string& setting)
+		{
+			const auto layer = layerNames.find(name);
+			if (layer == layerNames.end() || layer->second > 31)
+			{
+				throw std::invalid_argument(setting + " contains unknown or invalid layer '" + name + "'");
+			}
+			return layer->second;
+		};
+		for (const std::string& tag : collider.Common.Tags)
+		{
+			if (tag == "CollisionLayer" || tag.starts_with("CollisionLayer="))
+			{
+				if (hasLayer)
+				{
+					throw std::invalid_argument("Duplicate CollisionLayer tag");
+				}
+				hasLayer = true;
+				if (tag == "CollisionLayer")
+				{
+					throw std::invalid_argument("CollisionLayer requires =<name>");
+				}
+				collider.Layer = resolveLayer(tag.substr(15), "CollisionLayer");
+			}
+			else if (tag == "CollisionMask" || tag.starts_with("CollisionMask="))
+			{
+				if (hasMask)
+				{
+					throw std::invalid_argument("Duplicate CollisionMask tag");
+				}
+				hasMask = true;
+				if (tag == "CollisionMask")
+				{
+					throw std::invalid_argument("CollisionMask requires =<names>");
+				}
+				collider.Mask = 0;
+				const std::string names = tag.substr(14);
+				if (names.empty())
+				{
+					continue;
+				}
+				std::size_t start = 0;
+				do
+				{
+					const std::size_t end = names.find('|', start);
+					collider.Mask |= std::uint32_t{1} << resolveLayer(names.substr(start, end - start), "CollisionMask");
+					if (end == std::string::npos)
+					{
+						break;
+					}
+					start = end + 1;
+				} while (start <= names.size());
+			}
+		}
+	}
+
+	RuntimeConversionResult ConvertRuntimeScene(const UnrealScene::UnrealSceneData& source,
+	                                          const std::unordered_map<std::string, unsigned int>& layerNames)
 	{
 		RuntimeConversionResult result;
 		SceneData scene;
@@ -671,11 +755,33 @@ namespace
 			actor.Archetype = sourceActor.archetype;
 			actor.Tags = sourceActor.tags;
 			actor.Transform = *actorTransform;
+			const auto isCollider = [](const UnrealScene::ComponentData& component)
+			{
+				const auto type = GetBaseComponent(component).typeID;
+				return type == UnrealComponentType::Box || type == UnrealComponentType::Sphere;
+			};
+			if (std::count_if(sourceActor.components.begin(), sourceActor.components.end(), isCollider) > 1)
+			{
+				result.Diagnostics.push_back({sourceActor.name, "Only one Box or Sphere collider is supported per Actor"});
+				continue;
+			}
 
 			for (const UnrealScene::ComponentData& sourceComponent : sourceActor.components)
 			{
 				const UnrealScene::BaseComponentData& baseComponentData = GetBaseComponent(sourceComponent);
 				const std::string context = sourceActor.name + "/" + baseComponentData.name;
+				if (isCollider(sourceComponent) && !baseComponentData.parent.empty())
+				{
+					const auto parent = std::find_if(sourceActor.components.begin(), sourceActor.components.end(), [&](const auto& component)
+					{
+						return GetBaseComponent(component).name == baseComponentData.parent;
+					});
+					if (parent == sourceActor.components.end() || !GetBaseComponent(*parent).parent.empty())
+					{
+						result.Diagnostics.push_back({context, "Collider Parent must be the Actor's root component; nested attachments are unsupported"});
+						continue;
+					}
+				}
 				const std::optional<TransformData> componentTransform = ConvertTransform(baseComponentData.transform);
 				if (!componentTransform)
 				{
@@ -768,6 +874,40 @@ namespace
 						{
 							actor.Components.push_back(CameraData{ common, imported.fieldOfView });
 						}
+						else if constexpr (std::is_same_v<SourceType, UnrealScene::BoxComponentData>)
+						{
+							ColliderData collider;
+							collider.Common = common;
+							collider.Shape = BoxColliderShape{imported.boundsMaxima * UnrealUnitScale};
+							try
+							{
+								ValidateColliderDimensions(collider);
+								ApplyColliderTags(collider, layerNames);
+							}
+							catch (const std::exception& error)
+							{
+								result.Diagnostics.push_back({context, error.what()});
+								return;
+							}
+							actor.Components.push_back(std::move(collider));
+						}
+						else if constexpr (std::is_same_v<SourceType, UnrealScene::BaseSphericalComponentData>)
+						{
+							ColliderData collider;
+							collider.Common = common;
+							collider.Shape = SphereColliderShape{imported.radius * UnrealUnitScale};
+							try
+							{
+								ValidateColliderDimensions(collider);
+								ApplyColliderTags(collider, layerNames);
+							}
+							catch (const std::exception& error)
+							{
+								result.Diagnostics.push_back({context, error.what()});
+								return;
+							}
+							actor.Components.push_back(std::move(collider));
+						}
 						else if (baseComponentData.typeID == UnrealComponentType::SceneComponent)
 						{
 							actor.Components.push_back(SceneComponentData{ common });
@@ -818,6 +958,11 @@ namespace
 	}
 }
 
+UnrealSceneImporter::UnrealSceneImporter(std::unordered_map<std::string, unsigned int> collisionLayers)
+	: myCollisionLayers(std::move(collisionLayers))
+{
+}
+
 UnrealImportResult UnrealSceneImporter::ImportScene(const std::filesystem::path& jsonPath) const
 {
 	UnrealImportResult result;
@@ -829,7 +974,7 @@ UnrealImportResult UnrealSceneImporter::ImportScene(const std::filesystem::path&
 			result.Diagnostics.push_back({ jsonPath.string(), "could not parse scene JSON" });
 			return result;
 		}
-		RuntimeConversionResult converted = ConvertRuntimeScene(importedScene);
+		RuntimeConversionResult converted = ConvertRuntimeScene(importedScene, myCollisionLayers);
 		result.Diagnostics = std::move(converted.Diagnostics);
 		result.Data = std::move(converted.Scene);
 	}

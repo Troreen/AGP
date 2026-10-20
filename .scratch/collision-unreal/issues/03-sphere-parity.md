@@ -11,7 +11,8 @@ filtering, lifecycle and sequence behavior. Spec: ../spec.md.
 ## Acceptance criteria
 
 - [ ] A real exported sphere becomes a functioning collider with confirmed radius,
-  offset, enabled state, and uniform scale applied exactly once.
+  offset and uniform scale applied exactly once, retaining the agreed defaults for
+  settings not exported. No exporter changes are needed.
 - [ ] Nonuniform/invalid sphere transforms and unsupported capsule shapes receive
   the agreed diagnostics and never silently become another functioning shape.
 - [ ] Box/sphere and sphere/sphere entry activate the intended sequence; filtering,

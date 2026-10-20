@@ -27,8 +27,7 @@ bool ColliderComponent::CanReceiveCollision(const Component* listeningComponent)
 	       listeningComponent->GetOwner()->IsActive();
 }
 
-CollisionSubscription ColliderComponent::Subscribe(CollisionOverlapPhase collisionPhase,
-                                                   std::function<void(const Collision&)> collisionCallback)
+CollisionSubscription ColliderComponent::Subscribe(CollisionOverlapPhase collisionPhase, std::function<void(const Collision&)> collisionCallback)
 {
 	std::erase_if(myCollisionSubscriptions, [](const auto& collisionSubscription)
 	{

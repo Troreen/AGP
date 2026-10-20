@@ -39,7 +39,8 @@ public:
 int RunCustomComponentTests()
 {
 	UnrealSceneImporter importer;
-	auto importResult = importer.ImportScene("Content/ExportedScenes/lvl_component_test/Lvl_Component_Test_Level.json");
+	// Keep the exported property probes stable while the editable Unreal test level evolves.
+	auto importResult = importer.ImportScene("Tests/GameFramework/CustomComponentImportScene.json");
 	Check(importResult.Data.has_value(), "Custom probe scene did not import");
 	const CustomComponentData* spinComponentData = nullptr;
 	for (const auto& actorData : importResult.Data->Actors)

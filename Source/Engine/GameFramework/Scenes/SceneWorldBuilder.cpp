@@ -4,6 +4,7 @@
 #include "GameFramework/AssetHandling/TextureAsset.h"
 #include "GameFramework/Components/AnimatorComponent.h"
 #include "GameFramework/Components/CameraComponent.h"
+#include "GameFramework/Components/ColliderComponent.h"
 #include "GameFramework/Components/CustomComponent.h"
 #include "GameFramework/Components/LightComponent.h"
 #include "GameFramework/Components/SkeletalMeshComponent.h"
@@ -489,6 +490,32 @@ Component* SceneWorldBuilder::CreateComponent(Actor& anActor, const ComponentRec
 				light->SetShadowMapSize({ 512, 512 });
 				light->SetCastShadows(true);
 				return light;
+			}
+			else if constexpr (std::is_same_v<ComponentType, ColliderData>)
+			{
+				auto* collider = anActor.AddComponent<ColliderComponent>(commonData.Name);
+				const bool validShape = std::visit([&](const auto& shape)
+				{
+					using ShapeType = std::decay_t<decltype(shape)>;
+					if constexpr (std::is_same_v<ShapeType, SphereColliderShape>)
+					{
+						return collider->SetSphereRadius(shape.Radius);
+					}
+					else
+					{
+						return collider->SetBoxHalfExtents(shape.HalfExtents);
+					}
+				}, someComponentData.Shape);
+				if (!validShape)
+				{
+					throw std::runtime_error("Invalid collider dimensions");
+				}
+				if (!collider->SetLayer(someComponentData.Layer))
+				{
+					throw std::runtime_error("Invalid collider layer");
+				}
+				collider->SetMask(someComponentData.Mask);
+				return collider;
 			}
 			else if constexpr (std::is_same_v<ComponentType, CustomComponentData>)
 			{

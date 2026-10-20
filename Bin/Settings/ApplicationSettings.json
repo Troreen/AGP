@@ -39,7 +39,7 @@
       "shaderFolder": "EngineShaders",
       "scenesFolder": "ExportedScenes",
       "cursorPath": "",
-      "initialScene": "lvl_shader_testing_tarik/Lvl_Shader_Testing_Tarik_Level.json"
+      "initialScene": "lvl_component_test/Lvl_Component_Test_Level.json"
     },
     "sound": {
       "masterVolume": 1.0,

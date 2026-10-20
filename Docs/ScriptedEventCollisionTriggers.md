@@ -1,38 +1,61 @@
-# Collision triggers: Unreal next steps
+# Collision triggers from Unreal
 
 ## Ready now
 
-Put one `ColliderComponent`, one `CollisionScriptTriggerComponent`, one
-`ScriptedEventComponent`, and the sequence actions on the same Actor. Set the
-trigger's exported String field `EnteringActor` to the exact entering Actor name,
-for example `Player`.
+Put a collider, one `ScriptedEventComponent`, and the sequence actions on the same
+Actor. Set the sequence's exported String field `TriggerCollider` to that collider's
+component name, for example `TriggerBox`. No separate trigger component is needed.
+Leave the string empty for manual-only activation. A missing or wrong-type named
+component produces a diagnostic; another collider is never selected implicitly.
 
 Entry starts the sequence. Success disables the collider and logs both Actor
 names; the sequence keeps running. Failure leaves the collider enabled for a
 later entry. Debug Game builds show collider outlines; disabled ones are gray.
 The temporary scripted demo has been removed.
 
-## Still to do
+The importer now maps exported Box and Sphere components to runtime colliders.
+It reads existing geometry, transforms, and Tags; no exporter change is required.
+See [shape import and filtering](CollisionDetection.md#import-shapes-from-unreal)
+for the supported attachment rules and tag syntax. Capsules remain placeholders.
 
-1. **Import real colliders.** Box/Sphere/Capsule exports currently become
-   placeholders in `SceneData`, not runtime colliders. Agree the mapping with the
-   Unreal/exporter owner, then update `SceneWorldBuilder` and importer data as
-   needed. Start with boxes and spheres; capsules are not supported by detection.
-   Carry names, enabled state, relative transforms, radius/half-extents, layers,
-   and masks. Confirm units, axes, and scale with a real export. Boxes support
-   yaw and positive scale; spheres require uniform positive scale.
-2. **Give Player a collider too.** The normal C++ Player currently has none.
-   Configure it there if Player remains code-created; avoid exporting another
-   Actor with the same name. Both collider masks must accept the other's layer.
-3. **Author the trigger in Unreal.** Create the custom Actor Component Blueprint
-   `CollisionScriptTriggerComponent` with String field `EnteringActor`. Add it,
-   the collision shape, coordinator, and actions to one trigger Actor. Configure
-   action targets, steps, and timing using the
-   [existing guide](ScriptedEventsUnrealTestGuide.md).
-4. **Verify the export round trip.** Check the custom type and `EnteringActor`
-   survive export. In Game, check volume placement, unrelated Actors, entry,
-   activation log, gray outline, action completion, no retrigger, and F4 reload.
-   Also test initial overlap and retry after rejected playback.
+For a player trigger, set these Tags on its shape component:
+
+```text
+CollisionLayer=Trigger
+CollisionMask=Player
+```
+
+The available names are `Player`, `Trigger`, and `Enemy`. The entering Player
+collider must also accept `Trigger`. Admission depends on layers and masks rather
+than Actor names. Native Unreal collision responses are not exported.
+
+The supplied component test export has `SE_WorkflowTest/TriggerBox` with local
+half-extents `{32,32,32}` and scale about `8.765`. Its expected AGP center is
+`{-130,254,-1560}` and world half-extents are about `{280.48,280.48,280.48}`.
+These values provide an alignment target. The user has verified entry, the gray
+consumed outline and F4 reset in Debug Game after a real TGA re-export.
+
+## Verified component test encounter
+
+The sequence now owns the collision subscription. Configure
+`SE_WorkflowTest/ScriptedEventSequence` with `TriggerCollider=TriggerBox` and remove
+the obsolete `CollisionScriptTrigger` instance when migrating older maps. Export
+the updated map through the normal TGA workflow. The exporter has not been modified.
+Action setup follows the [existing guide](ScriptedEventsUnrealTestGuide.md).
+
+Player creation is restored in `Game.cpp` with radius 60, local offset `{0,90,0}`,
+layer Player and mask Trigger. Do not export another Actor named Player.
+Before this refactor, the user confirmed F2 sequence completion, automatic activation on first entry,
+gray consumption, and F4 restoring green and allowing activation again. The
+sequence's `Replayable=true` permits manual replay; the collision trigger consumes
+its collider on the first accepted collision start. Re-entry alone does not rearm it.
+
+A focused fixture from the updated real export covers import, registration, Player/Enemy
+filtering, entry, completion and consumption. Existing tests cover initial overlap
+and retry after rejected playback. Exact Player body fit and a real exported
+sphere's visual alignment remain future checks; the Player sphere is approximate.
+The sequence-owned trigger's fresh export is validated; its human entry/gray/F4
+check is pending.
 
 ## Other Unreal checks still open
 

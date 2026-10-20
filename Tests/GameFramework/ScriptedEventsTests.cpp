@@ -2,7 +2,6 @@
 #include "Components/ScriptedEvents/ScriptedEventComponent.h"
 #include "GameFramework/World/World.h"
 #include "Components/RegisterCustomComponents.h"
-#include "Components/ScriptedEvents/CollisionScriptTriggerComponent.h"
 #include "Components/CustomComponentRegistry.h"
 #include "GameFramework/Scenes/SceneWorldBuilder.h"
 #include "GameFramework/AssetHandling/AssetRegistry.h"
@@ -13,6 +12,8 @@
 #include "GameFramework/AssetHandling/MeshAsset.h"
 #include "GameFramework/Animation/AnimationManager.h"
 #include "GameFramework/ServiceLocator.h"
+#include "GameFramework/UnrealSceneImporter/UnrealSceneImporter.h"
+#include "GameCollisionLayers.h"
 #include <chrono>
 #include <cmath>
 #include <filesystem>
@@ -50,12 +51,8 @@ namespace
 		coordinator.Common.Name = "Sequence";
 		coordinator.CustomType = "ScriptedEventComponent_C";
 		coordinator.Variables.BoolVariables.emplace("Replayable", true);
+		coordinator.Variables.StringVariables.emplace("TriggerCollider", "TriggerCollider");
 		event.Components.push_back(coordinator);
-		CustomComponentData collisionTrigger;
-		collisionTrigger.Common.Name = "OnPlayerEnter";
-		collisionTrigger.CustomType = "CollisionScriptTriggerComponent_C";
-		collisionTrigger.Variables.StringVariables.emplace("EnteringActor", "Player");
-		event.Components.push_back(collisionTrigger);
 		CustomComponentData move;
 		move.Common.Name = "MoveFromExport";
 		move.CustomType = "MoveActionComponent_C";
@@ -84,12 +81,11 @@ namespace
 		auto* actor = world->FindActor("ExportedEvent");
 		auto* sequence = actor->GetComponent<ScriptedEventComponent>();
 		auto* action = actor->GetComponent<MoveActionComponent>();
-		auto* trigger = actor->GetComponent<CollisionScriptTriggerComponent>();
 		auto* collider = actor->AddComponent<ColliderComponent>("TriggerCollider");
 		collider->SetSphereRadius(5.0f);
 		auto* player = world->FindActor("Player");
 		player->AddComponent<ColliderComponent>("Collider")->SetSphereRadius(1.0f);
-		Check(sequence && sequence->Replayable && trigger && action && action->Step == 3 && action->WaitForCompletion,
+		Check(sequence && sequence->Replayable && sequence->TriggerCollider == "TriggerCollider" && action && action->Step == 3 && action->WaitForCompletion,
 			"Registry/builder did not apply exported sequence and action variables");
 		Check(action->TargetActor == "Target" && action->DestinationActor == "Marker" && action->DurationInSeconds == 0.5f,
 			"Exported action references or duration changed");
@@ -100,6 +96,65 @@ namespace
 		Check(sequence->HasCompleted() && !collider->IsEnabled() &&
 			world->FindActor("Target")->GetTransform().GetWorldPosition().x == 10,
 			"Exported trigger or action fields did not drive movement");
+		world.reset();
+		services.KillServices();
+	}
+
+	void TestAuthoredCollisionTrigger()
+	{
+		// Frozen subset of the real component-test re-export using TriggerCollider.
+		// Geometry, coordinator settings and the retained Wait action are unchanged.
+		// This checks import and activation, not the full sequence, rendering or audio.
+		UnrealSceneImporter importer(GameCollisionLayers::Names());
+		auto imported = importer.ImportScene("Tests/GameFramework/AuthoredCollisionTriggerScene.json");
+		Check(bool(imported), "Authored collision trigger fixture did not import cleanly");
+		auto& services = ServiceLocator::GetInstance();
+		services.Initialize();
+		CustomComponentRegistry registry;
+		RegisterCustomComponents(registry);
+		AssetRegistry assets;
+		SceneWorldBuilder builder;
+		auto world = builder.BuildWorld(*imported.Data, assets, {}, {1280, 720}, {},
+			[&registry](Actor& actor, const CustomComponentData& data) { return registry.Create(actor, data); });
+		auto* eventActor = world->FindActor("SE_WorkflowTest");
+		Check(eventActor != nullptr, "Authored event Actor was not built");
+		auto* sequence = eventActor->GetComponent<ScriptedEventComponent>();
+		auto* box = eventActor->GetComponent<ColliderComponent>();
+		auto* wait = eventActor->GetComponent<WaitActionComponent>();
+		Check(sequence && box && wait && sequence->TriggerCollider == "TriggerBox", "Authored trigger components were not built");
+		Check(box->GetLayer() == GameCollisionLayers::Trigger && box->GetMask() == (1u << GameCollisionLayers::Player),
+			"Authored TriggerBox layer tags were not applied");
+		Check(sequence->Replayable, "Authored replayable coordinator changed");
+
+		auto* player = world->SpawnActor("Player");
+		auto* playerCollider = player->AddComponent<ColliderComponent>("Collider");
+		playerCollider->SetSphereRadius(60.0f);
+		playerCollider->GetTransform().SetLocalPosition({0, 90, 0});
+		playerCollider->SetLayer(GameCollisionLayers::Player);
+		playerCollider->SetMask(1u << GameCollisionLayers::Trigger);
+		auto* enemy = world->SpawnActor("Enemy");
+		enemy->GetTransform().SetWorldPosition({-130, 254, -1560});
+		auto* enemyCollider = enemy->AddComponent<ColliderComponent>("Collider");
+		enemyCollider->SetSphereRadius(60.0f);
+		enemyCollider->SetLayer(GameCollisionLayers::Enemy);
+		enemyCollider->SetMask(1u << GameCollisionLayers::Trigger);
+		world->BeginPlay();
+		world->Update(0.0f);
+		Check(!sequence->IsRunning() && !sequence->HasCompleted() && box->IsEnabled(),
+			"Enemy or distant Player activated the authored trigger");
+
+		player->GetTransform().SetWorldPosition({0, 0, -1560});
+		world->Update(0.0f);
+		Check(sequence->IsRunning() && wait->IsStarted() && !box->IsEnabled(),
+			"Player entry did not start and consume the authored trigger");
+		Advance(*world, wait->DurationInSeconds + 0.25f);
+		Check(sequence->HasCompleted() && !sequence->IsRunning(), "Authored Wait action did not complete");
+		player->GetTransform().SetWorldPosition({0, 0, 0});
+		world->Update(0.0f);
+		player->GetTransform().SetWorldPosition({0, 0, -1560});
+		world->Update(0.0f);
+		Check(sequence->HasCompleted() && !sequence->IsRunning() && !box->IsEnabled(),
+			"Re-entry restarted the consumed authored trigger");
 		world.reset();
 		services.KillServices();
 	}
@@ -322,7 +377,7 @@ namespace
 		Check(replacement->HasCompleted(), "Replacement scene event did not complete");
 	}
 
-	void TestCollisionScriptTrigger()
+	void TestCollisionTrigger()
 	{
 		auto& services = ServiceLocator::GetInstance();
 		services.Initialize();
@@ -334,11 +389,8 @@ namespace
 			auto* volume = world.SpawnActor("EncounterVolume");
 			auto* volumeCollider = volume->AddComponent<ColliderComponent>("Collider");
 			volumeCollider->SetBoxHalfExtents({4, 4, 4});
-			auto* trigger = volume->AddComponent<CollisionScriptTriggerComponent>("Trigger");
-			CustomComponentVariables triggerVariables;
-			triggerVariables.StringVariables.emplace("EnteringActor", "Player");
-			trigger->InitializeCustomVariables(triggerVariables);
 			auto* sequence = volume->AddComponent<ScriptedEventComponent>("Sequence");
+			sequence->TriggerCollider = "Collider";
 			sequence->Replayable = true;
 			auto* reveal = volume->AddComponent<SetActorActiveActionComponent>("RevealTarget");
 			reveal->TargetActor = "Target";
@@ -362,11 +414,8 @@ namespace
 			auto* volume = replacement.SpawnActor("EncounterVolume");
 			auto* collider = volume->AddComponent<ColliderComponent>("Collider");
 			collider->SetBoxHalfExtents({4, 4, 4});
-			auto* trigger = volume->AddComponent<CollisionScriptTriggerComponent>("Trigger");
-			CustomComponentVariables variables;
-			variables.StringVariables.emplace("EnteringActor", "Player");
-			trigger->InitializeCustomVariables(variables);
 			auto* sequence = volume->AddComponent<ScriptedEventComponent>("Sequence");
+			sequence->TriggerCollider = "Collider";
 			auto* action = volume->AddComponent<SetActorActiveActionComponent>("Reveal");
 			action->TargetActor = "ReplacementTarget";
 			auto* target = replacement.SpawnActor("ReplacementTarget");
@@ -382,7 +431,7 @@ namespace
 		services.KillServices();
 	}
 
-	void TestCollisionScriptTriggerRetriesOnNewEnterAfterRejectedPlay()
+	void TestCollisionTriggerRetriesOnNewEnterAfterRejectedPlay()
 	{
 		auto& services = ServiceLocator::GetInstance();
 		services.Initialize();
@@ -395,11 +444,8 @@ namespace
 			auto* volume = world.SpawnActor("RetryVolume");
 			auto* volumeCollider = volume->AddComponent<ColliderComponent>("Collider");
 			volumeCollider->SetSphereRadius(4.0f);
-			auto* trigger = volume->AddComponent<CollisionScriptTriggerComponent>("Trigger");
-			CustomComponentVariables triggerVariables;
-			triggerVariables.StringVariables.emplace("EnteringActor", "Player");
-			trigger->InitializeCustomVariables(triggerVariables);
 			auto* sequence = volume->AddComponent<ScriptedEventComponent>("Sequence");
+			sequence->TriggerCollider = "Collider";
 			auto* reveal = volume->AddComponent<SetActorActiveActionComponent>("RevealTarget");
 			reveal->TargetActor = "Target";
 			world.BeginPlay();
@@ -421,25 +467,31 @@ namespace
 		services.KillServices();
 	}
 
-	void TestCollisionScriptTriggerFiltersOtherActors()
+	void TestCollisionTriggerFiltersLayers()
 	{
 		auto& services = ServiceLocator::GetInstance();
 		services.Initialize();
 		{
 			World world;
 			auto* unrelated = world.SpawnActor("Unrelated");
-			unrelated->AddComponent<ColliderComponent>("Collider")->SetSphereRadius(1.0f);
-			auto* player = world.SpawnActor("Player");
+			auto* unrelatedCollider = unrelated->AddComponent<ColliderComponent>("Collider");
+			unrelatedCollider->SetSphereRadius(1.0f);
+			unrelatedCollider->SetLayer(GameCollisionLayers::Enemy);
+			unrelatedCollider->SetMask(1u << GameCollisionLayers::Trigger);
+			// Admission depends on layers, so an Actor need not be named Player.
+			auto* player = world.SpawnActor("AllowedVisitor");
 			player->GetTransform().SetWorldPosition({20, 0, 0});
-			player->AddComponent<ColliderComponent>("Collider")->SetSphereRadius(1.0f);
+			auto* playerCollider = player->AddComponent<ColliderComponent>("Collider");
+			playerCollider->SetSphereRadius(1.0f);
+			playerCollider->SetLayer(GameCollisionLayers::Player);
+			playerCollider->SetMask(1u << GameCollisionLayers::Trigger);
 			auto* volume = world.SpawnActor("FilteredVolume");
 			auto* collider = volume->AddComponent<ColliderComponent>("Collider");
 			collider->SetBoxHalfExtents({4, 4, 4});
-			auto* trigger = volume->AddComponent<CollisionScriptTriggerComponent>("Trigger");
-			CustomComponentVariables variables;
-			variables.StringVariables.emplace("EnteringActor", "Player");
-			trigger->InitializeCustomVariables(variables);
+			collider->SetLayer(GameCollisionLayers::Trigger);
+			collider->SetMask(1u << GameCollisionLayers::Player);
 			auto* sequence = volume->AddComponent<ScriptedEventComponent>("Sequence");
+			sequence->TriggerCollider = "Collider";
 			auto* action = volume->AddComponent<SetActorActiveActionComponent>("Reveal");
 			action->TargetActor = "Target";
 			auto* target = world.SpawnActor("Target");
@@ -450,7 +502,45 @@ namespace
 				"An unrelated Actor activated the collision script trigger");
 			player->GetTransform().SetWorldPosition({0, 0, 0});
 			world.Update(0.0f);
-			Check(!collider->IsEnabled() && target->IsActive(), "The configured entering Actor was ignored");
+			Check(!collider->IsEnabled() && target->IsActive(), "An accepted layer was ignored because of its Actor name");
+			world.Clear();
+		}
+		services.KillServices();
+	}
+
+	void TestOptionalAndInvalidTriggerCollider()
+	{
+		auto& services = ServiceLocator::GetInstance();
+		services.Initialize();
+		for (const char* colliderName : {"", "MissingCollider", "NotACollider"})
+		{
+			World world;
+			auto* visitor = world.SpawnActor("Visitor");
+			visitor->AddComponent<ColliderComponent>("Collider")->SetSphereRadius(1.0f);
+			auto* sequence = Sequence(world, "OptionalTrigger");
+			sequence->TriggerCollider = colliderName;
+			auto* actor = sequence->GetOwner();
+			auto* unusedCollider = actor->AddComponent<ColliderComponent>("OtherCollider");
+			unusedCollider->SetSphereRadius(4.0f);
+			actor->AddComponent<Component>("NotACollider");
+			Wait(sequence, "Pause", 0, 0.5f);
+			world.BeginPlay();
+			world.Update(0.0f);
+			Check(!sequence->IsRunning() && unusedCollider->IsEnabled(),
+				"Blank or invalid TriggerCollider subscribed to another collider");
+			if (sequence->TriggerCollider.empty())
+			{
+				Check(sequence->GetLastError().empty(), "Optional blank TriggerCollider produced a diagnostic");
+				Check(sequence->Play(), "Blank TriggerCollider prevented manual sequence playback");
+				Check(unusedCollider->IsEnabled(), "Manual playback consumed an unconfigured collider");
+				Advance(world, 0.75f);
+				Check(sequence->HasCompleted(), "Manual sequence with blank TriggerCollider did not finish");
+			}
+			else
+			{
+				Check(sequence->GetLastError().find(colliderName) != std::string::npos,
+					"Missing or wrong-type TriggerCollider did not identify the named component");
+			}
 			world.Clear();
 		}
 		services.KillServices();
@@ -593,6 +683,7 @@ int main()
 try
 {
 	TestExportedCustomFields();
+	TestAuthoredCollisionTrigger();
 	TestOrderingAndOverlap();
 	TestPersistentChangesAndReplay();
 	TestClaimsAndValidation();
@@ -600,9 +691,10 @@ try
 	TestOverlappingMovementRejected();
 	TestControlCleanup();
 	TestSceneReplacementReleasesClaims();
-	TestCollisionScriptTrigger();
-	TestCollisionScriptTriggerRetriesOnNewEnterAfterRejectedPlay();
-	TestCollisionScriptTriggerFiltersOtherActors();
+	TestCollisionTrigger();
+	TestCollisionTriggerRetriesOnNewEnterAfterRejectedPlay();
+	TestCollisionTriggerFiltersLayers();
+	TestOptionalAndInvalidTriggerCollider();
 	TestAnimationPlaybackAndPreflight();
 	TestAnimationTreeHandoff();
 	std::cout << "PASS: scripted sequence ordering, movement, persistence, claims, replay and destruction\n";

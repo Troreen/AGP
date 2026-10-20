@@ -32,7 +32,7 @@
       <AdditionalDependencies>GraphicsEngine.lib;TGAFbx.lib;$(SoundEngineLibrary);d3d11.lib;dxguid.lib;dxgi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup><ClCompile Include="CollisionTests.cpp" /></ItemGroup>
+  <ItemGroup><ClCompile Include="CollisionTests.cpp" /><ClCompile Include="CollisionImportTests.cpp" /></ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Source\Engine\GameFramework\GameFramework.vcxproj">
       <Project>{cd9f039d-3960-7fd3-029b-c8506e1ac4af}</Project>

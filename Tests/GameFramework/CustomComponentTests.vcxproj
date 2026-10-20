@@ -32,7 +32,7 @@
       <AdditionalDependencies>GraphicsEngine.lib;TGAFbx.lib;$(SoundEngineLibrary);d3d11.lib;dxguid.lib;dxgi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup><ClCompile Include="CustomComponentTests.cpp" /><ClCompile Include="..\..\Source\Application\Game\Components\ScriptedEvents\ScriptedActionComponent.cpp" /><ClCompile Include="..\..\Source\Application\Game\Components\ScriptedEvents\ScriptedEventComponent.cpp" /><ClCompile Include="..\..\Source\Application\Game\Player\PlayerController.cpp" /><ClCompile Include="..\..\Source\Application\Game\Player\PlayerMovementComponent.cpp" /><ClCompile Include="..\..\Source\Application\Game\Components\RegisterCustomComponents.cpp" /><ClCompile Include="..\..\Source\Application\Game\Components\ScriptedEvents\CollisionScriptTriggerComponent.cpp" />
+  <ItemGroup><ClCompile Include="CustomComponentTests.cpp" /><ClCompile Include="..\..\Source\Application\Game\Components\ScriptedEvents\ScriptedActionComponent.cpp" /><ClCompile Include="..\..\Source\Application\Game\Components\ScriptedEvents\ScriptedEventComponent.cpp" /><ClCompile Include="..\..\Source\Application\Game\Player\PlayerController.cpp" /><ClCompile Include="..\..\Source\Application\Game\Player\PlayerMovementComponent.cpp" /><ClCompile Include="..\..\Source\Application\Game\Components\RegisterCustomComponents.cpp" />
 <ClCompile Include="..\..\Source\Application\Game\Components\SpinComponent.cpp" />
 <ClCompile Include="..\..\Source\Application\Game\BehaviourTree\**\*.cpp" /></ItemGroup>
   <ItemGroup>

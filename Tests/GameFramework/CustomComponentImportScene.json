@@ -1,0 +1,84 @@
+{
+  "MasterMaterials": [],
+  "Actors": [
+    {
+      "Name": "Floor",
+      "Archetype": "StaticMeshActor",
+      "Transform": [
+        8,
+        0,
+        0,
+        0,
+        0,
+        8,
+        0,
+        0,
+        0,
+        0,
+        8,
+        0,
+        0,
+        0,
+        -0.5,
+        1
+      ],
+      "Tags": [],
+      "Components": [
+        {
+          "Name": "SpinComponent",
+          "Parent": "",
+          "TypeID": -1,
+          "CustomType": "SpinComponent_C",
+          "Tags": [],
+          "Transform": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "Custom": {
+            "SpinSpeed": 25.00001,
+            "TargetComponentName": "",
+            "BoolProbe": true,
+            "IntProbe": 7,
+            "VectorProbe": {
+              "x": 1,
+              "y": 2,
+              "z": 3
+            },
+            "TransformProbe": {
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0.7071067811865477,
+                "w": 0.7071067811865475
+              },
+              "translation": {
+                "x": 10,
+                "y": 20,
+                "z": 30
+              },
+              "scale3D": {
+                "x": 1,
+                "y": 2,
+                "z": 3
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

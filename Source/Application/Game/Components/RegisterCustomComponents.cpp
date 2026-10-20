@@ -2,7 +2,6 @@
 #include "CustomComponentRegistry.h"
 #include "SpinComponent.h"
 #include "Components/ScriptedEvents/ScriptedEventComponent.h"
-#include "Components/ScriptedEvents/CollisionScriptTriggerComponent.h"
 #include "Components/ScriptedEvents/ScriptedActionComponent.h"
 #include <GameFramework/Components/AnimatorComponent.h>
 #include <Application/Game/BehaviourTree/BehaviourTreeComponent.h>
@@ -15,7 +14,6 @@ void RegisterCustomComponents(CustomComponentRegistry& aRegistry)
 
 	// --- Scripted Events ---
 	aRegistry.Register<ScriptedEventComponent>("ScriptedEventComponent");
-	aRegistry.Register<CollisionScriptTriggerComponent>("CollisionScriptTriggerComponent");
 	aRegistry.Register<WaitActionComponent>("WaitActionComponent");
 	aRegistry.Register<MoveActionComponent>("MoveActionComponent");
 	aRegistry.Register<PlayAnimationActionComponent>("PlayAnimationActionComponent");

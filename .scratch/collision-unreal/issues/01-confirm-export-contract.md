@@ -1,6 +1,6 @@
 # 01: Capture the real shape authoring and export contract
 
-Status: ready-for-agent
+Status: in-progress
 Blocked by: none
 
 ## What to build
@@ -16,9 +16,10 @@ observable target. Spec: ../spec.md.
 - [ ] Capture representative offset/yawed/scaled boxes and uniform spheres with
   disabled and multiple-shape examples. Record authored dimensions and transforms.
 - [ ] Establish Bounds half/full size, unit/axis conversion, scale ownership,
-  parent flattening, enabled/collision participation, and supported metadata.
-- [ ] Decide how designers author layer/mask filtering, and document safe handling
-  of multiple shapes and unsupported capsules without silently changing geometry.
+  parent handling, and supported metadata from the unchanged exporter.
+- [ ] Record AGP behavior for missing enabled/layer/mask fields. Do not add native
+  Unreal collision settings or exporter extensions. Document handling of multiple
+  shapes and unsupported capsules without silently changing geometry.
 - [ ] Record sanitized fixture locations, export procedure, expected geometry,
   and any decisions requiring the user's input. Update the spec's readiness.
 

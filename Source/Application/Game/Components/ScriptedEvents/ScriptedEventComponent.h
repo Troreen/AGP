@@ -1,5 +1,6 @@
 #pragma once
 #include "GameFramework/Components/CustomComponent.h"
+#include "GameFramework/Collision/CollisionSubscription.h"
 #include <string>
 #include <vector>
 
@@ -12,8 +13,10 @@ class ScriptedEventComponent final : public CustomComponent
 public:
 	// False allows one accepted start per scene load, even if that run is later cancelled.
 	bool Replayable = false;
-	// Optional input action for manual testing. Collision triggers call Play() directly.
+	// Optional input action for manual testing.
 	std::string TriggerAction;
+	// Optional collider on this Actor. An accepted collision start disables it.
+	std::string TriggerCollider;
 	void InitializeCustomVariables(const CustomComponentVariables& variables) override;
 	void BeginPlay() override;
 	void Update(float deltaTime) override;
@@ -28,6 +31,8 @@ public:
 	const std::string& GetLastError() const { return myLastError; }
 
 private:
+	void OnTriggerEnter(const Collision& collision);
+	CollisionSubscription myCollisionSubscription;
 	void ReleaseClaims() noexcept;
 	void Finish(bool cancelled) noexcept;
 	void StartStep();

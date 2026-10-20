@@ -1,6 +1,6 @@
 # Unreal-authored collision triggers
 
-Status: needs-info
+Status: in-progress
 
 ## Problem Statement
 
@@ -13,9 +13,9 @@ collision encounter in Unreal and run it in Game.
 First prepare a small Perforce checkpoint of the reusable collision implementation,
 excluding the optional demo. Then deliver a box-trigger round trip, followed by
 sphere parity, using actual exporter evidence before selecting shape semantics.
-The planning run covers the plan and demo cleanup. The user subsequently authorized
-committing and pushing those changes to GitHub. New importer implementation and
-Perforce submission remain outside this run.
+The user resumed implementation after committing the existing working-tree
+changes. Work in the component test scene and retain the existing exporter
+contract. Do not submit to Perforce. Keep implementation increments reviewable.
 
 ## User Stories
 
@@ -39,17 +39,26 @@ Perforce submission remain outside this run.
   dimensions already include scale from the actual exporter and real fixtures.
   Existing parsing reorders box bounds and applies a unit factor; this is evidence
   of current behavior, not proof of the exporter contract.
-- Establish how exported shape participation is represented before converting all
-  shape components into colliders. Confirm enabled state versus Unreal collision
-  mode and how layers/masks are authored. Existing runtime defaults are layer 0
-  with all mask bits; do not invent exporter fields or a physics-channel mapping.
+- Import only the existing shape and common component fields described in the
+  exporter programmer guide. Keep the exporter unchanged. Shape component tags
+  CollisionLayer=<name> and CollisionMask=<name>|<name> configure AGP filtering.
+  Only Player=1, Trigger=2 and Enemy=3 are named in game policy. The importer
+  receives a name-to-layer map; engine code does not hardcode gameplay names.
+  Missing tags retain enabled=true, layer 0 and all mask bits; an explicitly
+  empty CollisionMask accepts none. Unknown names, malformed settings and duplicate
+  setting tags fail import with clear diagnostics. Tags remain source metadata.
 - Keep the current one-collider-per-Actor rule. Define deterministic diagnostics
   for multiple shapes on one Actor before implementation; do not silently pick one.
 - Start with a box volume, a code-created Player sphere, and a simple existing
   movement/visibility sequence. Measure Player collider radius and offset against
   the mesh and scene; avoid a duplicate exported Player Actor.
-- Keep the existing same-Actor trigger, coordinator, and actions contract and exact
-  EnteringActor name matching. Successful Play disables the source collider;
+- User narrowed the current increment to import and tags first. Existing Player
+  creation is disabled for shader testing and stays unchanged. Restoring Player
+  and proving full sequence activation belong to the following increment.
+- The sequence's optional exported TriggerCollider string names a collider on
+  the same Actor. No separate trigger component or EnteringActor name filter is
+  needed; collision layers/masks select eligible entrants. Missing/wrong-type
+  names produce diagnostics. Successful collision Play disables that collider;
   rejected Play permits a later entry. Stay and Exit do not activate playback.
 - Sphere parity retains positive uniform scale; boxes retain positive scale and
   world-up yaw. Unsupported transforms remain excluded from detection.
@@ -60,8 +69,9 @@ Perforce submission remain outside this run.
   then observe World updates and collider callbacks. Verify behavior and geometry,
   not private helper structure. Use existing framework/custom-component tests as
   prior art; add narrow collision-import coverage where fixtures fit best.
-- Test translated/offset and yawed boxes, uniform spheres, disabled shapes,
-  filtering, and duplicate/unsupported records at public seams.
+- Test translated/offset and yawed boxes, uniform spheres, retained defaults,
+  and duplicate/unsupported records at public seams. Runtime enablement and
+  filtering remain covered separately by existing collision regressions.
 - Preserve collision and scripted-event regressions covering initial overlap,
   rejected playback followed by successful re-entry, disablement, destruction,
   and scene replacement.
@@ -76,11 +86,13 @@ Perforce submission remain outside this run.
 ## Out of Scope
 
 Blocking movement, physics, capsules, compound colliders, swept detection,
-animation-import completion, automatic Git commits, and Perforce submission.
+animation-import completion, exporter changes, native Unreal collision settings,
+automatic Git commits, and Perforce submission.
 No shipping demo Actors or new demo switches.
 
 ## Further Notes
 
-The schema/authoring decisions above require exporter inspection before this spec
-is ready to implement. See ticket 01. Source references and continuation evidence
-live in workflow.md and verification.md.
+Actual exported SE_WorkflowTest/TriggerBox establishes the box fixture. Source
+references, expected geometry and continuation evidence live in export-contract.md,
+workflow.md and verification.md. Runtime and sphere export evidence remain explicit
+verification gates rather than inferred from source or synthetic fixtures.

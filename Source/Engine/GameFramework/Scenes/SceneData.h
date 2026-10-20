@@ -49,6 +49,16 @@ struct DirectionalLightData { ComponentData Common; CommonUtilities::Vector3f Co
 struct PointLightData : DirectionalLightData { float Radius = 1000; float FalloffExponent = 0; };
 struct SpotLightData : PointLightData { float InnerConeDegrees = 20; float OuterConeDegrees = 35; };
 
+struct SphereColliderShape { float Radius = 1.0f; };
+struct BoxColliderShape { CommonUtilities::Vector3f HalfExtents{1, 1, 1}; };
+struct ColliderData
+{
+	ComponentData Common;
+	std::variant<SphereColliderShape, BoxColliderShape> Shape;
+	unsigned int Layer = 0;
+	std::uint32_t Mask = UINT32_MAX;
+};
+
 enum class PlaceholderComponentType { Box, Sphere, Capsule, SpringArm, Custom };
 struct BoxPlaceholderData { CommonUtilities::Vector3f BoundsMaxima; };
 struct SpherePlaceholderData { float Radius = 0.0f; };
@@ -80,6 +90,7 @@ using ComponentRecord =
 		DirectionalLightData,
 		PointLightData, 
 		SpotLightData, 
+		ColliderData,
 		PlaceholderComponentData,
 		CustomComponentData
 	>;

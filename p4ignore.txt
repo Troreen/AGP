@@ -43,15 +43,8 @@ Makefile
 /Bin/SimplifiedBaseline/
 /Bin/Tests/
 
-# Local snapshots and conflict-resolution backups
-/WorkInProgress/
-
 # Local test code and fixtures
 /Tests/
-
-# Local documentation and reference material stay outside Perforce submissions.
-
-
 .gitignore
 /.git
 README.md
@@ -61,3 +54,5 @@ README.md
 .pch
 .agents
 .scratch
+agents
+/Docs/
