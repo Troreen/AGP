@@ -260,7 +260,6 @@ exit /b 0</Command>
     <ClInclude Include="Components\ScriptedEvents\ScriptedEventComponent.h" />
     <ClInclude Include="Components\ScriptedEvents\CollisionScriptTriggerComponent.h" />
     <ClInclude Include="Components\SpinComponent.h" />
-    <ClInclude Include="Components\CollisionDemoComponent.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameLog.h" />
     <ClInclude Include="Player\PlayerActor.h" />
@@ -290,7 +289,6 @@ exit /b 0</Command>
     <ClCompile Include="Components\ScriptedEvents\ScriptedEventComponent.cpp" />
     <ClCompile Include="Components\ScriptedEvents\CollisionScriptTriggerComponent.cpp" />
     <ClCompile Include="Components\SpinComponent.cpp" />
-    <ClCompile Include="Components\CollisionDemoComponent.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Player\PlayerActor.cpp" />

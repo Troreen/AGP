@@ -91,8 +91,8 @@ handler. The collision and returned pointers are borrowed for the callback only.
 
 Callbacks run on both surviving colliders. New subscriptions wait until the next
 notification on that collider; disconnecting skips a callback that has not run yet.
-The runnable example is `Components/CollisionDemoComponent` in the Game project.
-It stores three subscriptions and resets them in EndPlay, including on scene replacement.
+The gameplay example is `CollisionScriptTriggerComponent`: it stores an Enter
+subscription and resets it in EndPlay, including on scene replacement.
 
 ## Timing and lifetime
 
@@ -124,39 +124,14 @@ Detection samples frames. A fast volume may cross another entirely between
 updates without an event. Direct queries, capsules, compound colliders, blocking,
 and physical resolution are outside this version.
 
-## Run the optional demonstration
+## Verify in a scene
 
-1. In `Source/Application/Game/Game.cpp`, set the single code switch
-   `EnableCollisionDemo` to `true` and build Debug x64. Its checked-in default is
-   `false`; no settings or input bindings need changing.
-2. Run `Bin/Debug/Game.exe`. The demonstration uses whichever scene the existing
-   application settings select. For the recorded verification procedure use
-   `lvl_verify_anim/Lvl_Verify_Anim_Level.json`, if present in the local Content
-   stream. The four separate volume Actors are spawned through ConfigureWorld.
-3. Keep the initial camera still for the 20-second run. At BeginPlay the sample
-   places its center 650 units along that camera's full view direction. Movement
-   uses a horizontal lateral axis; the camera itself is unchanged. Normal scene
-   geometry can occlude depth-tested outlines; use the existing camera controls
-   to inspect them if needed.
-4. Compare outlines and Debug console messages with the table below. The moving
-   ID must appear with the fixed sphere and box, never with the filtered ID.
-   Stay is delivered every overlapping frame but logged once per pair entry.
-5. Press the existing F4 reload action during a collision. Expect one
-   `Collision demo EndPlay: listener removed.` message, a fresh start, and one
-   set of phase logs. Clear emits no old-world Exit events. Repeat the run to
-   check that old listeners do not accumulate.
-6. Restore `EnableCollisionDemo` to `false` and rebuild after the check.
+Debug Game builds enable outlines for all scene colliders. The optional code-spawned
+demonstration has been removed. Imported Unreal shapes still become placeholders;
+the collider import work is the next slice.
 
-| Time | Expected observation |
-| --- | --- |
-| 0–4 seconds | Cyan sphere approaches yellow fixed sphere, then Enter and Stay. |
-| 5 seconds | Cyan becomes gray while overlapping; disable log and Exit. |
-| 6 seconds | Cyan returns; Enter and Stay occur again. |
-| 7 seconds onward | Moving sphere leaves the fixed sphere; Exit. |
-| About 10–14 seconds | Cyan crosses magenta layer-2 sphere with no event for its ID; the layer-1 box may also enter range toward the end. |
-| By 15 seconds | Cyan rests inside the yellow yaw-rotated box; Enter and Stay. |
-| 16 seconds | Box Actor is destroyed; its outline disappears and Exit occurs, with null lookup allowed. |
-| 17–20 seconds | Cyan moves away, then the completion log appears. F4 starts another run. |
-
-The scene, outlines, phase order, enable/disable, destruction, and reload cleanup
-need runtime observation. Build success alone does not verify those checks.
+See [the Unreal collision handoff](ScriptedEventCollisionTriggers.md) for the
+authoring and round-trip checks. Verify placement, entry, activation, disabled gray
+outlines, and F4 reload in Game once that path exists. Automated collision tests
+exercise overlap phases, filtering, transforms, and lifetime behavior; they do not
+prove visual appearance or Unreal export correctness.
