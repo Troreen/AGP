@@ -1,8 +1,8 @@
+#include "Logger/Logger.h"
 #include "ScriptedEventComponent.h"
 #include "ScriptedActionComponent.h"
 #include "GameFramework/Collision/CollisionLayers.h"
 #include "GameFramework/Components/ColliderComponent.h"
-#include "GameFramework/GameFrameworkLog.h"
 #include "GameFramework/Scenes/CustomComponentVariables.h"
 #include "GameFramework/World/Actor.h"
 #include "GameFramework/World/World.h"
@@ -11,6 +11,10 @@
 #include <algorithm>
 #include <iostream>
 #include <unordered_map>
+
+DECLARE_LOG_CATEGORY_WITH_NAME(LogScriptedEventComponent, ScriptedEvent, Verbose);
+
+DEFINE_LOG_CATEGORY(LogScriptedEventComponent);
 
 namespace
 {
@@ -69,7 +73,7 @@ void ScriptedEventComponent::OnCollisionEnter(const Collision& collision)
 	if (Play())
 	{
 		collider->SetEnabled(false);
-		LOG(LogGameFramework, Log, "Collision scripted event '{}' started when Actor '{}' entered.",
+		LOG(LogScriptedEventComponent, Log, "Collision scripted event '{}' started when Actor '{}' entered.",
 			GetOwner()->GetName(), enteringCollider->GetOwner()->GetName());
 	}
 }

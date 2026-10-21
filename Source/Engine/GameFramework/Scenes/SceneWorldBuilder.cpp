@@ -1,3 +1,4 @@
+#include "GameFramework.pch.h"
 #include "GameFramework/AssetHandling/AssetRegistry.h"
 #include "GameFramework/AssetHandling/MaterialAsset.h"
 #include "GameFramework/AssetHandling/MeshAsset.h"
@@ -9,7 +10,6 @@
 #include "GameFramework/Components/LightComponent.h"
 #include "GameFramework/Components/SkeletalMeshComponent.h"
 #include "GameFramework/Components/StaticMeshComponent.h"
-#include "GameFramework/GameFrameworkLog.h"
 #include "GameFramework/Scenes/SceneWorldBuilder.h"
 #include "GameFramework/World/World.h"
 

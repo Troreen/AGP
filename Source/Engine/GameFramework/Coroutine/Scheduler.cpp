@@ -1,5 +1,4 @@
-#pragma once
-
+#include "GameFramework.pch.h"
 #include "Scheduler.h"
 
 using namespace std::chrono;

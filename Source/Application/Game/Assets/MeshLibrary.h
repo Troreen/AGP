@@ -30,7 +30,6 @@ public:
 	std::shared_ptr<Animation> LoadFBXAnimation(std::string aAnimationName, const std::filesystem::path& aPath);
 
 private:
-	void RegisterPrimitiveMeshes();
 	void RegisterMesh(std::string aName, std::shared_ptr<Mesh> aMesh);
 	std::filesystem::path ResolvePath(const std::filesystem::path& aPath) const;
 

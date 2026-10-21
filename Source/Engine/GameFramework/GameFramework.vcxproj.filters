@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Animation">
@@ -6,6 +6,9 @@
     </Filter>
     <Filter Include="AssetHandling">
       <UniqueIdentifier>{4A86DE7F-B646-5AB6-7F81-A333EB009F92}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Collision">
+      <UniqueIdentifier>{B11A655C-1D85-19D3-66C3-CA78D26CF727}</UniqueIdentifier>
     </Filter>
     <Filter Include="Components">
       <UniqueIdentifier>{6B7DD516-5735-1764-C03C-F0BFAC13B254}</UniqueIdentifier>
@@ -88,10 +91,22 @@
       <Filter>AssetHandling</Filter>
     </ClInclude>
     <ClInclude Include="AudioManager.h" />
+    <ClInclude Include="Collision\CollisionLayers.h">
+      <Filter>Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="Collision\CollisionOverlapEvent.h">
+      <Filter>Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="Collision\CollisionSystem.h">
+      <Filter>Collision</Filter>
+    </ClInclude>
     <ClInclude Include="Components\AnimatorComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
     <ClInclude Include="Components\CameraComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\ColliderComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
     <ClInclude Include="Components\CustomComponent.h">
@@ -128,7 +143,7 @@
       <Filter>Coroutine</Filter>
     </ClInclude>
     <ClInclude Include="EventBus.hpp" />
-    <ClInclude Include="GameFrameworkLog.h" />
+    <ClInclude Include="GameFramework.pch.h" />
     <ClInclude Include="Helper\Event.hpp">
       <Filter>Helper</Filter>
     </ClInclude>
@@ -217,10 +232,16 @@
       <Filter>AssetHandling</Filter>
     </ClCompile>
     <ClCompile Include="AudioManager.cpp" />
+    <ClCompile Include="Collision\CollisionSystem.cpp">
+      <Filter>Collision</Filter>
+    </ClCompile>
     <ClCompile Include="Components\AnimatorComponent.cpp">
       <Filter>Components</Filter>
     </ClCompile>
     <ClCompile Include="Components\CameraComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\ColliderComponent.cpp">
       <Filter>Components</Filter>
     </ClCompile>
     <ClCompile Include="Components\DebugCameraController.cpp">
@@ -251,7 +272,7 @@
       <Filter>Coroutine</Filter>
     </ClCompile>
     <ClCompile Include="EventBus.cpp" />
-    <ClCompile Include="GameFrameworkLog.cpp" />
+    <ClCompile Include="GameFramework.pch.cpp" />
     <ClCompile Include="Scenes\SceneWorldBuilder.cpp">
       <Filter>Scenes</Filter>
     </ClCompile>
@@ -283,9 +304,5 @@
     <ClCompile Include="World\World.cpp">
       <Filter>World</Filter>
     </ClCompile>
-  </ItemGroup>
-<ItemGroup><ClInclude Include="Components\ColliderComponent.h"><Filter>Components</Filter></ClInclude><ClInclude Include="Collision\CollisionSystem.h" /><ClInclude Include="Collision\CollisionOverlapEvent.h" /><ClInclude Include="Collision\CollisionLayers.h" /><ClCompile Include="Components\ColliderComponent.cpp"><Filter>Components</Filter></ClCompile><ClCompile Include="Collision\CollisionSystem.cpp" /></ItemGroup>
-  <ItemGroup>
-    <Filter Include="Collision" />
   </ItemGroup>
 </Project>

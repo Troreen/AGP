@@ -1,3 +1,4 @@
+#include "GameFramework.pch.h"
 #include "GameFramework/World/Actor.h"
 #include "GameFramework/World/World.h"
 #include <stdexcept>

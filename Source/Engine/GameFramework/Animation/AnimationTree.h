@@ -3,8 +3,6 @@
 
 //#include "AnimatedModel.h"
 
-#include "CommonUtilities/Vector3.hpp"
-
 #include <string>
 #include <unordered_map>
 

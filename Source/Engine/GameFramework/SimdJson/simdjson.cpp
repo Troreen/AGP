@@ -1,3 +1,4 @@
+#include "GameFramework.pch.h"
 /* auto-generated on 2026-09-04 16:04:31 -0400. version 4.6.11 Do not edit! */
 /* including simdjson.cpp:  */
 /* begin file simdjson.cpp */

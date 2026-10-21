@@ -1,3 +1,4 @@
+#include "GameFramework.pch.h"
 #include "GameFramework/World/World.h"
 #include "GameFramework/Collision/CollisionSystem.h"
 #include "GameFramework/Components/ColliderComponent.h"
@@ -11,6 +12,7 @@
 #include <CommonUtilities/InputHandler.h>
 #include <CommonUtilities/EnumKeyCode.h>
 #include <GameFramework/Components/AnimatorComponent.h>
+#include <AISystems/Pathfinder.hpp>
 
 namespace
 {
@@ -254,6 +256,7 @@ void World::Update(float deltaTime)
 			}
 		}
 		myCollisionSystem->Update(*this, frame);
+		ServiceLocator::GetInstance().GetPathFinder().Update();
 
 		// Draw after gameplay and overlap callbacks have finished moving volumes.
 		// Disabled colliders can still draw; inactive or destroyed objects cannot.

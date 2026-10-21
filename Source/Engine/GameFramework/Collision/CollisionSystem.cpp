@@ -1,7 +1,9 @@
+#include "GameFramework.pch.h"
 #include "GameFramework/Collision/CollisionSystem.h"
 #include "GameFramework/Components/ColliderComponent.h"
 #include "GameFramework/World/Actor.h"
 #include "GameFramework/World/World.h"
+#include "GameFramework/World/Component.h"
 #include "GameFramework/EventBus.hpp"
 #include "GameFramework/ServiceLocator.h"
 #include <algorithm>

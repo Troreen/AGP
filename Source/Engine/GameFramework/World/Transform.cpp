@@ -1,3 +1,4 @@
+#include "GameFramework.pch.h"
 #include "GameFramework/World/Transform.h"
 #include "Maths.hpp"
 #include "Quaternion.hpp"

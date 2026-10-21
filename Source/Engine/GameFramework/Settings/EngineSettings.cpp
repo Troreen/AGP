@@ -1,3 +1,4 @@
+#include "GameFramework.pch.h"
 #include "EngineSettings.h"
 #include <nlohmann/json.hpp>
 
@@ -328,7 +329,7 @@ namespace
 			Invalid(aField, "expected a positive integer");
 		}
 		const auto value = anElement.get<int64_t>();
-		if (value <= 0 || static_cast<uint64_t>(value) > std::numeric_limits<unsigned>::max())
+		if (value <= 0 || static_cast<uint64_t>(value) > (std::numeric_limits<unsigned>::max)())
 		{
 			Invalid(aField, "expected a positive integer");
 		}

@@ -1,3 +1,4 @@
+#include "GameFramework.pch.h"
 #include "AssetLoadingHelper.h"
 
 CommonUtilities::Matrix4f AssetHelper::ConvertMatrix(const TGA::FBX::Matrix& aSourceMatrix)

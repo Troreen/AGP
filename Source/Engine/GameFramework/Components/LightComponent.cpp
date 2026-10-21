@@ -1,3 +1,4 @@
+#include "GameFramework.pch.h"
 #include "LightComponent.h"
 
 #include <algorithm>

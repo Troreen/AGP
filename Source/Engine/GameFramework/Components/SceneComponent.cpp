@@ -1,3 +1,4 @@
+#include "GameFramework.pch.h"
 #include "GameFramework/Components/SceneComponent.h"
 #include "GameFramework/World/Actor.h"
 #include "Maths.hpp"

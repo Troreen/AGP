@@ -1,3 +1,4 @@
+#include "GameFramework.pch.h"
 #include "GameFramework/Components/SkeletalMeshComponent.h"
 
 #include "GameFramework/AssetHandling/MeshAsset.h"

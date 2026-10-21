@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -192,8 +192,12 @@
     <ClInclude Include="AssetHandling\NavMeshAsset.h" />
     <ClInclude Include="AssetHandling\TextureAsset.h" />
     <ClInclude Include="AudioManager.h" />
+    <ClInclude Include="Collision\CollisionLayers.h" />
+    <ClInclude Include="Collision\CollisionOverlapEvent.h" />
+    <ClInclude Include="Collision\CollisionSystem.h" />
     <ClInclude Include="Components\AnimatorComponent.h" />
     <ClInclude Include="Components\CameraComponent.h" />
+    <ClInclude Include="Components\ColliderComponent.h" />
     <ClInclude Include="Components\CustomComponent.h" />
     <ClInclude Include="Components\DebugCameraController.h" />
     <ClInclude Include="Components\LightComponent.h" />
@@ -206,7 +210,7 @@
     <ClInclude Include="Coroutine\CoroutineHandler.h" />
     <ClInclude Include="Coroutine\Scheduler.h" />
     <ClInclude Include="EventBus.hpp" />
-    <ClInclude Include="GameFrameworkLog.h" />
+    <ClInclude Include="GameFramework.pch.h" />
     <ClInclude Include="Helper\Event.hpp" />
     <ClInclude Include="Scenes\CustomComponentVariables.h" />
     <ClInclude Include="Scenes\SceneData.h" />
@@ -241,8 +245,10 @@
     <ClCompile Include="AssetHandling\NavMeshAsset.cpp" />
     <ClCompile Include="AssetHandling\TextureAsset.cpp" />
     <ClCompile Include="AudioManager.cpp" />
+    <ClCompile Include="Collision\CollisionSystem.cpp" />
     <ClCompile Include="Components\AnimatorComponent.cpp" />
     <ClCompile Include="Components\CameraComponent.cpp" />
+    <ClCompile Include="Components\ColliderComponent.cpp" />
     <ClCompile Include="Components\DebugCameraController.cpp" />
     <ClCompile Include="Components\LightComponent.cpp" />
     <ClCompile Include="Components\MeshComponentBase.cpp" />
@@ -253,7 +259,7 @@
     <ClCompile Include="Coroutine\CoroutineHandler.cpp" />
     <ClCompile Include="Coroutine\Scheduler.cpp" />
     <ClCompile Include="EventBus.cpp" />
-    <ClCompile Include="GameFrameworkLog.cpp" />
+    <ClCompile Include="GameFramework.pch.cpp" />
     <ClCompile Include="Scenes\SceneWorldBuilder.cpp" />
     <ClCompile Include="ServiceLocator.cpp" />
     <ClCompile Include="Settings\EngineSettings.cpp" />
@@ -287,12 +293,4 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
-  <ItemGroup>
-    <ClInclude Include="Components\ColliderComponent.h" />
-    <ClInclude Include="Collision\CollisionSystem.h" />
-    <ClInclude Include="Collision\CollisionOverlapEvent.h" />
-    <ClInclude Include="Collision\CollisionLayers.h" />
-    <ClCompile Include="Components\ColliderComponent.cpp" />
-    <ClCompile Include="Collision\CollisionSystem.cpp" />
-  </ItemGroup>
 </Project>

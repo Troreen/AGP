@@ -1,3 +1,4 @@
+#include "GameFramework.pch.h"
 #include "WindowSettings.h"
 
 #include <algorithm>

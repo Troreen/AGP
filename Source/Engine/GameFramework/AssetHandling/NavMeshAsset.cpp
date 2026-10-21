@@ -1,3 +1,4 @@
+#include "GameFramework.pch.h"
 #include "NavMeshAsset.h"
 #include <Logger/Logger.h>
 #include <Importer.h>
@@ -63,5 +64,5 @@ bool NavMeshAsset::Load(const std::filesystem::path& aPath, [[maybe_unused]] Ass
 
 CommonUtilities::Vector3f NavMeshAsset::GetSwizzledPosition(const TGA::FBX::Vertex& aTgaFbxVertex) const
 {
-	return CommonUtilities::Vector3f{ aTgaFbxVertex.Position[2], aTgaFbxVertex.Position[0], aTgaFbxVertex.Position[1] };
+	return CommonUtilities::Vector3f{ -aTgaFbxVertex.Position[1], aTgaFbxVertex.Position[0], -aTgaFbxVertex.Position[2] };
 }

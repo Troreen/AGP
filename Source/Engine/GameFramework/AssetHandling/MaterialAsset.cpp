@@ -1,3 +1,4 @@
+#include "GameFramework.pch.h"
 #include "MaterialAsset.h"
 
 #include "AssetRegistry.h"

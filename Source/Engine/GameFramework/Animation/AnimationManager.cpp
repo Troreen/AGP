@@ -1,3 +1,4 @@
+#include "GameFramework.pch.h"
 #include "AnimationManager.h"
 #include "AnimationTree.h"
 #include "AnimationState.h"

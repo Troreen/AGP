@@ -6,9 +6,9 @@
 #include "Components/RegisterCustomComponents.h"
 #include "InputMapper.h"
 #include "Maths.hpp"
-#include "Assets/PrimitiveMeshBuilder.h"
 #include "StringHelpers.h"
 #include "Timer.h"
+#include "Logger/Logger.h"
 
 #include <algorithm>
 #include <exception>
@@ -21,7 +21,6 @@
 #include <GameFramework/AssetHandling/NavMeshAsset.h>
 #include <GameFramework/AudioManager.h>
 #include <GameFramework/Coroutine/Scheduler.h>
-#include <GameFramework/GameFrameworkLog.h>
 #include <GameFramework/Scenes/SceneWorldBuilder.h>
 #include <GameFramework/ServiceLocator.h>
 #include <GameFramework/Settings/EngineSettings.h>
@@ -35,6 +34,10 @@
 #include <stdexcept>
 #include <string_view>
 #include <utility>
+
+DECLARE_LOG_CATEGORY_WITH_NAME(LogGameApplication, Game_Application, Verbose);
+
+DEFINE_LOG_CATEGORY(LogGameApplication);
 
 namespace
 {
@@ -59,7 +62,7 @@ namespace
 			}
 			else
 			{
-				LOG(LogGameFramework, Error, "{} failed during cleanup: {}", aStep, error.what());
+				LOG(LogGameApplication, Error, "{} failed during cleanup: {}", aStep, error.what());
 			}
 		}
 		catch (...)
@@ -70,7 +73,7 @@ namespace
 			}
 			else
 			{
-				LOG(LogGameFramework, Error, "{} failed during cleanup", aStep);
+				LOG(LogGameApplication, Error, "{} failed during cleanup", aStep);
 			}
 		}
 	}
@@ -303,7 +306,7 @@ void GameApplication::InitializeServices()
 		}
 		else
 		{
-			LOG(LogGameFramework, Log, "Render-pass overlay disabled: {}", assets.GetLastError());
+			LOG(LogGameApplication, Log, "Render-pass overlay disabled: {}", assets.GetLastError());
 		}
 	}
 
@@ -523,6 +526,7 @@ void GameApplication::RenderFrame(GraphicsEngine& aGraphics)
 	if (myCommandList.FinishCommandList())
 	{
 		aGraphics.ExecuteCommandList(myCommandList);
+
 		aGraphics.Present();
 	}
 }
@@ -563,11 +567,11 @@ void GameApplication::ProcessPendingSceneLoad(Game& aGame)
 			throw std::runtime_error(message.str());
 		}
 		SceneData scene = std::move(*importResult.Data);
-		LOG(LogGameFramework, Log, "Loaded scene '{}' from '{}' ({} actors).", sceneName, requestedScene.string(), scene.Actors.size());
+		LOG(LogGameApplication, Log, "Loaded scene '{}' from '{}' ({} actors).", sceneName, requestedScene.string(), scene.Actors.size());
 		
 		SceneFallbackAssets fallbacks;
 		// TODO: Replace the procedural cube with the dedicated missing-mesh asset.
-		fallbacks.MissingMesh = std::make_shared<MeshAsset>(PrimitiveMeshBuilder::CreateCube());
+		fallbacks.MissingMesh = assets.GetAsset<MeshAsset>("SM_Cube.fbx");
 		fallbacks.MissingShader = myContentRoot / "Shaders" / "_DefaultMaterial.hlsli";
 
 		MaterialDescription matDesc;
@@ -581,7 +585,7 @@ void GameApplication::ProcessPendingSceneLoad(Game& aGame)
 		std::shared_ptr<Material> material = std::make_shared<Material>();
 		if (!GraphicsEngine::Get().CreateMaterial(matDesc, *material))
 		{
-			LOG(LogGameFramework, Warning, "Could not create default material!");
+			LOG(LogGameApplication, Warning, "Could not create default material!");
 		}
 		else
 		{
@@ -596,7 +600,7 @@ void GameApplication::ProcessPendingSceneLoad(Game& aGame)
 				CustomComponent* component = myComponentRegistry.Create(anActor, aCustomComponentData);
 				if (!component)
 				{
-					LOG(LogGameFramework, Warning, "Skipping unknown custom component '{}' on actor '{}': {}", aCustomComponentData.Common.Name, anActor.GetName(),
+					LOG(LogGameApplication, Warning, "Skipping unknown custom component '{}' on actor '{}': {}", aCustomComponentData.Common.Name, anActor.GetName(),
 					    aCustomComponentData.CustomType);
 				}
 				return component;
@@ -615,7 +619,7 @@ void GameApplication::ProcessPendingSceneLoad(Game& aGame)
 	{
 		// Keep the current world if a later scene load fails.
 		// An initial load must succeed because there is no current world.
-		LOG(LogGameFramework, Error, "Scene '{}': {}", sceneName, error.what());
+		LOG(LogGameApplication, Error, "Scene '{}': {}", sceneName, error.what());
 		if (!myWorld)
 		{
 			throw;

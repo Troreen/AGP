@@ -2,7 +2,6 @@
 
 #include "GameLog.h"
 #include "GraphicsEngine/Objects/Vertex.h"
-#include "Assets/PrimitiveMeshBuilder.h"
 #include "Importer.h"
 
 #include <utility>
@@ -207,7 +206,6 @@ MeshLibrary::~MeshLibrary()
 void MeshLibrary::Initialize(const std::filesystem::path& aContentRoot)
 {
 	myContentRoot = aContentRoot;
-	RegisterPrimitiveMeshes();
 }
 
 std::shared_ptr<Mesh> MeshLibrary::GetMesh(std::string_view aName) const
@@ -352,17 +350,6 @@ std::shared_ptr<Animation> MeshLibrary::LoadFBXAnimation(std::string aAnimationN
 
 	GAMELOG(Log, "Loaded animation '{}'.", animation->Name);
 	return animation;
-}
-
-void MeshLibrary::RegisterPrimitiveMeshes()
-{
-	RegisterMesh("Floor", PrimitiveMeshBuilder::CreateFloor());
-	RegisterMesh("Cube", PrimitiveMeshBuilder::CreateCube());
-	RegisterMesh("Pyramid", PrimitiveMeshBuilder::CreatePyramid());
-	RegisterMesh("Sphere", PrimitiveMeshBuilder::CreateSphere());
-	RegisterMesh("SmoothSphere", PrimitiveMeshBuilder::CreateSmoothSphere());
-	RegisterMesh("Torus", PrimitiveMeshBuilder::CreateTorus());
-	RegisterMesh("WorldAxes", PrimitiveMeshBuilder::CreateAxes());
 }
 
 void MeshLibrary::RegisterMesh(std::string aName, std::shared_ptr<Mesh> aMesh)

@@ -1,3 +1,4 @@
+#include "GameFramework.pch.h"
 #include "TextureAsset.h"
 
 #include <GraphicsEngine/GraphicsEngine.h>

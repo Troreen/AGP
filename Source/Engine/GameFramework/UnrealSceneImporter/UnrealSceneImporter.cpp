@@ -1,3 +1,4 @@
+#include "GameFramework.pch.h"
 #include "UnrealSceneImporter.h"
 #include "UnrealSceneStructs.h"
 #include "Maths.hpp"

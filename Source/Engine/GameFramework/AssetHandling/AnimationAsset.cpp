@@ -1,3 +1,4 @@
+#include "GameFramework.pch.h"
 #include "AnimationAsset.h"
 
 #include "AssetLoadingHelper.h"

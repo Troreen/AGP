@@ -1,6 +1,20 @@
 #pragma once
 
+#include "AssetHandling/Asset.h"
 #include "Logger/Logger.h"
+#include "World/Actor.h"
+#include "World/Component.h"
+
+#include <CommonUtilities/CommonUtilities.h>
+
+#include <filesystem>
+#include <functional>
+#include <vector>
+#include <array>
+#include <unordered_map>
+#include <memory>
+#include <string>
+#include <cassert>
 
 #if _DEBUG
 DECLARE_LOG_CATEGORY_WITH_NAME(LogGameFramework, GameFramework, Verbose);

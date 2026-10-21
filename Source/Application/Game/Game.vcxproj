@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -240,7 +240,6 @@ exit /b 0</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Assets\MeshLibrary.h" />
-    <ClInclude Include="Assets\PrimitiveMeshBuilder.h" />
     <ClInclude Include="BehaviourTree\BaseNodes\BT_CompositeNode.h" />
     <ClInclude Include="BehaviourTree\BaseNodes\BT_DecoratorNode.h" />
     <ClInclude Include="BehaviourTree\BaseNodes\BT_LeafNodeAction.h" />
@@ -272,7 +271,6 @@ exit /b 0</Command>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Assets\MeshLibrary.cpp" />
-    <ClCompile Include="Assets\PrimitiveMeshBuilder.cpp" />
     <ClCompile Include="BehaviourTree\BaseNodes\BT_LeafNodeCondition.cpp" />
     <ClCompile Include="BehaviourTree\BaseNodes\BT_Node.cpp" />
     <ClCompile Include="BehaviourTree\BaseNodes\BT_SelectorNode.cpp" />

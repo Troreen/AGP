@@ -1,3 +1,4 @@
+#include "GameFramework.pch.h"
 #include "InputSettingsApplier.h"
 
 #include "InputMapper.h"

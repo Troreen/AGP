@@ -1,3 +1,4 @@
+#include "GameFramework.pch.h"
 #include "SpriteComponent.h"
 #include <GraphicsEngine/Drawers/SpriteDrawer.h>
 
