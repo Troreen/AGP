@@ -220,6 +220,11 @@ void AudioManager::RegisterAllEvents()
 	SoundEngine::RegisterEvent("event:/Sickle Slash", SoundID::eSickleSlash);
 	SoundEngine::RegisterEvent("event:/Slash Hit", SoundID::eSlashHit);
 	SoundEngine::RegisterEvent("event:/Slash", SoundID::eSlash);
+	SoundEngine::RegisterEvent("event:/Intro Letter", SoundID::eIntroLetter);
+	SoundEngine::RegisterEvent("event:/After Heart Sway", SoundID::eAfterHeartSway);
+	SoundEngine::RegisterEvent("event:/After First Kill", SoundID::eAfterFirstKill);
+	SoundEngine::RegisterEvent("event:/Locked Gate", SoundID::eLockedGate);
+	SoundEngine::RegisterEvent("event:/Caretaker Scream", SoundID::eCaretakerScream);
 	myMusicList.insert({ SoundID::eMainTheme, SoundEngine::CreateEventInstance(SoundID::eMainTheme) });
 	myMusicList.insert({ SoundID::eBlizzardAmbience, SoundEngine::CreateEventInstance(SoundID::eBlizzardAmbience) });
 	myMusicList.insert({ SoundID::eCastleAmbienceOne, SoundEngine::CreateEventInstance(SoundID::eCastleAmbienceOne) });
@@ -233,6 +238,11 @@ void AudioManager::RegisterAllEvents()
 	myMusicList.insert({ SoundID::eSickleSlash, SoundEngine::CreateEventInstance(SoundID::eSickleSlash) });
 	myMusicList.insert({ SoundID::eSlashHit, SoundEngine::CreateEventInstance(SoundID::eSlashHit) });
 	myMusicList.insert({ SoundID::eSlash, SoundEngine::CreateEventInstance(SoundID::eSlash) });
+	myMusicList.insert({ SoundID::eIntroLetter, SoundEngine::CreateEventInstance(SoundID::eIntroLetter) });
+	myMusicList.insert({ SoundID::eAfterHeartSway, SoundEngine::CreateEventInstance(SoundID::eAfterHeartSway) });
+	myMusicList.insert({ SoundID::eAfterFirstKill, SoundEngine::CreateEventInstance(SoundID::eAfterFirstKill) });
+	myMusicList.insert({ SoundID::eLockedGate, SoundEngine::CreateEventInstance(SoundID::eLockedGate) });
+	myMusicList.insert({ SoundID::eCaretakerScream, SoundEngine::CreateEventInstance(SoundID::eCaretakerScream) });
 }
 
 AudioManager::AudioManager()

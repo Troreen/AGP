@@ -18,7 +18,12 @@ enum SoundID
 	eSickleSlash,
 	eSlashHit,
 	eSlash,
-	eSoundCount
+	eSoundCount,
+	eIntroLetter,
+	eAfterHeartSway,
+	eAfterFirstKill,
+	eLockedGate,
+	eCaretakerScream
 };
 
 enum BusID
