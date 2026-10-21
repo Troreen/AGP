@@ -43,3 +43,6 @@ p4ignore.txt
 # Local scripted-event session backups and probe output
 /.scratch/scripted-events/before-*/
 /.scratch/scripted-events/mcp-*.json
+
+# Runtime assets are owned by AGP-Content; keep only a local copy here.
+/Content/

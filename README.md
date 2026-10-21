@@ -30,8 +30,27 @@ covers gameplay, scenes, assets, and the path to `BeginPlay`. The
 - `Source/Engine/GameFramework` - actors, components, world, camera, lights, mesh components.
 - `Source/Utilities` - logging, camera controller, string helpers, common utilities glue.
 - `Source/Utilities/CommonUtilities` - math, input, timer, and utility types.
-- `Content` - runtime scenes, meshes, animations, and textures; paths are resolved from the executable.
+- `Content` - local runtime assets supplied by Perforce or AGP-Content; ignored by Git. Paths are resolved from the executable.
 - `assignment_4_2_shadow_mapping_translation_and_md.md` - assignment notes and translated lecture guidance.
+
+At school, Perforce supplies `Content/` through the existing stream import.
+For a Git-only checkout at home, clone `Troreen/AGP-Content` beside this repository,
+install Git LFS and run `git lfs pull` there. Then, from AGP-Content:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\SyncContent.ps1 -WhatIf
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\SyncContent.ps1 -OverwriteChangedFiles
+```
+
+For other folder layouts, pass `-EngineRoot "C:\path\to\AGP"`. Copying is manual;
+it does not delete destination-only files or run Git/Perforce commands. Save
+asset edits and exported scenes in AGP-Content before copying them here:
+AGP commits no longer include `Content/`. `ExportAssets.bat` in AGP-Content
+prepares runtime FBX/DDS assets separately from the Unreal level exporter.
+The build still combines game shaders from `Content/Shaders` with engine
+shader sources into `Bin/<configuration>/EngineShaders`.
+
+For home setup and the daily two-repository workflow, see [Home setup](Docs/HomeSetup.md).
 
 ## Build
 

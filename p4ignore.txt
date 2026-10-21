@@ -55,3 +55,8 @@ README.md
 .agents
 .scratch
 agents
+.git
+.gitattributes
+.gitmodules
+
+/Docs/
