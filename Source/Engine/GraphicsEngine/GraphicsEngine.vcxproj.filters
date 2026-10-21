@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="ConstantBuffers">
@@ -241,9 +241,6 @@
     <FxCompile Include="Shaders\Lines\Lines_VS.hlsl">
       <Filter>Shaders\Lines</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\Material\Skybox_PS.hlsl">
-      <Filter>Shaders\Material</Filter>
-    </FxCompile>
     <FxCompile Include="Shaders\Material\Deferred_AmbientLight_PS.hlsl">
       <Filter>Shaders\Material</Filter>
     </FxCompile>
@@ -263,6 +260,9 @@
       <Filter>Shaders\Material</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Material\ShadowCube_GS.hlsl">
+      <Filter>Shaders\Material</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Material\Skybox_PS.hlsl">
       <Filter>Shaders\Material</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Material\Surface_VS.hlsl">
@@ -309,12 +309,6 @@
     <None Include="Shaders\LUTFunctions.hlsli">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="Shaders\MM_ShaderTest.hlsli">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\SparklingSnow.hlsli">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="Shaders\Material\Common.hlsli">
       <Filter>Shaders\Material</Filter>
     </None>
@@ -348,9 +342,5 @@
     <None Include="Shaders\Text\TextOverlayHelper.hlsli">
       <Filter>Shaders\Text</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-  </ItemGroup>
-  <ItemGroup>
   </ItemGroup>
 </Project>
