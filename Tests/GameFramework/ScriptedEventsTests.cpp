@@ -162,6 +162,60 @@ namespace
 		services.KillServices();
 	}
 
+	void TestComponentTestSceneEntry()
+	{
+		UnrealSceneImporter importer;
+		auto imported = importer.ImportScene("Content/ExportedScenes/lvl_component_test/Lvl_Component_Test_Level.json");
+		Check(bool(imported), "Component test scene did not import");
+		imported.Data->Materials.clear();
+		// Keep the authored collider, movement and prop action. Rendering, audio and
+		// animation setup are unnecessary to reproduce sequence admission on entry.
+		for (auto& actor : imported.Data->Actors)
+		{
+			std::erase_if(actor.Components, [](const ComponentRecord& component)
+			{
+				if (std::holds_alternative<SceneComponentData>(component) ||
+					std::holds_alternative<ColliderData>(component)) { return false; }
+				const auto* custom = std::get_if<CustomComponentData>(&component);
+				return !custom || (custom->CustomType != "ScriptedEventComponent_C" &&
+					custom->CustomType != "LockControlActionComponent_C" &&
+					custom->CustomType != "MoveActionComponent_C" &&
+					custom->CustomType != "SetActorActiveActionComponent_C");
+			});
+		}
+		auto& services = ServiceLocator::GetInstance();
+		services.Initialize();
+		CustomComponentRegistry registry;
+		RegisterCustomComponents(registry);
+		AssetRegistry assets;
+		SceneWorldBuilder builder;
+		auto world = builder.BuildWorld(*imported.Data, assets, {}, {1280, 720}, {},
+			[&registry](Actor& actor, const CustomComponentData& data) { return registry.Create(actor, data); });
+		auto* eventActor = world->FindActor("ScriptedEventTest2");
+		Check(eventActor != nullptr, "Component test event Actor missing");
+		auto* sequence = eventActor->GetComponent<ScriptedEventComponent>();
+		auto* box = eventActor->GetComponent<ColliderComponent>();
+		Check(sequence && box, "Component test sequence or trigger missing");
+		auto* player = world->SpawnActor("Player");
+		player->AddComponent<PlayerController>()->SetEnabled(false);
+		auto* collider = player->AddComponent<ColliderComponent>("Collider");
+		collider->SetSphereRadius(60.0f);
+		collider->GetTransform().SetLocalPosition({0, 90, 0});
+		collider->SetLayer(CollisionLayer::Player);
+		collider->SetOverlapsWith({CollisionLayer::Trigger});
+		world->BeginPlay();
+		world->Update(0.0f);
+		player->GetTransform().SetWorldPosition(box->GetWorldPosition() - CommonUtilities::Vector3f{0, 90, 0});
+		world->Update(0.0f);
+		if (!sequence->IsRunning()) { throw std::runtime_error("Component test entry rejected: " + sequence->GetLastError()); }
+		Check(!box->IsEnabled(), "Component test trigger was not consumed");
+		Advance(*world, 2.0f);
+		Check(sequence->HasCompleted() && !world->FindActor("Barrel1")->IsActive(),
+			"Component test sequence did not finish and hide the barrel");
+		world.reset();
+		services.KillServices();
+	}
+
 	ScriptedEventComponent* Sequence(World& world, const char* name)
 	{
 		return world.SpawnActor(name)->AddComponent<ScriptedEventComponent>("Sequence");
@@ -320,6 +374,42 @@ namespace
 		world.BeginPlay();
 		Check(!sequence->Play() && !sequence->GetLastError().empty(), "Overlapping movement on one target was accepted");
 		CheckPosition(target, 0, "Overlapping movement failure mutated the target");
+	}
+
+	void TestIntegerSoundVariables()
+	{
+		PlayAudioActionComponent audio;
+		CustomComponentVariables variables;
+		variables.IntVariables.emplace("Sound", 12);
+		audio.InitializeCustomVariables(variables);
+		Check(audio.Sound == 12, "Scripted audio did not read an integer Sound ID");
+		variables.IntVariables["Sound"] = -1;
+		bool rejected = false;
+		try { audio.InitializeCustomVariables(variables); }
+		catch (const std::invalid_argument&) { rejected = true; }
+		Check(rejected, "Scripted audio accepted an invalid integer Sound ID");
+	}
+
+	void TestPlayerDestinationMovement()
+	{
+		World world;
+		auto* player = world.SpawnActor("Player");
+		auto* movement = player->AddComponent<PlayerMovementComponent>("Movement");
+		world.BeginPlay();
+		world.Update(0.1f);
+		CheckPosition(player, 0, "Idle player moved without a destination");
+		// Exercise the same destination entry point used by the mouse controller.
+		movement->SetDestination({100, 0, 0});
+		world.Update(0.1f);
+		CheckPosition(player, 30, "Player did not move towards the clicked destination");
+		movement->StopMovement();
+		world.Update(0.1f);
+		CheckPosition(player, 30, "Stopped player moved towards a cleared destination");
+		movement->SetDestination({60, 0, 0});
+		world.Update(0.1f);
+		world.Update(0.1f);
+		world.Update(0.1f);
+		CheckPosition(player, 60, "Player did not arrive and remain at the new destination");
 	}
 
 	void TestControlCleanup()
@@ -689,11 +779,14 @@ try
 {
 	TestExportedCustomFields();
 	TestAuthoredCollisionTrigger();
+	TestComponentTestSceneEntry();
 	TestOrderingAndOverlap();
 	TestPersistentChangesAndReplay();
 	TestClaimsAndValidation();
 	TestDestruction();
 	TestOverlappingMovementRejected();
+	TestPlayerDestinationMovement();
+	TestIntegerSoundVariables();
 	TestControlCleanup();
 	TestSceneReplacementReleasesClaims();
 	TestCollisionTrigger();

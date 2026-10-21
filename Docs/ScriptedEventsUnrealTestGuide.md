@@ -286,7 +286,7 @@ The current Game.cpp creates `Player` and its PlayerController in C++. Do not pl
 
 ### Audio IDs and expected behavior
 
-The current [SoundID enum](../Source/Engine/GameFramework/AudioManager.h) assigns **5 to eCollectItem** and **7 to eHeavyRoar**. Both are registered by AudioManager. These are integer IDs, not Unreal sound assets or FMOD event paths. Recheck the enum if someone changes its ordering.
+The current [SoundID enum](../Source/Engine/GameFramework/AudioManager.h) assigns **5 to eCollectItem** and **7 to eHeavyRoar**. Put `Sound` in `IntVariables`. Both are registered by AudioManager. These are integer IDs, not Unreal sound assets or FMOD event paths. Recheck the enum if someone changes its ordering.
 
 The expected run is:
 

@@ -38,7 +38,7 @@
 					{
 						"Name": "T_4M_Trimsheet_Wood_BaseColor",
 						"Path": "/Game/Textures/T_4M_Trimsheet_Wood_BaseColor.T_4M_Trimsheet_Wood_BaseColor",
-						"AssetImportPath": "C:/Users/egil.wendin/egil.wendin_P5G4/Content/Textures/T_4M_Trimsheet_Wood_BaseColor.png"
+						"AssetImportPath": "C:/Users/tarik.bergstrom/Perforce/AGP-Content/Unreal/P5G4_KnightHeart/Content/Textures/T_4M_Trimsheet_Wood_BaseColor.png"
 					}
 				},
 				{
@@ -48,7 +48,7 @@
 					{
 						"Name": "T_4M_Trimsheet_Wood_OcclusionRoughnessMetallic",
 						"Path": "/Game/Textures/T_4M_Trimsheet_Wood_OcclusionRoughnessMetallic.T_4M_Trimsheet_Wood_OcclusionRoughnessMetallic",
-						"AssetImportPath": "C:/Users/egil.wendin/egil.wendin_P5G4/Content/Textures/T_4M_Trimsheet_Wood_OcclusionRoughnessMetallic.png"
+						"AssetImportPath": "C:/Users/tarik.bergstrom/Perforce/AGP-Content/Unreal/P5G4_KnightHeart/Content/Textures/T_4M_Trimsheet_Wood_OcclusionRoughnessMetallic.png"
 					}
 				},
 				{
@@ -58,7 +58,7 @@
 					{
 						"Name": "T_4M_Trimsheet_Wood_Normal",
 						"Path": "/Game/Textures/T_4M_Trimsheet_Wood_Normal.T_4M_Trimsheet_Wood_Normal",
-						"AssetImportPath": "C:/Users/egil.wendin/egil.wendin_P5G4/Content/Textures/T_4M_Trimsheet_Wood_Normal.png"
+						"AssetImportPath": "C:/Users/tarik.bergstrom/Perforce/AGP-Content/Unreal/P5G4_KnightHeart/Content/Textures/T_4M_Trimsheet_Wood_Normal.png"
 					}
 				},
 				{
@@ -339,7 +339,7 @@
 			]
 		},
 		{
-			"Name": "SE_TestObject",
+			"Name": "Barrel1",
 			"Archetype": "StaticMeshActor",
 			"Transform": [
 				1,
@@ -399,7 +399,7 @@
 									{
 										"Name": "T_4M_Trimsheet_Wood_BaseColor",
 										"Path": "/Game/Textures/T_4M_Trimsheet_Wood_BaseColor.T_4M_Trimsheet_Wood_BaseColor",
-										"AssetImportPath": "C:/Users/egil.wendin/egil.wendin_P5G4/Content/Textures/T_4M_Trimsheet_Wood_BaseColor.png"
+										"AssetImportPath": "C:/Users/tarik.bergstrom/Perforce/AGP-Content/Unreal/P5G4_KnightHeart/Content/Textures/T_4M_Trimsheet_Wood_BaseColor.png"
 									}
 								},
 								{
@@ -409,7 +409,7 @@
 									{
 										"Name": "T_4M_Trimsheet_Wood_OcclusionRoughnessMetallic",
 										"Path": "/Game/Textures/T_4M_Trimsheet_Wood_OcclusionRoughnessMetallic.T_4M_Trimsheet_Wood_OcclusionRoughnessMetallic",
-										"AssetImportPath": "C:/Users/egil.wendin/egil.wendin_P5G4/Content/Textures/T_4M_Trimsheet_Wood_OcclusionRoughnessMetallic.png"
+										"AssetImportPath": "C:/Users/tarik.bergstrom/Perforce/AGP-Content/Unreal/P5G4_KnightHeart/Content/Textures/T_4M_Trimsheet_Wood_OcclusionRoughnessMetallic.png"
 									}
 								},
 								{
@@ -419,7 +419,7 @@
 									{
 										"Name": "T_4M_Trimsheet_Wood_Normal",
 										"Path": "/Game/Textures/T_4M_Trimsheet_Wood_Normal.T_4M_Trimsheet_Wood_Normal",
-										"AssetImportPath": "C:/Users/egil.wendin/egil.wendin_P5G4/Content/Textures/T_4M_Trimsheet_Wood_Normal.png"
+										"AssetImportPath": "C:/Users/tarik.bergstrom/Perforce/AGP-Content/Unreal/P5G4_KnightHeart/Content/Textures/T_4M_Trimsheet_Wood_Normal.png"
 									}
 								},
 								{
@@ -439,7 +439,7 @@
 			]
 		},
 		{
-			"Name": "SE_Start",
+			"Name": "MoveToTarget",
 			"Archetype": "TargetPoint",
 			"Transform": [
 				1,
@@ -454,7 +454,7 @@
 				0,
 				1,
 				0,
-				300,
+				240,
 				-200,
 				0,
 				1
@@ -488,633 +488,7 @@
 			]
 		},
 		{
-			"Name": "SE_End",
-			"Archetype": "TargetPoint",
-			"Transform": [
-				1,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				300,
-				550,
-				0,
-				1
-			],
-			"Tags": [],
-			"Components": [
-				{
-					"Name": "SceneComp",
-					"Parent": "",
-					"TypeID": 0,
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					]
-				}
-			]
-		},
-		{
-			"Name": "SE_WorkflowTest",
-			"Archetype": "BP_SE_WorkflowTest_C",
-			"Transform": [
-				1,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				-1560,
-				-130,
-				0,
-				1
-			],
-			"Tags": [],
-			"Components": [
-				{
-					"Name": "TriggerBox",
-					"Parent": "DefaultSceneRoot",
-					"TypeID": 6,
-					"Tags": [
-						"CollisionLayer=Trigger",
-						"CollisionMask=Player"
-					],
-					"Transform": [
-						8.7649998040869832,
-						0,
-						0,
-						0,
-						0,
-						8.7649998040869832,
-						0,
-						0,
-						0,
-						0,
-						8.7649998040869832,
-						0,
-						0,
-						0,
-						254,
-						1
-					],
-					"Bounds":
-					{
-						"x": 32,
-						"y": 32,
-						"z": 32
-					}
-				},
-				{
-					"Name": "DefaultSceneRoot",
-					"Parent": "",
-					"TypeID": 0,
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					]
-				},
-				{
-					"Name": "ScriptedEventSequence",
-					"Parent": "",
-					"TypeID": -1,
-					"CustomType": "ScriptedEventComponent_C",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Custom":
-					{
-						"TriggerAction": "PlayUnrealSequenceTest",
-						"TriggerCollider": "TriggerBox",
-						"Replayable": true
-					}
-				},
-				{
-					"Name": "MoveOut",
-					"Parent": "",
-					"TypeID": -1,
-					"CustomType": "MoveActionComponent_C",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Custom":
-					{
-						"DurationInSeconds": 3.0000100000000001,
-						"TargetActor": "SE_TestObject",
-						"TargetComponent": "",
-						"DestinationActor": "SE_End",
-						"WaitForCompletion": true,
-						"Step": 3
-					}
-				},
-				{
-					"Name": "PauseAtEnd",
-					"Parent": "",
-					"TypeID": -1,
-					"CustomType": "WaitActionComponent_C",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Custom":
-					{
-						"DurationInSeconds": 2.0000100000000001,
-						"TargetActor": "",
-						"TargetComponent": "",
-						"WaitForCompletion": true,
-						"Step": 4
-					}
-				},
-				{
-					"Name": "HideObject",
-					"Parent": "",
-					"TypeID": -1,
-					"CustomType": "SetActorActiveActionComponent_C",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Custom":
-					{
-						"TargetActor": "SE_TestObject",
-						"TargetComponent": "",
-						"WaitForCompletion": true,
-						"Active": false,
-						"Step": 5
-					}
-				},
-				{
-					"Name": "PauseHidden",
-					"Parent": "",
-					"TypeID": -1,
-					"CustomType": "WaitActionComponent_C",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Custom":
-					{
-						"DurationInSeconds": 2.0000100000000001,
-						"TargetActor": "",
-						"TargetComponent": "",
-						"WaitForCompletion": true,
-						"Step": 6
-					}
-				},
-				{
-					"Name": "ShowObject",
-					"Parent": "",
-					"TypeID": -1,
-					"CustomType": "SetActorActiveActionComponent_C",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Custom":
-					{
-						"TargetActor": "SE_TestObject",
-						"TargetComponent": "",
-						"WaitForCompletion": true,
-						"Active": true,
-						"Step": 7
-					}
-				},
-				{
-					"Name": "MoveBack",
-					"Parent": "",
-					"TypeID": -1,
-					"CustomType": "MoveActionComponent_C",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Custom":
-					{
-						"DurationInSeconds": 3.0000100000000001,
-						"TargetActor": "SE_TestObject",
-						"TargetComponent": "",
-						"DestinationActor": "SE_Start",
-						"WaitForCompletion": true,
-						"Step": 8
-					}
-				},
-				{
-					"Name": "LockPlayer",
-					"Parent": "",
-					"TypeID": -1,
-					"CustomType": "LockControlActionComponent_C",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Custom":
-					{
-						"TargetActor": "Player",
-						"TargetComponent": "",
-						"WaitForCompletion": true,
-						"Step": 0
-					}
-				},
-				{
-					"Name": "PauseSpin",
-					"Parent": "",
-					"TypeID": -1,
-					"CustomType": "SetComponentEnabledActionComponent_C",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Custom":
-					{
-						"TargetActor": "SE_Spinner",
-						"TargetComponent": "TestSpin",
-						"WaitForCompletion": true,
-						"Enabled": false,
-						"Step": 1
-					}
-				},
-				{
-					"Name": "ObserveStoppedSpin",
-					"Parent": "",
-					"TypeID": -1,
-					"CustomType": "WaitActionComponent_C",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Custom":
-					{
-						"DurationInSeconds": 2.0000100000000001,
-						"TargetActor": "",
-						"TargetComponent": "",
-						"WaitForCompletion": true,
-						"Step": 1
-					}
-				},
-				{
-					"Name": "AudioBeforeMove",
-					"Parent": "",
-					"TypeID": -1,
-					"CustomType": "PlayAudioActionComponent_C",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Custom":
-					{
-						"TargetActor": "",
-						"TargetComponent": "",
-						"WaitForCompletion": true,
-						"Positional": false,
-						"Step": 2,
-						"Sound": 5
-					}
-				},
-				{
-					"Name": "RoarAtObject",
-					"Parent": "",
-					"TypeID": -1,
-					"CustomType": "PlayAudioActionComponent_C",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Custom":
-					{
-						"TargetActor": "SE_TestObject",
-						"TargetComponent": "",
-						"WaitForCompletion": false,
-						"Positional": true,
-						"Step": 3,
-						"Sound": 7
-					}
-				},
-				{
-					"Name": "ResumeSpin",
-					"Parent": "",
-					"TypeID": -1,
-					"CustomType": "SetComponentEnabledActionComponent_C",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Custom":
-					{
-						"TargetActor": "SE_Spinner",
-						"TargetComponent": "TestSpin",
-						"WaitForCompletion": true,
-						"Enabled": true,
-						"Step": 9
-					}
-				},
-				{
-					"Name": "UnlockPlayer",
-					"Parent": "",
-					"TypeID": -1,
-					"CustomType": "UnlockControlActionComponent_C",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Custom":
-					{
-						"TargetActor": "Player",
-						"TargetComponent": "",
-						"WaitForCompletion": true,
-						"Step": 10
-					}
-				},
-				{
-					"Name": "ObserveHandoff",
-					"Parent": "",
-					"TypeID": -1,
-					"CustomType": "WaitActionComponent_C",
-					"Tags": [],
-					"Transform": [
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1
-					],
-					"Custom":
-					{
-						"DurationInSeconds": 4.0000099999999996,
-						"TargetActor": "",
-						"TargetComponent": "",
-						"WaitForCompletion": true,
-						"Step": 11
-					}
-				}
-			]
-		},
-		{
-			"Name": "SE_Spinner",
+			"Name": "SpinningBarrel",
 			"Archetype": "BP_SE_Spinner_C",
 			"Transform": [
 				1,
@@ -1122,14 +496,14 @@
 				0,
 				0,
 				0,
-				0.59999999999999998,
+				1,
 				0,
 				0,
 				0,
 				0,
-				1.3999999999999999,
+				1.5,
 				0,
-				300,
+				280,
 				-650,
 				0,
 				1
@@ -1198,7 +572,7 @@
 									{
 										"Name": "T_4M_Trimsheet_Wood_BaseColor",
 										"Path": "/Game/Textures/T_4M_Trimsheet_Wood_BaseColor.T_4M_Trimsheet_Wood_BaseColor",
-										"AssetImportPath": "C:/Users/egil.wendin/egil.wendin_P5G4/Content/Textures/T_4M_Trimsheet_Wood_BaseColor.png"
+										"AssetImportPath": "C:/Users/tarik.bergstrom/Perforce/AGP-Content/Unreal/P5G4_KnightHeart/Content/Textures/T_4M_Trimsheet_Wood_BaseColor.png"
 									}
 								},
 								{
@@ -1208,7 +582,7 @@
 									{
 										"Name": "T_4M_Trimsheet_Wood_OcclusionRoughnessMetallic",
 										"Path": "/Game/Textures/T_4M_Trimsheet_Wood_OcclusionRoughnessMetallic.T_4M_Trimsheet_Wood_OcclusionRoughnessMetallic",
-										"AssetImportPath": "C:/Users/egil.wendin/egil.wendin_P5G4/Content/Textures/T_4M_Trimsheet_Wood_OcclusionRoughnessMetallic.png"
+										"AssetImportPath": "C:/Users/tarik.bergstrom/Perforce/AGP-Content/Unreal/P5G4_KnightHeart/Content/Textures/T_4M_Trimsheet_Wood_OcclusionRoughnessMetallic.png"
 									}
 								},
 								{
@@ -1218,7 +592,7 @@
 									{
 										"Name": "T_4M_Trimsheet_Wood_Normal",
 										"Path": "/Game/Textures/T_4M_Trimsheet_Wood_Normal.T_4M_Trimsheet_Wood_Normal",
-										"AssetImportPath": "C:/Users/egil.wendin/egil.wendin_P5G4/Content/Textures/T_4M_Trimsheet_Wood_Normal.png"
+										"AssetImportPath": "C:/Users/tarik.bergstrom/Perforce/AGP-Content/Unreal/P5G4_KnightHeart/Content/Textures/T_4M_Trimsheet_Wood_Normal.png"
 									}
 								},
 								{
@@ -1285,7 +659,7 @@
 				0,
 				0,
 				0,
-				-30,
+				0,
 				1
 			],
 			"Tags": [],
@@ -1315,7 +689,7 @@
 					],
 					"Mesh": "SM_Plane",
 					"ContentPath": "/Game/Meshes/Debug/SM_Plane.SM_Plane",
-					"AssetImportPath": "C:/Users/egil.wendin/egil.wendin_P5G4/Content/Meshes/Debug/SM_Plane.fbx",
+					"AssetImportPath": "C:/Users/tarik.bergstrom/Perforce/AGP-Content/Unreal/P5G4_KnightHeart/Content/Meshes/Debug/SM_Plane.fbx",
 					"Materials": [
 						{
 							"Name": "M_PrototypeGrid",
@@ -1323,6 +697,389 @@
 							"Parameters": []
 						}
 					]
+				}
+			]
+		},
+		{
+			"Name": "ScriptedEventTest1",
+			"Archetype": "ScriptedEventTest1_C",
+			"Transform": [
+				1,
+				0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				-460,
+				-830,
+				-30,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "DefaultSceneRoot",
+					"Parent": "",
+					"TypeID": 0,
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					]
+				},
+				{
+					"Name": "TriggerBox",
+					"Parent": "DefaultSceneRoot",
+					"TypeID": 6,
+					"Tags": [],
+					"Transform": [
+						3.25,
+						0,
+						0,
+						0,
+						0,
+						3.25,
+						0,
+						0,
+						0,
+						0,
+						3.25,
+						0,
+						-130,
+						0,
+						20,
+						1
+					],
+					"Bounds":
+					{
+						"x": 32,
+						"y": 32,
+						"z": 32
+					}
+				},
+				{
+					"Name": "ScriptedEventSequence",
+					"Parent": "",
+					"TypeID": -1,
+					"CustomType": "ScriptedEventComponent_C",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Custom":
+					{
+						"TargetActor": "",
+						"TriggerAction": "",
+						"TriggerCollider": "TriggerBox",
+						"WaitForCompletion": true,
+						"Replayable": false,
+						"Step": 0
+					}
+				},
+				{
+					"Name": "0_LockControlAction",
+					"Parent": "",
+					"TypeID": -1,
+					"CustomType": "LockControlActionComponent_C",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Custom":
+					{
+						"TargetActor": "Player",
+						"TargetComponent": "",
+						"WaitForCompletion": true,
+						"Step": 0
+					}
+				},
+				{
+					"Name": "1_MovePlayerAction",
+					"Parent": "",
+					"TypeID": -1,
+					"CustomType": "MoveActionComponent_C",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Custom":
+					{
+						"DurationInSeconds": 1.0000100000000001,
+						"TargetActor": "Player",
+						"TargetComponent": "",
+						"DestinationActor": "MoveToTarget",
+						"WaitForCompletion": true,
+						"FaceMovementDirection": true,
+						"Step": 1
+					}
+				},
+				{
+					"Name": "3_PlayAudioAction",
+					"Parent": "",
+					"TypeID": -1,
+					"CustomType": "PlayAudioActionComponent_C",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Custom":
+					{
+						"TargetActor": "Player",
+						"TargetComponent": "",
+						"WaitForCompletion": true,
+						"Positional": true,
+						"Step": 3,
+						"Sound": 12
+					}
+				},
+				{
+					"Name": "4_DisableBarrel",
+					"Parent": "",
+					"TypeID": -1,
+					"CustomType": "SetActorActiveActionComponent_C",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Custom":
+					{
+						"TargetActor": "Barrel1",
+						"TargetComponent": "",
+						"WaitForCompletion": true,
+						"Active": false,
+						"Step": 4
+					}
+				},
+				{
+					"Name": "1_PlayIsRunningAnim",
+					"Parent": "",
+					"TypeID": -1,
+					"CustomType": "SetAnimationVariableActionComponent_C",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Custom":
+					{
+						"TargetActor": "Player",
+						"TargetComponent": "",
+						"Variable": "IsRunning",
+						"WaitForCompletion": true,
+						"Trigger": false,
+						"Value": true,
+						"Step": 1
+					}
+				},
+				{
+					"Name": "2_PlayIsIdleAnim",
+					"Parent": "",
+					"TypeID": -1,
+					"CustomType": "SetAnimationVariableActionComponent_C",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Custom":
+					{
+						"TargetActor": "Player",
+						"TargetComponent": "",
+						"Variable": "IsRunning",
+						"WaitForCompletion": true,
+						"Trigger": false,
+						"Value": false,
+						"Step": 2
+					}
+				},
+				{
+					"Name": "4_DisableSpinningBarrel",
+					"Parent": "",
+					"TypeID": -1,
+					"CustomType": "SetComponentEnabledActionComponent_C",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Custom":
+					{
+						"TargetActor": "SpinningBarrel",
+						"TargetComponent": "TestSpin",
+						"WaitForCompletion": true,
+						"Enabled": false,
+						"Step": 4
+					}
+				},
+				{
+					"Name": "2_WaitBeforeHitting",
+					"Parent": "",
+					"TypeID": -1,
+					"CustomType": "WaitActionComponent_C",
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Custom":
+					{
+						"DurationInSeconds": 3.0000100000000001,
+						"TargetActor": "",
+						"TargetComponent": "",
+						"WaitForCompletion": true,
+						"Step": 2
+					}
 				}
 			]
 		}
