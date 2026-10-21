@@ -7,6 +7,7 @@
 #include "GameFramework/AudioManager.h"
 #include "Player/PlayerController.h"
 #include "Player/PlayerMovementComponent.h"
+#include <Maths.hpp>
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -115,6 +116,7 @@ void MoveActionComponent::InitializeCustomVariables(const CustomComponentVariabl
 	ReadCommon(variables);
 	DestinationActor = variables.GetOrDefault<std::string>("DestinationActor", "");
 	DurationInSeconds = variables.GetOrDefault<float>("DurationInSeconds", 1.0f);
+	FaceMovementDirection = variables.GetOrDefault<bool>("FaceMovementDirection", true);
 }
 
 bool MoveActionComponent::Validate(std::string& error) const
@@ -139,6 +141,18 @@ bool MoveActionComponent::Start()
 	// Save both positions once. Moving the marker later does not change this trip's destination.
 	myStartPosition = FindTarget()->GetTransform().GetWorldPosition();
 	myDestinationPosition = GetWorld().FindActor(DestinationActor)->GetTransform().GetWorldPosition();
+	if (FaceMovementDirection)
+	{
+		CommonUtilities::Vector3f direction = myDestinationPosition - myStartPosition;
+		direction.y = 0.0f;
+		if (direction.LengthSqr() > 0.0f)
+		{
+			direction = direction.GetNormalized();
+			float yawAngleRadians = std::atan2(direction.x, direction.z);
+			float yawAngleDegrees = CommonUtilities::RadiansToDegrees(yawAngleRadians);
+			FindTarget()->GetTransform().SetLocalRotationDegrees({yawAngleDegrees, 0.0f, 0.0f});
+		}
+	}
 	myElapsedSeconds = 0;
 	myControlsMovement = true;
 	// Pause normal player movement so it does not move the actor at the same time as this action.
@@ -153,7 +167,7 @@ bool MoveActionComponent::Start()
 bool MoveActionComponent::Tick(float deltaTime)
 {
 	// Progress goes from 0 (start) to 1 (destination). Zero DurationInSeconds moves there on the first update.
-	// This is a straight-line position change; it does not find a path around obstacles or turn the actor.
+	// This is a straight-line position change; it does not find a path around obstacles.
 	myElapsedSeconds += deltaTime;
 	const float movementProgress = DurationInSeconds == 0 ? 1.0f : (std::min)(myElapsedSeconds / DurationInSeconds, 1.0f);
 	FindTarget()->GetTransform().SetWorldPosition(myStartPosition + (myDestinationPosition - myStartPosition) * movementProgress);

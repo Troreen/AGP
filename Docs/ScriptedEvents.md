@@ -1,105 +1,189 @@
-# Scripted events
+# Set up a scripted event
 
-A scripted event is a dedicated Actor with exactly one `ScriptedEventComponent` and any number of action components. Each encounter has its own Actor. Actions are reusable custom component types; an event does not need a new C++ class.
+A scripted event is an Actor with one `ScriptedEventComponent` and several action components. Each action does one job: move, wait, animate, play a sound, or change another Actor.
 
-## Playing an event
+## 1. Create the event in Unreal
 
-The coordinator exposes `Play()`, `Cancel()`, `IsRunning()`, `HasCompleted()`, and `GetLastError()`. A future trigger box can call `Play()` on it. For now, set `TriggerAction` to an existing input action name. The current input settings bind `PlayUnrealSequenceTest` to F2. An exported coordinator with that TriggerAction runs when the key is pressed; no event is created automatically in C++.
+1. Create an Actor Blueprint
+2. Open the Blueprint and add only one `ScriptedEventComponent`.
+3. Add the action components you need. Give every component a unique name.
+4. Place the Blueprint in the level. Give target Actors and destination markers unique names too.
 
-`Replayable` defaults to `false`: a successfully started event can run once per scene load, including if it was later cancelled. Set it to `true` for repeated testing. An event cannot restart while running. Invalid configuration or a claim conflict rejects playback before actions start and does not consume the attempt.
+In each component's Details, put fields in the matching map. Spelling and capitalization must match:
 
-Actions run in ascending `Step` order. Equal steps start together; use unique component names. The next step starts when all actions in the current step with `WaitForCompletion=true` finish. Other started actions continue updating across steps. Finishing the last step ends the sequence, so keep a waiting action alive for as long as scripted movement or animation is needed. Step numbers may have gaps. Equal-step actions start in component attachment order; put dependencies in different steps. Overlapping movement or direct-animation actions on the same Actor are rejected; a non-waiting action on one of these channels must be the last such action for that Actor in the sequence.
-
-## Component fields
-
-Names and variable types must match exactly. Put each variable into its corresponding Unreal custom variable map: `StringVariables`, `IntVariables`, `FloatVariables`, or `BoolVariables`. The existing exporter flattens these into the exported `Custom` object. These actions require no new exporter value types.
-
-| Component | Fields beyond the common action fields |
+| Map | Fields |
 | --- | --- |
-| `ScriptedEventComponent` | String `TriggerAction` (empty); bool `Replayable` (`false`). This is the coordinator, not an action. |
-| `WaitActionComponent` | Float `DurationInSeconds` (`1.0`). No target required. |
-| `MoveActionComponent` | String `DestinationActor`; float `DurationInSeconds` (`1.0`). |
-| `PlayAnimationActionComponent` | String `Animation`; bool `Loop` (`false`). |
-| `SetAnimationVariableActionComponent` | String `Variable`; bool `Trigger` (`false`); bool `Value` (`true`). |
-| `PlayAudioActionComponent` | Int `Sound` (`0`); bool `Positional` (`false`). |
-| `LockControlActionComponent` | Common fields; empty `TargetActor` defaults to `Player`. |
-| `UnlockControlActionComponent` | Common fields; empty `TargetActor` defaults to `Player`. |
-| `SetActorActiveActionComponent` | Bool `Active` (`true`). |
-| `SetComponentEnabledActionComponent` | Bool `Enabled` (`true`); requires `TargetComponent`. |
+| `StringVariables` | Names such as `TargetActor`, `DestinationActor`, `Variable` |
+| `IntVariables` | `Step`, `Sound` |
+| `FloatVariables` | `DurationInSeconds` |
+| `BoolVariables` | `WaitForCompletion`, `Value`, `Enabled`, etc. |
 
-Every action accepts int `Step` (`0`), bool `WaitForCompletion` (`true`), string `TargetActor` (empty), and string `TargetComponent` (empty). Target names are runtime Actor/component names, not asset paths. Use unique Actor names. Actions target another Actor, never the sequence Actor itself. Where supported, an empty `TargetComponent` selects the first matching component on the target Actor; set it explicitly when there are several animators or player controllers. A component name refers to its instance name, not its custom type.
+## 2. Choose how it starts
 
-Durations must be finite and nonnegative. Zero duration completes on the next sequence update. Movement interpolates world position directly to the named marker's position captured when the action starts; it does not navigate around obstacles or set facing. Use a marker Actor with the desired exported world position. Movement temporarily suspends the built-in PlayerMovementComponent; disable other movement/AI components explicitly when they could fight the scripted transform.
+Set these fields on `ScriptedEventComponent`:
 
-`Animation` is an alias already registered on the target `AnimatorComponent`, for example `Idle`; it does not load an animation asset. Register new clips in the actor's existing animation setup before authoring the event. The animator's mesh component stays attached during runtime; removing it separately is not supported. A direct clip temporarily overrides normal animation and releases that override when it finishes or the sequence ends. Keep the target Actor active and its animator enabled while waiting for a clip. A looping clip requires `WaitForCompletion=false` and another waiting action to hold the event open.
-
-When a direct clip releases control, the animation tree restarts its current state's clip from frame zero. The state and its variables stay unchanged, and entry/exit events do not run again. Without an animation tree, the actor holds its scripted pose until another animation is requested. Cancelling also uses this handoff; it does not restore a saved animation or playback time.
-
-Animation variables support bools and triggers. With `Trigger=false`, the action calls `SetBool(Variable, Value)`; with `Trigger=true`, it calls `SetTrigger(Variable)`. The variable must already exist in the target's animation tree. These actions finish immediately; they do not wait for the resulting animation transition. Use a direct clip or explicit wait when timing is required.
-
-`Sound` is the integer value of an existing `SoundID` in `AudioManager.h`, not an FMOD path or Unreal sound reference. New VO/music must first be registered in AGP's audio setup. `Positional=true` requires `TargetActor` and starts audio at its current world position; it does not follow a moving Actor. Each SoundID uses its existing registered playback. Two scripted events using the same ID share control of that sound, so do not use the same ID for independently controlled overlapping audio (including a background music playback using that ID). Waiting audio completes when FMOD reports that registered sound has finished. Do not wait on looping ambience/music. Non-waiting audio may continue after normal sequence completion; cancellation, scene teardown, and replay stop the registered sounds started by that sequence.
-
-Control locking clears existing player movement and blocks gameplay input while camera follow continues. Unlock explicitly with an `UnlockControlActionComponent` for an earlier handoff, or let sequence cleanup release its lock. Scripted movement remains possible while control is locked.
-
-`SetActorActiveActionComponent` and `SetComponentEnabledActionComponent` leave their changes in place. To keep an enemy passive until a reveal, disable its behavior component before it can update, then enable that named component in the handoff step. Setting the whole Actor inactive also hides it, so use component enabling when the enemy should stay visible. The sequence does not implement combat, destruction, or AI states itself.
-
-All non-audio target actions reserve their target Actors for the whole event. A second sequence targeting any reserved Actor is rejected rather than interrupting it. Positional audio does not reserve its source. Cancelling, completing, or unloading the scene releases claims and temporary movement/animation/control overrides. Completed position changes, animation variables, activation, and component enabled states remain authored results; cancellation does not rewind them.
-
-## Examples to author
-
-These are separate events, each on its own sequence Actor. Clip aliases, audio IDs, and Actor/component names below must be replaced with names available in the scene.
-
-| Event | Step | Actions |
+| Field | Type | Use |
 | --- | --- | --- |
-| Heart episode | 0 | Lock `Player`; play a registered heart animation on `Player` and wait; play heart audio with `WaitForCompletion=false`. |
-| Heart episode | 1 | Unlock `Player`. Normal completion also releases the temporary animation override. |
-| Bridge | 0 | Play registered VO. Use waiting audio if the player should keep moving until the VO finishes; use non-waiting audio if the next step should begin immediately. |
-| Bridge | 1 | Lock `Player`; play the registered heart animation and wait. |
-| Bridge | 2 | Unlock `Player`. |
-| Popcorn reveal | 0 | Lock `Player`; move `Player` to marker `PopcornApproach` over an authored duration and wait. |
-| Popcorn reveal | 1 | Play the enemy reveal clip and wait; optionally play positional audio on the enemy without waiting. |
-| Popcorn reveal | 2 | Enable the enemy's named behavior component; unlock `Player`. |
+| `TriggerAction` | String | Use for debugging via input buttons, such as `F2` needs Engine side setup. Leave blank for collision-triggered events. |
+| `TriggerCollider` | String | Optional name of a Box or Sphere component on the event Actor, such as `TriggerBox`. Player entry starts the event and disables that collider. Leave blank for manual playback. |
+| `Replayable` | Bool | `true` allows repeated playback after the event stops. Default is `false`. A consumed collision trigger stays disabled, even with replay enabled. So technically this feature is non-functional. |
 
-The distant crying and close reveal can use independent sequence Actors. Trigger boxes and distance detection are future callers of `Play()`; this version supplies the manual input entry point. Dedicated camera and VFX actions are also outside this version. Existing effect Actors can be activated with an activation action.
+Keep the event Actor active and its coordinator enabled. Collision triggering also needs the player's collider to accept the Trigger layer. Currently we have a debug collider on the player that is not Unreal authored.
 
-## Unreal setup tomorrow
+## 3. Set action order and targets
 
-Unreal is unavailable during this implementation. The editor setup and a real editor export remain unverified until the following steps are done.
+Every action uses these common fields:
 
-1. Follow the existing exported custom-component pattern used by `SpinComponent`. Create finite custom component blueprints/types with the exact `CustomType` names in the table. Set up the matching typed variable maps and defaults. Verify the exported custom type string; a Blueprint asset name alone is not proof that it matches.
-2. Place a dedicated Actor for each event. Add one coordinator and uniquely named action instances. Keep the sequence Actor active and its coordinator enabled throughout playback.
-3. Name the target Actors, animator/behavior component instances, and marker Actors clearly. Confirm target animation aliases and bool/trigger names in AGP. Prepare inactive/disabled enemy behavior through the existing scene/runtime setup before gameplay starts.
-4. Give the test coordinator `TriggerAction=PlayUnrealSequenceTest` and `Replayable=true`. Export a small scene and inspect its component records against the example below. Existing scalar maps already cover all action fields; no exporter format change is required.
-5. Run AGP from its normal runtime directory and press F2 to play the exported test sequence. Follow the [Unreal test guide](ScriptedEventsUnrealTestGuide.md) for movement, replay, and scene replacement checks, plus optional checks for the remaining actions.
+| Field | Type | Use |
+| --- | --- | --- |
+| `Step` | Int | Starts at `0`. Lower steps run first; actions with the same step start together. |
+| `WaitForCompletion` | Bool | Default `true`: hold this step until the action finishes. `false`: let later steps proceed while it continues. |
+| `TargetActor` | String | Exact runtime Actor name that the action will affect, for example `Player` or `Enemy_1`. Leave empty on waits and non-positional audio. |
+| `TargetComponent` | String | Component instance name. Usually leave empty to select the target's animator/controller automatically. Required when enabling or disabling a component. For example `EnemyBrainComponent` |
 
-The following is a complete custom component record within an exported Actor's `Components` array. The surrounding Actor/level records are still required. The exporter supplies the normal parent and transform values; the identity matrix below is only an example.
+Targets must be separate from the event Actor. The next step starts when all waiting actions finish. Put actions that depend on one another in different steps. Two events cannot control the same target Actor at once.
 
-```json
-{
-  "Name": "MovePlayerToMarker",
-  "Parent": "",
-  "TypeID": -1,
-  "Tags": [],
-  "Transform": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
-  "CustomType": "MoveActionComponent",
-  "Custom": {
-    "Step": 0,
-    "WaitForCompletion": true,
-    "TargetActor": "Player",
-    "DestinationActor": "PopcornApproach",
-    "DurationInSeconds": 2.0
-  }
-}
-```
+## 4. Pick your actions
 
-For the coordinator, use the same component envelope with `CustomType="ScriptedEventComponent"` and `Custom={"TriggerAction":"PlayUnrealSequenceTest","Replayable":true}`. The importer reads flattened scalar values directly under `Custom`; do not put nested `StringVariables` or `FloatVariables` objects there. For hand-written JSON, keep float values such as `DurationInSeconds` written as `2.0`, and ints such as `Step` and `Sound` written as `2`: the importer rejects a variable with the wrong type.
+| Action component | How to use it |
+| --- | --- |
+| `WaitActionComponent` | Set float `DurationInSeconds`, for example `1.0`, to pause the sequence. No target needed. |
+| `MoveActionComponent` | Set `TargetActor`, string `DestinationActor` to a marker's name, and float `DurationInSeconds`. It moves straight to the marker's starting position. Bool `FaceMovementDirection` defaults to `true`; set `false` to keep facing. Movement does not choose an animation or avoid obstacles. |
+| `SetAnimationVariableActionComponent` | Change a setting in the target's animation tree. For example, set the player's `IsRunning` to `true` to use running, or `false` to use idle. See the field examples below. |
+| `PlayAnimationActionComponent` | Set `TargetActor` and string `Animation` to a registered clip alias. Bool `Loop=false` plays once. It temporarily overrides the animation tree; finishing returns control to the tree and restarts its current clip. Looping requires `WaitForCompletion=false` and another waiting action to keep the event running. Avoid overlapping direct clips on the same Actor. |
+| `PlayAudioActionComponent` | Start a registered sound using int `Sound` (see sound IDs below). Set `WaitForCompletion=false` to keep playing it while later steps run, or `true` to hold this step until the sound ends. See the examples below. |
+| `LockControlActionComponent` | Set `TargetActor=Player` to stop current movement and block player commands. Scripted movement still works. Control is released when the event ends. |
+| `UnlockControlActionComponent` | Set `TargetActor=Player` to release this event's control lock at a chosen step. |
+| `SetActorActiveActionComponent` | Set `TargetActor` and bool `Active`. `false` hides the Actor and stops its updates; `true` activates it again. The result stays after the event. |
+| `SetComponentEnabledActionComponent` | Set `TargetActor`, `TargetComponent`, and bool `Enabled`. For example, disable `EnemyBrainComponent` without hiding its mesh. The result stays after the event. |
 
-## Manual checks
+Durations must be nonnegative. Keep animated Actors active and their animators enabled. The event ends after its final waiting action; unfinished scripted movement and direct animation are released then.
 
-Use the [Unreal test guide](ScriptedEventsUnrealTestGuide.md) to author and export a test sequence. The built-in C++ demo has been removed. Audio and animation checks are optional follow-up work and remain unverified in the editor round trip until performed.
+### SetAnimationVariable: running and idle
 
-## Verification and extending actions
+This action changes a named variable in an Actor's existing animation tree. The tree uses that variable to decide which animation to play. The action does not select a clip directly or move the Actor.
 
-Build `Game.sln` in Debug x64, then build `Tests/GameFramework/ScriptedEventsTests.vcxproj` and run `Bin/Tests/Debug/ScriptedEventsTests.exe`. These tests exercise real components and CPU animation assets; they do not establish audible/visual playback or an Unreal editor round trip. The current run's detailed results and remaining checks are in `.scratch/scripted-events/verification.md`.
+For the player's current tree, use these settings:
 
-To add an action later, derive from `ScriptedActionComponent`, read its exported fields in `InitializeCustomVariables`, implement validation/start and any timed update/cleanup, then register its custom type in `RegisterCustomComponents`. Actions update through the coordinator rather than advancing themselves independently.
+| Field | Start running | Return to idle | Type/map |
+| --- | --- | --- | --- |
+| `TargetActor` | `Player` | `Player` | String |
+| `Variable` | `IsRunning` | `IsRunning` | String |
+| `Trigger` | `false` | `false` | Bool |
+| `Value` | `true` | `false` | Bool |
+
+Keep `Trigger=false` for these bool settings. Set `Value=true` alongside the Move action, then set `Value=false` in the step after the move finishes. The current player tree returns to Idle when `IsRunning=false`; you do not need to set a separate `IsIdle` variable. Movement does not change animation variables automatically.
+
+**This action finishes after setting the variable.** `WaitForCompletion=true` does not wait for the resulting animation to finish. Use the Move action's completion to control when running ends, or a Wait action to hold an idle pause.
+
+### PlayAnimation: play a scripted clip once
+
+For a scripted roar, gesture, or other one-off animation, use `PlayAnimationActionComponent`:
+
+| Field | Example | Type/map |
+| --- | --- | --- |
+| `TargetActor` | The Actor that should roar | String |
+| `Animation` | `Roar` (must already be registered on its animator) | String |
+| `Loop` | `false` | Bool |
+| `WaitForCompletion` | `true` | Bool |
+
+This plays the clip directly and holds the step until it finishes. The animation tree then takes control again, restarting its current state's clip. No roar variable or roar transitions are needed in the tree. `Roar` here is an example alias to register, not an existing player animation. Without an animation tree, the Actor holds the final pose instead.
+
+Set `WaitForCompletion=false` if later steps should run while the clip plays. Keep the event running long enough for the clip to finish. Playing a clip does not stop movement or AI; lock control or disable the relevant behavior separately when needed.
+
+**Optional: animation-tree triggers.** Use `SetAnimationVariableActionComponent` with `Trigger=true` only when an existing trigger variable and the tree's transition rules should control playback. The variable must be declared as `Trigger` in [`AnimationManager.json`](<../Content/Animations/Animation Manager/AnimationManager.json>); `Value` is ignored, and the tree clears the request when it uses it. For a simple scripted one-off clip, use PlayAnimation as above.
+
+### PlayAudio: choose whether the sequence waits
+
+**You can start a sound and do other actions while it plays.** Set `WaitForCompletion=false` on the audio action. This starts the sound and lets the sequence move to its next step without waiting for the sound to end. Other waiting actions in the same step still need to finish.
+
+| Audio setting | What happens |
+| --- | --- |
+| `WaitForCompletion=false` | The sound plays while later steps run. Use for background dialogue, music, or a sound over movement. |
+| `WaitForCompletion=true` (default) | The next step waits until the sound stops. Use when something should happen after a line of dialogue or sound finishes. Do not use for looping sounds. |
+
+For example, to play dialogue while the player moves:
+
+| Step | Action | Settings |
+| --- | --- | --- |
+| 0 | PlayAudio | `Sound=<registered dialogue ID>`, `WaitForCompletion=false` |
+| 1 | Move | `TargetActor=Player`, `DestinationActor=SE_End`, `DurationInSeconds=3.0`, `WaitForCompletion=true` |
+| 2 | Hide a prop | Runs after the 3-second move, even if the dialogue is still playing. |
+
+If you change that audio action to `WaitForCompletion=true`, the move starts **after the dialogue ends**. To start sound and movement together but wait for both before the next step, give both actions the same `Step` and set both to `WaitForCompletion=true`.
+
+For audio location, set bool `Positional=false` when no Actor location is needed. Set `Positional=true` and `TargetActor` to play at that Actor's position when the sound starts; the sound does not follow later movement.
+
+Non-waiting audio can keep playing after normal sequence completion. Cancelling the event or unloading the scene stops sounds started by it.
+
+## Extra details: when is an action complete?
+
+Each action reports completion through `Tick()`: `true` means finished; `false` means still running. The sequence checks every frame and advances when **all actions in the current step with `WaitForCompletion=true` have finished**. Setting it to `false` does not make an action finish sooner; it only stops that action from holding up the next step.
+
+| Action | Completed when... |
+| --- | --- |
+| Wait | `DurationInSeconds` has elapsed. |
+| Move | Its duration has elapsed and the Actor has been placed at the destination. |
+| PlayAnimation | The non-looping clip finishes playing. |
+| PlayAudio | FMOD reports that the sound has stopped. |
+| SetAnimationVariable | The variable is set, **not** when the resulting animation finishes. |
+| LockControl / UnlockControl | The control change is applied. The lock itself can remain until a later unlock or event cleanup. |
+| SetActorActive / SetComponentEnabled | The setting is applied. |
+
+One-time changes finish on the first sequence update after starting. Looping clips and sounds do not finish naturally, so they must not hold a step open.
+
+For example:
+
+| Step | Action | `WaitForCompletion` |
+| --- | --- | --- |
+| 0 | Move the player for 3 seconds | `true` |
+| 0 | Play a 5-second sound | `false` |
+| 1 | Hide a prop | `true` |
+
+Both step 0 actions start together. After **3 seconds**, movement finishes and step 1 hides the prop while the sound continues. If the sound also waits, step 1 starts after **5 seconds**. If neither action waits, step 1 starts on the next sequence update.
+
+Keep a waiting action alive for as long as movement or direct animation is needed: ending the whole event releases those actions, even if they have not finished. Non-waiting audio can continue after normal event completion.
+
+## Where to find sound names and animation names
+
+**Sounds:** Put `Sound` in `IntVariables` using a numeric ID from [`AudioManager.h`](../Source/Engine/GameFramework/AudioManager.h): for example, 5 for eCollectItem, 7 for eHeavyRoar, or 12 for eSlash. IDs must be between 0 and eSoundCount - 1. Recheck IDs if the enum ordering changes. Avoid overlapping actions using the same sound: they share one playback.
+
+The current registered sounds, including music and ambience, are listed below. Event paths come from [`AudioManager::RegisterAllEvents`](../Source/Engine/GameFramework/AudioManager.cpp).
+
+| `Sound` integer | Sound ID | FMOD event |
+| --- | --- | --- |
+| 0 | `eMainTheme` | `event:/FMODTest` |
+| 1 | `eBlizzardAmbience` | `event:/Blizzard Ambience` |
+| 2 | `eCastleAmbienceOne` | `event:/Castle Ambience 1` |
+| 3 | `eCastleAmbienceTwo` | `event:/Castle Ambience 2` |
+| 4 | `eCombatOne` | `event:/Combat One` |
+| 5 | `eCollectItem` | `event:/Collect Item` |
+| 6 | `eCrossbowCock` | `event:/Crossbow Cock` |
+| 7 | `eHeavyRoar` | `event:/Heavy Roar` |
+| 8 | `eIntroSwell` | `event:/Intro Swell` |
+| 9 | `ePotion` | `event:/Potion Drink` |
+| 10 | `eSickleSlash` | `event:/Sickle Slash` |
+| 11 | `eSlashHit` | `event:/Slash Hit` |
+| 12 | `eSlash` | `event:/Slash` |
+
+`eSoundCount` is 13 and is a count, not a playable sound ID.
+
+**Animation variables:** Find the target's tree in [`AnimationManager.json`](<../Content/Animations/Animation Manager/AnimationManager.json>). Its `Variables` list gives names and whether each is a bool or trigger.
+
+**Clip aliases:** Check the tree files in [`Trees`](<../Content/Animations/Animation Manager/Trees>), or the Actor's C++ `AddAnimation` calls. Use the registered alias, not an FBX path. For `PlayerTree`, the aliases are `Idle` and `Running`; setting `IsRunning=true` selects running, and `false` selects idle.
+
+## Example: run, pause, play a slash sound
+
+Add these actions to one event Actor. All use `WaitForCompletion=true`:
+
+| Step | Action | Settings |
+| --- | --- | --- |
+| 0 | LockControl | `TargetActor=Player` |
+| 1 | SetAnimationVariable | `TargetActor=Player`, `Variable=IsRunning`, `Trigger=false`, `Value=true` |
+| 1 | Move | `TargetActor=Player`, `DestinationActor=SE_End`, `DurationInSeconds=3.0`, `FaceMovementDirection=true` |
+| 2 | SetAnimationVariable | `TargetActor=Player`, `Variable=IsRunning`, `Trigger=false`, `Value=false` |
+| 2 | Wait | `DurationInSeconds=1.0` |
+| 3 | PlayAudio | `Sound=12`, `Positional=true`, `TargetActor=Player` |
+| 4 | UnlockControl | `TargetActor=Player` |
+
+Compile and save the Blueprint and level, then **export the level using the TGA exporter** into AGP's `Content/ExportedScenes`. Load that scene in AGP and test!

@@ -91,6 +91,7 @@ class MoveActionComponent final : public ScriptedActionComponent
 public:
 	std::string DestinationActor;
 	float DurationInSeconds = 1.0f;
+	bool FaceMovementDirection = true;
 	void InitializeCustomVariables(const CustomComponentVariables&) override;
 	bool Validate(std::string&) const override;
 	bool Start() override;
