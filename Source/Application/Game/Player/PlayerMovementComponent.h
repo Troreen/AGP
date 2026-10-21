@@ -1,5 +1,5 @@
 #pragma once
-#include <GameFramework\World\Component.h>
+#include <GameFramework/Components/CustomComponent.h>
 #include <Vector.hpp>
 
 enum class MovementState
@@ -11,12 +11,13 @@ enum class MovementState
 
 };
 
-class PlayerMovementComponent : public Component
+class PlayerMovementComponent : public CustomComponent
 {
 public:
 
 	PlayerMovementComponent();
 
+	void InitializeCustomVariables(const CustomComponentVariables& someVariables) override;
 	void BeginPlay() override;
 
 	//Updates

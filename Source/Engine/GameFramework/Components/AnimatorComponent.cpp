@@ -23,6 +23,11 @@ void AnimatorComponent::BeginPlay()
 	{
 		return;
 	}
+
+	if (!(myMeshComponent = GetOwner()->GetComponent<SkeletalMeshComponent>()))
+	{
+		std::cout << "DIS NO WORK\n";
+	}
 	myAnimationTree->SetAnimationPlayer(this);
 	myAnimationTree->InitTree();
 }

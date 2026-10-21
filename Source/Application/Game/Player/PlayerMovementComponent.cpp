@@ -1,6 +1,8 @@
 #include "PlayerMovementComponent.h"
 #include <GameFramework/World/Actor.h>
 #include <GameFramework/Components/AnimatorComponent.h>
+#include <GameFramework/Scenes/CustomComponentVariables.h>
+
 #include <Maths.hpp>
 #include <GraphicsEngine/Drawers/LineDrawer.h>
 #include <iostream>
@@ -13,9 +15,13 @@ PlayerMovementComponent::PlayerMovementComponent()
 	myArrivedDistance = 0.0f;
 }
 
+void PlayerMovementComponent::InitializeCustomVariables(const CustomComponentVariables& someVariables)
+{
+	myMaxSpeed = someVariables.GetOrDefault<float>("Speed", 0.0f);
+}
+
 void PlayerMovementComponent::BeginPlay()
 {
-	myMaxSpeed = 300.f;
 	myVelocity = { 0.0f, 0.0f, 0.0f };
 	myHasDestination = false;
 	myArrivedDistance = 10.0f;

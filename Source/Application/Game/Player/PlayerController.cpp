@@ -9,10 +9,17 @@
 #include <GraphicsEngine/GraphicsEngine.h>
 #include <GameFramework/World/Actor.h>
 #include <iostream>
+#include <GameFramework/Scenes/CustomComponentVariables.h>
 
 
 PlayerController::PlayerController()
-{}
+{
+}
+
+void PlayerController::InitializeCustomVariables(const CustomComponentVariables& someVariables)
+{
+	someVariables;
+}
 
 void PlayerController::BeginPlay()
 {

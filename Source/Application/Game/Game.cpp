@@ -126,30 +126,26 @@ void Game::ConfigureWorld(World& aWorld)
 		component->SetPosition({ 0.0f, 0.0f });
 		component->SetAnchor({ 1.0f, 1.0f });
 	}
+	//{
+	//	Actor* actor = aWorld.SpawnActor("Player");
+	//	actor->GetTransform().SetLocalPosition({0, 0, 0});
+	//	auto* mesh = actor->AddComponent<SkeletalMeshComponent>();
+	//	AssetRegistry& assets = ServiceLocator::GetInstance().GetAssetRegistry();
+	//	mesh->SetMesh(assets.GetAsset<MeshAsset>("SK_player.fbx"));
+	//	auto* animator = actor->AddComponent<AnimatorComponent>();
+	//	animator->SetMeshComponent(mesh);
+	//	animator->SetTree("PlayerTree");
+	//	animator->GetTree().SetBool("IsIdle", true);
+	//	actor->AddComponent<PlayerController>();
+	//	actor->AddComponent<PlayerMovementComponent>();
 
-	{
-		Actor* actor = aWorld.SpawnActor("Player");
-		actor->GetTransform().SetLocalPosition({0, 0, 0});
-		auto* mesh = actor->AddComponent<SkeletalMeshComponent>();
-		AssetRegistry& assets = ServiceLocator::GetInstance().GetAssetRegistry();
-		mesh->SetMesh(assets.GetAsset<MeshAsset>("SK_player.fbx"));
-		auto* animator = actor->AddComponent<AnimatorComponent>();
-		animator->SetMeshComponent(mesh);
-		animator->SetTree("PlayerTree");
-		animator->GetTree().SetBool("IsIdle", true);
-		//animator->GetTree().GetAnimationState("Running").OnEnterEvent().Subscribe([]() { std::cout << "BigBoy Run" << std::endl; });
-		//animator->GetTree().GetAnimationState("Running").OnUpdateEvent().Subscribe([](float) { std::cout << "BigBoy Running" << std::endl; });
-		//animator->GetTree().GetAnimationState("Running").OnExitEvent().Subscribe([]() { std::cout << "BigBoy Ran" << std::endl; });
-		actor->AddComponent<PlayerController>();
-		actor->AddComponent<PlayerMovementComponent>();
-
-		// Body-only overlap approximation; equipment is outside this sphere.
-		auto* collider = actor->AddComponent<ColliderComponent>("Collider");
-		collider->SetSphereRadius(60.0f);
-		collider->GetTransform().SetLocalPosition({0, 90, 0});
-		collider->SetLayer(CollisionLayer::Player);
-		collider->SetOverlapsWith({CollisionLayer::Trigger});
-	}
+	//	// Body-only overlap approximation; equipment is outside this sphere.
+	//	auto* collider = actor->AddComponent<ColliderComponent>("Collider");
+	//	collider->SetSphereRadius(60.0f);
+	//	collider->GetTransform().SetLocalPosition({0, 90, 0});
+	//	collider->SetLayer(CollisionLayer::Player);
+	//	collider->SetOverlapsWith({CollisionLayer::Trigger});
+	//}
 //
 	//{
 	//	Actor* actor = aWorld.SpawnActor("Enemy");

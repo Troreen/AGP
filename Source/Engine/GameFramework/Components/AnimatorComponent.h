@@ -4,7 +4,6 @@
 #include <GameFramework/Components/CustomComponent.h>
 #include <GameFramework/Components/SkeletalMeshComponent.h>
 
-
 class AnimatorComponent : public CustomComponent
 {
 	friend class AnimationState;

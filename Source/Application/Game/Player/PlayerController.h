@@ -1,15 +1,16 @@
 #pragma once
-#include <GameFramework\World\Component.h>
+#include <GameFramework/Components/CustomComponent.h>
 #include <Vector.hpp>
 
 class PlayerMovementComponent;
 class CameraComponent;
 
-class PlayerController : public Component
+class PlayerController : public CustomComponent
 {
 public:
 	PlayerController();
 
+	void InitializeCustomVariables(const CustomComponentVariables& someVariables) override;
 	void BeginPlay() override;
 	void Update(float aDeltaTime) override;
 	void SetScriptedControlLocked(bool aLocked);

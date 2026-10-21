@@ -5,6 +5,8 @@
 #include "Components/ScriptedEvents/ScriptedActionComponent.h"
 #include <GameFramework/Components/AnimatorComponent.h>
 #include <Application/Game/BehaviourTree/BehaviourTreeComponent.h>
+#include <Application/Game/Player/PlayerController.h>
+#include <Application/Game/Player/PlayerMovementComponent.h>
 
 void RegisterCustomComponents(CustomComponentRegistry& aRegistry)
 {
@@ -23,4 +25,8 @@ void RegisterCustomComponents(CustomComponentRegistry& aRegistry)
 	aRegistry.Register<UnlockControlActionComponent>("UnlockControlActionComponent");
 	aRegistry.Register<SetActorActiveActionComponent>("SetActorActiveActionComponent");
 	aRegistry.Register<SetComponentEnabledActionComponent>("SetComponentEnabledActionComponent");
+
+	// --- Player ---
+	aRegistry.Register<PlayerController>("PlayerControllerComponent");
+	aRegistry.Register<PlayerMovementComponent>("PlayerMovementComponent");
 }
