@@ -182,8 +182,8 @@
     <ClInclude Include="Pathfinding\AStar.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Pathfinding\AStar.cpp" />
     <ClCompile Include="Pathfinder.cpp" />
+    <ClCompile Include="Pathfinding\AStar.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GraphicsEngine\GraphicsEngine.vcxproj">

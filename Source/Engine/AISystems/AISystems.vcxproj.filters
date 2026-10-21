@@ -12,9 +12,9 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Pathfinder.cpp" />
     <ClCompile Include="Pathfinding\AStar.cpp">
       <Filter>Pathfinding</Filter>
     </ClCompile>
-    <ClCompile Include="Pathfinder.cpp" />
   </ItemGroup>
 </Project>

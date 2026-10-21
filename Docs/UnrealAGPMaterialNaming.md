@@ -1,10 +1,5 @@
 # Unreal-to-AGP material and shader naming
 
-Use Unreal's material terms when describing material behavior. The table records
-the existing AGP HLSL interface; it does not introduce aliases or rename shader
-fields. It applies to `Source/Engine/GraphicsEngine/Shaders`, the configured engine
-shader set. `Content/Shaders/Material` is an older, separate set.
-
 ## Material outputs and mesh inputs
 
 | Unreal term | AGP HLSL | Meaning and differences |
@@ -21,18 +16,6 @@ shader set. `Content/Shaders/Material` is an older, separate set.
 | TextureCoordinate, Coordinate Index 1 | `MaterialPixelParameters.UV1` | Second UV set. |
 | WorldPosition | `MaterialPixelParameters.WorldPosition.xyz` | World position. Unreal uses Z-up; AGP uses Y-up, so directional masks need the corresponding axis. |
 | Time | `FB_TotalTime` | Elapsed scene simulation seconds, using sanitized/clamped world delta. Resets on world clear/replacement. This is not a promise of Unreal's time origin or Ignore Pause behavior. |
-
-`SurfaceValues.rgb` packs Ambient Occlusion, Roughness, Metallic in that order.
-`Material_Pixel` can compute these values from constants, textures or expressions;
-forward lighting and the GBuffer consume its modified values. This provides
-ordinary Unreal-style material controls. It does not let a material replace the
-renderer SSAO pass, shadow system or lighting model. AGP combines material AO with
-SSAO for ambient lighting; this is not a claim of identical Unreal rendering.
-
-Standard textures are sampled before `Material_Pixel`. To use UVs computed inside
-the hook, explicitly sample the texture with those UVs. Changing a UV field alone
-does not repeat an earlier sample. UV changes in `Material_Vertex` feed the later
-standard texture samples.
 
 ## Imported parameters
 
