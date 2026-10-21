@@ -16,6 +16,13 @@ struct Transition
 	bool Expected;
 };
 
+struct AnimationEvent
+{
+	unsigned TriggerFrame;
+
+	std::string Message;
+};
+
 enum class eAnimationLayer
 {
 	BaseLayer,
@@ -35,7 +42,7 @@ public:
 	void InitState(AnimationTree* anAnimationTree);
 
 	Event<>& OnEnterEvent();
-	Event<float>& UpdateEvent();
+	Event<float>& OnUpdateEvent();
 	Event<>& OnExitEvent();
 
 	AnimationState& operator=(const AnimationState& other);
@@ -47,6 +54,7 @@ private:
 	void SetAnimation(const std::string& aFilePath, bool aIsLooping = false, bool aIsFullBody = true);
 
 	void AddTransition(const Transition aTransition);
+	void AddEvent(const AnimationEvent aEvent);
 
 	void OnEnter();
 	void PlayAnimation();
@@ -60,9 +68,10 @@ private:
 	bool myOverwriteGlobal;
 
 	std::vector <Transition> myTransitions;
+	std::vector <AnimationEvent> myEvents;
 
 	Event<> myOnEnter;
-	Event<float> myUpdate;
+	Event<float> myOnUpdate;
 	Event<> myOnExit;
 
 	std::string myName;

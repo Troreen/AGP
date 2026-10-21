@@ -123,6 +123,20 @@ AnimationTree::AnimationTree(const std::string& aName, const std::string& aStart
 				myAnimationStates[myAnimationStates.size() - 1].AddTransition(newTransition);
 			}
 		}
+
+		if (!currentState["Events"].error())
+		{
+			simdjson::dom::array eventArray = currentState["Events"];
+			for (auto events : eventArray)
+			{
+				AnimationEvent newEvent = {
+				static_cast<unsigned>(events["TriggerFrame"].get<uint64_t>()),
+				std::string(events["Message"].get<const char*>()),
+				};
+
+				myAnimationStates[myAnimationStates.size() - 1].AddEvent(newEvent);
+			}
+		}
 	}
 }
 

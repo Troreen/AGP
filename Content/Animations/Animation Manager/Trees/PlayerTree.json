@@ -9,6 +9,13 @@
         "Variable": "IsRunning",
         "Expected": true
       }
+    ],
+    "Events":[
+      {
+        "TriggerFrame": 0,
+
+        "Message": "Something"
+      }
     ]
   },
   "Running": {

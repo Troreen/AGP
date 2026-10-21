@@ -43,6 +43,11 @@ void AnimationState::AddTransition(const Transition aTransition)
 	myTransitions.emplace_back(aTransition);
 }
 
+void AnimationState::AddEvent(const AnimationEvent aEvent)
+{
+	myEvents.emplace_back(aEvent);
+}
+
 void AnimationState::OnEnter()
 {
 	myOnEnter.Invoke();
@@ -64,7 +69,7 @@ void AnimationState::PlayAnimation()
 
 void AnimationState::Update(const float aDeltaTime, std::vector<Transition> someGlobalTransitions)
 {
-	myUpdate.Invoke(myAnimationTree->GetAnimationPlayer()->GetCurrentPlayBackState(true).CurrentFrame);
+	myOnUpdate.Invoke(myAnimationTree->GetAnimationPlayer()->GetCurrentPlayBackState(true).CurrentFrame);
 
 	if (!someGlobalTransitions.empty() && !myOverwriteGlobal) // If there are global transitions, they will be checked first
 	{
@@ -87,9 +92,9 @@ Event<>& AnimationState::OnEnterEvent()
 	return myOnEnter;
 }
 
-Event<float>& AnimationState::UpdateEvent()
+Event<float>& AnimationState::OnUpdateEvent()
 {
-	return myUpdate;
+	return myOnUpdate;
 }
 
 Event<>& AnimationState::OnExitEvent()

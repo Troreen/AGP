@@ -118,9 +118,9 @@ void AnimationManager::Initialize(const std::filesystem::path& aContentRoot)
 			myDebugData.Variables.push_back(variable);
 		}
 
-		myDebugData.Position.x = root["Debug Animation"]["World Position"]["X"].get<double>();
-		myDebugData.Position.y = root["Debug Animation"]["World Position"]["Y"].get<double>();
-		myDebugData.Position.z = root["Debug Animation"]["World Position"]["Z"].get<double>();
+		myDebugData.Position.x = static_cast<float>(root["Debug Animation"]["World Position"]["X"].get<double>());
+		myDebugData.Position.y = static_cast<float>(root["Debug Animation"]["World Position"]["Y"].get<double>());
+		myDebugData.Position.z = static_cast<float>(root["Debug Animation"]["World Position"]["Z"].get<double>());
 	}
 
 }

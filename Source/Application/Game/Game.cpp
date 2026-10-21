@@ -137,6 +137,9 @@ void Game::ConfigureWorld(World& aWorld)
 		animator->SetMeshComponent(mesh);
 		animator->SetTree("PlayerTree");
 		animator->GetTree().SetBool("IsIdle", true);
+		//animator->GetTree().GetAnimationState("Running").OnEnterEvent().Subscribe([]() { std::cout << "BigBoy Run" << std::endl; });
+		//animator->GetTree().GetAnimationState("Running").OnUpdateEvent().Subscribe([](float) { std::cout << "BigBoy Running" << std::endl; });
+		//animator->GetTree().GetAnimationState("Running").OnExitEvent().Subscribe([]() { std::cout << "BigBoy Ran" << std::endl; });
 		actor->AddComponent<PlayerController>();
 		actor->AddComponent<PlayerMovementComponent>();
 
