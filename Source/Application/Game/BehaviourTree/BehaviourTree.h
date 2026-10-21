@@ -1,17 +1,20 @@
 #pragma once
-#include "BaseNodes/BT_Node.h"
-#include "BaseNodes/BT_LeafNodeCondition.h"
-#include "BaseNodes/BT_CompositeNode.h"
+//#include "BaseNodes/BT_Node.h"
+//#include "BaseNodes/BT_LeafNodeCondition.h"
 
 #include "BlackBoard.h"
 #include <vector>
+#include <memory>
+
+class BT_Node;
+class BT_LeafNodeCondition;
 
 class BehaviourTree
 {
 public:
 	BehaviourTree();
 
-	void SetRoot(BT_Node* aRoot) { myRoot = aRoot; }
+	void SetRoot(std::shared_ptr<BT_Node> aRoot) { myRoot = aRoot; }
 	void Run();
 
 	BlackBoard& GetBlackBoard() { return myBlackBoard; }
@@ -21,7 +24,7 @@ public:
 private:
 	void CheckCurrentLeafNodeConditions();
 
-	BT_Node* myRoot;
+	std::shared_ptr<BT_Node> myRoot;
 	BlackBoard myBlackBoard;
 	bool myShouldTick;
 

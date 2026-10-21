@@ -1,5 +1,6 @@
 #pragma once
 #include "BT_Node.h"
+#include <memory>
 
 class BlackBoard;
 class BehaviourTree;

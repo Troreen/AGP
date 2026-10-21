@@ -66,6 +66,9 @@
     <ClInclude Include="BehaviourTree\BehaviourTreeComponent.h">
       <Filter>BehaviourTree</Filter>
     </ClInclude>
+    <ClInclude Include="BehaviourTree\BehaviourTreeFactory.h">
+      <Filter>BehaviourTree</Filter>
+    </ClInclude>
     <ClInclude Include="BehaviourTree\BlackBoard.h">
       <Filter>BehaviourTree</Filter>
     </ClInclude>
@@ -140,6 +143,9 @@
       <Filter>BehaviourTree</Filter>
     </ClCompile>
     <ClCompile Include="BehaviourTree\BehaviourTreeComponent.cpp">
+      <Filter>BehaviourTree</Filter>
+    </ClCompile>
+    <ClCompile Include="BehaviourTree\BehaviourTreeFactory.cpp">
       <Filter>BehaviourTree</Filter>
     </ClCompile>
     <ClCompile Include="BehaviourTree\BlackBoard.cpp">

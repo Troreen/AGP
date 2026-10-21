@@ -16,7 +16,7 @@ public:
 
 	BehaviourTreeComponent();
 
-	void SetBehaviourTree(BehaviourTree* aBehaviourTree);
+	void SetBehaviourTree(const char* aBehaviourTree);
 	void SetActionNode(BT_LeafNodeAction* aActionNode);
 
 	void InitializeCustomVariables(const CustomComponentVariables& someVariables) override;
@@ -32,14 +32,6 @@ private:
 	void UpdateMovement();
 	//void AddSteeringForce();
 	//void TriggerAction();
-
-	BT_Action_FollowPlayer myFollow;
-	BT_Action_Idle myIdle;
-
-	BT_Condition_IsPlayerInLOS myFind;
-
-	BT_SequenceNode myLooking;
-	BT_SelectorNode myRoot;
 
 	BehaviourTree myBehaviourTree;
 	BT_LeafNodeAction* myActionNode;

@@ -1,6 +1,7 @@
 #pragma once
 #include "BT_Node.h"
 #include <Vector.hpp>
+#include <memory>
 
 class BlackBoard;
 class BehaviourTree;

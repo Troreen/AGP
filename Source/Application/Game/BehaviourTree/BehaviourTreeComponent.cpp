@@ -1,25 +1,18 @@
 #include "BehaviourTreeComponent.h"
 #include <GameFramework/Components/AnimatorComponent.h>
 #include <GameFramework/World/Actor.h>
+#include <BehaviourTree/BehaviourTreeFactory.h>
 
 BehaviourTreeComponent::BehaviourTreeComponent()
-	: myFollow(&myBehaviourTree.GetBlackBoard())
-	, myFind(&myBehaviourTree)
-	, myIdle(&myBehaviourTree.GetBlackBoard())
 {
-	myLooking.AddChild(&myFind);
-	myLooking.AddChild(&myFollow);
-
-	myRoot.AddChild(&myLooking);
-	myRoot.AddChild(&myIdle);
-
-	myBehaviourTree.SetRoot(&myRoot);
-	myActionNode = &myIdle;
+	myActionNode = nullptr;
 }
 
-void BehaviourTreeComponent::SetBehaviourTree(BehaviourTree* /*aBehaviourTree*/)
+void BehaviourTreeComponent::SetBehaviourTree(const char* aBehaviourTree)
 {
-	//myBehaviourTree = aBehaviourTree;
+	BehaviourTreeFactory factory;
+	factory.Init();
+	myActionNode = factory.GetBehaviourTree(aBehaviourTree, myBehaviourTree);
 }
 
 void BehaviourTreeComponent::SetActionNode(BT_LeafNodeAction* aAtionNode)

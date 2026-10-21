@@ -1,4 +1,6 @@
 #include "BehaviourTree.h"
+#include "BaseNodes/BT_Node.h"
+#include "BaseNodes/BT_LeafNodeCondition.h"
 
 BehaviourTree::BehaviourTree()
 {

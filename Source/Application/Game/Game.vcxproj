@@ -249,6 +249,7 @@ exit /b 0</Command>
     <ClInclude Include="BehaviourTree\BaseNodes\BT_SequenceNode.h" />
     <ClInclude Include="BehaviourTree\BehaviourTree.h" />
     <ClInclude Include="BehaviourTree\BehaviourTreeComponent.h" />
+    <ClInclude Include="BehaviourTree\BehaviourTreeFactory.h" />
     <ClInclude Include="BehaviourTree\BlackBoard.h" />
     <ClInclude Include="BehaviourTree\CustomNodes\ActionNodes\BT_Action_FollowPlayer.h" />
     <ClInclude Include="BehaviourTree\CustomNodes\ActionNodes\BT_Action_Idle.h" />
@@ -277,6 +278,7 @@ exit /b 0</Command>
     <ClCompile Include="BehaviourTree\BaseNodes\BT_SequenceNode.cpp" />
     <ClCompile Include="BehaviourTree\BehaviourTree.cpp" />
     <ClCompile Include="BehaviourTree\BehaviourTreeComponent.cpp" />
+    <ClCompile Include="BehaviourTree\BehaviourTreeFactory.cpp" />
     <ClCompile Include="BehaviourTree\BlackBoard.cpp" />
     <ClCompile Include="BehaviourTree\CustomNodes\ActionNodes\BT_Action_FollowPlayer.cpp" />
     <ClCompile Include="BehaviourTree\CustomNodes\ActionNodes\BT_Action_Idle.cpp" />
