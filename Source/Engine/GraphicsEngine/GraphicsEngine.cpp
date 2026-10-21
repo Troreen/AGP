@@ -138,7 +138,7 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path&
 		return false;
 	}
 
-	if (!myRHI.CreateDynamicVertexBufferSimple("LineBuffer", 2048, myLineBuffer))
+	if (!myRHI.CreateDynamicVertexBufferSimple("LineBuffer", 64000, myLineBuffer))
 	{
 		GELOG(Error, "Failed to create line buffer!");
 		return false;

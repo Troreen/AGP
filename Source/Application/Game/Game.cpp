@@ -73,11 +73,8 @@ void Game::Shutdown()
 
 void Game::ConfigureWorld(World& aWorld)
 {
-#if _DEBUG
+	// TODO: remember to turn this off wheen handing in bozos
 	ColliderComponent::SetAllDebugDrawEnabled(true);
-#else
-	ColliderComponent::SetAllDebugDrawEnabled(false);
-#endif
 
 	// {
 	// 	Actor* playerBro = aWorld.SpawnActor("PLAYAH_BRO");

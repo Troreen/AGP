@@ -8,6 +8,14 @@
 #include <cmath>
 #include <numbers>
 
+
+void DrawEdge(const CU::Vector3f& startPosition, const CU::Vector3f& endPosition, const CU::Matrix4f& worldMatrix, const CU::Vector4f& color)
+{
+	const auto start = CU::Vector4f{startPosition.x, startPosition.y, startPosition.z, 1} * worldMatrix;
+	const auto end = CU::Vector4f{endPosition.x, endPosition.y, endPosition.z, 1} * worldMatrix;
+	LineDrawer::Get().DrawLine(start.XYZ(), end.XYZ(), color);
+}
+
 bool ColliderComponent::ourAllDebugDrawEnabled = false;
 
 ColliderComponent* Collision::OtherCollider() const
@@ -91,12 +99,6 @@ void ColliderComponent::DrawDebug() const
 
 	// Transform local outlines with the same composed matrix used for detection.
 	const CU::Matrix4f worldMatrix = GetWorldMatrix();
-	auto drawEdge = [&](const CU::Vector3f& aStart, const CU::Vector3f& anEnd)
-	{
-		const auto start = CU::Vector4f{aStart.x, aStart.y, aStart.z, 1} * worldMatrix;
-		const auto end = CU::Vector4f{anEnd.x, anEnd.y, anEnd.z, 1} * worldMatrix;
-		LineDrawer::Get().DrawLine(start.XYZ(), end.XYZ(), color);
-	};
 
 	if (GetShape() == ColliderShape::Sphere)
 	{
@@ -110,9 +112,9 @@ void ColliderComponent::DrawDebug() const
 			const float y = radius * std::sin(firstAngle);
 			const float nextX = radius * std::cos(secondAngle);
 			const float nextY = radius * std::sin(secondAngle);
-			drawEdge({x, y, 0}, {nextX, nextY, 0});
-			drawEdge({x, 0, y}, {nextX, 0, nextY});
-			drawEdge({0, x, y}, {0, nextX, nextY});
+			DrawEdge({x, y, 0}, {nextX, nextY, 0}, worldMatrix, color);
+			DrawEdge({x, 0, y}, {nextX, 0, nextY}, worldMatrix, color);
+			DrawEdge({0, x, y}, {0, nextX, nextY}, worldMatrix, color);
 		}
 		return;
 	}
@@ -133,7 +135,7 @@ void ColliderComponent::DrawDebug() const
 		{
 			if ((corner & axisBit) == 0)
 			{
-				drawEdge(corners[corner], corners[corner | axisBit]);
+				DrawEdge(corners[corner], corners[corner | axisBit], worldMatrix, color);
 			}
 		}
 	}
