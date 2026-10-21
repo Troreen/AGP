@@ -79,6 +79,12 @@ public:
 	bool CreateTexture(std::string_view aName, unsigned aWidth, unsigned aHeight, unsigned aNumMips, ResourceFormat aFormat, ResourceBindFlags aBindFlags, Texture& outTexture) const;
 	bool CreateShadowMap(std::string_view aName, unsigned aWidth, unsigned aHeight, Texture& outShadowMap, bool aCube) const;
 
+	ID3D11Device* GetNativeDevice() const;
+	ID3D11DeviceContext* GetNativeDeviceContext() const;
+
+	Texture* GetBackBuffer();
+	void SetRenderTarget(const Texture* aTargetList, const Texture* aDepthStencil) const;
+
 private:
 	using MeshList = std::vector<MeshComponentBase*>;
 

@@ -45,6 +45,7 @@ group "Engine"
 group "External"
     include "Source/Utilities/Logger/premake5.lua"
     include "Source/Utilities/CommonUtilities/premake5.lua"
+    include "Source/Utilities/ImGui/premake5.lua"
 
 group "Game"
     include "Source/Application/Game/premake5.lua"

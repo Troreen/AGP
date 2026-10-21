@@ -403,6 +403,46 @@ bool GraphicsEngine::CreateShadowMap(std::string_view aName, unsigned aWidth, un
 	return myRHI.CreateDepthStencil(aName, aWidth, aHeight, outShadowMap, aCube);
 }
 
+ID3D11Device* GraphicsEngine::GetNativeDevice() const
+{
+	return myRHI.GetNativeDevice();
+}
+ID3D11DeviceContext* GraphicsEngine::GetNativeDeviceContext() const
+{
+	return myRHI.GetNativeDeviceContext();
+}
+
+Texture* GraphicsEngine::GetBackBuffer()
+{
+	return &myBackBuffer;
+}
+
+void GraphicsEngine::SetRenderTarget(const Texture* aTarget, const Texture* aDepthStencil) const
+{
+	ID3D11RenderTargetView* rtv = nullptr;
+	ID3D11DepthStencilView* dsv = nullptr;
+	D3D11_VIEWPORT viewport = { 0, 0, 0, 0, 0, 1 };
+
+	if (aTarget)
+	{
+		memcpy_s(&viewport, sizeof(D3D11_VIEWPORT), &aTarget->myViewport, sizeof(Viewport));
+		rtv = aTarget->myRTV.Get();
+	}
+
+	if (aDepthStencil != nullptr)
+	{
+		dsv = aDepthStencil->myDSV.Get();
+
+		if (!aTarget)
+		{
+			memcpy_s(&viewport, sizeof(D3D11_VIEWPORT), &aDepthStencil->myViewport, sizeof(Viewport));
+		}
+	}
+
+	myRHI.GetNativeDeviceContext()->OMSetRenderTargets(1, &rtv, dsv);
+	myRHI.GetNativeDeviceContext()->RSSetViewports(1, &viewport);
+}
+
 bool GraphicsEngine::CreateConstantBufferInternal(ConstantBuffer aBufferId, std::string_view aName, size_t aBufferSize)
 {
 	Buffer buffer;

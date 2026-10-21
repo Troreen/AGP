@@ -1076,6 +1076,16 @@ bool RenderHardwareInterface::CompileShader(ShaderType aShaderType, const std::f
     return true;
 }
 
+ID3D11Device* RenderHardwareInterface::GetNativeDevice() const
+{
+	return myDevice.Get();
+}
+
+ID3D11DeviceContext* RenderHardwareInterface::GetNativeDeviceContext() const
+{
+	return myContext.Get();
+}
+
 void RenderHardwareInterface::SetObjectName(const Microsoft::WRL::ComPtr<ID3D11DeviceChild>& aObject, std::string_view aName) const
 {
     if (aObject)

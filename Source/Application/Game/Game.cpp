@@ -128,7 +128,6 @@ void Game::ConfigureWorld(World& aWorld)
 		component->SetPivot({ 1, 1 });
 		component->SetPosition({ 0.0f, 0.0f });
 		component->SetAnchor({ 1.0f, 1.0f });
-		//component->SendDrawCall();
 	}
 
 	{

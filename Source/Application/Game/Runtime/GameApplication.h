@@ -71,6 +71,8 @@ private:
 	void KillServices();
 	void DestroyWindowIfCreated() noexcept;
 
+	void UserInterface();
+
 	ApplicationSettings myApplicationSettings;
 	WindowSettings myWindowSettings;
 

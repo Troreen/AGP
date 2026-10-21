@@ -35,6 +35,9 @@
 #include <string_view>
 #include <utility>
 
+#include <imgui.h>
+#include <imgui_impl_dx11.h>
+#include <imgui_impl_win32.h>
 DECLARE_LOG_CATEGORY_WITH_NAME(LogGameApplication, Game_Application, Verbose);
 
 DEFINE_LOG_CATEGORY(LogGameApplication);
@@ -281,6 +284,12 @@ GraphicsEngine& GameApplication::InitializeWindowAndGraphics()
 		throw std::runtime_error("Could not initialize graphics engine: ");
 	}
 
+	ImGui::CreateContext();
+	ImGui::StyleColorsClassic();
+
+	ImGui_ImplWin32_Init(myMainWindowHandle);
+	ImGui_ImplDX11_Init(graphics.GetNativeDevice(), graphics.GetNativeDeviceContext());
+
 	myClientSize = graphics.GetClientSize();
 	return graphics;
 }
@@ -461,8 +470,8 @@ void GameApplication::RunMainLoop(Game& aGame, GraphicsEngine& aGraphics)
 		ServiceLocator::GetInstance().GetScheduler().IncreaseTimers(delta);
 		ServiceLocator::GetInstance().GetScheduler().Update();
 
+		UserInterface();
 		RenderFrame(aGraphics);
-
 	}
 }
 
@@ -526,6 +535,9 @@ void GameApplication::RenderFrame(GraphicsEngine& aGraphics)
 	if (myCommandList.FinishCommandList())
 	{
 		aGraphics.ExecuteCommandList(myCommandList);
+
+		aGraphics.SetRenderTarget(aGraphics.GetBackBuffer(), nullptr);
+		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
 		aGraphics.Present();
 	}
@@ -739,4 +751,17 @@ void GameApplication::DestroyWindowIfCreated() noexcept
 		DestroyCursor(myCustomCursor);
 		myCustomCursor = nullptr;
 	}
+}
+
+void GameApplication::UserInterface()
+{
+	ImGui_ImplDX11_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+
+	ImGui::NewFrame();
+
+	//bool demo = true;
+	//ImGui::ShowDemoWindow(&demo);
+
+	ImGui::Render();
 }

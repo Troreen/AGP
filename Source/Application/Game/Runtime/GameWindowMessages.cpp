@@ -2,6 +2,12 @@
 
 #include "InputHandler.h"
 
+#include <imgui.h>
+#include <imgui_impl_dx11.h>
+#include <imgui_impl_win32.h>
+
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
 LRESULT CALLBACK GameWindowMessages::WindowProc(HWND aWindow, UINT aMessage, WPARAM aWParam, LPARAM anLParam)
 {
 	if (aMessage == WM_NCCREATE)
@@ -18,6 +24,11 @@ LRESULT CALLBACK GameWindowMessages::WindowProc(HWND aWindow, UINT aMessage, WPA
 	{
 		PostQuitMessage(0);
 	}
+	if (ImGui_ImplWin32_WndProcHandler(aWindow, aMessage, aWParam, anLParam))
+	{
+		return true;
+	}
+
 	return DefWindowProcW(aWindow, aMessage, aWParam, anLParam);
 }
 

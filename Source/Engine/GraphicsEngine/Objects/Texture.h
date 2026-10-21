@@ -11,6 +11,7 @@ class Texture
 {
 	friend class RenderHardwareInterface;
 	friend class GraphicsCommandList;
+	friend class GraphicsEngine;
 
 public:
 	Texture();
