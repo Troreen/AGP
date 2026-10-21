@@ -98,6 +98,15 @@
     </ClInclude>
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameLog.h" />
+    <ClInclude Include="Player\Ability.h">
+      <Filter>Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Player\AbilityComponent.h">
+      <Filter>Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Player\DashAbility.h">
+      <Filter>Player</Filter>
+    </ClInclude>
     <ClInclude Include="Player\PlayerActor.h">
       <Filter>Player</Filter>
     </ClInclude>
@@ -174,6 +183,15 @@
     </ClCompile>
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Player\Ability.cpp">
+      <Filter>Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Player\AbilityComponent.cpp">
+      <Filter>Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Player\DashAbility.cpp">
+      <Filter>Player</Filter>
+    </ClCompile>
     <ClCompile Include="Player\PlayerActor.cpp">
       <Filter>Player</Filter>
     </ClCompile>

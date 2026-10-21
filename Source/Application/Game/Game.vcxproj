@@ -261,6 +261,9 @@ exit /b 0</Command>
     <ClInclude Include="Components\SpinComponent.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameLog.h" />
+    <ClInclude Include="Player\Ability.h" />
+    <ClInclude Include="Player\AbilityComponent.h" />
+    <ClInclude Include="Player\DashAbility.h" />
     <ClInclude Include="Player\PlayerActor.h" />
     <ClInclude Include="Player\PlayerController.h" />
     <ClInclude Include="Player\PlayerDataStruct.h" />
@@ -289,6 +292,9 @@ exit /b 0</Command>
     <ClCompile Include="Components\SpinComponent.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Player\Ability.cpp" />
+    <ClCompile Include="Player\AbilityComponent.cpp" />
+    <ClCompile Include="Player\DashAbility.cpp" />
     <ClCompile Include="Player\PlayerActor.cpp" />
     <ClCompile Include="Player\PlayerController.cpp" />
     <ClCompile Include="Player\PlayerMovementComponent.cpp" />

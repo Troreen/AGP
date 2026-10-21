@@ -20,47 +20,32 @@ void PlayerMovementComponent::BeginPlay()
 	myHasDestination = false;
 	myArrivedDistance = 10.0f;
 	myTurnSpeed = 100.0f;
+	myMovementState = MovementState::None;
 }
 
 void PlayerMovementComponent::Update(float aDeltaTime)
 {
-	if (myScriptedMovement || !myHasDestination)
+	if (myScriptedMovement || myMovementState == MovementState::None)
 	{
 		return;
 	}
 
-	if (AnimatorComponent* animation = GetOwner()->GetComponent<AnimatorComponent>())
+
+	switch (myMovementState)
 	{
-		animation->GetTree().SetBool("IsRunning", true);
+		case MovementState::Moving:
+			UpdateNormalMovement(aDeltaTime);
+			return;
+		case MovementState::Dashing:
+			UpdateDash(aDeltaTime);
+			return;
+		case MovementState::Dodging:
+			UpdateDodge(aDeltaTime);
+			return;
+		default:
+			std::cout << "You really shouldnt be here... - movement\n";
+			return;
 	}
-
-	CommonUtilities::Vector3f position = GetOwner()->GetTransform().GetLocalPosition();
-
-	CommonUtilities::Vector3f direction = myDestination - position;
-	float distance = (myDestination - position).Length();
-
-	if (distance <= myArrivedDistance)
-	{
-		if (AnimatorComponent* animation = GetOwner()->GetComponent<AnimatorComponent>())
-		{
-			animation->GetTree().SetBool("IsRunning", false);
-		}
-		myDestination = { 0.0f, 0.0f, 0.0f };
-		myHasDestination = false;
-		return;
-	}
-
-	direction = direction.GetNormalized();
-
-	myVelocity = direction * myMaxSpeed;
-
-	position += myVelocity * aDeltaTime;
-
-	GetOwner()->GetTransform().SetLocalPosition(position);
-
-	RotateTowardsTarget(myDestination, aDeltaTime);
-
-
 }
 
 void PlayerMovementComponent::SetDestination(CommonUtilities::Vector3f aDestination)
@@ -71,10 +56,12 @@ void PlayerMovementComponent::SetDestination(CommonUtilities::Vector3f aDestinat
 	}
 	myDestination = aDestination;
 	myHasDestination = true;
+	myMovementState = MovementState::Moving;
 }
 
 void PlayerMovementComponent::StopMovement()
 {
+	myMovementState = MovementState::None;
 	myDestination = { 0.0f, 0.0f, 0.0f };
 	myVelocity = { 0.0f, 0.0f, 0.0f };
 	myHasDestination = false;
@@ -102,37 +89,68 @@ void PlayerMovementComponent::RotateTowardsTarget(CommonUtilities::Vector3f aTar
 	float yawAngleDegrees = CommonUtilities::RadiansToDegrees(yawAngleRadians);
 
 	transform.SetLocalRotationDegrees({ yawAngleDegrees, 0.0f, 0.0f });
+}
 
-	//float t = std::clamp(myTurnSpeed * aDeltaTime, 0.0f, 1.0f);
+void PlayerMovementComponent::UpdateNormalMovement(float aDeltaTime)
+{
+	if (AnimatorComponent* animation = GetOwner()->GetComponent<AnimatorComponent>())
+	{
+		animation->GetTree().SetBool("IsRunning", true);
+	}
 
-	//CommonUtilities::Quaternion<float> turnRotation = CommonUtilities::Quaternion<float>::CreateFromAxisAngle(CommonUtilities::Vector3f::UnitY, angle);
+	CommonUtilities::Vector3f position = GetOwner()->GetTransform().GetLocalPosition();
 
-	//CommonUtilities::Vector3f rotationInDegrees = transform.GetLocalRotationDegrees();
+	CommonUtilities::Vector3f direction = myDestination - position;
 
-	//CommonUtilities::Vector3f rotationInRadians =
-	//{
-	//	CommonUtilities::DegreesToRadians(rotationInDegrees.x),
-	//	CommonUtilities::DegreesToRadians(rotationInDegrees.y),
-	//	CommonUtilities::DegreesToRadians(rotationInDegrees.z)
-	//};
+	float distance = (myDestination - position).Length();
 
-	//CommonUtilities::Quaternion<float> oldRotation = CommonUtilities::Quaternion<float>::CreateFromYawPitchRoll(rotationInRadians.y, rotationInRadians.x, rotationInRadians.z);
+	if (distance <= myArrivedDistance)
+	{
+		if (AnimatorComponent* animation = GetOwner()->GetComponent<AnimatorComponent>())
+		{
+			animation->GetTree().SetBool("IsRunning", false);
+		}
+		myDestination = { 0.0f, 0.0f, 0.0f };
+		myHasDestination = false;
+		myMovementState = MovementState::None;
+		return;
+	}
 
-	//CommonUtilities::Quaternion<float> newRotation = CommonUtilities::Quaternion<float>::Slerp(oldRotation, turnRotation, t);
+	LineDrawer& lineDrawer = LineDrawer::Get();
+	lineDrawer.DrawLine(position, myDestination, { 0.0f, 1.0f, 0.0f, 1.0f });
 
-	//CommonUtilities::Vector3f newRotationInRadians = newRotation.GetEulerAngles();
+	direction = direction.GetNormalized();
 
-	//CommonUtilities::Vector3f newRotationInDegrees =
-	//{
-	//	CommonUtilities::RadiansToDegrees(newRotationInRadians.x),
-	//	CommonUtilities::RadiansToDegrees(newRotationInRadians.y),
-	//	CommonUtilities::RadiansToDegrees(newRotationInRadians.z)
-	//};
+	myVelocity = direction * myMaxSpeed;
 
-	//transform.SetLocalRotationDegrees(newRotationInDegrees);
+	position += myVelocity * aDeltaTime;
 
-	//if (rotationInRadians != newRotationInRadians)
-	//{
-	//	std::cout << "Rotation: X: " << newRotationInRadians.x << " Y: " << newRotationInRadians.y << " Z: " << newRotationInRadians.z << "\n";
-	//}
+	GetOwner()->GetTransform().SetLocalPosition(position);
+
+	RotateTowardsTarget(myDestination, aDeltaTime);
+}
+
+void PlayerMovementComponent::UpdateDash(float aDeltaTime)
+{
+	aDeltaTime;
+}
+
+void PlayerMovementComponent::UpdateDodge(float aDeltaTime)
+{
+	aDeltaTime;
+}
+
+bool PlayerMovementComponent::CanPerformDash() const
+{
+	return myMovementState != MovementState::Dodging;
+}
+
+void PlayerMovementComponent::PerformDash()
+{
+	myMovementState = MovementState::Dashing;
+}
+
+void PlayerMovementComponent::PerformDodgeRoll()
+{
+	myMovementState = MovementState::Dodging;
 }

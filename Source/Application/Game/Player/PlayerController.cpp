@@ -9,7 +9,6 @@
 #include <GraphicsEngine/GraphicsEngine.h>
 #include <GameFramework/World/Actor.h>
 #include <iostream>
-#include <GraphicsEngine/Drawers/LineDrawer.h>
 
 
 PlayerController::PlayerController()
@@ -46,12 +45,6 @@ void PlayerController::BeginPlay()
 
 void PlayerController::Update(float aDeltaTime)
 {
-	LineDrawer& lineDrawer = LineDrawer::Get();
-	lineDrawer.DrawLine({ 0, 0, 0 }, { 100.0f, 0, 0 }, { 1.0f, 0.0f, 0.0f, 1.0f });
-	lineDrawer.DrawLine({ 0, 0, 0 }, { 0, 100.0f, 0 }, { 0.0f, 1.0f, 0.0f, 1.0f });
-	lineDrawer.DrawLine({ 0, 0, 0 }, { 0, 0, 100.0f }, { 0.0f, 0.0f, 1.0f, 1.0f });
-
-
 	if (!myCamera)
 	{
 		myCamera = &ServiceLocator::GetInstance().GetActiveCamera();
