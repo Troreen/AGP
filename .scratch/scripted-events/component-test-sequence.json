@@ -1,0 +1,146 @@
+{
+  "Status": "Applied and saved in Unreal via MCP; live action records synchronized into AGP exported scene",
+  "SequenceActor": "SE_WorkflowTest",
+  "Coordinator": "ScriptedEventSequence",
+  "CoordinatorCustom": {
+    "TriggerAction": "PlayUnrealSequenceTest",
+    "TriggerCollider": "TriggerBox",
+    "Replayable": true
+  },
+  "Notes": [
+    "Replace the existing action components on this sequence Actor; preserve its coordinator, root and TriggerBox.",
+    "Use existing SE_End as the destination; retain its current position until inspected in Unreal.",
+    "Target Player is spawned by AGP, so it need not be an Unreal level Actor.",
+    "Custom fields below must be placed in the corresponding Unreal typed variable maps.",
+    "Running/idle use PlayerTree.IsRunning; no direct animation clips or attack animations.",
+    "Only SoundID 12 (eSlash) is used.",
+    "The target prop is reactivated at the start of each run. The player starts from its current position."
+  ],
+  "Actions": [
+    {
+      "Name": "LockPlayer",
+      "CustomType": "LockControlActionComponent",
+      "Custom": {
+        "Step": 0,
+        "TargetActor": "Player",
+        "WaitForCompletion": true
+      }
+    },
+    {
+      "Name": "PauseSpin",
+      "CustomType": "SetComponentEnabledActionComponent",
+      "Custom": {
+        "Step": 0,
+        "TargetActor": "SE_Spinner",
+        "TargetComponent": "TestSpin",
+        "Enabled": false,
+        "WaitForCompletion": true
+      }
+    },
+    {
+      "Name": "ShowTarget",
+      "CustomType": "SetActorActiveActionComponent",
+      "Custom": {
+        "Step": 0,
+        "TargetActor": "SE_TestObject",
+        "Active": true,
+        "WaitForCompletion": true
+      }
+    },
+    {
+      "Name": "StartRunning",
+      "CustomType": "SetAnimationVariableActionComponent",
+      "Custom": {
+        "Step": 1,
+        "TargetActor": "Player",
+        "Variable": "IsRunning",
+        "Trigger": false,
+        "Value": true,
+        "WaitForCompletion": true
+      }
+    },
+    {
+      "Name": "RunToTarget",
+      "CustomType": "MoveActionComponent",
+      "Custom": {
+        "Step": 1,
+        "TargetActor": "Player",
+        "DestinationActor": "SE_End",
+        "DurationInSeconds": 3.0,
+        "FaceMovementDirection": true,
+        "WaitForCompletion": true
+      }
+    },
+    {
+      "Name": "ReturnToIdle",
+      "CustomType": "SetAnimationVariableActionComponent",
+      "Custom": {
+        "Step": 2,
+        "TargetActor": "Player",
+        "Variable": "IsRunning",
+        "Trigger": false,
+        "Value": false,
+        "WaitForCompletion": true
+      }
+    },
+    {
+      "Name": "IdlePause",
+      "CustomType": "WaitActionComponent",
+      "Custom": {
+        "Step": 2,
+        "DurationInSeconds": 1.0,
+        "WaitForCompletion": true
+      }
+    },
+    {
+      "Name": "SlashSound",
+      "CustomType": "PlayAudioActionComponent",
+      "Custom": {
+        "Step": 3,
+        "TargetActor": "Player",
+        "Sound": "eSlash",
+        "Positional": true,
+        "WaitForCompletion": true
+      }
+    },
+    {
+      "Name": "HideTarget",
+      "CustomType": "SetActorActiveActionComponent",
+      "Custom": {
+        "Step": 4,
+        "TargetActor": "SE_TestObject",
+        "Active": false,
+        "WaitForCompletion": true
+      }
+    },
+    {
+      "Name": "ResumeSpin",
+      "CustomType": "SetComponentEnabledActionComponent",
+      "Custom": {
+        "Step": 4,
+        "TargetActor": "SE_Spinner",
+        "TargetComponent": "TestSpin",
+        "Enabled": true,
+        "WaitForCompletion": true
+      }
+    },
+    {
+      "Name": "ObserveResult",
+      "CustomType": "WaitActionComponent",
+      "Custom": {
+        "Step": 4,
+        "DurationInSeconds": 0.5,
+        "WaitForCompletion": true
+      }
+    },
+    {
+      "Name": "UnlockPlayer",
+      "CustomType": "UnlockControlActionComponent",
+      "Custom": {
+        "Step": 5,
+        "TargetActor": "Player",
+        "WaitForCompletion": true
+      }
+    }
+  ]
+}

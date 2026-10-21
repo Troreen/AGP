@@ -39,3 +39,7 @@ __pycache__/
 /Source/Engine/GraphicsEngine/Intermediate/
 
 p4ignore.txt
+
+# Local scripted-event session backups and probe output
+/.scratch/scripted-events/before-*/
+/.scratch/scripted-events/mcp-*.json

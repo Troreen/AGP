@@ -55,4 +55,3 @@ README.md
 .agents
 .scratch
 agents
-/Docs/
