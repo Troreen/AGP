@@ -1317,7 +1317,10 @@ void GraphicsEngine::RenderLines(GraphicsCommandList& inoutCommandList, const Fr
 			{
 				int remaining = vertCount - i;
 				int numVertsToDraw = CU::Math::Min(remaining, 2);
-				inoutCommandList.UpdateDynamicVertexBuffer(myLineBuffer, lines.data() + i, numVertsToDraw * sizeof(SimpleVertex));
+				if (!inoutCommandList.UpdateDynamicVertexBuffer(myLineBuffer, lines.data() + i, numVertsToDraw))
+				{
+					continue;
+				}
 				inoutCommandList.SetVertexBuffer(&myLineBuffer);
 				inoutCommandList.Draw(static_cast<unsigned>(numVertsToDraw));
 			}

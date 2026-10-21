@@ -71,14 +71,15 @@ project "Game"
 	defines { "_WINDOWS" }
 
 	prebuildcommands { 'xcopy /s /y "$(SolutionDir)Dependencies\\.dlls\\*.dll" "$(OutDir)"' }
-	-- Fix the old shader copy bug: Debug wrote into the separate repository Content
-	-- stream, while Release/Retail copied to Bin/<Configuration>/Shaders even though
-	-- Main.cpp loads Content beside Game.exe. Deploy only to the executable output.
+	-- Combine custom and engine shaders beside the executable. Copy engine sources
+	-- last so legacy engine files in Content cannot replace the current interfaces.
 	postbuildcommands {
 		'if not exist "$(SolutionDir)Content" (echo ERROR: Content stream is missing & exit /b 1)',
 		'if not exist "$(SolutionDir)Source\\Engine\\GraphicsEngine\\Shaders" (echo ERROR: Engine shaders are missing & exit /b 1)',
 		'if not exist "$(SolutionDir)Dependencies\\FMod\\Desktop\\Master.bank" (echo ERROR: FMOD Master.bank is missing & exit /b 1)',
 		'if not exist "$(SolutionDir)Dependencies\\FMod\\Desktop\\Master.strings.bank" (echo ERROR: FMOD Master.strings.bank is missing & exit /b 1)',
+		'robocopy "$(SolutionDir)Content\\Shaders" "$(OutDir)EngineShaders" *.hlsl *.hlsli /E /IS /IT /COPY:DT /DCOPY:DT /R:1 /W:1 /NFL /NDL /NJH /NJS',
+		'if errorlevel 8 exit /b 1',
 		'robocopy "$(SolutionDir)Source\\Engine\\GraphicsEngine\\Shaders" "$(OutDir)EngineShaders" /E /IS /IT /COPY:DT /DCOPY:DT /R:1 /W:1 /NFL /NDL /NJH /NJS',
 		'if errorlevel 8 exit /b 1',
 		'robocopy "$(SolutionDir)Dependencies\\FMod\\Desktop" "$(OutDir)Audio" *.bank /MIR /COPY:DT /DCOPY:DT /R:1 /W:1 /NFL /NDL /NJH /NJS',

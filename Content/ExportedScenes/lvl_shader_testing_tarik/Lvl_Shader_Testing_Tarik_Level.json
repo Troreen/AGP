@@ -1,9 +1,9 @@
 {
 	"MasterMaterials": [
 		{
-			"Name": "MM_Standard_WithSnow",
+			"Name": "MM_Blood",
 			"Domain": 0,
-			"ShadingModel": 1,
+			"ShadingModel": 0,
 			"BlendMode": 0,
 			"BaseColor": [
 				0.5,
@@ -12,45 +12,46 @@
 				1
 			],
 			"Metallic": 0,
-			"Roughness": 0.5,
+			"Roughness": 0,
 			"TwoSided": false,
 			"Parameters": [
 				{
-					"Name": "Snow Tiling",
-					"Type": 0,
-					"Value": 0.10000000149011612
-				},
-				{
-					"Name": "Noise intensity",
-					"Type": 0,
-					"Value": 0.69999998807907104
-				},
-				{
-					"Name": "AlbedoMap",
+					"Name": "MergedBloodNoiseChannels",
 					"Type": 3,
 					"Value":
 					{
-						"Name": "T_4M_MixedMedievalBricks_BaseColor",
-						"Path": "/Game/Textures/T_4M_MixedMedievalBricks_BaseColor.T_4M_MixedMedievalBricks_BaseColor",
-						"AssetImportPath": "C:/Users/egil.wendin/egil.wendin_P5G4/Content/Textures/T_4M_MixedMedievalBricks_BaseColor.png"
+						"Name": "MergedBloodNoiseChannels",
+						"Path": "/Game/Textures/ShaderTextures/T_M_Blood/MergedBloodNoiseChannels.MergedBloodNoiseChannels",
+						"AssetImportPath": "C:/Users/farraz.monnajemi/Documents/Assets/AlphaTextures/MergedBloodNoiseChannels.png"
 					}
 				},
 				{
-					"Name": "NormalMap",
+					"Name": "MergedDistortNoiseChannels",
 					"Type": 3,
 					"Value":
 					{
-						"Name": "T_4M_MixedMedievalBricks_Normal",
-						"Path": "/Game/Textures/T_4M_MixedMedievalBricks_Normal.T_4M_MixedMedievalBricks_Normal",
-						"AssetImportPath": "C:/Users/egil.wendin/egil.wendin_P5G4/Content/Textures/T_4M_MixedMedievalBricks_Normal.png"
+						"Name": "MergedDistortNoiseChannels",
+						"Path": "/Game/Textures/ShaderTextures/T_M_Blood/MergedDistortNoiseChannels.MergedDistortNoiseChannels",
+						"AssetImportPath": "C:/Users/farraz.monnajemi/Documents/Assets/AlphaTextures/MergedDistortNoiseChannels.png"
 					}
-				},
-				{
-					"Name": "Noise Size",
-					"Type": 0,
-					"Value": 4
 				}
 			]
+		},
+		{
+			"Name": "WorldGridMaterial",
+			"Domain": 0,
+			"ShadingModel": 1,
+			"BlendMode": 0,
+			"BaseColor": [
+				0.50196081399917603,
+				0.50196081399917603,
+				0.50196081399917603,
+				1
+			],
+			"Metallic": 0,
+			"Roughness": 0.42379999160766602,
+			"TwoSided": false,
+			"Parameters": []
 		}
 	],
 	"Actors": [
@@ -128,7 +129,7 @@
 				0,
 				670,
 				-200,
-				20,
+				130,
 				1
 			],
 			"Tags": [],
@@ -158,10 +159,69 @@
 					],
 					"Mesh": "SM_Debug_ShaderMesh_Sphere",
 					"ContentPath": "/Game/Meshes/Debug/SM_Debug_ShaderMesh_Sphere.SM_Debug_ShaderMesh_Sphere",
-					"AssetImportPath": "C:/P4V/G4/Content/Meshes/Debug/SM_Debug_ShaderMesh_Sphere.fbx",
+					"AssetImportPath": "C:/Users/tarik.bergstrom/Perforce/AGP-Content/Unreal/P5G4_KnightHeart/Content/Meshes/Debug/SM_Debug_ShaderMesh_Sphere.fbx",
 					"Materials": [
 						{
-							"Name": "MM_Standard_WithSnow",
+							"Name": "MM_Blood",
+							"Parent": "Self",
+							"Parameters": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "SM_Plane",
+			"Archetype": "StaticMeshActor",
+			"Transform": [
+				10,
+				0,
+				0,
+				0,
+				0,
+				10,
+				0,
+				0,
+				0,
+				0,
+				10,
+				0,
+				670,
+				-200,
+				0,
+				1
+			],
+			"Tags": [],
+			"Components": [
+				{
+					"Name": "StaticMeshComponent0",
+					"Parent": "",
+					"TypeID": 1,
+					"Tags": [],
+					"Transform": [
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						0,
+						1
+					],
+					"Mesh": "SM_Plane",
+					"ContentPath": "/Game/Meshes/Debug/SM_Plane.SM_Plane",
+					"AssetImportPath": "C:/Users/tarik.bergstrom/Perforce/AGP-Content/Unreal/P5G4_KnightHeart/Content/Meshes/Debug/SM_Plane.fbx",
+					"Materials": [
+						{
+							"Name": "WorldGridMaterial",
 							"Parent": "Self",
 							"Parameters": []
 						}
