@@ -25,3 +25,17 @@ Use the default role strings in [Docs/agents/triage-labels.md](Docs/agents/triag
 ### Domain docs
 
 One root `GLOSSARY.md` and `Docs/adr/`, created when needed. See [Docs/agents/domain.md](Docs/agents/domain.md).
+
+<!-- BEGIN TARIK AGP CONTEXT -->
+## Shared personal rules and version control
+
+Read [project version control](Docs/ProjectVersionControl.md) before Git/Perforce
+or cross-repository content work. Follow the shared global Codex rules installed
+on this device. Read [CODING_STANDARDS.md](CODING_STANDARDS.md), `.clang-format`
+and `.editorconfig` before editing code. Perforce submission always requires
+explicit user authorization for the identified scope; GitHub permission does not
+authorize it. Keep existing local workflow and subsystem guidance in effect.
+
+This navigation block and the version-control guide are maintained from
+AGP-Content. See its `Docs/AgentSetup.md` to refresh them across devices.
+<!-- END TARIK AGP CONTEXT -->
