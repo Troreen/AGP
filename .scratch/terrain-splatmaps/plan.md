@@ -1,8 +1,8 @@
 # Unreal terrain import: exploratory plan
 
-Status: needs-info
+Status: historical exploration; superseded by the current museum planning record.
 
-The current owner checklist and next-agent handoff is [Splat map MVP preparation](../../Docs/SplatmapMVPPlan.md). It supersedes this broader exploratory plan. The owner will gather missing inputs and hold another planning session before implementation decisions are finalized. Keep this file as research history.
+The current owner checklist and next-agent handoff is [Splat map MVP preparation](../../Docs/SplatmapMVPPlan.md). It supersedes this broader exploratory plan. Update 2026-10-22: AGP-Content and exporter source are now local; Unreal is downloading. The owner reports a teammate-authored museum splat terrain with three base-color/ORM/normal texture sets. Plan for all three layers and properties with noisy blend weights. The current museum JSON does not expose an identifiable three-layer splat material; verify the Unreal map and export path next. Keep the remaining text below as historical research, not current scope or environment status.
 
 This is an exploration under agp-feature, not an approved implementation specification. See [research](research.md) for sourced terrain concepts, [pipeline investigation](pipeline-investigation.md) for engine/exporter evidence, [export inventory](export-inventory.md) for concrete assets, and [workflow](workflow.md) for continuation state.
 
