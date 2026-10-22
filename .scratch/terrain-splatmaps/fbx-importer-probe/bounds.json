@@ -1,0 +1,29 @@
+﻿{
+    "coordinate_system":  "AGP",
+    "meshes":  {
+                   "SM_Plane":  {
+                                    "min":  [
+                                                -100,
+                                                0,
+                                                -100
+                                            ],
+                                    "max":  [
+                                                100,
+                                                0,
+                                                100
+                                            ]
+                                },
+                   "SM_Landscape_Splatmap":  {
+                                                 "min":  [
+                                                             -2800,
+                                                             0,
+                                                             -2800
+                                                         ],
+                                                 "max":  [
+                                                             2800,
+                                                             24.21875,
+                                                             2800
+                                                         ]
+                                             }
+               }
+}

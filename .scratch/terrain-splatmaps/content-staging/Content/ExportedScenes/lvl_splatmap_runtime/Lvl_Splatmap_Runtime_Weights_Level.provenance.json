@@ -1,0 +1,91 @@
+{
+  "source_scene": "Lvl_Splatmap_Testing_Level.json",
+  "source_scene_sha256": "6b5f7909251d8dffcac04c4df84f74e38a998f6233727f0855c22342da43c6a6",
+  "geometry_bounds_source": "bounds.json",
+  "geometry_bounds_sha256": "3cd7a35c0d23fd5e5bcd4fddd86ea1eac65f4bc5cf9661ef2d62fcc948e59c17",
+  "coordinate_mapping": "Unreal XY = AGP ZX; centimetres; row-vector component * actor transforms",
+  "mask_bounds_unreal_xy": [
+    -2800,
+    -2800,
+    2800,
+    2800
+  ],
+  "surface_origin_unreal_xy": [
+    -2800,
+    -2800
+  ],
+  "surface_repeat_cm": 800,
+  "noise_strength": 0,
+  "noise_patch_size_cm": 200,
+  "debug_mode": 1,
+  "geometry_coverage": [
+    {
+      "actor": "SM_Landscape_Splatmap",
+      "mesh": "SM_Landscape_Splatmap",
+      "world_agp_bounds": {
+        "min": [
+          -2800,
+          -30,
+          -2800
+        ],
+        "max": [
+          2800,
+          -5.78125,
+          2800
+        ]
+      },
+      "covered": true
+    },
+    {
+      "actor": "GroundFloater_Aligned",
+      "mesh": "SM_Plane",
+      "world_agp_bounds": {
+        "min": [
+          -400.0,
+          80,
+          -1400.0
+        ],
+        "max": [
+          400.0,
+          80,
+          -600.0
+        ]
+      },
+      "covered": true
+    },
+    {
+      "actor": "GroundFloater_Rotated45",
+      "mesh": "SM_Plane",
+      "world_agp_bounds": {
+        "min": [
+          -565.685424949238,
+          80,
+          434.31457505076196
+        ],
+        "max": [
+          565.685424949238,
+          80,
+          1565.685424949238
+        ]
+      },
+      "covered": true
+    }
+  ],
+  "camera": {
+    "unreal_position": [
+      0,
+      -3500,
+      3200
+    ],
+    "target_unreal": [
+      0,
+      0,
+      0
+    ],
+    "horizontal_fov": 90
+  },
+  "limitations": [
+    "AABB coverage verifies bounds, not mask image registration or visible appearance.",
+    "Floaters are elevated inspection fixtures; matching terrain height remains a visual check."
+  ]
+}

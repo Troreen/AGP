@@ -1,0 +1,31 @@
+{
+  "mesh": "/Temp/SplatmapInvestigation/UVCorrectedYawMinus90_20261022/SM_SplatmapAudit_UVCorrected_YawMinus90.SM_SplatmapAudit_UVCorrected_YawMinus90",
+  "landscape": "/Game/Levels/Test_Levels/SP/Lvl_Splatmap_Testing.Lvl_Splatmap_Testing:PersistentLevel.Landscape_0",
+  "layers_rgb": [
+    "Snow_Dunes",
+    "Snow_Rough",
+    "Snow_Cliff"
+  ],
+  "bounds_unreal_xy_cm": [
+    -2800,
+    -2800,
+    2800,
+    2800
+  ],
+  "resolution": 512,
+  "mask_u": [
+    0.00017857142857142857,
+    0,
+    0,
+    0.5
+  ],
+  "mask_v": [
+    0,
+    0.00017857142857142857,
+    0,
+    0.5
+  ],
+  "pixel_centres": "min + (pixel + 0.5) * extent / resolution",
+  "save_source_assets": false,
+  "normal_note": "Final world-projected shading requires runtime visual verification"
+}

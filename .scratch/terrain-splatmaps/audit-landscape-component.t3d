@@ -1,0 +1,26 @@
+Begin Object Class=/Script/Landscape.LandscapeComponent Name="LandscapeComponent_0" ExportPath="/Script/Landscape.LandscapeComponent'/Game/Levels/Test_Levels/SP/Lvl_Splatmap_Testing.Lvl_Splatmap_Testing:PersistentLevel.Landscape_0.LandscapeComponent_0'"
+   ComponentSizeQuads=7
+   SubsectionSizeQuads=7
+   NumSubsections=1
+   MaterialInstances(0)="/Script/Landscape.LandscapeMaterialInstanceConstant'Lvl_Splatmap_Testing:PersistentLevel.Landscape_0.LandscapeMaterialInstanceConstant_132'"
+   LODIndexToMaterialIndex(1)=0
+   LODIndexToMaterialIndex(2)=0
+   WeightmapScaleBias=(X=0.125000,Y=0.125000,Z=0.062500,W=0.062500)
+   WeightmapSubsectionOffset=1.000000
+   HeightmapScaleBias=(X=0.015625,Y=0.015625,Z=0.000000,W=0.000000)
+   CachedLocalBox=(Min=(X=0.000000,Y=0.000000,Z=-1.000000),Max=(X=7.000000,Y=7.000000,Z=1.000000),IsValid=True)
+   MipToMipMaxDeltas(0)=0.000000
+   MipToMipMaxDeltas(1)=0.000000
+   MipToMipMaxDeltas(2)=0.000000
+   CollisionComponentRef="/Script/Landscape.LandscapeHeightfieldCollisionComponent'Lvl_Splatmap_Testing:PersistentLevel.Landscape_0.LandscapeHeightfieldCollisionComponent_0'"
+   LayersData=((98F9590742099CD5A35AF1B37BE40912, (DebugName="Layer",HeightmapData=(Texture="/Script/Engine.Texture2D'Lvl_Splatmap_Testing:PersistentLevel.Landscape_0.Heightmap_1'"),WeightmapData=(Textures=("/Script/Engine.Texture2D'Lvl_Splatmap_Testing:PersistentLevel.Landscape_0.Weightmap_18'"),LayerAllocations=((LayerInfo="/Script/Landscape.LandscapeLayerInfoObject'/Game/Levels/Test_Levels/SP/Lvl_Splatmap_Testing_sharedassets/Snow_Dunes_LayerInfo.Snow_Dunes_LayerInfo'",WeightmapTextureChannel=2))))))
+   HeightmapTexture="/Script/Engine.Texture2D'Lvl_Splatmap_Testing:PersistentLevel.Landscape_0.Heightmap_0'"
+   WeightmapLayerAllocations(0)=(LayerInfo="/Script/Landscape.LandscapeLayerInfoObject'/Game/Levels/Test_Levels/SP/Lvl_Splatmap_Testing_sharedassets/Snow_Dunes_LayerInfo.Snow_Dunes_LayerInfo'")
+   WeightmapTextures(0)="/Script/Engine.Texture2D'Lvl_Splatmap_Testing:PersistentLevel.Landscape_0.Weightmap_11'"
+   MapBuildDataId=D6D1F0184F565179F40D21B3FA9E2866
+   PhysicalMaterialHash=3744488066
+   MobileWeightmapLayerAllocations(0)=(LayerInfo="/Script/Landscape.LandscapeLayerInfoObject'/Game/Levels/Test_Levels/SP/Lvl_Splatmap_Testing_sharedassets/Snow_Dunes_LayerInfo.Snow_Dunes_LayerInfo'")
+   CastShadow=True
+   bCastFarShadow=True
+   AttachParent="RootComponent0"
+End Object

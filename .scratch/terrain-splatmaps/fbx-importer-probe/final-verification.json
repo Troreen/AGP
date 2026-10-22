@@ -1,0 +1,26 @@
+{
+  "vertices_checked": 3249,
+  "indices": 18816,
+  "all_errors_below_1e_minus6": true,
+  "maximum_absolute_errors": {
+    "geometry": 9.09494702e-13,
+    "uv0_formula": 1.0658141036401503e-14,
+    "uv1_formula": 4.228070171752307e-08,
+    "uv0_v_reflection_removed": 0
+  },
+  "runtime_uv0_formula": [
+    "(2800-AGP.X)/100",
+    "(AGP.Z+2800)/100"
+  ],
+  "runtime_uv1_formula": [
+    "(2800-AGP.X)/5700",
+    "(AGP.Z+2800)/5700"
+  ],
+  "normal_length_range": [
+    0.9999999700129725,
+    1.000000029404078
+  ],
+  "import_yaw_preserved": -90,
+  "runtime_export_force_front_x_axis": true,
+  "note": "World-projected surface/mask coordinates are independent of mesh UVs."
+}

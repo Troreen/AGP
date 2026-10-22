@@ -316,10 +316,22 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 	if (materialBufferSource)
 	{
 		const RHIShaderReflectionInfo::ConstantBufferInfo& info = materialBufferSource->ConstantBuffers[materialBufferSource->ConstantBufferNameToIndex.at(materialBufferName)];
+		if (info.Size > Material::MATERIAL_BUFFER_SIZE)
+		{
+			GELOG(Error, "Material '{}' constant buffer requires {} bytes; the supported limit is {}.", aDescription.Name, info.Size, Material::MATERIAL_BUFFER_SIZE);
+			return false;
+		}
 
 		for (size_t i = 0; i < info.Members.size(); ++i)
 		{
 			const auto& member = info.Members[i];
+			if (member.Offset > Material::MATERIAL_BUFFER_SIZE || member.Size > Material::MATERIAL_BUFFER_SIZE - member.Offset ||
+				member.Size > sizeof(member.Default))
+			{
+				GELOG(Error, "Material '{}' parameter '{}' exceeds material parameter storage.", aDescription.Name, member.Name);
+				return false;
+			}
+
 			MaterialParameterInfo param;
 			param.Name = member.Name;
 			param.Type = MaterialHelpers::HLSLTypeToMaterialParameterType(member.Type);

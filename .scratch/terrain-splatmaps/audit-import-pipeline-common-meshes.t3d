@@ -1,0 +1,5 @@
+Begin Object Class=/Script/InterchangePipelines.InterchangeGenericCommonMeshesProperties Name="InterchangeGenericCommonMeshesProperties_0" ExportPath="/Script/InterchangePipelines.InterchangeGenericCommonMeshesProperties'/Engine/Transient.InterchangeGenericAssetsPipeline_0:InterchangeGenericCommonMeshesProperties_0'"
+   VertexColorImportOption=IVCIO_Override
+   VertexOverrideColor=(B=0,G=0,R=0,A=255)
+   bComputeWeightedNormals=True
+End Object

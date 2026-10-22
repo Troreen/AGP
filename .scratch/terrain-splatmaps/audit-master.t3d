@@ -1,0 +1,273 @@
+Begin Object Class=/Script/Engine.Material Name="MM_Landscape" ExportPath="/Script/Engine.Material'/Game/Materials/MM_Landscape.MM_Landscape'"
+   Begin Object Class=/Script/Engine.MaterialExpressionTextureObject Name="MaterialExpressionTextureObject_8" ExportPath="/Script/Engine.MaterialExpressionTextureObject'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionTextureObject_8'"
+   End Object
+   Begin Object Class=/Script/Engine.MaterialExpressionTextureObject Name="MaterialExpressionTextureObject_7" ExportPath="/Script/Engine.MaterialExpressionTextureObject'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionTextureObject_7'"
+   End Object
+   Begin Object Class=/Script/Engine.MaterialExpressionTextureObject Name="MaterialExpressionTextureObject_6" ExportPath="/Script/Engine.MaterialExpressionTextureObject'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionTextureObject_6'"
+   End Object
+   Begin Object Class=/Script/Engine.MaterialExpressionTextureObject Name="MaterialExpressionTextureObject_5" ExportPath="/Script/Engine.MaterialExpressionTextureObject'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionTextureObject_5'"
+   End Object
+   Begin Object Class=/Script/Engine.MaterialExpressionTextureObject Name="MaterialExpressionTextureObject_4" ExportPath="/Script/Engine.MaterialExpressionTextureObject'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionTextureObject_4'"
+   End Object
+   Begin Object Class=/Script/Engine.MaterialExpressionTextureObject Name="MaterialExpressionTextureObject_3" ExportPath="/Script/Engine.MaterialExpressionTextureObject'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionTextureObject_3'"
+   End Object
+   Begin Object Class=/Script/Engine.MaterialExpressionTextureObject Name="MaterialExpressionTextureObject_2" ExportPath="/Script/Engine.MaterialExpressionTextureObject'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionTextureObject_2'"
+   End Object
+   Begin Object Class=/Script/Engine.MaterialExpressionTextureObject Name="MaterialExpressionTextureObject_1" ExportPath="/Script/Engine.MaterialExpressionTextureObject'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionTextureObject_1'"
+   End Object
+   Begin Object Class=/Script/Engine.MaterialExpressionTextureObject Name="MaterialExpressionTextureObject_0" ExportPath="/Script/Engine.MaterialExpressionTextureObject'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionTextureObject_0'"
+   End Object
+   Begin Object Class=/Script/Engine.MaterialExpressionScalarParameter Name="MaterialExpressionScalarParameter_0" ExportPath="/Script/Engine.MaterialExpressionScalarParameter'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionScalarParameter_0'"
+   End Object
+   Begin Object Class=/Script/Engine.MaterialExpressionMaterialFunctionCall Name="MaterialExpressionMaterialFunctionCall_2" ExportPath="/Script/Engine.MaterialExpressionMaterialFunctionCall'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionMaterialFunctionCall_2'"
+   End Object
+   Begin Object Class=/Script/Engine.MaterialExpressionMaterialFunctionCall Name="MaterialExpressionMaterialFunctionCall_1" ExportPath="/Script/Engine.MaterialExpressionMaterialFunctionCall'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionMaterialFunctionCall_1'"
+   End Object
+   Begin Object Class=/Script/Engine.MaterialExpressionMaterialFunctionCall Name="MaterialExpressionMaterialFunctionCall_0" ExportPath="/Script/Engine.MaterialExpressionMaterialFunctionCall'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionMaterialFunctionCall_0'"
+   End Object
+   Begin Object Class=/Script/Engine.MaterialExpressionMakeMaterialAttributes Name="MaterialExpressionMakeMaterialAttributes_4" ExportPath="/Script/Engine.MaterialExpressionMakeMaterialAttributes'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionMakeMaterialAttributes_4'"
+   End Object
+   Begin Object Class=/Script/Engine.MaterialExpressionMakeMaterialAttributes Name="MaterialExpressionMakeMaterialAttributes_3" ExportPath="/Script/Engine.MaterialExpressionMakeMaterialAttributes'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionMakeMaterialAttributes_3'"
+   End Object
+   Begin Object Class=/Script/Engine.MaterialExpressionMakeMaterialAttributes Name="MaterialExpressionMakeMaterialAttributes_2" ExportPath="/Script/Engine.MaterialExpressionMakeMaterialAttributes'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionMakeMaterialAttributes_2'"
+   End Object
+   Begin Object Class=/Script/Landscape.MaterialExpressionLandscapeLayerBlend Name="MaterialExpressionLandscapeLayerBlend_0" ExportPath="/Script/Landscape.MaterialExpressionLandscapeLayerBlend'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionLandscapeLayerBlend_0'"
+   End Object
+   Begin Object Class=/Script/Engine.MaterialExpressionConstant3Vector Name="MaterialExpressionConstant3Vector_2" ExportPath="/Script/Engine.MaterialExpressionConstant3Vector'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionConstant3Vector_2'"
+   End Object
+   Begin Object Class=/Script/Engine.MaterialExpressionConstant3Vector Name="MaterialExpressionConstant3Vector_1" ExportPath="/Script/Engine.MaterialExpressionConstant3Vector'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionConstant3Vector_1'"
+   End Object
+   Begin Object Class=/Script/Engine.MaterialExpressionConstant3Vector Name="MaterialExpressionConstant3Vector_0" ExportPath="/Script/Engine.MaterialExpressionConstant3Vector'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionConstant3Vector_0'"
+   End Object
+   Begin Object Class=/Script/Engine.MaterialExpressionBlendMaterialAttributes Name="MaterialExpressionBlendMaterialAttributes_2" ExportPath="/Script/Engine.MaterialExpressionBlendMaterialAttributes'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionBlendMaterialAttributes_2'"
+   End Object
+   Begin Object Class=/Script/Engine.MaterialExpressionBlendMaterialAttributes Name="MaterialExpressionBlendMaterialAttributes_1" ExportPath="/Script/Engine.MaterialExpressionBlendMaterialAttributes'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionBlendMaterialAttributes_1'"
+   End Object
+   Begin Object Class=/Script/Engine.MaterialExpressionBlendMaterialAttributes Name="MaterialExpressionBlendMaterialAttributes_0" ExportPath="/Script/Engine.MaterialExpressionBlendMaterialAttributes'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionBlendMaterialAttributes_0'"
+   End Object
+   Begin Object Class=/Script/Engine.MaterialEditorOnlyData Name="MM_LandscapeEditorOnlyData" ExportPath="/Script/Engine.MaterialEditorOnlyData'/Game/Materials/MM_Landscape.MM_Landscape:MM_LandscapeEditorOnlyData'"
+   End Object
+   Begin Object Name="MaterialExpressionTextureObject_8" ExportPath="/Script/Engine.MaterialExpressionTextureObject'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionTextureObject_8'"
+      Texture="/Script/Engine.Texture2D'/Game/Textures/T_8M_Snow_Rough_OcclusionRoughnessMetallic.T_8M_Snow_Rough_OcclusionRoughnessMetallic'"
+      MaterialExpressionEditorX=-2144
+      MaterialExpressionEditorY=-368
+      MaterialExpressionGuid=F30B8B4A41F83D45C63C6CB4A7287617
+      Material="/Script/Engine.Material'MM_Landscape'"
+   End Object
+   Begin Object Name="MaterialExpressionTextureObject_7" ExportPath="/Script/Engine.MaterialExpressionTextureObject'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionTextureObject_7'"
+      Texture="/Script/Engine.Texture2D'/Game/Textures/T_8M_Snow_Rough_Normal.T_8M_Snow_Rough_Normal'"
+      SamplerType=SAMPLERTYPE_Normal
+      MaterialExpressionEditorX=-2144
+      MaterialExpressionEditorY=-208
+      MaterialExpressionGuid=3CE6547844979BF872D346840D3A22C6
+      Material="/Script/Engine.Material'MM_Landscape'"
+   End Object
+   Begin Object Name="MaterialExpressionTextureObject_6" ExportPath="/Script/Engine.MaterialExpressionTextureObject'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionTextureObject_6'"
+      Texture="/Script/Engine.Texture2D'/Game/Textures/T_8M_Snow_Rough_BaseColor.T_8M_Snow_Rough_BaseColor'"
+      MaterialExpressionEditorX=-2144
+      MaterialExpressionEditorY=-528
+      MaterialExpressionGuid=870FF350427820D62AE4D68A5C900D11
+      Material="/Script/Engine.Material'MM_Landscape'"
+   End Object
+   Begin Object Name="MaterialExpressionTextureObject_5" ExportPath="/Script/Engine.MaterialExpressionTextureObject'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionTextureObject_5'"
+      Texture="/Script/Engine.Texture2D'/Game/Textures/T_8M_Snow_Dunes_OcclusionRoughnessMetallic.T_8M_Snow_Dunes_OcclusionRoughnessMetallic'"
+      MaterialExpressionEditorX=-2560
+      MaterialExpressionEditorY=-1168
+      MaterialExpressionGuid=5FDE883B4FF6174073901D8CD3AC7AA3
+      Material="/Script/Engine.Material'MM_Landscape'"
+   End Object
+   Begin Object Name="MaterialExpressionTextureObject_4" ExportPath="/Script/Engine.MaterialExpressionTextureObject'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionTextureObject_4'"
+      Texture="/Script/Engine.Texture2D'/Game/Textures/T_8M_Snow_Dunes_Normal.T_8M_Snow_Dunes_Normal'"
+      SamplerType=SAMPLERTYPE_Normal
+      MaterialExpressionEditorX=-2560
+      MaterialExpressionEditorY=-992
+      MaterialExpressionGuid=5201E059457FDE91AB466B81F5EC5378
+      Material="/Script/Engine.Material'MM_Landscape'"
+   End Object
+   Begin Object Name="MaterialExpressionTextureObject_3" ExportPath="/Script/Engine.MaterialExpressionTextureObject'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionTextureObject_3'"
+      Texture="/Script/Engine.Texture2D'/Game/Textures/T_8M_Snow_Dunes_BaseColor.T_8M_Snow_Dunes_BaseColor'"
+      MaterialExpressionEditorX=-2560
+      MaterialExpressionEditorY=-1328
+      MaterialExpressionGuid=F275F58946DAB3E03FB50B997960ED39
+      Material="/Script/Engine.Material'MM_Landscape'"
+   End Object
+   Begin Object Name="MaterialExpressionTextureObject_2" ExportPath="/Script/Engine.MaterialExpressionTextureObject'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionTextureObject_2'"
+      Texture="/Script/Engine.Texture2D'/Game/Textures/T_8M_Snow_Cliff_OcclusionRoughnessMetallic.T_8M_Snow_Cliff_OcclusionRoughnessMetallic'"
+      MaterialExpressionEditorX=-1856
+      MaterialExpressionEditorY=1008
+      MaterialExpressionGuid=3AA7E17B43E134D8A72E23BACA6127AD
+      Material="/Script/Engine.Material'MM_Landscape'"
+   End Object
+   Begin Object Name="MaterialExpressionTextureObject_1" ExportPath="/Script/Engine.MaterialExpressionTextureObject'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionTextureObject_1'"
+      Texture="/Script/Engine.Texture2D'/Game/Textures/T_8M_Snow_Cliff_Normal.T_8M_Snow_Cliff_Normal'"
+      SamplerType=SAMPLERTYPE_Normal
+      MaterialExpressionEditorX=-1856
+      MaterialExpressionEditorY=1168
+      MaterialExpressionGuid=C8E17EBE4F3B688E06AA0B85D5C4F0DA
+      Material="/Script/Engine.Material'MM_Landscape'"
+   End Object
+   Begin Object Name="MaterialExpressionTextureObject_0" ExportPath="/Script/Engine.MaterialExpressionTextureObject'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionTextureObject_0'"
+      Texture="/Script/Engine.Texture2D'/Game/Textures/T_8M_Snow_Cliff_BaseColor.T_8M_Snow_Cliff_BaseColor'"
+      MaterialExpressionEditorX=-1856
+      MaterialExpressionEditorY=848
+      MaterialExpressionGuid=450080C740ED118CDC8FFB8D64A8C80D
+      Material="/Script/Engine.Material'MM_Landscape'"
+   End Object
+   Begin Object Name="MaterialExpressionScalarParameter_0" ExportPath="/Script/Engine.MaterialExpressionScalarParameter'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionScalarParameter_0'"
+      SliderMax=1.000000
+      ParameterName="DEBUG"
+      ExpressionGUID=7E8EDF4E4187401999C532A5ED0AE5F4
+      MaterialExpressionEditorX=-1568
+      MaterialExpressionEditorY=-272
+      MaterialExpressionGuid=9281A7844E7E17FC2CD217ACC26E27C0
+      Material="/Script/Engine.Material'MM_Landscape'"
+   End Object
+   Begin Object Name="MaterialExpressionMaterialFunctionCall_2" ExportPath="/Script/Engine.MaterialExpressionMaterialFunctionCall'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionMaterialFunctionCall_2'"
+      MaterialFunction="/Script/Engine.MaterialFunction'/Game/Materials/MF_LandscapeLayer.MF_LandscapeLayer'"
+      FunctionInputs(0)=(ExpressionInputId=5457420F46F6F4A2636286B2F5335138,Input=(Expression="/Script/Engine.MaterialExpressionTextureObject'MM_Landscape:MaterialExpressionTextureObject_0'",InputName="BaseColor"))
+      FunctionInputs(1)=(ExpressionInputId=7BBA8AF2456B09004517F48C5F3C17AF,Input=(Expression="/Script/Engine.MaterialExpressionTextureObject'MM_Landscape:MaterialExpressionTextureObject_2'",InputName="ORM"))
+      FunctionInputs(2)=(ExpressionInputId=2095E8BB40A03EE696ECBCADE0CB5330,Input=(Expression="/Script/Engine.MaterialExpressionTextureObject'MM_Landscape:MaterialExpressionTextureObject_1'",InputName="Normal"))
+      FunctionOutputs(0)=(ExpressionOutputId=2FDC1F3F49021BCAE4CD68A3C8BD6EED,Output=(OutputName="MaterialAttributes"))
+      MaterialExpressionEditorX=-1136
+      MaterialExpressionEditorY=576
+      MaterialExpressionGuid=E975E7214C71DBBF296D628B5BD76635
+      Material="/Script/Engine.Material'MM_Landscape'"
+      Outputs(0)=(OutputName="MaterialAttributes")
+   End Object
+   Begin Object Name="MaterialExpressionMaterialFunctionCall_1" ExportPath="/Script/Engine.MaterialExpressionMaterialFunctionCall'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionMaterialFunctionCall_1'"
+      MaterialFunction="/Script/Engine.MaterialFunction'/Game/Materials/MF_LandscapeLayer.MF_LandscapeLayer'"
+      FunctionInputs(0)=(ExpressionInputId=5457420F46F6F4A2636286B2F5335138,Input=(Expression="/Script/Engine.MaterialExpressionTextureObject'MM_Landscape:MaterialExpressionTextureObject_6'",InputName="BaseColor"))
+      FunctionInputs(1)=(ExpressionInputId=7BBA8AF2456B09004517F48C5F3C17AF,Input=(Expression="/Script/Engine.MaterialExpressionTextureObject'MM_Landscape:MaterialExpressionTextureObject_8'",InputName="ORM"))
+      FunctionInputs(2)=(ExpressionInputId=2095E8BB40A03EE696ECBCADE0CB5330,Input=(Expression="/Script/Engine.MaterialExpressionTextureObject'MM_Landscape:MaterialExpressionTextureObject_7'",InputName="Normal"))
+      FunctionOutputs(0)=(ExpressionOutputId=2FDC1F3F49021BCAE4CD68A3C8BD6EED,Output=(OutputName="MaterialAttributes"))
+      MaterialExpressionEditorX=-1664
+      MaterialExpressionEditorY=-528
+      MaterialExpressionGuid=881A9D7A471358A513730CB18E9BAEA8
+      Material="/Script/Engine.Material'MM_Landscape'"
+      Outputs(0)=(OutputName="MaterialAttributes")
+   End Object
+   Begin Object Name="MaterialExpressionMaterialFunctionCall_0" ExportPath="/Script/Engine.MaterialExpressionMaterialFunctionCall'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionMaterialFunctionCall_0'"
+      MaterialFunction="/Script/Engine.MaterialFunction'/Game/Materials/MF_LandscapeLayer.MF_LandscapeLayer'"
+      FunctionInputs(0)=(ExpressionInputId=5457420F46F6F4A2636286B2F5335138,Input=(Expression="/Script/Engine.MaterialExpressionTextureObject'MM_Landscape:MaterialExpressionTextureObject_3'",InputName="BaseColor"))
+      FunctionInputs(1)=(ExpressionInputId=7BBA8AF2456B09004517F48C5F3C17AF,Input=(Expression="/Script/Engine.MaterialExpressionTextureObject'MM_Landscape:MaterialExpressionTextureObject_5'",InputName="ORM"))
+      FunctionInputs(2)=(ExpressionInputId=2095E8BB40A03EE696ECBCADE0CB5330,Input=(Expression="/Script/Engine.MaterialExpressionTextureObject'MM_Landscape:MaterialExpressionTextureObject_4'",InputName="Normal"))
+      FunctionOutputs(0)=(ExpressionOutputId=2FDC1F3F49021BCAE4CD68A3C8BD6EED,Output=(OutputName="MaterialAttributes"))
+      MaterialExpressionEditorX=-2048
+      MaterialExpressionEditorY=-1328
+      MaterialExpressionGuid=333AB3D648DB9CFE5476CAA660553B19
+      Material="/Script/Engine.Material'MM_Landscape'"
+      Outputs(0)=(OutputName="MaterialAttributes")
+   End Object
+   Begin Object Name="MaterialExpressionMakeMaterialAttributes_4" ExportPath="/Script/Engine.MaterialExpressionMakeMaterialAttributes'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionMakeMaterialAttributes_4'"
+      BaseColor=(Expression="/Script/Engine.MaterialExpressionConstant3Vector'MM_Landscape:MaterialExpressionConstant3Vector_2'",Mask=1,MaskR=1,MaskG=1,MaskB=1)
+      MaterialExpressionEditorX=-1728
+      MaterialExpressionEditorY=-16
+      MaterialExpressionGuid=AC62FD7A4537CB90B0A9BEAE9B4013BD
+      Material="/Script/Engine.Material'MM_Landscape'"
+   End Object
+   Begin Object Name="MaterialExpressionMakeMaterialAttributes_3" ExportPath="/Script/Engine.MaterialExpressionMakeMaterialAttributes'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionMakeMaterialAttributes_3'"
+      BaseColor=(Expression="/Script/Engine.MaterialExpressionConstant3Vector'MM_Landscape:MaterialExpressionConstant3Vector_1'",Mask=1,MaskR=1,MaskG=1,MaskB=1)
+      MaterialExpressionEditorX=-1808
+      MaterialExpressionEditorY=-1024
+      MaterialExpressionGuid=B1144DAA4C72769332EA30A8F8C46272
+      Material="/Script/Engine.Material'MM_Landscape'"
+   End Object
+   Begin Object Name="MaterialExpressionMakeMaterialAttributes_2" ExportPath="/Script/Engine.MaterialExpressionMakeMaterialAttributes'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionMakeMaterialAttributes_2'"
+      BaseColor=(Expression="/Script/Engine.MaterialExpressionConstant3Vector'MM_Landscape:MaterialExpressionConstant3Vector_0'",Mask=1,MaskR=1,MaskG=1,MaskB=1)
+      MaterialExpressionEditorX=-1472
+      MaterialExpressionEditorY=-1792
+      MaterialExpressionGuid=25A5E6F84B2962827B91FBA74968939F
+      Material="/Script/Engine.Material'MM_Landscape'"
+   End Object
+   Begin Object Name="MaterialExpressionLandscapeLayerBlend_0" ExportPath="/Script/Landscape.MaterialExpressionLandscapeLayerBlend'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionLandscapeLayerBlend_0'"
+      Layers(0)=(LayerName="Snow_Dunes",BlendType=LB_AlphaBlend,LayerInput=(Expression="/Script/Engine.MaterialExpressionBlendMaterialAttributes'MM_Landscape:MaterialExpressionBlendMaterialAttributes_0'"))
+      Layers(1)=(LayerName="Snow_Rough",BlendType=LB_AlphaBlend,LayerInput=(Expression="/Script/Engine.MaterialExpressionBlendMaterialAttributes'MM_Landscape:MaterialExpressionBlendMaterialAttributes_1'"))
+      Layers(2)=(LayerName="Snow_Cliff",BlendType=LB_AlphaBlend,LayerInput=(Expression="/Script/Engine.MaterialExpressionBlendMaterialAttributes'MM_Landscape:MaterialExpressionBlendMaterialAttributes_2'"))
+      MaterialExpressionEditorX=-272
+      MaterialExpressionEditorY=-80
+      MaterialExpressionGuid=575D45D649EB463E6A3549852C07E569
+      Material="/Script/Engine.Material'MM_Landscape'"
+   End Object
+   Begin Object Name="MaterialExpressionConstant3Vector_2" ExportPath="/Script/Engine.MaterialExpressionConstant3Vector'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionConstant3Vector_2'"
+      Constant=(R=0.000000,G=0.000000,B=1.000000,A=0.000000)
+      MaterialExpressionEditorX=-2224
+      MaterialExpressionEditorY=96
+      MaterialExpressionGuid=DFC967A94C75AEBE9025AFADE71598C7
+      Material="/Script/Engine.Material'MM_Landscape'"
+   End Object
+   Begin Object Name="MaterialExpressionConstant3Vector_1" ExportPath="/Script/Engine.MaterialExpressionConstant3Vector'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionConstant3Vector_1'"
+      Constant=(R=0.000000,G=1.000000,B=0.000000,A=0.000000)
+      MaterialExpressionEditorX=-2304
+      MaterialExpressionEditorY=-912
+      MaterialExpressionGuid=1A3EC291422624827223F59E5672E1A2
+      Material="/Script/Engine.Material'MM_Landscape'"
+   End Object
+   Begin Object Name="MaterialExpressionConstant3Vector_0" ExportPath="/Script/Engine.MaterialExpressionConstant3Vector'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionConstant3Vector_0'"
+      Constant=(R=1.000000,G=0.000000,B=0.000000,A=0.000000)
+      MaterialExpressionEditorX=-1968
+      MaterialExpressionEditorY=-1680
+      MaterialExpressionGuid=E338BC824DB6FE0DFD72C5B00B189FEA
+      Material="/Script/Engine.Material'MM_Landscape'"
+   End Object
+   Begin Object Name="MaterialExpressionBlendMaterialAttributes_2" ExportPath="/Script/Engine.MaterialExpressionBlendMaterialAttributes'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionBlendMaterialAttributes_2'"
+      A=(Expression="/Script/Engine.MaterialExpressionMaterialFunctionCall'MM_Landscape:MaterialExpressionMaterialFunctionCall_2'")
+      B=(Expression="/Script/Engine.MaterialExpressionMakeMaterialAttributes'MM_Landscape:MaterialExpressionMakeMaterialAttributes_4'")
+      Alpha=(Expression="/Script/Engine.MaterialExpressionScalarParameter'MM_Landscape:MaterialExpressionScalarParameter_0'")
+      MaterialExpressionEditorX=-720
+      MaterialExpressionEditorY=80
+      MaterialExpressionGuid=AA11BBC6459CE1AD367541823FD7F1D5
+      Material="/Script/Engine.Material'MM_Landscape'"
+   End Object
+   Begin Object Name="MaterialExpressionBlendMaterialAttributes_1" ExportPath="/Script/Engine.MaterialExpressionBlendMaterialAttributes'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionBlendMaterialAttributes_1'"
+      A=(Expression="/Script/Engine.MaterialExpressionMaterialFunctionCall'MM_Landscape:MaterialExpressionMaterialFunctionCall_1'")
+      B=(Expression="/Script/Engine.MaterialExpressionMakeMaterialAttributes'MM_Landscape:MaterialExpressionMakeMaterialAttributes_3'")
+      Alpha=(Expression="/Script/Engine.MaterialExpressionScalarParameter'MM_Landscape:MaterialExpressionScalarParameter_0'")
+      MaterialExpressionEditorX=-720
+      MaterialExpressionEditorY=-480
+      MaterialExpressionGuid=510CC30D47272E7AB3543881095F38FF
+      Material="/Script/Engine.Material'MM_Landscape'"
+   End Object
+   Begin Object Name="MaterialExpressionBlendMaterialAttributes_0" ExportPath="/Script/Engine.MaterialExpressionBlendMaterialAttributes'/Game/Materials/MM_Landscape.MM_Landscape:MaterialExpressionBlendMaterialAttributes_0'"
+      A=(Expression="/Script/Engine.MaterialExpressionMaterialFunctionCall'MM_Landscape:MaterialExpressionMaterialFunctionCall_0'")
+      B=(Expression="/Script/Engine.MaterialExpressionMakeMaterialAttributes'MM_Landscape:MaterialExpressionMakeMaterialAttributes_2'")
+      Alpha=(Expression="/Script/Engine.MaterialExpressionScalarParameter'MM_Landscape:MaterialExpressionScalarParameter_0'")
+      MaterialExpressionEditorX=-960
+      MaterialExpressionEditorY=-1072
+      MaterialExpressionGuid=F1A8EEB94B9B3BEABA2AC5A62A41E52E
+      Material="/Script/Engine.Material'MM_Landscape'"
+   End Object
+   Begin Object Name="MM_LandscapeEditorOnlyData" ExportPath="/Script/Engine.MaterialEditorOnlyData'/Game/Materials/MM_Landscape.MM_Landscape:MM_LandscapeEditorOnlyData'"
+      BaseColor=(UseConstant=True)
+      Metallic=(UseConstant=True)
+      Specular=(UseConstant=True)
+      Roughness=(UseConstant=True)
+      Normal=(UseConstant=True)
+      Tangent=(UseConstant=True)
+      EmissiveColor=(UseConstant=True)
+      Opacity=(UseConstant=True)
+      OpacityMask=(UseConstant=True)
+      SubsurfaceColor=(UseConstant=True)
+      ClearCoat=(UseConstant=True)
+      ClearCoatRoughness=(UseConstant=True)
+      AmbientOcclusion=(UseConstant=True)
+      Refraction=(UseConstant=True)
+      CustomizedUVs(0)=(UseConstant=True)
+      CustomizedUVs(1)=(UseConstant=True)
+      CustomizedUVs(2)=(UseConstant=True)
+      CustomizedUVs(3)=(UseConstant=True)
+      CustomizedUVs(4)=(UseConstant=True)
+      CustomizedUVs(5)=(UseConstant=True)
+      CustomizedUVs(6)=(UseConstant=True)
+      CustomizedUVs(7)=(UseConstant=True)
+      MaterialAttributes=(Expression="/Script/Landscape.MaterialExpressionLandscapeLayerBlend'MM_Landscape:MaterialExpressionLandscapeLayerBlend_0'")
+      SurfaceThickness=(UseConstant=True)
+      ExpressionCollection=(Expressions=("/Script/Landscape.MaterialExpressionLandscapeLayerBlend'MM_Landscape:MaterialExpressionLandscapeLayerBlend_0'","/Script/Engine.MaterialExpressionMaterialFunctionCall'MM_Landscape:MaterialExpressionMaterialFunctionCall_0'","/Script/Engine.MaterialExpressionMaterialFunctionCall'MM_Landscape:MaterialExpressionMaterialFunctionCall_1'","/Script/Engine.MaterialExpressionMaterialFunctionCall'MM_Landscape:MaterialExpressionMaterialFunctionCall_2'","/Script/Engine.MaterialExpressionTextureObject'MM_Landscape:MaterialExpressionTextureObject_0'","/Script/Engine.MaterialExpressionTextureObject'MM_Landscape:MaterialExpressionTextureObject_1'","/Script/Engine.MaterialExpressionTextureObject'MM_Landscape:MaterialExpressionTextureObject_2'","/Script/Engine.MaterialExpressionTextureObject'MM_Landscape:MaterialExpressionTextureObject_3'","/Script/Engine.MaterialExpressionTextureObject'MM_Landscape:MaterialExpressionTextureObject_4'","/Script/Engine.MaterialExpressionTextureObject'MM_Landscape:MaterialExpressionTextureObject_5'","/Script/Engine.MaterialExpressionTextureObject'MM_Landscape:MaterialExpressionTextureObject_6'","/Script/Engine.MaterialExpressionTextureObject'MM_Landscape:MaterialExpressionTextureObject_7'","/Script/Engine.MaterialExpressionTextureObject'MM_Landscape:MaterialExpressionTextureObject_8'","/Script/Engine.MaterialExpressionBlendMaterialAttributes'MM_Landscape:MaterialExpressionBlendMaterialAttributes_0'","/Script/Engine.MaterialExpressionScalarParameter'MM_Landscape:MaterialExpressionScalarParameter_0'","/Script/Engine.MaterialExpressionMakeMaterialAttributes'MM_Landscape:MaterialExpressionMakeMaterialAttributes_2'","/Script/Engine.MaterialExpressionConstant3Vector'MM_Landscape:MaterialExpressionConstant3Vector_0'","/Script/Engine.MaterialExpressionBlendMaterialAttributes'MM_Landscape:MaterialExpressionBlendMaterialAttributes_1'","/Script/Engine.MaterialExpressionMakeMaterialAttributes'MM_Landscape:MaterialExpressionMakeMaterialAttributes_3'","/Script/Engine.MaterialExpressionConstant3Vector'MM_Landscape:MaterialExpressionConstant3Vector_1'","/Script/Engine.MaterialExpressionBlendMaterialAttributes'MM_Landscape:MaterialExpressionBlendMaterialAttributes_2'","/Script/Engine.MaterialExpressionMakeMaterialAttributes'MM_Landscape:MaterialExpressionMakeMaterialAttributes_4'","/Script/Engine.MaterialExpressionConstant3Vector'MM_Landscape:MaterialExpressionConstant3Vector_2'"))
+      ParameterGroupData(0)=(GroupName="None")
+   End Object
+   EditorY=-80
+   bUseMaterialAttributes=True
+   StateId=A55232BC4CAA11868984FEB8124D9026
+   EditorOnlyData="/Script/Engine.MaterialEditorOnlyData'MM_LandscapeEditorOnlyData'"
+   ParameterOverviewExpansion=(("-12Global", True))
+   LightingGuid=170FBAB04782447AD0A22FB5944A96D5
+End Object

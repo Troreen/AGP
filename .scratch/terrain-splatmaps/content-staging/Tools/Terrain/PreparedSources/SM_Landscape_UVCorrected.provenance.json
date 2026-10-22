@@ -1,0 +1,16 @@
+{
+  "source_file": "SM_Landscape_Test.fbx",
+  "source_sha256": "0ea2e05ef3143bf1510dd477ad2f0c8f50f0af158db40bdded265070e1a75eed",
+  "output_sha256": "dd532ae2a0dc9694a790c1f6436b4d0611723c2f8ccae8f7bee85e62eb93f050",
+  "fbx_version": 7300,
+  "changed_property_paths": [
+    "/FileId",
+    "/CreationTime",
+    "/Objects/Geometry/LayerElementUV/UV",
+    "/Objects/Geometry/LayerElementBumpUV/UV"
+  ],
+  "all_other_parsed_properties_identical": true,
+  "unreal_import_yaw_degrees": -90,
+  "runtime_export_force_front_x_axis": true,
+  "note": "Writer also rewrites binary offsets/compression/footer; not a byte-only UV patch."
+}

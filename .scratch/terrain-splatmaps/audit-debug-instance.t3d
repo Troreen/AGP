@@ -1,0 +1,18 @@
+Begin Object Class=/Script/Engine.MaterialInstanceConstant Name="MI_Landscape_SplatMapTesting" ExportPath="/Script/Engine.MaterialInstanceConstant'/Game/LevelPrototyping/Materials/MI_Landscape_SplatMapTesting.MI_Landscape_SplatMapTesting'"
+   Begin Object Class=/Script/UnrealEd.SceneThumbnailInfoWithPrimitive Name="SceneThumbnailInfoWithPrimitive_0" ExportPath="/Script/UnrealEd.SceneThumbnailInfoWithPrimitive'/Game/LevelPrototyping/Materials/MI_Landscape_SplatMapTesting.MI_Landscape_SplatMapTesting:SceneThumbnailInfoWithPrimitive_0'"
+   End Object
+   Begin Object Class=/Script/Engine.MaterialInstanceEditorOnlyData Name="MI_Landscape_SplatMapTestingEditorOnlyData" ExportPath="/Script/Engine.MaterialInstanceEditorOnlyData'/Game/LevelPrototyping/Materials/MI_Landscape_SplatMapTesting.MI_Landscape_SplatMapTesting:MI_Landscape_SplatMapTestingEditorOnlyData'"
+   End Object
+   Begin Object Name="SceneThumbnailInfoWithPrimitive_0" ExportPath="/Script/UnrealEd.SceneThumbnailInfoWithPrimitive'/Game/LevelPrototyping/Materials/MI_Landscape_SplatMapTesting.MI_Landscape_SplatMapTesting:SceneThumbnailInfoWithPrimitive_0'"
+   End Object
+   Begin Object Name="MI_Landscape_SplatMapTestingEditorOnlyData" ExportPath="/Script/Engine.MaterialInstanceEditorOnlyData'/Game/LevelPrototyping/Materials/MI_Landscape_SplatMapTesting.MI_Landscape_SplatMapTesting:MI_Landscape_SplatMapTestingEditorOnlyData'"
+   End Object
+   ParameterStateId=890B4FE542F3488A664AFBB037484821
+   Parent="/Script/Engine.Material'/Game/Materials/MM_Landscape.MM_Landscape'"
+   ScalarParameterValues(0)=(ParameterInfo=(Name="DEBUG"),ParameterValue=1.000000,ExpressionGUID=7E8EDF4E4187401999C532A5ED0AE5F4)
+   ScalarParameterValues(1)=(ParameterInfo=(Name="RefractionDepthBias"))
+   BasePropertyOverrides=(OpacityMaskClipValue=0.333300)
+   EditorOnlyData="/Script/Engine.MaterialInstanceEditorOnlyData'MI_Landscape_SplatMapTestingEditorOnlyData'"
+   ThumbnailInfo="/Script/UnrealEd.SceneThumbnailInfoWithPrimitive'SceneThumbnailInfoWithPrimitive_0'"
+   LightingGuid=7091D8254B8A7ED76DD1F0A880820A04
+End Object

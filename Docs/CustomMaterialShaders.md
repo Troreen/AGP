@@ -2,8 +2,10 @@
 
 Each exported Unreal master material uses an individual `<MasterMaterialName>.hlsli`
 in the configured shader folder (`Bin/Debug/EngineShaders` for the default Debug
-configuration). Keep persistent engine shader sources under
-`Source/Engine/GraphicsEngine/Shaders`; the build copies them into that folder.
+configuration). Keep engine shader sources under
+`Source/Engine/GraphicsEngine/Shaders` and game materials in AGP-Content's
+`Content/Shaders`; copy content into AGP before building. The build deploys
+content shaders first and engine shaders second, so engine files win collisions.
 The include supplies `Material_Vertex` and `Material_Pixel`. Unreal exports values
 and texture references; computations live in these functions.
 
@@ -14,14 +16,16 @@ adds `MB_` if absent and replaces spaces with underscores, for both master
 materials and instances. For example, Unreal `Snow Amount` binds to
 `float MB_Snow_Amount`, and `Tint Color` binds to `float4 MB_Tint_Color`.
 
-Declare custom textures in available material slots (`t4` through `t15`). Standard
-texture asset suffixes select fixed slots: `_BaseColor` selects t0, `_Normal` t1,
-`_OcclusionRoughnessMetallic` t2, and `_Emissive` t3. For other assets, the shader
-resource name must match the texture asset name exactly. For example, asset
-`Noise_Map` binds to `Texture2D Noise_Map`. Exported texture parameter names do not
-select resources. Renaming an asset requires updating the matching shader name;
-there is no rename compatibility lookup. Reflection must retain the resource, so
-sample it in the shader. Failed bindings log a warning.
+Declare custom textures in available material slots (`t4` through `t15`). The
+exported texture parameter name selects a matching reflected resource first;
+spaces become underscores and texture names do not acquire an `MB_` prefix.
+For example, parameter `Rough BaseColor` selects `Texture2D Rough_BaseColor`
+regardless of its assigned asset's suffix. Resource matching is case-insensitive.
+If no matching parameter resource exists, legacy texture asset suffixes select
+fixed slots: `_BaseColor` selects t0, `_Normal` t1,
+`_OcclusionRoughnessMetallic` t2, and `_Emissive` t3. Other assets fall back to a
+resource matching the asset name, such as `Noise_Map`. Reflection must retain
+the resource, so sample it in the shader. Failed bindings log a warning.
 
 See [Unreal-to-AGP material naming](UnrealAGPMaterialNaming.md) for input mappings
 and the differences from Unreal's material interface.

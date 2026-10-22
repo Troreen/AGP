@@ -1,0 +1,325 @@
+{
+  "asset": "/Temp/SplatmapInvestigation/UVCorrectedYawMinus90_20261022/SM_SplatmapAudit_UVCorrected_YawMinus90.SM_SplatmapAudit_UVCorrected_YawMinus90",
+  "original_asset": "/Game/Meshes/Landscape/Test/SM_Landscape_Test.SM_Landscape_Test",
+  "import_yaw_degrees": -90,
+  "save_requested": false,
+  "placed_in_level": false,
+  "vertices_checked": 4096,
+  "vertex_instances_checked": 18816,
+  "triangles_topology_checked": 6272,
+  "uv0_formula": [
+    "(2800-localY)/100",
+    "(localX+2800)/100"
+  ],
+  "uv1_formula": [
+    "(2800-localY)/5700",
+    "(localX+2800)/5700"
+  ],
+  "maximum_absolute_errors": {
+    "geometry_vs_original": 0,
+    "uv0_expected": 1.0658141036401503e-14,
+    "uv1_expected": 4.182782087358561e-8,
+    "uv0_u_unchanged": 0,
+    "uv0_v_equals_1_minus_original": 0,
+    "uv1_u_unchanged": 0,
+    "uv1_v_equals_1_minus_original": 5.960464477539063e-8
+  },
+  "samples": [
+    {
+      "instance": 0,
+      "position": [
+        -2800,
+        2800,
+        0
+      ],
+      "old_uv0": [
+        0,
+        1
+      ],
+      "corrected_uv0": [
+        0,
+        0
+      ],
+      "corrected_uv1": [
+        0,
+        0
+      ]
+    },
+    {
+      "instance": 1,
+      "position": [
+        -2700,
+        2700,
+        0
+      ],
+      "old_uv0": [
+        1,
+        0
+      ],
+      "corrected_uv0": [
+        1,
+        1
+      ],
+      "corrected_uv1": [
+        0.017543859779834747,
+        0.01754385232925415
+      ]
+    },
+    {
+      "instance": 56,
+      "position": [
+        -2700,
+        2500,
+        0
+      ],
+      "old_uv0": [
+        3,
+        0
+      ],
+      "corrected_uv0": [
+        3,
+        1
+      ],
+      "corrected_uv1": [
+        0.05263157933950424,
+        0.01754385232925415
+      ]
+    },
+    {
+      "instance": 57,
+      "position": [
+        -2700,
+        2600,
+        0
+      ],
+      "old_uv0": [
+        2,
+        0
+      ],
+      "corrected_uv0": [
+        2,
+        1
+      ],
+      "corrected_uv1": [
+        0.035087719559669495,
+        0.01754385232925415
+      ]
+    },
+    {
+      "instance": 500,
+      "position": [
+        -2400,
+        1400,
+        0.78125
+      ],
+      "old_uv0": [
+        14,
+        -3
+      ],
+      "corrected_uv0": [
+        14,
+        4
+      ],
+      "corrected_uv1": [
+        0.24561403691768646,
+        0.0701754093170166
+      ]
+    },
+    {
+      "instance": 10000,
+      "position": [
+        100,
+        1400,
+        11.71875
+      ],
+      "old_uv0": [
+        14,
+        -28
+      ],
+      "corrected_uv0": [
+        14,
+        29
+      ],
+      "corrected_uv1": [
+        0.24561403691768646,
+        0.5087718963623047
+      ]
+    },
+    {
+      "instance": 18815,
+      "position": [
+        2800,
+        -2800,
+        0
+      ],
+      "old_uv0": [
+        56,
+        -55
+      ],
+      "corrected_uv0": [
+        56,
+        56
+      ],
+      "corrected_uv1": [
+        0.9824561476707458,
+        0.9824561476707458
+      ]
+    }
+  ],
+  "build_settings": {
+    "bake_meshes": true,
+    "bake_pivot_meshes": false,
+    "recompute_normals": true,
+    "recompute_tangents": true,
+    "use_mikk_t_space": true,
+    "compute_weighted_normals": true,
+    "use_full_precision_u_vs": false
+  },
+  "original_import_yaw_after": -90,
+  "dirty_maps_before": [
+    "/Game/Levels/Test_Levels/SP/Lvl_Splatmap_Testing"
+  ],
+  "dirty_maps_after": [
+    "/Game/Levels/Test_Levels/SP/Lvl_Splatmap_Testing"
+  ],
+  "dirty_content_after": [],
+  "copied_settings": {
+    "root": [
+      "asset_name",
+      "asset_type_sub_folders",
+      "import_offset_rotation",
+      "import_offset_translation",
+      "import_offset_uniform_scale",
+      "pipeline_display_name",
+      "reimport_strategy",
+      "scene_name_sub_folder",
+      "use_source_name_for_asset"
+    ],
+    "common_meshes_properties": [
+      "auto_detect_mesh_type",
+      "bake_meshes",
+      "bake_pivot_meshes",
+      "compute_weighted_normals",
+      "force_all_mesh_as_type",
+      "import_lods",
+      "import_sockets",
+      "keep_sections_separate",
+      "recompute_normals",
+      "recompute_tangents",
+      "remove_degenerates",
+      "single_bone_skeleton",
+      "use_backwards_compatible_f16_trunc_u_vs",
+      "use_full_precision_u_vs",
+      "use_high_precision_tangent_basis",
+      "use_mikk_t_space",
+      "vertex_color_import_option",
+      "vertex_override_color"
+    ],
+    "common_skeletal_meshes_and_animations_properties": [
+      "add_curve_metadata_to_skeleton",
+      "convert_statics_with_morph_targets_to_skeletals",
+      "import_meshes_in_bone_hierarchy",
+      "import_only_animations",
+      "skeleton",
+      "use_t0_as_ref_pose"
+    ],
+    "mesh_pipeline": [
+      "apply_constant_topology_optimizations",
+      "auto_compute_lod_screen_sizes",
+      "bone_influence_limit",
+      "build_nanite",
+      "build_reversed_index_buffer",
+      "build_scale3d",
+      "collision",
+      "combine_skeletal_meshes",
+      "combine_static_meshes",
+      "compressed_position_precision",
+      "compressed_texture_coordinates_number_of_bits",
+      "create_physics_asset",
+      "distance_field_replacement_mesh",
+      "distance_field_resolution_scale",
+      "dst_lightmap_index",
+      "fallback_collision_type",
+      "flatten_tracks",
+      "force_collision_primitive_generation",
+      "frame_end",
+      "frame_start",
+      "generate_distance_field_as_if_two_sided",
+      "generate_lightmap_u_vs",
+      "import_collision_according_to_mesh_name",
+      "import_geometry_caches",
+      "import_morph_targets",
+      "import_skeletal_meshes",
+      "import_static_meshes",
+      "import_vertex_attributes",
+      "lod_group",
+      "lod_screen_sizes",
+      "max_lumen_mesh_cards",
+      "merge_morph_targets_with_same_name",
+      "min_lightmap_resolution",
+      "morph_threshold_position",
+      "motion_vectors",
+      "nanite_triangle_threshold",
+      "one_convex_hull_per_ucx",
+      "optimize_index_buffers",
+      "override_time_range",
+      "physics_asset",
+      "skeletal_mesh_import_content_type",
+      "src_lightmap_index",
+      "store_imported_vertex_numbers",
+      "support_face_remap",
+      "threshold_position",
+      "threshold_tangent_normal",
+      "threshold_uv",
+      "update_skeleton_reference_pose",
+      "use_high_precision_skin_weights"
+    ],
+    "animation_pipeline": [
+      "animation_range",
+      "custom_bone_animation_sample_rate",
+      "delete_existing_custom_attribute_curves",
+      "delete_existing_morph_target_curves",
+      "delete_existing_non_curve_custom_attributes",
+      "do_not_import_curve_with_zero",
+      "frame_import_range",
+      "import_animations",
+      "import_bone_tracks",
+      "import_custom_attribute",
+      "material_curve_suffixes",
+      "remove_curve_redundant_keys",
+      "set_material_drive_parameter_on_custom_attribute",
+      "snap_to_closest_frame_boundary",
+      "use30_hz_to_bake_bone_animation"
+    ],
+    "material_pipeline": [
+      "asset_name",
+      "create_material_instance_for_parent",
+      "identify_duplicate_materials",
+      "import_materials",
+      "material_import",
+      "override_displacement",
+      "override_displacement_center",
+      "parent_material",
+      "pipeline_display_name",
+      "search_location"
+    ],
+    "textures": [
+      "allow_non_power_of_two",
+      "asset_name",
+      "detect_normal_map_texture",
+      "file_extensions_to_import_as_long_lat_cubemap",
+      "flip_normal_map_green_channel",
+      "import_textures",
+      "import_udi_ms",
+      "pipeline_display_name",
+      "prefer_compressed_source_data"
+    ]
+  },
+  "skipped_obsolete_properties": [
+    "mesh_pipeline.import_collision"
+  ],
+  "limitations": [
+    "Numeric source-mesh UV/geometry verification only; no final normal-map appearance check.",
+    "No AGP importer/runtime test or DDS round-trip performed."
+  ]
+}

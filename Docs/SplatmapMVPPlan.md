@@ -1,6 +1,55 @@
 ﻿# Splat map MVP: preparation checklist and agent handoff
 
-Status: museum setup identified by the owner; local content available; Unreal editor verification pending. Updated 2026-10-22. This is the owner's planning record and the next agent's continuation context, not a finalized implementation specification.
+Status: live splatmap testing scene and connected material inspected; painted-weight export remains unresolved. Updated 2026-10-22. This is the owner's planning record and the next agent's continuation context, not a finalized implementation specification.
+
+## Latest live research: splatmap testing scene
+
+The parallel investigation and independent cross-reviews are recorded in
+[investigation synthesis](../.scratch/terrain-splatmaps/investigation-summary.md)
+and [execution plan](../.scratch/terrain-splatmaps/investigation-plan.md).
+Owner decisions now preserve Dunes -> Rough -> Cliff order, fill uncovered
+areas with Dunes, use linear ORM, constrain noise to existing transitions, and
+match the native Landscape's world-space 8m surface placement.
+
+The owner clarified that stored import Yaw=-90 is intentional and must remain.
+Rotation does not corrupt UVs. The separate Landscape-FBX V-convention mismatch
+is unwanted. An approved scratch-FBX correction and unsaved temporary import
+preserved yaw -90, retained identical geometry/topology, and verified corrected
+UV0/UV1 at all 18816 mesh corners. See
+[test result](../.scratch/terrain-splatmaps/audit-uv-corrected-yaw-minus90.json).
+Correct asset preparation/export/import is the preferred fix; do not compensate
+for this asset-specific problem in HLSL. Final appearance remains unverified.
+See [cause and source evidence](../.scratch/terrain-splatmaps/uv-orientation-cause.md)
+and [temporary import measurement](../.scratch/terrain-splatmaps/audit-zero-rotation-import.json).
+The scratch-FBX test is complete; the DDS round-trip still awaits approval.
+
+The current Unreal map is `/Game/Levels/Test_Levels/SP/Lvl_Splatmap_Testing` in
+`C:/Users/tarik.bergstrom/Perforce/AGP-Content/Unreal/P5G4_KnightHeart/`.
+Both its native Landscape and converted `SM_Landscape_Test` use
+`MI_Landscape_SplatMapTesting`, parent `/Game/Materials/MM_Landscape`.
+The connected graph confirms Snow_Dunes, Snow_Rough and Snow_Cliff with all nine
+surface textures. All three layer inputs currently use alpha blending.
+DEBUG=1 substitutes red, green and blue respectively. Those debug colors are
+not evidence of internal Landscape weightmap channel packing.
+
+Painting weights are present in the Landscape data. The current JSON at
+`Content/ExportedScenes/lvl_splatmap_testing/Lvl_Splatmap_Testing_Level.json`
+contains the converted mesh/material and DEBUG parameter, but no weights or
+mask transform. Reusing a Landscape material on the converted mesh does not
+itself transfer Landscape painting. The connected surface function currently
+uses UV0 divided by 8; world-space tiling and noisy weights remain intended AGP
+behavior rather than verified features of this Unreal graph.
+
+Unreal exposes `Landscape.render_weightmaps` to render requested layers into
+chosen RGBA channels of a render target. An owner-approved temporary 512x512 bake
+succeeded, producing a diagnostic RGB image (Dunes, Rough, Cliff) under `.scratch`.
+No source assets or level were saved. Verify numeric color handling and mask registration before settling
+the transport contract. No code or material changes are authorized; ask the
+owner before testing beyond inspection. Earlier sections below retain historical
+museum/offline context and must be read against these newer observations.
+
+Evidence and remaining gaps: [live Unreal investigation](../.scratch/terrain-splatmaps/unreal-live-investigation.md)
+and [current JSON/exporter investigation](../.scratch/terrain-splatmaps/current-export-research.md).
 
 ## Goal and agreed requirements
 

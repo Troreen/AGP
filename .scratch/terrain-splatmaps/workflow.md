@@ -6,6 +6,65 @@ Research what splat maps are and investigate the existing Unreal export/import p
 
 ## Current stage
 
+2026-10-22 implementation authorized: owner requested remaining questions and
+implementation. Answers: splat mask covers the entire level (coverage validation
+required); use a noise texture with strength and patch-size controls. Proceed
+through spec/tickets/implementation/verification/review, without staging/commits.
+Current implementation base is HEAD 517a6d7137f6fee2741d0a109b46126cf792062f;
+original historical base remains recorded below. Branch splatmap-blending reused.
+Initial AGP changes match the preceding investigation plus scratch correction
+files; ApplicationSettings.json remains unrelated and must not be changed.
+No staged files. Content main has many existing modifications/deletions and
+untracked assets, including MM_Landscape and the test map: preserve all.
+Perforce inspected with explicit clients: engine opened p4ignore.txt; content
+opened T_Noise01.dds addition, p4ignore.txt, test map edit and museum JSON addition.
+No Perforce reconcile/edit/submit performed. Content Git inspection required
+escalated access and succeeded. Content writes require filesystem approval.
+Spec: [spec.md](spec.md). Tickets: [01](issues/01-independent-layer-bindings.md),
+[02](issues/02-three-layer-material.md), [03](issues/03-repeatable-assets-and-runtime.md).
+Owners: engine_materials owns engine binder/reflection and its integration tests;
+root owns shader/content preparation and shared records. No worktrees/commits.
+Builds serialized through root. Prior research-only restrictions below describe
+history and are superseded only within this newly authorized implementation.
+
+2026-10-22 latest continuation: owner clarified that import yaw -90 is intentional
+and must be preserved; the unwanted UV V flip must be removed. Owner explicitly
+approved a scratch-FBX correction, separate unsaved import retaining -90 yaw, and
+recording results. This approval does not cover production edits or the DDS test.
+The experiment passed: all 4096 vertex positions and 6272 triangle connections
+match the original; all 18816 vertex instances have corrected UV0/UV1. See
+[result](audit-uv-corrected-yaw-minus90.json),
+[semantic FBX comparison](audit-corrected-fbx-semantic.json), and
+[procedure/result](asset-correction-procedure.md).
+No source asset, level, material, settings or code was saved/changed by this run.
+The editor level was already dirty before this experiment and remains dirty;
+dirty content queries were empty before and after. The temporary mesh was not
+placed. Final texture/normal appearance and AGP import remain unverified.
+Next: discuss any further visual or production work before making those changes;
+the independent DDS round-trip still awaits authorization. Older recommendations
+below to remove yaw are superseded by this owner clarification.
+
+Live investigation continuation: parallel tracks and independent cross-audits
+are written and linked in [investigation-plan.md](investigation-plan.md).
+Owner answered: ordered Dunes/Rough/Cliff, linear ORM, Dunes uncovered base,
+transition-only noise preserving absent layers, original Landscape surface
+mapping, and preference to correct export/import instead of shader compensation.
+An approved unsaved temporary import with zero rotation confirmed the original
+mesh's stored -90 yaw and separate V mismatch. Source assets remain unchanged.
+Scratch corrected-FBX and DDS tests await their individual permissions.
+Implementation/spec tickets remain deferred under the research-only constraint.
+
+2026-10-22 continuation: owner explicitly requested a complete investigation plan
+and parallel subagent research, using agp-feature with grill-with-docs. Current
+scope remains research only; no code/source-asset edits. The debug instance's RGB
+colors and zero alpha are intentional per owner. See
+[investigation plan and assignments](investigation-plan.md) for active tracks,
+initial Git scope, verification checklist and stop condition. Root owns live MCP;
+unreal_semantics, runtime_contract and assets_geometry own disjoint research notes.
+Current HEAD is 517a6d7137f6fee2741d0a109b46126cf792062f on splatmap-blending.
+The earlier temporary mask bake was approved and succeeded; other experiments
+require asking the owner first. Historical context below is retained as history.
+
 Planning updated 2026-10-22. `Docs/SplatmapMVPPlan.md` is the current owner planning record and next-agent context. AGP-Content is now available beside AGP on this device, including the Unreal 5.7 project and TGA exporter source. Unreal is still downloading. The owner reports that their graphics teammate prepared realistic splat-map terrain in the museum scene with three complete base-color/ORM/normal texture sets. The target is three-layer blending of those properties with noise on weights; two-layer or base-color-only checks are intermediate diagnostics. The exact authored setup and its runtime export remain unverified. No implementation is authorized by this planning update.
 
 ## Current inputs and next verification

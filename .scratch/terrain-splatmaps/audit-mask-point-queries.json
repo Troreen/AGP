@@ -1,0 +1,107 @@
+[
+  {
+    "pixel": [
+      64,
+      64
+    ],
+    "world_xy": [
+      -2094.53125,
+      -2094.53125
+    ],
+    "landscape_query": {
+      "Snow_Dunes": 1.0,
+      "Snow_Rough": 0.0,
+      "Snow_Cliff": 0.0
+    }
+  },
+  {
+    "pixel": [
+      128,
+      128
+    ],
+    "world_xy": [
+      -1394.53125,
+      -1394.53125
+    ],
+    "landscape_query": {
+      "Snow_Dunes": 1.0,
+      "Snow_Rough": 0.0,
+      "Snow_Cliff": 0.036795347929000854
+    }
+  },
+  {
+    "pixel": [
+      256,
+      256
+    ],
+    "world_xy": [
+      5.46875,
+      5.46875
+    ],
+    "landscape_query": {
+      "Snow_Dunes": 0.9999530911445618,
+      "Snow_Rough": 0.9922961592674255,
+      "Snow_Cliff": 1.0
+    }
+  },
+  {
+    "pixel": [
+      384,
+      384
+    ],
+    "world_xy": [
+      1405.46875,
+      1405.46875
+    ],
+    "landscape_query": {
+      "Snow_Dunes": 0.0,
+      "Snow_Rough": 0.0,
+      "Snow_Cliff": 1.0
+    }
+  },
+  {
+    "pixel": [
+      448,
+      448
+    ],
+    "world_xy": [
+      2105.46875,
+      2105.46875
+    ],
+    "landscape_query": {
+      "Snow_Dunes": 0.0,
+      "Snow_Rough": 0.0,
+      "Snow_Cliff": 0.09399965405464172
+    }
+  },
+  {
+    "pixel": [
+      128,
+      384
+    ],
+    "world_xy": [
+      -1394.53125,
+      1405.46875
+    ],
+    "landscape_query": {
+      "Snow_Dunes": 0.026795871555805206,
+      "Snow_Rough": 1.0,
+      "Snow_Cliff": 0.053471826016902924
+    }
+  },
+  {
+    "pixel": [
+      384,
+      128
+    ],
+    "world_xy": [
+      1405.46875,
+      -1394.53125
+    ],
+    "landscape_query": {
+      "Snow_Dunes": 0.0,
+      "Snow_Rough": 0.0,
+      "Snow_Cliff": 1.0
+    }
+  }
+]

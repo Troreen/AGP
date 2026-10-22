@@ -1,0 +1,51 @@
+﻿{
+    "preparedUtc":  "2026-10-22T15:33:40.3865745Z",
+    "textures":  [
+                     {
+                         "source":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\.scratch\\terrain-splatmaps\\diagnostic-weightmap-dunes-rough-cliff.png",
+                         "sourceSha256":  "F544911FA7F263F1244478B9643D0C6DAEBFA0F02ACCF635F6F33A9665177039",
+                         "output":  "T_Splatmap_LevelWeights.dds",
+                         "width":  512,
+                         "height":  512,
+                         "dxgiFormat":  28,
+                         "mipCount":  10,
+                         "fileBytes":  1398248,
+                         "ddsChannelMismatchCountsRGBA":  [
+                                                              0,
+                                                              0,
+                                                              0,
+                                                              0
+                                                          ],
+                         "roundtripChannelMismatchCountsRGBA":  [
+                                                                    0,
+                                                                    0,
+                                                                    0,
+                                                                    0
+                                                                ],
+                         "sourceUnchanged":  true
+                     },
+                     {
+                         "source":  "C:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\Textures\\T_Noise01.png",
+                         "sourceSha256":  "BFC4959F6E764F8D05F8007ACE69C59E005952BC34EEDA92E0583CA1738B6035",
+                         "output":  "T_Splatmap_TransitionNoise.dds",
+                         "width":  256,
+                         "height":  256,
+                         "dxgiFormat":  28,
+                         "mipCount":  9,
+                         "fileBytes":  349672,
+                         "ddsChannelMismatchCountsRGBA":  [
+                                                              0,
+                                                              0,
+                                                              0,
+                                                              0
+                                                          ],
+                         "roundtripChannelMismatchCountsRGBA":  [
+                                                                    0,
+                                                                    0,
+                                                                    0,
+                                                                    0
+                                                                ],
+                         "sourceUnchanged":  true
+                     }
+                 ]
+}

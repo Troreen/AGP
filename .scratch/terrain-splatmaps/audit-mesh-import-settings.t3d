@@ -1,0 +1,3 @@
+Begin Object Class=/Script/InterchangeEngine.InterchangeAssetImportData Name="InterchangeAssetImportData_0" ExportPath="/Script/InterchangeEngine.InterchangeAssetImportData'/Game/Meshes/Landscape/Test/SM_Landscape_Test.SM_Landscape_Test:InterchangeAssetImportData_0'"
+   NodeUniqueID="Factory_\\MeshInstance\\RootNode.Landscape"
+End Object

@@ -26,16 +26,28 @@
 | Exported base property `Base Color` | `MB_DiffuseColor`, configured in `Bin/Settings/MaterialNameConversions.json`. |
 | Exported base property `Metallic` | `MB_Metalness`, configured in the same file. |
 | Exported base property `Roughness` | `MB_Roughness`, configured in the same file. |
+| Texture parameter `Dunes BaseColor` | Shader resource `Dunes_BaseColor`. Spaces become underscores; no `MB_` prefix is added. A matching parameter role takes priority over the texture asset suffix. |
 | Texture asset ending `_BaseColor` | `AlbedoTexture`, slot t0. |
 | Texture asset ending `_Normal` | `NormalTexture`, slot t1. |
 | Texture asset ending `_OcclusionRoughnessMetallic` | `MaterialTexture`, slot t2. |
 | Texture asset ending `_Emissive` | `FxTexture`, slot t3; emission mask is red only. |
 | Other texture asset, for example `Noise_Map` | Exact shader resource name `Noise_Map`, normally in t4 through t15. |
 
-Unreal identifies texture parameters by their parameter names. AGP currently uses
-the asset naming rules above; exported texture parameter names do not override
-them. Assets and matching custom shader resources must be maintained together.
-No automatic asset-rename support is provided.
+Unreal identifies texture parameters by their parameter names. AGP first tries
+the exported parameter name as a shader resource role, replacing spaces with
+underscores. For example, `Dunes BaseColor` and `Rough BaseColor` can bind separate
+resources even when both texture assets end in `_BaseColor`. Master materials and
+instance overrides use the same rule; overriding one role retains inherited roles.
+
+If that role does not exist, AGP retains the legacy asset suffix rules in the table,
+then the exact asset-name resource fallback for assets without a standard suffix.
+No automatic asset-rename support is provided. Texture resource names must fit
+within the existing t0 through t15 material slots.
+
+Material scalar and vector values use the compiled HLSL constant-buffer offsets,
+including alignment gaps and explicit padding. Members named with a leading `__`
+are not exposed as editable parameters, but still occupy their compiled space.
+The material constant buffer must fit within the existing 128-byte limit.
 
 Scalar/vector names remain subject to the existing HLSL naming convention; this
 is why Unreal labels containing spaces cannot be used verbatim. New descriptive

@@ -1,0 +1,16 @@
+{
+  "source": "C:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\Meshes\\Landscapes\\Test\\SM_Landscape_Test.fbx",
+  "source_md5_before_and_after": "18ba5d2bc52b9808e6c2f7f522e18417",
+  "scratch_fbx": "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\.scratch\\terrain-splatmaps\\SM_SplatmapAudit_UVCorrected_YawMinus90.fbx",
+  "fbx_version": 7300,
+  "changed_property_paths": [
+    "/FileId",
+    "/CreationTime",
+    "/Objects/Geometry/LayerElementUV/UV",
+    "/Objects/Geometry/LayerElementBumpUV/UV"
+  ],
+  "all_other_parsed_properties_identical": true,
+  "geometry_and_model_transforms_unchanged": true,
+  "planned_import_yaw_degrees": -90,
+  "writer_note": "Binary layout/compression/footer rewritten; FileId and CreationTime may change."
+}

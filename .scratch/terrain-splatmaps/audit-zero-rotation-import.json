@@ -1,0 +1,158 @@
+{
+  "asset": "/Temp/SplatmapInvestigation/ZeroRotation_20261022/SM_SplatmapAudit_ZeroRotation.SM_SplatmapAudit_ZeroRotation",
+  "import_rotation": [
+    0,
+    0,
+    0
+  ],
+  "save_requested": false,
+  "vertices_checked": 4096,
+  "vertex_instance_coverage": "first instance per vertex",
+  "triangles": 6272,
+  "uv0_formula": [
+    "(localX+2800)/100",
+    "1-(localY+2800)/100"
+  ],
+  "errors": {
+    "uv0_formula": 0.0,
+    "uv1_formula": 4.182782087358561e-08,
+    "stored_old_vs_yaw_minus90_new": 9.094947017729282e-13,
+    "old_new_uv0": 0.0
+  },
+  "samples": [
+    {
+      "vertex": 0,
+      "position": [
+        -2800.0,
+        -2800.0,
+        0.0
+      ],
+      "uv0": [
+        0.0,
+        1.0
+      ],
+      "uv1": [
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "vertex": 1,
+      "position": [
+        -2700.0,
+        -2800.0,
+        0.0
+      ],
+      "uv0": [
+        1.0,
+        1.0
+      ],
+      "uv1": [
+        0.017543859779834747,
+        1.0
+      ]
+    },
+    {
+      "vertex": 56,
+      "position": [
+        -2800.0,
+        -2100.0,
+        0.0
+      ],
+      "uv0": [
+        0.0,
+        -6.0
+      ],
+      "uv1": [
+        0.0,
+        0.8771929740905762
+      ]
+    },
+    {
+      "vertex": 57,
+      "position": [
+        -2700.0,
+        -2100.0,
+        0.0
+      ],
+      "uv0": [
+        1.0,
+        -6.0
+      ],
+      "uv1": [
+        0.017543859779834747,
+        0.8771929740905762
+      ]
+    },
+    {
+      "vertex": 500,
+      "position": [
+        2500.0,
+        -2200.0,
+        0.0
+      ],
+      "uv0": [
+        53.0,
+        -5.0
+      ],
+      "uv1": [
+        0.9298245906829834,
+        0.8947368264198303
+      ]
+    },
+    {
+      "vertex": 1000,
+      "position": [
+        2100.0,
+        -1600.0,
+        0.0
+      ],
+      "uv0": [
+        49.0,
+        -11.0
+      ],
+      "uv1": [
+        0.859649121761322,
+        0.7894736528396606
+      ]
+    },
+    {
+      "vertex": 2000,
+      "position": [
+        2100.0,
+        -500.0,
+        0.0
+      ],
+      "uv0": [
+        49.0,
+        -22.0
+      ],
+      "uv1": [
+        0.859649121761322,
+        0.5964912176132202
+      ]
+    },
+    {
+      "vertex": 4095,
+      "position": [
+        2800.0,
+        2800.0,
+        0.0
+      ],
+      "uv0": [
+        56.0,
+        -55.0
+      ],
+      "uv1": [
+        0.9824561476707458,
+        0.01754385232925415
+      ]
+    }
+  ],
+  "source": "C:/Users/tarik.bergstrom/Perforce/AGP-Content/Content/Meshes/Landscapes/Test/SM_Landscape_Test.fbx",
+  "all_vertex_instances_checked": 18816,
+  "all_vertex_instance_uv0_residual": [
+    0.0,
+    0.0
+  ]
+}

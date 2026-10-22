@@ -1,0 +1,4 @@
+Begin Object Class=/Script/Landscape.LandscapeLayerInfoObject Name="Snow_Dunes_LayerInfo" ExportPath="/Script/Landscape.LandscapeLayerInfoObject'/Game/Levels/Test_Levels/SP/Lvl_Splatmap_Testing_sharedassets/Snow_Dunes_LayerInfo.Snow_Dunes_LayerInfo'"
+   LayerName="Snow_Dunes"
+   LayerUsageDebugColor=(R=0.439216,G=0.772549,B=0.713726,A=1.000000)
+End Object

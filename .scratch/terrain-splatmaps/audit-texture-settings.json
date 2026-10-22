@@ -1,0 +1,110 @@
+[
+  {
+    "path": "/Game/Textures/T_8M_Snow_Dunes_BaseColor.T_8M_Snow_Dunes_BaseColor",
+    "srgb": "True",
+    "compression_settings": "<TextureCompressionSettings.TC_DEFAULT: 0>",
+    "flip_green_channel": "False",
+    "address_x": "<TextureAddress.TA_WRAP: 0>",
+    "address_y": "<TextureAddress.TA_WRAP: 0>",
+    "compression_no_alpha": "False",
+    "lod_bias": "0",
+    "max_texture_size": "0",
+    "virtual_texture_streaming": "False"
+  },
+  {
+    "path": "/Game/Textures/T_8M_Snow_Dunes_OcclusionRoughnessMetallic.T_8M_Snow_Dunes_OcclusionRoughnessMetallic",
+    "srgb": "True",
+    "compression_settings": "<TextureCompressionSettings.TC_DEFAULT: 0>",
+    "flip_green_channel": "False",
+    "address_x": "<TextureAddress.TA_WRAP: 0>",
+    "address_y": "<TextureAddress.TA_WRAP: 0>",
+    "compression_no_alpha": "False",
+    "lod_bias": "0",
+    "max_texture_size": "0",
+    "virtual_texture_streaming": "False"
+  },
+  {
+    "path": "/Game/Textures/T_8M_Snow_Dunes_Normal.T_8M_Snow_Dunes_Normal",
+    "srgb": "False",
+    "compression_settings": "<TextureCompressionSettings.TC_NORMALMAP: 1>",
+    "flip_green_channel": "False",
+    "address_x": "<TextureAddress.TA_WRAP: 0>",
+    "address_y": "<TextureAddress.TA_WRAP: 0>",
+    "compression_no_alpha": "False",
+    "lod_bias": "0",
+    "max_texture_size": "0",
+    "virtual_texture_streaming": "False"
+  },
+  {
+    "path": "/Game/Textures/T_8M_Snow_Rough_BaseColor.T_8M_Snow_Rough_BaseColor",
+    "srgb": "True",
+    "compression_settings": "<TextureCompressionSettings.TC_DEFAULT: 0>",
+    "flip_green_channel": "False",
+    "address_x": "<TextureAddress.TA_WRAP: 0>",
+    "address_y": "<TextureAddress.TA_WRAP: 0>",
+    "compression_no_alpha": "False",
+    "lod_bias": "0",
+    "max_texture_size": "0",
+    "virtual_texture_streaming": "False"
+  },
+  {
+    "path": "/Game/Textures/T_8M_Snow_Rough_OcclusionRoughnessMetallic.T_8M_Snow_Rough_OcclusionRoughnessMetallic",
+    "srgb": "True",
+    "compression_settings": "<TextureCompressionSettings.TC_DEFAULT: 0>",
+    "flip_green_channel": "False",
+    "address_x": "<TextureAddress.TA_WRAP: 0>",
+    "address_y": "<TextureAddress.TA_WRAP: 0>",
+    "compression_no_alpha": "False",
+    "lod_bias": "0",
+    "max_texture_size": "0",
+    "virtual_texture_streaming": "False"
+  },
+  {
+    "path": "/Game/Textures/T_8M_Snow_Rough_Normal.T_8M_Snow_Rough_Normal",
+    "srgb": "False",
+    "compression_settings": "<TextureCompressionSettings.TC_NORMALMAP: 1>",
+    "flip_green_channel": "False",
+    "address_x": "<TextureAddress.TA_WRAP: 0>",
+    "address_y": "<TextureAddress.TA_WRAP: 0>",
+    "compression_no_alpha": "False",
+    "lod_bias": "0",
+    "max_texture_size": "0",
+    "virtual_texture_streaming": "False"
+  },
+  {
+    "path": "/Game/Textures/T_8M_Snow_Cliff_BaseColor.T_8M_Snow_Cliff_BaseColor",
+    "srgb": "True",
+    "compression_settings": "<TextureCompressionSettings.TC_DEFAULT: 0>",
+    "flip_green_channel": "False",
+    "address_x": "<TextureAddress.TA_WRAP: 0>",
+    "address_y": "<TextureAddress.TA_WRAP: 0>",
+    "compression_no_alpha": "False",
+    "lod_bias": "0",
+    "max_texture_size": "0",
+    "virtual_texture_streaming": "False"
+  },
+  {
+    "path": "/Game/Textures/T_8M_Snow_Cliff_OcclusionRoughnessMetallic.T_8M_Snow_Cliff_OcclusionRoughnessMetallic",
+    "srgb": "True",
+    "compression_settings": "<TextureCompressionSettings.TC_DEFAULT: 0>",
+    "flip_green_channel": "False",
+    "address_x": "<TextureAddress.TA_WRAP: 0>",
+    "address_y": "<TextureAddress.TA_WRAP: 0>",
+    "compression_no_alpha": "False",
+    "lod_bias": "0",
+    "max_texture_size": "0",
+    "virtual_texture_streaming": "False"
+  },
+  {
+    "path": "/Game/Textures/T_8M_Snow_Cliff_Normal.T_8M_Snow_Cliff_Normal",
+    "srgb": "False",
+    "compression_settings": "<TextureCompressionSettings.TC_NORMALMAP: 1>",
+    "flip_green_channel": "False",
+    "address_x": "<TextureAddress.TA_WRAP: 0>",
+    "address_y": "<TextureAddress.TA_WRAP: 0>",
+    "compression_no_alpha": "False",
+    "lod_bias": "0",
+    "max_texture_size": "0",
+    "virtual_texture_streaming": "False"
+  }
+]

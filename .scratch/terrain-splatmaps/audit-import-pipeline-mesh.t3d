@@ -1,0 +1,6 @@
+Begin Object Class=/Script/InterchangePipelines.InterchangeGenericMeshPipeline Name="InterchangeGenericMeshPipeline_0" ExportPath="/Script/InterchangePipelines.InterchangeGenericMeshPipeline'/Engine/Transient.InterchangeGenericAssetsPipeline_0:InterchangeGenericMeshPipeline_0'"
+   bCombineStaticMeshes=True
+   bBuildNanite=False
+   ThresholdUV=0.000977
+   bImportGeometryCaches=False
+End Object
