@@ -12,7 +12,8 @@ The owner must complete the manual acceptance check below before we call it work
 `main`. The latest work adds RGB noise comparisons, comments explaining the
 compiled shader offsets, a content-sync batch launcher and prepared-terrain
 material export through the normal TGA scene exporter.
-Matching current content commit: `4a3fb550e74b32b6f10ca0157d5fc068ffae4fda`.
+Matching current content commit: `60f00b5bf67ee107f141dfa3a2c351298a9fdf37`.
+Material inheritance and paint refresh were checkpointed at `4a3fb55`.
 The earlier prepared-export handoff used `8cd98950fa1805c68e7be88a854dcb560435c771`.
 
 The exporter update and its four Unreal automation checks passed in Unreal
@@ -38,11 +39,14 @@ uses an isolated plugin project. See the
 **Paint updates:** **TGA -> Refresh Selected Landscape Paint Mask PNG** now
 refreshes an existing mask's source using saved bounds and named RGB layers.
 Reimport the texture and prepare/deploy its DDS explicitly. Fresh-Landscape GPU
-tests verify channels, orientation, repaint and output preservation. Initial
-mask creation remains a preparation step; see AGP-Content's artist guide.
+tests verify channels, orientation, repaint and output preservation.
+**TGA -> Create Selected Landscape Paint Mask** now creates/imports the first
+512 x 512 mask and records its bounds on the assigned material instance. Save
+the new assets manually. DDS preparation supports matching custom source stems;
+see AGP-Content's artist guide.
 
-**Pick up next:** add first-mask creation/import and integrate UV correction
-into the normal mesh update workflow, then perform the owner's fresh Landscape test.
+**Pick up next:** integrate UV correction into the normal mesh update workflow,
+then perform the owner's fresh Landscape test.
 Do not start with more shader features or scratch-folder cleanup.
 
 ### Required owner acceptance check

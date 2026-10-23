@@ -1,5 +1,31 @@
 # Splatmap authoring continuation, 2026-10-23
 
+## Latest resume: first-mask creation completed
+
+Ticket [06](issues/06-initial-mask-creation.md) is resolved. TGA now provides
+**Create Selected Landscape Paint Mask**: a new 512 x 512 PNG is captured,
+imported as a linear lossless texture and assigned to the Landscape's material
+instance with derived bounds. Parent metadata is preserved. Existing output
+files/assets are refused; no mesh or package is saved. The owner must save new
+texture/material assets normally. Refresh works after creation.
+
+Custom runtime DDS stems are supported by `-MaskName` / `-NoiseName`, preserving
+old defaults. Creation and conversion share safe-name rules, including hyphens
+and leading digits. Default/custom conversions retain exact RGBA and full mips.
+
+Final integrated report `Intermediate/TerrainBootstrapFinal/index.json`: all
+15 GPU checks pass, zero test warnings/failures, Unreal 5.7.4 / RTX 3070 / D3D11.
+Independent review found and resolved a filename-contract mismatch; standards
+review found no confirmed defect. Updated artist guide lives in AGP-Content
+`Docs/TerrainSceneExport.md`.
+
+Content bootstrap checkpoint: `60f00b5bf67ee107f141dfa3a2c351298a9fdf37` on
+`main`, following `4a3fb55`. Neither repository was pushed.
+
+Next: integrate strict UV correction and same-StaticMesh reimport, preserving
+the intentional -90 yaw and detecting already precompensated FBXs. The from-zero
+owner walkthrough remains pending. See [next-step research](authoring-next-steps.md).
+
 Status: in-progress. Rendering demonstrated; complete authoring/export workflow
 still awaits the owner's from-zero acceptance test.
 

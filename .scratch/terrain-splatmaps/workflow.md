@@ -1,5 +1,14 @@
 # Terrain splat maps: workflow continuation
 
+## Latest resume: first-mask bootstrap, 2026-10-23
+
+Ticket 06 resolved: new TGA creation/import action, derived bounds and effective
+instance assignment; optional matching custom DDS names. All 15 integrated GPU
+checks pass with zero test warnings/failures. Both reviews completed; naming
+contract issue fixed. See [current continuation](continuation-2026-10-23.md).
+Next is strict UV correction plus same-mesh reimport; full owner acceptance is
+still pending. No shader feature or scratch cleanup work was added.
+
 ## Active continuation: material-instance export, 2026-10-23
 
 Owner authorized continued implementation and requested a handoff plus commits

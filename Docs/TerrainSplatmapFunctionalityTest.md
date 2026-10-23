@@ -25,7 +25,9 @@ artist workflow unless the owner accepts and can repeat the documented steps.
 - [ ] Build the updated TGA plugin for the installed Unreal 5.7 editor, then
   restart Unreal. The home computer's generated plugin DLL is not in Git.
 - [ ] Confirm **TGA -> Edit Selected Terrain Material Export Data** and
-  **TGA -> Expose Selected Terrain Master Texture Parameters** are visible.
+  **TGA -> Expose Selected Terrain Master Texture Parameters** are visible,
+  along with **Create Selected Landscape Paint Mask** and **Refresh Selected
+  Landscape Paint Mask PNG**.
 - [ ] Build AGP `Game.sln`, **Debug | x64**, with the documented VS toolchain.
 - [ ] Choose a new test level and asset folder in AGP-Content. Keep existing
   team levels and materials intact. Reusing the supported master material and
@@ -117,8 +119,11 @@ conversion step before expecting an unassisted pass here.
 
 ## 4. Prepare this Landscape's paint data
 
-1. Produce a fresh mask from this Landscape's named painted layers, with
-   Dunes/Rough/Cliff in RGB. Use this terrain's actual world coverage.
+1. Select the new native Landscape with its own material instance and choose
+   **TGA -> Create Selected Landscape Paint Mask**. Choose a new PNG path inside
+   AGP-Content. The 512 x 512 mask is imported as a linear texture into a
+   `TerrainMasks` folder beside the instance. Its full loaded bounds and mask
+   assignment are set automatically; save the new texture and instance normally.
 2. Prepare the mask and transition-noise runtime DDSs as linear numeric data,
    with the required mipmaps. Keep base-color, ORM and normal conversions on
    their established color-space/format paths.
@@ -130,17 +135,14 @@ Expected: the owner can refresh the paint data without calculating shader
 mapping vectors or editing JSON. The mask must come from the newly painted
 Landscape, not the committed museum/test mask.
 
-**Current blocker:** creating/importing the first prepared mask is still a
-separate preparation step. Once a mask exists, **TGA -> Refresh Selected
-Landscape Paint Mask PNG** can update its source from the selected Landscape
-using the material's saved bounds. Then reimport the mask in Unreal and run
-verified DDS preparation/deployment explicitly. The command requires a complete
-loaded, unrotated native Landscape and an existing writable PNG. It leaves
-geometry untouched. Existing initial-preparation helpers are
-`Tools/Terrain/ExportTerrainRuntime.py` and `PrepareTerrainTextures.ps1` in
-AGP-Content. Their first-use assumptions and manual handoffs still need a usable
-workflow. Automated fresh-terrain GPU checks establish the refresh's numeric
-channels/orientation; this owner's workflow acceptance remains necessary.
+Creation and refresh commands now support the painted-mask step. After paint
+updates use **TGA -> Refresh Selected Landscape Paint Mask PNG**, reimport the
+texture, and explicitly prepare/deploy its DDS. Use `-MaskName` / `-NoiseName`
+matching imported PNG stems. Both commands require a complete loaded, unrotated
+native Landscape; refresh also requires an existing writable PNG source. Neither
+touches geometry or saves packages. Fresh-terrain GPU checks cover creation,
+channels/orientation, imported bytes, repaint and collision/failure handling;
+this owner's workflow acceptance remains necessary.
 
 - [ ] Pass
 - Blocker / confusing step:
