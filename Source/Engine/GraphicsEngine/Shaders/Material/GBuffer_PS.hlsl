@@ -48,8 +48,15 @@ GBufferOutput main(VStoPS aPixel)
     switch (FB_RenderPassType)
     {
         case 7:
-            result.WorldNormalDepth = float4(sampleNormal, 1, 1);
+        {
+            // Material hooks can blend or project normals without using NormalTexture.
+            // Show their final normal in the mesh tangent frame, rather than slot 1.
+            const float3 finalNormal = normalize(parameters.Normal);
+            const float3 localNormal = float3(dot(finalNormal, normalize(aPixel.Tangent)),
+                dot(finalNormal, normalize(aPixel.BiNormal)), dot(finalNormal, normalize(aPixel.Normal)));
+            result.WorldNormalDepth = float4(localNormal * 0.5 + 0.5, 1);
             break;
+        }
         
         default:
             result.WorldNormalDepth = float4(parameters.Normal, aPixel.ViewDepth);

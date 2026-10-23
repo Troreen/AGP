@@ -38,7 +38,11 @@ and the differences from Unreal's material interface.
   feed both deferred and forward lighting. Lighting keeps its existing roughness
   clamp. Debug views show final surface values.
 - `PixelColor`, `Normal`, `Emission`: existing editable material outputs. Color
-  and world-normal debug views show the custom output. The emission debug view
+  and world-normal debug views show the custom output. The local-normal view
+  projects the final material normal into the mesh tangent frame, so blended or
+  world-projected normal maps appear there too; it does not display only t1.
+  Neutral tangent normals appear purple (RGB approximately 0.5, 0.5, 1).
+  The emission debug view
   shows the raw red-channel FX texture mask as grayscale in both engine paths.
 
 `FB_TotalTime` is elapsed scene simulation time in seconds, available in both
