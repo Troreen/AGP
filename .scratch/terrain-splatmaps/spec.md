@@ -57,6 +57,14 @@ controls. Strength zero provides the comparison baseline.
 
 ## Testing Decisions
 
+- Owner acceptance clarified 2026-10-23: the feature is not considered working
+  until the owner manually creates a new Landscape from zero, sculpts/textures/
+  paints it, follows Unreal export/reimport and normal TGA scene export, and
+  sees the result in a normal AGP launch. The authoring/export process must be
+  human friendly and support another sculpt/paint update. Prepared fixtures,
+  automated tests and builds do not satisfy this criterion. See
+  `Docs/TerrainSplatmaps.md` for the continuation and acceptance checklist.
+
 - Existing MaterialImportTests scene-building/material interfaces exercise named
   texture priority, instance overrides, legacy fallbacks and reflected packing.
   They do not prove visual correctness.

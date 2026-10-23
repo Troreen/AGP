@@ -76,6 +76,14 @@ namespace
 		return typeString;
 	}
 
+	// HLSL constant-buffer data is organized around 16-byte registers, or rows of four 32-bit components.
+	// Small values can share a row, but a value that would cross its boundary starts on the next row.
+	// For example, float Strength followed by float4 Tint leaves a gap: Strength starts at byte 0, Tint at byte 16.
+	// Adding their sizes alone would put Tint at byte 4, so anOffset always comes from the compiled layout.
+	// Reading material for the packing rules and the two offset fields used here:
+	// Packing: https://learn.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-packing-rules
+	// StartOffset: https://learn.microsoft.com/en-us/windows/win32/api/d3d11shader/ns-d3d11shader-d3d11_shader_variable_desc
+	// Member Offset: https://learn.microsoft.com/en-us/windows/win32/api/d3d11shader/ns-d3d11shader-d3d11_shader_type_desc
 	void ReflectVariable(std::string_view aDomain, ID3D11ShaderReflectionType* aVarType, const D3D11_SHADER_VARIABLE_DESC* aVarDesc, const D3D11_SHADER_TYPE_DESC& aVarTypeDesc, RHIShaderReflectionInfo::ConstantBufferInfo& inoutBufferInfo, size_t anOffset)
 	{
 		if (aVarTypeDesc.Members > 0)
@@ -91,13 +99,17 @@ namespace
 				const std::string memberName = aVarType->GetMemberTypeName(m);
 				const std::string memberDomain = aDomain.empty() ? memberName : std::string(aDomain) + "." + memberName;
 
-				// Passing nullptr for Desc here since struct members are not allowed to have default values in HLSL.
+				// Offset is relative to the containing struct, not the whole buffer. A struct at byte 32 with
+				// a member at relative byte 16 places that member at byte 48. Recursion also handles nested structs.
+				// There is no separate variable descriptor/default-value blob for this member, so pass nullptr.
 				ReflectVariable(memberDomain, memberType, nullptr, memberTypeDesc, inoutBufferInfo, anOffset + memberTypeDesc.Offset);
 			}
 		}
 		else
 		{
 			RHIShaderReflectionInfo::ConstantBufferInfo::MemberInfo memInfo;
+			// Names beginning with __ are our convention for internal values, including explicit padding.
+			// Hide them from material parameters without removing the space they occupy in the shader's layout.
 			if (aDomain.starts_with("__"))
 			{
 				return;
@@ -116,7 +128,8 @@ namespace
 			{
 				memcpy_s(memInfo.Default, 64, aVarDesc->DefaultValue, aVarDesc->Size);
 			}
-			// Compiled offsets include register alignment and padding, even for members not exposed above.
+			// Save the actual byte position for later CPU writes. Do not advance a running size counter:
+			// alignment gaps and hidden values still occupy space even though they add no exposed parameters.
 			memInfo.Offset = anOffset;
 
 			inoutBufferInfo.MemberNameToIndex.emplace(memInfo.Name, inoutBufferInfo.Members.size());
@@ -179,6 +192,8 @@ namespace
 
 				D3D11_SHADER_TYPE_DESC varTypeDesc = {};
 				varType->GetDesc(&varTypeDesc);
+				// StartOffset gives this top-level variable's byte position inside the constant buffer.
+				// Let the compiler account for packing; ReflectVariable adds relative offsets for struct members.
 				ReflectVariable(varDesc.Name, varType, &varDesc, varTypeDesc, bufferInfo, varDesc.StartOffset);
 			}
 

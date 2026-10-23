@@ -1,8 +1,84 @@
 # Terrain splat material
 
 Implementation is available on `splatmap-blending`, with game shader, runtime
-assets and authoring tools in AGP-Content. Final authored-scene appearance and
-hardware performance await the owner's visual check. Nothing is committed.
+assets and authoring tools in AGP-Content. The prepared comparison scenes render
+correctly according to the owner's check. **The splatmap feature is not complete:**
+the path from authoring a Landscape to using it in AGP is not yet human friendly.
+The owner must complete the manual acceptance check below before we call it working.
+
+## Continuation on the school computer
+
+2026-10-23 handoff: use AGP branch `splatmap-blending` and AGP-Content branch
+`main`. The latest work adds RGB noise comparisons, comments explaining the
+compiled shader offsets, a content-sync batch launcher and prepared-terrain
+material export through the normal TGA scene exporter.
+Matching content commit: `8cd98950fa1805c68e7be88a854dcb560435c771`.
+
+The exporter update and its four Unreal automation checks passed in Unreal
+5.7.4, including a normal scene export from transient test assets. The tested
+plugin was installed locally; generated plugin DLLs and the comparison EXEs
+are ignored and must be built/prepared again on another computer. See
+AGP-Content's `Docs/TerrainSceneExport.md` for setup and verification details.
+
+**Pick up here:** make the normal authoring/export workflow usable, starting
+with material-instance behavior. Do not start with more shader features or
+scratch-folder cleanup. The current exporter stores
+a complete set of terrain inputs as material asset user data. Those inputs
+override matching graph parameters; child export data replaces the whole set.
+Prefer reading textures and artist controls from normal material-instance
+parameters, reserving export data for information such as mask world bounds.
+This improvement has been discussed but is not implemented yet.
+
+### Required owner acceptance check
+
+Use the [manual functionality walkthrough](TerrainSplatmapFunctionalityTest.md)
+to perform the run and record blockers/results stage by stage.
+
+The owner explicitly requires a manual run from zero. A prepared test scene,
+passing tests or a successful build cannot replace this check:
+
+1. Start with a new Landscape in Unreal, rather than the prepared splatmap fixture.
+2. Sculpt it, assign the terrain material/instance, set up its textures and paint
+   recognizable regions for the supported layers.
+3. Export/reimport through Unreal into the StaticMesh used in a scene, following
+   the team's existing workflow. Make the UV convention and import settings
+   predictable without requiring the artist to diagnose the FBX pipeline.
+4. Use the normal TGA exporter to produce the scene and its required material
+   data; make mask preparation/deployment understandable and reproducible.
+5. Open that scene through the normal AGP launch and see the sculpted terrain
+   with the assigned textures and painted layer placement working correctly.
+6. Change the original Landscape's sculpting/painting, repeat the normal update
+   path, and confirm AGP reflects those changes without replacing scene actors
+   or constructing a special verification scene by hand.
+
+The owner performs the authoring steps and judges whether they are usable.
+Document the steps and observed result. Until this passes, describe the status
+as "rendering demonstrated; authoring/export workflow incomplete."
+
+Preserve the team's authoring workflow: sculpt/paint a Landscape, export/reimport
+it through Unreal into an existing StaticMesh, place/use that mesh in scenes,
+then export through TGA. Automatic UV correction and mask refresh at the
+Landscape conversion step are still pending. Do not remove the intentional
+import yaw -90 or introduce a global UV flip in AGP.
+
+At school, inspect both working trees and the explicit Perforce clients before
+updating files; see [version control](ProjectVersionControl.md). Update the
+matching Git branches, download LFS assets, rebuild the Unreal plugin and AGP,
+and preview content deployment before copying. No Perforce submission is
+authorized by this handoff.
+
+To recreate the comparison launches from the AGP root after syncing/building:
+
+```powershell
+foreach ($variant in 'Baseline', 'Noise', 'Weights', 'NoiseWeights') {
+    powershell.exe -NoProfile -ExecutionPolicy Bypass -File .scratch/terrain-splatmaps/prepare-runtime-check.ps1 -Variant $variant
+}
+```
+
+`Weights` and `NoiseWeights` are the RGB baseline/noise pair. `NoiseWeights`
+generates its local scene from the committed RGB baseline; the generated scene
+does not need copying out of this machine. No scratch-folder cleanup has been
+performed; consolidate still-useful evidence before removing old investigations.
 
 ## Material contract
 

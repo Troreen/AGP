@@ -1,5 +1,34 @@
 # Terrain splat maps: workflow continuation
 
+## Latest handoff: 2026-10-23
+
+User authorized committing/pushing both repositories to continue at school.
+Use AGP `splatmap-blending` and AGP-Content `main`. Current continuation and
+verification details are in `Docs/TerrainSplatmaps.md`; read its **Pick up here**
+and **Required owner acceptance check** before the historical notes below.
+
+Status: rendering demonstrated; authoring/export workflow incomplete. The owner
+confirmed the prepared RGB baseline/noise comparison works, but explicitly does
+not consider the feature working until they manually create a Landscape from
+zero through sculpting, texturing, painting, Unreal export/reimport, normal TGA
+scene export and use in AGP. The earlier mention of TM was corrected to AGP.
+Follow `Docs/TerrainSplatmapFunctionalityTest.md` for the requested walkthrough
+and record the first failing stage there.
+
+Next: make that normal workflow usable, beginning with normal material-instance
+parameter inheritance instead of duplicating artist settings in export metadata.
+The exporter update currently serializes a complete opt-in export-data set;
+those values override matching graph parameters, and child data replaces the
+complete set. This limitation must be addressed in the next design iteration.
+UV correction/mask refresh during the normal mesh conversion remains pending.
+Do not delete investigation evidence before consolidating useful information.
+
+The new TGA plugin built and passed four automation checks in Unreal 5.7.4,
+including normal scene JSON export; its tested DLL was installed locally after
+the owner closed Unreal. These ignored binaries must be rebuilt at school.
+See AGP-Content `Docs/TerrainSceneExport.md`. RGB launch settings are regenerated
+with `prepare-runtime-check.ps1` variants `Weights` and `NoiseWeights`.
+
 ## Request and constraints
 
 Research what splat maps are and investigate the existing Unreal export/import path before implementation planning. Use agp-feature; this run is research and planning only. The user clarified the minimum: splat-map material blending with noise applied to weights. Texture-height blending is optional; geometry should arrive separately as a terrain mesh. Do not implement yet.
