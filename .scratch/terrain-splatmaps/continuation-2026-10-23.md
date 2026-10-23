@@ -1,5 +1,21 @@
 # Splatmap authoring continuation, 2026-10-23
 
+## Final school checkpoint
+
+Start with [the school handoff](../../Docs/SplatmapSchoolHandoff.md).
+Ticket 07 resolved: strict raw-FBX preparation and same-StaticMesh reimport are
+available through TGA, preserving stored yaw/materials and requiring the exact
+mesh in the completed import result. Final `Intermediate/TerrainSchoolVerified`
+report: 19 production checks plus one isolated experiment pass, zero warnings
+or failures. Two Python source-provenance guard tests pass. Full owner visuals,
+runtime FBX Front-X export after the new command and fresh walkthrough remain.
+
+Owner declined a proposed normal scene-export mask coverage check; it was
+removed. Do not reintroduce it. Owner approved committing current saved master
+material and test-map edits. A separate whitespace-only blank line in
+`TGATerrainMaterialExportData.cpp` was left untouched and excluded from the
+feature commit. No open editor or authored package was saved by the agent.
+
 ## Latest resume: first-mask creation completed
 
 Ticket [06](issues/06-initial-mask-creation.md) is resolved. TGA now provides

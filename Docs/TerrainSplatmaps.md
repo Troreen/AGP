@@ -8,6 +8,9 @@ The owner must complete the manual acceptance check below before we call it work
 
 ## Continuation on the school computer
 
+Start with [the current school handoff](SplatmapSchoolHandoff.md). It supersedes
+older setup/status notes below and records the commands and remaining checks.
+
 2026-10-23 handoff: use AGP branch `splatmap-blending` and AGP-Content branch
 `main`. The latest work adds RGB noise comparisons, comments explaining the
 compiled shader offsets, a content-sync batch launcher and prepared-terrain
@@ -45,8 +48,13 @@ tests verify channels, orientation, repaint and output preservation.
 the new assets manually. DDS preparation supports matching custom source stems;
 see AGP-Content's artist guide.
 
-**Pick up next:** integrate UV correction into the normal mesh update workflow,
-then perform the owner's fresh Landscape test.
+**Mesh updates:** the explicit **TGA -> Reimport Selected Terrain Mesh with
+Corrected UVs** action prepares the raw FBX and updates the same mesh through
+its saved yaw -90 pipeline. Keep raw input separate from generated prepared
+copies. Runtime FBX export still needs Force Front X; assets are saved manually.
+
+**Pick up next:** rebuild the plugin at school and perform the owner's fresh
+Landscape test, including another sculpt/paint update and final normal appearance.
 Do not start with more shader features or scratch-folder cleanup.
 
 ### Required owner acceptance check

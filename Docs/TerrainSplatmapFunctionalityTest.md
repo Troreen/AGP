@@ -84,11 +84,10 @@ Expected: the owner can understand which textures belong to each layer and
 which material-instance values will actually reach AGP. The painted pattern is
 asymmetric enough to detect an incorrect mask orientation or position.
 
-**Current blocker:** the existing master has hardwired textures. The provisional
-export settings duplicate those choices and override matching normal material
-parameters. Making normal instance parameters the artist-facing source of
-truth is the first continuation task. Do not mark this step passed merely
-because export metadata can be manually filled with a second set of values.
+The explicit texture-parameter conversion and effective instance export are
+implemented and automatically checked. Confirm the normal instance controls
+are understandable during this manual run; separate fallback settings must not
+replace the owner's texture choices or this acceptance check.
 
 - [ ] Pass
 - Blocker / confusing step:
@@ -97,6 +96,10 @@ because export metadata can be manually filled with a second set of values.
 
 1. Export the new Landscape to FBX using the team's normal Unreal workflow.
 2. Import it as a StaticMesh using the established settings for that conversion.
+   Select the mesh asset in the Content Browser, choose **TGA -> Reimport
+   Selected Terrain Mesh with Corrected UVs**, and select the original raw FBX.
+   The explicit command preserves stored yaw -90 and reuses the same mesh;
+   Blender's bundled Python/FBX tools must be installed for strict preparation.
 3. Keep the native Landscape as the editable source. Place the converted mesh
    in the test scene, using a saved material instance for its runtime surface.
 4. Compare its hill, trough, scale and placement against the source. Check a
@@ -109,10 +112,12 @@ predictable. A reimport should update the same mesh asset without replacing
 the scene actor. Preserve the intentional yaw -90 for the existing tested
 conversion; do not guess a new rotation just to hide a UV reflection.
 
-**Current blocker:** automatic V correction at this handoff is not implemented.
-`AGP-Content/Tools/Terrain/CorrectLandscapeFbx.py` is an existing technical
-preparation tool, not an integrated artist command. Decide/document the usable
-conversion step before expecting an unassisted pass here.
+The new explicit reimport command integrates the strict V correction. Known
+corrected/stale/malformed provenance is rejected to avoid a second reflection.
+Always keep the original raw source; generated prepared copies under project
+`Saved/TerrainPrepared` are machine-local and can be regenerated. Review/save
+the updated mesh normally and export runtime FBX with Force Front X enabled.
+The owner's visual/normal/tangent and full workflow checks remain pending.
 
 - [ ] Pass
 - Blocker / confusing step:

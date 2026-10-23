@@ -1,5 +1,18 @@
 # Terrain splat maps: workflow continuation
 
+## School handoff ready, 2026-10-23
+
+See [Docs/SplatmapSchoolHandoff.md](../../Docs/SplatmapSchoolHandoff.md) first.
+Tickets 04–07 are resolved. Final run: 19 production checks + one isolated
+experiment, zero test warnings/failures; Python guard tests pass. The explicit
+UV-corrected reimport command now supports repeated source/sculpt updates.
+The owner approved including the saved master/test-map edits. Full manual
+from-zero/visual acceptance and runtime Front-X export remain owner checks.
+
+Owner clarification during UV integration: normal scene-export mask coverage
+validation is not wanted. The proposed check and test were removed; do not add
+them back. Continue with strict UV preparation and same-mesh reimport.
+
 ## Latest resume: first-mask bootstrap, 2026-10-23
 
 Ticket 06 resolved: new TGA creation/import action, derived bounds and effective
