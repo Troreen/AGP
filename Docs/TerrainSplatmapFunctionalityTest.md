@@ -24,7 +24,8 @@ artist workflow unless the owner accepts and can repeat the documented steps.
 - [ ] Download LFS files in AGP-Content with `git lfs pull`.
 - [ ] Build the updated TGA plugin for the installed Unreal 5.7 editor, then
   restart Unreal. The home computer's generated plugin DLL is not in Git.
-- [ ] Confirm **TGA -> Edit Selected Terrain Material Export Data** is visible.
+- [ ] Confirm **TGA -> Edit Selected Terrain Material Export Data** and
+  **TGA -> Expose Selected Terrain Master Texture Parameters** are visible.
 - [ ] Build AGP `Game.sln`, **Debug | x64**, with the documented VS toolchain.
 - [ ] Choose a new test level and asset folder in AGP-Content. Keep existing
   team levels and materials intact. Reusing the supported master material and
@@ -63,6 +64,12 @@ oblique view. Capture an Unreal reference image showing the hill and trough.
 2. Assign it to the new Landscape.
 3. Set up the supported Dunes, Rough and Cliff texture sets: each has base
    color, packed AO/roughness/metallic and normal textures.
+   For the original hardwired master, select `MM_Landscape` in the Content
+   Browser and run **TGA -> Expose Selected Terrain Master Texture Parameters**
+   once. Close its editor and reload the asset if the command reports a cached
+   graph. Save the converted master when satisfied, then assign the nine texture
+   parameters in the new material instance. Export uses their effective values;
+   do not duplicate those textures in the legacy export fallback fields.
 4. In Landscape Paint mode, create/assign Layer Info assets for the material's
    target layers. Preserve the supported independent alpha-layer blend setup;
    do not silently switch to normalized weight blending. The current layer
@@ -123,12 +130,17 @@ Expected: the owner can refresh the paint data without calculating shader
 mapping vectors or editing JSON. The mask must come from the newly painted
 Landscape, not the committed museum/test mask.
 
-**Current blocker:** TGA serializes prepared inputs; it does not bake the mask
-or refresh it after painting. Existing technical helpers are
+**Current blocker:** creating/importing the first prepared mask is still a
+separate preparation step. Once a mask exists, **TGA -> Refresh Selected
+Landscape Paint Mask PNG** can update its source from the selected Landscape
+using the material's saved bounds. Then reimport the mask in Unreal and run
+verified DDS preparation/deployment explicitly. The command requires a complete
+loaded, unrotated native Landscape and an existing writable PNG. It leaves
+geometry untouched. Existing initial-preparation helpers are
 `Tools/Terrain/ExportTerrainRuntime.py` and `PrepareTerrainTextures.ps1` in
-AGP-Content. Their current assumptions and manual handoffs still need a usable
-workflow. A nonempty exported PNG alone does not establish correct channels,
-orientation or coverage.
+AGP-Content. Their first-use assumptions and manual handoffs still need a usable
+workflow. Automated fresh-terrain GPU checks establish the refresh's numeric
+channels/orientation; this owner's workflow acceptance remains necessary.
 
 - [ ] Pass
 - Blocker / confusing step:
@@ -149,8 +161,9 @@ No test-scene generator or manual JSON parameter patch is needed.
 
 Provisional setup details are in AGP-Content's `Docs/TerrainSceneExport.md`.
 Use its **TGA -> Edit Selected Terrain Material Export Data** dialog only with
-the limitations recorded above; it is not evidence that normal instance
-inheritance is finished.
+the preparation limitations recorded above. Effective normal material-instance
+parameters now take precedence over legacy fallback settings; mask world bounds
+remain export metadata. That automated coverage does not replace this manual run.
 
 - [ ] Pass
 - Blocker / confusing step:

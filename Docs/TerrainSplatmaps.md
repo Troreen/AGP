@@ -12,7 +12,8 @@ The owner must complete the manual acceptance check below before we call it work
 `main`. The latest work adds RGB noise comparisons, comments explaining the
 compiled shader offsets, a content-sync batch launcher and prepared-terrain
 material export through the normal TGA scene exporter.
-Matching content commit: `8cd98950fa1805c68e7be88a854dcb560435c771`.
+Matching current content commit: `4a3fb550e74b32b6f10ca0157d5fc068ffae4fda`.
+The earlier prepared-export handoff used `8cd98950fa1805c68e7be88a854dcb560435c771`.
 
 The exporter update and its four Unreal automation checks passed in Unreal
 5.7.4, including a normal scene export from transient test assets. The tested
@@ -20,14 +21,29 @@ plugin was installed locally; generated plugin DLLs and the comparison EXEs
 are ignored and must be built/prepared again on another computer. See
 AGP-Content's `Docs/TerrainSceneExport.md` for setup and verification details.
 
-**Pick up here:** make the normal authoring/export workflow usable, starting
-with material-instance behavior. Do not start with more shader features or
-scratch-folder cleanup. The current exporter stores
-a complete set of terrain inputs as material asset user data. Those inputs
-override matching graph parameters; child export data replaces the whole set.
-Prefer reading textures and artist controls from normal material-instance
-parameters, reserving export data for information such as mask world bounds.
-This improvement has been discussed but is not implemented yet.
+**Current continuation:** material-instance export now reads effective Unreal
+parameters, including inherited defaults and child overrides. Those values win
+over the separate prepared export settings; absent parameters retain the old
+settings as fallbacks. Mask world bounds remain export metadata. The explicit
+**TGA -> Expose Selected Terrain Master Texture Parameters** action converts
+the audited master's nine connected texture objects into instance parameters,
+preserving their defaults and connections. It does not save assets. Close the
+master's editor and reload it first if the command reports a cached graph.
+
+The open project's loaded plugin is still the earlier version. Close Unreal
+normally, rebuild its plugin, and reopen to use these changes; verification
+uses an isolated plugin project. See the
+[active continuation](../.scratch/terrain-splatmaps/continuation-2026-10-23.md).
+
+**Paint updates:** **TGA -> Refresh Selected Landscape Paint Mask PNG** now
+refreshes an existing mask's source using saved bounds and named RGB layers.
+Reimport the texture and prepare/deploy its DDS explicitly. Fresh-Landscape GPU
+tests verify channels, orientation, repaint and output preservation. Initial
+mask creation remains a preparation step; see AGP-Content's artist guide.
+
+**Pick up next:** add first-mask creation/import and integrate UV correction
+into the normal mesh update workflow, then perform the owner's fresh Landscape test.
+Do not start with more shader features or scratch-folder cleanup.
 
 ### Required owner acceptance check
 

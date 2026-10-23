@@ -1,5 +1,19 @@
 # Terrain splat maps: workflow continuation
 
+## Active continuation: material-instance export, 2026-10-23
+
+Owner authorized continued implementation and requested a handoff plus commits
+in both repos at 10% remaining. See [current continuation](continuation-2026-10-23.md)
+and [ticket 04](issues/04-material-instance-export.md) before older handoffs.
+Both Git trees started clean. Material-instance ticket 04 and paint-refresh
+ticket 05 are resolved. Ten material-export checks, an authored-master copy
+check and two fresh-Landscape GPU checks pass; independent reviews are complete.
+The opt-in tool exposes the nine hardwired textures as connected parameters;
+TGA can refresh an existing paint PNG without changing the mesh. First-mask
+creation/import and integrated UV correction remain next. The real editor's
+loaded plugin remains old; builds/tests use an isolated host to avoid changing
+the open editor. The owner has not passed the fresh Landscape acceptance test.
+
 ## Latest handoff: 2026-10-23
 
 User authorized committing/pushing both repositories to continue at school.
