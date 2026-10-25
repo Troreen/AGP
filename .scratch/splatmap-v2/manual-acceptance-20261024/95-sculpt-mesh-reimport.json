@@ -1,0 +1,14 @@
+{
+  "imported_paths": [
+    "/Game/Meshes/Landscape/Test/Lvl_Splatmap_Testing2.Lvl_Splatmap_Testing2"
+  ],
+  "source": "C:\\Users\\tarik\\Documents\\GitHub\\AGP\\.scratch\\splatmap-v2\\manual-acceptance-20261024\\91-blender-sculpt-corrected.fbx",
+  "asset": "/Game/Meshes/Landscape/Test/Lvl_Splatmap_Testing2.Lvl_Splatmap_Testing2",
+  "bounds": "<Struct 'Box' (0x00000236F468EC80) {min: {x: -6300.000000, y: -6300.000000, z: -757.031250}, max: {x: 6300.000977, y: 6300.000977, z: 1575.000000}, is_valid: True}>",
+  "saved": true,
+  "import_data_class": "InterchangeAssetImportData",
+  "bounds_verified": true,
+  "verified_import_filenames": [
+    "C:/Users/tarik/Documents/GitHub/AGP/.scratch/splatmap-v2/manual-acceptance-20261024/91-blender-sculpt-corrected.fbx"
+  ]
+}

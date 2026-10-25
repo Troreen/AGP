@@ -1,0 +1,4 @@
+{
+  "tool": "execute_python",
+  "arguments": {"code": "import unreal,json\na=next(a for a in unreal.get_editor_subsystem(unreal.EditorActorSubsystem).get_all_level_actors() if isinstance(a,unreal.Landscape))\nprint('Target layers:',a.get_target_layer_names())\nfor n in ['render_weightmap','render_weightmaps','render_heightmap','landscape_import_weightmap_from_render_target','landscape_import_heightmap_from_render_target','landscape_export_heightmap_to_render_target']:\n print(n, getattr(a,n).__doc__)\nprint('Rendering functions:',[n for n in dir(unreal.RenderingLibrary) if any(s in n for s in ['read', 'render_target', 'texture'])])\nprint('Material:',a.get_editor_property('landscape_material').get_path_name())"}
+}

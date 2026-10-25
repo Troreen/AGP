@@ -1,0 +1,57 @@
+[
+  {
+    "component": "Controller",
+    "values": {},
+    "errors": {
+      "TargetActor": "ActorComponent: Failed to find property 'TargetActor' for attribute 'TargetActor' on 'ScriptedEventComponent_C'",
+      "TriggerAction": "ActorComponent: Failed to find property 'TriggerAction' for attribute 'TriggerAction' on 'ScriptedEventComponent_C'",
+      "TriggerCollider": "ActorComponent: Failed to find property 'TriggerCollider' for attribute 'TriggerCollider' on 'ScriptedEventComponent_C'",
+      "WaitForCompletion": "ActorComponent: Failed to find property 'WaitForCompletion' for attribute 'WaitForCompletion' on 'ScriptedEventComponent_C'",
+      "Replayable": "ActorComponent: Failed to find property 'Replayable' for attribute 'Replayable' on 'ScriptedEventComponent_C'",
+      "Step": "ActorComponent: Failed to find property 'Step' for attribute 'Step' on 'ScriptedEventComponent_C'"
+    }
+  },
+  {
+    "component": "0_LockControlActionComponent",
+    "values": {},
+    "errors": {
+      "TargetActor": "ActorComponent: Failed to find property 'TargetActor' for attribute 'TargetActor' on 'LockControlActionComponent_C'",
+      "TargetComponent": "ActorComponent: Failed to find property 'TargetComponent' for attribute 'TargetComponent' on 'LockControlActionComponent_C'",
+      "WaitForCompletion": "ActorComponent: Failed to find property 'WaitForCompletion' for attribute 'WaitForCompletion' on 'LockControlActionComponent_C'",
+      "Step": "ActorComponent: Failed to find property 'Step' for attribute 'Step' on 'LockControlActionComponent_C'"
+    }
+  },
+  {
+    "component": "UnlockControlActionComponent",
+    "values": {},
+    "errors": {
+      "TargetActor": "ActorComponent: Failed to find property 'TargetActor' for attribute 'TargetActor' on 'UnlockControlActionComponent_C'",
+      "TargetComponent": "ActorComponent: Failed to find property 'TargetComponent' for attribute 'TargetComponent' on 'UnlockControlActionComponent_C'",
+      "WaitForCompletion": "ActorComponent: Failed to find property 'WaitForCompletion' for attribute 'WaitForCompletion' on 'UnlockControlActionComponent_C'",
+      "Step": "ActorComponent: Failed to find property 'Step' for attribute 'Step' on 'UnlockControlActionComponent_C'"
+    }
+  },
+  {
+    "component": "WaitActionComponent",
+    "values": {},
+    "errors": {
+      "DurationInSeconds": "ActorComponent: Failed to find property 'DurationInSeconds' for attribute 'DurationInSeconds' on 'WaitActionComponent_C'",
+      "TargetActor": "ActorComponent: Failed to find property 'TargetActor' for attribute 'TargetActor' on 'WaitActionComponent_C'",
+      "TargetComponent": "ActorComponent: Failed to find property 'TargetComponent' for attribute 'TargetComponent' on 'WaitActionComponent_C'",
+      "WaitForCompletion": "ActorComponent: Failed to find property 'WaitForCompletion' for attribute 'WaitForCompletion' on 'WaitActionComponent_C'",
+      "Step": "ActorComponent: Failed to find property 'Step' for attribute 'Step' on 'WaitActionComponent_C'"
+    }
+  },
+  {
+    "component": "PlayAudioActionComponent",
+    "values": {},
+    "errors": {
+      "TargetActor": "ActorComponent: Failed to find property 'TargetActor' for attribute 'TargetActor' on 'PlayAudioActionComponent_C'",
+      "TargetComponent": "ActorComponent: Failed to find property 'TargetComponent' for attribute 'TargetComponent' on 'PlayAudioActionComponent_C'",
+      "WaitForCompletion": "ActorComponent: Failed to find property 'WaitForCompletion' for attribute 'WaitForCompletion' on 'PlayAudioActionComponent_C'",
+      "Positional": "ActorComponent: Failed to find property 'Positional' for attribute 'Positional' on 'PlayAudioActionComponent_C'",
+      "Step": "ActorComponent: Failed to find property 'Step' for attribute 'Step' on 'PlayAudioActionComponent_C'",
+      "Sound": "ActorComponent: Failed to find property 'Sound' for attribute 'Sound' on 'PlayAudioActionComponent_C'"
+    }
+  }
+]

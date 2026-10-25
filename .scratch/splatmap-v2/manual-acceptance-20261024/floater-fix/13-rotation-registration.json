@@ -1,0 +1,6 @@
+{
+  "common_floater_pixels": 8260,
+  "same_mask_rgb_within_one_byte": 8260,
+  "stable_fraction": 1.0,
+  "note": "Overlap of actual isolated elevated cube renders; silhouette/side edges can differ."
+}

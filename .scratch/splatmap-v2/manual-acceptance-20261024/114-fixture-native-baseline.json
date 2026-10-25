@@ -1,0 +1,233 @@
+{
+  "source": {
+    "actor": "/Game/Levels/Test_Levels/SP/Lvl_Splatmap_ExporterFixture_20261025.Lvl_Splatmap_ExporterFixture_20261025:PersistentLevel.Landscape_0",
+    "components": [
+      {
+        "component": "LandscapeComponent_0",
+        "textures": [
+          "/Game/Levels/Test_Levels/SP/Lvl_Splatmap_ExporterFixture_20261025.Lvl_Splatmap_ExporterFixture_20261025:PersistentLevel.Landscape_0.Weightmap_9"
+        ],
+        "allocations": [
+          {
+            "layer": "Snow_Rough",
+            "texture_index": 0,
+            "channel": 0
+          },
+          {
+            "layer": "Snow_Dunes",
+            "texture_index": 0,
+            "channel": 1
+          },
+          {
+            "layer": "Snow_Cliff",
+            "texture_index": 0,
+            "channel": 2
+          }
+        ]
+      },
+      {
+        "component": "LandscapeComponent_1",
+        "textures": [
+          "/Game/Levels/Test_Levels/SP/Lvl_Splatmap_ExporterFixture_20261025.Lvl_Splatmap_ExporterFixture_20261025:PersistentLevel.Landscape_0.Weightmap_11"
+        ],
+        "allocations": [
+          {
+            "layer": "Snow_Rough",
+            "texture_index": 0,
+            "channel": 0
+          },
+          {
+            "layer": "Snow_Dunes",
+            "texture_index": 0,
+            "channel": 1
+          },
+          {
+            "layer": "Snow_Cliff",
+            "texture_index": 0,
+            "channel": 2
+          }
+        ]
+      },
+      {
+        "component": "LandscapeComponent_2",
+        "textures": [
+          "/Game/Levels/Test_Levels/SP/Lvl_Splatmap_ExporterFixture_20261025.Lvl_Splatmap_ExporterFixture_20261025:PersistentLevel.Landscape_0.Weightmap_14"
+        ],
+        "allocations": [
+          {
+            "layer": "Snow_Rough",
+            "texture_index": 0,
+            "channel": 0
+          },
+          {
+            "layer": "Snow_Dunes",
+            "texture_index": 0,
+            "channel": 1
+          },
+          {
+            "layer": "Snow_Cliff",
+            "texture_index": 0,
+            "channel": 2
+          }
+        ]
+      },
+      {
+        "component": "LandscapeComponent_3",
+        "textures": [
+          "/Game/Levels/Test_Levels/SP/Lvl_Splatmap_ExporterFixture_20261025.Lvl_Splatmap_ExporterFixture_20261025:PersistentLevel.Landscape_0.Weightmap_15"
+        ],
+        "allocations": [
+          {
+            "layer": "Snow_Rough",
+            "texture_index": 0,
+            "channel": 0
+          },
+          {
+            "layer": "Snow_Dunes",
+            "texture_index": 0,
+            "channel": 1
+          },
+          {
+            "layer": "Snow_Cliff",
+            "texture_index": 0,
+            "channel": 2
+          }
+        ]
+      }
+    ]
+  },
+  "shared_proxy": {
+    "actor": "/Game/Levels/Test_Levels/SP/Lvl_Splatmap_ExporterFixture_20261025.Lvl_Splatmap_ExporterFixture_20261025:PersistentLevel.Landscape_1",
+    "components": [
+      {
+        "component": "LandscapeComponent_0",
+        "textures": [
+          "/Game/Levels/Test_Levels/SP/Lvl_Splatmap_ExporterFixture_20261025.Lvl_Splatmap_ExporterFixture_20261025:PersistentLevel.Landscape_0.Weightmap_9"
+        ],
+        "allocations": [
+          {
+            "layer": "Snow_Rough",
+            "texture_index": 0,
+            "channel": 0
+          },
+          {
+            "layer": "Snow_Dunes",
+            "texture_index": 0,
+            "channel": 1
+          },
+          {
+            "layer": "Snow_Cliff",
+            "texture_index": 0,
+            "channel": 2
+          }
+        ]
+      },
+      {
+        "component": "LandscapeComponent_1",
+        "textures": [
+          "/Game/Levels/Test_Levels/SP/Lvl_Splatmap_ExporterFixture_20261025.Lvl_Splatmap_ExporterFixture_20261025:PersistentLevel.Landscape_0.Weightmap_11"
+        ],
+        "allocations": [
+          {
+            "layer": "Snow_Rough",
+            "texture_index": 0,
+            "channel": 0
+          },
+          {
+            "layer": "Snow_Dunes",
+            "texture_index": 0,
+            "channel": 1
+          },
+          {
+            "layer": "Snow_Cliff",
+            "texture_index": 0,
+            "channel": 2
+          }
+        ]
+      },
+      {
+        "component": "LandscapeComponent_2",
+        "textures": [
+          "/Game/Levels/Test_Levels/SP/Lvl_Splatmap_ExporterFixture_20261025.Lvl_Splatmap_ExporterFixture_20261025:PersistentLevel.Landscape_0.Weightmap_14"
+        ],
+        "allocations": [
+          {
+            "layer": "Snow_Rough",
+            "texture_index": 0,
+            "channel": 0
+          },
+          {
+            "layer": "Snow_Dunes",
+            "texture_index": 0,
+            "channel": 1
+          },
+          {
+            "layer": "Snow_Cliff",
+            "texture_index": 0,
+            "channel": 2
+          }
+        ]
+      },
+      {
+        "component": "LandscapeComponent_3",
+        "textures": [
+          "/Game/Levels/Test_Levels/SP/Lvl_Splatmap_ExporterFixture_20261025.Lvl_Splatmap_ExporterFixture_20261025:PersistentLevel.Landscape_0.Weightmap_15"
+        ],
+        "allocations": [
+          {
+            "layer": "Snow_Rough",
+            "texture_index": 0,
+            "channel": 0
+          },
+          {
+            "layer": "Snow_Dunes",
+            "texture_index": 0,
+            "channel": 1
+          },
+          {
+            "layer": "Snow_Cliff",
+            "texture_index": 0,
+            "channel": 2
+          }
+        ]
+      }
+    ]
+  },
+  "camera": "/Game/Levels/Test_Levels/SP/Lvl_Splatmap_ExporterFixture_20261025.Lvl_Splatmap_ExporterFixture_20261025:PersistentLevel.CameraActor_0",
+  "behavior_actor": "/Game/Levels/Test_Levels/SP/Lvl_Splatmap_ExporterFixture_20261025.Lvl_Splatmap_ExporterFixture_20261025:PersistentLevel.BP_ScriptedEvent_Test_C_0",
+  "behavior_components": [
+    {
+      "name": "DefaultSceneRoot",
+      "class": "SceneComponent"
+    },
+    {
+      "name": "BillboardComponent_1",
+      "class": "BillboardComponent"
+    },
+    {
+      "name": "TriggerBox",
+      "class": "BoxComponent"
+    },
+    {
+      "name": "Controller",
+      "class": "ScriptedEventComponent_C"
+    },
+    {
+      "name": "0_LockControlActionComponent",
+      "class": "LockControlActionComponent_C"
+    },
+    {
+      "name": "UnlockControlActionComponent",
+      "class": "UnlockControlActionComponent_C"
+    },
+    {
+      "name": "WaitActionComponent",
+      "class": "WaitActionComponent_C"
+    },
+    {
+      "name": "PlayAudioActionComponent",
+      "class": "PlayAudioActionComponent_C"
+    }
+  ],
+  "actor_count": 18
+}

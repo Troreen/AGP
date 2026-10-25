@@ -1,0 +1,13 @@
+{
+  "meta": null,
+  "content": [
+    {
+      "type": "text",
+      "text": "{\n  \"success\": true,\n  \"command\": \"import runpy\\nrunpy.run_path('C:/Users/tarik/Documents/GitHub/AGP/.scratch/splatmap-v2/manual-acceptance-20261024/capture_geometry_baseline.py',run_name='__main__')\",\n  \"result\": \"None\",\n  \"output\": [\n    {\n      \"type\": \"Info\",\n      \"output\": \"{\\\"sample_count\\\": 16129, \\\"min\\\": 31799, \\\"max\\\": 34784, \\\"zero_samples\\\": 0, \\\"first_rg\\\": [[132.0, 14.0], [132.0, 14.0], [132.0, 14.0], [132.0, 14.0], [132.0, 14.0], [132.0, 14.0], [132.0, 14.0], [132.0, 14.0]]}\\r\\n\"\n    },\n    {\n      \"type\": \"Info\",\n      \"output\": \"{\\r\\n  \\\"width\\\": 127,\\r\\n  \\\"height\\\": 127,\\r\\n  \\\"min_packed_height\\\": 31799,\\r\\n  \\\"max_packed_height\\\": 34784,\\r\\n  \\\"height_cm_range\\\": [\\r\\n    -757.03125,\\r\\n    1575.0\\r\\n  ],\\r\\n  \\\"geometry_changed\\\": false\\r\\n}\"\n    }\n  ]\n}",
+      "annotations": null,
+      "meta": null
+    }
+  ],
+  "structuredContent": null,
+  "isError": false
+}

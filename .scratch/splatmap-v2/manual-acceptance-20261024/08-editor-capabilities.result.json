@@ -1,0 +1,13 @@
+{
+  "meta": null,
+  "content": [
+    {
+      "type": "text",
+      "text": "{\n  \"success\": true,\n  \"command\": \"import unreal,json\\nprint(json.dumps({'menus': [n for n in dir(unreal.ToolMenus) if any(s in n for s in ['exec', 'menu', 'entry'])], 'landscape': [n for n in dir(unreal.Landscape) if any(s in n for s in ['weight', 'height', 'layer', 'render'])], 'terrain_tools': [n for n in dir(unreal) if any(s in n.lower() for s in ['tga', 'landscapetool', 'landscapeeditor'])]},indent=2))\",\n  \"result\": \"None\",\n  \"output\": [\n    {\n      \"type\": \"Info\",\n      \"output\": \"{\\r\\n  \\\"menus\\\": [\\r\\n    \\\"add_menu_entry_object\\\",\\r\\n    \\\"extend_menu\\\",\\r\\n    \\\"find_menu\\\",\\r\\n    \\\"is_menu_registered\\\",\\r\\n    \\\"refresh_menu_widget\\\",\\r\\n    \\\"register_menu\\\",\\r\\n    \\\"remove_entry\\\",\\r\\n    \\\"remove_menu\\\",\\r\\n    \\\"remove_menu_entry_object\\\"\\r\\n  ],\\r\\n  \\\"landscape\\\": [\\r\\n    \\\"delete_unused_layers\\\",\\r\\n    \\\"force_layers_full_update\\\",\\r\\n    \\\"get_target_layer_names\\\",\\r\\n    \\\"landscape_export_heightmap_to_render_target\\\",\\r\\n    \\\"landscape_import_heightmap_from_render_target\\\",\\r\\n    \\\"landscape_import_weightmap_from_render_target\\\",\\r\\n    \\\"render_custom_depth\\\",\\r\\n    \\\"render_heightmap\\\",\\r\\n    \\\"render_weightmap\\\",\\r\\n    \\\"render_weightmaps\\\",\\r\\n    \\\"virtual_texture_render_pass_type\\\",\\r\\n    \\\"virtual_texture_render_with_quad\\\",\\r\\n    \\\"virtual_texture_render_with_quad_hq\\\",\\r\\n    \\\"was_recently_rendered\\\"\\r\\n  ],\\r\\n  \\\"terrain_tools\\\": [\\r\\n    \\\"FunctionalTestGameMode\\\",\\r\\n    \\\"LandscapeToolTargetType\\\",\\r\\n    \\\"TGAExportSettingsComponent\\\",\\r\\n    \\\"TGASerializableInterface\\\",\\r\\n    \\\"TGATerrainLayerTextures\\\",\\r\\n    \\\"TestGameInstance\\\",\\r\\n    \\\"TextureExporterTGA\\\"\\r\\n  ]\\r\\n}\"\n    }\n  ]\n}",
+      "annotations": null,
+      "meta": null
+    }
+  ],
+  "structuredContent": null,
+  "isError": false
+}

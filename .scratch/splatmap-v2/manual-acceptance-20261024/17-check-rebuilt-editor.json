@@ -1,0 +1,4 @@
+{
+ "tool":"execute_python",
+ "arguments":{"code":"import unreal,json\nw=unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem).get_editor_world()\nactors=unreal.get_editor_subsystem(unreal.EditorActorSubsystem).get_all_level_actors()\nfor a in actors:\n if a.get_actor_label()=='Lvl_Splatmap_Testing2': a.set_is_temporarily_hidden_in_editor(True)\nprint(json.dumps({'world':w.get_path_name(),'actors':len(actors),'old_terrain_helper_class_exposed':hasattr(unreal,'TGATerrainLayerTextures'),'terrain_meshes':[c.static_mesh.get_path_name() if c.static_mesh else None for a in actors if a.get_actor_label()=='Lvl_Splatmap_Testing2' for c in a.get_components_by_class(unreal.StaticMeshComponent)]},indent=2))"}
+}

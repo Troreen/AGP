@@ -1,0 +1,50 @@
+{
+  "defaults": {
+    "application": {
+      "title": "TM Game",
+      "windowClassName": "Turkish Motors Game",
+      "windowedResolution": {
+        "width": 1920,
+        "height": 1080
+      },
+      "windowMode": "borderless",
+      "resizable": false,
+      "renderDiagnostics": true,
+      "mouseLook": true,
+      "contentPath": "../../Content",
+      "shaderFolder": "EngineShaders",
+      "scenesFolder": "ExportedScenes",
+      "cursorPath": "",
+      "initialScene": "lvl_blockout/Lvl_Blockout_Level.json"
+    },
+    "sound": {
+      "masterVolume": 1.0,
+      "musicVolume": 0.35,
+      "sfxVolume": 1.0
+    }
+  },
+  "current": {
+    "application": {
+      "title": "TM Game",
+      "windowClassName": "Turkish Motors Game",
+      "windowedResolution": {
+        "width": 1280,
+        "height": 720
+      },
+      "windowMode": "borderless",
+      "resizable": false,
+      "renderDiagnostics": true,
+      "mouseLook": true,
+      "contentPath": "../../Content",
+      "shaderFolder": "EngineShaders",
+      "scenesFolder": "ExportedScenes",
+      "cursorPath": "",
+      "initialScene": "lvl_splatmap_testing2_runtime/Lvl_Splatmap_Testing2_Runtime_RGB_Level.json"
+    },
+    "sound": {
+      "masterVolume": 1.0,
+      "musicVolume": 0.35,
+      "sfxVolume": 1.0
+    }
+  }
+}

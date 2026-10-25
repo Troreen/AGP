@@ -1,0 +1,13 @@
+{
+  "meta": null,
+  "content": [
+    {
+      "type": "text",
+      "text": "{\n  \"success\": true,\n  \"command\": \"import runpy\\nrunpy.run_path('C:/Users/tarik/Documents/GitHub/AGP/.scratch/splatmap-v2/manual-acceptance-20261024/export_fresh_landscape.py', run_name='__main__')\",\n  \"result\": \"None\",\n  \"output\": [\n    {\n      \"type\": \"Info\",\n      \"output\": \"{\\r\\n  \\\"success\\\": true,\\r\\n  \\\"errors\\\": [],\\r\\n  \\\"engine\\\": \\\"5.7.4-51494982+++UE5+Release-5.7\\\",\\r\\n  \\\"world\\\": \\\"/Game/Levels/Test_Levels/SP/Lvl_Splatmap_Testing2.Lvl_Splatmap_Testing2\\\",\\r\\n  \\\"selected_actor\\\": \\\"/Game/Levels/Test_Levels/SP/Lvl_Splatmap_Testing2.Lvl_Splatmap_Testing2:PersistentLevel.Landscape_0\\\",\\r\\n  \\\"actor_transform\\\": \\\"<Struct 'Transform' (0x0000027394E96CD0) {rotation: {x: 0.000000, y: 0.000000, z: 0.000000, w: 1.000000}, translation: {x: -6300.000000, y: -6300.000000, z: 0.000000}, scale3d: {x: 100.000000, y: 100.000000, z: 100.000000}}>\\\",\\r\\n  \\\"exporter\\\": \\\"LevelExporterFBX\\\",\\r\\n  \\\"settings\\\": {\\r\\n    \\\"ascii\\\": \\\"False\\\",\\r\\n    \\\"force_front_x_axis\\\": \\\"False\\\",\\r\\n    \\\"collision\\\": \\\"False\\\",\\r\\n    \\\"level_of_detail\\\": \\\"False\\\",\\r\\n    \\\"vertex_color\\\": \\\"True\\\",\\r\\n    \\\"fbx_export_compatibility\\\": \\\"<FbxExportCompatibility.FBX_2013: 2>\\\"\\r\\n  },\\r\\n  \\\"fbx\\\": \\\"C:\\\\\\\\Users\\\\\\\\tarik\\\\\\\\Documents\\\\\\\\GitHub\\\\\\\\AGP-Content\\\\\\\\.scratch\\\\\\\\splatmap-v2\\\\\\\\validation\\\\\\\\manual-acceptance-20261024\\\\\\\\fresh-fbx-01\\\\\\\\Lvl_Splatmap_Testing2.fbx\\\",\\r\\n  \\\"bytes\\\": 904624,\\r\\n  \\\"sha256\\\": \\\"74c11cfb907142aa6d4acede28887277a46a3501cf857bbaee8c75afa0023bbc\\\",\\r\\n  \\\"map_saved\\\": false,\\r\\n  \\\"paint_or_geometry_changed\\\": false\\r\\n}\"\n    }\n  ]\n}",
+      "annotations": null,
+      "meta": null
+    }
+  ],
+  "structuredContent": null,
+  "isError": false
+}

@@ -1,0 +1,4 @@
+{
+  "tool": "execute_python",
+  "arguments": {"code": "import unreal,json\nprint(json.dumps({'menus': [n for n in dir(unreal.ToolMenus) if any(s in n for s in ['exec', 'menu', 'entry'])], 'landscape': [n for n in dir(unreal.Landscape) if any(s in n for s in ['weight', 'height', 'layer', 'render'])], 'terrain_tools': [n for n in dir(unreal) if any(s in n.lower() for s in ['tga', 'landscapetool', 'landscapeeditor'])]},indent=2))"}
+}

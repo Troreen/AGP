@@ -1,0 +1,98 @@
+{
+  "actor": "/Game/Levels/Test_Levels/SP/Lvl_Splatmap_Testing2.Lvl_Splatmap_Testing2:PersistentLevel.Landscape_0",
+  "components": [
+    {
+      "component": "LandscapeComponent_0",
+      "textures": [
+        "/Game/Levels/Test_Levels/SP/Lvl_Splatmap_Testing2.Lvl_Splatmap_Testing2:PersistentLevel.Landscape_0.Weightmap_9"
+      ],
+      "allocations": [
+        {
+          "layer": "Snow_Rough",
+          "texture_index": 0,
+          "channel": 0
+        },
+        {
+          "layer": "Snow_Dunes",
+          "texture_index": 0,
+          "channel": 1
+        },
+        {
+          "layer": "Snow_Cliff",
+          "texture_index": 0,
+          "channel": 2
+        }
+      ]
+    },
+    {
+      "component": "LandscapeComponent_1",
+      "textures": [
+        "/Game/Levels/Test_Levels/SP/Lvl_Splatmap_Testing2.Lvl_Splatmap_Testing2:PersistentLevel.Landscape_0.Weightmap_11"
+      ],
+      "allocations": [
+        {
+          "layer": "Snow_Rough",
+          "texture_index": 0,
+          "channel": 0
+        },
+        {
+          "layer": "Snow_Dunes",
+          "texture_index": 0,
+          "channel": 1
+        },
+        {
+          "layer": "Snow_Cliff",
+          "texture_index": 0,
+          "channel": 2
+        }
+      ]
+    },
+    {
+      "component": "LandscapeComponent_2",
+      "textures": [
+        "/Game/Levels/Test_Levels/SP/Lvl_Splatmap_Testing2.Lvl_Splatmap_Testing2:PersistentLevel.Landscape_0.Weightmap_14"
+      ],
+      "allocations": [
+        {
+          "layer": "Snow_Rough",
+          "texture_index": 0,
+          "channel": 0
+        },
+        {
+          "layer": "Snow_Dunes",
+          "texture_index": 0,
+          "channel": 1
+        },
+        {
+          "layer": "Snow_Cliff",
+          "texture_index": 0,
+          "channel": 2
+        }
+      ]
+    },
+    {
+      "component": "LandscapeComponent_3",
+      "textures": [
+        "/Game/Levels/Test_Levels/SP/Lvl_Splatmap_Testing2.Lvl_Splatmap_Testing2:PersistentLevel.Landscape_0.Weightmap_15"
+      ],
+      "allocations": [
+        {
+          "layer": "Snow_Rough",
+          "texture_index": 0,
+          "channel": 0
+        },
+        {
+          "layer": "Snow_Dunes",
+          "texture_index": 0,
+          "channel": 1
+        },
+        {
+          "layer": "Snow_Cliff",
+          "texture_index": 0,
+          "channel": 2
+        }
+      ]
+    }
+  ],
+  "matches_export": true
+}

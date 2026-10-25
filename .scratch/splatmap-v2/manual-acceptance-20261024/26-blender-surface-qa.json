@@ -1,0 +1,53 @@
+[
+  {
+    "file": "10-source-inspection.blend",
+    "vertices": 16384,
+    "triangles": 31752,
+    "uv_layers": [
+      "TextureUVs"
+    ],
+    "normal_length_min": 0.9999998239800179,
+    "normal_length_max": 1.000000177882596,
+    "face_corner_dot_min": 0.9616689700633287,
+    "face_corner_dot_mean": 0.9986060198885653,
+    "opposed_corner_normals": 0,
+    "physical_bounds_m": [
+      [
+        -63.0,
+        -63.0,
+        -7.5703125
+      ],
+      [
+        63.0,
+        63.0,
+        15.75
+      ]
+    ]
+  },
+  {
+    "file": "17-reimport-inspection.blend",
+    "vertices": 16384,
+    "triangles": 31752,
+    "uv_layers": [
+      "TextureUVs",
+      "WeightmapUVs"
+    ],
+    "normal_length_min": 0.9999998316634304,
+    "normal_length_max": 1.000000176441047,
+    "face_corner_dot_min": 0.9616689700633287,
+    "face_corner_dot_mean": 0.9986060571093297,
+    "opposed_corner_normals": 0,
+    "physical_bounds_m": [
+      [
+        -63.0,
+        -63.0,
+        -7.570310115814209
+      ],
+      [
+        63.0,
+        63.0,
+        15.75
+      ]
+    ]
+  }
+]

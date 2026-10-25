@@ -1,0 +1,14 @@
+[
+  {
+    "component": "Controller",
+    "readable": {}
+  },
+  {
+    "component": "0_LockControlActionComponent",
+    "readable": {}
+  },
+  {
+    "component": "WaitActionComponent",
+    "readable": {}
+  }
+]

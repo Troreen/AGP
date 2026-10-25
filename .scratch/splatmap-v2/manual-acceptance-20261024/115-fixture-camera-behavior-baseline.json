@@ -1,0 +1,51 @@
+{
+  "camera_location": [
+    1000.0,
+    2000.0,
+    9000.0
+  ],
+  "fov": 90.0,
+  "aspect_ratio": 1.7777780294418335,
+  "behavior_components": [
+    {
+      "name": "DefaultSceneRoot",
+      "class": "SceneComponent",
+      "serialize_methods": []
+    },
+    {
+      "name": "BillboardComponent_1",
+      "class": "BillboardComponent",
+      "serialize_methods": []
+    },
+    {
+      "name": "TriggerBox",
+      "class": "BoxComponent",
+      "serialize_methods": []
+    },
+    {
+      "name": "Controller",
+      "class": "ScriptedEventComponent_C",
+      "serialize_methods": []
+    },
+    {
+      "name": "0_LockControlActionComponent",
+      "class": "LockControlActionComponent_C",
+      "serialize_methods": []
+    },
+    {
+      "name": "UnlockControlActionComponent",
+      "class": "UnlockControlActionComponent_C",
+      "serialize_methods": []
+    },
+    {
+      "name": "WaitActionComponent",
+      "class": "WaitActionComponent_C",
+      "serialize_methods": []
+    },
+    {
+      "name": "PlayAudioActionComponent",
+      "class": "PlayAudioActionComponent_C",
+      "serialize_methods": []
+    }
+  ]
+}

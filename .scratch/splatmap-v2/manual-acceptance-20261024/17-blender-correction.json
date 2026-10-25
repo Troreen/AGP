@@ -1,0 +1,64 @@
+{
+  "blender": "5.1.2",
+  "candidate": "C:\\Users\\tarik\\Documents\\GitHub\\AGP\\.scratch\\splatmap-v2\\manual-acceptance-20261024\\17-blender-uvsafe.fbx",
+  "sha256": "8659efc49ab8a4d193ec9dc85f0e596da8e29d9581101d1103232acb280614be",
+  "max_blender_world_position_error_m": 0.0,
+  "uv_values_unchanged_during_bake": true,
+  "custom_normals": true,
+  "settings": {
+    "use_selection": true,
+    "object_types": [
+      "MESH"
+    ],
+    "global_scale": 1.0,
+    "apply_unit_scale": true,
+    "apply_scale_options": "FBX_SCALE_ALL",
+    "axis_forward": "-Z",
+    "axis_up": "Y",
+    "use_space_transform": true,
+    "bake_space_transform": true,
+    "use_mesh_modifiers": false,
+    "mesh_smooth_type": "OFF",
+    "add_leaf_bones": false,
+    "bake_anim": false,
+    "use_tspace": true
+  },
+  "reimport": [
+    {
+      "name": "Landscape",
+      "parent": null,
+      "matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          7.549790126404332e-08,
+          -1.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          7.549790126404332e-08,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "vertices": 16384,
+      "uv_layers": [
+        "TextureUVs",
+        "WeightmapUVs"
+      ],
+      "custom_normals": true
+    }
+  ]
+}

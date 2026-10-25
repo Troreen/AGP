@@ -1,0 +1,95 @@
+[
+  {
+    "layer": "Snow_Dunes",
+    "blend_type": "<LandscapeLayerBlendType.LB_ALPHA_BLEND: 1>",
+    "debug_branch": {
+      "name": "MaterialExpressionReroute_3",
+      "class": "MaterialExpressionReroute",
+      "inputs": [
+        {
+          "name": "MaterialExpressionMakeMaterialAttributes_2",
+          "class": "MaterialExpressionMakeMaterialAttributes",
+          "inputs": [
+            {
+              "name": "MaterialExpressionReroute_2",
+              "class": "MaterialExpressionReroute",
+              "inputs": [
+                {
+                  "name": "MaterialExpressionConstant3Vector_0",
+                  "class": "MaterialExpressionConstant3Vector",
+                  "rgb": [
+                    1.0,
+                    0.0,
+                    0.0
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "layer": "Snow_Rough",
+    "blend_type": "<LandscapeLayerBlendType.LB_ALPHA_BLEND: 1>",
+    "debug_branch": {
+      "name": "MaterialExpressionReroute_1",
+      "class": "MaterialExpressionReroute",
+      "inputs": [
+        {
+          "name": "MaterialExpressionMakeMaterialAttributes_3",
+          "class": "MaterialExpressionMakeMaterialAttributes",
+          "inputs": [
+            {
+              "name": "MaterialExpressionReroute_0",
+              "class": "MaterialExpressionReroute",
+              "inputs": [
+                {
+                  "name": "MaterialExpressionConstant3Vector_1",
+                  "class": "MaterialExpressionConstant3Vector",
+                  "rgb": [
+                    0.0,
+                    1.0,
+                    0.0
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "layer": "Snow_Cliff",
+    "blend_type": "<LandscapeLayerBlendType.LB_ALPHA_BLEND: 1>",
+    "debug_branch": {
+      "name": "MaterialExpressionReroute_5",
+      "class": "MaterialExpressionReroute",
+      "inputs": [
+        {
+          "name": "MaterialExpressionMakeMaterialAttributes_4",
+          "class": "MaterialExpressionMakeMaterialAttributes",
+          "inputs": [
+            {
+              "name": "MaterialExpressionReroute_4",
+              "class": "MaterialExpressionReroute",
+              "inputs": [
+                {
+                  "name": "MaterialExpressionConstant3Vector_2",
+                  "class": "MaterialExpressionConstant3Vector",
+                  "rgb": [
+                    0.0,
+                    0.0,
+                    1.0
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+]

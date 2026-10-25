@@ -1,0 +1,13 @@
+{
+  "meta": null,
+  "content": [
+    {
+      "type": "text",
+      "text": "{\n  \"success\": true,\n  \"command\": \"import builtins,unreal,json\\ns=builtins._agp_acceptance_paint\\nv=[c.r for c in unreal.RenderingLibrary.read_render_target_raw(s['landscape'],s['rt'],False)]\\nd=[i for i,(a,b) in enumerate(zip(s['values'],v)) if a!=b]\\nprint(json.dumps({'changed':len(d),'outside':sum(not(35<=i%127<=41 and 70<=i//127<=76) for i in d),'min':min(v),'max':max(v),'bounds':[min(i%127 for i in d),min(i//127 for i in d),max(i%127 for i in d),max(i//127 for i in d)] if d else None,'examples':[(i%127,i//127,s['values'][i],v[i]) for i in d[:8]]}))\",\n  \"result\": \"None\",\n  \"output\": [\n    {\n      \"type\": \"Info\",\n      \"output\": \"{\\\"changed\\\": 9424, \\\"outside\\\": 9375, \\\"min\\\": 0.0, \\\"max\\\": 255.0, \\\"bounds\\\": [8, 35, 126, 126], \\\"examples\\\": [[90, 35, 4.0, 0.0], [91, 35, 4.0, 0.0], [92, 35, 4.0, 0.0], [93, 35, 4.0, 0.0], [94, 35, 4.0, 0.0], [95, 35, 4.0, 0.0], [96, 35, 4.0, 0.0], [97, 35, 4.0, 0.0]]}\\r\\n\"\n    }\n  ]\n}",
+      "annotations": null,
+      "meta": null
+    }
+  ],
+  "structuredContent": null,
+  "isError": false
+}

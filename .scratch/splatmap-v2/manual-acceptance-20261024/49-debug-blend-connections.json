@@ -1,0 +1,35 @@
+[
+  {
+    "node": "MaterialExpressionLandscapeLayerBlend_0",
+    "layers": [
+      {
+        "LayerName": "Snow_Dunes",
+        "BlendType": "<LandscapeLayerBlendType.LB_ALPHA_BLEND: 1>",
+        "ConstLayerInput": "<Struct 'Vector' (0x00000237C587AE38) {x: 0.000000, y: 0.000000, z: 0.000000}>",
+        "LayerInput": "LayerBlendInput: Property 'LayerInput' for attribute 'LayerInput' on 'LayerBlendInput' is protected and cannot be read"
+      },
+      {
+        "LayerName": "Snow_Rough",
+        "BlendType": "<LandscapeLayerBlendType.LB_ALPHA_BLEND: 1>",
+        "ConstLayerInput": "<Struct 'Vector' (0x00000237C58701B8) {x: 0.000000, y: 0.000000, z: 0.000000}>",
+        "LayerInput": "LayerBlendInput: Property 'LayerInput' for attribute 'LayerInput' on 'LayerBlendInput' is protected and cannot be read"
+      },
+      {
+        "LayerName": "Snow_Cliff",
+        "BlendType": "<LandscapeLayerBlendType.LB_ALPHA_BLEND: 1>",
+        "ConstLayerInput": "<Struct 'Vector' (0x00000237C587C198) {x: 0.000000, y: 0.000000, z: 0.000000}>",
+        "LayerInput": "LayerBlendInput: Property 'LayerInput' for attribute 'LayerInput' on 'LayerBlendInput' is protected and cannot be read"
+      }
+    ],
+    "input_names": [
+      "Layer Snow_Dunes",
+      "Layer Snow_Rough",
+      "Layer Snow_Cliff"
+    ],
+    "input_nodes": [
+      "MaterialExpressionBlendMaterialAttributes_0",
+      "MaterialExpressionBlendMaterialAttributes_1",
+      "MaterialExpressionBlendMaterialAttributes_2"
+    ]
+  }
+]

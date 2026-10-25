@@ -1,0 +1,34 @@
+[
+  {
+    "component": "LandscapeComponent_0",
+    "index": 0,
+    "source": "/Game/Levels/Test_Levels/SP/Lvl_Splatmap_Testing2.Lvl_Splatmap_Testing2:PersistentLevel.Landscape_0.Weightmap_9",
+    "output": "C:\\Users\\tarik\\Documents\\GitHub\\AGP\\.scratch\\splatmap-v2\\manual-acceptance-20261024\\native-mask-readback\\LandscapeComponent_0_0.png",
+    "success": true,
+    "errors": []
+  },
+  {
+    "component": "LandscapeComponent_1",
+    "index": 0,
+    "source": "/Game/Levels/Test_Levels/SP/Lvl_Splatmap_Testing2.Lvl_Splatmap_Testing2:PersistentLevel.Landscape_0.Weightmap_11",
+    "output": "C:\\Users\\tarik\\Documents\\GitHub\\AGP\\.scratch\\splatmap-v2\\manual-acceptance-20261024\\native-mask-readback\\LandscapeComponent_1_0.png",
+    "success": true,
+    "errors": []
+  },
+  {
+    "component": "LandscapeComponent_2",
+    "index": 0,
+    "source": "/Game/Levels/Test_Levels/SP/Lvl_Splatmap_Testing2.Lvl_Splatmap_Testing2:PersistentLevel.Landscape_0.Weightmap_14",
+    "output": "C:\\Users\\tarik\\Documents\\GitHub\\AGP\\.scratch\\splatmap-v2\\manual-acceptance-20261024\\native-mask-readback\\LandscapeComponent_2_0.png",
+    "success": true,
+    "errors": []
+  },
+  {
+    "component": "LandscapeComponent_3",
+    "index": 0,
+    "source": "/Game/Levels/Test_Levels/SP/Lvl_Splatmap_Testing2.Lvl_Splatmap_Testing2:PersistentLevel.Landscape_0.Weightmap_15",
+    "output": "C:\\Users\\tarik\\Documents\\GitHub\\AGP\\.scratch\\splatmap-v2\\manual-acceptance-20261024\\native-mask-readback\\LandscapeComponent_3_0.png",
+    "success": true,
+    "errors": []
+  }
+]

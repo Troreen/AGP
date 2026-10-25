@@ -1,0 +1,519 @@
+[
+  {
+    "name": "MaterialExpressionTextureObject_8",
+    "class": "MaterialExpressionTextureObject",
+    "texture": "<Object '/Game/Textures/T_8M_Snow_Rough_OcclusionRoughnessMetallic.T_8M_Snow_Rough_OcclusionRoughnessMetallic' (0x00000236C2FD7800) Class 'Texture2D'>",
+    "input_names": [],
+    "input_nodes": []
+  },
+  {
+    "name": "MaterialExpressionTextureObject_7",
+    "class": "MaterialExpressionTextureObject",
+    "texture": "<Object '/Game/Textures/T_8M_Snow_Rough_Normal.T_8M_Snow_Rough_Normal' (0x00000236C2FD7200) Class 'Texture2D'>",
+    "input_names": [],
+    "input_nodes": []
+  },
+  {
+    "name": "MaterialExpressionTextureObject_6",
+    "class": "MaterialExpressionTextureObject",
+    "texture": "<Object '/Game/Textures/T_8M_Snow_Rough_BaseColor.T_8M_Snow_Rough_BaseColor' (0x00000236C2FD6C00) Class 'Texture2D'>",
+    "input_names": [],
+    "input_nodes": []
+  },
+  {
+    "name": "MaterialExpressionTextureObject_5",
+    "class": "MaterialExpressionTextureObject",
+    "texture": "<Object '/Game/Textures/T_8M_Snow_Dunes_OcclusionRoughnessMetallic.T_8M_Snow_Dunes_OcclusionRoughnessMetallic' (0x00000236C2FD6600) Class 'Texture2D'>",
+    "input_names": [],
+    "input_nodes": []
+  },
+  {
+    "name": "MaterialExpressionTextureObject_4",
+    "class": "MaterialExpressionTextureObject",
+    "texture": "<Object '/Game/Textures/T_8M_Snow_Dunes_Normal.T_8M_Snow_Dunes_Normal' (0x00000236C2FD6000) Class 'Texture2D'>",
+    "input_names": [],
+    "input_nodes": []
+  },
+  {
+    "name": "MaterialExpressionTextureObject_3",
+    "class": "MaterialExpressionTextureObject",
+    "texture": "<Object '/Game/Textures/T_8M_Snow_Dunes_BaseColor.T_8M_Snow_Dunes_BaseColor' (0x00000236C2FD5A00) Class 'Texture2D'>",
+    "input_names": [],
+    "input_nodes": []
+  },
+  {
+    "name": "MaterialExpressionTextureObject_2",
+    "class": "MaterialExpressionTextureObject",
+    "texture": "<Object '/Game/Textures/T_8M_Snow_Cliff_OcclusionRoughnessMetallic.T_8M_Snow_Cliff_OcclusionRoughnessMetallic' (0x00000236C2FD5400) Class 'Texture2D'>",
+    "input_names": [],
+    "input_nodes": []
+  },
+  {
+    "name": "MaterialExpressionTextureObject_1",
+    "class": "MaterialExpressionTextureObject",
+    "texture": "<Object '/Game/Textures/T_8M_Snow_Cliff_Normal.T_8M_Snow_Cliff_Normal' (0x00000236C2FD4E00) Class 'Texture2D'>",
+    "input_names": [],
+    "input_nodes": []
+  },
+  {
+    "name": "MaterialExpressionTextureObject_0",
+    "class": "MaterialExpressionTextureObject",
+    "texture": "<Object '/Game/Textures/T_8M_Snow_Cliff_BaseColor.T_8M_Snow_Cliff_BaseColor' (0x00000236C2FD4800) Class 'Texture2D'>",
+    "input_names": [],
+    "input_nodes": []
+  },
+  {
+    "name": "MaterialExpressionScalarParameter_0",
+    "class": "MaterialExpressionScalarParameter",
+    "parameter_name": "DEBUG",
+    "default_value": "0.0",
+    "input_names": [],
+    "input_nodes": []
+  },
+  {
+    "name": "MaterialExpressionReroute_5",
+    "class": "MaterialExpressionReroute",
+    "input_names": [
+      "None"
+    ],
+    "input_nodes": [
+      "MaterialExpressionMakeMaterialAttributes_4"
+    ]
+  },
+  {
+    "name": "MaterialExpressionReroute_4",
+    "class": "MaterialExpressionReroute",
+    "input_names": [
+      "None"
+    ],
+    "input_nodes": [
+      "MaterialExpressionConstant3Vector_2"
+    ]
+  },
+  {
+    "name": "MaterialExpressionReroute_3",
+    "class": "MaterialExpressionReroute",
+    "input_names": [
+      "None"
+    ],
+    "input_nodes": [
+      "MaterialExpressionMakeMaterialAttributes_2"
+    ]
+  },
+  {
+    "name": "MaterialExpressionReroute_2",
+    "class": "MaterialExpressionReroute",
+    "input_names": [
+      "None"
+    ],
+    "input_nodes": [
+      "MaterialExpressionConstant3Vector_0"
+    ]
+  },
+  {
+    "name": "MaterialExpressionReroute_1",
+    "class": "MaterialExpressionReroute",
+    "input_names": [
+      "None"
+    ],
+    "input_nodes": [
+      "MaterialExpressionMakeMaterialAttributes_3"
+    ]
+  },
+  {
+    "name": "MaterialExpressionReroute_0",
+    "class": "MaterialExpressionReroute",
+    "input_names": [
+      "None"
+    ],
+    "input_nodes": [
+      "MaterialExpressionConstant3Vector_1"
+    ]
+  },
+  {
+    "name": "MaterialExpressionPinBase_5",
+    "class": "MaterialExpressionPinBase",
+    "input_names": [
+      "Output"
+    ],
+    "input_nodes": [
+      "MaterialExpressionMakeMaterialAttributes_4"
+    ]
+  },
+  {
+    "name": "MaterialExpressionPinBase_4",
+    "class": "MaterialExpressionPinBase",
+    "input_names": [],
+    "input_nodes": []
+  },
+  {
+    "name": "MaterialExpressionPinBase_3",
+    "class": "MaterialExpressionPinBase",
+    "input_names": [
+      "Output"
+    ],
+    "input_nodes": [
+      "MaterialExpressionMakeMaterialAttributes_2"
+    ]
+  },
+  {
+    "name": "MaterialExpressionPinBase_2",
+    "class": "MaterialExpressionPinBase",
+    "input_names": [],
+    "input_nodes": []
+  },
+  {
+    "name": "MaterialExpressionPinBase_1",
+    "class": "MaterialExpressionPinBase",
+    "input_names": [
+      "Output"
+    ],
+    "input_nodes": [
+      "MaterialExpressionMakeMaterialAttributes_3"
+    ]
+  },
+  {
+    "name": "MaterialExpressionPinBase_0",
+    "class": "MaterialExpressionPinBase",
+    "input_names": [],
+    "input_nodes": []
+  },
+  {
+    "name": "MaterialExpressionMaterialFunctionCall_2",
+    "class": "MaterialExpressionMaterialFunctionCall",
+    "material_function": "<Object '/Game/Materials/MF_LandscapeLayer.MF_LandscapeLayer' (0x00000236C2D5CA80) Class 'MaterialFunction'>",
+    "input_names": [
+      "BaseColor",
+      "ORM",
+      "Normal"
+    ],
+    "input_nodes": [
+      "MaterialExpressionTextureObject_0",
+      "MaterialExpressionTextureObject_2",
+      "MaterialExpressionTextureObject_1"
+    ]
+  },
+  {
+    "name": "MaterialExpressionMaterialFunctionCall_1",
+    "class": "MaterialExpressionMaterialFunctionCall",
+    "material_function": "<Object '/Game/Materials/MF_LandscapeLayer.MF_LandscapeLayer' (0x00000236C2D5CA80) Class 'MaterialFunction'>",
+    "input_names": [
+      "BaseColor",
+      "ORM",
+      "Normal"
+    ],
+    "input_nodes": [
+      "MaterialExpressionTextureObject_6",
+      "MaterialExpressionTextureObject_8",
+      "MaterialExpressionTextureObject_7"
+    ]
+  },
+  {
+    "name": "MaterialExpressionMaterialFunctionCall_0",
+    "class": "MaterialExpressionMaterialFunctionCall",
+    "material_function": "<Object '/Game/Materials/MF_LandscapeLayer.MF_LandscapeLayer' (0x00000236C2D5CA80) Class 'MaterialFunction'>",
+    "input_names": [
+      "BaseColor",
+      "ORM",
+      "Normal"
+    ],
+    "input_nodes": [
+      "MaterialExpressionTextureObject_3",
+      "MaterialExpressionTextureObject_5",
+      "MaterialExpressionTextureObject_4"
+    ]
+  },
+  {
+    "name": "MaterialExpressionMakeMaterialAttributes_4",
+    "class": "MaterialExpressionMakeMaterialAttributes",
+    "input_names": [
+      "BaseColor",
+      "Metallic",
+      "Specular",
+      "Roughness",
+      "Anisotropy",
+      "EmissiveColor",
+      "Opacity",
+      "OpacityMask",
+      "Normal",
+      "Tangent",
+      "WorldPositionOffset",
+      "SubsurfaceColor",
+      "ClearCoat",
+      "ClearCoatRoughness",
+      "AmbientOcclusion",
+      "Refraction",
+      "CustomizedUVs_0",
+      "CustomizedUVs_1",
+      "CustomizedUVs_2",
+      "CustomizedUVs_3",
+      "CustomizedUVs_4",
+      "CustomizedUVs_5",
+      "CustomizedUVs_6",
+      "CustomizedUVs_7",
+      "PixelDepthOffset",
+      "ShadingModel",
+      "Displacement"
+    ],
+    "input_nodes": [
+      "MaterialExpressionReroute_4",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "name": "MaterialExpressionMakeMaterialAttributes_3",
+    "class": "MaterialExpressionMakeMaterialAttributes",
+    "input_names": [
+      "BaseColor",
+      "Metallic",
+      "Specular",
+      "Roughness",
+      "Anisotropy",
+      "EmissiveColor",
+      "Opacity",
+      "OpacityMask",
+      "Normal",
+      "Tangent",
+      "WorldPositionOffset",
+      "SubsurfaceColor",
+      "ClearCoat",
+      "ClearCoatRoughness",
+      "AmbientOcclusion",
+      "Refraction",
+      "CustomizedUVs_0",
+      "CustomizedUVs_1",
+      "CustomizedUVs_2",
+      "CustomizedUVs_3",
+      "CustomizedUVs_4",
+      "CustomizedUVs_5",
+      "CustomizedUVs_6",
+      "CustomizedUVs_7",
+      "PixelDepthOffset",
+      "ShadingModel",
+      "Displacement"
+    ],
+    "input_nodes": [
+      "MaterialExpressionReroute_0",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "name": "MaterialExpressionMakeMaterialAttributes_2",
+    "class": "MaterialExpressionMakeMaterialAttributes",
+    "input_names": [
+      "BaseColor",
+      "Metallic",
+      "Specular",
+      "Roughness",
+      "Anisotropy",
+      "EmissiveColor",
+      "Opacity",
+      "OpacityMask",
+      "Normal",
+      "Tangent",
+      "WorldPositionOffset",
+      "SubsurfaceColor",
+      "ClearCoat",
+      "ClearCoatRoughness",
+      "AmbientOcclusion",
+      "Refraction",
+      "CustomizedUVs_0",
+      "CustomizedUVs_1",
+      "CustomizedUVs_2",
+      "CustomizedUVs_3",
+      "CustomizedUVs_4",
+      "CustomizedUVs_5",
+      "CustomizedUVs_6",
+      "CustomizedUVs_7",
+      "PixelDepthOffset",
+      "ShadingModel",
+      "Displacement"
+    ],
+    "input_nodes": [
+      "MaterialExpressionReroute_2",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "name": "MaterialExpressionLandscapeLayerBlend_0",
+    "class": "MaterialExpressionLandscapeLayerBlend",
+    "input_names": [
+      "Layer Snow_Dunes",
+      "Layer Snow_Rough",
+      "Layer Snow_Cliff"
+    ],
+    "input_nodes": [
+      "MaterialExpressionBlendMaterialAttributes_0",
+      "MaterialExpressionBlendMaterialAttributes_1",
+      "MaterialExpressionBlendMaterialAttributes_2"
+    ]
+  },
+  {
+    "name": "MaterialExpressionConstant3Vector_2",
+    "class": "MaterialExpressionConstant3Vector",
+    "constant": "<Struct 'LinearColor' (0x00000235A277E1A8) {r: 0.000000, g: 0.000000, b: 1.000000, a: 0.000000}>",
+    "input_names": [],
+    "input_nodes": []
+  },
+  {
+    "name": "MaterialExpressionConstant3Vector_1",
+    "class": "MaterialExpressionConstant3Vector",
+    "constant": "<Struct 'LinearColor' (0x00000235A2772128) {r: 0.000000, g: 1.000000, b: 0.000000, a: 0.000000}>",
+    "input_names": [],
+    "input_nodes": []
+  },
+  {
+    "name": "MaterialExpressionConstant3Vector_0",
+    "class": "MaterialExpressionConstant3Vector",
+    "constant": "<Struct 'LinearColor' (0x00000235A2770EC8) {r: 1.000000, g: 0.000000, b: 0.000000, a: 0.000000}>",
+    "input_names": [],
+    "input_nodes": []
+  },
+  {
+    "name": "MaterialExpressionComposite_2",
+    "class": "MaterialExpressionComposite",
+    "input_names": [
+      "BaseColor"
+    ],
+    "input_nodes": [
+      "MaterialExpressionConstant3Vector_2"
+    ]
+  },
+  {
+    "name": "MaterialExpressionComposite_1",
+    "class": "MaterialExpressionComposite",
+    "input_names": [
+      "BaseColor"
+    ],
+    "input_nodes": [
+      "MaterialExpressionConstant3Vector_0"
+    ]
+  },
+  {
+    "name": "MaterialExpressionComposite_0",
+    "class": "MaterialExpressionComposite",
+    "input_names": [
+      "BaseColor"
+    ],
+    "input_nodes": [
+      "MaterialExpressionConstant3Vector_1"
+    ]
+  },
+  {
+    "name": "MaterialExpressionBlendMaterialAttributes_2",
+    "class": "MaterialExpressionBlendMaterialAttributes",
+    "input_names": [
+      "A",
+      "B",
+      "Alpha"
+    ],
+    "input_nodes": [
+      "MaterialExpressionMaterialFunctionCall_2",
+      "MaterialExpressionReroute_5",
+      "MaterialExpressionScalarParameter_0"
+    ]
+  },
+  {
+    "name": "MaterialExpressionBlendMaterialAttributes_1",
+    "class": "MaterialExpressionBlendMaterialAttributes",
+    "input_names": [
+      "A",
+      "B",
+      "Alpha"
+    ],
+    "input_nodes": [
+      "MaterialExpressionMaterialFunctionCall_1",
+      "MaterialExpressionReroute_1",
+      "MaterialExpressionScalarParameter_0"
+    ]
+  },
+  {
+    "name": "MaterialExpressionBlendMaterialAttributes_0",
+    "class": "MaterialExpressionBlendMaterialAttributes",
+    "input_names": [
+      "A",
+      "B",
+      "Alpha"
+    ],
+    "input_nodes": [
+      "MaterialExpressionMaterialFunctionCall_0",
+      "MaterialExpressionReroute_3",
+      "MaterialExpressionScalarParameter_0"
+    ]
+  }
+]

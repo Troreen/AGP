@@ -1,0 +1,6 @@
+{
+  "source_scene": "Content\\ExportedScenes\\lvl_splatmap_testing2_runtime\\Lvl_Splatmap_Testing2_Runtime_RGB_Level.json",
+  "inspection_scene": "Content\\ExportedScenes\\lvl_splatmap_testing2_inspection\\Lvl_Splatmap_Testing2_Contributions_Level.json",
+  "only_scene_change": "MM_Landscape DEBUG: 2 -> 1",
+  "source_scene_unchanged": true
+}

@@ -1,0 +1,242 @@
+﻿[
+    {
+        "Scene":  "lvl_splatmap_testing2_runtime/Lvl_Splatmap_Testing2_Runtime_Level.json",
+        "TerrainMaterial":  "MM_Landscape_Inst",
+        "TerrainParent":  "MM_Landscape",
+        "Floaters":  [
+                         {
+                             "Actor":  "SM_Cube",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube2",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube3",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube4",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube5",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube6",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube7",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube8",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube9",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube10",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube11",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube12",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         }
+                     ],
+        "Passed":  true
+    },
+    {
+        "Scene":  "lvl_splatmap_testing2_runtime/Lvl_Splatmap_Testing2_Runtime_RGB_Level.json",
+        "TerrainMaterial":  "MM_Landscape_Inst",
+        "TerrainParent":  "MM_Landscape",
+        "Floaters":  [
+                         {
+                             "Actor":  "SM_Cube",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube2",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube3",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube4",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube5",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube6",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube7",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube8",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube9",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube10",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube11",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube12",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         }
+                     ],
+        "Passed":  true
+    },
+    {
+        "Scene":  "lvl_splatmap_testing2_inspection/Lvl_Splatmap_Testing2_Contributions_Level.json",
+        "TerrainMaterial":  "MM_Landscape_Inst",
+        "TerrainParent":  "MM_Landscape",
+        "Floaters":  [
+                         {
+                             "Actor":  "SM_Cube",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube2",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube3",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube4",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube5",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube6",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube7",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube8",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube9",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube10",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube11",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         },
+                         {
+                             "Actor":  "SM_Cube12",
+                             "Material":  "MM_Landscape_Inst",
+                             "Parent":  "MM_Landscape",
+                             "SharesGroundMaterial":  true
+                         }
+                     ],
+        "Passed":  true
+    }
+]

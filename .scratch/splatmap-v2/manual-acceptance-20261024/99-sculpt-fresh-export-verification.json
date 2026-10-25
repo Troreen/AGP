@@ -1,0 +1,98 @@
+﻿{
+    "ActorCount":  15,
+    "ComponentCount":  4,
+    "TerrainMeshReferences":  1,
+    "ChannelMapping":  "Snow_Rough:0,Snow_Dunes:1,Snow_Cliff:2",
+    "UniqueMaskFiles":  4,
+    "SharedRGBAComparisons":  1020,
+    "BorderMismatches":  0,
+    "PatchSamples":  49,
+    "PatchFailures":  0,
+    "SourceSHA256":  "53222834068DF11F266C15BD30899FF9E3066CAD7257B024069897881A72FCCC",
+    "Masks":  [
+                  {
+                      "Component":  "LandscapeComponent_0",
+                      "File":  "Landscape_0_LandscapeComponent_0_Weightmap_0.png",
+                      "X":  0,
+                      "Y":  0,
+                      "Layers":  [
+                                     {
+                                         "Name":  "Snow_Rough",
+                                         "Channel":  0
+                                     },
+                                     {
+                                         "Name":  "Snow_Dunes",
+                                         "Channel":  1
+                                     },
+                                     {
+                                         "Name":  "Snow_Cliff",
+                                         "Channel":  2
+                                     }
+                                 ],
+                      "SHA256":  "5984B40A8A10FAD690E39F49F0851223BEB9D01270F21F5B161712F658201C28"
+                  },
+                  {
+                      "Component":  "LandscapeComponent_1",
+                      "File":  "Landscape_0_LandscapeComponent_1_Weightmap_0.png",
+                      "X":  63,
+                      "Y":  0,
+                      "Layers":  [
+                                     {
+                                         "Name":  "Snow_Rough",
+                                         "Channel":  0
+                                     },
+                                     {
+                                         "Name":  "Snow_Dunes",
+                                         "Channel":  1
+                                     },
+                                     {
+                                         "Name":  "Snow_Cliff",
+                                         "Channel":  2
+                                     }
+                                 ],
+                      "SHA256":  "5959AAFDC34A21E66D842306637BA718150E58FE20765EDA9E00D0AB4321C61B"
+                  },
+                  {
+                      "Component":  "LandscapeComponent_2",
+                      "File":  "Landscape_0_LandscapeComponent_2_Weightmap_0.png",
+                      "X":  0,
+                      "Y":  63,
+                      "Layers":  [
+                                     {
+                                         "Name":  "Snow_Rough",
+                                         "Channel":  0
+                                     },
+                                     {
+                                         "Name":  "Snow_Dunes",
+                                         "Channel":  1
+                                     },
+                                     {
+                                         "Name":  "Snow_Cliff",
+                                         "Channel":  2
+                                     }
+                                 ],
+                      "SHA256":  "DCE83E6134EA05FF9446C018A5884D39A2A7A1660C0D69432B53EEB80CAC6FDD"
+                  },
+                  {
+                      "Component":  "LandscapeComponent_3",
+                      "File":  "Landscape_0_LandscapeComponent_3_Weightmap_0.png",
+                      "X":  63,
+                      "Y":  63,
+                      "Layers":  [
+                                     {
+                                         "Name":  "Snow_Rough",
+                                         "Channel":  0
+                                     },
+                                     {
+                                         "Name":  "Snow_Dunes",
+                                         "Channel":  1
+                                     },
+                                     {
+                                         "Name":  "Snow_Cliff",
+                                         "Channel":  2
+                                     }
+                                 ],
+                      "SHA256":  "97F30C03B3F5705692507F772B71452EFDCA59D8071FCE41944289E8B74323BF"
+                  }
+              ]
+}

@@ -1,0 +1,182 @@
+[
+  {
+    "node": "MaterialExpressionMakeMaterialAttributes_4",
+    "class": "MaterialExpressionMakeMaterialAttributes",
+    "inputs": [
+      {
+        "name": "MaterialExpressionReroute_4",
+        "class": "MaterialExpressionReroute"
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "node": "MaterialExpressionMakeMaterialAttributes_3",
+    "class": "MaterialExpressionMakeMaterialAttributes",
+    "inputs": [
+      {
+        "name": "MaterialExpressionReroute_0",
+        "class": "MaterialExpressionReroute"
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "node": "MaterialExpressionMakeMaterialAttributes_2",
+    "class": "MaterialExpressionMakeMaterialAttributes",
+    "inputs": [
+      {
+        "name": "MaterialExpressionReroute_2",
+        "class": "MaterialExpressionReroute"
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "node": "MaterialExpressionLandscapeLayerBlend_0",
+    "class": "MaterialExpressionLandscapeLayerBlend",
+    "inputs": [
+      {
+        "name": "MaterialExpressionBlendMaterialAttributes_0",
+        "class": "MaterialExpressionBlendMaterialAttributes"
+      },
+      {
+        "name": "MaterialExpressionBlendMaterialAttributes_1",
+        "class": "MaterialExpressionBlendMaterialAttributes"
+      },
+      {
+        "name": "MaterialExpressionBlendMaterialAttributes_2",
+        "class": "MaterialExpressionBlendMaterialAttributes"
+      }
+    ]
+  },
+  {
+    "node": "MaterialExpressionBlendMaterialAttributes_2",
+    "class": "MaterialExpressionBlendMaterialAttributes",
+    "inputs": [
+      {
+        "name": "MaterialExpressionMaterialFunctionCall_2",
+        "class": "MaterialExpressionMaterialFunctionCall"
+      },
+      {
+        "name": "MaterialExpressionReroute_5",
+        "class": "MaterialExpressionReroute"
+      },
+      {
+        "name": "MaterialExpressionScalarParameter_0",
+        "class": "MaterialExpressionScalarParameter"
+      }
+    ]
+  },
+  {
+    "node": "MaterialExpressionBlendMaterialAttributes_1",
+    "class": "MaterialExpressionBlendMaterialAttributes",
+    "inputs": [
+      {
+        "name": "MaterialExpressionMaterialFunctionCall_1",
+        "class": "MaterialExpressionMaterialFunctionCall"
+      },
+      {
+        "name": "MaterialExpressionReroute_1",
+        "class": "MaterialExpressionReroute"
+      },
+      {
+        "name": "MaterialExpressionScalarParameter_0",
+        "class": "MaterialExpressionScalarParameter"
+      }
+    ]
+  },
+  {
+    "node": "MaterialExpressionBlendMaterialAttributes_0",
+    "class": "MaterialExpressionBlendMaterialAttributes",
+    "inputs": [
+      {
+        "name": "MaterialExpressionMaterialFunctionCall_0",
+        "class": "MaterialExpressionMaterialFunctionCall"
+      },
+      {
+        "name": "MaterialExpressionReroute_3",
+        "class": "MaterialExpressionReroute"
+      },
+      {
+        "name": "MaterialExpressionScalarParameter_0",
+        "class": "MaterialExpressionScalarParameter"
+      }
+    ]
+  }
+]

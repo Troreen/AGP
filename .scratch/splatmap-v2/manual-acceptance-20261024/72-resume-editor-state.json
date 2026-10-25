@@ -1,0 +1,9 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\n  \"success\": true,\n  \"command\": \"import unreal, json\\nw=unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem).get_editor_world()\\nprint(json.dumps({'world':w.get_path_name(),'dirty':w.get_outer().is_dirty() if hasattr(w.get_outer(),'is_dirty') else 'not exposed','helper':hasattr(unreal,'AGPAcceptanceLibrary'),'camera':str(unreal.EditorLevelLibrary.get_level_viewport_camera_info())}))\",\n  \"result\": \"None\",\n  \"output\": [\n    {\n      \"type\": \"Warning\",\n      \"output\": \"<string>:3: DeprecationWarning: EditorLevelLibrary: Function 'get_level_viewport_camera_info' on 'EditorLevelLibrary' is deprecated: The Editor Scripting Utilities Plugin is deprecated - Use the function in Unreal Editor Subsystem\\n\"\n    },\n    {\n      \"type\": \"Info\",\n      \"output\": \"{\\\"world\\\": \\\"/Game/Levels/Test_Levels/SP/Lvl_Splatmap_Testing2.Lvl_Splatmap_Testing2\\\", \\\"dirty\\\": \\\"not exposed\\\", \\\"helper\\\": true, \\\"camera\\\": \\\"(<Struct 'Vector' (0x00000236F3F326D0) {x: 0.000000, y: 0.000000, z: 15120.000000}>, <Struct 'Rotator' (0x000002371ECF1EB0) {pitch: -90.000000, yaw: -90.000000, roll: 0.000000}>)\\\"}\\r\\n\"\n    }\n  ]\n}"
+    }
+  ],
+  "isError": false
+}

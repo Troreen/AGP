@@ -1,0 +1,22 @@
+[
+  {
+    "component": "LandscapeComponent_0",
+    "identical_png_bytes": true,
+    "sha256": "5984b40a8a10fad690e39f49f0851223beb9d01270f21f5b161712f658201c28"
+  },
+  {
+    "component": "LandscapeComponent_1",
+    "identical_png_bytes": true,
+    "sha256": "5959aafdc34a21e66d842306637ba718150e58fe20765eda9e00d0ab4321c61b"
+  },
+  {
+    "component": "LandscapeComponent_2",
+    "identical_png_bytes": true,
+    "sha256": "dce83e6134ea05ff9446c018a5884d39a2a7a1660c0d69432b53eeb80cac6fdd"
+  },
+  {
+    "component": "LandscapeComponent_3",
+    "identical_png_bytes": true,
+    "sha256": "97f30c03b3f5705692507f772b71452efdca59d8071fce41944289e8b74323bf"
+  }
+]

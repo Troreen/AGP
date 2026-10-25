@@ -1,0 +1,4 @@
+{
+  "tool": "execute_python",
+  "arguments": {"code": "import runpy\nrunpy.run_path('C:/Users/tarik/Documents/GitHub/AGP/.scratch/splatmap-v2/manual-acceptance-20261024/apply_paint_patch.py',run_name='__main__')"}
+}

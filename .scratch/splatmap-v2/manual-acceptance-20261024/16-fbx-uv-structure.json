@@ -1,0 +1,250 @@
+[
+  {
+    "path": "C:\\Users\\tarik\\Documents\\GitHub\\AGP-Content\\.scratch\\splatmap-v2\\validation\\manual-acceptance-20261024\\fresh-fbx-01\\Lvl_Splatmap_Testing2.fbx",
+    "version": 7300,
+    "uv_elements": [
+      {
+        "type": "LayerElementUV",
+        "index": [
+          0
+        ],
+        "children": [
+          {
+            "id": "Version",
+            "props": [
+              "101"
+            ],
+            "array_lengths": []
+          },
+          {
+            "id": "Name",
+            "props": [
+              "b'TextureUVs'"
+            ],
+            "array_lengths": []
+          },
+          {
+            "id": "MappingInformationType",
+            "props": [
+              "b'ByVertice'"
+            ],
+            "array_lengths": []
+          },
+          {
+            "id": "ReferenceInformationType",
+            "props": [
+              "b'Direct'"
+            ],
+            "array_lengths": []
+          },
+          {
+            "id": "UV",
+            "props": [
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                2.0,
+                0.0,
+                3.0,
+                0.0,
+                4.0,
+                0.0,
+                5.0,
+                0.0
+              ]
+            ],
+            "array_lengths": [
+              32768
+            ]
+          }
+        ]
+      },
+      {
+        "type": "LayerElementBumpUV",
+        "index": [
+          0
+        ],
+        "children": [
+          {
+            "id": "Version",
+            "props": [
+              "101"
+            ],
+            "array_lengths": []
+          },
+          {
+            "id": "Name",
+            "props": [
+              "b'WeightmapUVs'"
+            ],
+            "array_lengths": []
+          },
+          {
+            "id": "MappingInformationType",
+            "props": [
+              "b'ByVertice'"
+            ],
+            "array_lengths": []
+          },
+          {
+            "id": "ReferenceInformationType",
+            "props": [
+              "b'Direct'"
+            ],
+            "array_lengths": []
+          },
+          {
+            "id": "UV",
+            "props": [
+              [
+                0.0,
+                0.0,
+                0.007874015748031496,
+                0.0,
+                0.015748031496062992,
+                0.0,
+                0.023622047244094488,
+                0.0,
+                0.031496062992125984,
+                0.0,
+                0.03937007874015748,
+                0.0
+              ]
+            ],
+            "array_lengths": [
+              32768
+            ]
+          }
+        ]
+      }
+    ],
+    "global_settings": [
+      "[b'UpAxis', b'int', b'Integer', b'', 2]",
+      "[b'UpAxisSign', b'int', b'Integer', b'', 1]",
+      "[b'FrontAxis', b'int', b'Integer', b'', 1]",
+      "[b'FrontAxisSign', b'int', b'Integer', b'', -1]",
+      "[b'CoordAxis', b'int', b'Integer', b'', 0]",
+      "[b'CoordAxisSign', b'int', b'Integer', b'', 1]",
+      "[b'OriginalUpAxis', b'int', b'Integer', b'', 2]",
+      "[b'OriginalUpAxisSign', b'int', b'Integer', b'', 1]",
+      "[b'UnitScaleFactor', b'double', b'Number', b'', 1.0]",
+      "[b'OriginalUnitScaleFactor', b'double', b'Number', b'', 1.0]",
+      "[b'AmbientColor', b'ColorRGB', b'Color', b'', 0.0, 0.0, 0.0]",
+      "[b'DefaultCamera', b'KString', b'', b'', b'Producer Perspective']",
+      "[b'TimeMode', b'enum', b'', b'', 0]",
+      "[b'TimeProtocol', b'enum', b'', b'', 2]",
+      "[b'SnapOnFrameMode', b'enum', b'', b'', 0]",
+      "[b'TimeSpanStart', b'KTime', b'Time', b'', 0]",
+      "[b'TimeSpanStop', b'KTime', b'Time', b'', 46186158000]",
+      "[b'CustomFrameRate', b'double', b'Number', b'', -1.0]",
+      "[b'TimeMarker', b'Compound', b'', b'']",
+      "[b'CurrentTimeMarker', b'int', b'Integer', b'', -1]"
+    ]
+  },
+  {
+    "path": "C:\\Users\\tarik\\Documents\\GitHub\\AGP\\.scratch\\splatmap-v2\\manual-acceptance-20261024\\11-blender-corrected.fbx",
+    "version": 7400,
+    "uv_elements": [
+      {
+        "type": "LayerElementUV",
+        "index": [
+          0
+        ],
+        "children": [
+          {
+            "id": "Version",
+            "props": [
+              "101"
+            ],
+            "array_lengths": []
+          },
+          {
+            "id": "Name",
+            "props": [
+              "b'TextureUVs'"
+            ],
+            "array_lengths": []
+          },
+          {
+            "id": "MappingInformationType",
+            "props": [
+              "b'ByPolygonVertex'"
+            ],
+            "array_lengths": []
+          },
+          {
+            "id": "ReferenceInformationType",
+            "props": [
+              "b'IndexToDirect'"
+            ],
+            "array_lengths": []
+          },
+          {
+            "id": "UV",
+            "props": [
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                2.0,
+                0.0,
+                3.0,
+                0.0,
+                4.0,
+                0.0,
+                5.0,
+                0.0
+              ]
+            ],
+            "array_lengths": [
+              32768
+            ]
+          },
+          {
+            "id": "UVIndex",
+            "props": [
+              [
+                0,
+                129,
+                1,
+                0,
+                128,
+                129,
+                1,
+                130,
+                2,
+                1,
+                129,
+                130
+              ]
+            ],
+            "array_lengths": [
+              95256
+            ]
+          }
+        ]
+      }
+    ],
+    "global_settings": [
+      "[b'UpAxis', b'int', b'Integer', b'', 1]",
+      "[b'UpAxisSign', b'int', b'Integer', b'', 1]",
+      "[b'FrontAxis', b'int', b'Integer', b'', 2]",
+      "[b'FrontAxisSign', b'int', b'Integer', b'', 1]",
+      "[b'CoordAxis', b'int', b'Integer', b'', 0]",
+      "[b'CoordAxisSign', b'int', b'Integer', b'', 1]",
+      "[b'OriginalUpAxis', b'int', b'Integer', b'', -1]",
+      "[b'OriginalUpAxisSign', b'int', b'Integer', b'', 1]",
+      "[b'UnitScaleFactor', b'double', b'Number', b'', 0.9999999776482582]",
+      "[b'OriginalUnitScaleFactor', b'double', b'Number', b'', 0.9999999776482582]",
+      "[b'AmbientColor', b'ColorRGB', b'Color', b'', 0.0, 0.0, 0.0]",
+      "[b'DefaultCamera', b'KString', b'', b'', b'Producer Perspective']",
+      "[b'TimeMode', b'enum', b'', b'', 10]",
+      "[b'TimeSpanStart', b'KTime', b'Time', b'', 0]",
+      "[b'TimeSpanStop', b'KTime', b'Time', b'', 46186158000]",
+      "[b'CustomFrameRate', b'double', b'Number', b'', 25.0]"
+    ]
+  }
+]

@@ -1,0 +1,22 @@
+﻿[
+    {
+        "File":  "ExportedScenes/lvl_splatmap_testing2/Lvl_Splatmap_Testing2_Level.json",
+        "SHA256":  "53222834068DF11F266C15BD30899FF9E3066CAD7257B024069897881A72FCCC"
+    },
+    {
+        "File":  "ExportedScenes/lvl_splatmap_testing2_runtime/Lvl_Splatmap_Testing2_Runtime_Level.json",
+        "SHA256":  "FE57B3CA0677DD074AD9EB9395B10A09F3E7D173EBB6161E1E7A8A6A7A0757BE"
+    },
+    {
+        "File":  "ExportedScenes/lvl_splatmap_testing2_runtime/Lvl_Splatmap_Testing2_Runtime_RGB_Level.json",
+        "SHA256":  "8F607EADF73BD1ADCD0F2CECBB51E3DF59EFE2C80B1F364A503EF5AFB598477A"
+    },
+    {
+        "File":  "ExportedScenes/lvl_splatmap_testing2_runtime/preparation.json",
+        "SHA256":  "3E4CA261B88552EC4F40C7BDAE62283F2AE8607BCFB30D909DFC52C45C3BE626"
+    },
+    {
+        "File":  "Meshes/Landscape/Test/Lvl_Splatmap_Testing2.fbx",
+        "SHA256":  "29BBC7E277C3ACBA9517763EA39FC7B2D9CFCBA8DFD6522F3D50E455C9DCA72E"
+    }
+]

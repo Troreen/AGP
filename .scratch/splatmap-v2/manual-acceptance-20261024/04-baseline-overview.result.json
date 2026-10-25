@@ -1,0 +1,20 @@
+{
+  "meta": null,
+  "content": [
+    {
+      "type": "image",
+      "mimeType": "image/png",
+      "annotations": null,
+      "meta": null,
+      "saved_path": "C:\\Users\\tarik\\Documents\\GitHub\\AGP\\.scratch\\splatmap-v2\\manual-acceptance-20261024\\04-baseline-overview-image-0.png"
+    },
+    {
+      "type": "text",
+      "text": "{\"mode\": \"overview\", \"camera_loc\": [-697.5568387740077, -270.0, 5444.728867779237], \"ortho_width\": 14068.999999999998, \"hidden_ceiling_actors\": [], \"width\": 1280, \"height\": 1280, \"world\": \"Lvl_Splatmap_Testing2\", \"actor_count\": 15, \"captured_at\": \"2026-10-24T18:23:56.195530+00:00\", \"note\": \"Live on-demand clean scene render of the in-editor world from the stamped camera/time. NOT disk truth and NOT proof of saved state. Never delete or 'fix' an actor based on this image alone - confirm with get_level_actors first.\"}",
+      "annotations": null,
+      "meta": null
+    }
+  ],
+  "structuredContent": null,
+  "isError": false
+}

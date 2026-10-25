@@ -1,0 +1,42 @@
+﻿[
+    {
+        "Path":  "ExportedScenes/lvl_splatmap_testing2/Landscape_0_LandscapeComponent_0_Weightmap_0.dds",
+        "SHA256":  "D96F0FD0E757E14AF61875FC99AF1764F27199D8BB3446F0BAB68CF706446483"
+    },
+    {
+        "Path":  "ExportedScenes/lvl_splatmap_testing2/Landscape_0_LandscapeComponent_1_Weightmap_0.dds",
+        "SHA256":  "17AC168C84329E9C0F21F889C045F51AD6223F93AB5243C583F0951AD37858BE"
+    },
+    {
+        "Path":  "ExportedScenes/lvl_splatmap_testing2/Landscape_0_LandscapeComponent_2_Weightmap_0.dds",
+        "SHA256":  "C6B7095891E64F4CFDFBA18FBD9D4F07A667A16B45FE02B2552CCF045161D0E9"
+    },
+    {
+        "Path":  "ExportedScenes/lvl_splatmap_testing2/Landscape_0_LandscapeComponent_3_Weightmap_0.dds",
+        "SHA256":  "06BDF6BD5C26D0211A970C909A6293883C96C80425D2397BF84D20899A75013E"
+    },
+    {
+        "Path":  "ExportedScenes/lvl_splatmap_testing2/Lvl_Splatmap_Testing2_Level.json",
+        "SHA256":  "97097B8DB7B7731FB3DA56DD370B355535BADE2D516DCEB61DE44E35C872704B"
+    },
+    {
+        "Path":  "ExportedScenes/lvl_splatmap_testing2_runtime/Lvl_Splatmap_Testing2_Runtime_Level.json",
+        "SHA256":  "E069B116A22A3771A14361B4BEAD63527FEF7F9EF335A47F91BCF972A37BFAAC"
+    },
+    {
+        "Path":  "ExportedScenes/lvl_splatmap_testing2_runtime/Lvl_Splatmap_Testing2_Runtime_RGB_Level.json",
+        "SHA256":  "E1B44C9ECD1B8BC0639AB689464C1B7E1C24ADD9F01442507267D8CE8CCE4048"
+    },
+    {
+        "Path":  "ExportedScenes/lvl_splatmap_testing2_runtime/preparation.json",
+        "SHA256":  "5AA3C1907454514257CB9AAE321BFEFC359D8CC53E3710DC7145480307AA21B3"
+    },
+    {
+        "Path":  "ExportedScenes/lvl_splatmap_testing2_runtime/T_Lvl_Splatmap_Testing2_Weightmap_Combined.dds",
+        "SHA256":  "861E9927E4A2D2469733E007AC340F631669719256261DB6BB77BF0A390FA7EA"
+    },
+    {
+        "Path":  "Meshes/Landscape/Test/Lvl_Splatmap_Testing2.fbx",
+        "SHA256":  "8659EFC49AB8A4D193EC9DC85F0E596DA8E29D9581101D1103232ACB280614BE"
+    }
+]

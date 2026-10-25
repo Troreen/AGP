@@ -1,0 +1,13 @@
+{
+  "meta": null,
+  "content": [
+    {
+      "type": "text",
+      "text": "{\n  \"set\": true,\n  \"location\": [\n    0.0,\n    0.0,\n    15120.0\n  ],\n  \"rotation\": [\n    -90.0,\n    -90.0,\n    0.0\n  ]\n}",
+      "annotations": null,
+      "meta": null
+    }
+  ],
+  "structuredContent": null,
+  "isError": false
+}

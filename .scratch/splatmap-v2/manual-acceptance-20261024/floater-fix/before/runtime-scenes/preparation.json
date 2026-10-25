@@ -1,0 +1,88 @@
+﻿{
+    "SourceSceneSHA256":  "53222834068DF11F266C15BD30899FF9E3066CAD7257B024069897881A72FCCC",
+    "Mesh":  "Lvl_Splatmap_Testing2",
+    "MeshSHA256":  "29BBC7E277C3ACBA9517763EA39FC7B2D9CFCBA8DFD6522F3D50E455C9DCA72E",
+    "Inputs":  [
+                   {
+                       "Component":  "LandscapeComponent_0",
+                       "File":  "Landscape_0_LandscapeComponent_0_Weightmap_0.dds",
+                       "SHA256":  "D96F0FD0E757E14AF61875FC99AF1764F27199D8BB3446F0BAB68CF706446483",
+                       "Offset":  [
+                                      0,
+                                      0
+                                  ]
+                   },
+                   {
+                       "Component":  "LandscapeComponent_1",
+                       "File":  "Landscape_0_LandscapeComponent_1_Weightmap_0.dds",
+                       "SHA256":  "17AC168C84329E9C0F21F889C045F51AD6223F93AB5243C583F0951AD37858BE",
+                       "Offset":  [
+                                      63,
+                                      0
+                                  ]
+                   },
+                   {
+                       "Component":  "LandscapeComponent_2",
+                       "File":  "Landscape_0_LandscapeComponent_2_Weightmap_0.dds",
+                       "SHA256":  "C6B7095891E64F4CFDFBA18FBD9D4F07A667A16B45FE02B2552CCF045161D0E9",
+                       "Offset":  [
+                                      0,
+                                      63
+                                  ]
+                   },
+                   {
+                       "Component":  "LandscapeComponent_3",
+                       "File":  "Landscape_0_LandscapeComponent_3_Weightmap_0.dds",
+                       "SHA256":  "06BDF6BD5C26D0211A970C909A6293883C96C80425D2397BF84D20899A75013E",
+                       "Offset":  [
+                                      63,
+                                      63
+                                  ]
+                   }
+               ],
+    "Width":  127,
+    "Height":  127,
+    "Layers":  "0:Snow_Rough,1:Snow_Dunes,2:Snow_Cliff",
+    "MaskU":  [
+                  7.8740157480314957E-05,
+                  0,
+                  0,
+                  0.5
+              ],
+    "MaskV":  [
+                  0,
+                  7.8740157480314957E-05,
+                  0,
+                  0.5
+              ],
+    "WorldOrigin":  [
+                        -6300,
+                        -6300
+                    ],
+    "WorldExtent":  [
+                        12600,
+                        12600
+                    ],
+    "MaterialMode":  "Surface",
+    "SurfaceTextures":  [
+                            "T_8M_Snow_Dunes_BaseColor",
+                            "T_8M_Snow_Dunes_OcclusionRoughnessMetallic",
+                            "T_8M_Snow_Dunes_Normal",
+                            "T_8M_Snow_Rough_BaseColor",
+                            "T_8M_Snow_Rough_OcclusionRoughnessMetallic",
+                            "T_8M_Snow_Rough_Normal",
+                            "T_8M_Snow_Cliff_BaseColor",
+                            "T_8M_Snow_Cliff_OcclusionRoughnessMetallic",
+                            "T_8M_Snow_Cliff_Normal",
+                            "T_Splatmap_TransitionNoise"
+                        ],
+    "SurfaceRepeatMeters":  8,
+    "SurfaceOriginCentimeters":  [
+                                     -2800,
+                                     -2800
+                                 ],
+    "DirectionalLightIntensity":  2,
+    "Note":  "Original packed weights and explicit world mapping; no axis flip. Surface rendering requires visual verification.",
+    "AuthoringFbxSHA256":  "051E1BBE1BD405C9CAB79E060BF0CF33134ABA2CBFAEF324EEF2A864E43FE86F",
+    "RuntimeFbxPreparation":  "Fresh native sculpt; ForceFrontXAxis=true; Blender 5.1.2 X-forward/Z-up, transforms and units baked, original custom normals and explicit WeightmapUVs. Actual importer native height error zero, UV0/UV1 differences zero, normal alignment 0.999512. Surface parity remains failing."
+}

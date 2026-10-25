@@ -1,0 +1,4 @@
+{
+ "tool":"execute_python",
+ "arguments":{"code":"import builtins,unreal,json\ns=builtins._agp_acceptance_paint\nv=[c.r for c in unreal.RenderingLibrary.read_render_target_raw(s['landscape'],s['rt'],False)]\nd=[i for i,(a,b) in enumerate(zip(s['values'],v)) if a!=b]\nprint(json.dumps({'changed':len(d),'outside':sum(not(35<=i%127<=41 and 70<=i//127<=76) for i in d),'min':min(v),'max':max(v),'bounds':[min(i%127 for i in d),min(i//127 for i in d),max(i%127 for i in d),max(i//127 for i in d)] if d else None,'examples':[(i%127,i//127,s['values'][i],v[i]) for i in d[:8]]}))"}
+}

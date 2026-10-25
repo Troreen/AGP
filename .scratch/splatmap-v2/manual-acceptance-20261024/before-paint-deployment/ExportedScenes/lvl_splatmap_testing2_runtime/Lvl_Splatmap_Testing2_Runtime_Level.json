@@ -1,0 +1,1173 @@
+﻿{
+    "MasterMaterials":  [
+                            {
+                                "Name":  "WorldGridMaterial",
+                                "Domain":  0,
+                                "ShadingModel":  1,
+                                "BlendMode":  0,
+                                "BaseColor":  [
+                                                  0.50196081399917603,
+                                                  0.50196081399917603,
+                                                  0.50196081399917603,
+                                                  1
+                                              ],
+                                "Metallic":  0,
+                                "Roughness":  0.42379999160766602,
+                                "TwoSided":  false,
+                                "Parameters":  [
+
+                                               ]
+                            },
+                            {
+                                "Name":  "MM_Landscape",
+                                "Domain":  0,
+                                "ShadingModel":  1,
+                                "BlendMode":  0,
+                                "BaseColor":  [
+                                                  1,
+                                                  1,
+                                                  1,
+                                                  1
+                                              ],
+                                "Metallic":  0,
+                                "Roughness":  1,
+                                "TwoSided":  false,
+                                "Parameters":  [
+                                                   {
+                                                       "Name":  "MaskU",
+                                                       "Type":  1,
+                                                       "Value":  [
+                                                                     7.8740157480314957E-05,
+                                                                     0,
+                                                                     0,
+                                                                     0.5
+                                                                 ]
+                                                   },
+                                                   {
+                                                       "Name":  "MaskV",
+                                                       "Type":  1,
+                                                       "Value":  [
+                                                                     0,
+                                                                     7.8740157480314957E-05,
+                                                                     0,
+                                                                     0.5
+                                                                 ]
+                                                   },
+                                                   {
+                                                       "Name":  "SplatMask",
+                                                       "Type":  3,
+                                                       "Value":  {
+                                                                     "Path":  "T_Lvl_Splatmap_Testing2_Weightmap_Combined",
+                                                                     "Name":  "T_Lvl_Splatmap_Testing2_Weightmap_Combined",
+                                                                     "AssetImportPath":  "T_Lvl_Splatmap_Testing2_Weightmap_Combined.dds"
+                                                                 }
+                                                   },
+                                                   {
+                                                       "Name":  "AlbedoTexture",
+                                                       "Type":  3,
+                                                       "Value":  {
+                                                                     "Path":  "T_Lvl_Splatmap_Testing2_Debug_BaseColor",
+                                                                     "Name":  "T_Lvl_Splatmap_Testing2_Debug_BaseColor",
+                                                                     "AssetImportPath":  "T_Lvl_Splatmap_Testing2_Debug_BaseColor.dds"
+                                                                 }
+                                                   },
+                                                   {
+                                                       "Name":  "Layer1BaseColor",
+                                                       "Type":  3,
+                                                       "Value":  {
+                                                                     "Path":  "T_8M_Snow_Dunes_BaseColor",
+                                                                     "Name":  "T_8M_Snow_Dunes_BaseColor",
+                                                                     "AssetImportPath":  "T_8M_Snow_Dunes_BaseColor.dds"
+                                                                 }
+                                                   },
+                                                   {
+                                                       "Name":  "Layer1ORM",
+                                                       "Type":  3,
+                                                       "Value":  {
+                                                                     "Path":  "T_8M_Snow_Dunes_OcclusionRoughnessMetallic",
+                                                                     "Name":  "T_8M_Snow_Dunes_OcclusionRoughnessMetallic",
+                                                                     "AssetImportPath":  "T_8M_Snow_Dunes_OcclusionRoughnessMetallic.dds"
+                                                                 }
+                                                   },
+                                                   {
+                                                       "Name":  "Layer1Normal",
+                                                       "Type":  3,
+                                                       "Value":  {
+                                                                     "Path":  "T_8M_Snow_Dunes_Normal",
+                                                                     "Name":  "T_8M_Snow_Dunes_Normal",
+                                                                     "AssetImportPath":  "T_8M_Snow_Dunes_Normal.dds"
+                                                                 }
+                                                   },
+                                                   {
+                                                       "Name":  "Layer2MaskChannels",
+                                                       "Type":  1,
+                                                       "Value":  [
+                                                                     1,
+                                                                     0,
+                                                                     0,
+                                                                     0
+                                                                 ]
+                                                   },
+                                                   {
+                                                       "Name":  "Layer2BaseColor",
+                                                       "Type":  3,
+                                                       "Value":  {
+                                                                     "Path":  "T_8M_Snow_Rough_BaseColor",
+                                                                     "Name":  "T_8M_Snow_Rough_BaseColor",
+                                                                     "AssetImportPath":  "T_8M_Snow_Rough_BaseColor.dds"
+                                                                 }
+                                                   },
+                                                   {
+                                                       "Name":  "Layer2ORM",
+                                                       "Type":  3,
+                                                       "Value":  {
+                                                                     "Path":  "T_8M_Snow_Rough_OcclusionRoughnessMetallic",
+                                                                     "Name":  "T_8M_Snow_Rough_OcclusionRoughnessMetallic",
+                                                                     "AssetImportPath":  "T_8M_Snow_Rough_OcclusionRoughnessMetallic.dds"
+                                                                 }
+                                                   },
+                                                   {
+                                                       "Name":  "Layer2Normal",
+                                                       "Type":  3,
+                                                       "Value":  {
+                                                                     "Path":  "T_8M_Snow_Rough_Normal",
+                                                                     "Name":  "T_8M_Snow_Rough_Normal",
+                                                                     "AssetImportPath":  "T_8M_Snow_Rough_Normal.dds"
+                                                                 }
+                                                   },
+                                                   {
+                                                       "Name":  "Layer3MaskChannels",
+                                                       "Type":  1,
+                                                       "Value":  [
+                                                                     0,
+                                                                     0,
+                                                                     1,
+                                                                     0
+                                                                 ]
+                                                   },
+                                                   {
+                                                       "Name":  "Layer3BaseColor",
+                                                       "Type":  3,
+                                                       "Value":  {
+                                                                     "Path":  "T_8M_Snow_Cliff_BaseColor",
+                                                                     "Name":  "T_8M_Snow_Cliff_BaseColor",
+                                                                     "AssetImportPath":  "T_8M_Snow_Cliff_BaseColor.dds"
+                                                                 }
+                                                   },
+                                                   {
+                                                       "Name":  "Layer3ORM",
+                                                       "Type":  3,
+                                                       "Value":  {
+                                                                     "Path":  "T_8M_Snow_Cliff_OcclusionRoughnessMetallic",
+                                                                     "Name":  "T_8M_Snow_Cliff_OcclusionRoughnessMetallic",
+                                                                     "AssetImportPath":  "T_8M_Snow_Cliff_OcclusionRoughnessMetallic.dds"
+                                                                 }
+                                                   },
+                                                   {
+                                                       "Name":  "Layer3Normal",
+                                                       "Type":  3,
+                                                       "Value":  {
+                                                                     "Path":  "T_8M_Snow_Cliff_Normal",
+                                                                     "Name":  "T_8M_Snow_Cliff_Normal",
+                                                                     "AssetImportPath":  "T_8M_Snow_Cliff_Normal.dds"
+                                                                 }
+                                                   },
+                                                   {
+                                                       "Name":  "BlendNoise",
+                                                       "Type":  3,
+                                                       "Value":  {
+                                                                     "Path":  "T_Splatmap_TransitionNoise",
+                                                                     "Name":  "T_Splatmap_TransitionNoise",
+                                                                     "AssetImportPath":  "T_Splatmap_TransitionNoise.dds"
+                                                                 }
+                                                   },
+                                                   {
+                                                       "Name":  "NoiseControls",
+                                                       "Type":  1,
+                                                       "Value":  [
+                                                                     0,
+                                                                     200,
+                                                                     0,
+                                                                     0
+                                                                 ]
+                                                   },
+                                                   {
+                                                       "Name":  "SurfaceMapping",
+                                                       "Type":  1,
+                                                       "Value":  [
+                                                                     0.00125,
+                                                                     0.00125,
+                                                                     3.5,
+                                                                     3.5
+                                                                 ]
+                                                   },
+                                                   {
+                                                       "Name":  "DEBUG",
+                                                       "Type":  0,
+                                                       "Value":  0
+                                                   }
+                                               ]
+                            }
+                        ],
+    "Actors":  [
+                   {
+                       "Name":  "DirectionalLight",
+                       "Archetype":  "DirectionalLight",
+                       "Transform":  [
+                                         -1.6678870694654142,
+                                         -0.4079397753143072,
+                                         -1.8170684806100641,
+                                         0,
+                                         -0.89722429259372183,
+                                         2.3135414487620003,
+                                         0.30416201873330584,
+                                         0,
+                                         1.6319133838196653,
+                                         0.85505035207099755,
+                                         -1.6898957373558565,
+                                         0,
+                                         4904.8863224519846,
+                                         1925.8339970887575,
+                                         3944.7288677792362,
+                                         1
+                                     ],
+                       "Tags":  [
+
+                                ],
+                       "Components":  [
+                                          {
+                                              "Name":  "LightComponent0",
+                                              "Parent":  "",
+                                              "TypeID":  5,
+                                              "Tags":  [
+
+                                                       ],
+                                              "Transform":  [
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1
+                                                            ],
+                                              "Color":  [
+                                                            1,
+                                                            1,
+                                                            1,
+                                                            1
+                                                        ],
+                                              "Intensity":  2
+                                          }
+                                      ]
+                   },
+                   {
+                       "Name":  "SM_Cube",
+                       "Archetype":  "StaticMeshActor",
+                       "Transform":  [
+                                         1,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         1,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         1,
+                                         0,
+                                         1610,
+                                         4020,
+                                         150,
+                                         1
+                                     ],
+                       "Tags":  [
+
+                                ],
+                       "Components":  [
+                                          {
+                                              "Name":  "StaticMeshComponent0",
+                                              "Parent":  "",
+                                              "TypeID":  1,
+                                              "Tags":  [
+
+                                                       ],
+                                              "Transform":  [
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1
+                                                            ],
+                                              "Mesh":  "SM_Cube",
+                                              "ContentPath":  "/Game/Meshes/Debug/SM_Cube.SM_Cube",
+                                              "AssetImportPath":  "C:/Users/tarik.bergstrom/Perforce/AGP-Content/Unreal/P5G4_KnightHeart/Content/Meshes/Debug/SM_Cube.fbx",
+                                              "Materials":  [
+                                                                {
+                                                                    "Name":  "WorldGridMaterial",
+                                                                    "Parent":  "Self",
+                                                                    "Parameters":  [
+
+                                                                                   ]
+                                                                }
+                                                            ]
+                                          }
+                                      ]
+                   },
+                   {
+                       "Name":  "SM_Cube2",
+                       "Archetype":  "StaticMeshActor",
+                       "Transform":  [
+                                         1,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         1,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         1,
+                                         0,
+                                         -650,
+                                         4030,
+                                         150,
+                                         1
+                                     ],
+                       "Tags":  [
+
+                                ],
+                       "Components":  [
+                                          {
+                                              "Name":  "StaticMeshComponent0",
+                                              "Parent":  "",
+                                              "TypeID":  1,
+                                              "Tags":  [
+
+                                                       ],
+                                              "Transform":  [
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1
+                                                            ],
+                                              "Mesh":  "SM_Cube",
+                                              "ContentPath":  "/Game/Meshes/Debug/SM_Cube.SM_Cube",
+                                              "AssetImportPath":  "C:/Users/tarik.bergstrom/Perforce/AGP-Content/Unreal/P5G4_KnightHeart/Content/Meshes/Debug/SM_Cube.fbx",
+                                              "Materials":  [
+                                                                {
+                                                                    "Name":  "WorldGridMaterial",
+                                                                    "Parent":  "Self",
+                                                                    "Parameters":  [
+
+                                                                                   ]
+                                                                }
+                                                            ]
+                                          }
+                                      ]
+                   },
+                   {
+                       "Name":  "SM_Cube3",
+                       "Archetype":  "StaticMeshActor",
+                       "Transform":  [
+                                         1,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         1,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         1,
+                                         0,
+                                         -640,
+                                         -900,
+                                         150,
+                                         1
+                                     ],
+                       "Tags":  [
+
+                                ],
+                       "Components":  [
+                                          {
+                                              "Name":  "StaticMeshComponent0",
+                                              "Parent":  "",
+                                              "TypeID":  1,
+                                              "Tags":  [
+
+                                                       ],
+                                              "Transform":  [
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1
+                                                            ],
+                                              "Mesh":  "SM_Cube",
+                                              "ContentPath":  "/Game/Meshes/Debug/SM_Cube.SM_Cube",
+                                              "AssetImportPath":  "C:/Users/tarik.bergstrom/Perforce/AGP-Content/Unreal/P5G4_KnightHeart/Content/Meshes/Debug/SM_Cube.fbx",
+                                              "Materials":  [
+                                                                {
+                                                                    "Name":  "WorldGridMaterial",
+                                                                    "Parent":  "Self",
+                                                                    "Parameters":  [
+
+                                                                                   ]
+                                                                }
+                                                            ]
+                                          }
+                                      ]
+                   },
+                   {
+                       "Name":  "SM_Cube4",
+                       "Archetype":  "StaticMeshActor",
+                       "Transform":  [
+                                         1,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         1,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         1,
+                                         0,
+                                         -2540,
+                                         -890,
+                                         150,
+                                         1
+                                     ],
+                       "Tags":  [
+
+                                ],
+                       "Components":  [
+                                          {
+                                              "Name":  "StaticMeshComponent0",
+                                              "Parent":  "",
+                                              "TypeID":  1,
+                                              "Tags":  [
+
+                                                       ],
+                                              "Transform":  [
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1
+                                                            ],
+                                              "Mesh":  "SM_Cube",
+                                              "ContentPath":  "/Game/Meshes/Debug/SM_Cube.SM_Cube",
+                                              "AssetImportPath":  "C:/Users/tarik.bergstrom/Perforce/AGP-Content/Unreal/P5G4_KnightHeart/Content/Meshes/Debug/SM_Cube.fbx",
+                                              "Materials":  [
+                                                                {
+                                                                    "Name":  "WorldGridMaterial",
+                                                                    "Parent":  "Self",
+                                                                    "Parameters":  [
+
+                                                                                   ]
+                                                                }
+                                                            ]
+                                          }
+                                      ]
+                   },
+                   {
+                       "Name":  "SM_Cube5",
+                       "Archetype":  "StaticMeshActor",
+                       "Transform":  [
+                                         1,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         1,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         1,
+                                         0,
+                                         2460,
+                                         -880,
+                                         150,
+                                         1
+                                     ],
+                       "Tags":  [
+
+                                ],
+                       "Components":  [
+                                          {
+                                              "Name":  "StaticMeshComponent0",
+                                              "Parent":  "",
+                                              "TypeID":  1,
+                                              "Tags":  [
+
+                                                       ],
+                                              "Transform":  [
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1
+                                                            ],
+                                              "Mesh":  "SM_Cube",
+                                              "ContentPath":  "/Game/Meshes/Debug/SM_Cube.SM_Cube",
+                                              "AssetImportPath":  "C:/Users/tarik.bergstrom/Perforce/AGP-Content/Unreal/P5G4_KnightHeart/Content/Meshes/Debug/SM_Cube.fbx",
+                                              "Materials":  [
+                                                                {
+                                                                    "Name":  "WorldGridMaterial",
+                                                                    "Parent":  "Self",
+                                                                    "Parameters":  [
+
+                                                                                   ]
+                                                                }
+                                                            ]
+                                          }
+                                      ]
+                   },
+                   {
+                       "Name":  "SM_Cube6",
+                       "Archetype":  "StaticMeshActor",
+                       "Transform":  [
+                                         1,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         1,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         1,
+                                         0,
+                                         -1370,
+                                         2060,
+                                         150,
+                                         1
+                                     ],
+                       "Tags":  [
+
+                                ],
+                       "Components":  [
+                                          {
+                                              "Name":  "StaticMeshComponent0",
+                                              "Parent":  "",
+                                              "TypeID":  1,
+                                              "Tags":  [
+
+                                                       ],
+                                              "Transform":  [
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1
+                                                            ],
+                                              "Mesh":  "SM_Cube",
+                                              "ContentPath":  "/Game/Meshes/Debug/SM_Cube.SM_Cube",
+                                              "AssetImportPath":  "C:/Users/tarik.bergstrom/Perforce/AGP-Content/Unreal/P5G4_KnightHeart/Content/Meshes/Debug/SM_Cube.fbx",
+                                              "Materials":  [
+                                                                {
+                                                                    "Name":  "WorldGridMaterial",
+                                                                    "Parent":  "Self",
+                                                                    "Parameters":  [
+
+                                                                                   ]
+                                                                }
+                                                            ]
+                                          }
+                                      ]
+                   },
+                   {
+                       "Name":  "SM_Cube7",
+                       "Archetype":  "StaticMeshActor",
+                       "Transform":  [
+                                         1,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         1,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         1,
+                                         0,
+                                         4130,
+                                         3620,
+                                         150,
+                                         1
+                                     ],
+                       "Tags":  [
+
+                                ],
+                       "Components":  [
+                                          {
+                                              "Name":  "StaticMeshComponent0",
+                                              "Parent":  "",
+                                              "TypeID":  1,
+                                              "Tags":  [
+
+                                                       ],
+                                              "Transform":  [
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1
+                                                            ],
+                                              "Mesh":  "SM_Cube",
+                                              "ContentPath":  "/Game/Meshes/Debug/SM_Cube.SM_Cube",
+                                              "AssetImportPath":  "C:/Users/tarik.bergstrom/Perforce/AGP-Content/Unreal/P5G4_KnightHeart/Content/Meshes/Debug/SM_Cube.fbx",
+                                              "Materials":  [
+                                                                {
+                                                                    "Name":  "WorldGridMaterial",
+                                                                    "Parent":  "Self",
+                                                                    "Parameters":  [
+
+                                                                                   ]
+                                                                }
+                                                            ]
+                                          }
+                                      ]
+                   },
+                   {
+                       "Name":  "SM_Cube8",
+                       "Archetype":  "StaticMeshActor",
+                       "Transform":  [
+                                         1,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         1,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         1,
+                                         0,
+                                         -5210,
+                                         5760,
+                                         150,
+                                         1
+                                     ],
+                       "Tags":  [
+
+                                ],
+                       "Components":  [
+                                          {
+                                              "Name":  "StaticMeshComponent0",
+                                              "Parent":  "",
+                                              "TypeID":  1,
+                                              "Tags":  [
+
+                                                       ],
+                                              "Transform":  [
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1
+                                                            ],
+                                              "Mesh":  "SM_Cube",
+                                              "ContentPath":  "/Game/Meshes/Debug/SM_Cube.SM_Cube",
+                                              "AssetImportPath":  "C:/Users/tarik.bergstrom/Perforce/AGP-Content/Unreal/P5G4_KnightHeart/Content/Meshes/Debug/SM_Cube.fbx",
+                                              "Materials":  [
+                                                                {
+                                                                    "Name":  "WorldGridMaterial",
+                                                                    "Parent":  "Self",
+                                                                    "Parameters":  [
+
+                                                                                   ]
+                                                                }
+                                                            ]
+                                          }
+                                      ]
+                   },
+                   {
+                       "Name":  "SM_Cube9",
+                       "Archetype":  "StaticMeshActor",
+                       "Transform":  [
+                                         1,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         1,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         1,
+                                         0,
+                                         -5200,
+                                         -4240,
+                                         150,
+                                         1
+                                     ],
+                       "Tags":  [
+
+                                ],
+                       "Components":  [
+                                          {
+                                              "Name":  "StaticMeshComponent0",
+                                              "Parent":  "",
+                                              "TypeID":  1,
+                                              "Tags":  [
+
+                                                       ],
+                                              "Transform":  [
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1
+                                                            ],
+                                              "Mesh":  "SM_Cube",
+                                              "ContentPath":  "/Game/Meshes/Debug/SM_Cube.SM_Cube",
+                                              "AssetImportPath":  "C:/Users/tarik.bergstrom/Perforce/AGP-Content/Unreal/P5G4_KnightHeart/Content/Meshes/Debug/SM_Cube.fbx",
+                                              "Materials":  [
+                                                                {
+                                                                    "Name":  "WorldGridMaterial",
+                                                                    "Parent":  "Self",
+                                                                    "Parameters":  [
+
+                                                                                   ]
+                                                                }
+                                                            ]
+                                          }
+                                      ]
+                   },
+                   {
+                       "Name":  "SM_Cube10",
+                       "Archetype":  "StaticMeshActor",
+                       "Transform":  [
+                                         1,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         1,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         1,
+                                         0,
+                                         4310,
+                                         -4230,
+                                         150,
+                                         1
+                                     ],
+                       "Tags":  [
+
+                                ],
+                       "Components":  [
+                                          {
+                                              "Name":  "StaticMeshComponent0",
+                                              "Parent":  "",
+                                              "TypeID":  1,
+                                              "Tags":  [
+
+                                                       ],
+                                              "Transform":  [
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1
+                                                            ],
+                                              "Mesh":  "SM_Cube",
+                                              "ContentPath":  "/Game/Meshes/Debug/SM_Cube.SM_Cube",
+                                              "AssetImportPath":  "C:/Users/tarik.bergstrom/Perforce/AGP-Content/Unreal/P5G4_KnightHeart/Content/Meshes/Debug/SM_Cube.fbx",
+                                              "Materials":  [
+                                                                {
+                                                                    "Name":  "WorldGridMaterial",
+                                                                    "Parent":  "Self",
+                                                                    "Parameters":  [
+
+                                                                                   ]
+                                                                }
+                                                            ]
+                                          }
+                                      ]
+                   },
+                   {
+                       "Name":  "SM_Cube11",
+                       "Archetype":  "StaticMeshActor",
+                       "Transform":  [
+                                         1,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         1,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         1,
+                                         0,
+                                         -380,
+                                         -4220,
+                                         150,
+                                         1
+                                     ],
+                       "Tags":  [
+
+                                ],
+                       "Components":  [
+                                          {
+                                              "Name":  "StaticMeshComponent0",
+                                              "Parent":  "",
+                                              "TypeID":  1,
+                                              "Tags":  [
+
+                                                       ],
+                                              "Transform":  [
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1
+                                                            ],
+                                              "Mesh":  "SM_Cube",
+                                              "ContentPath":  "/Game/Meshes/Debug/SM_Cube.SM_Cube",
+                                              "AssetImportPath":  "C:/Users/tarik.bergstrom/Perforce/AGP-Content/Unreal/P5G4_KnightHeart/Content/Meshes/Debug/SM_Cube.fbx",
+                                              "Materials":  [
+                                                                {
+                                                                    "Name":  "WorldGridMaterial",
+                                                                    "Parent":  "Self",
+                                                                    "Parameters":  [
+
+                                                                                   ]
+                                                                }
+                                                            ]
+                                          }
+                                      ]
+                   },
+                   {
+                       "Name":  "SM_Cube12",
+                       "Archetype":  "StaticMeshActor",
+                       "Transform":  [
+                                         1,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         1,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         1,
+                                         0,
+                                         4320,
+                                         320,
+                                         150,
+                                         1
+                                     ],
+                       "Tags":  [
+
+                                ],
+                       "Components":  [
+                                          {
+                                              "Name":  "StaticMeshComponent0",
+                                              "Parent":  "",
+                                              "TypeID":  1,
+                                              "Tags":  [
+
+                                                       ],
+                                              "Transform":  [
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1
+                                                            ],
+                                              "Mesh":  "SM_Cube",
+                                              "ContentPath":  "/Game/Meshes/Debug/SM_Cube.SM_Cube",
+                                              "AssetImportPath":  "C:/Users/tarik.bergstrom/Perforce/AGP-Content/Unreal/P5G4_KnightHeart/Content/Meshes/Debug/SM_Cube.fbx",
+                                              "Materials":  [
+                                                                {
+                                                                    "Name":  "WorldGridMaterial",
+                                                                    "Parent":  "Self",
+                                                                    "Parameters":  [
+
+                                                                                   ]
+                                                                }
+                                                            ]
+                                          }
+                                      ]
+                   },
+                   {
+                       "Name":  "Lvl_Splatmap_Testing2",
+                       "Archetype":  "StaticMeshActor",
+                       "Transform":  [
+                                         1,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         1,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         1,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         1
+                                     ],
+                       "Tags":  [
+
+                                ],
+                       "Components":  [
+                                          {
+                                              "Name":  "StaticMeshComponent0",
+                                              "Parent":  "",
+                                              "TypeID":  1,
+                                              "Tags":  [
+
+                                                       ],
+                                              "Transform":  [
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1
+                                                            ],
+                                              "Mesh":  "Lvl_Splatmap_Testing2",
+                                              "ContentPath":  "/Game/Meshes/Landscape/Test/Lvl_Splatmap_Testing2.Lvl_Splatmap_Testing2",
+                                              "AssetImportPath":  "C:/Users/tarik.bergstrom/Perforce/AGP-Content/Unreal/P5G4_KnightHeart/Content/Meshes/Landscape/Test/Lvl_Splatmap_Testing2.fbx",
+                                              "Materials":  [
+                                                                {
+                                                                    "Name":  "MM_Landscape_Inst",
+                                                                    "Parent":  "MM_Landscape",
+                                                                    "Parameters":  [
+
+                                                                                   ]
+                                                                }
+                                                            ]
+                                          }
+                                      ]
+                   },
+                   {
+                       "Name":  "PaintedTerrainInspectionCamera",
+                       "Archetype":  "CameraActor",
+                       "Tags":  [
+
+                                ],
+                       "Transform":  [
+                                         0,
+                                         0,
+                                         -1,
+                                         0,
+                                         -1,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         1,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         15120,
+                                         1
+                                     ],
+                       "Components":  [
+                                          {
+                                              "Name":  "CameraComponent0",
+                                              "Parent":  "",
+                                              "TypeID":  11,
+                                              "Tags":  [
+
+                                                       ],
+                                              "Transform":  [
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1
+                                                            ],
+                                              "FOV":  90
+                                          }
+                                      ]
+                   }
+               ]
+}

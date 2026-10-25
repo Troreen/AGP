@@ -1,0 +1,13 @@
+{
+  "meta": null,
+  "content": [
+    {
+      "type": "text",
+      "text": "{\n  \"success\": true,\n  \"command\": \"import unreal,json\\nw=unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem).get_editor_world()\\nactors=unreal.get_editor_subsystem(unreal.EditorActorSubsystem).get_all_level_actors()\\nfor a in actors:\\n if a.get_actor_label()=='Lvl_Splatmap_Testing2': a.set_is_temporarily_hidden_in_editor(True)\\nprint(json.dumps({'world':w.get_path_name(),'actors':len(actors),'old_terrain_helper_class_exposed':hasattr(unreal,'TGATerrainLayerTextures'),'terrain_meshes':[c.static_mesh.get_path_name() if c.static_mesh else None for a in actors if a.get_actor_label()=='Lvl_Splatmap_Testing2' for c in a.get_components_by_class(unreal.StaticMeshComponent)]},indent=2))\",\n  \"result\": \"None\",\n  \"output\": [\n    {\n      \"type\": \"Info\",\n      \"output\": \"{\\r\\n  \\\"world\\\": \\\"/Game/Levels/Test_Levels/SP/Lvl_Splatmap_Testing2.Lvl_Splatmap_Testing2\\\",\\r\\n  \\\"actors\\\": 15,\\r\\n  \\\"old_terrain_helper_class_exposed\\\": false,\\r\\n  \\\"terrain_meshes\\\": [\\r\\n    \\\"/Game/Meshes/Landscape/Test/Lvl_Splatmap_Testing2.Lvl_Splatmap_Testing2\\\"\\r\\n  ]\\r\\n}\"\n    }\n  ]\n}",
+      "annotations": null,
+      "meta": null
+    }
+  ],
+  "structuredContent": null,
+  "isError": false
+}

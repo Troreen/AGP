@@ -1,0 +1,4 @@
+{
+  "tool": "execute_python",
+  "arguments": {"code": "import unreal\nfor cls,names in [(unreal.KismetRenderingLibrary if hasattr(unreal,'KismetRenderingLibrary') else unreal.RenderingLibrary,['read_render_target_raw','begin_draw_canvas_to_render_target','import_file_as_texture2d']), (unreal.Canvas,['draw_texture','draw_box','draw_material','k2_draw_texture'])]:\n for n in names:\n  if hasattr(cls,n): print(n,getattr(cls,n).__doc__)\na=next(a for a in unreal.get_editor_subsystem(unreal.EditorActorSubsystem).get_all_level_actors() if isinstance(a,unreal.Landscape))\nprint('Landscape edit functions:', [n for n in dir(a) if 'layer' in n])\nprint('Texture draw:', [n for n in dir(unreal.Canvas) if 'draw' in n])"}
+}

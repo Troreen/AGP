@@ -1,0 +1,4 @@
+{
+ "tool":"execute_python",
+ "arguments":{"code":"import unreal,json\na=next(a for a in unreal.get_editor_subsystem(unreal.EditorActorSubsystem).get_all_level_actors() if isinstance(a,unreal.Landscape))\nrows=[]\nfor c in a.get_components_by_class(unreal.LandscapeComponent):\n r={'component':c.get_name()}\n for name in ['WeightmapTextures','WeightmapLayerAllocations','ComponentSizeQuads']:\n  try: r[name]=str(c.get_editor_property(name))\n  except Exception as e: r[name]=str(e)\n rows.append(r)\nprint(json.dumps(rows,indent=2))"}
+}

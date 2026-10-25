@@ -1,0 +1,62 @@
+[
+  {
+    "actor": "SM_Cube",
+    "material": "/Game/Meshes/Landscape/Test/MI_Landscape_SplatMapTesting.MI_Landscape_SplatMapTesting",
+    "parent": "/InterchangeAssets/Materials/FBXLegacyPhongSurfaceMaterial.FBXLegacyPhongSurfaceMaterial"
+  },
+  {
+    "actor": "SM_Cube2",
+    "material": "/Game/Meshes/Landscape/Test/MI_Landscape_SplatMapTesting.MI_Landscape_SplatMapTesting",
+    "parent": "/InterchangeAssets/Materials/FBXLegacyPhongSurfaceMaterial.FBXLegacyPhongSurfaceMaterial"
+  },
+  {
+    "actor": "SM_Cube3",
+    "material": "/Game/Meshes/Landscape/Test/MI_Landscape_SplatMapTesting.MI_Landscape_SplatMapTesting",
+    "parent": "/InterchangeAssets/Materials/FBXLegacyPhongSurfaceMaterial.FBXLegacyPhongSurfaceMaterial"
+  },
+  {
+    "actor": "SM_Cube4",
+    "material": "/Game/Meshes/Landscape/Test/MI_Landscape_SplatMapTesting.MI_Landscape_SplatMapTesting",
+    "parent": "/InterchangeAssets/Materials/FBXLegacyPhongSurfaceMaterial.FBXLegacyPhongSurfaceMaterial"
+  },
+  {
+    "actor": "SM_Cube5",
+    "material": "/Game/Meshes/Landscape/Test/MI_Landscape_SplatMapTesting.MI_Landscape_SplatMapTesting",
+    "parent": "/InterchangeAssets/Materials/FBXLegacyPhongSurfaceMaterial.FBXLegacyPhongSurfaceMaterial"
+  },
+  {
+    "actor": "SM_Cube6",
+    "material": "/Game/Meshes/Landscape/Test/MI_Landscape_SplatMapTesting.MI_Landscape_SplatMapTesting",
+    "parent": "/InterchangeAssets/Materials/FBXLegacyPhongSurfaceMaterial.FBXLegacyPhongSurfaceMaterial"
+  },
+  {
+    "actor": "SM_Cube7",
+    "material": "/Game/Meshes/Landscape/Test/MI_Landscape_SplatMapTesting.MI_Landscape_SplatMapTesting",
+    "parent": "/InterchangeAssets/Materials/FBXLegacyPhongSurfaceMaterial.FBXLegacyPhongSurfaceMaterial"
+  },
+  {
+    "actor": "SM_Cube8",
+    "material": "/Game/Meshes/Landscape/Test/MI_Landscape_SplatMapTesting.MI_Landscape_SplatMapTesting",
+    "parent": "/InterchangeAssets/Materials/FBXLegacyPhongSurfaceMaterial.FBXLegacyPhongSurfaceMaterial"
+  },
+  {
+    "actor": "SM_Cube9",
+    "material": "/Game/Meshes/Landscape/Test/MI_Landscape_SplatMapTesting.MI_Landscape_SplatMapTesting",
+    "parent": "/InterchangeAssets/Materials/FBXLegacyPhongSurfaceMaterial.FBXLegacyPhongSurfaceMaterial"
+  },
+  {
+    "actor": "SM_Cube10",
+    "material": "/Game/Meshes/Landscape/Test/MI_Landscape_SplatMapTesting.MI_Landscape_SplatMapTesting",
+    "parent": "/InterchangeAssets/Materials/FBXLegacyPhongSurfaceMaterial.FBXLegacyPhongSurfaceMaterial"
+  },
+  {
+    "actor": "SM_Cube11",
+    "material": "/Game/Meshes/Landscape/Test/MI_Landscape_SplatMapTesting.MI_Landscape_SplatMapTesting",
+    "parent": "/InterchangeAssets/Materials/FBXLegacyPhongSurfaceMaterial.FBXLegacyPhongSurfaceMaterial"
+  },
+  {
+    "actor": "SM_Cube12",
+    "material": "/Game/Meshes/Landscape/Test/MI_Landscape_SplatMapTesting.MI_Landscape_SplatMapTesting",
+    "parent": "/InterchangeAssets/Materials/FBXLegacyPhongSurfaceMaterial.FBXLegacyPhongSurfaceMaterial"
+  }
+]

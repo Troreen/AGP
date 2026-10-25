@@ -1,0 +1,13 @@
+{
+  "meta": null,
+  "content": [
+    {
+      "type": "text",
+      "text": "{\n  \"success\": true,\n  \"command\": \"import runpy\\nrunpy.run_path('C:/Users/tarik/Documents/GitHub/AGP/.scratch/splatmap-v2/manual-acceptance-20261024/capture_paint_baseline.py',run_name='__main__')\",\n  \"result\": \"None\",\n  \"output\": [\n    {\n      \"type\": \"Info\",\n      \"output\": \"{\\r\\n  \\\"layer\\\": \\\"Snow_Cliff\\\",\\r\\n  \\\"width\\\": 127,\\r\\n  \\\"height\\\": 127,\\r\\n  \\\"extents\\\": [\\r\\n    -6350,\\r\\n    -6350,\\r\\n    6350,\\r\\n    6350\\r\\n  ],\\r\\n  \\\"min\\\": 0.0,\\r\\n  \\\"max\\\": 90.0,\\r\\n  \\\"planned_patch_pixels\\\": [\\r\\n    35,\\r\\n    70,\\r\\n    41,\\r\\n    76\\r\\n  ],\\r\\n  \\\"planned_world_xy_cm\\\": [\\r\\n    -2800,\\r\\n    700,\\r\\n    -2200,\\r\\n    1300\\r\\n  ],\\r\\n  \\\"nearby_landmark\\\": \\\"SM_Cube4 at (-2540,-890,150); patch is north of it\\\"\\r\\n}\"\n    }\n  ]\n}",
+      "annotations": null,
+      "meta": null
+    }
+  ],
+  "structuredContent": null,
+  "isError": false
+}

@@ -1,0 +1,13 @@
+{
+  "meta": null,
+  "content": [
+    {
+      "type": "text",
+      "text": "Error executing tool eyes_mirror: editor command failed after reconnect: Remote party failed to attempt the command socket connection!",
+      "annotations": null,
+      "meta": null
+    }
+  ],
+  "structuredContent": null,
+  "isError": true
+}

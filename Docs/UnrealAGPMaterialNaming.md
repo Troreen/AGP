@@ -26,16 +26,19 @@
 | Exported base property `Base Color` | `MB_DiffuseColor`, configured in `Bin/Settings/MaterialNameConversions.json`. |
 | Exported base property `Metallic` | `MB_Metalness`, configured in the same file. |
 | Exported base property `Roughness` | `MB_Roughness`, configured in the same file. |
-| Texture asset ending `_BaseColor` | `AlbedoTexture`, slot t0. |
-| Texture asset ending `_Normal` | `NormalTexture`, slot t1. |
-| Texture asset ending `_OcclusionRoughnessMetallic` | `MaterialTexture`, slot t2. |
-| Texture asset ending `_Emissive` | `FxTexture`, slot t3; emission mask is red only. |
-| Other texture asset, for example `Noise_Map` | Exact shader resource name `Noise_Map`, normally in t4 through t15. |
+| Texture parameter whose name matches a shader resource | That resource takes priority, including custom resources in t4 through t15. Spaces in the parameter name become underscores. |
+| Texture asset ending `_BaseColor`, when its parameter role did not bind | `AlbedoTexture`, slot t0. |
+| Texture asset ending `_Normal`, when its parameter role did not bind | `NormalTexture`, slot t1. |
+| Texture asset ending `_OcclusionRoughnessMetallic`, when its parameter role did not bind | `MaterialTexture`, slot t2. |
+| Texture asset ending `_Emissive`, when its parameter role did not bind | `FxTexture`, slot t3; emission mask is red only. |
+| Other texture asset, when its parameter role did not bind | Exact shader resource name matching the asset name, normally in t4 through t15. |
 
-Unreal identifies texture parameters by their parameter names. AGP currently uses
-the asset naming rules above; exported texture parameter names do not override
-them. Assets and matching custom shader resources must be maintained together.
-No automatic asset-rename support is provided.
+Unreal identifies texture parameters by their parameter names. AGP first tries
+the exported parameter name as a shader resource role. If that fails, it tries
+the standard asset suffix slots, then the exact texture asset name as a resource.
+Explicit roles let several assets with the same suffix bind to separate layer
+resources. Keep exported roles and shader resources in sync; there is no general
+asset-rename compatibility lookup.
 
 Scalar/vector names remain subject to the existing HLSL naming convention; this
 is why Unreal labels containing spaces cannot be used verbatim. New descriptive

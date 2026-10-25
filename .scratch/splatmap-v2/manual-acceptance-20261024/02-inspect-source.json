@@ -1,0 +1,6 @@
+{
+  "tool": "execute_python",
+  "arguments": {
+    "code": "import unreal, json\nactors = unreal.get_editor_subsystem(unreal.EditorActorSubsystem).get_all_level_actors()\nrows = []\nfor a in actors:\n    t = a.get_actor_transform()\n    row = {'name': a.get_name(), 'label': a.get_actor_label(), 'class': a.get_class().get_name(), 'location': [t.translation.x, t.translation.y, t.translation.z], 'scale': [t.scale3d.x, t.scale3d.y, t.scale3d.z]}\n    comps = a.get_components_by_class(unreal.StaticMeshComponent)\n    row['meshes'] = [{'component': c.get_name(), 'mesh': c.static_mesh.get_path_name() if c.static_mesh else None} for c in comps]\n    if isinstance(a, unreal.LandscapeProxy):\n        row['landscape_components'] = [c.get_name() for c in a.get_components_by_class(unreal.LandscapeComponent)]\n        row['bounds'] = str(a.get_actor_bounds(False))\n    rows.append(row)\nprint(json.dumps({'engine_version': unreal.SystemLibrary.get_engine_version(), 'world': unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem).get_editor_world().get_path_name(), 'actors': rows, 'tga_class_available': unreal.load_class(None, '/Script/TGAUnrealPlugin.TGAPluginDeveloperSettings') is not None}, indent=2))"
+  }
+}

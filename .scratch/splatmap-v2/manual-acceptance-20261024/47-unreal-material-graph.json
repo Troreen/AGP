@@ -1,0 +1,158 @@
+{
+  "material": "/Game/Materials/MM_Landscape.MM_Landscape",
+  "nodes": [
+    {
+      "name": "MaterialExpressionTextureObject_8",
+      "class": "MaterialExpressionTextureObject"
+    },
+    {
+      "name": "MaterialExpressionTextureObject_7",
+      "class": "MaterialExpressionTextureObject"
+    },
+    {
+      "name": "MaterialExpressionTextureObject_6",
+      "class": "MaterialExpressionTextureObject"
+    },
+    {
+      "name": "MaterialExpressionTextureObject_5",
+      "class": "MaterialExpressionTextureObject"
+    },
+    {
+      "name": "MaterialExpressionTextureObject_4",
+      "class": "MaterialExpressionTextureObject"
+    },
+    {
+      "name": "MaterialExpressionTextureObject_3",
+      "class": "MaterialExpressionTextureObject"
+    },
+    {
+      "name": "MaterialExpressionTextureObject_2",
+      "class": "MaterialExpressionTextureObject"
+    },
+    {
+      "name": "MaterialExpressionTextureObject_1",
+      "class": "MaterialExpressionTextureObject"
+    },
+    {
+      "name": "MaterialExpressionTextureObject_0",
+      "class": "MaterialExpressionTextureObject"
+    },
+    {
+      "name": "MaterialExpressionScalarParameter_0",
+      "class": "MaterialExpressionScalarParameter",
+      "parameter_name": "DEBUG"
+    },
+    {
+      "name": "MaterialExpressionReroute_5",
+      "class": "MaterialExpressionReroute"
+    },
+    {
+      "name": "MaterialExpressionReroute_4",
+      "class": "MaterialExpressionReroute"
+    },
+    {
+      "name": "MaterialExpressionReroute_3",
+      "class": "MaterialExpressionReroute"
+    },
+    {
+      "name": "MaterialExpressionReroute_2",
+      "class": "MaterialExpressionReroute"
+    },
+    {
+      "name": "MaterialExpressionReroute_1",
+      "class": "MaterialExpressionReroute"
+    },
+    {
+      "name": "MaterialExpressionReroute_0",
+      "class": "MaterialExpressionReroute"
+    },
+    {
+      "name": "MaterialExpressionPinBase_5",
+      "class": "MaterialExpressionPinBase"
+    },
+    {
+      "name": "MaterialExpressionPinBase_4",
+      "class": "MaterialExpressionPinBase"
+    },
+    {
+      "name": "MaterialExpressionPinBase_3",
+      "class": "MaterialExpressionPinBase"
+    },
+    {
+      "name": "MaterialExpressionPinBase_2",
+      "class": "MaterialExpressionPinBase"
+    },
+    {
+      "name": "MaterialExpressionPinBase_1",
+      "class": "MaterialExpressionPinBase"
+    },
+    {
+      "name": "MaterialExpressionPinBase_0",
+      "class": "MaterialExpressionPinBase"
+    },
+    {
+      "name": "MaterialExpressionMaterialFunctionCall_2",
+      "class": "MaterialExpressionMaterialFunctionCall"
+    },
+    {
+      "name": "MaterialExpressionMaterialFunctionCall_1",
+      "class": "MaterialExpressionMaterialFunctionCall"
+    },
+    {
+      "name": "MaterialExpressionMaterialFunctionCall_0",
+      "class": "MaterialExpressionMaterialFunctionCall"
+    },
+    {
+      "name": "MaterialExpressionMakeMaterialAttributes_4",
+      "class": "MaterialExpressionMakeMaterialAttributes"
+    },
+    {
+      "name": "MaterialExpressionMakeMaterialAttributes_3",
+      "class": "MaterialExpressionMakeMaterialAttributes"
+    },
+    {
+      "name": "MaterialExpressionMakeMaterialAttributes_2",
+      "class": "MaterialExpressionMakeMaterialAttributes"
+    },
+    {
+      "name": "MaterialExpressionLandscapeLayerBlend_0",
+      "class": "MaterialExpressionLandscapeLayerBlend"
+    },
+    {
+      "name": "MaterialExpressionConstant3Vector_2",
+      "class": "MaterialExpressionConstant3Vector"
+    },
+    {
+      "name": "MaterialExpressionConstant3Vector_1",
+      "class": "MaterialExpressionConstant3Vector"
+    },
+    {
+      "name": "MaterialExpressionConstant3Vector_0",
+      "class": "MaterialExpressionConstant3Vector"
+    },
+    {
+      "name": "MaterialExpressionComposite_2",
+      "class": "MaterialExpressionComposite"
+    },
+    {
+      "name": "MaterialExpressionComposite_1",
+      "class": "MaterialExpressionComposite"
+    },
+    {
+      "name": "MaterialExpressionComposite_0",
+      "class": "MaterialExpressionComposite"
+    },
+    {
+      "name": "MaterialExpressionBlendMaterialAttributes_2",
+      "class": "MaterialExpressionBlendMaterialAttributes"
+    },
+    {
+      "name": "MaterialExpressionBlendMaterialAttributes_1",
+      "class": "MaterialExpressionBlendMaterialAttributes"
+    },
+    {
+      "name": "MaterialExpressionBlendMaterialAttributes_0",
+      "class": "MaterialExpressionBlendMaterialAttributes"
+    }
+  ]
+}

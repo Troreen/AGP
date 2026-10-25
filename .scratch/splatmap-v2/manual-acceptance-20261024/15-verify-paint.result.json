@@ -1,0 +1,13 @@
+{
+  "meta": null,
+  "content": [
+    {
+      "type": "text",
+      "text": "{\n  \"success\": true,\n  \"command\": \"import runpy\\nrunpy.run_path('C:/Users/tarik/Documents/GitHub/AGP/.scratch/splatmap-v2/manual-acceptance-20261024/verify_paint_patch.py',run_name='__main__')\",\n  \"result\": \"None\",\n  \"output\": [\n    {\n      \"type\": \"Info\",\n      \"output\": \"{\\r\\n  \\\"changed_native_samples\\\": 49,\\r\\n  \\\"outside_patch_samples\\\": 0,\\r\\n  \\\"bounds\\\": [\\r\\n    35,\\r\\n    70,\\r\\n    41,\\r\\n    76\\r\\n  ],\\r\\n  \\\"max\\\": 255.0,\\r\\n  \\\"examples\\\": [\\r\\n    [\\r\\n      35,\\r\\n      70,\\r\\n      5.0,\\r\\n      255.0\\r\\n    ],\\r\\n    [\\r\\n      36,\\r\\n      70,\\r\\n      10.0,\\r\\n      255.0\\r\\n    ],\\r\\n    [\\r\\n      37,\\r\\n      70,\\r\\n      10.0,\\r\\n      255.0\\r\\n    ],\\r\\n    [\\r\\n      38,\\r\\n      70,\\r\\n      11.0,\\r\\n      255.0\\r\\n    ],\\r\\n    [\\r\\n      39,\\r\\n      70,\\r\\n      11.0,\\r\\n      255.0\\r\\n    ],\\r\\n    [\\r\\n      40,\\r\\n      70,\\r\\n      16.0,\\r\\n      255.0\\r\\n    ],\\r\\n    [\\r\\n      41,\\r\\n      70,\\r\\n      16.0,\\r\\n      255.0\\r\\n    ],\\r\\n    [\\r\\n      35,\\r\\n      71,\\r\\n      6.0,\\r\\n      255.0\\r\\n    ],\\r\\n    [\\r\\n      36,\\r\\n      71,\\r\\n      10.0,\\r\\n      255.0\\r\\n    ],\\r\\n    [\\r\\n      37,\\r\\n      71,\\r\\n      11.0,\\r\\n      255.0\\r\\n    ]\\r\\n  ],\\r\\n  \\\"saved\\\": false\\r\\n}\"\n    },\n    {\n      \"type\": \"Info\",\n      \"output\": \"Saved verified paint: True\\r\\n\"\n    }\n  ]\n}",
+      "annotations": null,
+      "meta": null
+    }
+  ],
+  "structuredContent": null,
+  "isError": false
+}

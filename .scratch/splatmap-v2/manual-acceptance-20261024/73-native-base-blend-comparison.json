@@ -1,0 +1,34 @@
+﻿{
+    "Samples":  16384,
+    "DifferentOverOneByte":  16335,
+    "MaxLinearRedDifference":  1,
+    "MeanLinearRedDifference":  0.41654509741566043,
+    "Components":  [
+                       {
+                           "File":  "LandscapeComponent_0_0.png",
+                           "DunesMin":  164,
+                           "DunesMax":  216,
+                           "DifferentOverOneByte":  4096
+                       },
+                       {
+                           "File":  "LandscapeComponent_1_0.png",
+                           "DunesMin":  0,
+                           "DunesMax":  215,
+                           "DifferentOverOneByte":  4096
+                       },
+                       {
+                           "File":  "LandscapeComponent_2_0.png",
+                           "DunesMin":  0,
+                           "DunesMax":  216,
+                           "DifferentOverOneByte":  4047
+                       },
+                       {
+                           "File":  "LandscapeComponent_3_0.png",
+                           "DunesMin":  9,
+                           "DunesMax":  215,
+                           "DifferentOverOneByte":  4096
+                       }
+                   ],
+    "EqualWithinOneByte":  false,
+    "Scope":  "Base-color formula comparison using native texture readback; excludes lighting, filtering and tone mapping."
+}

@@ -1,0 +1,7 @@
+{
+  "world": "/Game/Levels/Test_Levels/SP/Lvl_Splatmap_Testing2.Lvl_Splatmap_Testing2",
+  "native_debug": 1.0,
+  "actor_count": 15,
+  "terrain_temporarily_hidden": true,
+  "fixture_not_deployed": true
+}

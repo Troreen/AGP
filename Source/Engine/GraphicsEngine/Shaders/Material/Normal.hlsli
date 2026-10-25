@@ -38,4 +38,29 @@ float3 Normal_TangentToWorld(float3 aNormalTS, float3 aNormal, float3 aTangent, 
     return normalize(mul(aNormalTS, surfaceAxes));
 }
 
+// Orient a decoded detail normal on a world-aligned projection while retaining
+// the mesh's geometric slope. The detail map's +X follows projected world +Z;
+// use world +X when that axis is parallel to the surface normal. Mesh UV
+// tangents are deliberately unused, so rotated meshes share the same frame.
+float3 Normal_ProjectWorldZ(float3 aDetailNormal, float3 aGeometricNormal)
+{
+    // Guard against zero-length input before normalization. The fallback is
+    // world up for geometry and a flat +Z normal for the detail map.
+    const float geometricLengthSquared = dot(aGeometricNormal, aGeometricNormal);
+    const float3 normal = geometricLengthSquared > 1.0e-8f
+        ? aGeometricNormal * rsqrt(geometricLengthSquared) : float3(0, 1, 0);
+    float3 tangent = float3(0, 0, 1) - normal * normal.z;
+    if (dot(tangent, tangent) < 1.0e-6f)
+    {
+        // Projection onto a nearly perpendicular plane has an unstable U axis.
+        tangent = float3(1, 0, 0) - normal * normal.x;
+    }
+    tangent = normalize(tangent);
+    const float3 bitangent = cross(normal, tangent);
+    const float detailLengthSquared = dot(aDetailNormal, aDetailNormal);
+    const float3 detail = detailLengthSquared > 1.0e-8f
+        ? aDetailNormal * rsqrt(detailLengthSquared) : float3(0, 0, 1);
+    return normalize(detail.x * tangent + detail.y * bitangent + detail.z * normal);
+}
+
 #endif

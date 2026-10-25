@@ -1,0 +1,4 @@
+{
+ "tool":"set_viewport_camera",
+ "arguments":{"location":[0,0,15120],"rotation":[-90,-90,0]}
+}

@@ -1,0 +1,249 @@
+﻿{
+    "Passed":  true,
+    "Actors":  18,
+    "Proxies":  2,
+    "UniqueMasks":  8,
+    "NativeRGBACompared":  32768,
+    "PreservedActors":  [
+                            "DirectionalLight",
+                            "SM_Cube",
+                            "SM_Cube2",
+                            "SM_Cube3",
+                            "SM_Cube4",
+                            "SM_Cube5",
+                            "SM_Cube6",
+                            "SM_Cube7",
+                            "SM_Cube8",
+                            "SM_Cube9",
+                            "SM_Cube10",
+                            "SM_Cube11",
+                            "SM_Cube12",
+                            "Lvl_Splatmap_Testing2"
+                        ],
+    "PreservedMasterMaterials":  3,
+    "CameraPreserved":  true,
+    "BehaviorComponents":  [
+                               {
+                                   "Name":  "Controller",
+                                   "Parent":  "",
+                                   "TypeID":  -1,
+                                   "CustomType":  "ScriptedEventComponent_C",
+                                   "Tags":  [
+
+                                            ],
+                                   "Transform":  [
+                                                     1,
+                                                     0,
+                                                     0,
+                                                     0,
+                                                     0,
+                                                     1,
+                                                     0,
+                                                     0,
+                                                     0,
+                                                     0,
+                                                     1,
+                                                     0,
+                                                     0,
+                                                     0,
+                                                     0,
+                                                     1
+                                                 ],
+                                   "Custom":  {
+                                                  "TargetActor":  "",
+                                                  "TriggerAction":  "",
+                                                  "TriggerCollider":  "",
+                                                  "WaitForCompletion":  true,
+                                                  "Replayable":  false,
+                                                  "Step":  0
+                                              }
+                               },
+                               {
+                                   "Name":  "0_LockControlActionComponent",
+                                   "Parent":  "",
+                                   "TypeID":  -1,
+                                   "CustomType":  "LockControlActionComponent_C",
+                                   "Tags":  [
+
+                                            ],
+                                   "Transform":  [
+                                                     1,
+                                                     0,
+                                                     0,
+                                                     0,
+                                                     0,
+                                                     1,
+                                                     0,
+                                                     0,
+                                                     0,
+                                                     0,
+                                                     1,
+                                                     0,
+                                                     0,
+                                                     0,
+                                                     0,
+                                                     1
+                                                 ],
+                                   "Custom":  {
+                                                  "TargetActor":  "Player",
+                                                  "TargetComponent":  "",
+                                                  "WaitForCompletion":  true,
+                                                  "Step":  0
+                                              }
+                               },
+                               {
+                                   "Name":  "UnlockControlActionComponent",
+                                   "Parent":  "",
+                                   "TypeID":  -1,
+                                   "CustomType":  "UnlockControlActionComponent_C",
+                                   "Tags":  [
+
+                                            ],
+                                   "Transform":  [
+                                                     1,
+                                                     0,
+                                                     0,
+                                                     0,
+                                                     0,
+                                                     1,
+                                                     0,
+                                                     0,
+                                                     0,
+                                                     0,
+                                                     1,
+                                                     0,
+                                                     0,
+                                                     0,
+                                                     0,
+                                                     1
+                                                 ],
+                                   "Custom":  {
+                                                  "TargetActor":  "Player",
+                                                  "TargetComponent":  "",
+                                                  "WaitForCompletion":  true,
+                                                  "Step":  0
+                                              }
+                               },
+                               {
+                                   "Name":  "WaitActionComponent",
+                                   "Parent":  "",
+                                   "TypeID":  -1,
+                                   "CustomType":  "WaitActionComponent_C",
+                                   "Tags":  [
+
+                                            ],
+                                   "Transform":  [
+                                                     1,
+                                                     0,
+                                                     0,
+                                                     0,
+                                                     0,
+                                                     1,
+                                                     0,
+                                                     0,
+                                                     0,
+                                                     0,
+                                                     1,
+                                                     0,
+                                                     0,
+                                                     0,
+                                                     0,
+                                                     1
+                                                 ],
+                                   "Custom":  {
+                                                  "DurationInSeconds":  1.0000100000000001,
+                                                  "TargetActor":  "",
+                                                  "TargetComponent":  "",
+                                                  "WaitForCompletion":  true,
+                                                  "Step":  0
+                                              }
+                               },
+                               {
+                                   "Name":  "PlayAudioActionComponent",
+                                   "Parent":  "",
+                                   "TypeID":  -1,
+                                   "CustomType":  "PlayAudioActionComponent_C",
+                                   "Tags":  [
+
+                                            ],
+                                   "Transform":  [
+                                                     1,
+                                                     0,
+                                                     0,
+                                                     0,
+                                                     0,
+                                                     1,
+                                                     0,
+                                                     0,
+                                                     0,
+                                                     0,
+                                                     1,
+                                                     0,
+                                                     0,
+                                                     0,
+                                                     0,
+                                                     1
+                                                 ],
+                                   "Custom":  {
+                                                  "TargetActor":  "",
+                                                  "TargetComponent":  "",
+                                                  "WaitForCompletion":  true,
+                                                  "Positional":  false,
+                                                  "Step":  0,
+                                                  "Sound":  0
+                                              }
+                               }
+                           ],
+    "EmptyCustomPayloads":  0,
+    "EmptyPayloadGate":  "not exercised by available actor",
+    "Masks":  [
+                  {
+                      "Proxy":  "Landscape_0",
+                      "File":  "Landscape_0_LandscapeComponent_0_Weightmap_0.png",
+                      "PixelsCompared":  4096,
+                      "SHA256":  "5984B40A8A10FAD690E39F49F0851223BEB9D01270F21F5B161712F658201C28"
+                  },
+                  {
+                      "Proxy":  "Landscape_0",
+                      "File":  "Landscape_0_LandscapeComponent_1_Weightmap_0.png",
+                      "PixelsCompared":  4096,
+                      "SHA256":  "5959AAFDC34A21E66D842306637BA718150E58FE20765EDA9E00D0AB4321C61B"
+                  },
+                  {
+                      "Proxy":  "Landscape_0",
+                      "File":  "Landscape_0_LandscapeComponent_2_Weightmap_0.png",
+                      "PixelsCompared":  4096,
+                      "SHA256":  "DCE83E6134EA05FF9446C018A5884D39A2A7A1660C0D69432B53EEB80CAC6FDD"
+                  },
+                  {
+                      "Proxy":  "Landscape_0",
+                      "File":  "Landscape_0_LandscapeComponent_3_Weightmap_0.png",
+                      "PixelsCompared":  4096,
+                      "SHA256":  "97F30C03B3F5705692507F772B71452EFDCA59D8071FCE41944289E8B74323BF"
+                  },
+                  {
+                      "Proxy":  "Landscape_1",
+                      "File":  "Landscape_1_LandscapeComponent_0_Weightmap_0.png",
+                      "PixelsCompared":  4096,
+                      "SHA256":  "5984B40A8A10FAD690E39F49F0851223BEB9D01270F21F5B161712F658201C28"
+                  },
+                  {
+                      "Proxy":  "Landscape_1",
+                      "File":  "Landscape_1_LandscapeComponent_1_Weightmap_0.png",
+                      "PixelsCompared":  4096,
+                      "SHA256":  "5959AAFDC34A21E66D842306637BA718150E58FE20765EDA9E00D0AB4321C61B"
+                  },
+                  {
+                      "Proxy":  "Landscape_1",
+                      "File":  "Landscape_1_LandscapeComponent_2_Weightmap_0.png",
+                      "PixelsCompared":  4096,
+                      "SHA256":  "DCE83E6134EA05FF9446C018A5884D39A2A7A1660C0D69432B53EEB80CAC6FDD"
+                  },
+                  {
+                      "Proxy":  "Landscape_1",
+                      "File":  "Landscape_1_LandscapeComponent_3_Weightmap_0.png",
+                      "PixelsCompared":  4096,
+                      "SHA256":  "97F30C03B3F5705692507F772B71452EFDCA59D8071FCE41944289E8B74323BF"
+                  }
+              ]
+}

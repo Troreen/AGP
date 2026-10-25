@@ -1,0 +1,13 @@
+{
+  "meta": null,
+  "content": [
+    {
+      "type": "text",
+      "text": "{\n  \"success\": true,\n  \"command\": \"import unreal, json\\nles = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)\\nues = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)\\noriginal = ues.get_editor_world().get_path_name().split('.')[0]\\nif unreal.EditorLoadingAndSavingUtils.get_dirty_map_packages(): raise RuntimeError('Dirty map; inspection deferred')\\nif not les.load_level('/Game/Levels/Game_Levels/Lvl_Forsaken_Castle'): raise RuntimeError('Map load failed')\\nrows = []\\nfor a in unreal.get_editor_subsystem(unreal.EditorActorSubsystem).get_all_level_actors():\\n    if isinstance(a, unreal.LevelInstance):\\n        row = {'actor': a.get_actor_label()}\\n        try: row['world_asset'] = str(a.get_editor_property('world_asset'))\\n        except Exception as e: row['error'] = str(e)\\n        rows.append(row)\\nprint(json.dumps(rows, indent=2))\\nif not unreal.EditorLoadingAndSavingUtils.get_dirty_map_packages(): print('Returned:', les.load_level(original))\",\n  \"result\": \"None\",\n  \"output\": [\n    {\n      \"type\": \"Info\",\n      \"output\": \"[\\r\\n  {\\r\\n    \\\"actor\\\": \\\"Lvl_02_Barracks\\\",\\r\\n    \\\"world_asset\\\": \\\"<Object '/Game/Levels/Game_Levels/Level_02_Instances/Lvl_02_Barracks.Lvl_02_Barracks' (0x00000272C084B600) Class 'World'>\\\"\\r\\n  },\\r\\n  {\\r\\n    \\\"actor\\\": \\\"Lvl_02_Courtyards\\\",\\r\\n    \\\"world_asset\\\": \\\"<Object '/Game/Levels/Game_Levels/Level_02_Instances/Lvl_02_Courtyards.Lvl_02_Courtyards' (0x000002735E678C00) Class 'World'>\\\"\\r\\n  },\\r\\n  {\\r\\n    \\\"actor\\\": \\\"Lvl_02_CastleWalls\\\",\\r\\n    \\\"world_asset\\\": \\\"<Object '/Game/Levels/Game_Levels/Level_02_Instances/Lvl_02_CastleWalls.Lvl_02_CastleWalls' (0x0000027390BE5400) Class 'World'>\\\"\\r\\n  },\\r\\n  {\\r\\n    \\\"actor\\\": \\\"Lvl_02_ThroneRoom\\\",\\r\\n    \\\"world_asset\\\": \\\"<Object '/Game/Levels/Game_Levels/Level_02_Instances/Lvl_02_ThroneRoom.Lvl_02_ThroneRoom' (0x0000027390BE9A00) Class 'World'>\\\"\\r\\n  }\\r\\n]\"\n    },\n    {\n      \"type\": \"Info\",\n      \"output\": \"Returned: True\\r\\n\"\n    }\n  ]\n}",
+      "annotations": null,
+      "meta": null
+    }
+  ],
+  "structuredContent": null,
+  "isError": false
+}

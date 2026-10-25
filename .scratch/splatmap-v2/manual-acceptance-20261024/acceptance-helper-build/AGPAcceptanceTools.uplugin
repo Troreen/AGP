@@ -1,0 +1,23 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "acceptance-2026-10-24",
+	"FriendlyName": "AGP local acceptance tools",
+	"Description": "Local disposable-fixture setup and independent Landscape allocation evidence.",
+	"Category": "",
+	"CreatedBy": "",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"EngineVersion": "5.7.0",
+	"CanContainContent": false,
+	"Installed": true,
+	"Modules": [
+		{
+			"Name": "AGPAcceptanceTools",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		}
+	]
+}

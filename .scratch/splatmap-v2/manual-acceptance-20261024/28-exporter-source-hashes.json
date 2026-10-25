@@ -1,0 +1,62 @@
+﻿[
+    {
+        "Path":  "C:\\Users\\tarik\\Documents\\GitHub\\AGP\\.scratch\\splatmap-v2\\manual-acceptance-20261024\\exporter-source\\TGAUnrealPlugin\\Source\\TGAUnrealPlugin\\TGAUnrealPlugin.Build.cs",
+        "Hash":  "868F42FD10FC87FB1BFD8F6ACDFC861A2F8524D1AFD316BB465B08F0A68DBE56"
+    },
+    {
+        "Path":  "C:\\Users\\tarik\\Documents\\GitHub\\AGP\\.scratch\\splatmap-v2\\manual-acceptance-20261024\\exporter-source\\TGAUnrealPlugin\\Source\\TGAUnrealPlugin\\Private\\TGAExportSettingsComponent.cpp",
+        "Hash":  "CDB5583B94CA2EB591521B8F3DD96147B241C39F7ADA2E1C5AFFBB4AB06B19F6"
+    },
+    {
+        "Path":  "C:\\Users\\tarik\\Documents\\GitHub\\AGP\\.scratch\\splatmap-v2\\manual-acceptance-20261024\\exporter-source\\TGAUnrealPlugin\\Source\\TGAUnrealPlugin\\Private\\TGALevelSerializer.cpp",
+        "Hash":  "1E5596E1207F1165D5BFAFF0DF564379AF90FA71A1C394AA023C70E5D7A31A64"
+    },
+    {
+        "Path":  "C:\\Users\\tarik\\Documents\\GitHub\\AGP\\.scratch\\splatmap-v2\\manual-acceptance-20261024\\exporter-source\\TGAUnrealPlugin\\Source\\TGAUnrealPlugin\\Private\\TGALevelSerializer.h",
+        "Hash":  "618815FB04678625814D09F8295CEAC53CEBA321C4F457CD4B32E8008D706F68"
+    },
+    {
+        "Path":  "C:\\Users\\tarik\\Documents\\GitHub\\AGP\\.scratch\\splatmap-v2\\manual-acceptance-20261024\\exporter-source\\TGAUnrealPlugin\\Source\\TGAUnrealPlugin\\Private\\TGAPluginDeveloperSettings.cpp",
+        "Hash":  "5CAEA7E76F9387CDE2B91CAAFBFA5DE30C6B1A8466990AF81CEC9F3767462C49"
+    },
+    {
+        "Path":  "C:\\Users\\tarik\\Documents\\GitHub\\AGP\\.scratch\\splatmap-v2\\manual-acceptance-20261024\\exporter-source\\TGAUnrealPlugin\\Source\\TGAUnrealPlugin\\Private\\TGASerializableInterface.cpp",
+        "Hash":  "0199128A5726288EFA75CC22B18E1DA865238051A92649522322FCFEEC13E031"
+    },
+    {
+        "Path":  "C:\\Users\\tarik\\Documents\\GitHub\\AGP\\.scratch\\splatmap-v2\\manual-acceptance-20261024\\exporter-source\\TGAUnrealPlugin\\Source\\TGAUnrealPlugin\\Private\\TGAUnrealPlugin.cpp",
+        "Hash":  "1AEF8495F4ADBF0461CC1BC222A5C31CFF27B00F53595BAA80EA6B5022C0A225"
+    },
+    {
+        "Path":  "C:\\Users\\tarik\\Documents\\GitHub\\AGP\\.scratch\\splatmap-v2\\manual-acceptance-20261024\\exporter-source\\TGAUnrealPlugin\\Source\\TGAUnrealPlugin\\Private\\TGAUnrealPluginCommands.cpp",
+        "Hash":  "62D5398BA4026CFF861BFB6B48FF5439CCA9FDF32333DEB18F875B9F771FC1A7"
+    },
+    {
+        "Path":  "C:\\Users\\tarik\\Documents\\GitHub\\AGP\\.scratch\\splatmap-v2\\manual-acceptance-20261024\\exporter-source\\TGAUnrealPlugin\\Source\\TGAUnrealPlugin\\Private\\TGAUnrealPluginStyle.cpp",
+        "Hash":  "CB32A5C06992F0028EDB3CE88FF87541FAB0D253DCE62514566AA1CE3167B87D"
+    },
+    {
+        "Path":  "C:\\Users\\tarik\\Documents\\GitHub\\AGP\\.scratch\\splatmap-v2\\manual-acceptance-20261024\\exporter-source\\TGAUnrealPlugin\\Source\\TGAUnrealPlugin\\Public\\TGAExportSettingsComponent.h",
+        "Hash":  "5C1D43EE9124EE56FEAC06B0FB2D1FAC77D5A66F5F539B8B3565E0688BDE63F5"
+    },
+    {
+        "Path":  "C:\\Users\\tarik\\Documents\\GitHub\\AGP\\.scratch\\splatmap-v2\\manual-acceptance-20261024\\exporter-source\\TGAUnrealPlugin\\Source\\TGAUnrealPlugin\\Public\\TGAPluginDeveloperSettings.h",
+        "Hash":  "C400FC594F9EAFF44E5C37A4BC9A2BA20470A6CAD8CE6F3A1956AACD7BB59F99"
+    },
+    {
+        "Path":  "C:\\Users\\tarik\\Documents\\GitHub\\AGP\\.scratch\\splatmap-v2\\manual-acceptance-20261024\\exporter-source\\TGAUnrealPlugin\\Source\\TGAUnrealPlugin\\Public\\TGASerializableInterface.h",
+        "Hash":  "B83BA1B8803E60B137B72053934344FCF0714C3C45508720BBD884E33E6BF904"
+    },
+    {
+        "Path":  "C:\\Users\\tarik\\Documents\\GitHub\\AGP\\.scratch\\splatmap-v2\\manual-acceptance-20261024\\exporter-source\\TGAUnrealPlugin\\Source\\TGAUnrealPlugin\\Public\\TGAUnrealPlugin.h",
+        "Hash":  "FC9D92C85F4E2CC898D4DB5E0B8A12B3F7A0353FB8D9A451709B9865C81EB959"
+    },
+    {
+        "Path":  "C:\\Users\\tarik\\Documents\\GitHub\\AGP\\.scratch\\splatmap-v2\\manual-acceptance-20261024\\exporter-source\\TGAUnrealPlugin\\Source\\TGAUnrealPlugin\\Public\\TGAUnrealPluginCommands.h",
+        "Hash":  "347F736B822B73138D353E05F93B250F5D1FAA575376E4838A3C4D10C1AA4498"
+    },
+    {
+        "Path":  "C:\\Users\\tarik\\Documents\\GitHub\\AGP\\.scratch\\splatmap-v2\\manual-acceptance-20261024\\exporter-source\\TGAUnrealPlugin\\Source\\TGAUnrealPlugin\\Public\\TGAUnrealPluginStyle.h",
+        "Hash":  "C51970E42DA49265067FD9BD67962F3E88F06DA8AF831D4FC5392F07D108B94F"
+    }
+]

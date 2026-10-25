@@ -1,0 +1,15 @@
+{
+  "imported": [
+    "/Game/Meshes/Landscape/Test/Lvl_Splatmap_Testing2.Lvl_Splatmap_Testing2"
+  ],
+  "mesh": "/Game/Meshes/Landscape/Test/Lvl_Splatmap_Testing2.Lvl_Splatmap_Testing2",
+  "bounds": "<Struct 'Box' (0x000002739210A000) {min: {x: -6300.000000, y: -6300.000000, z: -757.031250}, max: {x: 6300.000000, y: 6300.000000, z: 1575.000000}, is_valid: True}>",
+  "actor": "/Game/Levels/Test_Levels/SP/Lvl_Splatmap_Testing2.Lvl_Splatmap_Testing2:PersistentLevel.StaticMeshActor_0",
+  "actor_transform": "<Struct 'Transform' (0x0000027394E97F60) {rotation: {x: 0.000000, y: 0.000000, z: 0.000000, w: 1.000000}, translation: {x: 0.000000, y: 0.000000, z: 0.000000}, scale3d: {x: 1.000000, y: 1.000000, z: 1.000000}}>",
+  "material": "/Game/LevelPrototyping/Materials/MI_Landscape_SplatMapTesting.MI_Landscape_SplatMapTesting",
+  "saved_map": true,
+  "temporary_editor_hidden": true,
+  "generate_lightmap_uvs": false,
+  "normal_import": "ImportNormalsAndTangents",
+  "import_materials": false
+}

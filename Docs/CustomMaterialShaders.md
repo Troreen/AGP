@@ -14,14 +14,17 @@ adds `MB_` if absent and replaces spaces with underscores, for both master
 materials and instances. For example, Unreal `Snow Amount` binds to
 `float MB_Snow_Amount`, and `Tint Color` binds to `float4 MB_Tint_Color`.
 
-Declare custom textures in available material slots (`t4` through `t15`). Standard
-texture asset suffixes select fixed slots: `_BaseColor` selects t0, `_Normal` t1,
-`_OcclusionRoughnessMetallic` t2, and `_Emissive` t3. For other assets, the shader
-resource name must match the texture asset name exactly. For example, asset
-`Noise_Map` binds to `Texture2D Noise_Map`. Exported texture parameter names do not
-select resources. Renaming an asset requires updating the matching shader name;
-there is no rename compatibility lookup. Reflection must retain the resource, so
-sample it in the shader. Failed bindings log a warning.
+Declare custom textures in available material slots (`t4` through `t15`). The
+exported texture parameter name selects a matching shader resource first, after
+spaces become underscores. For example, parameter `Layer1BaseColor` binds its
+asset to `Texture2D Layer1BaseColor` even when that asset ends in `_BaseColor`.
+When the parameter role does not bind, standard texture asset suffixes select
+fixed slots: `_BaseColor` selects t0, `_Normal` t1,
+`_OcclusionRoughnessMetallic` t2, and `_Emissive` t3. Finally, the exact asset
+name can select a resource, such as `Texture2D Noise_Map`. Keep explicit roles
+and shader declarations in sync; there is no general rename compatibility lookup.
+Reflection must retain the resource, so sample it in the shader. Failed bindings
+log a warning.
 
 See [Unreal-to-AGP material naming](UnrealAGPMaterialNaming.md) for input mappings
 and the differences from Unreal's material interface.

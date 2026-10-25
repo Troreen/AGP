@@ -1,0 +1,13 @@
+{
+  "meta": null,
+  "content": [
+    {
+      "type": "text",
+      "text": "{\n  \"success\": false,\n  \"command\": \"import runpy\\nrunpy.run_path('C:/Users/tarik/Documents/GitHub/AGP/.scratch/splatmap-v2/manual-acceptance-20261024/apply_paint_patch.py',run_name='__main__')\",\n  \"result\": \"Traceback (most recent call last):\\n\\n  File \\\"<string>\\\", line 2, in <module>\\n\\n  File \\\"<frozen runpy>\\\", line 291, in run_path\\n\\n  File \\\"<frozen runpy>\\\", line 98, in _run_module_code\\n\\n  File \\\"<frozen runpy>\\\", line 88, in _run_code\\n\\n  File \\\"C:/Users/tarik/Documents/GitHub/AGP/.scratch/splatmap-v2/manual-acceptance-20261024/apply_paint_patch.py\\\", line 14, in <module>\\n    raise RuntimeError('Transient paint target differs outside the exact 7x7 patch')\\n\\nRuntimeError: Transient paint target differs outside the exact 7x7 patch\\n\",\n  \"output\": []\n}",
+      "annotations": null,
+      "meta": null
+    }
+  ],
+  "structuredContent": null,
+  "isError": false
+}

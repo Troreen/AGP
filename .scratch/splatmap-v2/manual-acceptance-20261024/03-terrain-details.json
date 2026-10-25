@@ -1,0 +1,6 @@
+{
+  "tool": "execute_python",
+  "arguments": {
+    "code": "import unreal, json\nactors = unreal.get_editor_subsystem(unreal.EditorActorSubsystem).get_all_level_actors()\nreport = {'landscapes': [], 'mesh_assets': []}\nfor a in actors:\n    if not isinstance(a, unreal.LandscapeProxy): continue\n    row = {'actor': a.get_actor_label(), 'components': []}\n    for prop in ['landscape_material', 'landscape_guid', 'landscape_layers']:\n        try: row[prop] = str(a.get_editor_property(prop))\n        except Exception as e: row[prop] = str(e)\n    for c in a.get_components_by_class(unreal.LandscapeComponent):\n        comp = {'name': c.get_name()}\n        for prop in ['section_base_x', 'section_base_y', 'component_size_quads', 'weightmap_layer_allocations', 'weightmap_textures']:\n            try: comp[prop] = str(c.get_editor_property(prop))\n            except Exception as e: comp[prop] = str(e)\n        row['components'].append(comp)\n    report['landscapes'].append(row)\nar = unreal.AssetRegistryHelpers.get_asset_registry()\nfor asset in ar.get_assets_by_path('/Game', recursive=True):\n    if 'splatmap_testing2' in str(asset.asset_name).lower(): report['mesh_assets'].append({'name': str(asset.asset_name), 'package': str(asset.package_name), 'class': str(asset.asset_class_path)})\nprint(json.dumps(report, indent=2))"
+  }
+}

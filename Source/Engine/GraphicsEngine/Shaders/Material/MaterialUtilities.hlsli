@@ -37,4 +37,21 @@ float2 UV_ScreenTexture(float2 aPixelPosition, float2 aTextureSize)
     return aPixelPosition / max(aTextureSize, float2(1, 1));
 }
 
+// Apply two affine rows to a world-plane position. Each row contains X/Y
+// scales, an unused Z coefficient, and an offset. A mask sampler can clamp the
+// result while a surface texture can use the same mapping with a wrap sampler.
+float2 UV_WorldAffine(float2 aWorldPlanePosition, float4 aURow, float4 aVRow)
+{
+    const float4 position = float4(aWorldPlanePosition, 0, 1);
+    return float2(dot(aURow, position), dot(aVRow, position));
+}
+
+// Reshape a painted mask only between its endpoints. Noise in [-1, 1] and
+// strength in [0, 1] leave weights 0 and 1 fixed; callers choose the scale and
+// sampling of the noise texture independently.
+float Mask_ReshapeTransition(float aWeight, float aSignedNoise, float aStrength)
+{
+    return saturate(aWeight + aSignedNoise * aStrength * aWeight * (1.0f - aWeight));
+}
+
 #endif

@@ -1,0 +1,30 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "TGA Unreal Utilities Plugin",
+	"Description": "The amazing internal-only utilities plugin by The Game Asembly. Maintned by Daniel Borgshammar @ TGA Malm�.",
+	"Category": "Utility",
+	"CreatedBy": "The Game Assembly",
+	"CreatedByURL": "https://thegameassembly.se",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"EngineVersion": "5.7.0",
+	"CanContainContent": true,
+	"IsBetaVersion": true,
+	"Installed": true,
+	"Modules": [
+		{
+			"Name": "TGAUnrealPlugin",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "JsonBlueprintUtilities",
+			"Enabled": true
+		}
+	]
+}

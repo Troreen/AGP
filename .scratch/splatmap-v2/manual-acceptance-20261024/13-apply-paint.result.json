@@ -1,0 +1,13 @@
+{
+  "meta": null,
+  "content": [
+    {
+      "type": "text",
+      "text": "{\n  \"success\": true,\n  \"command\": \"import runpy\\nrunpy.run_path('C:/Users/tarik/Documents/GitHub/AGP/.scratch/splatmap-v2/manual-acceptance-20261024/apply_paint_patch.py',run_name='__main__')\",\n  \"result\": \"None\",\n  \"output\": [\n    {\n      \"type\": \"Info\",\n      \"output\": \"{\\r\\n  \\\"layer\\\": \\\"Snow_Cliff\\\",\\r\\n  \\\"changed_target_pixels\\\": 49,\\r\\n  \\\"outside_target_changes\\\": 0,\\r\\n  \\\"imported\\\": true,\\r\\n  \\\"saved\\\": false,\\r\\n  \\\"pending_native_weight_verification\\\": true\\r\\n}\"\n    }\n  ]\n}",
+      "annotations": null,
+      "meta": null
+    }
+  ],
+  "structuredContent": null,
+  "isError": false
+}

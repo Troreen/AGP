@@ -1,0 +1,89 @@
+﻿{
+    "SourceSceneSHA256":  "E5623486188E09FB74CBF3D37C8C23CBE1963BD66C6843F21FD48A7A1C098A94",
+    "Mesh":  "Lvl_Splatmap_Testing2",
+    "MeshSHA256":  "922941C79F3DBB02EFDDF9040B9F0DE572270B2C884E3C968FC8CC22C46046D0",
+    "Inputs":  [
+                   {
+                       "Component":  "LandscapeComponent_0",
+                       "File":  "Landscape_0_LandscapeComponent_0_Weightmap_0.png",
+                       "SHA256":  "5984B40A8A10FAD690E39F49F0851223BEB9D01270F21F5B161712F658201C28",
+                       "Offset":  [
+                                      0,
+                                      0
+                                  ]
+                   },
+                   {
+                       "Component":  "LandscapeComponent_1",
+                       "File":  "Landscape_0_LandscapeComponent_1_Weightmap_0.png",
+                       "SHA256":  "5959AAFDC34A21E66D842306637BA718150E58FE20765EDA9E00D0AB4321C61B",
+                       "Offset":  [
+                                      63,
+                                      0
+                                  ]
+                   },
+                   {
+                       "Component":  "LandscapeComponent_2",
+                       "File":  "Landscape_0_LandscapeComponent_2_Weightmap_0.png",
+                       "SHA256":  "CF263D49F48E9DE69FE31F940CB8A4774BBB459C528906268A246DA55CB0084A",
+                       "Offset":  [
+                                      0,
+                                      63
+                                  ]
+                   },
+                   {
+                       "Component":  "LandscapeComponent_3",
+                       "File":  "Landscape_0_LandscapeComponent_3_Weightmap_0.png",
+                       "SHA256":  "97F30C03B3F5705692507F772B71452EFDCA59D8071FCE41944289E8B74323BF",
+                       "Offset":  [
+                                      63,
+                                      63
+                                  ]
+                   }
+               ],
+    "Width":  127,
+    "Height":  127,
+    "Layers":  "0:Snow_Rough,1:Snow_Dunes,2:Snow_Cliff",
+    "MaskU":  [
+                  7.8740157480314957E-05,
+                  0,
+                  0,
+                  0.5
+              ],
+    "MaskV":  [
+                  0,
+                  7.8740157480314957E-05,
+                  0,
+                  0.5
+              ],
+    "WorldOrigin":  [
+                        -6300,
+                        -6300
+                    ],
+    "WorldExtent":  [
+                        12600,
+                        12600
+                    ],
+    "MaterialMode":  "Surface",
+    "SurfaceTextures":  [
+                            "T_8M_Snow_Dunes_BaseColor",
+                            "T_8M_Snow_Dunes_OcclusionRoughnessMetallic",
+                            "T_8M_Snow_Dunes_Normal",
+                            "T_8M_Snow_Rough_BaseColor",
+                            "T_8M_Snow_Rough_OcclusionRoughnessMetallic",
+                            "T_8M_Snow_Rough_Normal",
+                            "T_8M_Snow_Cliff_BaseColor",
+                            "T_8M_Snow_Cliff_OcclusionRoughnessMetallic",
+                            "T_8M_Snow_Cliff_Normal",
+                            "T_Splatmap_TransitionNoise"
+                        ],
+    "SurfaceRepeatMeters":  8,
+    "SurfaceOriginCentimeters":  [
+                                     -2800,
+                                     -2800
+                                 ],
+    "DirectionalLightIntensity":  2,
+    "Note":  "Original packed weights and explicit world mapping; no axis flip. Surface rendering requires visual verification.",
+    "AuthoringFbxSHA256":  "2002A493239A8359FE9E0440C09D8493AEACF20D74513DF370F1A17BB43E5686",
+    "RuntimeFbxPreparation":  "Node transform baked into geometry; directions rotated and normalized; original authoring FBX preserved.",
+    "RGBView":  "Full lit MM_Landscape with DEBUG=2; only base color is raw mask RGB, normal and ORM maps remain active."
+}

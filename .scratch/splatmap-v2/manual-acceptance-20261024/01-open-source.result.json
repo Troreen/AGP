@@ -1,0 +1,13 @@
+{
+  "meta": null,
+  "content": [
+    {
+      "type": "text",
+      "text": "{\n  \"opened\": true,\n  \"requested\": \"/Game/Levels/Test_Levels/SP/Lvl_Splatmap_Testing2\",\n  \"world\": \"Lvl_Splatmap_Testing2\"\n}",
+      "annotations": null,
+      "meta": null
+    }
+  ],
+  "structuredContent": null,
+  "isError": false
+}

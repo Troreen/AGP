@@ -1,0 +1,20 @@
+{
+  "meta": null,
+  "content": [
+    {
+      "type": "image",
+      "mimeType": "image/png",
+      "annotations": null,
+      "meta": null,
+      "saved_path": "C:\\Users\\tarik\\Documents\\GitHub\\AGP\\.scratch\\splatmap-v2\\manual-acceptance-20261024\\31-unreal-actual-camera-reference-image-0.png"
+    },
+    {
+      "type": "text",
+      "text": "{\"mode\": \"mirror\", \"camera_loc\": [0.0, 0.0, 15120.0], \"camera_rot\": [-90.0, -90.0, 0.0], \"fov\": 90.0, \"width\": 2560, \"height\": 1440, \"world\": \"Lvl_Splatmap_Testing2\", \"actor_count\": 15, \"captured_at\": \"2026-10-24T23:14:30.646034+00:00\", \"note\": \"Live on-demand clean scene render of the in-editor world from the stamped camera/time. NOT disk truth and NOT proof of saved state. Never delete or 'fix' an actor based on this image alone - confirm with get_level_actors first.\"}",
+      "annotations": null,
+      "meta": null
+    }
+  ],
+  "structuredContent": null,
+  "isError": false
+}

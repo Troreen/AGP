@@ -1,0 +1,70 @@
+		if (argc == 4 && std::wstring_view(argv[3]) == L"--ground-floaters")
+		{
+			unsigned matched = 0;
+			for (unsigned index = 1; index <= 12; ++index)
+			{
+				const std::string name = index == 1 ? "SM_Cube" : "SM_Cube" + std::to_string(index);
+				Actor* actor = world->FindActor(name);
+				const auto meshes = actor ? actor->GetComponents<MeshComponentBase>() : std::vector<MeshComponentBase*>{};
+				const bool shared = meshes.size() == 1 && meshes[0]->GetMaterialCount() == 1
+					&& meshes[0]->GetMaterial(0) == material;
+				std::cout << name << ": shares actual terrain material/mask=" << shared << '\n';
+				matched += shared ? 1 : 0;
+			}
+			if (matched != 12)
+			{
+				throw std::runtime_error("Ground floaters do not share the actual terrain material/mask");
+			}
+			const std::filesystem::path output = ".scratch/splatmap-v2/manual-acceptance-20261024/floater-fix/render";
+			std::filesystem::create_directories(output);
+			const auto instance = std::dynamic_pointer_cast<MaterialInstance>(material->GetMaterial());
+			if (!instance)
+			{
+				throw std::runtime_error("Expected shared ground material instance");
+			}
+			world->BeginPlay();
+			world->Update(0.0f);
+			MeshComponentBase* floater = nullptr;
+			for (auto* meshComponent : world->GenerateRenderSnapshot().Meshes)
+			{
+				const bool selected = meshComponent->GetOwner()->GetName() == "SM_Cube4";
+				meshComponent->GetOwner()->SetActive(selected);
+				if (selected)
+				{
+					floater = meshComponent;
+				}
+			}
+			if (!floater)
+			{
+				throw std::runtime_error("Diagnostic floater is missing");
+			}
+			if (world->GenerateRenderSnapshot().Meshes.size() != 1)
+			{
+				throw std::runtime_error("Probe failed to isolate the floater");
+			}
+			// Isolate an elevated floater across the actual painted Cliff boundary.
+			// These edits exist only in this disposable probe World, never in scene files.
+			auto& floaterTransform = floater->GetOwner()->GetTransform();
+			floaterTransform.SetLocalPosition({1000, 2000, -2500});
+			floaterTransform.SetLocalScale({8, 1, 8});
+			world->GetActiveCamera()->GetOwner()->GetTransform().SetLocalPosition({1000, 6000, -2500});
+			instance->SetValue("MB_DEBUG", 2.0f);
+			for (const float yaw : {0.0f, 35.0f})
+			{
+				floaterTransform.SetLocalRotationDegrees(yaw, 0, 0);
+				const std::string suffix = std::to_string(static_cast<int>(yaw));
+				instance->SetTexture("SplatMask", atlas->GetTexture());
+				const auto painted = CaptureRender(*world, RenderPassType::Albedo, output / ("painted-" + suffix + ".ppm"));
+				instance->SetTexture("SplatMask", white->GetTexture());
+				const auto overridden = CaptureRender(*world, RenderPassType::Albedo, output / ("white-mask-" + suffix + ".ppm"));
+				instance->SetTexture("SplatMask", atlas->GetTexture());
+				const size_t changed = ChangedPixels(painted, overridden);
+				std::cout << "Elevated floater yaw=" << yaw << ": mask-responsive albedo pixels=" << changed << '\n';
+				if (changed < 100)
+				{
+					throw std::runtime_error("Rendered floater does not respond to the ground mask");
+				}
+			}
+			std::cout << "PASS: all 12 real material bindings and isolated elevated/rotated mask rendering\n";
+		}
+		else if (argc == 4 && std::wstring_view(argv[3]) == L"--rgb-surface")

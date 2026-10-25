@@ -1,0 +1,49 @@
+{
+  "material": "/Game/Materials/MM_Landscape.MM_Landscape",
+  "nodes": [
+    {
+      "name": "MaterialExpressionMakeMaterialAttributes_4",
+      "class": "MaterialExpressionMakeMaterialAttributes"
+    },
+    {
+      "name": "MaterialExpressionMakeMaterialAttributes_3",
+      "class": "MaterialExpressionMakeMaterialAttributes"
+    },
+    {
+      "name": "MaterialExpressionMakeMaterialAttributes_2",
+      "class": "MaterialExpressionMakeMaterialAttributes"
+    },
+    {
+      "name": "MaterialExpressionLandscapeLayerBlend_0",
+      "class": "MaterialExpressionLandscapeLayerBlend",
+      "layers": "[{}, {}, {}]"
+    },
+    {
+      "name": "MaterialExpressionConstant3Vector_2",
+      "class": "MaterialExpressionConstant3Vector",
+      "constant": "<Struct 'LinearColor' (0x00000235A277E1A8) {r: 0.000000, g: 0.000000, b: 1.000000, a: 0.000000}>"
+    },
+    {
+      "name": "MaterialExpressionConstant3Vector_1",
+      "class": "MaterialExpressionConstant3Vector",
+      "constant": "<Struct 'LinearColor' (0x00000235A2772128) {r: 0.000000, g: 1.000000, b: 0.000000, a: 0.000000}>"
+    },
+    {
+      "name": "MaterialExpressionConstant3Vector_0",
+      "class": "MaterialExpressionConstant3Vector",
+      "constant": "<Struct 'LinearColor' (0x00000235A2770EC8) {r: 1.000000, g: 0.000000, b: 0.000000, a: 0.000000}>"
+    },
+    {
+      "name": "MaterialExpressionBlendMaterialAttributes_2",
+      "class": "MaterialExpressionBlendMaterialAttributes"
+    },
+    {
+      "name": "MaterialExpressionBlendMaterialAttributes_1",
+      "class": "MaterialExpressionBlendMaterialAttributes"
+    },
+    {
+      "name": "MaterialExpressionBlendMaterialAttributes_0",
+      "class": "MaterialExpressionBlendMaterialAttributes"
+    }
+  ]
+}

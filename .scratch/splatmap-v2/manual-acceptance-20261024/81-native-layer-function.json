@@ -1,0 +1,140 @@
+[
+  {
+    "name": "MaterialExpressionTextureSample_2",
+    "class": "MaterialExpressionTextureSample",
+    "inputs": [
+      "UVs",
+      "Tex",
+      "Apply View MipBias"
+    ],
+    "connections": []
+  },
+  {
+    "name": "MaterialExpressionTextureSample_1",
+    "class": "MaterialExpressionTextureSample",
+    "inputs": [
+      "UVs",
+      "Tex",
+      "Apply View MipBias"
+    ],
+    "connections": []
+  },
+  {
+    "name": "MaterialExpressionTextureSample_0",
+    "class": "MaterialExpressionTextureSample",
+    "inputs": [
+      "UVs",
+      "Tex",
+      "Apply View MipBias"
+    ],
+    "connections": []
+  },
+  {
+    "name": "MaterialExpressionTextureCoordinate_0",
+    "class": "MaterialExpressionTextureCoordinate",
+    "inputs": [],
+    "connections": []
+  },
+  {
+    "name": "MaterialExpressionMultiply_0",
+    "class": "MaterialExpressionMultiply",
+    "const_a": "0.0",
+    "const_b": "1.0",
+    "inputs": [
+      "A",
+      "B"
+    ],
+    "connections": []
+  },
+  {
+    "name": "MaterialExpressionMakeMaterialAttributes_0",
+    "class": "MaterialExpressionMakeMaterialAttributes",
+    "inputs": [
+      "BaseColor",
+      "Metallic",
+      "Specular",
+      "Roughness",
+      "Anisotropy",
+      "EmissiveColor",
+      "Opacity",
+      "OpacityMask",
+      "Normal",
+      "Tangent",
+      "WorldPositionOffset",
+      "SubsurfaceColor",
+      "ClearCoat",
+      "ClearCoatRoughness",
+      "AmbientOcclusion",
+      "Refraction",
+      "CustomizedUVs_0",
+      "CustomizedUVs_1",
+      "CustomizedUVs_2",
+      "CustomizedUVs_3",
+      "CustomizedUVs_4",
+      "CustomizedUVs_5",
+      "CustomizedUVs_6",
+      "CustomizedUVs_7",
+      "PixelDepthOffset",
+      "ShadingModel",
+      "Displacement"
+    ],
+    "connections": []
+  },
+  {
+    "name": "MaterialExpressionFunctionOutput_0",
+    "class": "MaterialExpressionFunctionOutput",
+    "output_name": "MaterialAttributes",
+    "inputs": [
+      "None"
+    ],
+    "connections": []
+  },
+  {
+    "name": "MaterialExpressionFunctionInput_2",
+    "class": "MaterialExpressionFunctionInput",
+    "input_name": "Normal",
+    "preview_value": "<Struct 'Vector4f' (0x00000236D57ACBB0) {}>",
+    "inputs": [
+      "Preview"
+    ],
+    "connections": []
+  },
+  {
+    "name": "MaterialExpressionFunctionInput_1",
+    "class": "MaterialExpressionFunctionInput",
+    "input_name": "ORM",
+    "preview_value": "<Struct 'Vector4f' (0x00000236D57AD330) {}>",
+    "inputs": [
+      "Preview"
+    ],
+    "connections": []
+  },
+  {
+    "name": "MaterialExpressionFunctionInput_0",
+    "class": "MaterialExpressionFunctionInput",
+    "input_name": "BaseColor",
+    "preview_value": "<Struct 'Vector4f' (0x00000236D57AD630) {}>",
+    "inputs": [
+      "Preview"
+    ],
+    "connections": []
+  },
+  {
+    "name": "MaterialExpressionDivide_0",
+    "class": "MaterialExpressionDivide",
+    "const_a": "1.0",
+    "const_b": "2.0",
+    "inputs": [
+      "A",
+      "B"
+    ],
+    "connections": []
+  },
+  {
+    "name": "MaterialExpressionConstant_0",
+    "class": "MaterialExpressionConstant",
+    "r": "8.0",
+    "inputs": [],
+    "connections": []
+  }
+]

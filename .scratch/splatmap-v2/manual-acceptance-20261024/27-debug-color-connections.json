@@ -1,0 +1,4 @@
+{
+ "tool":"execute_python",
+ "arguments":{"code":"import unreal,json\nfrom pathlib import Path\nmaterial=unreal.load_asset('/Game/Materials/MM_Landscape')\nrows=[]\nfor obj in unreal.ObjectIterator(unreal.MaterialExpression):\n if obj.get_outermost()!=material.get_outermost(): continue\n if not any(n in obj.get_class().get_name() for n in ['BlendMaterialAttributes','MakeMaterialAttributes','LandscapeLayerBlend']): continue\n inputs=unreal.MaterialEditingLibrary.get_inputs_for_material_expression(material,obj)\n rows.append({'node':obj.get_name(),'class':obj.get_class().get_name(),'inputs':[{'name':x.get_name(),'class':x.get_class().get_name()} if x else None for x in inputs]})\nPath('C:/Users/tarik/Documents/GitHub/AGP/.scratch/splatmap-v2/manual-acceptance-20261024/50-debug-color-connections.json').write_text(json.dumps(rows,indent=2))\nprint(json.dumps(rows,indent=2))"}
+}
