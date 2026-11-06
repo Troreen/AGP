@@ -359,7 +359,7 @@
       <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
       <ObjectFileOutput></ObjectFileOutput>
     </FxCompile>
-    <FxCompile Include="Shaders\Material\Tonemapper_PS.hlsl">
+    <FxCompile Include="Shaders\Internal\Tonemapper_PS.hlsl">
       <ShaderType>Pixel</ShaderType>
       <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
       <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
@@ -466,7 +466,7 @@
     <None Include="Shaders\Material\MaterialParameters.hlsli" />
     <None Include="Shaders\Material\MaterialUtilities.hlsli" />
     <None Include="Shaders\Material\Normal.hlsli" />
-    <None Include="Shaders\Material\Tonemap.hlsli" />
+    <None Include="Shaders\Internal\Tonemap.hlsli" />
     <None Include="Shaders\Particles\ParticleCommon.hlsli" />
     <None Include="Shaders\Particles\ParticleMaterial.hlsli" />
     <None Include="Shaders\Particles\ParticleMaterialParameters.hlsli" />

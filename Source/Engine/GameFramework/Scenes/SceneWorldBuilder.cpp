@@ -279,23 +279,25 @@ void SceneWorldBuilder::ApplyMaterialParameters(MaterialInstance& aMaterial, con
 				continue;
 			}
 
-			if (textureName->ends_with("_BaseColor"))
+			// Explicit shader roles keep surface layers independent of asset naming conventions.
+			bound = aMaterial.SetTexture(parameterName, texture->GetTexture());
+			if (!bound && textureName->ends_with("_BaseColor"))
 			{
 				bound = aMaterial.SetTexture(0, texture->GetTexture());
 			}
-			else if (textureName->ends_with("_Normal"))
+			else if (!bound && textureName->ends_with("_Normal"))
 			{
 				bound = aMaterial.SetTexture(1, texture->GetTexture());
 			}
-			else if (textureName->ends_with("_OcclusionRoughnessMetallic"))
+			else if (!bound && textureName->ends_with("_OcclusionRoughnessMetallic"))
 			{
 				bound = aMaterial.SetTexture(2, texture->GetTexture());
 			}
-			else if (textureName->ends_with("_Emissive"))
+			else if (!bound && textureName->ends_with("_Emissive"))
 			{
 				bound = aMaterial.SetTexture(3, texture->GetTexture());
 			}
-			else
+			else if (!bound)
 			{
 				bound = aMaterial.SetTexture(*textureName, texture->GetTexture());
 			}

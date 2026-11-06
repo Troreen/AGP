@@ -279,7 +279,7 @@
     <FxCompile Include="Shaders\Material\Surface_VS.hlsl">
       <Filter>Shaders\Material</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\Material\Tonemapper_PS.hlsl">
+    <FxCompile Include="Shaders\Internal\Tonemapper_PS.hlsl">
       <Filter>Shaders\Material</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Material\Unlit_PS.hlsl">
@@ -356,7 +356,7 @@
     <None Include="Shaders\Material\Normal.hlsli">
       <Filter>Shaders\Material</Filter>
     </None>
-    <None Include="Shaders\Material\Tonemap.hlsli">
+    <None Include="Shaders\Internal\Tonemap.hlsli">
       <Filter>Shaders\Material</Filter>
     </None>
     <None Include="Shaders\Particles\ParticleCommon.hlsli">

@@ -192,6 +192,9 @@
     <ClCompile Include="Player\Abilities\DashAbility.cpp">
       <Filter>Player\Abilities</Filter>
     </ClCompile>
+    <ClCompile Include="Player\Abilities\DodgeAbility.cpp">
+      <Filter>Player\Abilities</Filter>
+    </ClCompile>
     <ClCompile Include="Player\Abilities\MeleeAbility.cpp">
       <Filter>Player\Abilities</Filter>
     </ClCompile>

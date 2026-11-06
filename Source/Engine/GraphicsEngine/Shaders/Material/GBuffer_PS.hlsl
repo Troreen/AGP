@@ -54,7 +54,7 @@ GBufferOutput main(VStoPS aPixel)
             break;
 
         case 7:
-            result.WorldNormalDepth = float4(sampleNormal, 1, 1);
+            result.WorldNormalDepth = float4(normalize(parameters.Normal), 1);
             break;
         
         case 8:

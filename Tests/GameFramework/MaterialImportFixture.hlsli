@@ -1,4 +1,5 @@
 #include "MaterialParameters.hlsli"
+#include "MaterialUtilities.hlsli"
 
 cbuffer MaterialBuffer : register(b4)
 {

@@ -302,6 +302,7 @@ exit /b 0</Command>
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Player\Abilities\Ability.cpp" />
     <ClCompile Include="Player\Abilities\DashAbility.cpp" />
+    <ClCompile Include="Player\Abilities\DodgeAbility.cpp" />
     <ClCompile Include="Player\Abilities\MeleeAbility.cpp" />
     <ClCompile Include="Player\Components\AbilityComponent.cpp" />
     <ClCompile Include="Player\Components\PlayerController.cpp" />
