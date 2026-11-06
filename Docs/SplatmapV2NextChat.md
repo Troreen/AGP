@@ -1,5 +1,112 @@
 # Splatmap V2 manual acceptance: next-chat handoff
 
+## Current checkpoint: 2026-11-06
+
+Start here when resuming landscape export, normals, painted masks or the LD
+handoff. This checkpoint supersedes conflicting October state below. The simple
+authoring workflow is [Landscape to AGP](LandscapeToAGP.md); the implementation
+contract is in the content repo's
+[preparation guide](../../AGP-Content/Tools/Terrain/PreparePaintedLandscapeRuntime.md).
+
+### Repository and exporter state
+
+- Engine: `AGP`, branch `SplatmapV2`; content: `AGP-Content`, branch
+  `ExporterUpdateBranch`. Discover paths and inspect status before edits.
+- Content commit `c7e80bc` is pushed. The plugin now writes exact linear RGBA
+  DDS weightmaps directly from editable texture Source data. Names end in
+  `_Weightmap_<index>_Linear.dds`; scene metadata names the same files. This
+  avoids collisions with older PNG conversion. No image flip is added.
+- Preparation accepts explicit DDS references and older PNG exports. Tests
+  passed for exact RGBA/alpha/orientation, unique names across shared textures
+  and proxies, DDS preparation, missing files, and legacy-conversion safety.
+  Unreal 5.7.4 plugin build and its automation test passed. A fresh painted-level
+  export using this new DDS build still needs visual acceptance.
+- Rebuilt plugin binaries were installed locally; they are ignored build output.
+  Rebuild the plugin on another machine before testing its source changes there.
+- The teacher's November 3 exporter update is absent from this device. The user
+  explicitly deferred investigating it. Keep that separate from the DDS work.
+- The HLSL converter helper is separate unfinished work. Its files are preserved
+  locally and excluded through `.git/info/exclude` at the user's request.
+
+### Normals: fresh Unreal MCP experiment
+
+A fresh export of `/Game/Levels/Test_Levels/SP/Lvl_Splatmap_Testing2` established
+where the mesh-normal failure occurs:
+
+| Actual check | Face/normal alignment | Result |
+| --- | ---: | --- |
+| Fresh Landscape FBX imported into Unreal, Import Normals | 0.998493 | Pass |
+| Same fresh Landscape FBX loaded by AGP | 0.217846 | Fail |
+| Unreal static-mesh re-export loaded by AGP, full precision | 0.999512 | Pass |
+
+Unreal's default import and Compute Normals cases also passed. An independent
+Blender read of the raw source found unit normals and no opposed face corners.
+AGP instead produced mean normal components around -6299, 92, -6300. This
+reproduces the existing diagnosis of incorrect normal transformation inside the
+bundled AGP FBX importer. Its implementation is still unavailable in this repo;
+only headers and prebuilt libraries are present. No importer code was changed.
+
+An Unreal-only alternative to the Blender correction was tested:
+
+1. Export only the native Landscape with **Force Front X Axis on**.
+2. Import as a combined static mesh using **Import Normals**, baked/absolute
+   vertex transforms, no imported materials/textures, and no generated lightmap
+   UVs. The observed importer was Interchange.
+3. Set LOD0 **Use Full Precision UVs** and **Use High Precision Tangent Basis**,
+   preserve imported normals, then apply/rebuild.
+4. Export the static-mesh **asset** with **Force Front X Axis off** and
+   **Export Source Mesh off**. Keep the authoring and runtime FBXs separate.
+
+AGP's existing probe verified all 95,256 indexed corners: position difference
+at most 2.73e-12 cm, UV0 error zero, UV1 error zero, and good normals. Default
+re-export fixed normals too, but quantized UV1 by up to 0.000242233; the precision
+settings removed that difference. Export Source Mesh alone did not remove it.
+
+This was a mesh-data experiment, not a rendered parity test or a deployment.
+All imported assets were under `/Temp`, saving disabled. Existing terrain assets,
+levels and runtime FBXs were preserved; Unreal reported no dirty game packages
+or maps. The probe executable was reused, not rebuilt for this experiment.
+
+Local evidence remains under ignored `.scratch/landscape-normal-roundtrip/`:
+`report.md`, export/import/Blender scripts, JSON readbacks, raw and candidate
+FBXs, and AGP comparison logs. Shader-cache files were removed during cleanup.
+That evidence is local, not transferred by Git; the findings/settings above and
+the authoring guide are the durable handoff. The successful MCP session used
+`UnrealEditor-Cmd.exe -NullRHI`; windowed NullRHI failed during startup. Test
+editor sessions were closed. Re-query editor state rather than using old PIDs.
+
+### LD layout clarification and next work
+
+- LD prefers starting at **1x1 components**, then adds/removes components to
+  shape the level. "SG" refers to graphics artists. This preference is recorded;
+  irregular-layout support has not been implemented or accepted.
+- With section size 63 quads, one section per component, and XY scale 100:
+  **1x1 components = 64x64 vertices / 63x63 metres**;
+  **2x2 components = 127x127 vertices / 126x126 metres**. The earlier supplied
+  settings mixed those two sizes.
+- The current preparer supports one axis-aligned Landscape, one subsection per
+  component, a complete rectangular grid, one packed mask per component, and
+  matching layer/channel allocations. Rectangles need not be square. Removing
+  a component to make an L-shape or missing corner fails with
+  `The component grid contains holes.` Different channel layouts require remapping.
+- A multi-component Landscape can become one combined static mesh. Duplicate
+  preview actors overlapping the native Landscape are a separate issue.
+- Decide the LD/graphics footprint contract before extending the tools: retain
+  a complete rectangle or explicitly support sparse/irregular grids and their
+  mask coverage. Add representative fixtures and native-paint comparisons for
+  any new support; the current guide documents the supported path only.
+- A reusable Unreal-only handoff could replace manual Blender work, but no new
+  automation or production asset replacement was authorized/implemented here.
+- Current source already implements explicit ground-floater selection through
+  `-GroundFloaterActorNames`; October statements that this is unimplemented are
+  historical. Preserve unrelated materials when selecting floaters.
+- Exact Unreal/AGP surface parity remains open: native painted base alpha and
+  AGP's continuous base differ, and earlier lighting differed. Preserve the
+  agreed blend contract until the user changes it. Complete visual acceptance,
+  including floaters, using fresh exports before closing tickets 02/03.
+
+## Historical checkpoint: 2026-10-25
+
 Handoff recorded 2026-10-25. Resume the existing acceptance run; do not start a
 new implementation or repeat completed setup. Read AGENTS.md and its required
 guides first, then [the run log](SplatmapV2AcceptanceRun-2026-10-24.md), especially

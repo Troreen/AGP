@@ -44,5 +44,8 @@ p4ignore.txt
 /.scratch/scripted-events/before-*/
 /.scratch/scripted-events/mcp-*.json
 
+# Local Unreal landscape roundtrip probes, FBXs, logs and shader caches.
+/.scratch/landscape-normal-roundtrip/
+
 # Runtime assets are owned by AGP-Content; keep only a local copy here.
 /Content/

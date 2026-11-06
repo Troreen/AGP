@@ -51,6 +51,10 @@ The build still combines game shaders from `Content/Shaders` with engine
 shader sources into `Bin/<configuration>/EngineShaders`.
 
 For home setup and the daily two-repository workflow, see [Home setup](Docs/HomeSetup.md).
+For creating, painting and exporting terrain into AGP, see the
+[step-by-step Landscape guide](Docs/LandscapeToAGP.md).
+For resuming splatmap development, start with the current checkpoint in
+[the splatmap handoff](Docs/SplatmapV2NextChat.md).
 
 ## Build
 
