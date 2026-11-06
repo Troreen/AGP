@@ -1,0 +1,164 @@
+[
+    {
+        "action":  "deleted",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\AGENTS.md",
+        "depotFile":  "//MAL25-G4/Mainline/AGENTS.md",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Retail\\EngineShaders\\Internal\\BRDF_LUT_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Internal/BRDF_LUT_PS.hlsl",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Retail\\EngineShaders\\Internal\\DeferredComposite_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Internal/DeferredComposite_PS.hlsl",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Retail\\EngineShaders\\Internal\\DeferredDirectional_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Internal/DeferredDirectional_PS.hlsl",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Retail\\EngineShaders\\Internal\\DeferredLighting.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Internal/DeferredLighting.hlsli",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Retail\\EngineShaders\\Internal\\DeferredPoint_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Internal/DeferredPoint_PS.hlsl",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Retail\\EngineShaders\\Internal\\DeferredSpot_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Internal/DeferredSpot_PS.hlsl",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Retail\\EngineShaders\\Internal\\PointShadow_GS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Internal/PointShadow_GS.hlsl",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Retail\\EngineShaders\\Internal\\RenderPassDebug_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Internal/RenderPassDebug_PS.hlsl",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Retail\\EngineShaders\\Internal\\ScreenSpaceAO_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Internal/ScreenSpaceAO_PS.hlsl",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Retail\\EngineShaders\\Internal\\TextOverlay_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Internal/TextOverlay_PS.hlsl",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Retail\\EngineShaders\\Internal\\TextOverlay_VS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Internal/TextOverlay_VS.hlsl",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Retail\\EngineShaders\\Material\\GlobalLightingTextures.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Material/GlobalLightingTextures.hlsli",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Retail\\EngineShaders\\Material\\MaterialTextures.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Material/MaterialTextures.hlsli",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Retail\\EngineShaders\\Material\\PBR.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Material/PBR.hlsli",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Retail\\EngineShaders\\Material\\Samplers.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Material/Samplers.hlsli",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Retail\\EngineShaders\\Material\\ShadowSampling.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Material/ShadowSampling.hlsli",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\CODING_STANDARDS.md",
+        "depotFile":  "//MAL25-G4/Mainline/CODING_STANDARDS.md",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Dependencies\\SetupFmodSdk.ps1",
+        "depotFile":  "//MAL25-G4/Mainline/Dependencies/SetupFmodSdk.ps1",
+        "rev":  "none"
+    },
+    {
+        "action":  "refreshed",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Docs\\EngineArchitectureBasics.md",
+        "depotFile":  "//MAL25-G4/Mainline/Docs/EngineArchitectureBasics.md",
+        "rev":  "1"
+    },
+    {
+        "action":  "refreshed",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Docs\\GameLoopOnboarding.md",
+        "depotFile":  "//MAL25-G4/Mainline/Docs/GameLoopOnboarding.md",
+        "rev":  "3"
+    },
+    {
+        "action":  "refreshed",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Docs\\Kod Struktur.md",
+        "depotFile":  "//MAL25-G4/Mainline/Docs/Kod Struktur.md",
+        "rev":  "1"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\imgui.ini",
+        "depotFile":  "//MAL25-G4/Mainline/imgui.ini",
+        "rev":  "none"
+    },
+    {
+        "action":  "refreshed",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Premake\\EnsurePremake.ps1",
+        "depotFile":  "//MAL25-G4/Mainline/Premake/EnsurePremake.ps1",
+        "rev":  "1"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\SetupWindows.bat",
+        "depotFile":  "//MAL25-G4/Mainline/SetupWindows.bat",
+        "rev":  "none"
+    },
+    {
+        "action":  "refreshed",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Engine\\GraphicsEngine\\RHI\\RHIShaderReflectionInfo.cpp",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/RHI/RHIShaderReflectionInfo.cpp",
+        "rev":  "3"
+    },
+    {
+        "action":  "refreshed",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Utilities\\ImGui\\docs\\BACKENDS.md",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Utilities/ImGui/docs/BACKENDS.md",
+        "rev":  "1"
+    }
+]

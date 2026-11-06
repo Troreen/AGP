@@ -51,10 +51,6 @@ The build still combines game shaders from `Content/Shaders` with engine
 shader sources into `Bin/<configuration>/EngineShaders`.
 
 For home setup and the daily two-repository workflow, see [Home setup](Docs/HomeSetup.md).
-For creating, painting and exporting terrain into AGP, see the
-[step-by-step Landscape guide](Docs/LandscapeToAGP.md).
-For resuming splatmap development, start with the current checkpoint in
-[the splatmap handoff](Docs/SplatmapV2NextChat.md).
 
 ## Build
 
@@ -121,6 +117,9 @@ The current shadow setup keeps material textures in low texture slots and binds 
 Directional shadows use four cascades. Spot shadows use perspective shadow maps matched to the spot light cone. Point shadows use cube depth maps sampled by direction from the light to the shaded world position.
 
 For component-based scripted events, see [Scripted events](Docs/ScriptedEvents.md) and the [Unreal test guide](Docs/ScriptedEventsUnrealTestGuide.md).
+
+For creating, exporting and manually testing a painted Landscape from scratch,
+see [Landscape to AGP](Docs/LandscapeToAGP.md).
 
 For sphere/box overlaps and Component collision methods,
 see [Collision detection](Docs/CollisionDetection.md).

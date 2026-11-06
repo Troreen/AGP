@@ -1,0 +1,131 @@
+//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Material/Tonemap.hlsli#2 - deleted as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Retail\EngineShaders\Material\Tonemap.hlsli
+//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Material/Tonemapper_PS.hlsl#2 - deleted as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Retail\EngineShaders\Material\Tonemapper_PS.hlsl
+//MAL25-G4/Mainline/Bin/Retail/imgui.ini#3 - deleted as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Retail\imgui.ini
+//MAL25-G4/Content_&_Unreal_Project/Content/Animations/Characters/enemy_02/A_enemy02_death.fbx#2 - deleted as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Content\Animations\Characters\enemy_02\A_enemy02_death.fbx
+//MAL25-G4/Content_&_Unreal_Project/Content/Animations/Characters/enemy_02/A_enemy02_idle.fbx#2 - deleted as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Content\Animations\Characters\enemy_02\A_enemy02_idle.fbx
+//MAL25-G4/Content_&_Unreal_Project/Content/Meshes/Landscapes/BlisteringTundra/SM_BlisteringTundra_01.fbx#1 - deleted as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Content\Meshes\Landscapes\BlisteringTundra\SM_BlisteringTundra_01.fbx
+//MAL25-G4/Content_&_Unreal_Project/Content/Meshes/Landscapes/BlisteringTundra/SM_BlisteringTundra_02.fbx#1 - deleted as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Content\Meshes\Landscapes\BlisteringTundra\SM_BlisteringTundra_02.fbx
+//MAL25-G4/Content_&_Unreal_Project/Content/Meshes/Landscapes/BlisteringTundra/SM_BlisteringTundra_03.fbx#1 - deleted as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Content\Meshes\Landscapes\BlisteringTundra\SM_BlisteringTundra_03.fbx
+//MAL25-G4/Content_&_Unreal_Project/Content/Meshes/Landscapes/BlisteringTundra/SM_BlisteringTundra_04.fbx#1 - deleted as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Content\Meshes\Landscapes\BlisteringTundra\SM_BlisteringTundra_04.fbx
+//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/Shaders/Material/Tonemap.hlsli#2 - deleted as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Engine\GraphicsEngine\Shaders\Material\Tonemap.hlsli
+//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/Shaders/Material/Tonemapper_PS.hlsl#2 - deleted as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Engine\GraphicsEngine\Shaders\Material\Tonemapper_PS.hlsl
+//MAL25-G4/Mainline/Bin/Release/Audio/Master.bank#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\Audio\Master.bank
+//MAL25-G4/Mainline/Bin/Release/Audio/Master.strings.bank#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\Audio\Master.strings.bank
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/_DefaultMaterial.hlsli#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\_DefaultMaterial.hlsli
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/BRDF LUT_PS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Internal\BRDF LUT_PS.hlsl
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/Common.hlsli#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Internal\Common.hlsli
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/FullTexture_VS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Internal\FullTexture_VS.hlsl
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/Lighting.hlsli#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Internal\Lighting.hlsli
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/LUTFunctions.hlsli#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Internal\LUTFunctions.hlsli
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/PoissonDisks.hlsli#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Internal\PoissonDisks.hlsli
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/Samplers.hlsli#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Internal\Samplers.hlsli
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/Sprite_PS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Internal\Sprite_PS.hlsl
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/Sprite_VS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Internal\Sprite_VS.hlsl
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/Tonemap.hlsli#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Internal\Tonemap.hlsli
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/Tonemapper_PS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Internal\Tonemapper_PS.hlsl
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Lines/Lines_PS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Lines\Lines_PS.hlsl
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Lines/Lines_VS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Lines\Lines_VS.hlsl
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/Deferred_AmbientLight_PS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Material\Deferred_AmbientLight_PS.hlsl
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/Deferred_DirLight_PS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Material\Deferred_DirLight_PS.hlsl
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/Deferred_PointLight_PS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Material\Deferred_PointLight_PS.hlsl
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/Deferred_SpotLight_PS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Material\Deferred_SpotLight_PS.hlsl
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/GBuffer_PS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Material\GBuffer_PS.hlsl
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/Lit_PS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Material\Lit_PS.hlsl
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/Material.hlsli#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Material\Material.hlsli
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/MaterialParameters.hlsli#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Material\MaterialParameters.hlsli
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/MaterialUtilities.hlsli#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Material\MaterialUtilities.hlsli
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/Normal.hlsli#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Material\Normal.hlsli
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/ShadowCube_GS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Material\ShadowCube_GS.hlsl
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/Skybox_PS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Material\Skybox_PS.hlsl
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/Surface_VS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Material\Surface_VS.hlsl
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/Unlit_PS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Material\Unlit_PS.hlsl
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/MM_Blood.hlsli#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\MM_Blood.hlsli
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/MM_Blood_Absorption.hlsli#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\MM_Blood_Absorption.hlsli
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/MM_Enemy_Dissolve.hlsli#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\MM_Enemy_Dissolve.hlsli
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/MM_ShaderTest.hlsli#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\MM_ShaderTest.hlsli
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/MM_Standard_WithSnow.hlsli#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\MM_Standard_WithSnow.hlsli
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Particles/Particle_GS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Particles\Particle_GS.hlsl
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Particles/Particle_PS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Particles\Particle_PS.hlsl
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Particles/Particle_VS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Particles\Particle_VS.hlsl
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Particles/ParticleCommon.hlsli#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Particles\ParticleCommon.hlsli
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Particles/ParticleMaterial.hlsli#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Particles\ParticleMaterial.hlsli
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Particles/ParticleMaterialParameters.hlsli#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Particles\ParticleMaterialParameters.hlsli
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/ParticleTest.hlsli#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\ParticleTest.hlsli
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/Bloom01Downsample_PS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\PostProcess\Bloom01Downsample_PS.hlsl
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/Bloom_PS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\PostProcess\Bloom_PS.hlsl
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/BloomDownsample_PS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\PostProcess\BloomDownsample_PS.hlsl
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/BloomHelper.hlsli#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\PostProcess\BloomHelper.hlsli
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/BloomLuminance_PS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\PostProcess\BloomLuminance_PS.hlsl
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/BloomUpsample_PS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\PostProcess\BloomUpsample_PS.hlsl
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/Resample_PS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\PostProcess\Resample_PS.hlsl
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/SSAO_BlurH_PS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\PostProcess\SSAO_BlurH_PS.hlsl
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/SSAO_BlurV_PS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\PostProcess\SSAO_BlurV_PS.hlsl
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/SSAO_PS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\PostProcess\SSAO_PS.hlsl
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/SSAOHelper.hlsli#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\PostProcess\SSAOHelper.hlsli
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/SparklingSnow.hlsli#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\SparklingSnow.hlsli
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Text/TextOverlay_PS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Text\TextOverlay_PS.hlsl
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Text/TextOverlay_VS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Text\TextOverlay_VS.hlsl
+//MAL25-G4/Mainline/Bin/Release/EngineShaders/Text/TextOverlayHelper.hlsli#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\EngineShaders\Text\TextOverlayHelper.hlsli
+//MAL25-G4/Mainline/Bin/Release/fmod.dll#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\fmod.dll
+//MAL25-G4/Mainline/Bin/Release/fmodL.dll#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\fmodL.dll
+//MAL25-G4/Mainline/Bin/Release/fmodstudio.dll#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\fmodstudio.dll
+//MAL25-G4/Mainline/Bin/Release/fmodstudioL.dll#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\fmodstudioL.dll
+//MAL25-G4/Mainline/Bin/Release/Game.exe#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\Game.exe
+//MAL25-G4/Mainline/Bin/Release/Game.pdb#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\Game.pdb
+//MAL25-G4/Mainline/Bin/Release/libfbxsdk.dll#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Release\libfbxsdk.dll
+//MAL25-G4/Mainline/Bin/Retail/Audio/Master.bank#12 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Retail\Audio\Master.bank
+//MAL25-G4/Mainline/Bin/Retail/Audio/Master.strings.bank#11 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Retail\Audio\Master.strings.bank
+//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Internal/Lighting.hlsli#4 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Retail\EngineShaders\Internal\Lighting.hlsli
+//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Internal/Tonemap.hlsli#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Retail\EngineShaders\Internal\Tonemap.hlsli
+//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Internal/Tonemapper_PS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Retail\EngineShaders\Internal\Tonemapper_PS.hlsl
+//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Material/Unlit_PS.hlsl#4 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Retail\EngineShaders\Material\Unlit_PS.hlsl
+//MAL25-G4/Mainline/Bin/Retail/EngineShaders/MM_Enemy_Dissolve.hlsli#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Retail\EngineShaders\MM_Enemy_Dissolve.hlsli
+//MAL25-G4/Mainline/Bin/Retail/Game.exe#39 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Retail\Game.exe
+//MAL25-G4/Mainline/Bin/Retail/Game.pdb#34 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Retail\Game.pdb
+//MAL25-G4/Content_&_Unreal_Project/Content/Animations/Animation Manager/Trees/PlayerTree.json#18 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Content\Animations\Animation Manager\Trees\PlayerTree.json
+//MAL25-G4/Content_&_Unreal_Project/Content/Animations/Characters/enemy_02/A_enemy02_awake.fbx#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Content\Animations\Characters\enemy_02\A_enemy02_awake.fbx
+//MAL25-G4/Content_&_Unreal_Project/Content/Animations/Characters/enemy_02/A_enemy02_mainAttack.fbx#4 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Content\Animations\Characters\enemy_02\A_enemy02_mainAttack.fbx
+//MAL25-G4/Content_&_Unreal_Project/Content/Animations/Characters/enemy_02/A_enemy02_stun.fbx#3 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Content\Animations\Characters\enemy_02\A_enemy02_stun.fbx
+//MAL25-G4/Content_&_Unreal_Project/Content/Animations/Characters/enemy_02/A_ranged_death.fbx#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Content\Animations\Characters\enemy_02\A_ranged_death.fbx
+//MAL25-G4/Content_&_Unreal_Project/Content/Animations/Characters/enemy_02/A_ranged_idle.fbx#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Content\Animations\Characters\enemy_02\A_ranged_idle.fbx
+//MAL25-G4/Content_&_Unreal_Project/Content/ExportedScenes/lvl_forsaken_castle/Lvl_Forsaken_Castle_Level.json#20 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Content\ExportedScenes\lvl_forsaken_castle\Lvl_Forsaken_Castle_Level.json
+//MAL25-G4/Content_&_Unreal_Project/Content/ExportedScenes/lvl_forsaken_castle/Lvl_Forsaken_Castle_Level.nav#6 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Content\ExportedScenes\lvl_forsaken_castle\Lvl_Forsaken_Castle_Level.nav
+//MAL25-G4/Content_&_Unreal_Project/Content/Meshes/Landscapes/BlisteringTundra/SM_Landscape_BlisteringTundra_01.fbx#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Content\Meshes\Landscapes\BlisteringTundra\SM_Landscape_BlisteringTundra_01.fbx
+//MAL25-G4/Content_&_Unreal_Project/Content/Meshes/Landscapes/BlisteringTundra/SM_Landscape_BlisteringTundra_02.fbx#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Content\Meshes\Landscapes\BlisteringTundra\SM_Landscape_BlisteringTundra_02.fbx
+//MAL25-G4/Content_&_Unreal_Project/Content/Meshes/Landscapes/BlisteringTundra/SM_Landscape_BlisteringTundra_03.fbx#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Content\Meshes\Landscapes\BlisteringTundra\SM_Landscape_BlisteringTundra_03.fbx
+//MAL25-G4/Content_&_Unreal_Project/Content/Meshes/Landscapes/BlisteringTundra/SM_Landscape_BlisteringTundra_04.fbx#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Content\Meshes\Landscapes\BlisteringTundra\SM_Landscape_BlisteringTundra_04.fbx
+//MAL25-G4/Content_&_Unreal_Project/Content/Shaders/MM_Enemy_Dissolve.hlsli#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Content\Shaders\MM_Enemy_Dissolve.hlsli
+//MAL25-G4/Content_&_Unreal_Project/Content/Textures/__ColorGrading_LUT__.cube#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Content\Textures\__ColorGrading_LUT__.cube
+//MAL25-G4/Mainline/Dependencies/FMod/Desktop/Master.bank#20 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Dependencies\FMod\Desktop\Master.bank
+//MAL25-G4/Mainline/Dependencies/FMod/Desktop/Master.strings.bank#16 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Dependencies\FMod\Desktop\Master.strings.bank
+//MAL25-G4/Mainline/Dependencies/FMod/GUIDs.txt#14 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Dependencies\FMod\GUIDs.txt
+//MAL25-G4/Mainline/Source/Application/Game/Game.cpp#80 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Application\Game\Game.cpp
+//MAL25-G4/Mainline/Source/Application/Game/Player/Abilities/Ability.h#2 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Application\Game\Player\Abilities\Ability.h
+//MAL25-G4/Mainline/Source/Application/Game/Player/Abilities/DodgeAbility.cpp#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Application\Game\Player\Abilities\DodgeAbility.cpp
+//MAL25-G4/Mainline/Source/Application/Game/Player/Abilities/DodgeAbility.h#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Application\Game\Player\Abilities\DodgeAbility.h
+//MAL25-G4/Mainline/Source/Application/Game/Player/Abilities/MeleeAbility.cpp#2 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Application\Game\Player\Abilities\MeleeAbility.cpp
+//MAL25-G4/Mainline/Source/Application/Game/Player/Components/AbilityComponent.cpp#2 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Application\Game\Player\Components\AbilityComponent.cpp
+//MAL25-G4/Mainline/Source/Application/Game/Player/Components/AbilityComponent.h#3 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Application\Game\Player\Components\AbilityComponent.h
+//MAL25-G4/Mainline/Source/Application/Game/Player/Components/PlayerController.cpp#19 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Application\Game\Player\Components\PlayerController.cpp
+//MAL25-G4/Mainline/Source/Application/Game/Player/Components/PlayerMovementComponent.cpp#11 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Application\Game\Player\Components\PlayerMovementComponent.cpp
+//MAL25-G4/Mainline/Source/Application/Game/Player/Components/PlayerMovementComponent.h#6 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Application\Game\Player\Components\PlayerMovementComponent.h
+//MAL25-G4/Mainline/Source/Application/Game/Runtime/GameApplication.cpp#17 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Application\Game\Runtime\GameApplication.cpp
+//MAL25-G4/Mainline/Source/Engine/GameFramework/AudioManager.cpp#23 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Engine\GameFramework\AudioManager.cpp
+//MAL25-G4/Mainline/Source/Engine/GameFramework/AudioManager.h#20 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Engine\GameFramework\AudioManager.h
+//MAL25-G4/Mainline/Source/Engine/GameFramework/Components/AnimatorComponent.cpp#11 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Engine\GameFramework\Components\AnimatorComponent.cpp
+//MAL25-G4/Mainline/Source/Engine/GameFramework/Components/CameraComponent.cpp#11 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Engine\GameFramework\Components\CameraComponent.cpp
+//MAL25-G4/Mainline/Source/Engine/GameFramework/Components/LightComponent.h#4 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Engine\GameFramework\Components\LightComponent.h
+//MAL25-G4/Mainline/Source/Engine/GameFramework/Scenes/SceneWorldBuilder.cpp#10 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Engine\GameFramework\Scenes\SceneWorldBuilder.cpp
+//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/ConstantBuffers/LightBuffer.h#5 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Engine\GraphicsEngine\ConstantBuffers\LightBuffer.h
+//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/GraphicsEngine.cpp#37 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Engine\GraphicsEngine\GraphicsEngine.cpp
+//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/GraphicsEngine.h#20 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Engine\GraphicsEngine\GraphicsEngine.h
+//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/PostProcessing/BloomEffect.cpp#6 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Engine\GraphicsEngine\PostProcessing\BloomEffect.cpp
+//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/RHI/RenderHardwareInterface.cpp#11 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Engine\GraphicsEngine\RHI\RenderHardwareInterface.cpp
+//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/RHI/RenderHardwareInterface.h#10 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Engine\GraphicsEngine\RHI\RenderHardwareInterface.h
+//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/RHI/RHIStructs.h#8 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Engine\GraphicsEngine\RHI\RHIStructs.h
+//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/Shaders/Internal/Lighting.hlsli#6 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Engine\GraphicsEngine\Shaders\Internal\Lighting.hlsli
+//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/Shaders/Internal/Tonemap.hlsli#3 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Engine\GraphicsEngine\Shaders\Internal\Tonemap.hlsli
+//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/Shaders/Internal/Tonemapper_PS.hlsl#1 - added as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Engine\GraphicsEngine\Shaders\Internal\Tonemapper_PS.hlsl
+//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/Shaders/Material/Unlit_PS.hlsl#9 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Engine\GraphicsEngine\Shaders\Material\Unlit_PS.hlsl
+//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/TextWidget.cpp#3 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Engine\GraphicsEngine\TextWidget.cpp
+//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/TextWidget.h#3 - updating C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Engine\GraphicsEngine\TextWidget.h

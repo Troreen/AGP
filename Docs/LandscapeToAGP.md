@@ -4,7 +4,7 @@ Work in **AGP-Content**. Keep the editable Landscape in Unreal; AGP receives a
 static mesh for the shape and DDS masks describing where you painted.
 
 **Create → sculpt → paint → export Landscape → import static mesh → prepare
-mesh → export mesh and scene → prepare masks → copy → run AGP.**
+mesh → link its Landscape → export mesh and scene → copy → run AGP.**
 
 ## 1. Create the Landscape
 
@@ -29,10 +29,10 @@ range. Click **Create**. [Epic's size calculation](https://dev.epicgames.com/doc
 Sculpt the terrain into the desired hills, slopes and valleys. Adding components
 makes the Landscape larger; deleting components changes its footprint.
 
-**Our current mask-preparation tool needs a complete rectangle of components.**
+**The current normal exporter needs a complete rectangle of components.**
 A rectangle can be wider than it is tall. An L-shape, a missing corner, or a hole
 from a deleted component needs a pipeline update before this guide can complete.
-The current tool reports `The component grid contains holes.` for those layouts.
+The exporter reports unsupported layouts instead of guessing at missing terrain.
 
 Starting with one component and adding more does not keep it a one-component
 Landscape. Component borders are shared terrain edges. The final import can
@@ -40,8 +40,9 @@ combine several components into one static mesh for the graphics artists.
 
 ## 3. Assign the landscape material and paint
 
-Assign the project's Landscape material instance whose parent is
-**MM_Landscape**. Use these existing paint layers:
+Create a material instance from **/Game/Materials/MM_Landscape**, save it in
+your new level's asset folder, and assign it to the Landscape. Keep the
+original master material unchanged. Use these paint layers:
 
 | Layer | Purpose in AGP |
 | --- | --- |
@@ -49,16 +50,18 @@ Assign the project's Landscape material instance whose parent is
 | Snow_Rough | First painted overlay |
 | Snow_Cliff | Final painted overlay |
 
-In **Landscape → Paint**, assign the matching existing **Layer Info** asset to
-each target layer. Keep the project's existing blend settings. Every paint
-target needs a Layer Info asset. [Epic's paint setup](https://dev.epicgames.com/documentation/en-us/unreal-engine/landscape-paint-mode-in-unreal-engine?application_version=5.7)
+In **Landscape → Paint**, create a Layer Info asset for each target layer in
+your new level's own asset folder. Match its type to the original material's
+blend settings; do not change the material to accommodate the test. Every paint
+target needs a Layer Info asset. The old test maps and their LayerInfo assets
+are no longer part of this workflow. [Epic's paint setup](https://dev.epicgames.com/documentation/en-us/unreal-engine/landscape-paint-mode-in-unreal-engine?application_version=5.7)
 
 Fill Snow_Dunes as the starting ground, then paint the other layers. Paint a
 recognizable patch near a landmark so you can check its position in AGP later.
 Save the level and its assets.
 
-The current preparation tool expects these exact three snow-layer names and
-textures. A different material/layer set needs its preparation mapping updated.
+The current exporter profile expects these exact three snow-layer names and
+textures. A different material/layer set needs its export profile updated.
 
 ## 4. Export the Landscape's shape
 
@@ -120,38 +123,44 @@ This roundtrip fixes the raw Landscape FBX normal problem in AGP's current
 importer. The tested route preserves positions and both UV channels without
 requiring Blender.
 
-## 8. Export the level and its paint masks
+## 8. Link the runtime mesh to the painted Landscape
 
-Save your Unreal level. Use **TGA → Export Level to JSON** and select:
+Select the runtime static-mesh actor in the level and add a **TGA Export Settings**
+component. Set **Source Landscape** to your native painted Landscape. Keep
+**Do Not Export** off. Leave the surface repeat at **8 metres** and noise strength
+at zero for the first comparison.
+
+The source picker explicitly connects shape and paint. The exporter does not
+infer this relationship from actor names, mesh UVs or bounding boxes. Ground
+floaters opt in through the same component and source picker; use the same
+surface/noise settings on actors sharing a source Landscape.
+
+Keep the editable native Landscape in the level. It supplies export data while
+AGP renders the static mesh. The exporter applies the ground material to the
+linked mesh's exported slots without modifying the Unreal source material.
+
+## 9. Export the level and its paint masks
+
+In the TGA plugin's Landscape export settings, enable **Export Weight (Splat)
+Maps** and **Export Material List**. Save your Unreal level, then use
+**TGA → Export Level to JSON** and select:
 
 `AGP-Content/Content/ExportedScenes`
 
-The plugin creates a folder for the level containing its JSON and component DDS
-weightmaps. Keep these files together. The native Landscape supplies the paint
-data; the static-mesh actor supplies the mesh AGP will render.
+The plugin creates a folder for the level containing its JSON, component DDS
+weightmaps and a combined runtime atlas for each linked Landscape. Keep these
+files together. It writes the surface texture bindings and world-to-mask mapping
+into the normal exported material instance. No separate preparation command or
+inspection scene is needed.
+
+Components can store the named paint layers in different texture channels. The
+exporter reads each component's allocation by layer name. An unallocated layer
+on a component contributes zero; it is not a missing-file error. The current
+combined atlas uses red=Dunes, green=Rough, blue=Cliff. Weights are linear data
+and are not normalized. The source component DDS files retain their own layouts.
 
 If either actor has a TGA Export Settings component, **Do Not Export must be
 off**. Merely hiding an actor in the editor is not the same as excluding it.
-
-## 9. Prepare the AGP scene
-
-From AGP-Content, run the following, replacing the example level and mesh names:
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File Tools/Terrain/PreparePaintedLandscapeRuntime.ps1 -SourceScene Content/ExportedScenes/lvl_mylandscape/Lvl_MyLandscape_Level.json -OutputDirectory Content/ExportedScenes/lvl_mylandscape_runtime -TerrainMeshName SM_MyLandscape -MaterialMode Surface -Force
-```
-
-This combines the component masks, attaches the landscape material and mask to
-the terrain mesh, and creates the prepared runtime scene. Leave the original
-export intact. The current tool produces **inspection scenes with a top-down
-camera**.
-
-For ground floaters that should share the paint, also pass
-`-GroundFloaterActorNames 'RockActor,OtherActor'`, using their exact actor names.
-
-If preparation reports missing components or different layer/channel layouts,
-resolve that handoff problem before copying the scene. The current tool does
-not automatically repair irregular footprints or remap differing allocations.
 
 ## 10. Copy the content and run AGP
 
@@ -163,27 +172,29 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\SyncContent.ps1 -Overw
 ```
 
 In **AGP/Bin/Settings/ApplicationSettings.json**, set
-**current.application.initialScene** to your prepared scene, for example:
+**current.application.initialScene** to your ordinary exported scene, for example:
 
-`lvl_mylandscape_runtime/Lvl_MyLandscape_Runtime_Level.json`
+`lvl_mylandscape/Lvl_MyLandscape_Level.json`
 
 Build **Game.sln → Debug | x64** using the project's v145 toolset, then fully
 restart **Bin/Debug/Game.exe**.
 
 Check the recognizable paint patch, component borders, terrain orientation,
-shape and shading. The generated `Runtime_RGB_Level.json` scene can help inspect
-the raw paint masks. Correct mask placement and matching lighting/material
-appearance are separate checks; exact Unreal/AGP surface parity remains open.
+shape and shading. Authored cameras, lighting, transforms and gameplay components
+are retained. If no camera is authored, AGP supplies its normal debug camera.
+Correct mask placement and matching lighting/material appearance are separate
+checks; exact Unreal/AGP surface parity remains a manual acceptance check.
 
 ## When the level changes
 
 | Change | Repeat |
 | --- | --- |
-| Paint only | TGA scene export → preparation → content copy → restart AGP |
-| Sculpt, add or remove components | Shape export → mesh reimport/settings → final mesh export → TGA export → preparation → copy → restart |
-| Surface texture files | ExportAssets.bat → restore/re-export final runtime FBX → preparation → copy → build/restart |
+| Paint only | TGA scene export → content copy → restart AGP |
+| Sculpt, add or remove components | Shape export → mesh reimport/settings → final mesh export → TGA export → copy → restart |
+| Surface texture files | ExportAssets.bat → restore/re-export final runtime FBX → TGA export → copy → build/restart |
 
 After adding components, check their paint layers too. An irregular final
-component layout needs preparation-tool support before the normal handoff works.
+component layout needs exporter support before the normal handoff works.
 
-For the detailed tool contract, see the [preparation guide](../../AGP-Content/Tools/Terrain/PreparePaintedLandscapeRuntime.md).
+For the implementation and verification checkpoint, see
+[normal Landscape loading](SplatmapIntegration.md).

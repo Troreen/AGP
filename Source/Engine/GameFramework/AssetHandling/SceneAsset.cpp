@@ -27,6 +27,10 @@ bool SceneAsset::Load(const std::filesystem::path& aPath, [[maybe_unused]] Asset
 	UnrealImportResult importResult = UnrealSceneImporter{}.ImportScene(aPath);
 	if (!importResult)
 	{
+		for (const ImportDiagnostic& diagnostic : importResult.Diagnostics)
+		{
+			LOG(LogSceneAsset, Error, "Scene import error in '{}': {}", diagnostic.Context, diagnostic.Message);
+		}
 		LOG(LogSceneAsset, Log, "Scene import failed: {}", aPath.string());
 		return false;
 	}

@@ -26,6 +26,8 @@ enum SoundID
 	eMouseButtonTwo,
 	eFootstepOne,
 	eDodge,
+	eTakeDamage,
+	eDie,
 	eIntroLetter,
 	eAfterHeartSway,
 	eAfterFirstKill,

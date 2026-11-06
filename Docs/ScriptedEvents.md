@@ -1,4 +1,4 @@
-# Set up a scripted event
+﻿# Set up a scripted event
 
 A scripted event is an Actor with one `ScriptedEventComponent` and several action components. Each action does one job: move, wait, animate, play a sound, or change another Actor.
 
@@ -165,8 +165,27 @@ The current registered sounds, including music and ambience, are listed below. E
 | 10 | `eSickleSlash` | `event:/Sickle Slash` |
 | 11 | `eSlashHit` | `event:/Slash Hit` |
 | 12 | `eSlash` | `event:/Slash` |
+| 13 | `eAbilityOne` | `event:/Ability 1` |
+| 14 | `eAbilityTwo` | `event:/Ability 2` |
+| 15 | `eAbilityThree` | `event:/Ability 3` |
+| 16 | `eAbilityFour` | `event:/Ability 4` |
+| 17 | `eMouseButtonOne` | `event:/MB1` |
+| 18 | `eMouseButtonTwo` | `event:/MB2` |
+| 19 | `eFootstepOne` | `event:/Footstep 1` |
+| 20 | `eDodge` | `event:/Dodge` |
+| 21 | `eTakeDamage` | `event:/Take Damage` |
+| 22 | `eDie` | `event:/Die` |
+| 23 | `eIntroLetter` | `event:/Intro Letter` |
+| 24 | `eAfterHeartSway` | `event:/After Heart Sway` |
+| 25 | `eAfterFirstKill` | `event:/After First Kill` |
+| 26 | `eLockedGate` | `event:/Locked Gate` |
+| 27 | `eCaretakerScream` | `event:/Caretaker Scream` |
+| 28 | `eGoodbyeHorse` | `event:/Goodbye Horse` |
+| 29 | `eGrushenkaCrying` | `event:/GrushenkaCrying` |
+| 30 | `eReminiscingDeadBodies` | `event:/Reminiscing Dead Bodies` |
+| 31 | `eMeetingDaddy` | `event:/Meeting Daddy` |
 
-`eSoundCount` is 13 and is a count, not a playable sound ID.
+`eSoundCount` is 32 and is a count, not a playable sound ID.
 
 **Animation variables:** Find the target's tree in [`AnimationManager.json`](<../Content/Animations/Animation Manager/AnimationManager.json>). Its `Variables` list gives names and whether each is a bool or trigger.
 

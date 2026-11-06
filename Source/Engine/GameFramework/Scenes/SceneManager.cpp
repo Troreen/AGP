@@ -103,6 +103,7 @@ bool SceneManager::ProcessSceneLoadRequest()
 		{
 			myCurrentWorld->Clear();
 		}
+
 		myCurrentWorld = std::move(candidateWorld);
 
 		Pathfinder& pathFinder = ServiceLocator::GetInstance().GetPathFinder();
@@ -111,7 +112,7 @@ bool SceneManager::ProcessSceneLoadRequest()
 		std::shared_ptr<NavMeshAsset> navMesh = assets.GetAsset<NavMeshAsset>(myRequestedScene->GetSceneName() + ".nav");
 		if (navMesh != nullptr)
 		{
-			pathFinder.Init(navMesh->MoveVertexIndices(), navMesh->MoveVertices());
+			pathFinder.Init(navMesh->MoveVertexIndices(), navMesh->MoveVertices(), navMesh->GetMinBounds(), navMesh->GetMaxBounds());
 		}
 
 		myCurrentWorld->BeginPlay();

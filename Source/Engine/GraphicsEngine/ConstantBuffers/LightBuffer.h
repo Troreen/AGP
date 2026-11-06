@@ -23,9 +23,10 @@ struct Light
 struct LightBuffer
 {
 	Light Lights[MAX_FORWARD_LIGHTS];
+	CU::Vector4f CascadeSplits;
 	uint32_t NumActiveLights = 0;
-	CU::Vector3f __padding;
 	CU::Vector3f AmbientLightColor;
 	float AmbientLightIntensity = 1;
-	CU::Vector4f CascadeSplits;
+	float EV100Exposure = 2.0f;
+	CU::Vector2f __padding;
 };

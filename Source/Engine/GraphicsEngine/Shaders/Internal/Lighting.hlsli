@@ -26,12 +26,13 @@ struct Light
 
 cbuffer LightBuffer : register(b3)
 {
-	Light LB_Lights[MAX_FORWARD_LIGHTS];
+    Light LB_Lights[MAX_FORWARD_LIGHTS];
+    float4 LB_CascadeSplits;
     uint LB_NumActiveLights;
-    float3 __LB_padding;
     float3 LB_AmbientLightColor;
     float LB_AmbientLightIntensity;
-    float4 LB_CascadeSplits;
+    float LB_EV100Exposure;
+    float2 __LB_padding;
 };
 
 Texture2D SSAOTexture : register(t80);
@@ -141,9 +142,8 @@ float3 CalculateDirectionalLight(float3 aSpecularColor, float3 aDiffuseColor, fl
 	const float3 lightColor = aLight.Color * aLight.Intensity;
 	const float nDotL = saturate(dot(directionToLight, aPixelNormal));
 	
-    const float ev100 = 1.4f; // TODO: Expose to CPU.
-    const float e = 1.0f / (1.2f * ev100 * ev100);
     const float3 radiance = (kd + ks) * lightColor * nDotL;
+    const float e = 1.0f / (1.2f * LB_EV100Exposure * LB_EV100Exposure);
     return radiance * e;
 }
 

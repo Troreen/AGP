@@ -8,9 +8,48 @@
 #include <stdexcept>
 #include <type_traits>
 #include <cmath>
+#include <unordered_map>
+#include <unordered_set>
 
 namespace UnrealScene
 {
+	class MaterialImportError : public std::invalid_argument
+	{
+	public:
+		MaterialImportError(std::string aContext, const std::string& aMessage)
+			: std::invalid_argument(aMessage), Context(std::move(aContext))
+		{
+		}
+
+		std::string Context;
+	};
+
+	CommonUtilities::Matrix4f ReadSceneTransform(simdjson::dom::element anObject, const std::string& aContext)
+	{
+		const auto transform = anObject["Transform"];
+		if (transform.error() == simdjson::NO_SUCH_FIELD)
+		{
+			return {};
+		}
+		const auto matrix = transform.get_array().value();
+		if (matrix.size() != 16)
+		{
+			throw MaterialImportError(aContext, "Transform must contain 16 numbers");
+		}
+		CommonUtilities::Matrix4f result;
+		constexpr size_t permutation[] = { 1, 2, 0, 3 };
+		for (size_t row = 0; row < 4; ++row)
+		{
+			for (size_t column = 0; column < 4; ++column)
+			{
+				const size_t sourceIndex = column == 3 ? row * 4 + column : permutation[row] * 4 + permutation[column];
+				result(static_cast<int>(row + 1), static_cast<int>(column + 1)) =
+					static_cast<float>(matrix.at(sourceIndex).get_double().value());
+			}
+		}
+		return result;
+	}
+
 	CommonUtilities::Vector3f ReadCustomVector(simdjson::dom::element aValue)
 	{
 		CommonUtilities::Vector3f vector;
@@ -137,29 +176,8 @@ namespace UnrealScene
 			outComponent.tags.emplace_back(tag.get_c_str().value());
 		}
 
-		const auto& transformElement = component.at_key("Transform");
-		if (transformElement.error() != simdjson::NO_SUCH_FIELD)
-		{
-			const auto& matrix = transformElement.get_array().value();
-			outComponent.transform = {
-				static_cast<float>(matrix.at(5).get_double().value()),
-				static_cast<float>(matrix.at(6).get_double().value()),
-				static_cast<float>(matrix.at(4).get_double().value()),
-				static_cast<float>(matrix.at(3).get_double().value()),
-				static_cast<float>(matrix.at(9).get_double().value()),
-				static_cast<float>(matrix.at(10).get_double().value()),
-				static_cast<float>(matrix.at(8).get_double().value()),
-				static_cast<float>(matrix.at(7).get_double().value()),
-				static_cast<float>(matrix.at(1).get_double().value()),
-				static_cast<float>(matrix.at(2).get_double().value()),
-				static_cast<float>(matrix.at(0).get_double().value()),
-				static_cast<float>(matrix.at(11).get_double().value()),
-				static_cast<float>(matrix.at(13).get_double().value()),
-				static_cast<float>(matrix.at(14).get_double().value()),
-				static_cast<float>(matrix.at(12).get_double().value()),
-				static_cast<float>(matrix.at(15).get_double().value()) };
-		}
-		}
+		outComponent.transform = ReadSceneTransform(component, "Component '" + outComponent.name + "'");
+	}
 
 	CommonUtilities::Matrix4x4<float> UnrealToCommonUtilitiesMatrix(const std::vector<float>& aJsonTransform)
 	{
@@ -294,6 +312,141 @@ namespace UnrealScene
 		}
 	}
 
+	struct MaterialTemplate
+	{
+		std::string Parent;
+		std::vector<MaterialParameterData> Parameters;
+	};
+
+	struct ResolvedMaterialTemplate
+	{
+		std::string RootName;
+		std::vector<MaterialParameterData> Parameters;
+	};
+
+	class MaterialTemplates
+	{
+	public:
+		explicit MaterialTemplates(simdjson::dom::element someMaterials)
+		{
+			for (const auto& material : someMaterials.get_array().value())
+			{
+				const std::string name(material["Name"].get_string().value());
+				MaterialTemplate definition;
+				const auto parent = material["Parent"];
+				if (parent.error() != simdjson::NO_SUCH_FIELD)
+				{
+					definition.Parent = parent.get_string().value();
+				}
+				if (definition.Parent == "Self")
+				{
+					definition.Parent.clear();
+				}
+				ReadMaterialParameters(material, definition.Parameters);
+				if (name.empty() || !myDefinitions.emplace(name, definition).second)
+				{
+					throw MaterialImportError("Material '" + name + "'", "Duplicate or empty material name");
+				}
+				if (!definition.Parent.empty())
+				{
+					continue;
+				}
+
+				MasterMaterialData master;
+				master.name = name;
+				master.domain = material["Domain"].operator size_t();
+				master.shadingModel = material["ShadingModel"].operator size_t();
+				master.blendMode = material["BlendMode"].operator size_t();
+				const auto baseColor = material["BaseColor"].get_array().value();
+				master.baseColor = {
+					static_cast<float>(baseColor.at(0).get_double().value()),
+					static_cast<float>(baseColor.at(1).get_double().value()),
+					static_cast<float>(baseColor.at(2).get_double().value()),
+					static_cast<float>(baseColor.at(3).get_double().value())
+				};
+				master.metallic = static_cast<float>(material["Metallic"].get_double().value());
+				master.roughness = static_cast<float>(material["Roughness"].get_double().value());
+				const auto twoSided = material["TwoSided"];
+				if (twoSided.error() != simdjson::NO_SUCH_FIELD)
+				{
+					master.twoSided = twoSided.get_bool().value();
+				}
+				master.parameters = definition.Parameters;
+				Masters.push_back(std::move(master));
+			}
+
+			// Resolve after collection so child-before-parent export order is valid.
+			for (const auto& [name, definition] : myDefinitions)
+			{
+				Resolve(name);
+			}
+		}
+
+		MaterialData ReadInstance(simdjson::dom::element aMaterial, const std::string& aContext) const
+		{
+			MaterialData result;
+			result.name = aMaterial["Name"].get_string().value();
+			const auto parent = aMaterial["Parent"];
+			if (parent.error() != simdjson::NO_SUCH_FIELD)
+			{
+				result.parent = parent.get_string().value();
+			}
+
+			// An explicit component parent takes precedence over any same-named
+			// template. Empty/Self references may name a top-level template directly.
+			const std::string templateName = result.parent.empty() || result.parent == "Self" ? result.name : result.parent;
+			const auto resolved = myResolved.find(templateName);
+			if (resolved != myResolved.end())
+			{
+				result.parent = resolved->second.RootName;
+				result.parameters = resolved->second.Parameters;
+			}
+			else if (!result.parent.empty() && result.parent != "Self")
+			{
+				throw MaterialImportError(aContext + "/Material '" + result.name + "'", "missing parent '" + result.parent + "'");
+			}
+			ReadMaterialParameters(aMaterial, result.parameters);
+			return result;
+		}
+
+		std::vector<MasterMaterialData> Masters;
+
+	private:
+		const ResolvedMaterialTemplate& Resolve(const std::string& aName)
+		{
+			const auto cached = myResolved.find(aName);
+			if (cached != myResolved.end())
+			{
+				return cached->second;
+			}
+			if (!myResolving.insert(aName).second)
+			{
+				throw MaterialImportError("Material '" + aName + "'", "Material inheritance cycle");
+			}
+			const MaterialTemplate& definition = myDefinitions.at(aName);
+			ResolvedMaterialTemplate result;
+			if (definition.Parent.empty())
+			{
+				result.RootName = aName;
+			}
+			else
+			{
+				if (!myDefinitions.contains(definition.Parent))
+				{
+					throw MaterialImportError("Material '" + aName + "'", "missing parent '" + definition.Parent + "'");
+				}
+				result = Resolve(definition.Parent);
+				result.Parameters.insert(result.Parameters.end(), definition.Parameters.begin(), definition.Parameters.end());
+			}
+			myResolving.erase(aName);
+			return myResolved.emplace(aName, std::move(result)).first->second;
+		}
+
+		std::unordered_map<std::string, MaterialTemplate> myDefinitions;
+		std::unordered_map<std::string, ResolvedMaterialTemplate> myResolved;
+		std::unordered_set<std::string> myResolving;
+	};
+
 	UnrealSceneData ImportScene(std::filesystem::path aJSONPath)
 	{
 		simdjson::padded_string json = simdjson::padded_string::load(aJSONPath.c_str());
@@ -309,34 +462,8 @@ namespace UnrealScene
 		UnrealSceneData unrealData = {};
 		unrealData.parsed = true;
 		
-		for (const auto& material : root["MasterMaterials"])
-		{
-			MasterMaterialData materialData = {};
-			materialData.name = material["Name"];
-			materialData.domain = material["Domain"].operator size_t();
-			materialData.shadingModel = material["ShadingModel"].operator size_t();
-			materialData.blendMode = material["BlendMode"].operator size_t();
-
-			const simdjson::dom::array baseColor = material["BaseColor"].get_array().value();
-			const float r = static_cast<float>(baseColor.at(0).get_double().value());
-			const float g = static_cast<float>(baseColor.at(1).get_double().value());
-			const float b = static_cast<float>(baseColor.at(2).get_double().value());
-			const float a = static_cast<float>(baseColor.at(3).get_double().value());
-			materialData.baseColor = { r, g, b, a };
-
-			materialData.metallic = static_cast<float>(material["Metallic"].operator double());
-			materialData.roughness = static_cast<float>(material["Roughness"].operator double());
-
-			const auto twoSided = material["TwoSided"];
-			if (twoSided.error() != simdjson::NO_SUCH_FIELD)
-			{
-				materialData.twoSided = twoSided.get_bool().value();
-			}
-
-			ReadMaterialParameters(material, materialData.parameters);
-
-			unrealData.materials.emplace_back(materialData);
-		}
+		const MaterialTemplates materialTemplates(root["MasterMaterials"].value());
+		unrealData.materials = materialTemplates.Masters;
 
 		for (const auto& actor : root["Actors"])
 		{
@@ -349,37 +476,17 @@ namespace UnrealScene
 				actorData.tags.emplace_back(actorTag);
 			}
 
-			{
-				const auto& matrix = actor["Transform"].get_array().value();
-				actorData.transform =
-				{
-					 static_cast<float>(matrix.at(5).get_double().value()),
-					 static_cast<float>(matrix.at(6).get_double().value()),
-					 static_cast<float>(matrix.at(4).get_double().value()),
-					 static_cast<float>(matrix.at(3).get_double().value()),
-
-					 static_cast<float>(matrix.at(9).get_double().value()),
-					 static_cast<float>(matrix.at(10).get_double().value()),
-					 static_cast<float>(matrix.at(8).get_double().value()),
-					 static_cast<float>(matrix.at(7).get_double().value()),
-
-					 static_cast<float>(matrix.at(1).get_double().value()),
-					 static_cast<float>(matrix.at(2).get_double().value()),
-					 static_cast<float>(matrix.at(0).get_double().value()),
-					 static_cast<float>(matrix.at(11).get_double().value()),
-
-					 static_cast<float>(matrix.at(13).get_double().value()),
-					 static_cast<float>(matrix.at(14).get_double().value()),
-					 static_cast<float>(matrix.at(12).get_double().value()),
-					 static_cast<float>(matrix.at(15).get_double().value())
-				};
-			}
+			actorData.transform = ReadSceneTransform(actor, "Actor '" + actorData.name + "'");
 
 			for (const auto& component : actor["Components"])
 			{
 				const UnrealComponentType type = static_cast<UnrealComponentType>(component["TypeID"].get_int64().value());
 				switch (type)
 				{
+					case UnrealComponentType::Landscape:
+						// Native Landscape records describe authoring paint. The linked
+						// static mesh carries runtime geometry and exported material bindings.
+						break;
 					case UnrealComponentType::Custom:
 					case UnrealComponentType::SceneComponent:
 					{
@@ -404,57 +511,7 @@ namespace UnrealScene
 								continue;
 							}
 
-							MaterialData materialData;
-							materialData.name = material["Name"];
-							materialData.parent = material["Parent"].has_value() ? material["Parent"].get_c_str().value() : "";
-
-							for (const auto& parameter : material["Parameters"].get_array().value())
-							{
-								MaterialParameterData parameterData;
-								parameterData.name = parameter["Name"];
-								parameterData.type = static_cast<MaterialType>(parameter["Type"].get_int64().value());
-
-								switch (parameterData.type)
-								{
-									case MaterialType::Scalar:
-									{
-										float scalar = 0;
-
-										scalar = static_cast<float>(parameter["Value"].get_double());
-										parameterData.value = scalar;
-									}
-									break;
-									case MaterialType::Vector3f:
-									{
-										CommonUtilities::Vector4f vector;
-
-										const auto& value = parameter["Value"].get_array().value();
-
-										vector.x = static_cast<float>(value.at(0).get_double());
-										vector.y = static_cast<float>(value.at(1).get_double());
-										vector.z = static_cast<float>(value.at(2).get_double());
-										vector.w = static_cast<float>(value.at(3).get_double());
-
-										parameterData.value = vector;
-									}
-
-									break;
-									case MaterialType::Texture:
-									{
-										TextureValue textureValue;
-										const auto& value = parameter["Value"].get_object().value();
-										textureValue.name = value["Name"].get_string().value();
-										textureValue.path = std::filesystem::path(value["AssetImportPath"].get_string().value()).stem().string();
-
-										parameterData.value = textureValue;
-									}
-									break;
-									default:
-										continue;
-								}
-								materialData.parameters.emplace_back(parameterData);
-							}
-							componentData.materials.emplace_back(materialData);
+							componentData.materials.push_back(materialTemplates.ReadInstance(material, actorData.name + "/" + componentData.name));
 						}
 
 						actorData.components.emplace_back(componentData);
@@ -847,7 +904,21 @@ namespace
 UnrealImportResult UnrealSceneImporter::ImportScene(const std::filesystem::path& jsonPath) const
 {
 	UnrealImportResult result;
-	const UnrealScene::UnrealSceneData importedScene = UnrealScene::ImportScene(jsonPath);
+	UnrealScene::UnrealSceneData importedScene;
+	try
+	{
+		importedScene = UnrealScene::ImportScene(jsonPath);
+	}
+	catch (const UnrealScene::MaterialImportError& error)
+	{
+		result.Diagnostics.push_back({ error.Context, error.what() });
+		return result;
+	}
+	catch (const std::exception& error)
+	{
+		result.Diagnostics.push_back({ jsonPath.string(), error.what() });
+		return result;
+	}
 	if (!importedScene.parsed)
 	{
 		result.Diagnostics.push_back({ jsonPath.string(), "could not parse scene JSON" });

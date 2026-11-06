@@ -37,7 +37,7 @@
       "contentPath": "../../Content",
       "shaderFolder": "EngineShaders",
       "cursorPath": "",
-      "initialScene": "Lvl_Forsaken_Castle_Level.json"
+      "initialScene": "lvl_blockout/Lvl_Blockout_Level.json"
     },
     "sound": {
       "masterVolume": 1.0,

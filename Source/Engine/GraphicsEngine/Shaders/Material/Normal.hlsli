@@ -38,6 +38,7 @@ float3 Normal_TangentToWorld(float3 aNormalTS, float3 aNormal, float3 aTangent, 
     return normalize(mul(aNormalTS, surfaceAxes));
 }
 
+// TODO: check if this needs to be this complicated or if it can be simplified 
 // Orient a decoded detail normal on a world-aligned projection while retaining
 // the mesh's geometric slope. The detail map's +X follows projected world +Z;
 // use world +X when that axis is parallel to the surface normal. Mesh UV

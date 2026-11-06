@@ -292,8 +292,8 @@ namespace TGA
 
 			std::string Name;
 
-			size_t TotalVertexCount;
-			size_t TotalIndexCount;
+			size_t TotalVertexCount = 0;
+			size_t TotalIndexCount = 0;
 
 			BoxSphereBounds BoxSphereBounds;
 			Box BoxBounds;

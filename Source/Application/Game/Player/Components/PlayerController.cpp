@@ -102,12 +102,12 @@ void PlayerController::BeginPlay()
 		}));
 
 	myAnimationEventIds.emplace_back("KB1", 1, animation->GetTree().GetAnimationState("KB1").OnExitEvent().Subscribe([this]()
+		{
+			if (myMovement)
 			{
-				if (myMovement)
-				{
-					myMovement->SetAbilityMovementLocked(false);
-				}
-			}));
+				myMovement->SetAbilityMovementLocked(false);
+			}
+		}));
 
 	myAnimationEventIds.emplace_back("KB2", 0, animation->GetTree().GetAnimationState("KB2").OnEnterEvent().Subscribe([this]()
 		{
@@ -125,12 +125,12 @@ void PlayerController::BeginPlay()
 		}));
 
 	myAnimationEventIds.emplace_back("KB3", 1, animation->GetTree().GetAnimationState("KB3").OnExitEvent().Subscribe([this]()
+		{
+			if (myMovement)
 			{
-				if (myMovement)
-				{
-					myMovement->SetAbilityMovementLocked(false);
-				}
-			}));
+				myMovement->SetAbilityMovementLocked(false);
+			}
+		}));
 
 
 	myAnimationEventIds.emplace_back("KB4", 0, animation->GetTree().GetAnimationState("KB4").OnEnterEvent().Subscribe([this]()
@@ -186,6 +186,7 @@ void PlayerController::BeginPlay()
 				myMovement->SetAbilityMovementLocked(false);
 			}
 		}));
+
 
 	myAnimationEventIds.emplace_back("MB2", 0, animation->GetTree().GetAnimationState("MB2").OnEnterEvent().Subscribe([this]()
 		{
@@ -390,12 +391,11 @@ void PlayerController::Update(float aDeltaTime)
 		}
 	}
 
-	if (!myScriptedControlLocked && ServiceLocator::GetInstance().GetInputMapper().GetInputHandler()->IsKeyDown(static_cast<int>(EKeyCode::MOUSELBUTTON)) && ServiceLocator::GetInstance().GetInputMapper().GetInputHandler()->IsKeyDown(static_cast<int>(EKeyCode::SHIFT)))
+	if (!myScriptedControlLocked && myAbility)
 	{
-		if (AnimatorComponent* animation = GetOwner()->GetComponent<AnimatorComponent>())
-		{
-			animation->GetTree().SetTrigger("IsFirstMB1");
-		}
+		bool attackHeld = ServiceLocator::GetInstance().GetInputMapper().GetInputHandler()->IsKeyDown(static_cast<int>(EKeyCode::MOUSELBUTTON)) && ServiceLocator::GetInstance().GetInputMapper().GetInputHandler()->IsKeyDown(static_cast<int>(EKeyCode::SHIFT));
+
+		myAbility->SetMeleeAttackHeld(attackHeld);
 	}
 
 	if (!myScriptedControlLocked && (ServiceLocator::GetInstance().GetInputMapper().GetInputHandler()->IsKeyPressed(static_cast<int>(EKeyCode::MOUSERBUTTON))))
@@ -428,6 +428,11 @@ bool PlayerController::IsScriptedControlLocked() const
 
 void PlayerController::NavigationHandler(const CommonUtilities::InputEvent& aEvent)
 {
+	if (ServiceLocator::GetInstance().GetInputMapper().GetInputHandler()->IsKeyDown(static_cast<int>(EKeyCode::SHIFT)))
+	{
+		return;
+	}
+
 	if (aEvent.inputData.isHeld && myMovement && myMovement->CanTakeMovementInput())
 	{
 		const CommonUtilities::Vector2f mousePos{ aEvent.inputData.valueA, aEvent.inputData.valueB };

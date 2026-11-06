@@ -207,6 +207,8 @@ void AudioManager::RegisterAllEvents()
 	SoundEngine::RegisterEvent("event:/MB2", SoundID::eMouseButtonTwo);
 	SoundEngine::RegisterEvent("event:/Footstep 1", SoundID::eFootstepOne);
 	SoundEngine::RegisterEvent("event:/Dodge", SoundID::eDodge);
+	SoundEngine::RegisterEvent("event:/Take Damage", SoundID::eTakeDamage);
+	SoundEngine::RegisterEvent("event:/Die", SoundID::eDie);
 	SoundEngine::RegisterEvent("event:/Intro Letter", SoundID::eIntroLetter);
 	SoundEngine::RegisterEvent("event:/After Heart Sway", SoundID::eAfterHeartSway);
 	SoundEngine::RegisterEvent("event:/After First Kill", SoundID::eAfterFirstKill);
@@ -237,6 +239,8 @@ void AudioManager::RegisterAllEvents()
 	myMusicList.insert({ SoundID::eMouseButtonTwo, SoundEngine::CreateEventInstance(SoundID::eMouseButtonTwo) });
 	myMusicList.insert({ SoundID::eFootstepOne, SoundEngine::CreateEventInstance(SoundID::eFootstepOne) });
 	myMusicList.insert({ SoundID::eDodge, SoundEngine::CreateEventInstance(SoundID::eDodge) });
+	myMusicList.insert({ SoundID::eTakeDamage, SoundEngine::CreateEventInstance(SoundID::eTakeDamage) });
+	myMusicList.insert({ SoundID::eDie, SoundEngine::CreateEventInstance(SoundID::eDie) });
 	myMusicList.insert({ SoundID::eIntroLetter, SoundEngine::CreateEventInstance(SoundID::eIntroLetter) });
 	myMusicList.insert({ SoundID::eAfterHeartSway, SoundEngine::CreateEventInstance(SoundID::eAfterHeartSway) });
 	myMusicList.insert({ SoundID::eAfterFirstKill, SoundEngine::CreateEventInstance(SoundID::eAfterFirstKill) });

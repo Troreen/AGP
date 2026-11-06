@@ -30,13 +30,19 @@ public:
 	void BeginPlay() override;
 	void AssignAbility(const AbilitySlot& aSlot, Ability* aAbility);
 	bool TryActivateAbility(const AbilitySlot& aSlot, const AbilityActivationContext& aContext) const;
+	void SetMeleeAttackHeld(bool aHeld);
 	void Update(float aDeltaTime) override;
 
 private:
 
 	Ability* mySlots[static_cast<int>(AbilitySlot::COUNT)] = {};
 
+	Ability* myMeleeAbility = nullptr;
+	Ability* myHeavyMeleeAbility = nullptr;
+	Ability* myAbsorptionAbility = nullptr;
 	Ability* myDashAbility = nullptr;
+	Ability* myPulseAbility = nullptr;
+	Ability* myArrowStormAbility = nullptr;
 	Ability* myDodgeAbility = nullptr;
 
 	PlayerMovementComponent* myMovement = nullptr;

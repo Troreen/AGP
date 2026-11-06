@@ -1,0 +1,7 @@
+//MAL25-G4/Mainline/Source/Engine/GameFramework/Scenes/SceneWorldBuilder.cpp#9 - was edit, reverted
+//MAL25-G4/Mainline/Source/Engine/GameFramework/UnrealSceneImporter/UnrealSceneImporter.cpp#25 - was edit, reverted
+//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/GraphicsEngine.cpp#33 - was edit, reverted
+//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/Materials/MaterialInterface.h#7 - was edit, reverted
+//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/Shaders/Material/GBuffer_PS.hlsl#8 - was edit, reverted
+//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/Shaders/Material/Lit_PS.hlsl#10 - was edit, reverted
+//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/Shaders/Material/Normal.hlsli#1 - was edit, reverted

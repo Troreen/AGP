@@ -19,14 +19,14 @@ public:
 
 	//Getters
 	const CommonUtilities::Vector3f& GetLocalPosition() const { return myPosition; }
-	const CommonUtilities::Vector3f& GetLocalRotationDegrees() const;
-	const CommonUtilities::Vector3f& GetLocalRotationRadians() const;
+	CommonUtilities::Vector3f GetLocalRotationDegrees() const;
+	CommonUtilities::Vector3f GetLocalRotationRadians() const;
 	const CommonUtilities::Quaternion<float>& GetLocalRotation() const { return myRotation; };
 	const CommonUtilities::Vector3f& GetLocalScale() const { return myScale; }
 
 	const CommonUtilities::Matrix4f& GetLocalMatrix() const;
 	const CommonUtilities::Matrix4f& GetWorldMatrix() const;
-	CommonUtilities::Vector3f GetWorldPosition() const { return myPosition; }
+	const CommonUtilities::Vector3f& GetWorldPosition() const { return myPosition; }
 
 	CommonUtilities::Vector3f GetLocalForward() const;
 	CommonUtilities::Vector3f GetLocalRight() const;

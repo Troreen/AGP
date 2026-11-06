@@ -1,5 +1,23 @@
 # Splatmap integration checkpoint — 2026-11-06
 
+## Current manual-testing baseline
+
+The old splatmap test maps, exclusive material instances, terrain meshes,
+LayerInfo assets and runtime exports were retired on 2026-11-06. Their local
+edits and historical investigation records were archived outside both repos.
+The fixture-specific `FreshTesting2` automation test was retired with its map;
+the synthetic DDS exporter and runtime-preparation regression tests remain.
+
+Start a new manual test using [Landscape to AGP](LandscapeToAGP.md). Use the
+original `/Game/Materials/MM_Landscape` and create the new level's own instance
+and LayerInfo assets. The original materials, functions and textures remain.
+Application startup now uses the existing blockout scene until a new prepared
+landscape scene is explicitly selected. No new landscape has been generated.
+
+The verification below records the integration before fixture cleanup. Its
+painted-boundary, seam, floater and final normal-view acceptance gaps still
+require manual testing; it does not describe bundled test assets.
+
 The integration retains the Perforce engine/exporter behavior and restores the
 reviewed Git splatmap pipeline. Git commits and pushes were authorized in the
 implementation session. Perforce submission was not authorized or performed.

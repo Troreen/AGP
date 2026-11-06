@@ -89,7 +89,7 @@ void Game::ConfigureWorld()
 	ColliderComponent::SetAllDebugDrawEnabled(true);
 	World& world = *ServiceLocator::GetInstance().GetSceneManager().GetLoadedWorld();
 
-	{
+	/*{
 		Actor* actor = world.SpawnActor("GlowCube");
 		StaticMeshComponent* component = actor->AddComponent<StaticMeshComponent>();
 
@@ -160,7 +160,7 @@ void Game::ConfigureWorld()
 
 		std::shared_ptr<ParticleSystemAsset> asset = assetRegistry.GetAsset<ParticleSystemAsset>("Test.particles");
 		component->SetParticleSystem(asset);
-	}
+	}*/
 
 	{
 		Actor* actor = world.SpawnActor("TGALOGO");

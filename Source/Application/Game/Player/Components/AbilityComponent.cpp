@@ -2,6 +2,8 @@
 #include <GameFramework/World/Actor.h>
 #include <Player/Abilities/DashAbility.h>
 #include <Player/Abilities/DodgeAbility.h>
+#include <Player/Abilities/MeleeAbility.h>
+#include <GameFramework/Components/AnimatorComponent.h>
 #include "PlayerMovementComponent.h"
 #include <iostream>
 
@@ -21,19 +23,24 @@ void AbilityComponent::InitializeCustomVariables(const CustomComponentVariables&
 
 void AbilityComponent::BeginPlay()
 {
-	myMovement = GetOwner()->GetComponent<PlayerMovementComponent>();
-	if (myMovement)
-	{
-		myDashAbility = new DashAbility(*myMovement);
+    myMovement = GetOwner()->GetComponent<PlayerMovementComponent>();
 
-		AssignAbility(AbilitySlot::Slot2, myDashAbility);
-	}
-	if (myMovement)
-	{
-		myDodgeAbility = new DodgeAbility(*myMovement);
+    if (myMovement)
+    {
+        myDashAbility = new DashAbility(*myMovement);
+        AssignAbility(AbilitySlot::Slot2, myDashAbility);
 
-		AssignAbility(AbilitySlot::Space, myDodgeAbility);
-	}
+        myDodgeAbility = new DodgeAbility(*myMovement);
+        AssignAbility(AbilitySlot::Space, myDodgeAbility);
+    }
+
+    AnimatorComponent* animator = GetOwner()->GetComponent<AnimatorComponent>();
+
+    if (animator)
+    {
+        myMeleeAbility = new MeleeAbility(*animator);
+        AssignAbility(AbilitySlot::LeftMouse, myMeleeAbility);
+    }
 }
 
 void AbilityComponent::AssignAbility(const AbilitySlot& aSlot, Ability* aAbility)
@@ -50,6 +57,14 @@ bool AbilityComponent::TryActivateAbility(const AbilitySlot& aSlot, const Abilit
 		return ability->TryActivate(aContext);
 	}
 	return false;
+}
+
+void AbilityComponent::SetMeleeAttackHeld(bool aHeld)
+{
+	if (myMeleeAbility)
+	{
+		myMeleeAbility->SetAttackHeld(aHeld);
+	}
 }
 
 void AbilityComponent::Update(float aDeltaTime)

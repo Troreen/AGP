@@ -25,7 +25,8 @@ namespace UnrealScene
 		Capsule,
 		SpringArm,
 		SkyLight,
-		Camera
+		Camera,
+		Landscape
 	};
 
 	enum class MaterialType : int64_t

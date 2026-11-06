@@ -37,10 +37,19 @@ std::vector<CommonUtilities::Vector3f>&& NavMeshAsset::MoveVertices()
 	return std::move(myVertices);
 }
 
+const CommonUtilities::Vector3f& NavMeshAsset::GetMinBounds() const
+{
+	return myMinBounds;
+}
+
+const CommonUtilities::Vector3f& NavMeshAsset::GetMaxBounds() const
+{
+	return myMaxBounds;
+}
+
 bool NavMeshAsset::Load(const std::filesystem::path& aPath, [[maybe_unused]] AssetRegistry& aRegistry)
 {
 	TGA::FBX::Importer::InitImporter();
-
 	TGA::FBX::Mesh importedNavMesh;
 
 	if (!TGA::FBX::Importer::LoadMesh(aPath, importedNavMesh))
@@ -69,6 +78,7 @@ bool NavMeshAsset::Load(const std::filesystem::path& aPath, [[maybe_unused]] Ass
 	JoinVerticallyMisalignedVertices(myIndices, myVertices);
 	JoinOverlappingBorderEdges(myIndices, myVertices);
 	CullSmallerIslands(myIndices, myVertices);
+	SwizzleMeshBounds(importedNavMesh.BoxBounds, myMinBounds, myMaxBounds);
 
 	return true;
 }
@@ -412,6 +422,16 @@ void NavMeshAsset::CullSmallerIslands(std::vector<uint32_t>& outIndexList, std::
 
 	outIndexList = std::move(islandIndices);
 	outVertexList = std::move(islandVertices);
+}
+
+void NavMeshAsset::SwizzleMeshBounds(const TGA::FBX::Box& aTgaFbxBounds, CommonUtilities::Vector3f& outMinBounds, CommonUtilities::Vector3f& outMaxBounds) const
+{
+	outMinBounds.x = -aTgaFbxBounds.Max[1];
+	outMinBounds.y = aTgaFbxBounds.Min[0];
+	outMinBounds.z = -aTgaFbxBounds.Max[2];
+	outMaxBounds.x = -aTgaFbxBounds.Min[1];
+	outMaxBounds.y = aTgaFbxBounds.Max[0];
+	outMaxBounds.z = -aTgaFbxBounds.Min[2];
 }
 
 CommonUtilities::Vector3f NavMeshAsset::GetSwizzledPosition(const TGA::FBX::Vertex& aTgaFbxVertex) const

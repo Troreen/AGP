@@ -3,8 +3,8 @@
 
 #include "AssetLoadingHelper.h"
 
-#include <Importer.h>
 #include <GraphicsEngine/Objects/Vertex.h>
+#include <Importer.h>
 #include <Logger/Logger.h>
 
 DECLARE_LOG_CATEGORY_WITH_NAME(MeshAssetLog, ASSET, Verbose);
@@ -43,34 +43,16 @@ bool MeshAsset::Load(const std::filesystem::path& aPath, [[maybe_unused]] AssetR
 	std::vector<Vertex> vertices;
 	std::vector<unsigned> indices;
 
-	for (const TGA::FBX::Mesh::Element& importedElement : importedMesh.Elements)
+	const std::string meshName = aPath.stem().string();
+	const bool isLandscape = meshName.starts_with("SM_Landscape_");
+
+	if (!isLandscape)
 	{
-		if (importedElement.Vertices.empty() || importedElement.Indices.empty())
-		{
-			continue;
-		}
-
-		Mesh::Element element;
-		element.VertexOffset = static_cast<unsigned>(vertices.size());
-		element.IndexOffset = static_cast<unsigned>(indices.size());
-		element.NumVertices = static_cast<unsigned>(importedElement.Vertices.size());
-		element.NumIndices = static_cast<unsigned>(importedElement.Indices.size());
-		element.MaterialIndex = importedElement.MaterialIndex;
-
-		vertices.reserve(vertices.size() + importedElement.Vertices.size());
-		indices.reserve(indices.size() + importedElement.Indices.size());
-
-		for (const TGA::FBX::Vertex& sourceVertex : importedElement.Vertices)
-		{
-			vertices.push_back(AssetHelper::ConvertVertex(sourceVertex));
-		}
-
-		for (const unsigned sourceIndex : importedElement.Indices)
-		{
-			indices.push_back(element.VertexOffset + sourceIndex);
-		}
-
-		elements.push_back(element);
+		SetElements(importedMesh, elements, vertices, indices);
+	}
+	else
+	{
+		SetLandscapeElements(importedMesh, elements, vertices, indices);
 	}
 
 	if (elements.empty())
@@ -79,7 +61,6 @@ bool MeshAsset::Load(const std::filesystem::path& aPath, [[maybe_unused]] AssetR
 		return false;
 	}
 
-	const std::string meshName = aPath.stem().string();
 	std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
 	mesh->Initialize(meshName, std::move(elements), std::move(vertices), std::move(indices));
 	if (!importedMesh.Skeleton.Bones.empty())
@@ -90,4 +71,99 @@ bool MeshAsset::Load(const std::filesystem::path& aPath, [[maybe_unused]] AssetR
 	myMesh = std::move(mesh);
 	LOG(MeshAssetLog, Log, "Loaded FBX mesh '{}' with {} elements.", meshName, importedMesh.Elements.size());
 	return true;
+}
+
+void MeshAsset::SetElements(const TGA::FBX::Mesh& aImportedMesh,
+	std::vector<Mesh::Element>& inoutElements, std::vector<Vertex>& inoutVertices, std::vector<unsigned>& inoutIndices) const
+{
+	for (const TGA::FBX::Mesh::Element& importedElement : aImportedMesh.Elements)
+	{
+		if (importedElement.Vertices.empty() || importedElement.Indices.empty())
+		{
+			continue;
+		}
+
+		Mesh::Element element;
+		element.VertexOffset = static_cast<unsigned>(inoutVertices.size());
+		element.IndexOffset = static_cast<unsigned>(inoutIndices.size());
+		element.NumVertices = static_cast<unsigned>(importedElement.Vertices.size());
+		element.NumIndices = static_cast<unsigned>(importedElement.Indices.size());
+		element.MaterialIndex = importedElement.MaterialIndex;
+
+		inoutVertices.reserve(inoutVertices.size() + importedElement.Vertices.size());
+		inoutIndices.reserve(inoutIndices.size() + importedElement.Indices.size());
+
+		for (const TGA::FBX::Vertex& sourceVertex : importedElement.Vertices)
+		{
+			inoutVertices.push_back(AssetHelper::ConvertVertex(sourceVertex));
+		}
+
+		for (const unsigned sourceIndex : importedElement.Indices)
+		{
+			inoutIndices.push_back(element.VertexOffset + sourceIndex);
+		}
+
+		inoutElements.push_back(element);
+	}
+}
+
+void MeshAsset::SetLandscapeElements(const TGA::FBX::Mesh& aImportedMesh,
+	std::vector<Mesh::Element>& inoutElements, std::vector<Vertex>& inoutVertices, std::vector<unsigned>& inoutIndices) const
+{
+	for (const TGA::FBX::Mesh::Element& importedElement : aImportedMesh.Elements)
+	{
+		if (importedElement.Vertices.empty() || importedElement.Indices.empty())
+		{
+			continue;
+		}
+
+		Mesh::Element element;
+		element.VertexOffset = static_cast<unsigned>(inoutVertices.size());
+		element.IndexOffset = static_cast<unsigned>(inoutIndices.size());
+		element.NumVertices = static_cast<unsigned>(importedElement.Vertices.size());
+		element.NumIndices = static_cast<unsigned>(importedElement.Indices.size());
+		element.MaterialIndex = importedElement.MaterialIndex;
+
+		inoutVertices.reserve(inoutVertices.size() + importedElement.Vertices.size());
+		inoutIndices.reserve(inoutIndices.size() + importedElement.Indices.size());
+
+		for (const TGA::FBX::Vertex& sourceVertex : importedElement.Vertices)
+		{
+			inoutVertices.push_back(AssetHelper::ConvertVertex(sourceVertex));
+			inoutVertices[inoutVertices.size() - 1].Normal = CU::Vector3f::Zero;
+		}
+
+		int triangleCounter = 0;
+		for (size_t i = 0; i < importedElement.Indices.size(); ++i)
+		{
+			inoutIndices.push_back(element.VertexOffset + importedElement.Indices[i]);
+
+			if (triangleCounter == 2)
+			{
+				const unsigned index1 = inoutIndices[i - 2];
+				const unsigned index2 = inoutIndices[i - 1];
+				const unsigned index3 = inoutIndices[i - 0];
+
+				const CU::Vector3f vertex1Position = inoutVertices[index1].Position.XYZ();
+				const CU::Vector3f vertex2Position = inoutVertices[index2].Position.XYZ();
+				const CU::Vector3f vertex3Position = inoutVertices[index3].Position.XYZ();
+
+				const CU::Vector3f a = vertex2Position - vertex1Position;
+				const CU::Vector3f b = vertex3Position - vertex1Position;
+				const CU::Vector3f faceNormal = a.Cross(b);
+
+				inoutVertices[index1].Normal += faceNormal;
+				inoutVertices[index2].Normal += faceNormal;
+				inoutVertices[index3].Normal += faceNormal;
+			}
+			triangleCounter = (triangleCounter + 1) % 3;
+		}
+
+		inoutElements.push_back(element);
+	}
+
+	for (Vertex& vertex : inoutVertices)
+	{
+		vertex.Normal.Normalize();
+	}
 }

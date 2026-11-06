@@ -1,0 +1,1806 @@
+[
+    {
+        "action":  "deleted",
+        "change":  "514271",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\Animations\\Characters\\enemy_02\\A_enemy02_death.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Animations/Characters/enemy_02/A_enemy02_death.fbx",
+        "rev":  "2",
+        "totalFileCount":  "260",
+        "totalFileSize":  "211496504"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\Animations\\Characters\\enemy_02\\A_enemy02_idle.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Animations/Characters/enemy_02/A_enemy02_idle.fbx",
+        "rev":  "2"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\Meshes\\Landscapes\\BlisteringTundra\\SM_BlisteringTundra_01.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Meshes/Landscapes/BlisteringTundra/SM_BlisteringTundra_01.fbx",
+        "rev":  "1"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\Meshes\\Landscapes\\BlisteringTundra\\SM_BlisteringTundra_02.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Meshes/Landscapes/BlisteringTundra/SM_BlisteringTundra_02.fbx",
+        "rev":  "1"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\Meshes\\Landscapes\\BlisteringTundra\\SM_BlisteringTundra_03.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Meshes/Landscapes/BlisteringTundra/SM_BlisteringTundra_03.fbx",
+        "rev":  "1"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\Meshes\\Landscapes\\BlisteringTundra\\SM_BlisteringTundra_04.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Meshes/Landscapes/BlisteringTundra/SM_BlisteringTundra_04.fbx",
+        "rev":  "1"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build\\EngineShaders\\Material\\Tonemap.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Material/Tonemap.hlsli",
+        "rev":  "2"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build\\EngineShaders\\Material\\Tonemapper_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Material/Tonemapper_PS.hlsl",
+        "rev":  "2"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build\\imgui.ini",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/imgui.ini",
+        "rev":  "3"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Landscape\\Blistering_Tundra\\SM_BlisteringTundra_01.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Landscape/Blistering_Tundra/SM_BlisteringTundra_01.uasset",
+        "rev":  "2"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Landscape\\Blistering_Tundra\\SM_BlisteringTundra_02.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Landscape/Blistering_Tundra/SM_BlisteringTundra_02.uasset",
+        "rev":  "2"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Landscape\\Blistering_Tundra\\SM_BlisteringTundra_03.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Landscape/Blistering_Tundra/SM_BlisteringTundra_03.uasset",
+        "rev":  "1"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Landscape\\Blistering_Tundra\\SM_BlisteringTundra_04.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Landscape/Blistering_Tundra/SM_BlisteringTundra_04.uasset",
+        "rev":  "1"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\SM_CH_BloatedElite_BaseColor.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/SM_CH_BloatedElite_BaseColor.png",
+        "rev":  "1"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\SM_CH_BloatedElite_Normal.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/SM_CH_BloatedElite_Normal.png",
+        "rev":  "1"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\SM_CH_BloatedElite_OcclusionRoughnessMetallic.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/SM_CH_BloatedElite_OcclusionRoughnessMetallic.png",
+        "rev":  "1"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_CH_Peasant_C.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_CH_Peasant_C.png",
+        "rev":  "1"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_CH_Peasant_M.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_CH_Peasant_M.png",
+        "rev":  "1"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_CH_Peasant_N.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_CH_Peasant_N.png",
+        "rev":  "1"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\Animations\\Animation Manager\\Trees\\PlayerTree.json",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Animations/Animation Manager/Trees/PlayerTree.json",
+        "fileSize":  "5703",
+        "rev":  "18"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\Animations\\Characters\\enemy_02\\A_enemy02_awake.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Animations/Characters/enemy_02/A_enemy02_awake.fbx",
+        "fileSize":  "1076368",
+        "rev":  "1"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\Animations\\Characters\\enemy_02\\A_enemy02_mainAttack.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Animations/Characters/enemy_02/A_enemy02_mainAttack.fbx",
+        "fileSize":  "1076288",
+        "rev":  "4"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\Animations\\Characters\\enemy_02\\A_enemy02_stun.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Animations/Characters/enemy_02/A_enemy02_stun.fbx",
+        "fileSize":  "1283728",
+        "rev":  "3"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\Animations\\Characters\\enemy_02\\A_ranged_death.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Animations/Characters/enemy_02/A_ranged_death.fbx",
+        "fileSize":  "806240",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\Animations\\Characters\\enemy_02\\A_ranged_idle.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Animations/Characters/enemy_02/A_ranged_idle.fbx",
+        "fileSize":  "980544",
+        "rev":  "1"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\ExportedScenes\\lvl_forsaken_castle\\Lvl_Forsaken_Castle_Level.json",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/ExportedScenes/lvl_forsaken_castle/Lvl_Forsaken_Castle_Level.json",
+        "fileSize":  "6973206",
+        "rev":  "20"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\ExportedScenes\\lvl_forsaken_castle\\Lvl_Forsaken_Castle_Level.nav",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/ExportedScenes/lvl_forsaken_castle/Lvl_Forsaken_Castle_Level.nav",
+        "fileSize":  "51712",
+        "rev":  "6"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\Meshes\\Landscapes\\BlisteringTundra\\SM_Landscape_BlisteringTundra_01.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Meshes/Landscapes/BlisteringTundra/SM_Landscape_BlisteringTundra_01.fbx",
+        "fileSize":  "1135008",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\Meshes\\Landscapes\\BlisteringTundra\\SM_Landscape_BlisteringTundra_02.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Meshes/Landscapes/BlisteringTundra/SM_Landscape_BlisteringTundra_02.fbx",
+        "fileSize":  "606816",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\Meshes\\Landscapes\\BlisteringTundra\\SM_Landscape_BlisteringTundra_03.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Meshes/Landscapes/BlisteringTundra/SM_Landscape_BlisteringTundra_03.fbx",
+        "fileSize":  "481488",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\Meshes\\Landscapes\\BlisteringTundra\\SM_Landscape_BlisteringTundra_04.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Meshes/Landscapes/BlisteringTundra/SM_Landscape_BlisteringTundra_04.fbx",
+        "fileSize":  "162576",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\Shaders\\MM_Enemy_Dissolve.hlsli",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Shaders/MM_Enemy_Dissolve.hlsli",
+        "fileSize":  "2176",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\Textures\\__ColorGrading_LUT__.cube",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Textures/__ColorGrading_LUT__.cube",
+        "fileSize":  "970506",
+        "rev":  "1"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build\\Audio\\Master.bank",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/Audio/Master.bank",
+        "fileSize":  "9921760",
+        "rev":  "12"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build\\Audio\\Master.strings.bank",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/Audio/Master.strings.bank",
+        "fileSize":  "2100",
+        "rev":  "11"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build\\EngineShaders\\Internal\\Lighting.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Internal/Lighting.hlsli",
+        "fileSize":  "17170",
+        "rev":  "4"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build\\EngineShaders\\Internal\\Tonemap.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Internal/Tonemap.hlsli",
+        "fileSize":  "1907",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build\\EngineShaders\\Internal\\Tonemapper_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Internal/Tonemapper_PS.hlsl",
+        "fileSize":  "1293",
+        "rev":  "1"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build\\EngineShaders\\Material\\Unlit_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Material/Unlit_PS.hlsl",
+        "fileSize":  "1064",
+        "rev":  "4"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build\\EngineShaders\\MM_Enemy_Dissolve.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/EngineShaders/MM_Enemy_Dissolve.hlsli",
+        "fileSize":  "2176",
+        "rev":  "1"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build\\Game.exe",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/Game.exe",
+        "fileSize":  "2287616",
+        "rev":  "39"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build\\Game.pdb",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/Game.pdb",
+        "fileSize":  "30191616",
+        "rev":  "34"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\Audio\\Master.bank",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/Audio/Master.bank",
+        "fileSize":  "10145184",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\Audio\\Master.strings.bank",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/Audio/Master.strings.bank",
+        "fileSize":  "2136",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\_DefaultMaterial.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/_DefaultMaterial.hlsli",
+        "fileSize":  "650",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Internal\\BRDF LUT_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/BRDF LUT_PS.hlsl",
+        "fileSize":  "201",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Internal\\Common.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/Common.hlsli",
+        "fileSize":  "983",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Internal\\FullTexture_VS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/FullTexture_VS.hlsl",
+        "fileSize":  "518",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Internal\\Lighting.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/Lighting.hlsli",
+        "fileSize":  "17169",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Internal\\LUTFunctions.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/LUTFunctions.hlsli",
+        "fileSize":  "3381",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Internal\\PoissonDisks.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/PoissonDisks.hlsli",
+        "fileSize":  "3529",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Internal\\Samplers.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/Samplers.hlsli",
+        "fileSize":  "239",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Internal\\Sprite_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/Sprite_PS.hlsl",
+        "fileSize":  "270",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Internal\\Sprite_VS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/Sprite_VS.hlsl",
+        "fileSize":  "598",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Internal\\Tonemap.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/Tonemap.hlsli",
+        "fileSize":  "1907",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Internal\\Tonemapper_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/Tonemapper_PS.hlsl",
+        "fileSize":  "1293",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Lines\\Lines_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Lines/Lines_PS.hlsl",
+        "fileSize":  "147",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Lines\\Lines_VS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Lines/Lines_VS.hlsl",
+        "fileSize":  "781",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Material\\Deferred_AmbientLight_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/Deferred_AmbientLight_PS.hlsl",
+        "fileSize":  "2465",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Material\\Deferred_DirLight_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/Deferred_DirLight_PS.hlsl",
+        "fileSize":  "1443",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Material\\Deferred_PointLight_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/Deferred_PointLight_PS.hlsl",
+        "fileSize":  "1496",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Material\\Deferred_SpotLight_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/Deferred_SpotLight_PS.hlsl",
+        "fileSize":  "1494",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Material\\GBuffer_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/GBuffer_PS.hlsl",
+        "fileSize":  "2362",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Material\\Lit_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/Lit_PS.hlsl",
+        "fileSize":  "4919",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Material\\Material.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/Material.hlsli",
+        "fileSize":  "226",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Material\\MaterialParameters.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/MaterialParameters.hlsli",
+        "fileSize":  "580",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Material\\MaterialUtilities.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/MaterialUtilities.hlsli",
+        "fileSize":  "1747",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Material\\Normal.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/Normal.hlsli",
+        "fileSize":  "1870",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Material\\ShadowCube_GS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/ShadowCube_GS.hlsl",
+        "fileSize":  "1140",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Material\\Skybox_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/Skybox_PS.hlsl",
+        "fileSize":  "918",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Material\\Surface_VS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/Surface_VS.hlsl",
+        "fileSize":  "2455",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Material\\Unlit_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/Unlit_PS.hlsl",
+        "fileSize":  "1064",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\MM_Blood.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/MM_Blood.hlsli",
+        "fileSize":  "2139",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\MM_Blood_Absorption.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/MM_Blood_Absorption.hlsli",
+        "fileSize":  "2139",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\MM_Enemy_Dissolve.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/MM_Enemy_Dissolve.hlsli",
+        "fileSize":  "2176",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\MM_ShaderTest.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/MM_ShaderTest.hlsli",
+        "fileSize":  "1167",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\MM_Standard_WithSnow.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/MM_Standard_WithSnow.hlsli",
+        "fileSize":  "1585",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Particles\\Particle_GS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Particles/Particle_GS.hlsl",
+        "fileSize":  "1580",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Particles\\Particle_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Particles/Particle_PS.hlsl",
+        "fileSize":  "845",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Particles\\Particle_VS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Particles/Particle_VS.hlsl",
+        "fileSize":  "1113",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Particles\\ParticleCommon.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Particles/ParticleCommon.hlsli",
+        "fileSize":  "517",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Particles\\ParticleMaterial.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Particles/ParticleMaterial.hlsli",
+        "fileSize":  "251",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Particles\\ParticleMaterialParameters.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Particles/ParticleMaterialParameters.hlsli",
+        "fileSize":  "417",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\ParticleTest.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/ParticleTest.hlsli",
+        "fileSize":  "287",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\PostProcess\\Bloom01Downsample_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/Bloom01Downsample_PS.hlsl",
+        "fileSize":  "212",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\PostProcess\\Bloom_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/Bloom_PS.hlsl",
+        "fileSize":  "261",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\PostProcess\\BloomDownsample_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/BloomDownsample_PS.hlsl",
+        "fileSize":  "1727",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\PostProcess\\BloomHelper.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/BloomHelper.hlsli",
+        "fileSize":  "235",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\PostProcess\\BloomLuminance_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/BloomLuminance_PS.hlsl",
+        "fileSize":  "640",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\PostProcess\\BloomUpsample_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/BloomUpsample_PS.hlsl",
+        "fileSize":  "1195",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\PostProcess\\Resample_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/Resample_PS.hlsl",
+        "fileSize":  "215",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\PostProcess\\SSAO_BlurH_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/SSAO_BlurH_PS.hlsl",
+        "fileSize":  "318",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\PostProcess\\SSAO_BlurV_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/SSAO_BlurV_PS.hlsl",
+        "fileSize":  "317",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\PostProcess\\SSAO_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/SSAO_PS.hlsl",
+        "fileSize":  "3459",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\PostProcess\\SSAOHelper.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/SSAOHelper.hlsli",
+        "fileSize":  "1891",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\SparklingSnow.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/SparklingSnow.hlsli",
+        "fileSize":  "3581",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Text\\TextOverlay_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Text/TextOverlay_PS.hlsl",
+        "fileSize":  "673",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Text\\TextOverlay_VS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Text/TextOverlay_VS.hlsl",
+        "fileSize":  "637",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\EngineShaders\\Text\\TextOverlayHelper.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Text/TextOverlayHelper.hlsli",
+        "fileSize":  "345",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\fmod.dll",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/fmod.dll",
+        "fileSize":  "1842176",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\fmodL.dll",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/fmodL.dll",
+        "fileSize":  "2075136",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\fmodstudio.dll",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/fmodstudio.dll",
+        "fileSize":  "1503232",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\fmodstudioL.dll",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/fmodstudioL.dll",
+        "fileSize":  "2302464",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\Game.exe",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/Game.exe",
+        "fileSize":  "2287104",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\Game.pdb",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/Game.pdb",
+        "fileSize":  "30240768",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Engine\\Build_Debug\\libfbxsdk.dll",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/libfbxsdk.dll",
+        "fileSize":  "10059872",
+        "rev":  "1"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Config\\DefaultEngine.ini",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Config/DefaultEngine.ini",
+        "fileSize":  "9111",
+        "rev":  "3"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Blueprints\\Scripted_Events\\BP_RemeniscingOnDeadBodies.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Blueprints/Scripted_Events/BP_RemeniscingOnDeadBodies.uasset",
+        "fileSize":  "29708",
+        "rev":  "3"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Characters\\Enemy\\Testing\\SM_CH_Bloated.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Characters/Enemy/Testing/SM_CH_Bloated.fbx",
+        "fileSize":  "205628",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Characters\\Enemy\\Testing\\SM_CH_Bloated.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Characters/Enemy/Testing/SM_CH_Bloated.uasset",
+        "fileSize":  "328061",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Characters\\Enemy\\Testing\\SM_CH_Fool.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Characters/Enemy/Testing/SM_CH_Fool.fbx",
+        "fileSize":  "558780",
+        "rev":  "1"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Characters\\Player\\BP_Player.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Characters/Player/BP_Player.uasset",
+        "fileSize":  "38756",
+        "rev":  "8"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\LevelPrototyping\\Materials\\Landscape_Info\\Dirt_Path_LayerInfo.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/LevelPrototyping/Materials/Landscape_Info/Dirt_Path_LayerInfo.uasset",
+        "fileSize":  "1699",
+        "rev":  "3"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\LevelPrototyping\\Materials\\M_Landscape.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/LevelPrototyping/Materials/M_Landscape.uasset",
+        "fileSize":  "13228",
+        "rev":  "5"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Levels\\Game_Levels\\Level_01_Instances\\Lvl_01_CityOutskirts.umap",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Levels/Game_Levels/Level_01_Instances/Lvl_01_CityOutskirts.umap",
+        "fileSize":  "487888",
+        "rev":  "16"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Levels\\Game_Levels\\Level_01_Instances\\Lvl_01_Gallows.umap",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Levels/Game_Levels/Level_01_Instances/Lvl_01_Gallows.umap",
+        "fileSize":  "141292",
+        "rev":  "10"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Levels\\Game_Levels\\Level_01_Instances\\LVL_01_GoldenCorner_Slums.umap",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Levels/Game_Levels/Level_01_Instances/LVL_01_GoldenCorner_Slums.umap",
+        "fileSize":  "41361",
+        "rev":  "2"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Levels\\Game_Levels\\Level_01_Instances\\Lvl_01_Lighting.umap",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Levels/Game_Levels/Level_01_Instances/Lvl_01_Lighting.umap",
+        "fileSize":  "25964",
+        "rev":  "3"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Levels\\Game_Levels\\Level_01_Instances\\Lvl_01_Slums.umap",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Levels/Game_Levels/Level_01_Instances/Lvl_01_Slums.umap",
+        "fileSize":  "301898",
+        "rev":  "13"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Levels\\Game_Levels\\Level_01_Instances\\Lvl_01_Tundra.umap",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Levels/Game_Levels/Level_01_Instances/Lvl_01_Tundra.umap",
+        "fileSize":  "893782",
+        "rev":  "20"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Levels\\Game_Levels\\Level_02_Instances\\Lvl_02_Barracks.umap",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Levels/Game_Levels/Level_02_Instances/Lvl_02_Barracks.umap",
+        "fileSize":  "560451",
+        "rev":  "27"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Levels\\Game_Levels\\Level_02_Instances\\Lvl_02_CastleWalls.umap",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Levels/Game_Levels/Level_02_Instances/Lvl_02_CastleWalls.umap",
+        "fileSize":  "2109267",
+        "rev":  "22"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Levels\\Game_Levels\\Level_02_Instances\\Lvl_02_Courtyards.umap",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Levels/Game_Levels/Level_02_Instances/Lvl_02_Courtyards.umap",
+        "fileSize":  "1562993",
+        "rev":  "23"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Levels\\Game_Levels\\Level_02_Instances\\Lvl_02_GoldenCornerCastleWall.umap",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Levels/Game_Levels/Level_02_Instances/Lvl_02_GoldenCornerCastleWall.umap",
+        "fileSize":  "144899",
+        "rev":  "5"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Levels\\Game_Levels\\Level_02_Instances\\Lvl_02_ThroneRoom.umap",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Levels/Game_Levels/Level_02_Instances/Lvl_02_ThroneRoom.umap",
+        "fileSize":  "800779",
+        "rev":  "14"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Levels\\Game_Levels\\Lvl_Blistering_Tundra.umap",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Levels/Game_Levels/Lvl_Blistering_Tundra.umap",
+        "fileSize":  "576118",
+        "rev":  "20"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Levels\\Game_Levels\\Lvl_Forsaken_Castle.umap",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Levels/Game_Levels/Lvl_Forsaken_Castle.umap",
+        "fileSize":  "1598447",
+        "rev":  "39"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Levels\\Test_Levels\\SG\\Lvl_Asset_Axel.umap",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Levels/Test_Levels/SG/Lvl_Asset_Axel.umap",
+        "fileSize":  "92481",
+        "rev":  "8"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Levels\\Test_Levels\\SG\\Lvl_Asset_Margo.umap",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Levels/Test_Levels/SG/Lvl_Asset_Margo.umap",
+        "fileSize":  "914117",
+        "rev":  "5"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Levels\\Test_Levels\\SG\\Lvl_Asset_Museum.umap",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Levels/Test_Levels/SG/Lvl_Asset_Museum.umap",
+        "fileSize":  "1360041",
+        "rev":  "25"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Levels\\Test_Levels\\TA\\Lvl_Piotr.umap",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Levels/Test_Levels/TA/Lvl_Piotr.umap",
+        "fileSize":  "38330",
+        "rev":  "3"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Materials\\MI_Enemy_Dissolve.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Materials/MI_Enemy_Dissolve.uasset",
+        "fileSize":  "16339",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Materials\\MI_ProtectiveWalls_Rubble_Snow.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Materials/MI_ProtectiveWalls_Rubble_Snow.uasset",
+        "fileSize":  "19458",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Materials\\MI_ProtectiveWalls_Tiles_Snow.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Materials/MI_ProtectiveWalls_Tiles_Snow.uasset",
+        "fileSize":  "14343",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Materials\\MM_Enemy_Dissolve.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Materials/MM_Enemy_Dissolve.uasset",
+        "fileSize":  "28377",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Decor\\Area_Non_specific\\SM_Bag_A.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Decor/Area_Non_specific/SM_Bag_A.fbx",
+        "fileSize":  "78348",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Decor\\Area_Non_specific\\SM_Bag_A.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Decor/Area_Non_specific/SM_Bag_A.uasset",
+        "fileSize":  "143169",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Decor\\Area_Non_specific\\SM_Bag_B.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Decor/Area_Non_specific/SM_Bag_B.fbx",
+        "fileSize":  "75180",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Decor\\Area_Non_specific\\SM_Bag_B.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Decor/Area_Non_specific/SM_Bag_B.uasset",
+        "fileSize":  "142377",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Decor\\Area_Non_specific\\SM_SingularSpike.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Decor/Area_Non_specific/SM_SingularSpike.fbx",
+        "fileSize":  "23036",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Decor\\Area_Non_specific\\SM_SingularSpike.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Decor/Area_Non_specific/SM_SingularSpike.uasset",
+        "fileSize":  "77565",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Decor\\Area_Non_specific\\SM_SomethingUnderCloth.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Decor/Area_Non_specific/SM_SomethingUnderCloth.fbx",
+        "fileSize":  "59452",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Decor\\Area_Non_specific\\SM_SomethingUnderCloth.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Decor/Area_Non_specific/SM_SomethingUnderCloth.uasset",
+        "fileSize":  "137567",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Decor\\Blistering_Tundra\\Lvl_01_Farmhouses\\Empty_Tundra\\SM_Axe.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Decor/Blistering_Tundra/Lvl_01_Farmhouses/Empty_Tundra/SM_Axe.fbx",
+        "fileSize":  "23020",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Decor\\Blistering_Tundra\\Lvl_01_Farmhouses\\Empty_Tundra\\SM_Axe.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Decor/Blistering_Tundra/Lvl_01_Farmhouses/Empty_Tundra/SM_Axe.uasset",
+        "fileSize":  "85083",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Decor\\Blistering_Tundra\\Lvl_01_Farmhouses\\Empty_Tundra\\SM_AxeInTree.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Decor/Blistering_Tundra/Lvl_01_Farmhouses/Empty_Tundra/SM_AxeInTree.fbx",
+        "fileSize":  "30364",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Decor\\Blistering_Tundra\\Lvl_01_Farmhouses\\Empty_Tundra\\SM_AxeInTree.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Decor/Blistering_Tundra/Lvl_01_Farmhouses/Empty_Tundra/SM_AxeInTree.uasset",
+        "fileSize":  "92955",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Decor\\Blistering_Tundra\\Lvl_01_Farmhouses\\Empty_Tundra\\SM_Feeder.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Decor/Blistering_Tundra/Lvl_01_Farmhouses/Empty_Tundra/SM_Feeder.fbx",
+        "fileSize":  "95852",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Decor\\Blistering_Tundra\\Lvl_01_Farmhouses\\Empty_Tundra\\SM_Feeder.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Decor/Blistering_Tundra/Lvl_01_Farmhouses/Empty_Tundra/SM_Feeder.uasset",
+        "fileSize":  "163254",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Decor\\Blistering_Tundra\\Lvl_01_Farmhouses\\Empty_Tundra\\SM_Plane.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Decor/Blistering_Tundra/Lvl_01_Farmhouses/Empty_Tundra/SM_Plane.fbx",
+        "fileSize":  "1319180",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Decor\\Blistering_Tundra\\Lvl_01_Farmhouses\\Empty_Tundra\\SM_ScareCrow.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Decor/Blistering_Tundra/Lvl_01_Farmhouses/Empty_Tundra/SM_ScareCrow.fbx",
+        "fileSize":  "290524",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Decor\\Blistering_Tundra\\Lvl_01_Farmhouses\\Empty_Tundra\\SM_ScareCrow.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Decor/Blistering_Tundra/Lvl_01_Farmhouses/Empty_Tundra/SM_ScareCrow.uasset",
+        "fileSize":  "385821",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Decor\\Blistering_Tundra\\Lvl_01_Farmhouses\\Empty_Tundra\\SM_VedHus.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Decor/Blistering_Tundra/Lvl_01_Farmhouses/Empty_Tundra/SM_VedHus.fbx",
+        "fileSize":  "1319180",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Decor\\Blistering_Tundra\\Lvl_01_Farmhouses\\Empty_Tundra\\SM_VedHus.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Decor/Blistering_Tundra/Lvl_01_Farmhouses/Empty_Tundra/SM_VedHus.uasset",
+        "fileSize":  "1275776",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Decor\\Blistering_Tundra\\Lvl_01_Gallows\\SM_Cage_A.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Decor/Blistering_Tundra/Lvl_01_Gallows/SM_Cage_A.fbx",
+        "fileSize":  "100108",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Decor\\Blistering_Tundra\\Lvl_01_Gallows\\SM_Cage_A.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Decor/Blistering_Tundra/Lvl_01_Gallows/SM_Cage_A.uasset",
+        "fileSize":  "175575",
+        "rev":  "1"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Foliage\\SM_Snow_Bank_Medium.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Foliage/SM_Snow_Bank_Medium.uasset",
+        "fileSize":  "107800",
+        "rev":  "3"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Foliage\\SM_Snow_Pile.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Foliage/SM_Snow_Pile.uasset",
+        "fileSize":  "94572",
+        "rev":  "3"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Hero_Pieces\\Blistering_Tundra\\SM_Gallows_A_8m.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Hero_Pieces/Blistering_Tundra/SM_Gallows_A_8m.fbx",
+        "fileSize":  "317676",
+        "rev":  "2"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Hero_Pieces\\Blistering_Tundra\\SM_Gallows_A_8m.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Hero_Pieces/Blistering_Tundra/SM_Gallows_A_8m.uasset",
+        "fileSize":  "421559",
+        "rev":  "4"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Hero_Pieces\\Blistering_Tundra\\SM_SharpStone_A.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Hero_Pieces/Blistering_Tundra/SM_SharpStone_A.fbx",
+        "fileSize":  "47964",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Hero_Pieces\\Blistering_Tundra\\SMs_Gallows_A_8m.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Hero_Pieces/Blistering_Tundra/SMs_Gallows_A_8m.fbx",
+        "fileSize":  "317612",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Landscape\\Blistering_Tundra\\SM_Landscape_BlisteringTundra_01.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Landscape/Blistering_Tundra/SM_Landscape_BlisteringTundra_01.uasset",
+        "fileSize":  "1203869",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Landscape\\Blistering_Tundra\\SM_Landscape_BlisteringTundra_02.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Landscape/Blistering_Tundra/SM_Landscape_BlisteringTundra_02.uasset",
+        "fileSize":  "573342",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Landscape\\Blistering_Tundra\\SM_Landscape_BlisteringTundra_04.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Landscape/Blistering_Tundra/SM_Landscape_BlisteringTundra_04.uasset",
+        "fileSize":  "291492",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Landscape\\Blistering_Tundra\\SM_LandscapeBlisteringTundra_03.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Landscape/Blistering_Tundra/SM_LandscapeBlisteringTundra_03.uasset",
+        "fileSize":  "493087",
+        "rev":  "1"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Modules\\Castle\\Castle_ProtectiveWall_8x4M_Middle.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Modules/Castle/Castle_ProtectiveWall_8x4M_Middle.fbx",
+        "fileSize":  "51420",
+        "rev":  "3"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Modules\\Castle\\Castle_ProtectiveWall_8x4M_Middle.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Modules/Castle/Castle_ProtectiveWall_8x4M_Middle.uasset",
+        "fileSize":  "119492",
+        "rev":  "5"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Modules\\Castle\\Castle_ProtectiveWall_8x4M_Start.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Modules/Castle/Castle_ProtectiveWall_8x4M_Start.fbx",
+        "fileSize":  "492908",
+        "rev":  "3"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Modules\\Castle\\Castle_ProtectiveWall_8x4M_Start.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Modules/Castle/Castle_ProtectiveWall_8x4M_Start.uasset",
+        "fileSize":  "631224",
+        "rev":  "5"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Modules\\Castle\\Castle_ProtectiveWall_8x4M_Start_Mirrored.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Modules/Castle/Castle_ProtectiveWall_8x4M_Start_Mirrored.fbx",
+        "fileSize":  "489452",
+        "rev":  "3"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Modules\\Castle\\Castle_ProtectiveWall_8x4M_Start_Mirrored.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Modules/Castle/Castle_ProtectiveWall_8x4M_Start_Mirrored.uasset",
+        "fileSize":  "642567",
+        "rev":  "5"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Modules\\Castle\\SM_Castle_ProtectiveWall_16x16M.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Modules/Castle/SM_Castle_ProtectiveWall_16x16M.fbx",
+        "fileSize":  "23996",
+        "rev":  "3"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Modules\\Castle\\SM_Castle_ProtectiveWall_16x16M.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Modules/Castle/SM_Castle_ProtectiveWall_16x16M.uasset",
+        "fileSize":  "85941",
+        "rev":  "4"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Modules\\Castle\\SM_Castle_ProtectiveWall_4M_Edge.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Modules/Castle/SM_Castle_ProtectiveWall_4M_Edge.fbx",
+        "fileSize":  "29964",
+        "rev":  "3"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Modules\\Castle\\SM_Castle_ProtectiveWall_4M_Edge.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Modules/Castle/SM_Castle_ProtectiveWall_4M_Edge.uasset",
+        "fileSize":  "93249",
+        "rev":  "5"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Modules\\Castle\\SM_Castle_ProtectiveWall_8M_Edge.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Modules/Castle/SM_Castle_ProtectiveWall_8M_Edge.fbx",
+        "fileSize":  "34780",
+        "rev":  "3"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Modules\\Castle\\SM_Castle_ProtectiveWall_8M_Edge.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Modules/Castle/SM_Castle_ProtectiveWall_8M_Edge.uasset",
+        "fileSize":  "98247",
+        "rev":  "4"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Modules\\Castle\\SM_Castle_ProtectiveWall_8M_Edge_Corner.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Modules/Castle/SM_Castle_ProtectiveWall_8M_Edge_Corner.fbx",
+        "fileSize":  "20524",
+        "rev":  "3"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Modules\\Castle\\SM_Castle_ProtectiveWall_8M_Edge_Corner.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Modules/Castle/SM_Castle_ProtectiveWall_8M_Edge_Corner.uasset",
+        "fileSize":  "80300",
+        "rev":  "4"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Modules\\Castle\\SM_Castle_ProtectiveWall_8M_Edge_Corner_Inner.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Modules/Castle/SM_Castle_ProtectiveWall_8M_Edge_Corner_Inner.fbx",
+        "fileSize":  "20764",
+        "rev":  "3"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Modules\\Castle\\SM_Castle_ProtectiveWall_8M_Edge_Corner_Inner.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Modules/Castle/SM_Castle_ProtectiveWall_8M_Edge_Corner_Inner.uasset",
+        "fileSize":  "81412",
+        "rev":  "4"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Modules\\Castle\\SM_Castle_ProtectiveWall_8x8M.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Modules/Castle/SM_Castle_ProtectiveWall_8x8M.fbx",
+        "fileSize":  "19260",
+        "rev":  "3"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Modules\\Castle\\SM_Castle_ProtectiveWall_8x8M.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Modules/Castle/SM_Castle_ProtectiveWall_8x8M.uasset",
+        "fileSize":  "78156",
+        "rev":  "4"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Modules\\Castle\\SM_Castle_ProtectiveWall_Stairs.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Modules/Castle/SM_Castle_ProtectiveWall_Stairs.fbx",
+        "fileSize":  "19132",
+        "rev":  "3"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Modules\\Castle\\SM_Castle_ProtectiveWall_Stairs.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Modules/Castle/SM_Castle_ProtectiveWall_Stairs.uasset",
+        "fileSize":  "79192",
+        "rev":  "4"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Modules\\Castle\\SM_Castle_Wall_Half_A_1M.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Modules/Castle/SM_Castle_Wall_Half_A_1M.fbx",
+        "fileSize":  "219804",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Modules\\Castle\\SM_Castle_Wall_Half_A_1M.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Modules/Castle/SM_Castle_Wall_Half_A_1M.uasset",
+        "fileSize":  "215049",
+        "rev":  "1"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Modules\\VillageHouse\\HouseInstances\\Lvl_Instance_House_05.umap",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Modules/VillageHouse/HouseInstances/Lvl_Instance_House_05.umap",
+        "fileSize":  "381283",
+        "rev":  "3"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Modules\\VillageHouse\\HouseInstances\\Lvl_Instance_House_09.umap",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Modules/VillageHouse/HouseInstances/Lvl_Instance_House_09.umap",
+        "fileSize":  "134584",
+        "rev":  "2"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Scatter\\SM_Cube_265.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Scatter/SM_Cube_265.fbx",
+        "fileSize":  "21372",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Scatter\\SM_Scatter_A_Rocks.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Scatter/SM_Scatter_A_Rocks.fbx",
+        "fileSize":  "178300",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Scatter\\SM_Scatter_A_Rocks.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Scatter/SM_Scatter_A_Rocks.uasset",
+        "fileSize":  "275037",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Scatter\\SM_Scatter_A_Tree.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Scatter/SM_Scatter_A_Tree.fbx",
+        "fileSize":  "139964",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Scatter\\SM_Scatter_A_Tree.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Scatter/SM_Scatter_A_Tree.uasset",
+        "fileSize":  "218028",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Scatter\\SM_Scatter_B_Rocks.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Scatter/SM_Scatter_B_Rocks.fbx",
+        "fileSize":  "66796",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Scatter\\SM_Scatter_B_Rocks.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Scatter/SM_Scatter_B_Rocks.uasset",
+        "fileSize":  "138779",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Scatter\\SM_Scatter_B_Tree.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Scatter/SM_Scatter_B_Tree.fbx",
+        "fileSize":  "144188",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Scatter\\SM_Scatter_B_Tree.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Scatter/SM_Scatter_B_Tree.uasset",
+        "fileSize":  "219952",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Scatter\\SM_Scatter_C_Rocks.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Scatter/SM_Scatter_C_Rocks.fbx",
+        "fileSize":  "30636",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Scatter\\SM_Scatter_C_Rocks.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Scatter/SM_Scatter_C_Rocks.uasset",
+        "fileSize":  "92575",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Scatter\\SM_Scatter_C_Tree.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Scatter/SM_Scatter_C_Tree.fbx",
+        "fileSize":  "153564",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Scatter\\SM_Scatter_C_Tree.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Scatter/SM_Scatter_C_Tree.uasset",
+        "fileSize":  "227482",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Scatter\\SM_Scatter_D_Rocks.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Scatter/SM_Scatter_D_Rocks.fbx",
+        "fileSize":  "46284",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Scatter\\SM_Scatter_D_Rocks.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Scatter/SM_Scatter_D_Rocks.uasset",
+        "fileSize":  "111782",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\SM_CH_Bloated_DefaultMaterial_BaseColor.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/SM_CH_Bloated_DefaultMaterial_BaseColor.uasset",
+        "fileSize":  "1491",
+        "rev":  "2"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\SM_CH_Bloated_DefaultMaterial_Normal.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/SM_CH_Bloated_DefaultMaterial_Normal.uasset",
+        "fileSize":  "1464",
+        "rev":  "2"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\SM_CH_Bloated_DefaultMaterial_OcclusionRoughnessMetallic.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/SM_CH_Bloated_DefaultMaterial_OcclusionRoughnessMetallic.uasset",
+        "fileSize":  "1644",
+        "rev":  "2"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\SM_CH_BloatedElite_BaseColor.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/SM_CH_BloatedElite_BaseColor.uasset",
+        "fileSize":  "1456",
+        "rev":  "3"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\SM_CH_BloatedElite_Normal.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/SM_CH_BloatedElite_Normal.uasset",
+        "fileSize":  "1429",
+        "rev":  "3"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\SM_CH_BloatedElite_OcclusionRoughnessMetallic.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/SM_CH_BloatedElite_OcclusionRoughnessMetallic.uasset",
+        "fileSize":  "1609",
+        "rev":  "3"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_4M_ProtectiveWall_Rubble_BaseColor.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_4M_ProtectiveWall_Rubble_BaseColor.png",
+        "fileSize":  "471927",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_4M_ProtectiveWall_Rubble_BaseColor.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_4M_ProtectiveWall_Rubble_BaseColor.uasset",
+        "fileSize":  "527455",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_4M_ProtectiveWall_Rubble_Normal.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_4M_ProtectiveWall_Rubble_Normal.png",
+        "fileSize":  "672441",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_4M_ProtectiveWall_Rubble_Normal.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_4M_ProtectiveWall_Rubble_Normal.uasset",
+        "fileSize":  "810736",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_4M_ProtectiveWall_Rubble_OcclusionRoughnessMetallic.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_4M_ProtectiveWall_Rubble_OcclusionRoughnessMetallic.png",
+        "fileSize":  "456957",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_4M_ProtectiveWall_Rubble_OcclusionRoughnessMetallic.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_4M_ProtectiveWall_Rubble_OcclusionRoughnessMetallic.uasset",
+        "fileSize":  "530285",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_4M_ProtectiveWall_Tiles_BaseColor.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_4M_ProtectiveWall_Tiles_BaseColor.png",
+        "fileSize":  "336219",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_4M_ProtectiveWall_Tiles_BaseColor.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_4M_ProtectiveWall_Tiles_BaseColor.uasset",
+        "fileSize":  "370770",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_4M_ProtectiveWall_Tiles_Normal.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_4M_ProtectiveWall_Tiles_Normal.png",
+        "fileSize":  "425144",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_4M_ProtectiveWall_Tiles_Normal.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_4M_ProtectiveWall_Tiles_Normal.uasset",
+        "fileSize":  "544760",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_4M_ProtectiveWall_Tiles_OcclusionRoughnessMetallic.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_4M_ProtectiveWall_Tiles_OcclusionRoughnessMetallic.png",
+        "fileSize":  "326152",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_4M_ProtectiveWall_Tiles_OcclusionRoughnessMetallic.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_4M_ProtectiveWall_Tiles_OcclusionRoughnessMetallic.uasset",
+        "fileSize":  "386657",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_CH_Bloated_BaseColor.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_CH_Bloated_BaseColor.png",
+        "fileSize":  "1792398",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_CH_Bloated_BaseColor.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_CH_Bloated_BaseColor.uasset",
+        "fileSize":  "1736564",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_CH_Bloated_Normal.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_CH_Bloated_Normal.png",
+        "fileSize":  "1576620",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_CH_Bloated_Normal.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_CH_Bloated_Normal.uasset",
+        "fileSize":  "2028250",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_CH_Bloated_OcclusionRoughnessMetallic.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_CH_Bloated_OcclusionRoughnessMetallic.png",
+        "fileSize":  "1007872",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_CH_Bloated_OcclusionRoughnessMetallic.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_CH_Bloated_OcclusionRoughnessMetallic.uasset",
+        "fileSize":  "1126418",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_CH_BloatedElite_BaseColor.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_CH_BloatedElite_BaseColor.png",
+        "fileSize":  "2128465",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_CH_BloatedElite_BaseColor.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_CH_BloatedElite_BaseColor.uasset",
+        "fileSize":  "2091014",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_CH_BloatedElite_Normal.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_CH_BloatedElite_Normal.png",
+        "fileSize":  "1630739",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_CH_BloatedElite_Normal.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_CH_BloatedElite_Normal.uasset",
+        "fileSize":  "2125378",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_CH_BloatedElite_OcclusionRoughnessMetallic.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_CH_BloatedElite_OcclusionRoughnessMetallic.png",
+        "fileSize":  "1117089",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_CH_BloatedElite_OcclusionRoughnessMetallic.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_CH_BloatedElite_OcclusionRoughnessMetallic.uasset",
+        "fileSize":  "1246204",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_CH_Hunched_BaseColor.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_CH_Hunched_BaseColor.png",
+        "fileSize":  "151046",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_CH_Hunched_Crossbow_BaseColor.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_CH_Hunched_Crossbow_BaseColor.png",
+        "fileSize":  "98459",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_CH_Hunched_Crossbow_Normal.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_CH_Hunched_Crossbow_Normal.png",
+        "fileSize":  "130599",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_CH_Hunched_Crossbow_OcclusionRoughnessMetallic.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_CH_Hunched_Crossbow_OcclusionRoughnessMetallic.png",
+        "fileSize":  "98721",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_CH_Hunched_Normal.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_CH_Hunched_Normal.png",
+        "fileSize":  "139454",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_CH_Hunched_OcclusionRoughnessMetallic.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_CH_Hunched_OcclusionRoughnessMetallic.png",
+        "fileSize":  "119755",
+        "rev":  "1"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_CH_Peasant_BaseColor.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_CH_Peasant_BaseColor.png",
+        "fileSize":  "3693107",
+        "rev":  "3"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_CH_Peasant_BaseColor.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_CH_Peasant_BaseColor.uasset",
+        "fileSize":  "3386132",
+        "rev":  "4"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_CH_Peasant_Normal.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_CH_Peasant_Normal.png",
+        "fileSize":  "6036843",
+        "rev":  "3"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_CH_Peasant_Normal.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_CH_Peasant_Normal.uasset",
+        "fileSize":  "6492971",
+        "rev":  "4"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_CH_Peasant_OcclusionRoughnessMetallic.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_CH_Peasant_OcclusionRoughnessMetallic.png",
+        "fileSize":  "3048320",
+        "rev":  "3"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_CH_Peasant_OcclusionRoughnessMetallic.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_CH_Peasant_OcclusionRoughnessMetallic.uasset",
+        "fileSize":  "2785417",
+        "rev":  "4"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_CubeMap_HornKoppeSnow.hdr",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_CubeMap_HornKoppeSnow.hdr",
+        "fileSize":  "5250240",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_CubeMap_HornKoppeSnow.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_CubeMap_HornKoppeSnow.uasset",
+        "fileSize":  "3392682",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_UI_HUD_AbilityBar_BaseColor.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_UI_HUD_AbilityBar_BaseColor.png",
+        "fileSize":  "44509",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_UI_HUD_AttackIcon_KB1_BaseColor.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_UI_HUD_AttackIcon_KB1_BaseColor.png",
+        "fileSize":  "21327",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_UI_HUD_AttackIcon_KB2_BaseColor.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_UI_HUD_AttackIcon_KB2_BaseColor.png",
+        "fileSize":  "28008",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_UI_HUD_AttackIcon_KB3_BaseColor.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_UI_HUD_AttackIcon_KB3_BaseColor.png",
+        "fileSize":  "33969",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_UI_HUD_AttackIcon_KB4_BaseColor.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_UI_HUD_AttackIcon_KB4_BaseColor.png",
+        "fileSize":  "29449",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_UI_HUD_AttackIcon_MB1BaseColor.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_UI_HUD_AttackIcon_MB1BaseColor.png",
+        "fileSize":  "33588",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_UI_HUD_AttackIcon_MB2_BaseColor.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_UI_HUD_AttackIcon_MB2_BaseColor.png",
+        "fileSize":  "37942",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_UI_HUD_Background_BaseColor.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_UI_HUD_Background_BaseColor.png",
+        "fileSize":  "3123840",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_UI_HUD_DashIcon_BaseColor.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_UI_HUD_DashIcon_BaseColor.png",
+        "fileSize":  "54835",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_UI_HUD_LockedAbility_BaseColor.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_UI_HUD_LockedAbility_BaseColor.png",
+        "fileSize":  "45444",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Textures\\T_UI_HUD_PotionIcon_BaseColor.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Textures/T_UI_HUD_PotionIcon_BaseColor.png",
+        "fileSize":  "77946",
+        "rev":  "1"
+    }
+]

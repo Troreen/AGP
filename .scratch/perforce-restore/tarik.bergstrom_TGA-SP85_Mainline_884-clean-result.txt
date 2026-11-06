@@ -1,0 +1,21 @@
+//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Internal/BRDF_LUT_PS.hlsl#none - deleted as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Retail\EngineShaders\Internal\BRDF_LUT_PS.hlsl
+//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Internal/DeferredComposite_PS.hlsl#none - deleted as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Retail\EngineShaders\Internal\DeferredComposite_PS.hlsl
+//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Internal/DeferredDirectional_PS.hlsl#none - deleted as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Retail\EngineShaders\Internal\DeferredDirectional_PS.hlsl
+//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Internal/DeferredLighting.hlsli#none - deleted as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Retail\EngineShaders\Internal\DeferredLighting.hlsli
+//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Internal/DeferredPoint_PS.hlsl#none - deleted as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Retail\EngineShaders\Internal\DeferredPoint_PS.hlsl
+//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Internal/DeferredSpot_PS.hlsl#none - deleted as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Retail\EngineShaders\Internal\DeferredSpot_PS.hlsl
+//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Internal/PointShadow_GS.hlsl#none - deleted as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Retail\EngineShaders\Internal\PointShadow_GS.hlsl
+//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Internal/RenderPassDebug_PS.hlsl#none - deleted as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Retail\EngineShaders\Internal\RenderPassDebug_PS.hlsl
+//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Internal/ScreenSpaceAO_PS.hlsl#none - deleted as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Retail\EngineShaders\Internal\ScreenSpaceAO_PS.hlsl
+//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Internal/TextOverlay_PS.hlsl#none - deleted as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Retail\EngineShaders\Internal\TextOverlay_PS.hlsl
+//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Internal/TextOverlay_VS.hlsl#none - deleted as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Retail\EngineShaders\Internal\TextOverlay_VS.hlsl
+//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Material/GlobalLightingTextures.hlsli#none - deleted as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Retail\EngineShaders\Material\GlobalLightingTextures.hlsli
+//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Material/MaterialTextures.hlsli#none - deleted as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Retail\EngineShaders\Material\MaterialTextures.hlsli
+//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Material/PBR.hlsli#none - deleted as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Retail\EngineShaders\Material\PBR.hlsli
+//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Material/Samplers.hlsli#none - deleted as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Retail\EngineShaders\Material\Samplers.hlsli
+//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Material/ShadowSampling.hlsli#none - deleted as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Bin\Retail\EngineShaders\Material\ShadowSampling.hlsli
+//MAL25-G4/Mainline/Dependencies/SetupFmodSdk.ps1#none - deleted as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Dependencies\SetupFmodSdk.ps1
+//MAL25-G4/Mainline/imgui.ini#none - deleted as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\imgui.ini
+//MAL25-G4/Mainline/Premake/EnsurePremake.ps1#1 - refreshing C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Premake\EnsurePremake.ps1
+//MAL25-G4/Mainline/SetupWindows.bat#none - deleted as C:\Users\tarik.bergstrom\Documents\GitHub\AGP\SetupWindows.bat
+//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/RHI/RHIShaderReflectionInfo.cpp#3 - refreshing C:\Users\tarik.bergstrom\Documents\GitHub\AGP\Source\Engine\GraphicsEngine\RHI\RHIShaderReflectionInfo.cpp

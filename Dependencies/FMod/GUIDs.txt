@@ -16,6 +16,7 @@
 {181f7354-b87d-4bbe-8027-56a93fbdc504} event:/Collect Item
 {81cbcc1f-8784-4ef2-a27e-9e50dc2d3eb6} event:/Combat One
 {0fa5d6cc-0dd1-42e4-a266-536c5f7b9f0b} event:/Crossbow Cock
+{c8c9887c-e340-4f43-a4bf-a8595d470ded} event:/Die
 {29ce63c0-41fd-4f24-a78b-4667d8229b70} event:/Dodge
 {732e38f7-411c-47ad-8453-97d23bb271bd} event:/FMODTest
 {5eb990c3-1b92-4c78-88a4-f22f40a25ea3} event:/Footstep 1
@@ -33,3 +34,4 @@
 {6f677fe5-1a80-4808-af9e-14cb88aba8eb} event:/Sickle Slash
 {5df00fd9-ba2b-44d2-b933-9d27cd963cfc} event:/Slash
 {d4124cfd-63af-450e-a691-cd40fdde6788} event:/Slash Hit
+{f48e89e9-6ee0-45e1-a079-9b1d1869cf06} event:/Take Damage

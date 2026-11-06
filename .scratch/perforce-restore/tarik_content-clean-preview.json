@@ -1,0 +1,404 @@
+[
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\ExportedScenes\\lvl_splatmap_runtime\\Lvl_Splatmap_Runtime_Level.json",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/ExportedScenes/lvl_splatmap_runtime/Lvl_Splatmap_Runtime_Level.json",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\ExportedScenes\\lvl_splatmap_runtime\\Lvl_Splatmap_Runtime_Level.provenance.json",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/ExportedScenes/lvl_splatmap_runtime/Lvl_Splatmap_Runtime_Level.provenance.json",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\ExportedScenes\\lvl_splatmap_runtime\\Lvl_Splatmap_Runtime_Noise_Level.json",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/ExportedScenes/lvl_splatmap_runtime/Lvl_Splatmap_Runtime_Noise_Level.json",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\ExportedScenes\\lvl_splatmap_runtime\\Lvl_Splatmap_Runtime_Noise_Level.provenance.json",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/ExportedScenes/lvl_splatmap_runtime/Lvl_Splatmap_Runtime_Noise_Level.provenance.json",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\ExportedScenes\\lvl_splatmap_runtime\\Lvl_Splatmap_Runtime_Weights_Level.json",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/ExportedScenes/lvl_splatmap_runtime/Lvl_Splatmap_Runtime_Weights_Level.json",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\ExportedScenes\\lvl_splatmap_runtime\\Lvl_Splatmap_Runtime_Weights_Level.provenance.json",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/ExportedScenes/lvl_splatmap_runtime/Lvl_Splatmap_Runtime_Weights_Level.provenance.json",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\ExportedScenes\\lvl_splatmap_testing2\\Landscape_0_LandscapeComponent_0_Weightmap_0.dds",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/ExportedScenes/lvl_splatmap_testing2/Landscape_0_LandscapeComponent_0_Weightmap_0.dds",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\ExportedScenes\\lvl_splatmap_testing2\\Landscape_0_LandscapeComponent_0_Weightmap_0.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/ExportedScenes/lvl_splatmap_testing2/Landscape_0_LandscapeComponent_0_Weightmap_0.png",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\ExportedScenes\\lvl_splatmap_testing2\\Landscape_0_LandscapeComponent_1_Weightmap_0.dds",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/ExportedScenes/lvl_splatmap_testing2/Landscape_0_LandscapeComponent_1_Weightmap_0.dds",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\ExportedScenes\\lvl_splatmap_testing2\\Landscape_0_LandscapeComponent_1_Weightmap_0.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/ExportedScenes/lvl_splatmap_testing2/Landscape_0_LandscapeComponent_1_Weightmap_0.png",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\ExportedScenes\\lvl_splatmap_testing2\\Landscape_0_LandscapeComponent_2_Weightmap_0.dds",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/ExportedScenes/lvl_splatmap_testing2/Landscape_0_LandscapeComponent_2_Weightmap_0.dds",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\ExportedScenes\\lvl_splatmap_testing2\\Landscape_0_LandscapeComponent_2_Weightmap_0.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/ExportedScenes/lvl_splatmap_testing2/Landscape_0_LandscapeComponent_2_Weightmap_0.png",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\ExportedScenes\\lvl_splatmap_testing2\\Landscape_0_LandscapeComponent_3_Weightmap_0.dds",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/ExportedScenes/lvl_splatmap_testing2/Landscape_0_LandscapeComponent_3_Weightmap_0.dds",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\ExportedScenes\\lvl_splatmap_testing2\\Landscape_0_LandscapeComponent_3_Weightmap_0.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/ExportedScenes/lvl_splatmap_testing2/Landscape_0_LandscapeComponent_3_Weightmap_0.png",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\ExportedScenes\\lvl_splatmap_testing2\\Lvl_Splatmap_Testing2_Level.json",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/ExportedScenes/lvl_splatmap_testing2/Lvl_Splatmap_Testing2_Level.json",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\ExportedScenes\\lvl_splatmap_testing2_runtime\\Lvl_Splatmap_Testing2_Runtime_Level.json",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/ExportedScenes/lvl_splatmap_testing2_runtime/Lvl_Splatmap_Testing2_Runtime_Level.json",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\ExportedScenes\\lvl_splatmap_testing2_runtime\\Lvl_Splatmap_Testing2_Runtime_RGB_Level.json",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/ExportedScenes/lvl_splatmap_testing2_runtime/Lvl_Splatmap_Testing2_Runtime_RGB_Level.json",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\ExportedScenes\\lvl_splatmap_testing2_runtime\\preparation.json",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/ExportedScenes/lvl_splatmap_testing2_runtime/preparation.json",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\ExportedScenes\\lvl_splatmap_testing2_runtime\\T_Lvl_Splatmap_Testing2_Debug_BaseColor.dds",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/ExportedScenes/lvl_splatmap_testing2_runtime/T_Lvl_Splatmap_Testing2_Debug_BaseColor.dds",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\ExportedScenes\\lvl_splatmap_testing2_runtime\\T_Lvl_Splatmap_Testing2_Weightmap_Combined.dds",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/ExportedScenes/lvl_splatmap_testing2_runtime/T_Lvl_Splatmap_Testing2_Weightmap_Combined.dds",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\Meshes\\Landscape\\Test\\Lvl_Splatmap_Testing2.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Meshes/Landscape/Test/Lvl_Splatmap_Testing2.fbx",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\Meshes\\Landscapes\\Splatmap\\SM_Landscape_Splatmap.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Meshes/Landscapes/Splatmap/SM_Landscape_Splatmap.fbx",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\Shaders\\M_PaintedLandscapeWeights.hlsli",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Shaders/M_PaintedLandscapeWeights.hlsli",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\Shaders\\MM_Landscape.hlsli",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Shaders/MM_Landscape.hlsli",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\Shaders\\MM_LandscapeRuntime4.hlsli",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Shaders/MM_LandscapeRuntime4.hlsli",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\Textures\\T_Noise01.dds",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Textures/T_Noise01.dds",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\Textures\\T_Noise01.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Textures/T_Noise01.png",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\Textures\\T_Splatmap_LevelWeights.dds",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Textures/T_Splatmap_LevelWeights.dds",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Content\\Textures\\T_Splatmap_TransitionNoise.dds",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Textures/T_Splatmap_TransitionNoise.dds",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\SyncContent.bat",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/SyncContent.bat",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Tools\\Terrain\\BuildTerrainScene.md",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Tools/Terrain/BuildTerrainScene.md",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Tools\\Terrain\\BuildTerrainScene.py",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Tools/Terrain/BuildTerrainScene.py",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Tools\\Terrain\\CorrectLandscapeFbx.py",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Tools/Terrain/CorrectLandscapeFbx.py",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Tools\\Terrain\\ExportTerrainRuntime.py",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Tools/Terrain/ExportTerrainRuntime.py",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Tools\\Terrain\\PreparedSources\\SM_Landscape_UVCorrected.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Tools/Terrain/PreparedSources/SM_Landscape_UVCorrected.fbx",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Tools\\Terrain\\PreparedSources\\SM_Landscape_UVCorrected.provenance.json",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Tools/Terrain/PreparedSources/SM_Landscape_UVCorrected.provenance.json",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Tools\\Terrain\\PreparePaintedLandscapeRuntime.md",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Tools/Terrain/PreparePaintedLandscapeRuntime.md",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Tools\\Terrain\\PreparePaintedLandscapeRuntime.ps1",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Tools/Terrain/PreparePaintedLandscapeRuntime.ps1",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Tools\\Terrain\\PrepareTerrainTextures.ps1",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Tools/Terrain/PrepareTerrainTextures.ps1",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Tools\\Terrain\\SourceImages\\T_Splatmap_LevelWeights.png",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Tools/Terrain/SourceImages/T_Splatmap_LevelWeights.png",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Tools\\Terrain\\SourceImages\\terrain-export.json",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Tools/Terrain/SourceImages/terrain-export.json",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Tools\\Tests\\PaintedLandscapeRuntime.Tests.ps1",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Tools/Tests/PaintedLandscapeRuntime.Tests.ps1",
+        "rev":  "none"
+    },
+    {
+        "action":  "refreshed",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\LevelPrototyping\\Textures\\Sk?rmbild_2026-10-09_112853.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/LevelPrototyping/Textures/Sk?rmbild_2026-10-09_112853.uasset",
+        "rev":  "2"
+    },
+    {
+        "action":  "refreshed",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\LevelPrototyping\\Textures\\Sk?rmbild_2026-10-09_112853_Mat.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/LevelPrototyping/Textures/Sk?rmbild_2026-10-09_112853_Mat.uasset",
+        "rev":  "2"
+    },
+    {
+        "action":  "refreshed",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\LevelPrototyping\\Textures\\Sk?rmbild_2026-10-09_112915.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/LevelPrototyping/Textures/Sk?rmbild_2026-10-09_112915.uasset",
+        "rev":  "2"
+    },
+    {
+        "action":  "refreshed",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\LevelPrototyping\\Textures\\Sk?rmbild_2026-10-09_112915_Mat.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/LevelPrototyping/Textures/Sk?rmbild_2026-10-09_112915_Mat.uasset",
+        "rev":  "2"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\LevelPrototyping\\Textures\\Sk?rmbild_2026-10-09_112853.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/LevelPrototyping/Textures/Sk?rmbild_2026-10-09_112853.uasset",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\LevelPrototyping\\Textures\\Sk?rmbild_2026-10-09_112853_Mat.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/LevelPrototyping/Textures/Sk?rmbild_2026-10-09_112853_Mat.uasset",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\LevelPrototyping\\Textures\\Sk?rmbild_2026-10-09_112915.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/LevelPrototyping/Textures/Sk?rmbild_2026-10-09_112915.uasset",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\LevelPrototyping\\Textures\\Sk?rmbild_2026-10-09_112915_Mat.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/LevelPrototyping/Textures/Sk?rmbild_2026-10-09_112915_Mat.uasset",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Levels\\Test_Levels\\SP\\Lvl_Splatmap_Testing2.umap",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Levels/Test_Levels/SP/Lvl_Splatmap_Testing2.umap",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Landscape\\Test\\Lvl_Splatmap_Testing2.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Landscape/Test/Lvl_Splatmap_Testing2.fbx",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Landscape\\Test\\Lvl_Splatmap_Testing2.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Landscape/Test/Lvl_Splatmap_Testing2.uasset",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\Meshes\\Landscape\\Test\\MI_Landscape_SplatMapTesting.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Landscape/Test/MI_Landscape_SplatMapTesting.uasset",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\RecoveryNativeRuntime\\Maps\\Lvl_NativeRuntimeMaterialFixture.umap",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/RecoveryNativeRuntime/Maps/Lvl_NativeRuntimeMaterialFixture.umap",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\RecoveryNativeRuntime\\Materials\\MI_LandscapeRuntime4.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/RecoveryNativeRuntime/Materials/MI_LandscapeRuntime4.uasset",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\RecoveryNativeRuntime\\Materials\\MM_LandscapeRuntime4.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/RecoveryNativeRuntime/Materials/MM_LandscapeRuntime4.uasset",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\RecoveryNativeRuntime\\Textures\\LandscapeComp_0_Weightmap_0.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/RecoveryNativeRuntime/Textures/LandscapeComp_0_Weightmap_0.uasset",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\RecoveryNativeRuntime\\Textures\\LandscapeComp_1_Weightmap_0.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/RecoveryNativeRuntime/Textures/LandscapeComp_1_Weightmap_0.uasset",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\RecoveryNativeRuntime\\Textures\\LandscapeComp_2_Weightmap_0.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/RecoveryNativeRuntime/Textures/LandscapeComp_2_Weightmap_0.uasset",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\RecoveryNativeRuntime\\Textures\\LandscapeComp_3_Weightmap_0.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/RecoveryNativeRuntime/Textures/LandscapeComp_3_Weightmap_0.uasset",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\RecoveryNativeRuntime\\Textures\\T_8M_Snow_Cliff_OcclusionRoughnessMetallic.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/RecoveryNativeRuntime/Textures/T_8M_Snow_Cliff_OcclusionRoughnessMetallic.uasset",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\RecoveryNativeRuntime\\Textures\\T_8M_Snow_Dunes_OcclusionRoughnessMetallic.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/RecoveryNativeRuntime/Textures/T_8M_Snow_Dunes_OcclusionRoughnessMetallic.uasset",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\RecoveryNativeRuntime\\Textures\\T_8M_Snow_Rough_OcclusionRoughnessMetallic.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/RecoveryNativeRuntime/Textures/T_8M_Snow_Rough_OcclusionRoughnessMetallic.uasset",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Content\\RecoveryNativeRuntime\\Textures\\T_Splatmap_TransitionNoise.uasset",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Content/RecoveryNativeRuntime/Textures/T_Splatmap_TransitionNoise.uasset",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Exported\\lvl_asset_museum\\Lvl_Asset_Museum_Level.json",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Exported/lvl_asset_museum/Lvl_Asset_Museum_Level.json",
+        "rev":  "none"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "c:\\Users\\tarik.bergstrom\\Perforce\\AGP-Content\\Unreal\\P5G4_KnightHeart\\Plugins\\TGAUnrealPlugin\\Config\\FilterPlugin.ini",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Unreal/P5G4_KnightHeart/Plugins/TGAUnrealPlugin/Config/FilterPlugin.ini",
+        "rev":  "none"
+    }
+]

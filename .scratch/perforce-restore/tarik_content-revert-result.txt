@@ -1,0 +1,11 @@
+//MAL25-G4/Content_&_Unreal_Project/Content/Textures/T_Noise01.dds#none - was add, abandoned
+//MAL25-G4/Content_&_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Levels/Test_Levels/SP/Lvl_Splatmap_Testing2.umap#none - was add, abandoned
+//MAL25-G4/Content_&_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Landscape/Test/Lvl_Splatmap_Testing2.uasset#none - was add, abandoned
+//MAL25-G4/Content_&_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Meshes/Landscape/Test/MI_Landscape_SplatMapTesting.uasset#none - was add, abandoned
+//MAL25-G4/Content_&_Unreal_Project/Unreal/P5G4_KnightHeart/Exported/lvl_asset_museum/Lvl_Asset_Museum_Level.json#none - was add, abandoned
+//MAL25-G4/Content_&_Unreal_Project/ExportAssets.bat#2 - was edit, reverted
+//MAL25-G4/Content_&_Unreal_Project/Unreal/P5G4_KnightHeart/Content/LevelPrototyping/Materials/MI_Landscape_SplatMapTesting.uasset#1 - was edit, reverted
+//MAL25-G4/Content_&_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Levels/Test_Levels/SP/Lvl_Splatmap_Testing.umap#2 - was edit, reverted
+//MAL25-G4/Content_&_Unreal_Project/Unreal/P5G4_KnightHeart/Content/Materials/MM_Landscape.uasset#6 - was edit, reverted
+//MAL25-G4/Content_&_Unreal_Project/Unreal/P5G4_KnightHeart/Plugins/TGAUnrealPlugin/Binaries/Win64/UnrealEditor-TGAUnrealPlugin.dll#6 - was edit, reverted
+//MAL25-G4/Content_&_Unreal_Project/Unreal/P5G4_KnightHeart/Plugins/TGAUnrealPlugin/Source/TGAUnrealPlugin/Private/TGAUnrealPlugin.cpp#9 - was edit, reverted

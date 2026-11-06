@@ -319,12 +319,12 @@ bool SceneWorldBuilder::ApplyMesh(Actor& anActor, MeshComponentBase& aComponent,
 	std::shared_ptr<MeshAsset> mesh = anAssetRegistry.GetAsset<MeshAsset>(someMeshData.MeshName);
 	if (!mesh)
 	{
-		GFLOG(Warning, "Using fallback cube for mesh component '{}' on actor '{}': {}", someMeshData.Common.Name, anActor.GetName(), anAssetRegistry.GetLastError());
 		mesh = someFallbacks.MissingMesh;
 		if (!mesh)
 		{
 			return false;
 		}
+		GFLOG(Warning, "Using fallback cube for mesh component '{}' on actor '{}': {}", someMeshData.Common.Name, anActor.GetName(), anAssetRegistry.GetLastError());
 	}
 	const bool usingFallbackMesh = mesh == someFallbacks.MissingMesh;
 
@@ -383,6 +383,12 @@ Component* SceneWorldBuilder::CreateComponent(Actor& anActor, const ComponentRec
 			}
 			else if constexpr (std::is_same_v<ComponentType, StaticMeshData>)
 			{
+				if (anActor.GetName().starts_with("SM_Landscape_"))
+				{
+					const CU::Vector3f& position = anActor.GetTransform().GetWorldPosition();
+					anActor.GetTransform().SetWorldPosition({ position.x, position.y + 1000, position.z });
+				}
+
 				StaticMeshComponent* meshComponent = anActor.AddComponent<StaticMeshComponent>(commonData.Name);
 				if (!ApplyMesh(anActor, *meshComponent, someComponentData, anAssetRegistry, someFallbacks))
 				{

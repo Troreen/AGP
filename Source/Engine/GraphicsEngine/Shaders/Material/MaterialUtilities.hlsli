@@ -37,6 +37,7 @@ float2 UV_ScreenTexture(float2 aPixelPosition, float2 aTextureSize)
     return aPixelPosition / max(aTextureSize, float2(1, 1));
 }
 
+// TODO: what do these do? 
 // Apply two affine rows to a world-plane position. Each row contains X/Y
 // scales, an unused Z coefficient, and an offset. A mask sampler can clamp the
 // result while a surface texture can use the same mapping with a wrap sampler.

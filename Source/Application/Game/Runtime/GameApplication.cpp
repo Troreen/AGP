@@ -259,9 +259,9 @@ GraphicsEngine& GameApplication::InitializeWindowAndGraphics()
 
 	std::shared_ptr<BloomEffect> bloom = std::make_shared<BloomEffect>();
 	bloom->GetSettings().FilterRadius = 0.005f;
-	bloom->GetSettings().Strength = 1.0f;
-	bloom->GetSettings().Threshold = 1.0f;
-	bloom->GetSettings().Softness = 0.6f;
+	bloom->GetSettings().Strength = 1.5f;
+	bloom->GetSettings().Threshold = 1.25f;
+	bloom->GetSettings().Softness = 1.0f;
 	graphics.AddPostProcessEffect(bloom);
 
 	if (!graphics.Initialize(myMainWindowHandle, myApplicationSettings.ShaderFolder) || 

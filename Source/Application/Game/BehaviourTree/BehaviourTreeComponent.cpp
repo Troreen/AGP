@@ -49,6 +49,7 @@ void BehaviourTreeComponent::BeginPlay()
 
 void BehaviourTreeComponent::Update(float aDeltaTime)
 {
+	aDeltaTime;
 	//myTree.Run();
 
 	myActionNode = myTree.GetBlackBoard().Get<BT_LeafNodeAction*>("Running");

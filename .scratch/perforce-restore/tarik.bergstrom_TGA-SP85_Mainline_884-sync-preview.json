@@ -1,0 +1,926 @@
+[
+    {
+        "action":  "deleted",
+        "change":  "514271",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Retail\\EngineShaders\\Material\\Tonemap.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Material/Tonemap.hlsli",
+        "rev":  "2",
+        "totalFileCount":  "132",
+        "totalFileSize":  "129005523"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Retail\\EngineShaders\\Material\\Tonemapper_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Material/Tonemapper_PS.hlsl",
+        "rev":  "2"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Retail\\imgui.ini",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/imgui.ini",
+        "rev":  "3"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Content\\Animations\\Characters\\enemy_02\\A_enemy02_death.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Animations/Characters/enemy_02/A_enemy02_death.fbx",
+        "rev":  "2"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Content\\Animations\\Characters\\enemy_02\\A_enemy02_idle.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Animations/Characters/enemy_02/A_enemy02_idle.fbx",
+        "rev":  "2"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Content\\Meshes\\Landscapes\\BlisteringTundra\\SM_BlisteringTundra_01.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Meshes/Landscapes/BlisteringTundra/SM_BlisteringTundra_01.fbx",
+        "rev":  "1"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Content\\Meshes\\Landscapes\\BlisteringTundra\\SM_BlisteringTundra_02.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Meshes/Landscapes/BlisteringTundra/SM_BlisteringTundra_02.fbx",
+        "rev":  "1"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Content\\Meshes\\Landscapes\\BlisteringTundra\\SM_BlisteringTundra_03.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Meshes/Landscapes/BlisteringTundra/SM_BlisteringTundra_03.fbx",
+        "rev":  "1"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Content\\Meshes\\Landscapes\\BlisteringTundra\\SM_BlisteringTundra_04.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Meshes/Landscapes/BlisteringTundra/SM_BlisteringTundra_04.fbx",
+        "rev":  "1"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Engine\\GraphicsEngine\\Shaders\\Material\\Tonemap.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/Shaders/Material/Tonemap.hlsli",
+        "rev":  "2"
+    },
+    {
+        "action":  "deleted",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Engine\\GraphicsEngine\\Shaders\\Material\\Tonemapper_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/Shaders/Material/Tonemapper_PS.hlsl",
+        "rev":  "2"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\Audio\\Master.bank",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/Audio/Master.bank",
+        "fileSize":  "10145184",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\Audio\\Master.strings.bank",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/Audio/Master.strings.bank",
+        "fileSize":  "2136",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\_DefaultMaterial.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/_DefaultMaterial.hlsli",
+        "fileSize":  "650",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Internal\\BRDF LUT_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/BRDF LUT_PS.hlsl",
+        "fileSize":  "201",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Internal\\Common.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/Common.hlsli",
+        "fileSize":  "983",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Internal\\FullTexture_VS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/FullTexture_VS.hlsl",
+        "fileSize":  "518",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Internal\\Lighting.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/Lighting.hlsli",
+        "fileSize":  "17169",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Internal\\LUTFunctions.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/LUTFunctions.hlsli",
+        "fileSize":  "3381",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Internal\\PoissonDisks.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/PoissonDisks.hlsli",
+        "fileSize":  "3529",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Internal\\Samplers.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/Samplers.hlsli",
+        "fileSize":  "239",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Internal\\Sprite_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/Sprite_PS.hlsl",
+        "fileSize":  "270",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Internal\\Sprite_VS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/Sprite_VS.hlsl",
+        "fileSize":  "598",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Internal\\Tonemap.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/Tonemap.hlsli",
+        "fileSize":  "1907",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Internal\\Tonemapper_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Internal/Tonemapper_PS.hlsl",
+        "fileSize":  "1293",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Lines\\Lines_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Lines/Lines_PS.hlsl",
+        "fileSize":  "147",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Lines\\Lines_VS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Lines/Lines_VS.hlsl",
+        "fileSize":  "781",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Material\\Deferred_AmbientLight_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/Deferred_AmbientLight_PS.hlsl",
+        "fileSize":  "2465",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Material\\Deferred_DirLight_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/Deferred_DirLight_PS.hlsl",
+        "fileSize":  "1443",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Material\\Deferred_PointLight_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/Deferred_PointLight_PS.hlsl",
+        "fileSize":  "1496",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Material\\Deferred_SpotLight_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/Deferred_SpotLight_PS.hlsl",
+        "fileSize":  "1494",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Material\\GBuffer_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/GBuffer_PS.hlsl",
+        "fileSize":  "2362",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Material\\Lit_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/Lit_PS.hlsl",
+        "fileSize":  "4919",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Material\\Material.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/Material.hlsli",
+        "fileSize":  "226",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Material\\MaterialParameters.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/MaterialParameters.hlsli",
+        "fileSize":  "580",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Material\\MaterialUtilities.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/MaterialUtilities.hlsli",
+        "fileSize":  "1747",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Material\\Normal.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/Normal.hlsli",
+        "fileSize":  "1870",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Material\\ShadowCube_GS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/ShadowCube_GS.hlsl",
+        "fileSize":  "1140",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Material\\Skybox_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/Skybox_PS.hlsl",
+        "fileSize":  "918",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Material\\Surface_VS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/Surface_VS.hlsl",
+        "fileSize":  "2455",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Material\\Unlit_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Material/Unlit_PS.hlsl",
+        "fileSize":  "1064",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\MM_Blood.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/MM_Blood.hlsli",
+        "fileSize":  "2139",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\MM_Blood_Absorption.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/MM_Blood_Absorption.hlsli",
+        "fileSize":  "2139",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\MM_Enemy_Dissolve.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/MM_Enemy_Dissolve.hlsli",
+        "fileSize":  "2176",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\MM_ShaderTest.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/MM_ShaderTest.hlsli",
+        "fileSize":  "1167",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\MM_Standard_WithSnow.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/MM_Standard_WithSnow.hlsli",
+        "fileSize":  "1585",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Particles\\Particle_GS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Particles/Particle_GS.hlsl",
+        "fileSize":  "1580",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Particles\\Particle_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Particles/Particle_PS.hlsl",
+        "fileSize":  "845",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Particles\\Particle_VS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Particles/Particle_VS.hlsl",
+        "fileSize":  "1113",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Particles\\ParticleCommon.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Particles/ParticleCommon.hlsli",
+        "fileSize":  "517",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Particles\\ParticleMaterial.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Particles/ParticleMaterial.hlsli",
+        "fileSize":  "251",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Particles\\ParticleMaterialParameters.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Particles/ParticleMaterialParameters.hlsli",
+        "fileSize":  "417",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\ParticleTest.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/ParticleTest.hlsli",
+        "fileSize":  "287",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\PostProcess\\Bloom01Downsample_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/Bloom01Downsample_PS.hlsl",
+        "fileSize":  "212",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\PostProcess\\Bloom_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/Bloom_PS.hlsl",
+        "fileSize":  "261",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\PostProcess\\BloomDownsample_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/BloomDownsample_PS.hlsl",
+        "fileSize":  "1727",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\PostProcess\\BloomHelper.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/BloomHelper.hlsli",
+        "fileSize":  "235",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\PostProcess\\BloomLuminance_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/BloomLuminance_PS.hlsl",
+        "fileSize":  "640",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\PostProcess\\BloomUpsample_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/BloomUpsample_PS.hlsl",
+        "fileSize":  "1195",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\PostProcess\\Resample_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/Resample_PS.hlsl",
+        "fileSize":  "215",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\PostProcess\\SSAO_BlurH_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/SSAO_BlurH_PS.hlsl",
+        "fileSize":  "318",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\PostProcess\\SSAO_BlurV_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/SSAO_BlurV_PS.hlsl",
+        "fileSize":  "317",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\PostProcess\\SSAO_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/SSAO_PS.hlsl",
+        "fileSize":  "3459",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\PostProcess\\SSAOHelper.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/PostProcess/SSAOHelper.hlsli",
+        "fileSize":  "1891",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\SparklingSnow.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/SparklingSnow.hlsli",
+        "fileSize":  "3581",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Text\\TextOverlay_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Text/TextOverlay_PS.hlsl",
+        "fileSize":  "673",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Text\\TextOverlay_VS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Text/TextOverlay_VS.hlsl",
+        "fileSize":  "637",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\EngineShaders\\Text\\TextOverlayHelper.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/EngineShaders/Text/TextOverlayHelper.hlsli",
+        "fileSize":  "345",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\fmod.dll",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/fmod.dll",
+        "fileSize":  "1842176",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\fmodL.dll",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/fmodL.dll",
+        "fileSize":  "2075136",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\fmodstudio.dll",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/fmodstudio.dll",
+        "fileSize":  "1503232",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\fmodstudioL.dll",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/fmodstudioL.dll",
+        "fileSize":  "2302464",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\Game.exe",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/Game.exe",
+        "fileSize":  "2287104",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\Game.pdb",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/Game.pdb",
+        "fileSize":  "30240768",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Release\\libfbxsdk.dll",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Release/libfbxsdk.dll",
+        "fileSize":  "10059872",
+        "rev":  "1"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Retail\\Audio\\Master.bank",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/Audio/Master.bank",
+        "fileSize":  "9921760",
+        "rev":  "12"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Retail\\Audio\\Master.strings.bank",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/Audio/Master.strings.bank",
+        "fileSize":  "2100",
+        "rev":  "11"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Retail\\EngineShaders\\Internal\\Lighting.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Internal/Lighting.hlsli",
+        "fileSize":  "17170",
+        "rev":  "4"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Retail\\EngineShaders\\Internal\\Tonemap.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Internal/Tonemap.hlsli",
+        "fileSize":  "1907",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Retail\\EngineShaders\\Internal\\Tonemapper_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Internal/Tonemapper_PS.hlsl",
+        "fileSize":  "1293",
+        "rev":  "1"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Retail\\EngineShaders\\Material\\Unlit_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/EngineShaders/Material/Unlit_PS.hlsl",
+        "fileSize":  "1064",
+        "rev":  "4"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Retail\\EngineShaders\\MM_Enemy_Dissolve.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/EngineShaders/MM_Enemy_Dissolve.hlsli",
+        "fileSize":  "2176",
+        "rev":  "1"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Retail\\Game.exe",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/Game.exe",
+        "fileSize":  "2287616",
+        "rev":  "39"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Bin\\Retail\\Game.pdb",
+        "depotFile":  "//MAL25-G4/Mainline/Bin/Retail/Game.pdb",
+        "fileSize":  "30191616",
+        "rev":  "34"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Content\\Animations\\Animation Manager\\Trees\\PlayerTree.json",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Animations/Animation Manager/Trees/PlayerTree.json",
+        "fileSize":  "5703",
+        "rev":  "18"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Content\\Animations\\Characters\\enemy_02\\A_enemy02_awake.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Animations/Characters/enemy_02/A_enemy02_awake.fbx",
+        "fileSize":  "1076368",
+        "rev":  "1"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Content\\Animations\\Characters\\enemy_02\\A_enemy02_mainAttack.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Animations/Characters/enemy_02/A_enemy02_mainAttack.fbx",
+        "fileSize":  "1076288",
+        "rev":  "4"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Content\\Animations\\Characters\\enemy_02\\A_enemy02_stun.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Animations/Characters/enemy_02/A_enemy02_stun.fbx",
+        "fileSize":  "1283728",
+        "rev":  "3"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Content\\Animations\\Characters\\enemy_02\\A_ranged_death.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Animations/Characters/enemy_02/A_ranged_death.fbx",
+        "fileSize":  "806240",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Content\\Animations\\Characters\\enemy_02\\A_ranged_idle.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Animations/Characters/enemy_02/A_ranged_idle.fbx",
+        "fileSize":  "980544",
+        "rev":  "1"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Content\\ExportedScenes\\lvl_forsaken_castle\\Lvl_Forsaken_Castle_Level.json",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/ExportedScenes/lvl_forsaken_castle/Lvl_Forsaken_Castle_Level.json",
+        "fileSize":  "6973206",
+        "rev":  "20"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Content\\ExportedScenes\\lvl_forsaken_castle\\Lvl_Forsaken_Castle_Level.nav",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/ExportedScenes/lvl_forsaken_castle/Lvl_Forsaken_Castle_Level.nav",
+        "fileSize":  "51712",
+        "rev":  "6"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Content\\Meshes\\Landscapes\\BlisteringTundra\\SM_Landscape_BlisteringTundra_01.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Meshes/Landscapes/BlisteringTundra/SM_Landscape_BlisteringTundra_01.fbx",
+        "fileSize":  "1135008",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Content\\Meshes\\Landscapes\\BlisteringTundra\\SM_Landscape_BlisteringTundra_02.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Meshes/Landscapes/BlisteringTundra/SM_Landscape_BlisteringTundra_02.fbx",
+        "fileSize":  "606816",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Content\\Meshes\\Landscapes\\BlisteringTundra\\SM_Landscape_BlisteringTundra_03.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Meshes/Landscapes/BlisteringTundra/SM_Landscape_BlisteringTundra_03.fbx",
+        "fileSize":  "481488",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Content\\Meshes\\Landscapes\\BlisteringTundra\\SM_Landscape_BlisteringTundra_04.fbx",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Meshes/Landscapes/BlisteringTundra/SM_Landscape_BlisteringTundra_04.fbx",
+        "fileSize":  "162576",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Content\\Shaders\\MM_Enemy_Dissolve.hlsli",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Shaders/MM_Enemy_Dissolve.hlsli",
+        "fileSize":  "2176",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Content\\Textures\\__ColorGrading_LUT__.cube",
+        "depotFile":  "//MAL25-G4/Content_\u0026_Unreal_Project/Content/Textures/__ColorGrading_LUT__.cube",
+        "fileSize":  "970506",
+        "rev":  "1"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Dependencies\\FMod\\Desktop\\Master.bank",
+        "depotFile":  "//MAL25-G4/Mainline/Dependencies/FMod/Desktop/Master.bank",
+        "fileSize":  "10145184",
+        "rev":  "20"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Dependencies\\FMod\\Desktop\\Master.strings.bank",
+        "depotFile":  "//MAL25-G4/Mainline/Dependencies/FMod/Desktop/Master.strings.bank",
+        "fileSize":  "2136",
+        "rev":  "16"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Dependencies\\FMod\\GUIDs.txt",
+        "depotFile":  "//MAL25-G4/Mainline/Dependencies/FMod/GUIDs.txt",
+        "fileSize":  "2011",
+        "rev":  "14"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Docs\\ScriptedEvents.md",
+        "depotFile":  "//MAL25-G4/Mainline/Docs/ScriptedEvents.md",
+        "fileSize":  "14684",
+        "rev":  "10"
+    },
+    {
+        "data":  "//MAL25-G4/Mainline/p4ignore.txt#15 - is opened and not being changed",
+        "level":  0
+    },
+    {
+        "data":  "//MAL25-G4/Mainline/p4ignore.txt - must resolve #15 before submitting",
+        "level":  1
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Application\\Game\\Game.cpp",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Application/Game/Game.cpp",
+        "fileSize":  "7008",
+        "rev":  "80"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Application\\Game\\Player\\Abilities\\Ability.h",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Application/Game/Player/Abilities/Ability.h",
+        "fileSize":  "436",
+        "rev":  "2"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Application\\Game\\Player\\Abilities\\DodgeAbility.cpp",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Application/Game/Player/Abilities/DodgeAbility.cpp",
+        "fileSize":  "545",
+        "rev":  "1"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Application\\Game\\Player\\Abilities\\DodgeAbility.h",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Application/Game/Player/Abilities/DodgeAbility.h",
+        "fileSize":  "372",
+        "rev":  "1"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Application\\Game\\Player\\Abilities\\MeleeAbility.cpp",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Application/Game/Player/Abilities/MeleeAbility.cpp",
+        "fileSize":  "184",
+        "rev":  "2"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Application\\Game\\Player\\Components\\AbilityComponent.cpp",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Application/Game/Player/Components/AbilityComponent.cpp",
+        "fileSize":  "1424",
+        "rev":  "2"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Application\\Game\\Player\\Components\\AbilityComponent.h",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Application/Game/Player/Components/AbilityComponent.h",
+        "fileSize":  "895",
+        "rev":  "3"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Application\\Game\\Player\\Components\\PlayerController.cpp",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Application/Game/Player/Components/PlayerController.cpp",
+        "fileSize":  "13748",
+        "rev":  "19"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Application\\Game\\Player\\Components\\PlayerMovementComponent.cpp",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Application/Game/Player/Components/PlayerMovementComponent.cpp",
+        "fileSize":  "8739",
+        "rev":  "11"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Application\\Game\\Player\\Components\\PlayerMovementComponent.h",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Application/Game/Player/Components/PlayerMovementComponent.h",
+        "fileSize":  "1822",
+        "rev":  "6"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Application\\Game\\Runtime\\GameApplication.cpp",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Application/Game/Runtime/GameApplication.cpp",
+        "fileSize":  "21301",
+        "rev":  "17"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Engine\\GameFramework\\AudioManager.cpp",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Engine/GameFramework/AudioManager.cpp",
+        "fileSize":  "10330",
+        "rev":  "23"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Engine\\GameFramework\\AudioManager.h",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Engine/GameFramework/AudioManager.h",
+        "fileSize":  "2621",
+        "rev":  "20"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Engine\\GameFramework\\Components\\AnimatorComponent.cpp",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Engine/GameFramework/Components/AnimatorComponent.cpp",
+        "fileSize":  "10419",
+        "rev":  "11"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Engine\\GameFramework\\Components\\CameraComponent.cpp",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Engine/GameFramework/Components/CameraComponent.cpp",
+        "fileSize":  "8498",
+        "rev":  "11"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Engine\\GameFramework\\Components\\LightComponent.h",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Engine/GameFramework/Components/LightComponent.h",
+        "fileSize":  "3162",
+        "rev":  "4"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Engine\\GameFramework\\Scenes\\SceneWorldBuilder.cpp",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Engine/GameFramework/Scenes/SceneWorldBuilder.cpp",
+        "fileSize":  "18437",
+        "rev":  "10"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Engine\\GraphicsEngine\\ConstantBuffers\\LightBuffer.h",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/ConstantBuffers/LightBuffer.h",
+        "fileSize":  "698",
+        "rev":  "5"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Engine\\GraphicsEngine\\GraphicsEngine.cpp",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/GraphicsEngine.cpp",
+        "fileSize":  "58956",
+        "rev":  "37"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Engine\\GraphicsEngine\\GraphicsEngine.h",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/GraphicsEngine.h",
+        "fileSize":  "7608",
+        "rev":  "20"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Engine\\GraphicsEngine\\PostProcessing\\BloomEffect.cpp",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/PostProcessing/BloomEffect.cpp",
+        "fileSize":  "7022",
+        "rev":  "6"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Engine\\GraphicsEngine\\RHI\\RenderHardwareInterface.cpp",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/RHI/RenderHardwareInterface.cpp",
+        "fileSize":  "42231",
+        "rev":  "11"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Engine\\GraphicsEngine\\RHI\\RenderHardwareInterface.h",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/RHI/RenderHardwareInterface.h",
+        "fileSize":  "3542",
+        "rev":  "10"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Engine\\GraphicsEngine\\RHI\\RHIStructs.h",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/RHI/RHIStructs.h",
+        "fileSize":  "1825",
+        "rev":  "8"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Engine\\GraphicsEngine\\Shaders\\Internal\\Lighting.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/Shaders/Internal/Lighting.hlsli",
+        "fileSize":  "17170",
+        "rev":  "6"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Engine\\GraphicsEngine\\Shaders\\Internal\\Tonemap.hlsli",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/Shaders/Internal/Tonemap.hlsli",
+        "fileSize":  "1907",
+        "rev":  "3"
+    },
+    {
+        "action":  "added",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Engine\\GraphicsEngine\\Shaders\\Internal\\Tonemapper_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/Shaders/Internal/Tonemapper_PS.hlsl",
+        "fileSize":  "1293",
+        "rev":  "1"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Engine\\GraphicsEngine\\Shaders\\Material\\Unlit_PS.hlsl",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/Shaders/Material/Unlit_PS.hlsl",
+        "fileSize":  "1064",
+        "rev":  "9"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Engine\\GraphicsEngine\\TextWidget.cpp",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/TextWidget.cpp",
+        "fileSize":  "3829",
+        "rev":  "3"
+    },
+    {
+        "action":  "updated",
+        "clientFile":  "C:\\Users\\tarik.bergstrom\\Documents\\GitHub\\AGP\\Source\\Engine\\GraphicsEngine\\TextWidget.h",
+        "depotFile":  "//MAL25-G4/Mainline/Source/Engine/GraphicsEngine/TextWidget.h",
+        "fileSize":  "1522",
+        "rev":  "3"
+    }
+]

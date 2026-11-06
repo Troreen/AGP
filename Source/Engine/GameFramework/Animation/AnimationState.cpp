@@ -71,7 +71,8 @@ void AnimationState::PlayAnimation()
 
 void AnimationState::Update(const float aDeltaTime, std::vector<Transition> someGlobalTransitions)
 {
-	unsigned currentFrame = myAnimationTree->GetAnimationPlayer()->GetCurrentPlayBackState(true).CurrentFrame;
+	aDeltaTime;
+	unsigned currentFrame = static_cast<unsigned>(myAnimationTree->GetAnimationPlayer()->GetCurrentPlayBackState(true).CurrentFrame);
 
 	myOnUpdate.Invoke(static_cast<float>(currentFrame));
 

@@ -50,11 +50,11 @@ bool Transform::SetMatrix(const CommonUtilities::Matrix4x4<float>& aMatrix)
 	return true;
 }
 
-const CommonUtilities::Vector3f& Transform::GetLocalRotationDegrees() const
+CommonUtilities::Vector3f Transform::GetLocalRotationDegrees() const
 {
-	const CommonUtilities::Vector3f& eulerInRadians = myRotation.GetEulerAngles();
+	const CommonUtilities::Vector3f eulerInRadians = myRotation.GetEulerAngles();
 
-	const CommonUtilities::Vector3f& eulerInDegrees =
+	const CommonUtilities::Vector3f eulerInDegrees =
 	{
 		CommonUtilities::RadiansToDegrees(eulerInRadians.x),
 		CommonUtilities::RadiansToDegrees(eulerInRadians.y),
@@ -64,9 +64,9 @@ const CommonUtilities::Vector3f& Transform::GetLocalRotationDegrees() const
 	return eulerInDegrees;
 }
 
-const CommonUtilities::Vector3f& Transform::GetLocalRotationRadians() const
+CommonUtilities::Vector3f Transform::GetLocalRotationRadians() const
 {
-	const CommonUtilities::Vector3f& eulerInRadians = myRotation.GetEulerAngles();
+	CommonUtilities::Vector3f eulerInRadians = myRotation.GetEulerAngles();
 
 	return eulerInRadians;
 }

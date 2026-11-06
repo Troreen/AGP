@@ -1,6 +1,7 @@
 #pragma once
 #include "Pathfinding/AStar.h"
 #include <CommonUtilities.h>
+#include <Octree.hpp>
 #include <Ray.hpp>
 #include <Heap.hpp>
 #include <unordered_map>
@@ -13,7 +14,7 @@ class Pathfinder
 	public:
 		using QueueRequestHandler = std::function<void(std::vector<CU::Vector3f>& outWaypoints)>;
 
-		void Init(std::vector<uint32_t>&& anIndexList, std::vector<CU::Vector3f>&& aVertexList);
+		void Init(std::vector<uint32_t>&& anIndexList, std::vector<CU::Vector3f>&& aVertexList, const CU::Vector3f& aMinBounds, const CU::Vector3f& aMaxBounds);
 		void Update();
 		void Clear();
 
@@ -31,11 +32,10 @@ class Pathfinder
 	private:
 		struct NavMeshQueryResult;
 
+		CommonUtilities::Octree<float, uint32_t, 8u, 2.0f> myPolyIndexOctree;
+		AStar::PersistentData myPersistentGraphData;
 		std::vector<uint32_t> myIndices;
 		std::vector<CU::Vector3f> myVertices;
-		std::vector<CU::Vector2f> myProjectedVertices;
-
-		AStar::PersistentData myPersistentGraphData;
 
 		NavMeshQueryResult GetClosestValidGeometry(const CU::Vector3f& aPosition) const;
 		NavMeshQueryResult GetClosestValidGeometry(const CU::Ray<float>& aRay);

@@ -1,4 +1,5 @@
 #include "Pathfinder.hpp"
+#include <Vector2.hpp>
 #include <Vector4.hpp>
 #include <GraphicsEngine/Drawers/LineDrawer.h>
 #include <cassert>
@@ -14,16 +15,51 @@ struct Pathfinder::NavMeshQueryResult
 	bool wasValid = false;
 };
 
-void Pathfinder::Init(std::vector<uint32_t>&& anIndexList, std::vector<CU::Vector3f>&& aVertexList)
+void Pathfinder::Init(std::vector<uint32_t>&& anIndexList, std::vector<CU::Vector3f>&& aVertexList, const CU::Vector3f& aMinBounds, const CU::Vector3f& aMaxBounds)
 {
+	myPolyIndexOctree.Clear();
 	myIndices.clear();
 	myVertices.clear();
 
+	{
+		const CU::Vector3f boundsSize = aMaxBounds - aMinBounds;
+		const float halfExtent = (std::max)({ boundsSize.x, boundsSize.y, boundsSize.z }) * 0.5f + 1.0f;
+		const CU::Vector3f cubeHalfExtent{ halfExtent, halfExtent, halfExtent };
+
+		myPolyIndexOctree.Initialize(aMinBounds - cubeHalfExtent, aMaxBounds + cubeHalfExtent);
+	}
+
 	myIndices = std::move(anIndexList);
 	myVertices = std::move(aVertexList);
-	myProjectedVertices.resize(myVertices.size());
 
 	AStar::InitializeData(myIndices, myVertices, myPersistentGraphData);
+
+	for (uint32_t polyStartIndex = 0; polyStartIndex < myIndices.size(); polyStartIndex += 3)
+	{
+		const CU::Vector3f& vertexA = myVertices[myIndices[polyStartIndex]];
+		const CU::Vector3f& vertexB = myVertices[myIndices[polyStartIndex + 1]];
+		const CU::Vector3f& vertexC = myVertices[myIndices[polyStartIndex + 2]];
+
+		const CU::Vector3f minBound
+		{
+			(std::min)({ vertexA.x, vertexB.x, vertexC.x }),
+			(std::min)({ vertexA.y, vertexB.y, vertexC.y }),
+			(std::min)({ vertexA.z, vertexB.z, vertexC.z })
+		};
+
+		const CU::Vector3f maxBound
+		{
+			(std::max)({ vertexA.x, vertexB.x, vertexC.x }),
+			(std::max)({ vertexA.y, vertexB.y, vertexC.y }),
+			(std::max)({ vertexA.z, vertexB.z, vertexC.z })
+		};
+
+		const CU::Vector3f halfExtent = (maxBound - minBound) * 0.5f;
+		const CU::Vector3f position = minBound + halfExtent;
+
+		[[maybe_unused]] const bool inserted = myPolyIndexOctree.Insert(polyStartIndex / 3, position, (std::max)({ halfExtent.x, halfExtent.y, halfExtent.z }));
+		assert(inserted && "Failed to insert polygon into octree. Check that the octree bounds are valid and encompass all geometry.");
+	}
 }
 
 void Pathfinder::Update()
@@ -64,9 +100,9 @@ void Pathfinder::Update()
 
 void Pathfinder::Clear()
 {
+	myPolyIndexOctree.Clear();
 	myIndices.clear();
 	myVertices.clear();
-	myProjectedVertices.clear();
 	myPersistentGraphData.nodeIndicesFromPolyIndex.clear();
 	myPersistentGraphData.graphNodes.clear();
 	myPersistentGraphData.searchNodes.clear();
@@ -88,7 +124,7 @@ void Pathfinder::ImmediateRequest(const CU::Vector3f& aStartPos, const CU::Ray<f
 
 bool Pathfinder::GetIsInitialized() const
 {
-	return myIndices.empty();
+	return !myIndices.empty();
 }
 
 Pathfinder::NavMeshQueryResult Pathfinder::GetClosestValidGeometry(const CU::Vector3f& aPosition) const
@@ -100,15 +136,34 @@ Pathfinder::NavMeshQueryResult Pathfinder::GetClosestValidGeometry(const CU::Vec
 		.wasValid = false
 	};
 
+	uint32_t polyIndexGuess = 0;
+
+	if (!myPolyIndexOctree.QueryClosest(aPosition, polyIndexGuess))
+	{
+		return result;
+	}
+
+	float guessDistSqr = (std::numeric_limits<float>::max)();
+
+	for (uint32_t cornerIndex = 0; cornerIndex < 3; ++cornerIndex)
+	{
+		guessDistSqr = (std::min)(guessDistSqr, (myVertices[myIndices[polyIndexGuess * 3 + cornerIndex]] - aPosition).LengthSqr());
+	}
+
+	std::vector<uint32_t> candidatePolyIndices;
+	myPolyIndexOctree.Query(aPosition, std::sqrt(guessDistSqr), candidatePolyIndices);
+
 	float nearestDistSqr = (std::numeric_limits<float>::max)();
 
-	for (size_t i = 0; i + 2 < myIndices.size(); i += 3)
+	for (uint32_t polyIndex = 0; polyIndex < candidatePolyIndices.size(); ++polyIndex)
 	{
+		const size_t indexIndex = static_cast<size_t>(candidatePolyIndices[polyIndex] * 3);
+
 		const CU::Vector3f toVertices[3]
 		{
-			myVertices[myIndices[i]] - aPosition,
-			myVertices[myIndices[i + 1]] - aPosition,
-			myVertices[myIndices[i + 2]] - aPosition
+			myVertices[myIndices[indexIndex]] - aPosition,
+			myVertices[myIndices[indexIndex + 1]] - aPosition,
+			myVertices[myIndices[indexIndex + 2]] - aPosition
 		};
 
 		const CU::Vector3f faceNormal = (toVertices[1] - toVertices[0]).Cross(toVertices[2] - toVertices[0]);
@@ -128,8 +183,6 @@ Pathfinder::NavMeshQueryResult Pathfinder::GetClosestValidGeometry(const CU::Vec
 		}
 		else
 		{
-			toCandidateDistSqr = (std::numeric_limits<float>::max)();
-
 			for (uint8_t edgeStartIdx = 0; edgeStartIdx < 3; ++edgeStartIdx)
 			{
 				const uint8_t edgeEndIdx = (edgeStartIdx == 2) ? 0 : edgeStartIdx + 1;
@@ -160,7 +213,7 @@ Pathfinder::NavMeshQueryResult Pathfinder::GetClosestValidGeometry(const CU::Vec
 		nearestDistSqr = toCandidateDistSqr;
 
 		result.nearestPoint = aPosition + toCandidatePos;
-		result.polyIndex = static_cast<uint32_t>(i / 3);
+		result.polyIndex = candidatePolyIndices[polyIndex];
 	}
 
 	return result;
@@ -178,18 +231,11 @@ Pathfinder::NavMeshQueryResult Pathfinder::GetClosestValidGeometry(const CU::Ray
 	const CU::Vector3f rayBasisX = rayBasisHelperAxis.Cross(rayDir).GetNormalized();
 	const CU::Vector3f rayBasisY = rayDir.Cross(rayBasisX);
 
+	const auto projectToRayPlane = [&rayPos, &rayBasisX, &rayBasisY](const CU::Vector3f& aVertex)
 	{
-		const size_t vertexCount = myVertices.size();
-
-		const CU::Vector3f* vertexData = myVertices.data();
-		CU::Vector2f* projectedData = myProjectedVertices.data();
-
-		for (size_t i = 0; i < vertexCount; ++i)
-		{
-			const CU::Vector3f toVertex = vertexData[i] - rayPos;
-			projectedData[i] = CU::Vector2f{ toVertex.Dot(rayBasisX), toVertex.Dot(rayBasisY) };
-		}
-	}
+		const CU::Vector3f toVertex = aVertex - rayPos;
+		return CU::Vector2f{ toVertex.Dot(rayBasisX), toVertex.Dot(rayBasisY) };
+	};
 
 	float nearestHitDist = (std::numeric_limits<float>::max)();
 
@@ -200,15 +246,20 @@ Pathfinder::NavMeshQueryResult Pathfinder::GetClosestValidGeometry(const CU::Ray
 		.wasValid = false
 	};
 
-	for (size_t i = 0; i + 2 < myIndices.size(); i += 3)
-	{
-		const uint32_t vertexIndexA = myIndices[i];
-		const uint32_t vertexIndexB = myIndices[i + 1];
-		const uint32_t vertexIndexC = myIndices[i + 2];
+	std::vector<uint32_t> candidatePolyIndices;
+	myPolyIndexOctree.Query(aRay, candidatePolyIndices);
 
-		const CU::Vector2f& projectedA = myProjectedVertices[vertexIndexA];
-		const CU::Vector2f& projectedB = myProjectedVertices[vertexIndexB];
-		const CU::Vector2f& projectedC = myProjectedVertices[vertexIndexC];
+	for (uint32_t polyIndex = 0; polyIndex < candidatePolyIndices.size(); ++polyIndex)
+	{
+		const size_t indexIndex = static_cast<size_t>(candidatePolyIndices[polyIndex] * 3);
+
+		const uint32_t vertexIndexA = myIndices[indexIndex];
+		const uint32_t vertexIndexB = myIndices[indexIndex + 1];
+		const uint32_t vertexIndexC = myIndices[indexIndex + 2];
+
+		const CU::Vector2f& projectedA = projectToRayPlane(myVertices[vertexIndexA]);
+		const CU::Vector2f& projectedB = projectToRayPlane(myVertices[vertexIndexB]);
+		const CU::Vector2f& projectedC = projectToRayPlane(myVertices[vertexIndexC]);
 
 		const float weightA = projectedB.Perp(projectedC);
 		const float weightB = projectedC.Perp(projectedA);
@@ -244,7 +295,7 @@ Pathfinder::NavMeshQueryResult Pathfinder::GetClosestValidGeometry(const CU::Ray
 		nearestHitDist = hitDist;
 
 		result.nearestPoint = rayPos + toHitPos;
-		result.polyIndex = static_cast<uint32_t>(i / 3);
+		result.polyIndex = candidatePolyIndices[polyIndex];
 		result.wasValid = true;
 	}
 
@@ -253,17 +304,38 @@ Pathfinder::NavMeshQueryResult Pathfinder::GetClosestValidGeometry(const CU::Ray
 		return result;
 	}
 
+	uint32_t polyIndexGuess = 0;
+
+	if (!myPolyIndexOctree.QueryClosest(aRay, polyIndexGuess))
+	{
+		return result;
+	}
+
+	float guessDistSqr = (std::numeric_limits<float>::max)();
+
+	for (uint32_t cornerIndex = 0; cornerIndex < 3; ++cornerIndex)
+	{
+		const CU::Vector3f rayToCorner = myVertices[myIndices[polyIndexGuess * 3 + cornerIndex]] - rayPos;
+		const float cornerAlongRayScalar = (std::max)(0.0f, rayDir.Dot(rayToCorner));
+		guessDistSqr = (std::min)(guessDistSqr, (rayToCorner - rayDir * cornerAlongRayScalar).LengthSqr());
+	}
+
+	candidatePolyIndices.clear();
+	myPolyIndexOctree.Query(aRay, candidatePolyIndices, std::sqrt(guessDistSqr));
+
 	float nearestDistSqr = (std::numeric_limits<float>::max)();
 
-	for (size_t i = 0; i + 2 < myIndices.size(); i += 3)
+	for (uint32_t polyIndex = 0; polyIndex < candidatePolyIndices.size(); ++polyIndex)
 	{
-		const uint32_t vertexIndexA = myIndices[i];
-		const uint32_t vertexIndexB = myIndices[i + 1];
-		const uint32_t vertexIndexC = myIndices[i + 2];
+		const size_t indexIndex = static_cast<size_t>(candidatePolyIndices[polyIndex] * 3);
 
-		const CU::Vector2f& projectedA = myProjectedVertices[vertexIndexA];
-		const CU::Vector2f& projectedB = myProjectedVertices[vertexIndexB];
-		const CU::Vector2f& projectedC = myProjectedVertices[vertexIndexC];
+		const uint32_t vertexIndexA = myIndices[indexIndex];
+		const uint32_t vertexIndexB = myIndices[indexIndex + 1];
+		const uint32_t vertexIndexC = myIndices[indexIndex + 2];
+
+		const CU::Vector2f& projectedA = projectToRayPlane(myVertices[vertexIndexA]);
+		const CU::Vector2f& projectedB = projectToRayPlane(myVertices[vertexIndexB]);
+		const CU::Vector2f& projectedC = projectToRayPlane(myVertices[vertexIndexC]);
 
 		const float nearestBoundX = (std::max)({
 			0.0f,
@@ -381,7 +453,7 @@ Pathfinder::NavMeshQueryResult Pathfinder::GetClosestValidGeometry(const CU::Ray
 		nearestDistSqr = toCandidateDistSqr;
 
 		result.nearestPoint = rayPos + toCandidatePos;
-		result.polyIndex = static_cast<uint32_t>(i / 3);
+		result.polyIndex = candidatePolyIndices[polyIndex];
 	}
 	
 	return result;
@@ -389,6 +461,11 @@ Pathfinder::NavMeshQueryResult Pathfinder::GetClosestValidGeometry(const CU::Ray
 
 bool Pathfinder::RunPathfinding(const NavMeshQueryResult& startQueryResult, const NavMeshQueryResult& targetQueryResult, std::vector<CU::Vector3f>& outWaypoints)
 {
+	if (startQueryResult.polyIndex == (std::numeric_limits<uint32_t>::max)() || targetQueryResult.polyIndex == (std::numeric_limits<uint32_t>::max)())
+	{
+		return false;
+	}
+
 	std::vector<uint32_t> pathNodeIndices;
 	bool wasSearchValid = AStar::Search(myPersistentGraphData, startQueryResult.polyIndex, targetQueryResult.polyIndex, startQueryResult.nearestPoint, targetQueryResult.nearestPoint, pathNodeIndices);
 
