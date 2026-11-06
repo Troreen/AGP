@@ -56,8 +56,9 @@ void Mesh::Initialize(std::string_view aName, std::vector<Element>&& aElementLis
 		for (const Vertex& vertex : myVertices)
 		{
 			const CU::Vector3f position(vertex.Position.x, vertex.Position.y, vertex.Position.z);
-			myLocalBoundsRadius = (std::max)(myLocalBoundsRadius, (position - myLocalBoundsCenter).Length());
+			myLocalBoundsRadius = (std::max)(myLocalBoundsRadius, (position - myLocalBoundsCenter).LengthSqr());
 		}
+		myLocalBoundsRadius = std::sqrt(myLocalBoundsRadius);
 	}
 	else
 	{
@@ -79,4 +80,10 @@ const Skeleton* Mesh::GetSkeleton() const
 bool Mesh::HasSkeleton() const
 {
 	return mySkeleton.IsValid();
+}
+
+void Mesh::GetLocalBounds(CU::Vector3f& outLocalBoundsCenter, float& outLocalBoundsRadius) const
+{
+	outLocalBoundsCenter = myLocalBoundsCenter;
+	outLocalBoundsRadius = myLocalBoundsRadius;
 }

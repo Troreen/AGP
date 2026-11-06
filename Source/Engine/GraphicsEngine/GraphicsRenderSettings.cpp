@@ -26,10 +26,13 @@ const char* GraphicsRenderSettings::GetRenderPassName(RenderPassType aRenderPass
 			return "Ambient Occlusion (Screen Space, Linear Greyscale)";
 
 		case RenderPassType::NormalLocal:
-			return "Normals (Local Space, Linear)";
+			return "Normals (Local Space, sRGB)";
+
+		case RenderPassType::VertexNormalWorld:
+			return "Vertex Normals (World Space, sRGB)";
 
 		case RenderPassType::NormalWorld:
-			return "Normals (World Space, Linear)";
+			return "Normals (World Space, sRGB)";
 
 		/*case RenderPassType::Shadows:
 			return "Shadows (Directional)";*/

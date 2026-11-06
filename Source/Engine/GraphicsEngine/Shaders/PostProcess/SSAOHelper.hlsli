@@ -1,8 +1,8 @@
 #ifndef SSAO_HELPER_HLSLI
 #define SSAO_HELPER_HLSLI
 
-#include "../Material/Common.hlsli"
-#include "../Material/Lighting.hlsli"
+#include "../Internal/Common.hlsli"
+#include "../Internal/Samplers.hlsli"
 
 cbuffer SSAOBuffer : register(b5)
 {

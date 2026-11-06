@@ -215,7 +215,7 @@ namespace TGA
 			std::string Application;
 			std::string ApplicationVersion;
 			// The original Up axis of the file before conversion to DirectX Left Handed Y-Up.
-			Axis OriginalUpAxis;
+			Axis OriginalUpAxis = Axis::X;
 			// The system unit in the file before conversion to Centimeter.
 			SystemUnit OriginalSystemUnit = SystemUnit::Unknown;
 		};

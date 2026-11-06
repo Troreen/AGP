@@ -1,7 +1,6 @@
 #include "GameFramework.pch.h"
 #include "GameFramework/World/Transform.h"
 #include "Maths.hpp"
-#include "Quaternion.hpp"
 
 namespace
 {
@@ -26,82 +25,156 @@ namespace
 	}
 
 	// Transform axes may contain scale, so callers should only receive unit directions.
-	CU::Vector3f Direction(const CU::Vector3f& value)
+	CU::Vector3f Direction(const CU::Vector3f& aValue)
 	{
-		return CU::NormalizeSafe(value);
-	}
-
-	CU::Matrix4f MakeMatrix(const TransformData& data)
-	{
-		const CU::Quaternion<float> yaw =
-			CU::Quaternion<float>::CreateFromAxisAngle(CU::Vector3f::UnitY, CU::DegreesToRadians(data.RotationDegrees.x));
-		const CU::Quaternion<float> pitch =
-			CU::Quaternion<float>::CreateFromAxisAngle(CU::Vector3f::UnitX, CU::DegreesToRadians(data.RotationDegrees.y));
-		const CU::Quaternion<float> roll =
-			CU::Quaternion<float>::CreateFromAxisAngle(CU::Vector3f::UnitZ, CU::DegreesToRadians(data.RotationDegrees.z));
-		const CU::Matrix4f rotationMatrix = (yaw * pitch * roll).GetNormalized().ToMatrix4x4();
-		return CU::CreateScale(data.Scale) * rotationMatrix * CU::CreateTranslation(data.Position);
+		return CU::NormalizeSafe(aValue);
 	}
 }
 
-bool Transform::SetData(const TransformData& data)
+bool Transform::SetMatrix(const CommonUtilities::Matrix4x4<float>& aMatrix)
 {
-	if (!Finite(data.Position) || !Finite(data.RotationDegrees) || !Finite(data.Scale))
+	CommonUtilities::Vector3f scale;
+	CommonUtilities::Vector3f position;
+	CommonUtilities::Quaternion<float> rotation;
+	if (!CommonUtilities::DecomposeSRT(aMatrix, scale, rotation, position))
 	{
 		return false;
 	}
-	const CU::Matrix4f matrix = MakeMatrix(data);
-	if (!Finite(matrix))
-	{
-		return false;
-	}
-	myData = data;
-	myLocalMatrix = matrix;
+
+	myPosition = position;
+	myRotation = rotation;
+	myScale = scale;
+
+	myLocalMatrix = aMatrix;
+
 	return true;
 }
 
-void Transform::SetMatrix(const CommonUtilities::Matrix4x4<float>& aMatrix)
+const CommonUtilities::Vector3f& Transform::GetLocalRotationDegrees() const
 {
-	myLocalMatrix = aMatrix;
+	const CommonUtilities::Vector3f& eulerInRadians = myRotation.GetEulerAngles();
+
+	const CommonUtilities::Vector3f& eulerInDegrees =
+	{
+		CommonUtilities::RadiansToDegrees(eulerInRadians.x),
+		CommonUtilities::RadiansToDegrees(eulerInRadians.y),
+		CommonUtilities::RadiansToDegrees(eulerInRadians.z)
+	};
+
+	return eulerInDegrees;
 }
 
-bool Transform::SetLocalPosition(const CommonUtilities::Vector3f& position)
+const CommonUtilities::Vector3f& Transform::GetLocalRotationRadians() const
 {
-	TransformData data = myData;
-	data.Position = position;
-	return SetData(data);
+	const CommonUtilities::Vector3f& eulerInRadians = myRotation.GetEulerAngles();
+
+	return eulerInRadians;
 }
 
-bool Transform::SetLocalRotationDegrees(float yaw, float pitch, float roll)
+void Transform::SetLocalPosition(const CommonUtilities::Vector3f& aPosition)
 {
-	return SetLocalRotationDegrees({yaw, pitch, roll});
+	myPosition = aPosition;
+	myIsDirty = true;
 }
 
-bool Transform::SetLocalRotationDegrees(const CommonUtilities::Vector3f& rotation)
+void Transform::SetLocalRotationDegrees(float aPitch, float aYaw, float aRoll)
 {
-	TransformData data = myData;
-	data.RotationDegrees = rotation;
-	return SetData(data);
+	SetLocalRotationDegrees({ aPitch, aYaw, aRoll });
 }
 
-bool Transform::SetLocalScale(const CommonUtilities::Vector3f& scale)
+void Transform::SetLocalRotationDegrees(const CommonUtilities::Vector3f& aRotation)
 {
-	TransformData data = myData;
-	data.Scale = scale;
-	return SetData(data);
+	const CommonUtilities::Vector3f& rotationInRadians =
+	{
+		CommonUtilities::DegreesToRadians(aRotation.x),
+		CommonUtilities::DegreesToRadians(aRotation.y),
+		CommonUtilities::DegreesToRadians(aRotation.z)
+	};
+
+	const CommonUtilities::Quaternion<float>& rotation = CommonUtilities::Quaternion<float>::CreateFromEulerAngles(rotationInRadians);
+
+	if (rotation.LengthSqr() < 0.000001f)
+	{
+		return;
+	}
+
+	myRotation = rotation;
+	myIsDirty = true;
+}
+
+void Transform::SetLocalRotation(const CommonUtilities::Vector3f& aRotation)
+{
+	const CommonUtilities::Quaternion<float>& rotation = CommonUtilities::Quaternion<float>::CreateFromEulerAngles(aRotation);
+
+	if (rotation.LengthSqr() < 0.000001f)
+	{
+		return;
+	}
+
+	myRotation = rotation;
+	myIsDirty = true;
+}
+
+void Transform::SetLocalRotation(const CommonUtilities::Quaternion<float>& aRotation)
+{
+	if (aRotation.LengthSqr() < 0.000001f)
+	{
+		return;
+	}
+
+	myRotation = aRotation;
+	myIsDirty = true;
+}
+
+void Transform::SetLocalScale(const CommonUtilities::Vector3f& aScale)
+{
+	myScale = aScale;
+	myIsDirty = true;
+}
+
+const CommonUtilities::Matrix4f& Transform::GetLocalMatrix() const
+{
+	if (myIsDirty)
+	{
+		RecalculateMatrix();
+	}
+
+	return myLocalMatrix;
+
+}
+
+const CommonUtilities::Matrix4f& Transform::GetWorldMatrix() const
+{
+	if (myIsDirty)
+	{
+		RecalculateMatrix();
+	}
+
+	return myLocalMatrix;
 }
 
 CommonUtilities::Vector3f Transform::GetLocalRight() const
 {
-	return Direction({myLocalMatrix(1, 1), myLocalMatrix(1, 2), myLocalMatrix(1, 3)});
+	return Direction({ myLocalMatrix(1, 1), myLocalMatrix(1, 2), myLocalMatrix(1, 3) });
 }
 
 CommonUtilities::Vector3f Transform::GetLocalUp() const
 {
-	return Direction({myLocalMatrix(2, 1), myLocalMatrix(2, 2), myLocalMatrix(2, 3)});
+	return Direction({ myLocalMatrix(2, 1), myLocalMatrix(2, 2), myLocalMatrix(2, 3) });
+}
+
+void Transform::RecalculateMatrix() const
+{
+	const CU::Matrix4f rotationMatrix(myRotation.GetRotationMatrix());
+
+	const CommonUtilities::Matrix4f newMatrix = CU::CreateScale(myScale) * rotationMatrix * CU::CreateTranslation(myPosition);
+
+	myLocalMatrix = newMatrix;
+
+	myIsDirty = false;
 }
 
 CommonUtilities::Vector3f Transform::GetLocalForward() const
 {
-	return Direction({myLocalMatrix(3, 1), myLocalMatrix(3, 2), myLocalMatrix(3, 3)});
+	return Direction({ myLocalMatrix(3, 1), myLocalMatrix(3, 2), myLocalMatrix(3, 3) });
 }

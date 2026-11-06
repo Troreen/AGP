@@ -1,8 +1,9 @@
 #include "BloomHelper.hlsli"
-#include "../Material/Common.hlsli"
-#include "../Material/Lighting.hlsli"
+#include "../Internal/Common.hlsli"
+#include "../Internal/Samplers.hlsli"
 
 float4 main(FullTextureVertex aInput) : SV_TARGET
 {
-    return Resource.Sample(TrilinearWrap, aInput.UV);
+    float4 bloomSample = Resource.Sample(LinearClamp, aInput.UV);
+    return bloomSample * BB_Strength;
 }

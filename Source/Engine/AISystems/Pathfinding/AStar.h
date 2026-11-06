@@ -3,11 +3,11 @@
 #include <Heap.hpp>
 #include <cstdint>
 #include <vector>
+#include <array>
+#include <unordered_map>
 
 namespace AStar
 {
-	using namespace CommonUtilities;
-
 	constexpr uint32_t invalidIndex = (std::numeric_limits<uint32_t>::max)();
 
 	struct GraphNode
@@ -55,18 +55,21 @@ namespace AStar
 
 	struct PersistentData
 	{
+		std::vector<std::array<uint32_t, 3>> nodeIndicesFromPolyIndex;
 		std::vector<GraphNode> graphNodes;
 		std::vector<SearchNode> searchNodes;
 		CommonUtilities::Heap<HeapNode, true> heapNodes;
+
 		uint32_t searchCount;
 	};
 
-	void InitializeData(std::vector<uint32_t>& indices, std::vector<Vector3f>& vertices, PersistentData& outData);
-	void Search(PersistentData& someData, uint32_t aStartIndex, uint32_t aTargetIndex, std::vector<uint32_t>& outPathIndices);
-	void Funnel(PersistentData& someData, const Vector3f& aStartPos, const Vector3f& aTargetPos, const std::vector<uint32_t>& pathIndices, std::vector<Vector3f>& outWaypoints);
+	void InitializeData(std::vector<uint32_t>& anIndexList, std::vector<CommonUtilities::Vector3f>& aVertexList, PersistentData& outGraphData);
+	bool Search(PersistentData& someGraphData, uint32_t aStartPolyIndex, uint32_t aTargetPolyIndex, const CommonUtilities::Vector3f& aStartPos, const CommonUtilities::Vector3f& aTargetPos, std::vector<uint32_t>& outNodeIndices);
+	void Funnel(PersistentData& someGraphData, const CommonUtilities::Vector3f& aStartPos, const CommonUtilities::Vector3f& aTargetPos, const std::vector<uint32_t>& somePathNodeIndices, std::vector<CommonUtilities::Vector3f>& outWaypoints);
+	//void SmoothWaypoints(float aRadius, uint8_t anIterationCount, const std::vector<CommonUtilities::Vector3f>& someInputWaypoints, std::vector<CommonUtilities::Vector3f>& outWaypoints);
 
 	namespace detail
 	{
-		SearchNode& TouchSearchNode(PersistentData& someData, uint32_t aSearchNodeIndex);
+		SearchNode& TouchSearchNode(PersistentData& someGraphData, uint32_t aSearchNodeIndex);
 	}
 }

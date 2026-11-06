@@ -34,6 +34,9 @@
     <Filter Include="Shaders\Material">
       <UniqueIdentifier>{6DD8FDB3-59D1-1C06-8203-028B6E5BFC11}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\Particles">
+      <UniqueIdentifier>{85289119-F13E-8FAF-3AB6-1AD1A60B6037}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Shaders\PostProcess">
       <UniqueIdentifier>{A335500E-0F97-2D1C-9804-74CE046564DB}</UniqueIdentifier>
     </Filter>
@@ -45,6 +48,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AmbientSettings.h" />
     <ClInclude Include="ConstantBuffers\AnimationBuffer.h">
       <Filter>ConstantBuffers</Filter>
     </ClInclude>
@@ -99,7 +103,13 @@
     <ClInclude Include="Objects\GBuffer.h">
       <Filter>Objects</Filter>
     </ClInclude>
+    <ClInclude Include="Objects\InstanceData.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
     <ClInclude Include="Objects\Mesh.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\ParticleVertex.h">
       <Filter>Objects</Filter>
     </ClInclude>
     <ClInclude Include="Objects\Sampler.h">
@@ -141,8 +151,6 @@
     <ClInclude Include="RHI\RenderHardwareInterface.h">
       <Filter>RHI</Filter>
     </ClInclude>
-    <ClInclude Include="RenderCulling.h" />
-    <ClInclude Include="RenderItemRouting.h" />
     <ClInclude Include="RenderSnapshot.h" />
     <ClInclude Include="Sprite\SpriteStructs.h">
       <Filter>Sprite</Filter>
@@ -181,6 +189,9 @@
       <Filter>Objects</Filter>
     </ClCompile>
     <ClCompile Include="Objects\Mesh.cpp">
+      <Filter>Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\ParticleVertex.cpp">
       <Filter>Objects</Filter>
     </ClCompile>
     <ClCompile Include="Objects\Sampler.cpp">
@@ -223,11 +234,11 @@
     <ClCompile Include="TextWidget.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shaders\BRDF LUT_PS.hlsl">
-      <Filter>Shaders</Filter>
+    <FxCompile Include="Shaders\Internal\BRDF LUT_PS.hlsl">
+      <Filter>Shaders\Internal</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\FullTexture_VS.hlsl">
-      <Filter>Shaders</Filter>
+    <FxCompile Include="Shaders\Internal\FullTexture_VS.hlsl">
+      <Filter>Shaders\Internal</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Internal\Sprite_PS.hlsl">
       <Filter>Shaders\Internal</Filter>
@@ -274,16 +285,28 @@
     <FxCompile Include="Shaders\Material\Unlit_PS.hlsl">
       <Filter>Shaders\Material</Filter>
     </FxCompile>
+    <FxCompile Include="Shaders\Particles\Particle_GS.hlsl">
+      <Filter>Shaders\Particles</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Particles\Particle_PS.hlsl">
+      <Filter>Shaders\Particles</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Particles\Particle_VS.hlsl">
+      <Filter>Shaders\Particles</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\PostProcess\Bloom01Downsample_PS.hlsl">
+      <Filter>Shaders\PostProcess</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\PostProcess\BloomDownsample_PS.hlsl">
+      <Filter>Shaders\PostProcess</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\PostProcess\BloomLuminance_PS.hlsl">
+      <Filter>Shaders\PostProcess</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\PostProcess\BloomUpsample_PS.hlsl">
+      <Filter>Shaders\PostProcess</Filter>
+    </FxCompile>
     <FxCompile Include="Shaders\PostProcess\Bloom_PS.hlsl">
-      <Filter>Shaders\PostProcess</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\PostProcess\GaussianBlurH_PS.hlsl">
-      <Filter>Shaders\PostProcess</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\PostProcess\GaussianBlurV_PS.hlsl">
-      <Filter>Shaders\PostProcess</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\PostProcess\Luminance_PS.hlsl">
       <Filter>Shaders\PostProcess</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\PostProcess\Resample_PS.hlsl">
@@ -306,14 +329,20 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\LUTFunctions.hlsli">
-      <Filter>Shaders</Filter>
+    <None Include="Shaders\Internal\Common.hlsli">
+      <Filter>Shaders\Internal</Filter>
     </None>
-    <None Include="Shaders\Material\Common.hlsli">
-      <Filter>Shaders\Material</Filter>
+    <None Include="Shaders\Internal\LUTFunctions.hlsli">
+      <Filter>Shaders\Internal</Filter>
     </None>
-    <None Include="Shaders\Material\Lighting.hlsli">
-      <Filter>Shaders\Material</Filter>
+    <None Include="Shaders\Internal\Lighting.hlsli">
+      <Filter>Shaders\Internal</Filter>
+    </None>
+    <None Include="Shaders\Internal\PoissonDisks.hlsli">
+      <Filter>Shaders\Internal</Filter>
+    </None>
+    <None Include="Shaders\Internal\Samplers.hlsli">
+      <Filter>Shaders\Internal</Filter>
     </None>
     <None Include="Shaders\Material\Material.hlsli">
       <Filter>Shaders\Material</Filter>
@@ -327,11 +356,17 @@
     <None Include="Shaders\Material\Normal.hlsli">
       <Filter>Shaders\Material</Filter>
     </None>
-    <None Include="Shaders\Material\PoissonDisks.hlsli">
-      <Filter>Shaders\Material</Filter>
-    </None>
     <None Include="Shaders\Material\Tonemap.hlsli">
       <Filter>Shaders\Material</Filter>
+    </None>
+    <None Include="Shaders\Particles\ParticleCommon.hlsli">
+      <Filter>Shaders\Particles</Filter>
+    </None>
+    <None Include="Shaders\Particles\ParticleMaterial.hlsli">
+      <Filter>Shaders\Particles</Filter>
+    </None>
+    <None Include="Shaders\Particles\ParticleMaterialParameters.hlsli">
+      <Filter>Shaders\Particles</Filter>
     </None>
     <None Include="Shaders\PostProcess\BloomHelper.hlsli">
       <Filter>Shaders\PostProcess</Filter>

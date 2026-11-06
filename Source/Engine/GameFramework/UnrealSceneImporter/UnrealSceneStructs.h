@@ -121,6 +121,14 @@ namespace UnrealScene
 		float armLength = 0.0f;
 	};
 
+	struct SkyLightComponentData : BaseComponentData
+	{
+		std::string EnvironmentCubeTexture;
+
+		CommonUtilities::Vector3f AmbientLightColor = CommonUtilities::Vector3f(1.0f, 1.0f, 1.0f);
+		float AmbientLightIntensity = 1.0f;
+	};
+
 	struct CameraComponentData : BaseComponentData
 	{
 		float fieldOfView = 0.0f;
@@ -137,6 +145,7 @@ namespace UnrealScene
 			BaseSphericalComponentData,
 			CapsuleComponentData,
 			SpringArmComponentData,
+			SkyLightComponentData,
 			CameraComponentData>;
 
 	struct MasterMaterialData

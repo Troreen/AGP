@@ -1,5 +1,5 @@
-#include "Common.hlsli"
-#include "Lighting.hlsli"
+#include "../Internal/Common.hlsli"
+#include "../Internal/Lighting.hlsli"
 
 Texture2D GBufferAlbedo : register(t0);
 Texture2D GBufferWorldNormal : register(t1);
@@ -50,7 +50,8 @@ float4 main(FullTextureVertex input) : SV_TARGET
         case 7: // Local Normal Pass
             return float4(pixelNormal, 1);
         
-        case 8: // World Normal Pass
+        case 8: // Vertex World Normal Pass
+        case 9: // World Normal Pass
             return DebugNormal(pixelNormal);
     }
     

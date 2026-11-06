@@ -4,6 +4,8 @@
 #include "Matrix4x4.hpp"
 
 #include <array>
+#include <CommonUtilities/Sphere.hpp>
+#include <GraphicsEngine/Objects/InstanceData.h>
 #include <memory>
 #include <vector>
 
@@ -40,9 +42,15 @@ public:
 		return static_cast<unsigned>(myMaterials.size());
 	}
 
+	CommonUtilities::Spheref GetCullingSphere() const;
+
 	// Visibility affects extraction only; hidden skeletal meshes continue playback.
 	void SetVisible(bool aVisible);
 	bool IsVisible() const;
+
+	void AddInstance(InstanceData&& aInstanceData);
+	const std::vector<InstanceData>& GetInstanceData() const;
+	bool IsInstanced() const;
 
 protected:
 	virtual void OnMeshChanged();
@@ -53,6 +61,7 @@ private:
 
 	std::shared_ptr<MeshAsset> myMesh;
 	std::vector<std::shared_ptr<MaterialAsset>> myMaterials;
+	std::vector<InstanceData> myInstanceData;
 
 	bool myVisible = true;
 };

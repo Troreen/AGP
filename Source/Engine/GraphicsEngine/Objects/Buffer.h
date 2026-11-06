@@ -6,6 +6,7 @@
 #include <wrl/client.h>
 
 struct ID3D11Buffer;
+struct ID3D11ShaderResourceView;
 
 class Buffer
 {
@@ -21,6 +22,7 @@ public:
 private:
     std::string myName;
     Microsoft::WRL::ComPtr<ID3D11Buffer> myBuffer;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> mySRV;
     size_t mySize;
     unsigned myStride;
     BufferType myType;

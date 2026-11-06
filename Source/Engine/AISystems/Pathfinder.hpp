@@ -1,48 +1,52 @@
 #pragma once
 #include "Pathfinding/AStar.h"
-#include <Vector3.hpp>
+#include <CommonUtilities.h>
 #include <Ray.hpp>
 #include <Heap.hpp>
 #include <unordered_map>
 #include <vector>
-#include <limits>
-#include <utility>
 #include <cstdint>
 #include <functional>
-
-using namespace CommonUtilities;
 
 class Pathfinder
 {
 	public:
-		using QueueRequestHandler = std::function<void(std::vector<Vector3f>& outWaypoints)>;
+		using QueueRequestHandler = std::function<void(std::vector<CU::Vector3f>& outWaypoints)>;
 
-		void Init(std::vector<uint32_t>&& anIndexList, std::vector<Vector3f>&& aVertexList);
+		void Init(std::vector<uint32_t>&& anIndexList, std::vector<CU::Vector3f>&& aVertexList);
 		void Update();
 		void Clear();
 
 		template <typename T>
-		void QueueRequest(const T* aRequester, const Vector3f& aStartPos, const Vector3f& aTargetPos, std::vector<Vector3f>& outWaypoints);
+		void QueueRequest(const T* aRequester, const CU::Vector3f& aStartPos, const CU::Vector3f& aTargetPos, std::vector<CU::Vector3f>& outWaypoints);
 
 		template <typename T>
-		void QueueRequest(const T* aRequester, const Vector3f& aStartPos, const Ray<float>& aTargetRay, std::vector<Vector3f>& outWaypoints);
+		void QueueRequest(const T* aRequester, const CU::Vector3f& aStartPos, const CU::Ray<float>& aTargetRay, std::vector<CU::Vector3f>& outWaypoints);
 
-		void ImmediateRequest(const Vector3f& aStartPos, const Vector3f& aTargetPos, std::vector<Vector3f>& outWaypoints) const;
-		void ImmediateRequest(const Vector3f& aStartPos, const Ray<float>& aTargetRay, std::vector<Vector3f>& outWaypoints) const;
-		
+		void ImmediateRequest(const CU::Vector3f& aStartPos, const CU::Vector3f& aTargetPos, std::vector<CU::Vector3f>& outWaypoints);
+		void ImmediateRequest(const CU::Vector3f& aStartPos, const CU::Ray<float>& aTargetRay, std::vector<CU::Vector3f>& outWaypoints);
+
+		bool GetIsInitialized() const;
+
 	private:
 		struct NavMeshQueryResult;
 
 		std::vector<uint32_t> myIndices;
-		std::vector<Vector3f> myVertices;
-		AStar::PersistentData myGraphData;
+		std::vector<CU::Vector3f> myVertices;
+		std::vector<CU::Vector2f> myProjectedVertices;
 
-		NavMeshQueryResult GetClosestValidGeometry(const Vector3f& aPosition) const;
-		NavMeshQueryResult GetClosestValidGeometry(const Ray<float>& aRay) const;
+		AStar::PersistentData myPersistentGraphData;
+
+		NavMeshQueryResult GetClosestValidGeometry(const CU::Vector3f& aPosition) const;
+		NavMeshQueryResult GetClosestValidGeometry(const CU::Ray<float>& aRay);
+		bool RunPathfinding(const NavMeshQueryResult& startQueryResult, const NavMeshQueryResult& targetQueryResult, std::vector<CU::Vector3f>& outWaypoints);
+
+		// TODO: TEMPORARY TESTING; REMOVE
+		std::vector<CU::Vector3f> testWaypoints;
 };
 
 template <typename T>
-inline void Pathfinder::QueueRequest(const T* aRequester, const Vector3f& aStartPos, const Vector3f& aTargetPos, std::vector<Vector3f>& outWaypoints)
+inline void Pathfinder::QueueRequest(const T* aRequester, const CU::Vector3f& aStartPos, const CU::Vector3f& aTargetPos, std::vector<CU::Vector3f>& outWaypoints)
 {
 	// TODO
 	(void)aRequester;
@@ -52,7 +56,7 @@ inline void Pathfinder::QueueRequest(const T* aRequester, const Vector3f& aStart
 }
 
 template <typename T>
-inline void Pathfinder::QueueRequest(const T* aRequester, const Vector3f& aStartPos, const Ray<float>& aTargetRay, std::vector<Vector3f>& outWaypoints)
+inline void Pathfinder::QueueRequest(const T* aRequester, const CU::Vector3f& aStartPos, const CU::Ray<float>& aTargetRay, std::vector<CU::Vector3f>& outWaypoints)
 {
 	// TODO
 	(void)aRequester;

@@ -12,8 +12,20 @@ AnimatorComponent::AnimatorComponent() : myMeshComponent(nullptr), myAnimationTr
 	myAnimations;
 }
 
+AnimatorComponent::~AnimatorComponent()
+{
+	if (myAnimationTree)
+	{
+		delete myAnimationTree;
+	}
+}
+
 void AnimatorComponent::InitializeCustomVariables(const CustomComponentVariables& someVariables)
 {
+	if (someVariables.StringVariables.at("AnimationTree").empty())
+	{
+		SetEnabled(false);
+	}
 	SetTree(someVariables.StringVariables.at("AnimationTree"));
 }
 
@@ -24,10 +36,7 @@ void AnimatorComponent::BeginPlay()
 		return;
 	}
 
-	if (!(myMeshComponent = GetOwner()->GetComponent<SkeletalMeshComponent>()))
-	{
-		std::cout << "DIS NO WORK\n";
-	}
+	myMeshComponent = GetOwner()->GetComponent<SkeletalMeshComponent>();
 	myAnimationTree->SetAnimationPlayer(this);
 	myAnimationTree->InitTree();
 }

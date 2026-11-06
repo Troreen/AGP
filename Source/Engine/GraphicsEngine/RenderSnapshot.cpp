@@ -5,7 +5,10 @@ void RenderSnapshot::Clear()
 {
 	TotalTime = 0.0f;
 	ActiveCamera = nullptr;
-	Meshes.clear();
+	AllMeshes.clear();
+	OpaqueMeshes.clear();
+	BlendedMeshes.clear();
 	Lights.clear();
+	Particles.clear();
 	ScreenTextItems.clear();
 }

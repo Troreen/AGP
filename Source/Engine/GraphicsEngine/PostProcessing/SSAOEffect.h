@@ -29,7 +29,5 @@ private:
 
 	std::vector<Texture> myResizeTextures;
 
-    Texture mySSAOBuffer;
-
     Settings mySettings;
 };

@@ -28,9 +28,8 @@ public:
 	void SetRenderTarget(const Texture* aTarget, const Texture* aDepthStencil) const;
 	void SetRenderTarget(const Texture** aTargetList, unsigned aNumTargets, const Texture* aDepthStencil) const;
 
-	bool UpdateConstantBuffer(const Buffer& aConstantBuffer, const void* aBufferData, size_t aBufferDataSize) const;
-	bool UpdateDynamicVertexBuffer(const Buffer& aVertexBuffer, const Vertex* aVertices, size_t aVertexCount) const;
-	bool UpdateDynamicVertexBuffer(const Buffer& aVertexBuffer, const SimpleVertex* aVertices, size_t aVertexCount) const;
+	bool UpdateDataBuffer(const Buffer& aDataBuffer, const void* aBufferData, size_t aBufferDataSize) const;
+    bool UpdateDynamicVertexBuffer(const Buffer& aBuffer, const void* aBufferData, size_t aBufferDataSize) const;
 
 	void SetVertexBuffer(const Buffer* aBuffer) const;
 	void SetIndexBuffer(const Buffer* aBuffer) const;
@@ -39,10 +38,13 @@ public:
 
 	void SetShaderResource(const Texture* aResource, unsigned aSlot, PipelineStages aStages) const;
 	void SetShaderResources(const Texture* const* aResourcesList, size_t aNumResources, unsigned aStartSlot, PipelineStages aStages) const;
+	void SetShaderResources(const Buffer* const* aResourcesList, size_t aNumResources, unsigned aStartSlot, PipelineStages aStages) const;
 	void SetShaderSamplers(const Sampler* const* aSamplerList, size_t aNumSamplers, unsigned aStartSlot, PipelineStages aStages) const;
 
 	void Draw(unsigned aNumVertices) const;
+	void DrawInstanced(unsigned aNumVertices, unsigned aInstanceCount) const;
 	void DrawIndexed(unsigned aIndexCount, unsigned aIndexOffset) const;
+	void DrawIndexedInstanced(unsigned aIndexCount, unsigned aIndexOffset, unsigned aInstanceCount) const;
 
 	void SetMarker(std::string_view aMarker) const;
 	void BeginEvent(std::string_view aEvent) const;

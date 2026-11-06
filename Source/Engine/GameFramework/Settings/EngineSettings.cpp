@@ -476,11 +476,6 @@ namespace
 			settings.ShaderFolder = std::filesystem::path(utf8Path);
 		}
 
-		if (const auto sceneFolder = ReadOptionalString(anObject, "scenesFolder", aField))
-		{
-			settings.SceneFolder = sceneFolder.value();
-		}
-
 		if (const auto cursorPath = ReadOptionalString(anObject, "cursorPath", aField))
 		{
 			const std::u8string utf8Path(reinterpret_cast<const char8_t*>(cursorPath->data()), cursorPath->size());

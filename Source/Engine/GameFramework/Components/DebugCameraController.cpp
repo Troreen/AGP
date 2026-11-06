@@ -35,7 +35,8 @@ CameraComponent* DebugCameraService::Ensure(World& world, CommonUtilities::Vecto
 	Actor* actor = world.SpawnActor(DebugCameraActorName);
 
 	const DebugCameraPreset& preset = GetDebugCameraPreset();
-	actor->GetTransform().SetData(preset.Transform);
+	actor->GetTransform().SetLocalPosition(preset.Position);
+	actor->GetTransform().SetLocalRotation(preset.Rotation);
 
 	CameraComponent* camera = actor->AddComponent<CameraComponent>(
 		"Camera", preset.FieldOfView, preset.NearPlane, preset.FarPlane, clientSize);
@@ -81,20 +82,28 @@ void DebugCameraController::BeginPlay()
 	myPitch = -std::asin(CU::Clamp(forward.y, -1.f, 1.f));
 	CommonUtilities::InputMapper& input = ServiceLocator::GetInstance().GetInputMapper();
 
-	auto held = [this, &input](std::string_view action, bool& target)
+	auto movementInput = [this, &input](std::string_view action, float& target, float aMultiplier)
 	{
-		myListenerIDs.push_back(input.AddEventListener(action, [&target](const CommonUtilities::InputEvent& event)
+		myListenerIDs.push_back(input.AddEventListener(action, [&target, aMultiplier](const CommonUtilities::InputEvent& event)
 		{
-			target = event.inputData.isHeld;
+			target = static_cast<float>(event.inputData.isHeld) * aMultiplier;
 		}));
 	};
-	held("CameraLookEnable", myLook);
-	held("CameraForward", myForward);
-	held("CameraBack", myBack);
-	held("CameraLeft", myLeft);
-	held("CameraRight", myRight);
-	held("CameraUp", myUp);
-	held("CameraDown", myDown);
+	movementInput("CameraForward", myInput.z, 1);
+	movementInput("CameraBack", myInput.z, -1);
+	movementInput("CameraRight", myInput.x, 1);
+	movementInput("CameraLeft", myInput.x, -1);
+	movementInput("CameraUp", myInput.y, 1);
+	movementInput("CameraDown", myInput.y, -1);
+
+	myListenerIDs.push_back(input.AddEventListener("CameraLookEnable", [this](const CommonUtilities::InputEvent& event)
+		{
+			myLook = event.inputData.isHeld;
+			if (event.inputData.isPressed || event.inputData.isReleased)
+			{
+				ServiceLocator::GetInstance().GetInputMapper().GetInputHandler()->SetCursorVisibility(event.inputData.isReleased);
+			}
+		}));
 
 	myListenerIDs.push_back(input.AddEventListener("CameraLookDelta", [this](const CommonUtilities::InputEvent& event)
 	{
@@ -112,49 +121,34 @@ void DebugCameraController::Update(float deltaTime)
 		myLookDelta = {};
 		return;
 	}
+
 	Transform& transform = GetOwner()->GetTransform();
 	const DebugCameraPreset& preset = GetDebugCameraPreset();
+
 	if (myLook)
 	{
 		myYaw += myLookDelta.x * preset.LookSensitivity;
 		myPitch = CU::Clamp(myPitch + myLookDelta.y * preset.LookSensitivity,
 		                    CU::DegreesToRadians(-MaximumPitchDegrees), CU::DegreesToRadians(MaximumPitchDegrees));
-		transform.SetLocalRotationDegrees(CU::RadiansToDegrees(myYaw), CU::RadiansToDegrees(myPitch), 0);
-		if (ServiceLocator::GetInstance().GetEngineSettings().GetApplicationSettings().EnableMouseLook)
+
+		CommonUtilities::Quaternion<float> yawRotation = CommonUtilities::Quaternion<float>::CreateFromAxisAngle(CU::Vector3f::UnitY, myYaw);
+
+		CommonUtilities::Quaternion<float> pitchRotation = CommonUtilities::Quaternion<float>::CreateFromAxisAngle(CU::Vector3f::UnitX, myPitch);
+
+		transform.SetLocalRotation(yawRotation * pitchRotation);
+
+		CommonUtilities::InputHandler* inputHandler = ServiceLocator::GetInstance().GetInputMapper().GetInputHandler();
+		if (ServiceLocator::GetInstance().GetEngineSettings().GetApplicationSettings().EnableMouseLook
+			&& inputHandler && GetForegroundWindow() == inputHandler->GetWindowHandle())
 		{
-			if (CommonUtilities::InputHandler* inputHandler = ServiceLocator::GetInstance().GetInputMapper().GetInputHandler();
-				inputHandler && GetForegroundWindow() == inputHandler->GetWindowHandle())
-			{
-				inputHandler->CenterMouse();
-			}
+			inputHandler->CenterMouse();
 		}
 	}
+
 	myLookDelta = {};
-	CommonUtilities::Vector3f motion{};
-	if (myForward)
-	{
-		motion += CU::NormalizeSafe(transform.GetLocalForward());
-	}
-	if (myBack)
-	{
-		motion -= CU::NormalizeSafe(transform.GetLocalForward());
-	}
-	if (myRight)
-	{
-		motion += CU::NormalizeSafe(transform.GetLocalRight());
-	}
-	if (myLeft)
-	{
-		motion -= CU::NormalizeSafe(transform.GetLocalRight());
-	}
-	if (myUp)
-	{
-		motion += CommonUtilities::Vector3f::UnitY;
-	}
-	if (myDown)
-	{
-		motion -= CommonUtilities::Vector3f::UnitY;
-	}
+
+	CommonUtilities::Vector3f motion = (transform.GetLocalForward() * myInput.z) + (transform.GetLocalRight() * myInput.x);
+	motion.y += myInput.y;
 	if (motion.LengthSqr() > 0)
 	{
 		transform.SetLocalPosition(transform.GetLocalPosition() + CU::NormalizeSafe(motion) * preset.MoveSpeed * deltaTime);

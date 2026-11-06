@@ -7,6 +7,8 @@
 #include "Materials/Material.h"
 #include "Materials/MaterialHelpers.h"
 #include "Materials/MaterialShaderIncludeHandler.h"
+#include "Objects/InstanceData.h"
+#include "Objects/ParticleVertex.h"
 #include "Objects/Shader.h"
 #include "Objects/Vertex.h"
 #include "RHI/GraphicsCommandList.h"
@@ -17,23 +19,29 @@
 #include "Deferred_PointLight_PS.h"
 #include "Deferred_SpotLight_PS.h"
 #include "FullTexture_VS.h"
-#include "Skybox_PS.h"
+#include "Lines_PS.h"
+#include "Lines_VS.h"
+#include "Particle_GS.h"
 #include "ShadowCube_GS.h"
+#include "Skybox_PS.h"
 #include "Sprite_PS.h"
 #include "Sprite_VS.h"
 #include "TextOverlay_PS.h"
 #include "TextOverlay_VS.h"
 #include "Tonemapper_PS.h"
-#include "Lines_PS.h"
-#include "Lines_VS.h"
 
+#include <CommonUtilities/Intersection.hpp>
+#include "Drawers/LineDrawer.h"
 #include <GameFramework/AssetHandling/MaterialAsset.h>
 #include <GameFramework/AssetHandling/MeshAsset.h>
+#include <GameFramework/AssetHandling/ParticleSystemAsset.h>
+#include <GameFramework/AssetHandling/TextureAsset.h>
 #include <GameFramework/Components/CameraComponent.h>
 #include <GameFramework/Components/MeshComponentBase.h>
+#include <GameFramework/Components/ParticleComponent.h>
+#include <GameFramework/Particles/ParticleEmitter.h>
+#include <GameFramework/Particles/ParticleSystem.h>
 #include <GameFramework/World/Actor.h>
-#include "Drawers/LineDrawer.h"
-#include <Maths.hpp>
 
 /*
  * GraphicsEngine handles rendering of a scene.
@@ -64,6 +72,7 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path&
 	}
 
 	myMaterialDomainShaders.emplace(MaterialDomain::Surface, aShaderRoot / "Material" / "Surface_VS.hlsl");
+	myMaterialDomainShaders.emplace(MaterialDomain::Particles, aShaderRoot / "Particles" / "Particle_VS.hlsl");
 	myMaterialShadingModelShaders.emplace(ShadingModel::Unlit, aShaderRoot / "Material" / "Unlit_PS.hlsl");
 	myMaterialShadingModelShaders.emplace(ShadingModel::Lit, aShaderRoot / "Material" / "Lit_PS.hlsl");
 
@@ -92,6 +101,10 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path&
 	CreateConstantBuffer(ConstantBuffer::MaterialBuffer, "MaterialBuffer", Material::MATERIAL_BUFFER_SIZE);
 	CreateConstantBuffer(ConstantBuffer::PostProcessBuffer, "PostProcessBuffer", PostProcessEffect::POST_PROCESS_BUFFER_SIZE);
 	CreateConstantBuffer<TextOverlayBuffer>(ConstantBuffer::TextOverlayBuffer, "TextOverlayBuffer");
+
+	constexpr unsigned bufferSize = sizeof(InstanceData) * MAX_MESH_INSTANCES;
+	constexpr unsigned bufferStride = sizeof(InstanceData);
+	myRHI.CreateStructuredBuffer("InstanceBuffer", bufferSize, bufferStride, myInstanceBuffer);
 
 	CreateSamplers();
 	if (!GenerateLUT())
@@ -123,22 +136,27 @@ bool GraphicsEngine::Initialize(HWND aWindowHandle, const std::filesystem::path&
 	myDefaultMaterial.SetTexture(2, myDefaultORMTexture);
 	myDefaultMaterial.SetTexture(3, myNoEmissionTexture);
 
-
-	if (!myRHI.CreateColorCubeTexture("Default Environment", { 255, 255, 255, 255 }, myEnvironmentCubeTexture))
+	if (!myRHI.CreateDefaultLutCubeTexture("Default Color Grade LUT", 33, myDefaultColorGradingLut))
 	{
-		GELOG(Error, "Failed to create default enviroment Cube!");
+		GELOG(Error, "Failed to create default color grade LUT texture!");
 		return false;
 	}
+	myColorGradingLut = myDefaultColorGradingLut;
 
-	myDefaultEnvironmentCubeTexture = myEnvironmentCubeTexture;
+	if (!myRHI.CreateColorCubeTexture("Default Environment", { 255, 255, 255, 255 }, myDefaultEnvironmentCubeTexture))
+	{
+		GELOG(Error, "Failed to create default environment cube!");
+		return false;
+	}
+	myAmbientSettings.EnvironmentCubeTexture = myDefaultEnvironmentCubeTexture;
 
-	if (!myRHI.CreateDynamicVertexBuffer("SpriteBuffer", 6, mySpriteVertexBuffer))
+	if (!myRHI.CreateDynamicVertexBuffer("SpriteBuffer", sizeof(Vertex), 6, mySpriteVertexBuffer))
 	{
 		GELOG(Error, "Failed to create sprite buffer!");
 		return false;
 	}
 
-	if (!myRHI.CreateDynamicVertexBufferSimple("LineBuffer", 64000, myLineBuffer))
+	if (!myRHI.CreateDynamicVertexBuffer("LineBuffer", sizeof(SimpleVertex), 1000, myLineBuffer))
 	{
 		GELOG(Error, "Failed to create line buffer!");
 		return false;
@@ -157,7 +175,7 @@ void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const RenderS
 	ResetPipeline(inoutCommandList);
 	inoutCommandList.BeginEvent("Render Setup");
 
-	std::vector<const Texture*> pblTextures = { &myEnvironmentCubeTexture, &myLut };
+	std::vector<const Texture*> pblTextures = { &myAmbientSettings.EnvironmentCubeTexture, &myLut};
 	inoutCommandList.SetShaderResources(pblTextures.data(), pblTextures.size(), 98, PipelineStage_PixelShader);
 
 	FrameBuffer fb;
@@ -167,13 +185,10 @@ void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const RenderS
 	fb.TonemapType = static_cast<uint32_t>(aSettings.TonemapAlgorithm);
 	fb.RenderPassType = static_cast<uint32_t>(aSettings.RenderPass);
 	fb.TotalTime = aSnapshot.TotalTime;
-
-	std::vector<MeshComponentBase*> opaqueMeshes(0);
-	std::vector<MeshComponentBase*> blendedMeshes(0);
-	SortMeshObjects(aSnapshot, fb.CameraPosition, opaqueMeshes, blendedMeshes);
+	fb.DeltaTime = aSnapshot.DeltaTime;
 
 	std::vector<Light> lights = SetupLights(inoutCommandList, aSnapshot, fb.SunDirectionToLight);
-	const Texture** gBuffer = CreateDeferredTextures(inoutCommandList, fb, opaqueMeshes);
+	const Texture** gBuffer = CreateDeferredTextures(inoutCommandList, fb, aSnapshot.OpaqueMeshes);
 
 	inoutCommandList.EndEvent(); // Render Setup
 
@@ -186,16 +201,20 @@ void GraphicsEngine::Render(GraphicsCommandList& inoutCommandList, const RenderS
 	lb.CascadeSplits.x = aSnapshot.ActiveCamera->GetCascadeSplit(0);
 	lb.CascadeSplits.y = aSnapshot.ActiveCamera->GetCascadeSplit(1);
 	lb.CascadeSplits.z = aSnapshot.ActiveCamera->GetCascadeSplit(2);
+	lb.CascadeSplits.w = aSnapshot.ActiveCamera->GetCascadeSplit(3);
+	lb.AmbientLightColor = myAmbientSettings.AmbientLightColor;
+	lb.AmbientLightIntensity = myAmbientSettings.AmbientLightIntensity;
 	RenderDeferredLight(inoutCommandList, aSettings, gBuffer, lb, lights);
 	RenderSkybox(inoutCommandList, aSettings);
-	RenderBlendedObjects(inoutCommandList, blendedMeshes, lb, lights);
+	RenderBlendedObjects(inoutCommandList, aSnapshot.BlendedMeshes, lb, lights);
+	RenderParticles(inoutCommandList, aSnapshot.Particles);
 	inoutCommandList.EndEvent(); // Finalize Render
 
 	RunPostLightPostProcess(inoutCommandList, aSettings);
 	RunTonemap(inoutCommandList);
+	RenderLines(inoutCommandList, fb);
 	RenderScreenText(inoutCommandList, aSnapshot);
 	RenderScreenSprites(inoutCommandList, aSnapshot);
-	RenderLines(inoutCommandList, fb);
 }
 
 void GraphicsEngine::Present() const
@@ -203,25 +222,13 @@ void GraphicsEngine::Present() const
 	myRHI.Present();
 }
 
-bool GraphicsEngine::SetEnvironmentMap(const std::filesystem::path& aCubeTexturePath, bool aShowSkybox)
+void GraphicsEngine::SetAmbientSettings(AmbientSettings&& aSettings)
 {
-	Texture environmentCube;
-	if (!LoadTexture(aCubeTexturePath, environmentCube))
+	myAmbientSettings = std::move(aSettings);
+	if (myAmbientSettings.EnvironmentCubeTexture.GetName().empty())
 	{
-		GELOG(Error, "Failed to load environment cube map {}!", aCubeTexturePath.string());
-		return false;
+		myAmbientSettings.EnvironmentCubeTexture = myDefaultEnvironmentCubeTexture;
 	}
-
-	// Keep the old environment if the new cubemap fails to load.
-	myEnvironmentCubeTexture = environmentCube;
-	myShowSkybox = aShowSkybox;
-	return true;
-}
-
-void GraphicsEngine::ResetEnvironmentMap()
-{
-	myEnvironmentCubeTexture = myDefaultEnvironmentCubeTexture;
-	myShowSkybox = false;
 }
 
 void GraphicsEngine::AddPostProcessEffect(const std::shared_ptr<PostProcessEffect>& aEffect)
@@ -238,6 +245,19 @@ void GraphicsEngine::RemovePostProcessEffect(const std::shared_ptr<PostProcessEf
 	if (it != myPostProcessEffects.end())
 	{
 		myPostProcessEffects.erase(it);
+	}
+}
+
+void GraphicsEngine::SetColorGradingLut(const std::filesystem::path& aLutPath)
+{
+	Texture lut{};
+	if (LoadLutCubeTexture(aLutPath, lut))
+	{
+		myColorGradingLut = std::move(lut);
+	}
+	else
+	{
+		myColorGradingLut = myDefaultColorGradingLut;
 	}
 }
 
@@ -277,9 +297,10 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 		return false;
 	}
 
+	const std::string_view headerReplacement = aDescription.Domain == MaterialDomain::Particles ? "particlematerial.hlsli" : "material.hlsli";
 	{
 		const std::filesystem::path& path = myMaterialDomainShaders.at(aDescription.Domain);
-		MaterialShaderIncludeHandler handler(myShaderRoot / "Material", path, aDescription.MaterialShaderCode);
+		MaterialShaderIncludeHandler handler(myShaderRoot / "Material", path, aDescription.MaterialShaderCode, headerReplacement);
 		if (!myRHI.CompileShader(ShaderType::VertexShader, path, &handler, true, materialVS))
 		{
 			return false;
@@ -287,9 +308,12 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 	}
 
 	{
-		const std::filesystem::path& path = aDescription.BlendMode != BlendMode::Opaque ?
-			myMaterialShadingModelShaders.at(aDescription.ShadingModel) : (myShaderRoot / "Material" / "GBuffer_PS.hlsl");
-		MaterialShaderIncludeHandler handler(myShaderRoot / "Material", path, aDescription.MaterialShaderCode);
+		const std::filesystem::path& path = aDescription.Domain == MaterialDomain::Particles
+			? (myShaderRoot / "Particles" / "Particle_PS.hlsl")
+			: (aDescription.BlendMode != BlendMode::Opaque
+				? myMaterialShadingModelShaders.at(aDescription.ShadingModel)
+				: (myShaderRoot / "Material" / "GBuffer_PS.hlsl"));
+		MaterialShaderIncludeHandler handler(myShaderRoot / "Material", path, aDescription.MaterialShaderCode, headerReplacement);
 		if (!myRHI.CompileShader(ShaderType::PixelShader, path, &handler, true, materialPS))
 		{
 			return false;
@@ -316,22 +340,10 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 	if (materialBufferSource)
 	{
 		const RHIShaderReflectionInfo::ConstantBufferInfo& info = materialBufferSource->ConstantBuffers[materialBufferSource->ConstantBufferNameToIndex.at(materialBufferName)];
-		if (info.Size > Material::MATERIAL_BUFFER_SIZE)
-		{
-			GELOG(Error, "Material '{}' constant buffer requires {} bytes; the supported limit is {}.", aDescription.Name, info.Size, Material::MATERIAL_BUFFER_SIZE);
-			return false;
-		}
 
 		for (size_t i = 0; i < info.Members.size(); ++i)
 		{
 			const auto& member = info.Members[i];
-			if (member.Offset > Material::MATERIAL_BUFFER_SIZE || member.Size > Material::MATERIAL_BUFFER_SIZE - member.Offset ||
-				member.Size > sizeof(member.Default))
-			{
-				GELOG(Error, "Material '{}' parameter '{}' exceeds material parameter storage.", aDescription.Name, member.Name);
-				return false;
-			}
-
 			MaterialParameterInfo param;
 			param.Name = member.Name;
 			param.Type = MaterialHelpers::HLSLTypeToMaterialParameterType(member.Type);
@@ -352,8 +364,22 @@ bool GraphicsEngine::CreateMaterial(const MaterialDescription& aDescription, Mat
 	matPSOdesc.VertexShader.ByteCodeSize = materialVS.GetDataSize();
 	matPSOdesc.PixelShader.ByteCode = materialPS.GetDataPtr();
 	matPSOdesc.PixelShader.ByteCodeSize = materialPS.GetDataSize();
-	matPSOdesc.InputLayoutElements = Vertex::Description;
-	matPSOdesc.Topology = Topology::TriangleList;
+
+	if (aDescription.Domain == MaterialDomain::Particles)
+	{
+		matPSOdesc.GeometryShader.ByteCode = INTERNAL_Particle_GS_ByteCode;
+		matPSOdesc.GeometryShader.ByteCodeSize = sizeof(INTERNAL_Particle_GS_ByteCode);
+		matPSOdesc.InputLayoutElements = ParticleVertex::Description;
+		matPSOdesc.Topology = Topology::PointList;
+		matPSOdesc.DepthStencilState = DepthStencilState::ReadOnly;
+	}
+	else
+	{
+		matPSOdesc.InputLayoutElements = Vertex::Description;
+		matPSOdesc.Topology = Topology::TriangleList;
+		matPSOdesc.DepthStencilState = DepthStencilState::ReadWrite;
+	}
+
 	matPSOdesc.FillMode = RasterizerState::FillSolid;
 	matPSOdesc.CullMode = aDescription.CullMode;
 	matPSOdesc.BlendMode = aDescription.BlendMode;
@@ -405,9 +431,96 @@ bool GraphicsEngine::LoadTexture(const std::filesystem::path& aPath, Texture& ou
 	return myRHI.CreateTexture(aPath.stem().string(), fileData.data(), fileData.size(), outTexture);
 }
 
+bool GraphicsEngine::LoadLutCubeTexture(const std::filesystem::path& aPath, Texture& outTexture) const
+{
+	if (!std::filesystem::exists(aPath))
+	{
+		GELOG(Error, "Failed to load 3D LUT texture {}! File not found!", aPath.string());
+		return false;
+	}
+
+	std::ifstream file(aPath);
+	if (!file)
+	{
+		GELOG(Error, "Failed to load 3D LUT texture {}! Could not open file!", aPath.string());
+		return false;
+	}
+
+	std::vector<CU::Vector4f> lut_data(0);
+	unsigned size = 0;
+
+	std::string line;
+
+	while (std::getline(file, line))
+	{
+		size_t comment = line.find('#');
+		if (comment != std::string::npos)
+		{
+			line = line.substr(0, comment);
+		}
+
+		std::stringstream ss(line);
+		std::string keyword;
+
+		if (!(ss >> keyword))
+		{
+			continue;
+		}
+
+		if (keyword == "TITLE" || keyword == "DOMAIN_MIN" || keyword == "DOMAIN_MAX")
+		{
+			continue;
+		}
+		else if (keyword == "LUT_3D_SIZE")
+		{
+			ss >> size;
+			lut_data.reserve(size * size * size);
+			continue;
+		}
+		else if (keyword == "LUT_1D_SIZE" && size == 0)
+		{
+			GELOG(Error, "Failed to load 3D LUT texture {}! Only 3D LUTs are supported!", aPath.string());
+			return false;
+		}
+
+		if (lut_data.capacity() == 0)
+		{
+			GELOG(Error, "Failed to load 3D LUT texture {}! No size has been specified in file!", aPath.string());
+			return false;
+		}
+
+		try
+		{
+			float r = std::stof(keyword);
+			float g, b;
+
+			if (!(ss >> g >> b))
+			{
+				return false;
+			}
+
+			lut_data.emplace_back(CU::Vector4f(r, g, b, 1));
+		}
+		catch (...)
+		{
+			return false;
+		}
+	}
+
+	file.close();
+
+	myRHI.CreateLutCubeTexture(aPath.stem().string(), size, lut_data.data(), sizeof(CU::Vector4f), outTexture);
+	return true;
+}
+
 bool GraphicsEngine::CreateTexture(std::string_view aName, unsigned aWidth, unsigned aHeight, unsigned aNumMips, ResourceFormat aFormat, ResourceBindFlags aBindFlags, Texture& outTexture) const
 {
 	return myRHI.CreateTexture(aName, aWidth, aHeight, aNumMips, aFormat, aBindFlags, outTexture);
+}
+
+bool GraphicsEngine::CreateColorTexture(std::string_view aName, const std::array<uint8_t, 4>& aColor, Texture& outTexture) const
+{
+	return myRHI.CreateColorTexture(aName, aColor, outTexture);
 }
 
 bool GraphicsEngine::CreateShadowMap(std::string_view aName, unsigned aWidth, unsigned aHeight, Texture& outShadowMap, bool aCube) const
@@ -419,6 +532,7 @@ ID3D11Device* GraphicsEngine::GetNativeDevice() const
 {
 	return myRHI.GetNativeDevice();
 }
+
 ID3D11DeviceContext* GraphicsEngine::GetNativeDeviceContext() const
 {
 	return myRHI.GetNativeDeviceContext();
@@ -476,7 +590,7 @@ bool GraphicsEngine::UpdateAndSetConstantBufferInternal(GraphicsCommandList& inp
 	}
 
 	const Buffer& buffer = myConstantBuffers.at(aBufferId);
-	if (!inputCommandList.UpdateConstantBuffer(buffer, aData, aDataSize))
+	if (!inputCommandList.UpdateDataBuffer(buffer, aData, aDataSize))
 	{
 		return false;
 	}
@@ -753,7 +867,7 @@ bool GraphicsEngine::GenerateLUT()
 	Shader lutVS;
 	Shader lutPS;
 	{
-		const std::filesystem::path& path = myShaderRoot / "FullTexture_VS.hlsl";
+		const std::filesystem::path& path = myShaderRoot / "Internal" / "FullTexture_VS.hlsl";
 		MaterialShaderIncludeHandler handler(myShaderRoot, path, "");
 		if (!myRHI.CompileShader(ShaderType::VertexShader, path, &handler, true, lutVS))
 		{
@@ -762,7 +876,7 @@ bool GraphicsEngine::GenerateLUT()
 	}
 
 	{
-		const std::filesystem::path& path = myShaderRoot / "BRDF LUT_PS.hlsl";
+		const std::filesystem::path& path = myShaderRoot / "Internal" / "BRDF LUT_PS.hlsl";
 		MaterialShaderIncludeHandler handler(myShaderRoot, path, "");
 		if (!myRHI.CompileShader(ShaderType::PixelShader, path, &handler, true, lutPS))
 		{
@@ -821,8 +935,7 @@ void GraphicsEngine::ResetPipeline(GraphicsCommandList& inoutCommandList)
 	inoutCommandList.EndEvent(); // Reset Pipeline
 }
 
-std::vector<Light> GraphicsEngine::SetupLights(GraphicsCommandList& inoutCommandList, const RenderSnapshot& aSnapshot,
-	CU::Vector3f& outSunDirectionToLight)
+std::vector<Light> GraphicsEngine::SetupLights(GraphicsCommandList& inoutCommandList, const RenderSnapshot& aSnapshot, CU::Vector3f& outSunDirectionToLight)
 {
 	inoutCommandList.BeginEvent("Setup Lights");
 	// Clear last frame's direction if the sun was removed or switched off.
@@ -886,7 +999,7 @@ std::vector<Light> GraphicsEngine::SetupLights(GraphicsCommandList& inoutCommand
 				{
 					inoutCommandList.ChangeActiveOverrides(PipelineStage_PixelShader | PipelineStage_Rasterizer | PipelineStage_GeometryShader);
 
-					lb.Lights[0].Position = lightComponent->GetTransform().GetWorldPosition();
+					lb.Lights[0].Position = lightComponent->GetOwner()->GetTransform().GetWorldPosition();
 					UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::LightBuffer, lb, 3, PipelineStage_GeometryShader);
 
 					light.LightViewProjTexture[0] = RenderShadowMap(inoutCommandList, aSnapshot, lightComponent, pointLightShadowStartSlot++, PipelineStage_VertexShader | PipelineStage_GeometryShader) * NDCtoUV;
@@ -913,73 +1026,11 @@ std::vector<Light> GraphicsEngine::SetupLights(GraphicsCommandList& inoutCommand
 	return lights;
 }
 
-void GraphicsEngine::SortMeshObjects(const RenderSnapshot& aSnapshot, const CU::Vector3f& aCameraPosition, MeshList& outOpaqueMeshes, MeshList& outBlendedMeshes)
-{
-	outOpaqueMeshes.reserve(aSnapshot.Meshes.size());
-	outBlendedMeshes.reserve(aSnapshot.Meshes.size());
-
-	for (MeshComponentBase* meshComponent : aSnapshot.Meshes)
-	{
-		const std::shared_ptr<Mesh>& mesh = meshComponent->GetMesh()->GetMesh();
-		const std::vector<std::shared_ptr<MaterialAsset>>& materials = meshComponent->GetMaterialList();
-
-		bool addedOpaque = false;
-		bool addedBlended = false;
-
-		MaterialInterface* currentMaterial = nullptr;
-		for (const Mesh::Element& element : mesh->myElements)
-		{
-			MaterialInterface* elementMaterial = materials[element.MaterialIndex] == nullptr ? nullptr : materials[element.MaterialIndex]->GetMaterial().get();
-			if (elementMaterial != nullptr && elementMaterial != currentMaterial)
-			{
-				currentMaterial = elementMaterial;
-			}
-			else if (elementMaterial == nullptr)
-			{
-				currentMaterial = &myDefaultMaterial;
-			}
-
-			switch (currentMaterial->GetBlendMode())
-			{
-				case BlendMode::Opaque:
-					if (!addedOpaque)
-					{
-						outOpaqueMeshes.emplace_back(meshComponent);
-						addedOpaque = true;
-					}
-					break;
-
-				default:
-					if (!addedBlended)
-					{
-						outBlendedMeshes.emplace_back(meshComponent);
-						addedBlended = true;
-					}
-					break;
-			}
-		}
-	}
-
-	std::sort(outOpaqueMeshes.begin(), outOpaqueMeshes.end(), [&aCameraPosition](const MeshComponentBase* aLeft, const MeshComponentBase* aRight)
-		{
-			const float distanceToLeft = (aCameraPosition - aLeft->GetTransform().GetWorldPosition()).LengthSqr();
-			const float distanceToRight = (aCameraPosition - aRight->GetTransform().GetWorldPosition()).LengthSqr();
-			return distanceToLeft < distanceToRight;
-		});
-
-	std::sort(outBlendedMeshes.begin(), outBlendedMeshes.end(), [&aCameraPosition](const MeshComponentBase* aLeft, const MeshComponentBase* aRight)
-		{
-			const float distanceToLeft = (aCameraPosition - aLeft->GetTransform().GetWorldPosition()).LengthSqr();
-			const float distanceToRight = (aCameraPosition - aRight->GetTransform().GetWorldPosition()).LengthSqr();
-			return distanceToLeft > distanceToRight;
-		});
-}
-
 const Texture** GraphicsEngine::CreateDeferredTextures(GraphicsCommandList& inoutCommandList, const FrameBuffer& aFb, const MeshList aOpaqueMeshes)
 {
 	inoutCommandList.BeginEvent("Create Deferred Textures");
 
-	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::FrameBuffer, aFb, 0, PipelineStage_VertexShader | PipelineStage_PixelShader);
+	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::FrameBuffer, aFb, 0, PipelineStage_VertexShader | PipelineStage_GeometryShader | PipelineStage_PixelShader);
 
 	const Texture** gBuffer = myGBuffer.GetTexturePointers();
 	inoutCommandList.SetRenderTarget(gBuffer, GBuffer::NumGBufferTargets, &myDepthBuffer);
@@ -1025,6 +1076,7 @@ void GraphicsEngine::RenderDeferredLight(GraphicsCommandList& inoutCommandList, 
 	inoutCommandList.BeginEvent("Render Deferred Light");
 
 	inoutCommandList.SetShaderResources(aGBuffer, GBuffer::NumGBufferTargets, 0, PipelineStage_VertexShader | PipelineStage_PixelShader);
+	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::LightBuffer, aLb, 3, PipelineStage_PixelShader);
 
 	inoutCommandList.SetPipelineState(*myAmbientLightPSO);
 	inoutCommandList.Draw(4);
@@ -1068,7 +1120,7 @@ void GraphicsEngine::RenderDeferredLight(GraphicsCommandList& inoutCommandList, 
 
 void GraphicsEngine::RenderSkybox(GraphicsCommandList& inoutCommandList, const GraphicsRenderSettings& aSettings)
 {
-	if (!myShowSkybox || aSettings.RenderPass != RenderPassType::Light)
+	if (!myAmbientSettings.ShowSkybox || aSettings.RenderPass != RenderPassType::Light)
 	{
 		return;
 	}
@@ -1109,6 +1161,61 @@ void GraphicsEngine::RenderBlendedObjects(GraphicsCommandList& inoutCommandList,
 	inoutCommandList.EndEvent(); // Render Blended Objects
 }
 
+void GraphicsEngine::RenderParticles(GraphicsCommandList& inoutCommandList, const std::vector<ParticleComponent*>& aParticles)
+{
+	inoutCommandList.BeginEvent("Render Particles");
+
+	inoutCommandList.SetIndexBuffer(nullptr);
+
+	for (const ParticleComponent* component : aParticles)
+	{
+		const std::shared_ptr<ParticleSystemAsset>& particleSystemAsset = component->GetParticleSystem();
+		if (particleSystemAsset == nullptr)
+		{
+			continue;
+		}
+
+		const std::shared_ptr<ParticleSystem>& particleSystem = particleSystemAsset->GetParticleSystem();
+		if (particleSystem == nullptr)
+		{
+			continue;
+		}
+
+		ObjectBuffer ob;
+		ob.World = component->GetOwner()->GetTransform().GetWorldMatrix();
+		ob.HasSkinning = false;
+		UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::ObjectBuffer, ob, 1, PipelineStage_VertexShader);
+
+		for (ParticleEmitter* emitter : particleSystem->GetEmitters())
+		{
+			if (emitter == nullptr || !PrepareParticlemitterForRendering(*emitter) || !emitter->IsPlaying())
+			{
+				continue;
+			}
+
+			inoutCommandList.UpdateDynamicVertexBuffer(emitter->myVertexBuffer, emitter->myParticles.data(), sizeof(ParticleVertex) * emitter->myParticles.size());
+			inoutCommandList.SetVertexBuffer(&emitter->myVertexBuffer);
+
+			std::vector<const Texture*> textures(Material::MAX_MATERIAL_TEXTURE_COUNT);
+			for (size_t t = 0; t < Material::MAX_MATERIAL_TEXTURE_COUNT; ++t)
+			{
+				const unsigned textureIndex = static_cast<unsigned>(t);
+				if (emitter->mySettings->Textures.contains(textureIndex))
+				{
+					textures[t] = emitter->mySettings->Textures[textureIndex]->GetTexture().get();
+				}
+			}
+
+			inoutCommandList.SetShaderResources(textures.data(), textures.size(), 0, PipelineStage_VertexShader | PipelineStage_PixelShader);
+
+			inoutCommandList.SetPipelineState(emitter->mySettings->Material->GetMaterial()->GetPSO());
+			inoutCommandList.Draw(static_cast<unsigned>(emitter->myParticles.size()));
+		}
+	}
+
+	inoutCommandList.EndEvent(); // Render Particles
+}
+
 void GraphicsEngine::RunPostLightPostProcess(GraphicsCommandList& inoutCommandList, const GraphicsRenderSettings& aSettings)
 {
 	inoutCommandList.BeginEvent("Post Processing (Post Light)");
@@ -1135,13 +1242,45 @@ void GraphicsEngine::RunTonemap(GraphicsCommandList& inoutCommandList)
 	inoutCommandList.BeginEvent("Tonemap");
 
 	inoutCommandList.SetRenderTarget(&myBackBuffer, nullptr);
-
-	inoutCommandList.SetShaderResource(&myHDRBuffer, 0, PipelineStage_PixelShader);
+	const Texture* resources[] = { &myHDRBuffer, &myColorGradingLut };
+	inoutCommandList.SetShaderResources(resources, 2, 0, PipelineStage_PixelShader);
 
 	inoutCommandList.SetPipelineState(*myTonemapPSO);
 	inoutCommandList.Draw(4);
 
 	inoutCommandList.EndEvent(); // Tonemap
+}
+
+void GraphicsEngine::RenderLines(GraphicsCommandList& inoutCommandList, const FrameBuffer& aFb)
+{
+	inoutCommandList.BeginEvent("Line Render Pass");
+
+	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::FrameBuffer, aFb, 0, PipelineStage_VertexShader | PipelineStage_PixelShader);
+
+	inoutCommandList.SetShaderResource(nullptr, 1, PipelineStage_PixelShader);
+	inoutCommandList.SetRenderTarget(&myBackBuffer, nullptr);
+	inoutCommandList.SetPipelineState(*myLinePSO);
+	const std::vector<SimpleVertex>& lines = LineDrawer::Get().GetLines();
+	{
+		if (lines.size() != 0)
+		{
+			const int vertCount = static_cast<int>(lines.size());
+			for (int i = 0; i < vertCount; i += 2)
+			{
+				int remaining = vertCount - i;
+				int numVertsToDraw = CU::Math::Min(remaining, 2);
+				if (!inoutCommandList.UpdateDynamicVertexBuffer(myLineBuffer, lines.data() + i, sizeof(SimpleVertex) * numVertsToDraw))
+				{
+					continue;
+				}
+				inoutCommandList.SetVertexBuffer(&myLineBuffer);
+				inoutCommandList.Draw(static_cast<unsigned>(numVertsToDraw));
+			}
+		}
+
+		LineDrawer::Get().Clear();
+	}
+	inoutCommandList.EndEvent();
 }
 
 void GraphicsEngine::RenderScreenText(GraphicsCommandList& inoutCommandList, const RenderSnapshot& aSnapshot)
@@ -1303,43 +1442,11 @@ void GraphicsEngine::RenderScreenSprites(GraphicsCommandList& inoutCommandList, 
 				Material::MATERIAL_BUFFER_SIZE, 4, PipelineStage_VertexShader | PipelineStage_PixelShader);
 		}
 
-		inoutCommandList.UpdateDynamicVertexBuffer(mySpriteVertexBuffer, vertices, vertexCount);
+		inoutCommandList.UpdateDynamicVertexBuffer(mySpriteVertexBuffer, vertices, sizeof(Vertex) * vertexCount);
 		inoutCommandList.SetVertexBuffer(&mySpriteVertexBuffer);
 		inoutCommandList.Draw(vertexCount);
 	}
 
-	inoutCommandList.EndEvent();
-}
-
-void GraphicsEngine::RenderLines(GraphicsCommandList& inoutCommandList, const FrameBuffer& aFb)
-{
-	inoutCommandList.BeginEvent("Line Render Pass");
-
-	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::FrameBuffer, aFb, 0, PipelineStage_VertexShader | PipelineStage_PixelShader);
-
-	inoutCommandList.SetShaderResource(nullptr, 1, PipelineStage_PixelShader);
-	inoutCommandList.SetRenderTarget(&myBackBuffer, nullptr);
-	inoutCommandList.SetPipelineState(*myLinePSO);
-	const std::vector<SimpleVertex>& lines = LineDrawer::Get().GetLines();
-	{
-		if (lines.size() != 0)
-		{
-			const int vertCount = static_cast<int>(lines.size());
-			for (int i = 0; i < vertCount; i += 2)
-			{
-				int remaining = vertCount - i;
-				int numVertsToDraw = CU::Math::Min(remaining, 2);
-				if (!inoutCommandList.UpdateDynamicVertexBuffer(myLineBuffer, lines.data() + i, numVertsToDraw))
-				{
-					continue;
-				}
-				inoutCommandList.SetVertexBuffer(&myLineBuffer);
-				inoutCommandList.Draw(static_cast<unsigned>(numVertsToDraw));
-			}
-		}
-
-		LineDrawer::Get().Clear();
-	}
 	inoutCommandList.EndEvent();
 }
 
@@ -1395,7 +1502,9 @@ const Texture* GraphicsEngine::RenderShadowCascade(GraphicsCommandList& inoutCom
 	lightView(4, 1) += offset.x;
 	lightView(4, 2) += offset.y;
 
-	const CU::Matrix4f lightProj = CU::Matrix4f::CreateOrthographicProjection(-radius, radius, -radius, radius, -radius * 4.0f, radius * 4.0f);
+	const float nearPlane = -radius * 4.0f;
+	const float farPlane = radius * 4.0f;
+	const CU::Matrix4f lightProj = CU::Matrix4f::CreateOrthographicProjection(-radius, radius, -radius, radius, nearPlane, farPlane);
 
 	FrameBuffer lightFb;
 	lightFb.View = lightView;
@@ -1407,9 +1516,14 @@ const Texture* GraphicsEngine::RenderShadowCascade(GraphicsCommandList& inoutCom
 	inoutCommandList.ClearDepthStencilView(shadowMap);
 	inoutCommandList.SetRenderTarget(nullptr, 0, &shadowMap);
 
-	for (const MeshComponentBase* meshComponent : aSnapshot.Meshes)
+	const Frustum cascadeFrustum = CameraComponent::GetFrustum(lightProj, lightView.GetFastInverse(), nearPlane, farPlane);
+
+	for (const MeshComponentBase* meshComponent : aSnapshot.AllMeshes)
 	{
-		RenderMesh(inoutCommandList, meshComponent, 0);
+		if (!cascadeFrustum.IsCulled(meshComponent->GetCullingSphere()))
+		{
+			RenderMesh(inoutCommandList, meshComponent, 0);
+		}
 	}
 
 	inoutCommandList.SetRenderTarget(nullptr, 0, nullptr);
@@ -1436,9 +1550,15 @@ CU::Matrix4f GraphicsEngine::RenderShadowMap(GraphicsCommandList& inoutCommandLi
 	inoutCommandList.ClearDepthStencilView(shadowMap);
 	inoutCommandList.SetRenderTarget(nullptr, 0, &shadowMap);
 
-	for (const MeshComponentBase* meshComponent : aSnapshot.Meshes)
+	const CU::Spheref lightRangeSphere(aLight->GetOwner()->GetTransform().GetWorldPosition(), aLight->GetRadius());
+
+	for (const MeshComponentBase* meshComponent : aSnapshot.AllMeshes)
 	{
-		RenderMesh(inoutCommandList, meshComponent, 0);
+		const CU::Spheref cullingSphere = meshComponent->GetCullingSphere();
+		if (CU::IntersectionSphereSphere(lightRangeSphere, cullingSphere))
+		{
+			RenderMesh(inoutCommandList, meshComponent, 0);
+		}
 	}
 
 	inoutCommandList.SetRenderTarget(nullptr, 0, nullptr);
@@ -1474,6 +1594,20 @@ bool GraphicsEngine::PrepareMeshForRendering(const Mesh& aMesh) const
 	return true;
 }
 
+bool GraphicsEngine::PrepareParticlemitterForRendering(const ParticleEmitter& aEmitter) const
+{
+	if (!aEmitter.myVertexBuffer.IsValid())
+	{
+		if (!myRHI.CreateDynamicVertexBuffer("particleBoy", sizeof(ParticleVertex), aEmitter.myParticles.size(), aEmitter.myVertexBuffer))
+		{
+			GELOG(Warning, "Could not prepare particle emitter {}! Dynamic Vertex Buffer could not be created!", "particleBoy");
+			return false;
+		}
+	}
+
+	return true;
+}
+
 void GraphicsEngine::RenderMesh(GraphicsCommandList& inoutCommandList, const MeshComponentBase* aWorldObject, char aOpaqueOrBlended)
 {
 	const std::shared_ptr<Mesh>& mesh = aWorldObject->GetMesh()->GetMesh();
@@ -1488,9 +1622,22 @@ void GraphicsEngine::RenderMesh(GraphicsCommandList& inoutCommandList, const Mes
 	inoutCommandList.SetIndexBuffer(&mesh->myIndexBuffer);
 
 	ObjectBuffer ob;
-	ob.World = aWorldObject->GetOwner()->GetTransform().GetWorldMatrix();
-	ob.WorldInvT = ob.World.GetInverse().GetTranspose();
 	ob.HasSkinning = mesh->HasSkeleton();
+	ob.IsInstanced = aWorldObject->IsInstanced();
+
+	const std::vector<InstanceData>& instanceData = aWorldObject->GetInstanceData();
+	const unsigned numInstances = static_cast<unsigned>(instanceData.size());
+	if (ob.IsInstanced)
+	{
+		inoutCommandList.UpdateDataBuffer(myInstanceBuffer, instanceData.data(), numInstances * sizeof(InstanceData));
+		const Buffer* instanceBuffer[] = { &myInstanceBuffer };
+		inoutCommandList.SetShaderResources(instanceBuffer, 1, 20, PipelineStage_VertexShader);
+	}
+	else
+	{
+		ob.World = aWorldObject->GetOwner()->GetTransform().GetWorldMatrix();
+		ob.WorldInvT = ob.World.GetInverse().GetTranspose();
+	}
 	UpdateAndSetConstantBuffer(inoutCommandList, ConstantBuffer::ObjectBuffer, ob, 1, PipelineStage_VertexShader);
 
 	if (ob.HasSkinning)
@@ -1542,6 +1689,13 @@ void GraphicsEngine::RenderMesh(GraphicsCommandList& inoutCommandList, const Mes
 		inoutCommandList.SetShaderResources(textures.data(), textures.size(), 0, PipelineStage_VertexShader | PipelineStage_PixelShader);
 
 		inoutCommandList.SetPipelineState(currentMaterial->GetPSO());
-		inoutCommandList.DrawIndexed(element.NumIndices, element.IndexOffset);
+		if (ob.IsInstanced)
+		{
+			inoutCommandList.DrawIndexedInstanced(element.NumIndices, element.IndexOffset, numInstances);
+		}
+		else
+		{
+			inoutCommandList.DrawIndexed(element.NumIndices, element.IndexOffset);
+		}
 	}
 }

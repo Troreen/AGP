@@ -1,8 +1,8 @@
 #pragma once
 #include "GameFramework/World/Actor.h"
 #include "Vector2.hpp"
-#include <cstdint>
 
+#include <cstdint>
 #include <GraphicsEngine/RenderSnapshot.h>
 
 class CameraComponent;
@@ -18,6 +18,7 @@ public:
 
 	~World();
 	World(const World&) = delete;
+	World& operator=(World&&);
 	World& operator=(const World&) = delete;
 	Actor* SpawnActor(std::string_view name);
 	Actor* FindActor(std::string_view name) const;
@@ -40,16 +41,18 @@ private:
 	std::vector<Component*> CollectFrame();
 	void RemoveDestroyed();
 	void RegisterCollider(Component& component);
-	std::unique_ptr<CollisionSystem> myCollisionSystem;
-
-	std::vector<std::unique_ptr<Actor>> myActors;
-	std::unordered_map<std::string, size_t> myActorNameCount;
-	CameraComponent* myCamera = nullptr;
-	bool myUpdating = false;
-	bool myClearing = false;
-	double mySimulationTime = 0.0;
-
-	Actor* myDebugActor;
 
 	RenderSnapshot myWorldSnapshot;
+
+	std::unordered_map<std::string, size_t> myActorNameCount;
+	std::vector<std::unique_ptr<Actor>> myActors;
+
+	std::unique_ptr<CollisionSystem> myCollisionSystem;
+
+	CameraComponent* myCamera = nullptr;
+
+	double mySimulationTime = 0.0;
+
+	bool myUpdating = false;
+	bool myClearing = false;
 };

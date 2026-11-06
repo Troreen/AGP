@@ -1,5 +1,7 @@
 #pragma once
 
+#include <random>
+
 namespace CommonUtilities
 {
 	class InputMapper;
@@ -15,6 +17,7 @@ class Scheduler;
 class CoroutineHandler;
 class CameraComponent;
 class Actor;
+class SceneManager;
 
 class ServiceLocator
 {
@@ -37,8 +40,10 @@ public:
 	EngineSettings& GetEngineSettings() const;
 	Scheduler& GetScheduler() const;
 	CoroutineHandler& GetCoroutineHandler() const;
+	SceneManager& GetSceneManager() const;
+	std::mt19937& GetRngEngine();
 
-	CameraComponent& GetActiveCamera() const;
+	CameraComponent* GetActiveCamera() const;
 	void SetActiveCamera(CameraComponent* aCamera);
 
 	Actor* GetPlayer() const;
@@ -64,6 +69,8 @@ private:
 	CoroutineHandler* myCouroutineHandler;
 	CameraComponent* mySceneCamera;
 	Actor* myPlayer;
+	SceneManager* mySceneManager;
+	std::mt19937 myRngEngine;
 
 	float myDeltaTime;
 };

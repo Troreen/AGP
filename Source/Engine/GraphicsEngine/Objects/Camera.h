@@ -23,8 +23,6 @@ private:
 	float myAspectRatio;
 
     CommonUtilities::Matrix4f myProjection;
-    CommonUtilities::Matrix4f myNearProjection;
-    CommonUtilities::Matrix4f myMidProjection;
-    CommonUtilities::Matrix4f myFarProjection;
+    CommonUtilities::Matrix4f myCascadeProjections[DirectionalLightComponent::ShadowCascadeCount];
 };
 

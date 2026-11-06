@@ -3,7 +3,6 @@
 
 #include <algorithm>
 #include <CommonUtilities/Maths.hpp>
-#include <d3d11_1.h>
 #include <GraphicsEngine/GraphicsEngine.h>
 
 namespace

@@ -116,112 +116,64 @@ void GraphicsCommandList::SetRenderTarget(const Texture** aTargetList, unsigned 
 	myContext->RSSetViewports(1, &viewport);
 }
 
-bool GraphicsCommandList::UpdateConstantBuffer(const Buffer& aConstantBuffer, const void* aBufferData, size_t aBufferDataSize) const
+bool GraphicsCommandList::UpdateDataBuffer(const Buffer& aDataBuffer, const void* aBufferData, size_t aBufferDataSize) const
 {
 	ensure(!IsReadyForExecution());
 
-	if (!aConstantBuffer.IsValid() || aConstantBuffer.myType != BufferType::ConstantBuffer)
+	if (!aDataBuffer.IsValid() || (aDataBuffer.myType != BufferType::ConstantBuffer && aDataBuffer.myType != BufferType::StructuredBuffer))
 	{
-		LOG(CmdLog, Error, "Failed to update constant buffer! Buffer is either null or invalid type!");
+		LOG(CmdLog, Error, "Failed to update data buffer! Buffer is either null or invalid type!");
 		return false;
 	}
 
-	if (aBufferDataSize > aConstantBuffer.mySize)
+	if (aBufferDataSize > aDataBuffer.mySize)
 	{
-		LOG(CmdLog, Error, "Failed to update constant buffer {}! Data provided is larger than the buffer capacity!", aConstantBuffer.myName);
+		LOG(CmdLog, Error, "Failed to update data buffer {}! Data provided is larger than the buffer capacity!", aDataBuffer.myName);
 		return false;
 	}
 
 	D3D11_MAPPED_SUBRESOURCE resource = {};
 
-	const HRESULT result = myContext->Map(aConstantBuffer.myBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
+	const HRESULT result = myContext->Map(aDataBuffer.myBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
 
 	if (FAILED(result))
 	{
-		LOG(CmdLog, Error, "Failed to update constant buffer {}! Failed to map buffer!", aConstantBuffer.myName);
+		LOG(CmdLog, Error, "Failed to update data buffer {}! Failed to map buffer!", aDataBuffer.myName);
 		return false;
 	}
 
-	memcpy_s(resource.pData, aConstantBuffer.mySize, aBufferData, aBufferDataSize);
-	myContext->Unmap(aConstantBuffer.myBuffer.Get(), 0);
+	memcpy_s(resource.pData, aDataBuffer.mySize, aBufferData, aBufferDataSize);
+	myContext->Unmap(aDataBuffer.myBuffer.Get(), 0);
 
 	return true;
 }
 
-bool GraphicsCommandList::UpdateDynamicVertexBuffer(const Buffer& aVertexBuffer, const Vertex* aVertices, size_t aVertexCount) const
+bool GraphicsCommandList::UpdateDynamicVertexBuffer(const Buffer& aBuffer, const void* aBufferData, size_t aBufferDataSize) const
 {
-	if (!aVertexBuffer.IsValid())
+	ensure(!IsReadyForExecution());
+	if (!aBuffer.IsValid() && aBuffer.myType != BufferType::DynamicVertexBuffer)
 	{
-		LOG(CmdLog, Error, "Failed to update Vertex buffer! Buffer is either null!");
+		LOG(CmdLog, Error, "Failed to update dynamic vertex buffer! Buffer is either null or invalid type!");
 		return false;
 	}
 
-	if (aVertexCount == 0)
+	if (aBufferDataSize > aBuffer.mySize)
 	{
-		LOG(CmdLog, Error, "Failed to update Vertex buffer {}! Data provided is larger than buffer capacity!", aVertexBuffer.myName);
+		LOG(CmdLog, Error, "Failed to update dynamic vertex buffer {}! Data provided is larger than the buffer capacity!");
 		return false;
 	}
 
-	if (aVertexBuffer.myType != BufferType::VertexBuffer)
-	{
-		LOG(CmdLog, Error, "Failed to update Vertex buffer! Buffer  invalid type!");
-		return false;
-	}
+	D3D11_MAPPED_SUBRESOURCE bufferResource = {};
 
-	const size_t dataSize = sizeof(Vertex) * aVertexCount;
-	if (dataSize > aVertexBuffer.mySize)
-	{
-		return false;
-	}
-
-	D3D11_MAPPED_SUBRESOURCE mappedResource = {};
-	const HRESULT result = myContext->Map(aVertexBuffer.myBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	const HRESULT result = myContext->Map(aBuffer.myBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &bufferResource);
 	if (FAILED(result))
 	{
+		LOG(CmdLog, Error, "Failed to update dynamic vertex buffer! Could not map buffer!");
 		return false;
 	}
 
-	memcpy(mappedResource.pData, aVertices, dataSize);
-	myContext->Unmap(aVertexBuffer.myBuffer.Get(), 0);
-
-	return true;
-}
-
-bool GraphicsCommandList::UpdateDynamicVertexBuffer(const Buffer& aVertexBuffer, const SimpleVertex* aVertices, size_t aVertexCount) const
-{
-	if (!aVertexBuffer.IsValid())
-	{
-		LOG(CmdLog, Error, "Failed to update Vertex buffer! Buffer is either null!");
-		return false;
-	}
-
-	if (aVertexCount == 0)
-	{
-		LOG(CmdLog, Error, "Failed to update Vertex buffer {}! Data provided is larger than buffer capacity!", aVertexBuffer.myName);
-		return false;
-	}
-
-	if (aVertexBuffer.myType != BufferType::VertexBuffer)
-	{
-		LOG(CmdLog, Error, "Failed to update Vertex buffer! Buffer  invalid type!");
-		return false;
-	}
-
-	const size_t dataSize = sizeof(SimpleVertex) * aVertexCount;
-	if (dataSize > aVertexBuffer.mySize)
-	{
-		return false;
-	}
-
-	D3D11_MAPPED_SUBRESOURCE mappedResource = {};
-	const HRESULT result = myContext->Map(aVertexBuffer.myBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	if (FAILED(result))
-	{
-		return false;
-	}
-
-	memcpy(mappedResource.pData, aVertices, dataSize);
-	myContext->Unmap(aVertexBuffer.myBuffer.Get(), 0);
+	memcpy_s(bufferResource.pData, aBuffer.mySize, aBufferData, aBufferDataSize);
+	myContext->Unmap(aBuffer.myBuffer.Get(), 0);
 
 	return true;
 }
@@ -334,6 +286,15 @@ void GraphicsCommandList::SetPipelineState(const PipelineStateObject& aPSO) cons
 		myContext->OMSetBlendState(aPSO.myBlendState.Get(), blendFactor, 0xffffffff);
 	}
 
+	if (IsOverrideActive(PipelineStage_Depth))
+	{
+		myContext->OMSetDepthStencilState(myOverridePipelineState.myDepthStencilState.Get(), 0);
+	}
+	else
+	{
+		myContext->OMSetDepthStencilState(aPSO.myDepthStencilState.Get(), 0);
+	}
+
 	const std::string message = std::format("Change Pipeline State {}", aPSO.myName);
 	SetMarker(message);
 }
@@ -352,6 +313,34 @@ void GraphicsCommandList::SetShaderResources(const Texture* const* aResourcesLis
 		if (const Texture* currentTexture = aResourcesList[t])
 		{
 			srvs[t] = currentTexture->mySRV.Get();
+		}
+	}
+
+	if (aStages & PipelineStage_VertexShader)
+	{
+		myContext->VSSetShaderResources(aStartSlot, static_cast<unsigned>(srvs.size()), srvs.data());
+	}
+
+	if (aStages & PipelineStage_GeometryShader)
+	{
+		myContext->GSSetShaderResources(aStartSlot, static_cast<unsigned>(srvs.size()), srvs.data());
+	}
+
+	if (aStages & PipelineStage_PixelShader)
+	{
+		myContext->PSSetShaderResources(aStartSlot, static_cast<unsigned>(srvs.size()), srvs.data());
+	}
+}
+
+void GraphicsCommandList::SetShaderResources(const Buffer* const* aResourcesList, size_t aNumResources, unsigned aStartSlot, PipelineStages aStages) const
+{
+	std::vector<ID3D11ShaderResourceView*> srvs(aNumResources);
+
+	for (size_t t = 0; t < aNumResources; ++t)
+	{
+		if (const Buffer* currentBuffer = aResourcesList[t])
+		{
+			srvs[t] = currentBuffer->mySRV.Get();
 		}
 	}
 
@@ -406,11 +395,25 @@ void GraphicsCommandList::Draw(unsigned aNumVertices) const
 	myContext->Draw(aNumVertices, 0);
 }
 
+void GraphicsCommandList::DrawInstanced(unsigned aNumVertices, unsigned aInstanceCount) const
+{
+	ensure(!IsReadyForExecution());
+
+	myContext->DrawInstanced(aNumVertices, aInstanceCount, 0, 0);
+}
+
 void GraphicsCommandList::DrawIndexed(unsigned aIndexCount, unsigned aIndexOffset) const
 {
 	ensure(!IsReadyForExecution());
 
 	myContext->DrawIndexed(aIndexCount, aIndexOffset, 0);
+}
+
+void GraphicsCommandList::DrawIndexedInstanced(unsigned aIndexCount, unsigned aIndexOffset, unsigned aInstanceCount) const
+{
+	ensure(!IsReadyForExecution());
+
+	myContext->DrawIndexedInstanced(aIndexCount, aInstanceCount, aIndexOffset, 0, 0);
 }
 
 void GraphicsCommandList::SetMarker(std::string_view aMarker) const

@@ -1,5 +1,5 @@
-#include "Common.hlsli"
-#include "Lighting.hlsli"
+#include "../Internal/Common.hlsli"
+#include "../Internal/Lighting.hlsli"
 #include "Material.hlsli"
 #include "MaterialParameters.hlsli"
 
@@ -105,7 +105,10 @@ float4 main(VStoPS aPixel) : SV_TARGET
         case 7: // Local Normal Pass
             return float4(sampleNormal, 1, 1);
         
-        case 8: // World Normal Pass
+        case 8: // Vertex World Normal Pass
+            return DebugNormal(parameters.VertexNormal);
+        
+        case 9: // World Normal Pass
             return DebugNormal(parameters.Normal);
     }
     

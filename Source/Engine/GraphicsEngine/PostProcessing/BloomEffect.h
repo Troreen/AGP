@@ -7,9 +7,10 @@ class BloomEffect : public PostProcessEffect
 public:
     struct Settings
     {
-        float LuminanceExponent = 1.f;
-        float LuminanceThreshhold = 1.f;
-        CommonUtilities::Vector2f __padding;
+		float FilterRadius = 0.0075f;
+        float Strength = 0.3f;
+		float Threshold = 1.0f;
+		float Softness = 0.5f;
     };
 
     ~BloomEffect() override;
@@ -23,12 +24,11 @@ protected:
 	void RunPostLight(GraphicsCommandList& inoutCommandList, PostProcessCache& inoutCache, const Texture* aBackBuffer) override;
 
 private:
-    void Blur(GraphicsCommandList& inoutCommandList, PostProcessCache& inoutCache, const PipelineStateObject& aBlurPSO, int aCurrentSlot);
-
-    std::unique_ptr<PipelineStateObject> myLuminancePSO;
-    std::unique_ptr<PipelineStateObject> myGaussianBlurHPSO;
-    std::unique_ptr<PipelineStateObject> myGaussianBlurVPSO;
-    std::unique_ptr<PipelineStateObject> myBloomPSO;
+    std::unique_ptr<PipelineStateObject> myDownscalePSO;
+    std::unique_ptr<PipelineStateObject> myUpscalePSO;
+	std::unique_ptr<PipelineStateObject> myBloom01DownsamplePSO;
+	std::unique_ptr<PipelineStateObject> myBloomLuminancePSO;
+	std::unique_ptr<PipelineStateObject> myBloomPSO;
 
 	std::vector<Texture> myResizeTextures;
 

@@ -16,15 +16,12 @@
 #include <AISystems/Pathfinder.hpp>
 #include <GameFramework/AssetHandling/AssetRegistry.h>
 #include <GameFramework/AssetHandling/FontAsset.h>
-#include <GameFramework/AssetHandling/MaterialAsset.h>
-#include <GameFramework/AssetHandling/MeshAsset.h>
-#include <GameFramework/AssetHandling/NavMeshAsset.h>
+#include <GameFramework/AssetHandling/SceneAsset.h>
 #include <GameFramework/AudioManager.h>
 #include <GameFramework/Coroutine/Scheduler.h>
-#include <GameFramework/Scenes/SceneWorldBuilder.h>
+#include <GameFramework/Scenes/SceneManager.h>
 #include <GameFramework/ServiceLocator.h>
 #include <GameFramework/Settings/EngineSettings.h>
-#include <GameFramework/UnrealSceneImporter/UnrealSceneImporter.h>
 #include <GameFramework/World/World.h>
 #include <GraphicsEngine/Drawers/SpriteDrawer.h>
 #include <GraphicsEngine/PostProcessing/BloomEffect.h>
@@ -38,6 +35,7 @@
 #include <imgui.h>
 #include <imgui_impl_dx11.h>
 #include <imgui_impl_win32.h>
+
 DECLARE_LOG_CATEGORY_WITH_NAME(LogGameApplication, Game_Application, Verbose);
 
 DEFINE_LOG_CATEGORY(LogGameApplication);
@@ -84,7 +82,7 @@ namespace
 
 GameApplication::GameApplication()
 {
-	RegisterCustomComponents(myComponentRegistry);
+	RegisterCustomComponents(ServiceLocator::GetInstance().GetSceneManager().GetCustomComponentRegistry());
 }
 
 GameApplication::~GameApplication()
@@ -95,9 +93,12 @@ GameApplication::~GameApplication()
 int GameApplication::Run(Game& aGame)
 {
 	std::exception_ptr failure;
+#ifndef _DEBUG
 	try
 	{
+#endif // !_DEBUG
 		RunSession(aGame);
+#ifndef _DEBUG
 	}
 	catch (...)
 	{
@@ -116,6 +117,7 @@ int GameApplication::Run(Game& aGame)
 			MessageBoxA(myMainWindowHandle, "Unknown application error", "AGP Game error", MB_OK | MB_ICONERROR);
 		}
 	}
+#endif // !_DEBUG
 
 	// Clean up after normal exit or failure, preserving the first exception.
 	Cleanup(aGame, failure);
@@ -153,7 +155,6 @@ void GameApplication::RunSession(Game& aGame)
 	settings.SetApplicationApplyCallback([this](const ApplicationSettings& requested)
 	{
 		ApplicationSettings effective = myWindowSettings.Apply(myMainWindowHandle, requested, myApplicationSettings.Mode);
-		myInputHandler.SetMouseDeltaEnabled(effective.EnableMouseLook);
 		myApplicationSettings = effective;
 		return effective;
 	});
@@ -169,23 +170,6 @@ void GameApplication::RunSession(Game& aGame)
 	myGameInitializationStarted = true;
 	InitializeGameSession(aGame, graphics);
 	RunMainLoop(aGame, graphics);
-}
-
-bool GameApplication::RequestSceneLoad(const std::filesystem::path& aScene)
-{
-	if (!myAcceptSceneRequests)
-	{
-		return false;
-	}
-	// pendingScene is consumed in the next frame by the update loop
-	myPendingScene = aScene;
-	return true;
-}
-
-// TODO: this probably should be moved to a sceneloader class or similar, since it is not really a GameApplication concern.
-bool GameApplication::ReloadCurrentScene()
-{
-	return myCurrentScene && RequestSceneLoad(*myCurrentScene);
 }
 
 GraphicsEngine& GameApplication::InitializeWindowAndGraphics()
@@ -274,14 +258,23 @@ GraphicsEngine& GameApplication::InitializeWindowAndGraphics()
 	graphics.AddPostProcessEffect(ssao);
 
 	std::shared_ptr<BloomEffect> bloom = std::make_shared<BloomEffect>();
-	bloom->GetSettings().LuminanceThreshhold = 1.3f;
-	bloom->GetSettings().LuminanceExponent = 1.5f;
+	bloom->GetSettings().FilterRadius = 0.005f;
+	bloom->GetSettings().Strength = 1.0f;
+	bloom->GetSettings().Threshold = 1.0f;
+	bloom->GetSettings().Softness = 0.6f;
 	graphics.AddPostProcessEffect(bloom);
 
 	if (!graphics.Initialize(myMainWindowHandle, myApplicationSettings.ShaderFolder) || 
 		!graphics.CreateCommandList("Game Scene", myCommandList))
 	{
 		throw std::runtime_error("Could not initialize graphics engine: ");
+	}
+
+	// TODO: Move to SceneManager such that each scene can have it's own color grading.
+	const std::filesystem::path colorGradingLutPath = myContentRoot / "Textures" / "__ColorGrading_LUT__.cube";
+	if (std::filesystem::exists(colorGradingLutPath))
+	{
+		graphics.SetColorGradingLut(colorGradingLutPath);
 	}
 
 	ImGui::CreateContext();
@@ -322,6 +315,18 @@ void GameApplication::InitializeServices()
 	// The buses must exist before applying saved volumes.
 	EngineSettings& settings = services.GetEngineSettings();
 	ApplySoundSettings(settings.GetSoundSettings());
+
+	SceneManager& sceneManager = services.GetSceneManager();
+	sceneManager.OnLoadScene().Subscribe([this]() {
+		// Select a debug camera if the scene did not provide an active camera.
+		myToggleDebugCameraRequested = false;
+		myDebugCamera.Reset();
+		World* world = ServiceLocator::GetInstance().GetSceneManager().GetLoadedWorld();
+		if (world != nullptr && !world->GetActiveCamera())
+		{
+			world->SetActiveCamera(myDebugCamera.Ensure(*world, myClientSize));
+		}
+	});
 }
 
 void GameApplication::ApplySoundSettings(const SoundSettings& soundSettings)
@@ -335,8 +340,6 @@ void GameApplication::ApplySoundSettings(const SoundSettings& soundSettings)
 void GameApplication::InitializeInputAndApplicationControls()
 {
 	myInputHandler.SetWindowHandle(myMainWindowHandle);
-	myInputHandler.SetAutoMouseCapture(false);
-	myInputHandler.SetMouseDeltaEnabled(myApplicationSettings.EnableMouseLook);
 
 	CU::InputMapper& input = ServiceLocator::GetInstance().GetInputMapper();
 	input.Init(&myInputHandler, &myXInputHandler);
@@ -359,6 +362,13 @@ void GameApplication::InitializeInputAndApplicationControls()
 			myToggleDebugCameraRequested = true;
 		}
 	}));
+	myApplicationInputListenerIds.push_back(input.AddEventListener("ToggleDebugWindow", [this](const CommonUtilities::InputEvent& anEvent)
+		{
+			if (anEvent.inputData.isPressed)
+			{
+				myShowDebugWindow = !myShowDebugWindow;
+			}
+		}));
 	if (myApplicationSettings.EnableRenderDiagnostics)
 	{
 		myApplicationInputListenerIds.push_back(input.AddEventListener("PreviousRenderPass", [this](const CommonUtilities::InputEvent& anEvent)
@@ -386,19 +396,22 @@ void GameApplication::InitializeInputAndApplicationControls()
 
 void GameApplication::InitializeGameSession(Game& aGame, GraphicsEngine& aGraphics)
 {
-	aGame.Initialize(*this);
+	aGame.Initialize();
 
-	// Prefer Content/EAP.json 
-	if (!myPendingScene)
+	// Prefer Content/EAP.json
+	SceneManager& sceneManager = ServiceLocator::GetInstance().GetSceneManager();
+	if (!sceneManager.HasRequestedScene())
 	{
-		const std::filesystem::path eapPath = myContentRoot / "EAP.json";
-		if (std::filesystem::exists(eapPath))
+		AssetRegistry& assets = ServiceLocator::GetInstance().GetAssetRegistry();
+		const std::shared_ptr<SceneAsset> eapScene = assets.GetAsset<SceneAsset>("EAP.json");
+
+		if (eapScene != nullptr)
 		{
-			RequestSceneLoad(eapPath);
+			sceneManager.LoadScene(eapScene);
 		}
 		else
 		{
-			RequestSceneLoad(myApplicationSettings.InitialScene);
+			sceneManager.LoadScene(assets.GetAsset<SceneAsset>(myApplicationSettings.InitialScene));
 		}
 	}
 
@@ -406,7 +419,7 @@ void GameApplication::InitializeGameSession(Game& aGame, GraphicsEngine& aGraphi
 	SetForegroundWindow(myMainWindowHandle);
 	aGraphics.Present();
 
-	ProcessPendingSceneLoad(aGame);
+	sceneManager.ProcessSceneLoadRequest();
 }
 
 void GameApplication::RunMainLoop(Game& aGame, GraphicsEngine& aGraphics)
@@ -423,22 +436,52 @@ void GameApplication::RunMainLoop(Game& aGame, GraphicsEngine& aGraphics)
 		{
 			break;
 		}
-		if (myWindowSettings.MonitorChanged(myMainWindowHandle))
+
+		// TODO: Ask Tarik why this is here. Moving the windows between monitors works without it.
+		/*if (myWindowSettings.MonitorChanged(myMainWindowHandle))
 		{
 			ServiceLocator::GetInstance().GetEngineSettings().UpdateApplicationSettings(myApplicationSettings);
-		}
+		}*/
 
 		// Process any pending scene load requests before ticking the timer, so that the first frame of a new scene is not delayed by a full frame time.
-		if (myPendingScene)
-		{
-			ProcessPendingSceneLoad(aGame);
-			timer.Update();
-		}
+		SceneManager& sceneManager = ServiceLocator::GetInstance().GetSceneManager();
+		sceneManager.ProcessSceneLoadRequest();
 
 		// skip updating and rendering if the window is minimized or has no client area
 		if (!PrepareRenderTargetSize(aGraphics))
 		{
 			continue;
+		}
+
+		ImGui_ImplDX11_NewFrame();
+		ImGui_ImplWin32_NewFrame();
+
+		ImGui::NewFrame();
+
+		// TODO: Remove after sprint review!
+		if (myShowDebugWindow)
+		{
+			AssetRegistry& assets = ServiceLocator::GetInstance().GetAssetRegistry();
+			if (ImGui::Button("Level 1", ImVec2(100, 25)))
+			{
+				sceneManager.LoadScene(assets.GetAsset<SceneAsset>("Lvl_Blistering_Tundra_Level.json"));
+				myShowDebugWindow = false;
+			}
+			if (ImGui::Button("Level 2", ImVec2(100, 25)))
+			{
+				sceneManager.LoadScene(assets.GetAsset<SceneAsset>("Lvl_Forsaken_Castle_Level.json"));
+				myShowDebugWindow = false;
+			}
+			if (ImGui::Button("Diorama", ImVec2(100, 25)))
+			{
+				sceneManager.LoadScene(assets.GetAsset<SceneAsset>("Lvl_01_Diorama_Level.json"));
+				myShowDebugWindow = false;
+			}
+			if (ImGui::Button("Asset Museum", ImVec2(100, 25)))
+			{
+				sceneManager.LoadScene(assets.GetAsset<SceneAsset>("Lvl_Asset_Museum_Level.json"));
+				myShowDebugWindow = false;
+			}
 		}
 
 		// Tick
@@ -459,19 +502,21 @@ void GameApplication::RunMainLoop(Game& aGame, GraphicsEngine& aGraphics)
 		// Handle debug camera toggle
 		if (std::exchange(myToggleDebugCameraRequested, false))
 		{
-			myDebugCamera.Toggle(*myWorld, myClientSize);
+			myDebugCamera.Toggle(*sceneManager.GetLoadedWorld(), myClientSize);
 		}
 
 		// Update game and world
-		aGame.Update(*myWorld, delta);
-		myWorld->Update(delta);
+		aGame.Update(*sceneManager.GetLoadedWorld(), delta);
+		sceneManager.GetLoadedWorld()->Update(delta);
 		ServiceLocator::GetInstance().GetAudioManager().Update(delta);
 		ServiceLocator::GetInstance().SetDeltaTime(delta);
-		ServiceLocator::GetInstance().GetScheduler().IncreaseTimers(delta);
-		ServiceLocator::GetInstance().GetScheduler().Update();
 
-		UserInterface();
-		RenderFrame(aGraphics);
+		Scheduler& scheduler = ServiceLocator::GetInstance().GetScheduler();
+		scheduler.IncreaseTimers(delta);
+		scheduler.Update();
+
+		ImGui::Render();
+		RenderFrame(delta, aGraphics);
 	}
 }
 
@@ -492,7 +537,8 @@ bool GameApplication::PrepareRenderTargetSize(GraphicsEngine& aGraphics)
 		}
 		myClientSize = clientSize;
 
-		if (myWorld && !myWorld->SetCameraResolution(clientSize))
+		SceneManager& sceneManager = ServiceLocator::GetInstance().GetSceneManager();
+		if (sceneManager.GetLoadedWorld() != nullptr && !sceneManager.GetLoadedWorld()->SetCameraResolution(clientSize))
 		{
 			throw std::runtime_error("Failed to resize the cameras");
 		}
@@ -501,9 +547,10 @@ bool GameApplication::PrepareRenderTargetSize(GraphicsEngine& aGraphics)
 	return true;
 }
 
-void GameApplication::RenderFrame(GraphicsEngine& aGraphics)
+void GameApplication::RenderFrame(float aDeltaTime, GraphicsEngine& aGraphics)
 {
-	RenderSnapshot& worldSnapshot = myWorld->GenerateRenderSnapshot();
+	RenderSnapshot& worldSnapshot = ServiceLocator::GetInstance().GetSceneManager().GetLoadedWorld()->GenerateRenderSnapshot();
+	worldSnapshot.DeltaTime = aDeltaTime;
 
 	// Render pass notification overlay
 	if (myRenderPassNotificationWidget && myRenderPassNotificationWidget->GetOpacity() > 0)
@@ -543,132 +590,6 @@ void GameApplication::RenderFrame(GraphicsEngine& aGraphics)
 	}
 }
 
-// TODO: this should be moved to a sceneloader class or similar aswell
-void GameApplication::ProcessPendingSceneLoad(Game& aGame)
-{
-	const std::filesystem::path requestedScene = *myPendingScene;
-	// Consume the request so it is not loaded again next frame
-	myPendingScene.reset();
-
-	const std::string sceneName = requestedScene.stem().string();
-	std::filesystem::path scenePath = myContentRoot / myApplicationSettings.SceneFolder / requestedScene;
-	
-	std::unique_ptr<World> candidateWorld;
-
-	try
-	{
-		if (!std::filesystem::exists(scenePath))
-		{
-			throw std::runtime_error(
-				std::format("Scene '{}' does not exist within the scene folder '{}' in the content folder!",
-					requestedScene.string(),
-					myApplicationSettings.SceneFolder));
-		}
-
-		// Build and configure a replacemet before changing the running world.
-		AssetRegistry& assets = ServiceLocator::GetInstance().GetAssetRegistry();
-		UnrealImportResult importResult = UnrealSceneImporter{}.ImportScene(scenePath);
-		if (!importResult)
-		{
-			std::ostringstream message;
-			message << "Scene import failed:";
-			for (const ImportDiagnostic& diagnostic : importResult.Diagnostics)
-			{
-				message << "\n - " << diagnostic.Context << ": " << diagnostic.Message;
-			}
-			throw std::runtime_error(message.str());
-		}
-		SceneData scene = std::move(*importResult.Data);
-		LOG(LogGameApplication, Log, "Loaded scene '{}' from '{}' ({} actors).", sceneName, requestedScene.string(), scene.Actors.size());
-		
-		SceneFallbackAssets fallbacks;
-		// TODO: Replace the procedural cube with the dedicated missing-mesh asset.
-		fallbacks.MissingMesh = assets.GetAsset<MeshAsset>("SM_Cube.fbx");
-		fallbacks.MissingShader = myContentRoot / "Shaders" / "_DefaultMaterial.hlsli";
-
-		MaterialDescription matDesc;
-		matDesc.Name = "_Default Material_";
-		matDesc.Domain = MaterialDomain::Surface;
-		matDesc.ShadingModel = ShadingModel::Lit;
-		matDesc.BlendMode = BlendMode::Opaque;
-		matDesc.MaterialShaderCode = fallbacks.MissingShader;
-		matDesc.AlbedoTexture = myContentRoot / "Textures" / "T_ERROR_FALLBACK_BaseColor.dds";
-
-		std::shared_ptr<Material> material = std::make_shared<Material>();
-		if (!GraphicsEngine::Get().CreateMaterial(matDesc, *material))
-		{
-			LOG(LogGameApplication, Warning, "Could not create default material!");
-		}
-		else
-		{
-			fallbacks.MissingMaterial = std::make_shared<MaterialAsset>(material);
-		}
-
-		SceneWorldBuilder worldBuilder;
-		worldBuilder.Initialize(ServiceLocator::GetInstance().GetEngineSettings().GetSettingsDirectory() / "MaterialNameConversions.json");
-		candidateWorld = worldBuilder.BuildWorld(scene, assets, myApplicationSettings.ShaderFolder, myClientSize, fallbacks,
-			[this](Actor& anActor, const CustomComponentData& aCustomComponentData)
-			{
-				CustomComponent* component = myComponentRegistry.Create(anActor, aCustomComponentData);
-				if (!component)
-				{
-					LOG(LogGameApplication, Warning, "Skipping unknown custom component '{}' on actor '{}': {}", aCustomComponentData.Common.Name, anActor.GetName(),
-					    aCustomComponentData.CustomType);
-				}
-				return component;
-			});
-		aGame.ConfigureWorld(*candidateWorld);
-
-		// TODO: Add a scene-configurable HDRI skybox instead of the hardcoded test cubemap.
-		// GraphicsEngine::Get().SetEnvironmentMap(myContentRoot / "Textures" / "snowy_hillside_02_cube.dds", true);
-		GraphicsEngine::Get().ResetEnvironmentMap();
-	}
-	catch (const std::bad_alloc&)
-	{
-		throw;
-	}
-	catch (const std::exception& error)
-	{
-		// Keep the current world if a later scene load fails.
-		// An initial load must succeed because there is no current world.
-		LOG(LogGameApplication, Error, "Scene '{}': {}", sceneName, error.what());
-		if (!myWorld)
-		{
-			throw;
-		}
-		return;
-	}
-
-	// The candidate is ready; replace the running world.
-	if (myWorld)
-	{
-		myWorld->Clear();
-	}
-	myWorld = std::move(candidateWorld);
-	myCurrentScene = requestedScene;
-
-	{
-		// Load navigation mesh for the new world.
-		std::shared_ptr<NavMeshAsset> navMesh = ServiceLocator::GetInstance().GetAssetRegistry().GetAsset<NavMeshAsset>(sceneName + ".nav");
-
-		if (navMesh)
-		{
-			ServiceLocator::GetInstance().GetPathFinder().Init(navMesh->MoveVertexIndices(), navMesh->MoveVertices());
-		}
-	}
-
-	// Select a debug camera if the scene did not provide an active camera.
-	myToggleDebugCameraRequested = false;
-	myDebugCamera.Reset();
-	if (!myWorld->GetActiveCamera())
-	{
-		myWorld->SetActiveCamera(myDebugCamera.Ensure(*myWorld, myClientSize));
-	}
-
-	// Start the new world
-	myWorld->BeginPlay();
-}
-
 void GameApplication::ShowRenderPassNotification()
 {
 	if (!myRenderPassNotificationWidget)
@@ -683,7 +604,6 @@ void GameApplication::ShowRenderPassNotification()
 void GameApplication::Cleanup(Game& aGame, std::exception_ptr& aFailure)
 {
 	// Stop new scene requests before game shutdown can invoke callbacks.
-	myAcceptSceneRequests = false;
 	if (myGameInitializationStarted)
 	{
 		AttemptCleanup(aFailure, "Game shutdown", &Game::Shutdown, aGame);
@@ -691,21 +611,16 @@ void GameApplication::Cleanup(Game& aGame, std::exception_ptr& aFailure)
 
 	// Each step runs even if an earlier step fails. Release users of a service
 	// before destroying that service, then close the window last.
-	AttemptCleanup(aFailure, "World cleanup", &GameApplication::ClearWorld, *this);
+	AttemptCleanup(aFailure, "World cleanup", &GameApplication::ClearScene, *this);
 	AttemptCleanup(aFailure, "Application input cleanup", &GameApplication::RemoveApplicationInputListeners, *this);
 	AttemptCleanup(aFailure, "Render reference cleanup", &GameApplication::ReleaseRenderReferences, *this);
 	AttemptCleanup(aFailure, "Service cleanup", &GameApplication::KillServices, *this);
 	DestroyWindowIfCreated();
 }
 
-void GameApplication::ClearWorld()
+void GameApplication::ClearScene()
 {
-	if (myWorld)
-	{
-		myWorld->Clear();
-		myWorld.reset();
-	}
-
+	ServiceLocator::GetInstance().GetSceneManager().Cleanup();
 	ServiceLocator::GetInstance().GetPathFinder().Clear();
 }
 
@@ -717,7 +632,7 @@ void GameApplication::RemoveApplicationInputListeners()
 		input.RemoveEventListener(id);
 	}
 	myApplicationInputListenerIds.clear();
-	myInputHandler.ReleaseMouse();
+	myInputHandler.SetCursorLockMode(CU::LockMode::None);
 }
 
 void GameApplication::ReleaseRenderReferences()
@@ -751,17 +666,4 @@ void GameApplication::DestroyWindowIfCreated() noexcept
 		DestroyCursor(myCustomCursor);
 		myCustomCursor = nullptr;
 	}
-}
-
-void GameApplication::UserInterface()
-{
-	ImGui_ImplDX11_NewFrame();
-	ImGui_ImplWin32_NewFrame();
-
-	ImGui::NewFrame();
-
-	//bool demo = true;
-	//ImGui::ShowDemoWindow(&demo);
-
-	ImGui::Render();
 }

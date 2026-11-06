@@ -262,66 +262,28 @@ bool RenderHardwareInterface::CreateVertexBuffer(std::string_view aName, const s
     return true;
 }
 
-bool RenderHardwareInterface::CreateDynamicVertexBuffer(std::string_view aName, size_t aMaxVertexCount, Buffer& outBuffer) const
+bool RenderHardwareInterface::CreateDynamicVertexBuffer(std::string_view aName, size_t aVertexSize, size_t aCapacity, Buffer& outBuffer) const
 {
-	if (aMaxVertexCount == 0)
-	{
-		LOG(RhiLog, Error, "Failed to create dynamic vertex buffer for {}! Max vertex count is 0", aName);
-		return false;
-	}
+	D3D11_BUFFER_DESC vxBufferDesc = {};
+	vxBufferDesc.ByteWidth = static_cast <unsigned>(aCapacity * aVertexSize);
+	vxBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	vxBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vxBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-	D3D11_BUFFER_DESC desc = {};
-	desc.Usage = D3D11_USAGE_DYNAMIC;
-	desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	desc.ByteWidth = static_cast<UINT>(sizeof(Vertex) * aMaxVertexCount);
-
-	const HRESULT result = myDevice->CreateBuffer(&desc, nullptr, &outBuffer.myBuffer);
+	const HRESULT result = myDevice->CreateBuffer(&vxBufferDesc, nullptr, &outBuffer.myBuffer);
 	if (FAILED(result))
 	{
-		LOG(RhiLog, Error, "Failed to create dynamic vertex buffer for {}!", aName);
+		LOG(RhiLog, Error, "Failed to create dynamic vertex buffer {}.", aName);
 		return false;
 	}
 
 	const std::string bufferName = std::format("{}_Dynamic_VX", aName);
 	SetObjectName(outBuffer.myBuffer, bufferName);
 
+	outBuffer.myType = BufferType::DynamicVertexBuffer;
 	outBuffer.myName = aName;
-	outBuffer.mySize = desc.ByteWidth;
-	outBuffer.myStride = sizeof(Vertex);
-	outBuffer.myType = BufferType::VertexBuffer;
-
-	return true;
-}
-
-bool RenderHardwareInterface::CreateDynamicVertexBufferSimple(std::string_view aName, size_t aMaxVertexCount, Buffer& outBuffer) const
-{
-	if (aMaxVertexCount == 0)
-	{
-		LOG(RhiLog, Error, "Failed to create dynamic vertex buffer for {}! Max vertex count is 0", aName);
-		return false;
-	}
-
-	D3D11_BUFFER_DESC desc = {};
-	desc.Usage = D3D11_USAGE_DYNAMIC;
-	desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	desc.ByteWidth = static_cast<UINT>(sizeof(SimpleVertex) * aMaxVertexCount);
-
-	const HRESULT result = myDevice->CreateBuffer(&desc, nullptr, &outBuffer.myBuffer);
-	if (FAILED(result))
-	{
-		LOG(RhiLog, Error, "Failed to create dynamic vertex buffer for {}!", aName);
-		return false;
-	}
-
-	const std::string bufferName = std::format("{}_Dynamic_VX", aName);
-	SetObjectName(outBuffer.myBuffer, bufferName);
-
-	outBuffer.myName = aName;
-	outBuffer.mySize = desc.ByteWidth;
-	outBuffer.myStride = sizeof(SimpleVertex);
-	outBuffer.myType = BufferType::VertexBuffer;
+	outBuffer.mySize = vxBufferDesc.ByteWidth;
+	outBuffer.myStride = static_cast <unsigned>(aVertexSize);
 
 	return true;
 }
@@ -390,6 +352,60 @@ bool RenderHardwareInterface::CreateConstantBuffer(std::string_view aName, size_
     outBuffer.myType = BufferType::ConstantBuffer;
 
     return true;
+}
+
+bool RenderHardwareInterface::CreateStructuredBuffer(std::string_view aName, size_t aSize, size_t aStride, Buffer& outBuffer) const
+{
+	if (aSize == 0)
+	{
+		LOG(RhiLog, Error, "Failed to create structured buffer {}! Size is 0!!!", aName);
+		return false;
+	}
+
+	if (aSize % 16 != 0)
+	{
+		LOG(RhiLog, Error, "Failed to create structured buffer {}! Size is not a multiple of 16!!!", aName);
+		return false;
+	}
+
+	D3D11_BUFFER_DESC desc = {};
+	desc.Usage = D3D11_USAGE_DYNAMIC;
+	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	desc.ByteWidth = static_cast<unsigned>(aSize);
+	desc.StructureByteStride = static_cast<unsigned>(aStride);
+
+	HRESULT result = myDevice->CreateBuffer(&desc, nullptr, &outBuffer.myBuffer);
+	if (FAILED(result))
+	{
+		LOG(RhiLog, Error, "Failed to create structured buffah {}!", aName);
+		return false;
+	}
+
+	SetObjectName(outBuffer.myBuffer, aName);
+
+	outBuffer.myName = aName;
+	outBuffer.mySize = aSize;
+	outBuffer.myStride = static_cast<unsigned>(aStride);
+	outBuffer.myType = BufferType::StructuredBuffer;
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+	srvDesc.Buffer.FirstElement = 0;
+	srvDesc.Buffer.NumElements = static_cast<unsigned>(aSize / outBuffer.myStride);
+
+	result = myDevice->CreateShaderResourceView(outBuffer.myBuffer.Get(), &srvDesc, &outBuffer.mySRV);
+	if (FAILED(result))
+	{
+		LOG(RhiLog, Error, "Failed to create Structured Buffer {}! Could not create Shader Resource View!", aName);
+		return false;
+	}
+
+	SetObjectName(outBuffer.mySRV, std::format("{}_SRV", aName));
+
+	return true;
 }
 
 bool RenderHardwareInterface::CreateDepthStencil(std::string_view aName, unsigned aWidth, unsigned aHeight, Texture& outDepthStencil, bool aCube) const
@@ -642,6 +658,45 @@ bool RenderHardwareInterface::CreatePipelineStateObject(const PipelineStateDescr
         }
     }
 
+	{
+		D3D11_DEPTH_STENCIL_DESC desc = CD3D11_DEPTH_STENCIL_DESC(D3D11_DEFAULT);
+
+		switch (aDescription.DepthStencilState)
+		{
+			case DepthStencilState::ReadWrite: // Use default settings.
+				break;
+
+			case DepthStencilState::ReadOnly:
+				desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+				break;
+
+			case DepthStencilState::Disabled:
+				desc.DepthEnable = false;
+				desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+				desc.DepthFunc = D3D11_COMPARISON_ALWAYS;
+				break;
+
+			default:
+				LOG(RhiLog, Error, "Failed to set DepthStencilState! Unsupported state!");
+				hasErrored = true;
+				break;
+		}
+
+		ComPtr<ID3D11DepthStencilState> depthState;
+		const HRESULT result = myDevice->CreateDepthStencilState(&desc, &depthState);
+		if (FAILED(result))
+		{
+			LOG(RhiLog, Error, "Failed to create DepthStencilState for pipeline state object {}!", aDescription.Name);
+			hasErrored = true;
+		}
+		else
+		{
+			const std::string dssName = std::format("{}_DSS", aDescription.Name);
+			SetObjectName(depthState, dssName);
+			outPSO.myDepthStencilState = depthState;
+		}
+	}
+
     outPSO.myName = aDescription.Name;
     outPSO.myTopology = aDescription.Topology;
 
@@ -859,6 +914,114 @@ bool RenderHardwareInterface::CreateColorCubeTexture(std::string_view aName, con
 	SMViewDesc.TextureCube.MostDetailedMip = 0;
 
 	result = myDevice->CreateShaderResourceView(texture.Get(), &SMViewDesc, &outTexture.mySRV);
+	if (FAILED(result))
+	{
+		LOG(RhiLog, Error, "Failed to create the shader resource view for texture {}!", aName);
+		return false;
+	}
+
+	const std::string resourceName = std::format("{}_SRV", aName);
+	SetObjectName(outTexture.mySRV, resourceName);
+
+	return true;
+}
+
+bool RenderHardwareInterface::CreateLutCubeTexture(std::string_view aName, unsigned aSize, const void* aByteCode, size_t aDataTypeSize, Texture& outTexture) const
+{
+	ensure(!aName.empty());
+
+	D3D11_TEXTURE3D_DESC desc;
+	desc.Width = aSize;
+	desc.Height = aSize;
+	desc.Depth = aSize;
+	desc.MipLevels = 1;
+	desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	desc.Usage = D3D11_USAGE_IMMUTABLE;
+	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	desc.CPUAccessFlags = 0;
+	desc.MiscFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA lutData{};
+	lutData.pSysMem = aByteCode;
+	lutData.SysMemPitch = static_cast<UINT>(aSize * aDataTypeSize);
+	lutData.SysMemSlicePitch = static_cast<UINT>(aSize * aSize * aDataTypeSize);
+
+	ComPtr<ID3D11Texture3D> texture;
+	HRESULT result = myDevice->CreateTexture3D(&desc, &lutData, &texture);
+	if (FAILED(result))
+	{
+		LOG(RhiLog, Error, "Failed to create the 3D texture {}!", aName);
+		return false;
+	}
+
+	const std::string textureName = std::format("{}_T3D", aName);
+	SetObjectName(texture, textureName);
+
+	result = myDevice->CreateShaderResourceView(texture.Get(), nullptr, &outTexture.mySRV);
+	if (FAILED(result))
+	{
+		LOG(RhiLog, Error, "Failed to create the shader resource view for texture {}!", aName);
+		return false;
+	}
+
+	const std::string resourceName = std::format("{}_SRV", aName);
+	SetObjectName(outTexture.mySRV, resourceName);
+
+	return true;
+}
+
+bool RenderHardwareInterface::CreateDefaultLutCubeTexture(std::string_view aName, unsigned aSize, Texture& outTexture) const
+{
+	ensure(!aName.empty());
+
+	D3D11_TEXTURE3D_DESC desc;
+	desc.Width = aSize;
+	desc.Height = aSize;
+	desc.Depth = aSize;
+	desc.MipLevels = 1;
+	desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	desc.Usage = D3D11_USAGE_IMMUTABLE;
+	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	desc.CPUAccessFlags = 0;
+	desc.MiscFlags = 0;
+
+	std::vector<CU::Vector4f> lut_data(0);
+	constexpr size_t dataTypeSize = sizeof(CU::Vector4f);
+
+	for (size_t bV = 0; bV < aSize; ++bV)
+	{
+		const float b = CU::Math::Lerp(0.0f, 1.0f, static_cast<float>(bV) / aSize);
+
+		for (size_t gV = 0; gV < aSize; ++gV)
+		{
+			const float g = CU::Math::Lerp(0.0f, 1.0f, static_cast<float>(gV) / aSize);
+
+			for (size_t rV = 0; rV < aSize; ++rV)
+			{
+				const float r = CU::Math::Lerp(0.0f, 1.0f, static_cast<float>(rV) / aSize);
+
+				lut_data.emplace_back(CU::Vector4f(r, g, b, 1));
+			}
+		}
+	}
+
+	D3D11_SUBRESOURCE_DATA lutData{};
+	lutData.pSysMem = lut_data.data();
+	lutData.SysMemPitch = static_cast<UINT>(aSize * dataTypeSize);
+	lutData.SysMemSlicePitch = static_cast<UINT>(aSize * aSize * dataTypeSize);
+
+	ComPtr<ID3D11Texture3D> texture;
+	HRESULT result = myDevice->CreateTexture3D(&desc, &lutData, &texture);
+	if (FAILED(result))
+	{
+		LOG(RhiLog, Error, "Failed to create the 3D texture {}!", aName);
+		return false;
+	}
+
+	const std::string textureName = std::format("{}_T3D", aName);
+	SetObjectName(texture, textureName);
+
+	result = myDevice->CreateShaderResourceView(texture.Get(), nullptr, &outTexture.mySRV);
 	if (FAILED(result))
 	{
 		LOG(RhiLog, Error, "Failed to create the shader resource view for texture {}!", aName);

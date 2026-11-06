@@ -1,8 +1,7 @@
 #include "InputHandler.h"
+
 #include "EnumKeyCode.h"
 #include "Vector2.hpp"
-#include <WinUser.h>
-#include <iostream>
 
 namespace CommonUtilities
 {
@@ -18,7 +17,7 @@ namespace CommonUtilities
 				// Let the mapper emit releases on its next (single) frame update.
 				myTentativeState.reset();
 				myTentativeMouseDelta = {};
-				ReleaseMouse();
+				SetCursorLockMode(LockMode::None);
 				return true;
 
 			case WM_KEYDOWN:
@@ -37,7 +36,6 @@ namespace CommonUtilities
 
 			case WM_RBUTTONDOWN:
 				myTentativeState.set(static_cast<unsigned>(EKeyCode::MOUSERBUTTON));
-				myTentativeMouseDelta = {};
 				return true;
 
 			case WM_MBUTTONDOWN:
@@ -69,7 +67,34 @@ namespace CommonUtilities
 				return true;
 			}
 
-			default: return false;
+			case WM_ACTIVATEAPP:
+			{
+				if (wParam)
+				{
+					UpdateWindowAreaEvent();
+					SetLockArea();
+				}
+				else
+				{
+					ClipCursor(NULL);
+				}
+				return true;
+			}
+
+			case WM_SIZE:
+			case WM_MOVE:
+			{
+				UpdateWindowAreaEvent();
+
+				if (GetForegroundWindow() == myWindowHandle)
+				{
+					SetLockArea();
+				}
+				return true;
+			}
+
+			default:
+				return false;
 		}
 	}
 
@@ -79,40 +104,24 @@ namespace CommonUtilities
 		myCurrentState = myTentativeState;
 		myCurrentMousePosition = myTentativeMousePosition;
 
-		myCurrentMouseDelta = myMouseDeltaEnabled ? myTentativeMouseDelta : Vector2<int>{};
+		myCurrentMouseDelta = myTentativeMouseDelta;
 		myTentativeMouseDelta.x = 0;
 		myTentativeMouseDelta.y = 0;
 	}
 
 	bool InputHandler::IsKeyDown(const int aKeyCode) const
 	{
-		return myCurrentState.test(static_cast<size_t>(aKeyCode));
+		return myCurrentState[aKeyCode];
 	}
 
 	bool InputHandler::IsKeyPressed(const int aKeyCode) const
 	{
-		if (myCurrentState.test(static_cast<size_t>(aKeyCode)))
-		{
-			if (!myPreviousState.test(static_cast<size_t>(aKeyCode)))
-			{
-				return true;
-			}
-		}
-
-		return false;
+		return myCurrentState[aKeyCode] && !myPreviousState[aKeyCode];
 	}
 
 	bool InputHandler::IsKeyReleased(const int aKeyCode) const
 	{
-		if (!myCurrentState.test(static_cast<size_t>(aKeyCode)))
-		{
-			if (myPreviousState.test(static_cast<size_t>(aKeyCode)))
-			{
-				return true;
-			}
-		}
-
-		return false;
+		return !myCurrentState[aKeyCode] && myPreviousState[aKeyCode];
 	}
 
 	bool InputHandler::IsMouseMoved() const
@@ -140,71 +149,22 @@ namespace CommonUtilities
 		myWindowHandle = aWindowHandle;
 	}
 
-	void InputHandler::SetAutoMouseCapture(bool anEnabled)
+	void InputHandler::SetCursorVisibility(bool aShow)
 	{
-		myAutoMouseCapture = anEnabled;
-	}
-
-	void InputHandler::ShowCursor()
-	{
-		if (!myIsCursorVisible)
+		for (int i = 0; i < 100; ++i)
 		{
-			::ShowCursor(true);
-			myIsCursorVisible = true;
+			const int result = ShowCursor(aShow);
+			if ((aShow && result >= 0) || (!aShow && result < 0))
+			{
+				break;
+			}
 		}
 	}
 
-	void InputHandler::HideCursor()
+	void InputHandler::SetCursorLockMode(LockMode aLockMode)
 	{
-		if (myIsCursorVisible)
-		{
-			::ShowCursor(false);
-			myIsCursorVisible = false;
-		}
-	}
-
-	void InputHandler::CaptureMouse()
-	{
-		if (myIsMouseCaptured)
-		{
-			return;
-		}
-
-		RECT clipRect;
-
-		GetClientRect(myWindowHandle, &clipRect);
-
-		POINT rectMin
-		{
-			clipRect.left,
-			clipRect.top
-		};
-
-		POINT rectMax
-		{
-			clipRect.right,
-			clipRect.bottom
-		};
-
-		MapWindowPoints(myWindowHandle, nullptr, &rectMin, 1);
-		MapWindowPoints(myWindowHandle, nullptr, &rectMax, 1);
-
-		clipRect.left = rectMin.x;
-		clipRect.top = rectMin.y;
-		clipRect.right = rectMax.x;
-		clipRect.bottom = rectMax.y;
-
-		ClipCursor(&clipRect);
-		myIsMouseCaptured = true;
-	}
-
-	void InputHandler::ReleaseMouse()
-	{
-		if (myIsMouseCaptured)
-		{
-			ClipCursor(nullptr);
-			myIsMouseCaptured = false;
-		}
+		myLockMode = aLockMode;
+		SetLockArea();
 	}
 
 	void InputHandler::CenterMouse()
@@ -226,5 +186,39 @@ namespace CommonUtilities
 
 		ClientToScreen(myWindowHandle, &center);
 		SetCursorPos(center.x, center.y);
+	}
+
+	void InputHandler::UpdateWindowAreaEvent()
+	{
+		if (!GetClientRect(myWindowHandle, &myWindowArea))
+		{
+			return;
+		}
+
+		myLockedArea.left = static_cast<LONG>(static_cast<double>(myWindowArea.left) + (myWindowArea.right * 0.5));
+		myLockedArea.top = static_cast<LONG>(static_cast<double>(myWindowArea.top) + (myWindowArea.bottom * 0.5));
+		myLockedArea.right = myLockedArea.left + 1;
+		myLockedArea.bottom = myLockedArea.top + 1;
+
+		MapWindowPoints(myWindowHandle, NULL, (LPPOINT)&myWindowArea, 2);
+		MapWindowPoints(myWindowHandle, NULL, (LPPOINT)&myLockedArea, 2);
+	}
+
+	void InputHandler::SetLockArea() const
+	{
+		switch (myLockMode)
+		{
+			case LockMode::None:
+				ClipCursor(NULL);
+				break;
+
+			case LockMode::Restricted:
+				ClipCursor(&myWindowArea);
+				break;
+
+			case LockMode::Locked:
+				ClipCursor(&myLockedArea);
+				break;
+		}
 	}
 }

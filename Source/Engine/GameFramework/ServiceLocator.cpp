@@ -9,6 +9,7 @@
 #include "GameFramework/Coroutine/Scheduler.h"
 #include "GameFramework/Coroutine/CoroutineHandler.h"
 #include <GameFramework/Components/CameraComponent.h>
+#include "GameFramework/Scenes/SceneManager.h"
 #include <GameFramework/World/Actor.h>
 #include <AISystems/Pathfinder.hpp>
 
@@ -31,8 +32,9 @@ void ServiceLocator::Initialize()
 	myEngineSettings = new EngineSettings();
 	myScheduler = new Scheduler();
 	myCouroutineHandler = new CoroutineHandler();
-	mySceneCamera = new CameraComponent();
-	
+	mySceneManager = new SceneManager();
+	std::random_device seed;
+	myRngEngine = std::mt19937(seed());
 }
 
 CommonUtilities::InputMapper& ServiceLocator::GetInputMapper()
@@ -80,9 +82,19 @@ CoroutineHandler& ServiceLocator::GetCoroutineHandler() const
 	return *myCouroutineHandler;
 }
 
-CameraComponent& ServiceLocator::GetActiveCamera() const
+SceneManager& ServiceLocator::GetSceneManager() const
 {
-	return *mySceneCamera;
+	return *mySceneManager;
+}
+
+std::mt19937& ServiceLocator::GetRngEngine()
+{
+	return myRngEngine;
+}
+
+CameraComponent* ServiceLocator::GetActiveCamera() const
+{
+	return mySceneCamera;
 }
 
 void ServiceLocator::SetActiveCamera(CameraComponent* aCamera)
@@ -131,14 +143,15 @@ void ServiceLocator::KillServices()
 	delete myAnimationManager;
 	myAnimationManager = nullptr;
 
-	// Settings stay available until the services that use them are gone.
-	delete myEngineSettings;
-	myEngineSettings = nullptr;
-
 	delete myScheduler;
 	myScheduler = nullptr;
 
-	mySceneCamera = nullptr;
+	delete mySceneManager;
+	mySceneManager = nullptr;
+
+	// Settings stay available until the services that use them are gone.
+	delete myEngineSettings;
+	myEngineSettings = nullptr;
 }
 
 ServiceLocator::ServiceLocator()
@@ -152,6 +165,7 @@ ServiceLocator::ServiceLocator()
 	, myScheduler(nullptr)
 	, myCouroutineHandler(nullptr)
 	, mySceneCamera(nullptr)
+	, mySceneManager(nullptr)
 	, myPlayer(nullptr)
 	, myDeltaTime(0)
 {

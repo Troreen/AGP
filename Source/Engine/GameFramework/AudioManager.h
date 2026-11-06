@@ -18,12 +18,24 @@ enum SoundID
 	eSickleSlash,
 	eSlashHit,
 	eSlash,
-	eSoundCount,
+	eAbilityOne,
+	eAbilityTwo,
+	eAbilityThree,
+	eAbilityFour,
+	eMouseButtonOne,
+	eMouseButtonTwo,
+	eFootstepOne,
+	eDodge,
 	eIntroLetter,
 	eAfterHeartSway,
 	eAfterFirstKill,
 	eLockedGate,
-	eCaretakerScream
+	eCaretakerScream,
+	eGoodbyeHorse,
+	eGrushenkaCrying,
+	eReminiscingDeadBodies,
+	eMeetingDaddy,
+	eSoundCount
 };
 
 enum BusID
@@ -62,7 +74,7 @@ public:
 	void SetMasterVolume(float aPercentage);
 	void SetEventVolume(const SoundID aSoundID, float aPercentage);
 
-	void SetAudioListener(const CommonUtilities::Vector3f aPosition);
+	void SetAudioListener(const CommonUtilities::Vector3f aPosition, const CommonUtilities::Vector3f aForward, const CommonUtilities::Vector3f aUp);
 	const CommonUtilities::Vector3f& GetAudioListenerPosition() const;
 
 	void FadeOut(const SoundID anID, const float aFadeSpeed);
@@ -86,7 +98,7 @@ private:
 	static inline float myBusVolume[2];
 	float myEventVolume;
 	SoundID myFadeID;
-	bool myInitialized = false;
+	bool myInitialized;
 
 	CommonUtilities::Vector3f myListenerPosition;
 };

@@ -51,6 +51,8 @@ public:
 	void SetAnimationPlayer(AnimatorComponent* aAnimationPlayer);
 	AnimatorComponent* GetAnimationPlayer();
 
+	void ResetVariables();
+
 private:
 	void AddVariable(const AnimationVariable& anAnimationVariable);
 

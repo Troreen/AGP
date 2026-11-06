@@ -1,4 +1,4 @@
-#include "../Material/Common.hlsli"
+#include "Common.hlsli"
 
 struct Vertex
 {

@@ -34,6 +34,9 @@ namespace CommonUtilities
 		Vector2& operator=(const Vector2<T>&) = default;
 		~Vector2() = default;
 
+		Vector3<T> XY0() const;
+		Vector4<T> XY00() const;
+
 		template<class TargetType>
 		Vector2<TargetType> ToType() const;
 		Tga::Vector2<T> ToTga() const;
@@ -48,6 +51,7 @@ namespace CommonUtilities
 		Vector2<T> GetNormalized() const;
 		void Normalize();
 		T Dot(const Vector2<T>& aVector) const;
+		T Perp(const Vector2<T>& aVector) const;
 
 		T Distance(const Vector2<T>& anOther) const;
 		T DistanceSqr(const Vector2<T>& anOther) const;
@@ -180,6 +184,12 @@ namespace CommonUtilities
 		return x * aVector.x + y * aVector.y;
 	}
 
+	template <typename T>
+	inline T Vector2<T>::Perp(const Vector2<T>& aVector) const
+	{
+		return x * aVector.y - y * aVector.x;
+	}
+
 	template<typename T>
 	inline T Vector2<T>::Distance(const Vector2<T>& anOther) const
 	{
@@ -290,6 +300,18 @@ namespace CommonUtilities
 	{
 		aVector.x /= aScalar;
 		aVector.y /= aScalar;
+	}
+
+	template<typename T>
+	inline Vector3<T> Vector2<T>::XY0() const
+	{
+		return Vector3<T>{x, y, 0};
+	}
+
+	template<typename T>
+	inline Vector4<T> Vector2<T>::XY00() const
+	{
+		return Vector4<T>{x, y, 0, 0};
 	}
 
 	template<typename T>

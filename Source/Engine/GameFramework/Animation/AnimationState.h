@@ -43,6 +43,7 @@ public:
 
 	Event<>& OnEnterEvent();
 	Event<float>& OnUpdateEvent();
+	Event<unsigned, std::string>& OnFrameEvent();
 	Event<>& OnExitEvent();
 
 	AnimationState& operator=(const AnimationState& other);
@@ -72,9 +73,11 @@ private:
 
 	Event<> myOnEnter;
 	Event<float> myOnUpdate;
+	Event<unsigned, std::string> myOnFrame;
 	Event<> myOnExit;
 
 	std::string myName;
 	std::string myPath;
 	bool myIsLooping;
+	unsigned myPreviousFrame = 0;
 };

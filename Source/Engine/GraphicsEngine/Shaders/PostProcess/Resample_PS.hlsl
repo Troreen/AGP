@@ -1,6 +1,6 @@
 #include "BloomHelper.hlsli"
-#include "../Material/Common.hlsli"
-#include "../Material/Lighting.hlsli"
+#include "../Internal/Common.hlsli"
+#include "../Internal/Samplers.hlsli"
 
 float4 main(FullTextureVertex aVertex) : SV_Target
 {

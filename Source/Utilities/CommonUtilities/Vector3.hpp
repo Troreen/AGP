@@ -48,6 +48,10 @@ namespace CommonUtilities
 		//Destructor (compiler generated)
 		~Vector3() = default;
 
+		Vector2<T> XY() const;
+		Vector4<T> XYZ0() const;
+		Vector4<T> XYZ1() const;
+
 		// Returns a CommonUtilities Vector3 copy with another datatype as elements,
 		// ex: converts from Vector3<int> to Vector3<float>
 		// useful to explicitly do operations, such as addition, for an explicit type
@@ -296,6 +300,24 @@ namespace CommonUtilities
 		return !(*this == anOther);
 	}
 
+
+	template<typename T>
+	inline Vector2<T> Vector3<T>::XY() const
+	{
+		return Vector2<T>{x, y};
+	}
+
+	template<typename T>
+	inline Vector4<T> Vector3<T>::XYZ0() const
+	{
+		return Vector4<T>{x, y, z, static_cast<T>(0)};
+	}
+
+	template<typename T>
+	inline Vector4<T> Vector3<T>::XYZ1() const
+	{
+		return Vector4<T>{x, y, z, static_cast<T>(1)};
+	}
 
 	template<typename T>
 	template<class TargetType>

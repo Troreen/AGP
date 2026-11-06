@@ -1,4 +1,4 @@
-#include "Common.hlsli"
+#include "../Internal/Common.hlsli"
 #include "Material.hlsli"
 
 struct Vertex
@@ -13,8 +13,24 @@ struct Vertex
     float3 Tangent : TANGENT;
 };
 
-VStoPS main(Vertex aVertex)
+struct InstanceData
 {
+    float4x4 World;
+    float4x4 WorldInvT;
+};
+
+StructuredBuffer<InstanceData> InstanceBuffer : register(t20);
+
+VStoPS main(Vertex aVertex, uint aInstanceId : SV_InstanceID)
+{
+    float4x4 world = OB_World;
+    float4x4 worldInvT = OB_WorldInvT;
+    if (OB_IsInstanced)
+    {
+        world = InstanceBuffer[aInstanceId].World;
+        worldInvT = InstanceBuffer[aInstanceId].WorldInvT;
+    }
+    
     [flatten]
     if (OB_HasSkinning)
     {
@@ -32,7 +48,7 @@ VStoPS main(Vertex aVertex)
         aVertex.Tangent = mul(skinRotation, aVertex.Tangent);
     }
     
-    const float4 worldPos = mul(OB_World, aVertex.Position);
+    const float4 worldPos = mul(world, aVertex.Position);
     
     MaterialVertexParameters parameters;
     parameters.WorldPosition = worldPos;
@@ -51,10 +67,11 @@ VStoPS main(Vertex aVertex)
     result.UV0 = parameters.UV0;
     result.UV1 = parameters.UV1;
     
-    const float3x3 worldNormalRot = (float3x3) OB_WorldInvT;
+    const float3x3 worldNormalRot = (float3x3) worldInvT;
     result.Normal = normalize(mul(worldNormalRot, aVertex.Normal));
     result.Tangent = normalize(mul(worldNormalRot, aVertex.Tangent));
-    result.BiNormal = normalize(cross(result.Normal, result.Tangent));
+    const float3 biNormal = cross(result.Normal, result.Tangent);
+    result.BiNormal = biNormal / max(length(biNormal), 0.0000001f);
     
     result.ViewDepth = viewPos.z;
     

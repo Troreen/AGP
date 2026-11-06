@@ -85,7 +85,8 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>GameFramework.pch.h</PrecompiledHeaderFile>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.;..\..;..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -113,7 +114,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>GameFramework.pch.h</PrecompiledHeaderFile>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>_RELEASE;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.;..\..;..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -146,7 +148,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Retail|x64'">
     <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>GameFramework.pch.h</PrecompiledHeaderFile>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>_RETAIL;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.;..\..;..;..\..\Utilities;..\..\Utilities\CommonUtilities;..\..\..\Dependencies\FMod\include;..\..\..\Dependencies\nlohmann_json\include;..\..\..\Dependencies\TGAFBXImporter\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -190,6 +193,8 @@
     <ClInclude Include="AssetHandling\MaterialAsset.h" />
     <ClInclude Include="AssetHandling\MeshAsset.h" />
     <ClInclude Include="AssetHandling\NavMeshAsset.h" />
+    <ClInclude Include="AssetHandling\ParticleSystemAsset.h" />
+    <ClInclude Include="AssetHandling\SceneAsset.h" />
     <ClInclude Include="AssetHandling\TextureAsset.h" />
     <ClInclude Include="AudioManager.h" />
     <ClInclude Include="Collision\CollisionLayers.h" />
@@ -199,9 +204,11 @@
     <ClInclude Include="Components\CameraComponent.h" />
     <ClInclude Include="Components\ColliderComponent.h" />
     <ClInclude Include="Components\CustomComponent.h" />
+    <ClInclude Include="Components\CustomComponentRegistry.h" />
     <ClInclude Include="Components\DebugCameraController.h" />
     <ClInclude Include="Components\LightComponent.h" />
     <ClInclude Include="Components\MeshComponentBase.h" />
+    <ClInclude Include="Components\ParticleComponent.h" />
     <ClInclude Include="Components\SceneComponent.h" />
     <ClInclude Include="Components\SkeletalMeshComponent.h" />
     <ClInclude Include="Components\SpriteComponent.h" />
@@ -212,8 +219,12 @@
     <ClInclude Include="EventBus.hpp" />
     <ClInclude Include="GameFramework.pch.h" />
     <ClInclude Include="Helper\Event.hpp" />
+    <ClInclude Include="Helper\JsonHelper.hpp" />
+    <ClInclude Include="Particles\ParticleEmitter.h" />
+    <ClInclude Include="Particles\ParticleSystem.h" />
     <ClInclude Include="Scenes\CustomComponentVariables.h" />
     <ClInclude Include="Scenes\SceneData.h" />
+    <ClInclude Include="Scenes\SceneManager.h" />
     <ClInclude Include="Scenes\SceneWorldBuilder.h" />
     <ClInclude Include="ServiceLocator.h" />
     <ClInclude Include="Settings\EngineSettings.h" />
@@ -243,6 +254,8 @@
     <ClCompile Include="AssetHandling\MaterialAsset.cpp" />
     <ClCompile Include="AssetHandling\MeshAsset.cpp" />
     <ClCompile Include="AssetHandling\NavMeshAsset.cpp" />
+    <ClCompile Include="AssetHandling\ParticleSystemAsset.cpp" />
+    <ClCompile Include="AssetHandling\SceneAsset.cpp" />
     <ClCompile Include="AssetHandling\TextureAsset.cpp" />
     <ClCompile Include="AudioManager.cpp" />
     <ClCompile Include="Collision\CollisionSystem.cpp" />
@@ -252,6 +265,7 @@
     <ClCompile Include="Components\DebugCameraController.cpp" />
     <ClCompile Include="Components\LightComponent.cpp" />
     <ClCompile Include="Components\MeshComponentBase.cpp" />
+    <ClCompile Include="Components\ParticleComponent.cpp" />
     <ClCompile Include="Components\SceneComponent.cpp" />
     <ClCompile Include="Components\SkeletalMeshComponent.cpp" />
     <ClCompile Include="Components\SpriteComponent.cpp" />
@@ -259,7 +273,12 @@
     <ClCompile Include="Coroutine\CoroutineHandler.cpp" />
     <ClCompile Include="Coroutine\Scheduler.cpp" />
     <ClCompile Include="EventBus.cpp" />
-    <ClCompile Include="GameFramework.pch.cpp" />
+    <ClCompile Include="GameFramework.pch.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Particles\ParticleEmitter.cpp" />
+    <ClCompile Include="Particles\ParticleSystem.cpp" />
+    <ClCompile Include="Scenes\SceneManager.cpp" />
     <ClCompile Include="Scenes\SceneWorldBuilder.cpp" />
     <ClCompile Include="ServiceLocator.cpp" />
     <ClCompile Include="Settings\EngineSettings.cpp" />

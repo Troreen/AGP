@@ -193,6 +193,7 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AmbientSettings.h" />
     <ClInclude Include="ConstantBuffers\AnimationBuffer.h" />
     <ClInclude Include="ConstantBuffers\FrameBuffer.h" />
     <ClInclude Include="ConstantBuffers\LightBuffer.h" />
@@ -213,7 +214,9 @@
     <ClInclude Include="Objects\Camera.h" />
     <ClInclude Include="Objects\Font.h" />
     <ClInclude Include="Objects\GBuffer.h" />
+    <ClInclude Include="Objects\InstanceData.h" />
     <ClInclude Include="Objects\Mesh.h" />
+    <ClInclude Include="Objects\ParticleVertex.h" />
     <ClInclude Include="Objects\Sampler.h" />
     <ClInclude Include="Objects\Shader.h" />
     <ClInclude Include="Objects\Texture.h" />
@@ -227,8 +230,6 @@
     <ClInclude Include="RHI\RHIShaderReflectionInfo.h" />
     <ClInclude Include="RHI\RHIStructs.h" />
     <ClInclude Include="RHI\RenderHardwareInterface.h" />
-    <ClInclude Include="RenderCulling.h" />
-    <ClInclude Include="RenderItemRouting.h" />
     <ClInclude Include="RenderSnapshot.h" />
     <ClInclude Include="Sprite\SpriteStructs.h" />
     <ClInclude Include="TextWidget.h" />
@@ -251,6 +252,7 @@
     <ClCompile Include="Objects\Buffer.cpp" />
     <ClCompile Include="Objects\Camera.cpp" />
     <ClCompile Include="Objects\Mesh.cpp" />
+    <ClCompile Include="Objects\ParticleVertex.cpp" />
     <ClCompile Include="Objects\Sampler.cpp" />
     <ClCompile Include="Objects\Shader.cpp" />
     <ClCompile Include="Objects\Texture.cpp" />
@@ -267,13 +269,13 @@
     <ClCompile Include="TextWidget.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shaders\BRDF LUT_PS.hlsl">
+    <FxCompile Include="Shaders\Internal\BRDF LUT_PS.hlsl">
       <ShaderType>Pixel</ShaderType>
       <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
       <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
       <ObjectFileOutput></ObjectFileOutput>
     </FxCompile>
-    <FxCompile Include="Shaders\FullTexture_VS.hlsl">
+    <FxCompile Include="Shaders\Internal\FullTexture_VS.hlsl">
       <ShaderType>Vertex</ShaderType>
       <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
       <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
@@ -369,25 +371,49 @@
       <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
       <ObjectFileOutput></ObjectFileOutput>
     </FxCompile>
+    <FxCompile Include="Shaders\Particles\Particle_GS.hlsl">
+      <ShaderType>Geometry</ShaderType>
+      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
+      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
+      <ObjectFileOutput></ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shaders\Particles\Particle_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
+      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
+      <ObjectFileOutput></ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shaders\Particles\Particle_VS.hlsl">
+      <ShaderType>Vertex</ShaderType>
+      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
+      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
+      <ObjectFileOutput></ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shaders\PostProcess\Bloom01Downsample_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
+      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
+      <ObjectFileOutput></ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shaders\PostProcess\BloomDownsample_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
+      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
+      <ObjectFileOutput></ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shaders\PostProcess\BloomLuminance_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
+      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
+      <ObjectFileOutput></ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shaders\PostProcess\BloomUpsample_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
+      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
+      <ObjectFileOutput></ObjectFileOutput>
+    </FxCompile>
     <FxCompile Include="Shaders\PostProcess\Bloom_PS.hlsl">
-      <ShaderType>Pixel</ShaderType>
-      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
-      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
-      <ObjectFileOutput></ObjectFileOutput>
-    </FxCompile>
-    <FxCompile Include="Shaders\PostProcess\GaussianBlurH_PS.hlsl">
-      <ShaderType>Pixel</ShaderType>
-      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
-      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
-      <ObjectFileOutput></ObjectFileOutput>
-    </FxCompile>
-    <FxCompile Include="Shaders\PostProcess\GaussianBlurV_PS.hlsl">
-      <ShaderType>Pixel</ShaderType>
-      <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
-      <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
-      <ObjectFileOutput></ObjectFileOutput>
-    </FxCompile>
-    <FxCompile Include="Shaders\PostProcess\Luminance_PS.hlsl">
       <ShaderType>Pixel</ShaderType>
       <VariableName>INTERNAL_%(Filename)_ByteCode</VariableName>
       <HeaderFileOutput>../../..\Intermediate\$(ProjectName)\$(Configuration)\PrecompiledShaders\%(Filename).h</HeaderFileOutput>
@@ -431,15 +457,19 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\LUTFunctions.hlsli" />
-    <None Include="Shaders\Material\Common.hlsli" />
-    <None Include="Shaders\Material\Lighting.hlsli" />
+    <None Include="Shaders\Internal\Common.hlsli" />
+    <None Include="Shaders\Internal\LUTFunctions.hlsli" />
+    <None Include="Shaders\Internal\Lighting.hlsli" />
+    <None Include="Shaders\Internal\PoissonDisks.hlsli" />
+    <None Include="Shaders\Internal\Samplers.hlsli" />
     <None Include="Shaders\Material\Material.hlsli" />
     <None Include="Shaders\Material\MaterialParameters.hlsli" />
     <None Include="Shaders\Material\MaterialUtilities.hlsli" />
     <None Include="Shaders\Material\Normal.hlsli" />
-    <None Include="Shaders\Material\PoissonDisks.hlsli" />
     <None Include="Shaders\Material\Tonemap.hlsli" />
+    <None Include="Shaders\Particles\ParticleCommon.hlsli" />
+    <None Include="Shaders\Particles\ParticleMaterial.hlsli" />
+    <None Include="Shaders\Particles\ParticleMaterialParameters.hlsli" />
     <None Include="Shaders\PostProcess\BloomHelper.hlsli" />
     <None Include="Shaders\PostProcess\SSAOHelper.hlsli" />
     <None Include="Shaders\Text\TextOverlayHelper.hlsli" />

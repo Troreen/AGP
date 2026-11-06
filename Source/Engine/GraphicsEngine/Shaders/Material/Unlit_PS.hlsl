@@ -1,8 +1,7 @@
-#include "Common.hlsli"
-#include "Lighting.hlsli"
+#include "../Internal/Common.hlsli"
+#include "../Internal/Lighting.hlsli"
 #include "Material.hlsli"
 #include "MaterialParameters.hlsli"
-#include "Tonemap.hlsli"
 
 Texture2D AlbedoTexture : register(t0);
 

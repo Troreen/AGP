@@ -50,6 +50,8 @@ void AnimationState::AddEvent(const AnimationEvent aEvent)
 
 void AnimationState::OnEnter()
 {
+	myPreviousFrame = 0;
+
 	myOnEnter.Invoke();
 	PlayAnimation();
 }
@@ -69,16 +71,28 @@ void AnimationState::PlayAnimation()
 
 void AnimationState::Update(const float aDeltaTime, std::vector<Transition> someGlobalTransitions)
 {
-	myOnUpdate.Invoke(myAnimationTree->GetAnimationPlayer()->GetCurrentPlayBackState(true).CurrentFrame);
+	unsigned currentFrame = myAnimationTree->GetAnimationPlayer()->GetCurrentPlayBackState(true).CurrentFrame;
 
-	if (!someGlobalTransitions.empty() && !myOverwriteGlobal) // If there are global transitions, they will be checked first
+	myOnUpdate.Invoke(static_cast<float>(currentFrame));
+
+	for (const AnimationEvent& event : myEvents)
+	{
+		if (event.TriggerFrame > myPreviousFrame && event.TriggerFrame <= currentFrame)
+		{
+			myOnFrame.Invoke(event.TriggerFrame, event.Message);
+		}
+	}
+
+	myPreviousFrame = currentFrame;
+
+	if (!someGlobalTransitions.empty() && !myOverwriteGlobal)
 	{
 		if (TransitionCheck(someGlobalTransitions))
 		{
 			return;
 		}
 	}
-	
+
 	TransitionCheck(myTransitions);
 }
 
@@ -95,6 +109,11 @@ Event<>& AnimationState::OnEnterEvent()
 Event<float>& AnimationState::OnUpdateEvent()
 {
 	return myOnUpdate;
+}
+
+Event<unsigned, std::string>& AnimationState::OnFrameEvent()
+{
+	return myOnFrame;
 }
 
 Event<>& AnimationState::OnExitEvent()

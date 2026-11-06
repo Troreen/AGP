@@ -2,7 +2,9 @@
 #include "GameFramework/Components/CameraComponent.h"
 #include "GameFramework/World/Actor.h"
 #include "Maths.hpp"
+
 #include <cmath>
+#include <CommonUtilities/Intersection.hpp>
 #include <stdexcept>
 
 namespace
@@ -13,23 +15,34 @@ namespace
 	constexpr float WorldUpSelectionThreshold = 0.9f;
 }
 
+bool Frustum::IsCulled(const CU::Spheref& aCullingSphere) const
+{
+	for (const CommonUtilities::Planef& plane : planes)
+	{
+		if (!plane.IsInside(aCullingSphere.GetCenter()) && !CU::IntersectionPlaneSphere(plane, aCullingSphere))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 CameraComponent::CameraComponent()
 {
-	for (size_t i = 0; i < DirectionalLightComponent::ShadowCascadeCount; ++i)
-	{
-		myCascadeSplits[i] = DefaultCascadeSplits[i];
-	}
+	SetCascadeSplits();
+
 	myCamera = Camera(DefaultFieldOfView, DefaultNearPlane, DefaultFarPlane, myCascadeSplits, DefaultAspectRatio);
 }
 
 CameraComponent::CameraComponent(float aHorizontalFieldOfViewDegrees, float aNearPlane, float aFarPlane,
-                                 const CommonUtilities::Vector2u& aResolution)
-    : CameraComponent()
+	const CommonUtilities::Vector2u& aResolution)
+	: CameraComponent()
 {
-	for (size_t i = 0; i < DirectionalLightComponent::ShadowCascadeCount; ++i)
-	{
-		myCascadeSplits[i] = DefaultCascadeSplits[i];
-	}
+	myNearPlane = aNearPlane;
+	myFarPlane = aFarPlane;
+
+	SetCascadeSplits();
 
 	if (!SetPerspective(aHorizontalFieldOfViewDegrees, aNearPlane, aFarPlane, aResolution))
 	{
@@ -38,12 +51,12 @@ CameraComponent::CameraComponent(float aHorizontalFieldOfViewDegrees, float aNea
 }
 
 bool CameraComponent::SetPerspective(float aHorizontalFieldOfViewDegrees, float aNearPlane, float aFarPlane,
-                                     const CommonUtilities::Vector2u& aResolution)
+	const CommonUtilities::Vector2u& aResolution)
 {
 	if (!CU::IsFinite(aHorizontalFieldOfViewDegrees) || aHorizontalFieldOfViewDegrees <= MinimumFieldOfViewDegrees ||
-	    aHorizontalFieldOfViewDegrees >= MaximumFieldOfViewDegrees || !CU::IsFinite(aNearPlane) || !CU::IsFinite(aFarPlane) ||
-	    aNearPlane <= 0 || aFarPlane <= aNearPlane || aResolution.x == 0 ||
-	    aResolution.y == 0)
+		aHorizontalFieldOfViewDegrees >= MaximumFieldOfViewDegrees || !CU::IsFinite(aNearPlane) || !CU::IsFinite(aFarPlane) ||
+		aNearPlane <= 0 || aFarPlane <= aNearPlane || aResolution.x == 0 ||
+		aResolution.y == 0)
 	{
 		return false;
 	}
@@ -100,35 +113,59 @@ float CameraComponent::GetCascadeSplit(size_t aIndex) const
 	return myCascadeSplits[aIndex];
 }
 
-std::array<CU::Vector3f, 8> CameraComponent::GetFrustumCorners() const
+Frustum CameraComponent::GetFrustum() const
 {
-	return GetFrustumCorners(myNearPlane, myFarPlane);
+	return GetFrustum(myNearPlane, myFarPlane);
 }
 
-std::array<CU::Vector3f, 8> CameraComponent::GetFrustumCorners(float aNearPlane, float aFarPlane) const
+Frustum CameraComponent::GetFrustum(float aNearPlane, float aFarPlane) const
 {
-	const CU::Vector3f position = GetOwner()->GetTransform().GetWorldPosition();
-	const CU::Vector3f forward = GetOwner()->GetTransform().GetLocalForward();
-	const CU::Vector3f right = GetOwner()->GetTransform().GetLocalRight();
-	const CU::Vector3f up = GetOwner()->GetTransform().GetLocalUp();
-	const float tanHalfFov = std::tan(myHorizontalFieldOfViewRadians * 0.5f);
+	return GetFrustum(myCamera.GetProjection(), GetOwner()->GetTransform().GetWorldMatrix(), aNearPlane, aFarPlane);
+}
 
-	const float nearHeight = 2.0f * tanHalfFov * aNearPlane;
-	const float nearWidth = nearHeight * GetAspectRatio();
-	const float farHeight = 2.0f * tanHalfFov * aFarPlane;
-	const float farWidth = farHeight * GetAspectRatio();
+Frustum CameraComponent::GetFrustum(const CU::Matrix4f& aProjection, const CU::Matrix4f& aWorld, float aNearPlane, float aFarPlane)
+{
+	Frustum frustum;
 
-	const CU::Vector3f nearCenter = position + forward * aNearPlane;
-	const CU::Vector3f farCenter = position + forward * aFarPlane;
+	const CU::Vector3f right(aWorld(1, 1), aWorld(1, 2), aWorld(1, 3));
+	const CU::Vector3f up(aWorld(2, 1), aWorld(2, 2), aWorld(2, 3));
+	const CU::Vector3f forward(aWorld(3, 1), aWorld(3, 2), aWorld(3, 3));
+	const CU::Vector3f position(aWorld(4, 1), aWorld(4, 2), aWorld(4, 3));
 
-	return { nearCenter - right * (nearWidth * 0.5f) + up * (nearHeight * 0.5f),
-			nearCenter + right * (nearWidth * 0.5f) + up * (nearHeight * 0.5f),
-			nearCenter + right * (nearWidth * 0.5f) - up * (nearHeight * 0.5f),
-			nearCenter - right * (nearWidth * 0.5f) - up * (nearHeight * 0.5f),
-			farCenter - right * (farWidth * 0.5f) + up * (farHeight * 0.5f),
-			farCenter + right * (farWidth * 0.5f) + up * (farHeight * 0.5f),
-			farCenter + right * (farWidth * 0.5f) - up * (farHeight * 0.5f),
-			farCenter - right * (farWidth * 0.5f) - up * (farHeight * 0.5f) };
+	const float inverseXScale = 1.0f / aProjection(1, 1);
+	const float inverseYScale = 1.0f / aProjection(1, 1);
+
+	if (aProjection(3, 4) == 0) // Orthographic perspective
+	{
+		frustum.left.InitWithPointAndNormal(position - right * inverseXScale, -right);
+		frustum.right.InitWithPointAndNormal(position + right * inverseXScale, right);
+
+		frustum.top.InitWithPointAndNormal(position + up * inverseYScale, up);
+		frustum.bottom.InitWithPointAndNormal(position - up * inverseYScale, -up);
+
+	}
+	else
+	{
+		const CU::Vector3f leftNormal = (forward * inverseXScale) - right;
+		const CU::Vector3f rightNormal = (forward * inverseXScale) + right;
+
+		const CU::Vector3f topNormal = (forward * inverseYScale) + up;
+		const CU::Vector3f bottomNormal = (forward * inverseYScale) - up;
+
+		frustum.left.InitWithPointAndNormal(position, -leftNormal);
+		frustum.right.InitWithPointAndNormal(position, -rightNormal);
+
+		frustum.top.InitWithPointAndNormal(position, -topNormal);
+		frustum.bottom.InitWithPointAndNormal(position, -bottomNormal);
+	}
+
+	const CU::Vector3f nearPoint = position + (forward * aNearPlane);
+	const CU::Vector3f farPoint = position + (forward * aFarPlane);
+
+	frustum.nearplane.InitWithPointAndNormal(nearPoint, -forward);
+	frustum.farplane.InitWithPointAndNormal(farPoint, forward);
+
+	return frustum;
 }
 
 void CameraComponent::LookAt(const CU::Vector3<float>& aTarget)
@@ -203,4 +240,21 @@ CU::Vector3<float> CameraComponent::WorldToScreenPoint(const CU::Vector3<float>&
 		(ndc.x + 1.0f) * 0.5f,
 		(1.0f - ndc.y) * 0.5f,
 		ndc.z);
+}
+
+void CameraComponent::SetCascadeSplits()
+{
+	constexpr float cascadeSplitLambdas[DirectionalLightComponent::ShadowCascadeCount] = { 0.9f, 0.7f, 0.65f, 0.6f };
+
+	const float m = (float)(DirectionalLightComponent::ShadowCascadeCount);
+	const float ratio = myFarPlane / myNearPlane;
+	const float clipRange = myFarPlane - myNearPlane;
+
+	for (size_t i = 0; i < DirectionalLightComponent::ShadowCascadeCount; ++i)
+	{
+		const float p = (i + 1) / m;
+		const float log = myNearPlane * std::pow(ratio, p);
+		const float uniform = myNearPlane + clipRange * p;
+		myCascadeSplits[i] = cascadeSplitLambdas[i] * (log - uniform) + uniform;
+	}
 }

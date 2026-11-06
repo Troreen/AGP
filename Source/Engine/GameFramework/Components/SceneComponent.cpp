@@ -21,3 +21,30 @@ CommonUtilities::Vector3f SceneComponent::GetWorldDirection() const
 	const CommonUtilities::Vector3f forward{worldMatrix(3, 1), worldMatrix(3, 2), worldMatrix(3, 3)};
 	return CU::NormalizeSafe(forward, CU::Vector3f::UnitZ);
 }
+
+CommonUtilities::Vector3f SceneComponent::GetWorldForward() const
+{
+	const CommonUtilities::Matrix4f worldMatrix = GetWorldMatrix();
+
+	const CommonUtilities::Vector3f forward{
+		worldMatrix(3, 1),
+		worldMatrix(3, 2),
+		worldMatrix(3, 3)
+	};
+
+	return CU::NormalizeSafe(forward, CU::Vector3f::UnitZ);
+}
+
+CommonUtilities::Vector3f SceneComponent::GetWorldUp() const
+{
+	const CommonUtilities::Matrix4f worldMatrix = GetWorldMatrix();
+
+	const CommonUtilities::Vector3f up{
+		worldMatrix(2, 1),
+		worldMatrix(2, 2),
+		worldMatrix(2, 3)
+	};
+
+	return CU::NormalizeSafe(up, CU::Vector3f::UnitY);
+}
+

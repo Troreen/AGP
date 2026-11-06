@@ -76,7 +76,7 @@ namespace
 		return typeString;
 	}
 
-	void ReflectVariable(std::string_view aDomain, ID3D11ShaderReflectionType* aVarType, const D3D11_SHADER_VARIABLE_DESC* aVarDesc, const D3D11_SHADER_TYPE_DESC& aVarTypeDesc, RHIShaderReflectionInfo::ConstantBufferInfo& inoutBufferInfo, size_t anOffset)
+	void ReflectVariable(std::string_view aDomain, ID3D11ShaderReflectionType* aVarType, const D3D11_SHADER_VARIABLE_DESC* aVarDesc, const D3D11_SHADER_TYPE_DESC& aVarTypeDesc, RHIShaderReflectionInfo::ConstantBufferInfo& inoutBufferInfo, size_t& inoutOffset)
 	{
 		if (aVarTypeDesc.Members > 0)
 		{
@@ -91,17 +91,23 @@ namespace
 				const std::string memberName = aVarType->GetMemberTypeName(m);
 				const std::string memberDomain = aDomain.empty() ? memberName : std::string(aDomain) + "." + memberName;
 
+				std::string typeString = DeriveHLSLType(memberTypeDesc);
+				memberTypeDesc.Name = typeString.c_str();
+
+				// To avoid weird things happening with structs fill in the name in the type desc.
+				if (memberTypeDesc.Name)
+				{
+					ensure(typeString == memberTypeDesc.Name);
+				}
 				// Passing nullptr for Desc here since struct members are not allowed to have default values in HLSL.
-				ReflectVariable(memberDomain, memberType, nullptr, memberTypeDesc, inoutBufferInfo, anOffset + memberTypeDesc.Offset);
+				ReflectVariable(memberDomain, memberType, nullptr, memberTypeDesc, inoutBufferInfo, inoutOffset);
 			}
 		}
 		else
 		{
 			RHIShaderReflectionInfo::ConstantBufferInfo::MemberInfo memInfo;
 			if (aDomain.starts_with("__"))
-			{
 				return;
-			}
 			memInfo.Name = aDomain;
 			std::string typeString = DeriveHLSLType(aVarTypeDesc);
 			memInfo.Type = typeString.c_str();
@@ -116,8 +122,8 @@ namespace
 			{
 				memcpy_s(memInfo.Default, 64, aVarDesc->DefaultValue, aVarDesc->Size);
 			}
-			// Compiled offsets include register alignment and padding, even for members not exposed above.
-			memInfo.Offset = anOffset;
+			memInfo.Offset = inoutOffset;
+			inoutOffset += memInfo.Size;
 
 			inoutBufferInfo.MemberNameToIndex.emplace(memInfo.Name, inoutBufferInfo.Members.size());
 			inoutBufferInfo.Members.emplace_back(memInfo);
@@ -168,6 +174,7 @@ namespace
 			bufferInfo.Members.reserve(cbufferDesc.Variables);
 			bufferInfo.MemberNameToIndex.reserve(cbufferDesc.Variables);
 
+			size_t offset = 0;
 			for (unsigned v = 0; v < cbufferDesc.Variables; ++v)
 			{
 				ID3D11ShaderReflectionVariable* var = bufferRefl->GetVariableByIndex(v);
@@ -179,7 +186,7 @@ namespace
 
 				D3D11_SHADER_TYPE_DESC varTypeDesc = {};
 				varType->GetDesc(&varTypeDesc);
-				ReflectVariable(varDesc.Name, varType, &varDesc, varTypeDesc, bufferInfo, varDesc.StartOffset);
+				ReflectVariable(varDesc.Name, varType, &varDesc, varTypeDesc, bufferInfo, offset);
 			}
 
 			//std::string lowerName = bufferInfo.Name;

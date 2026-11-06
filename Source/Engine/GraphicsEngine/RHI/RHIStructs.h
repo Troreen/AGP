@@ -27,15 +27,25 @@ enum class BufferType : uint8_t
 	Unknown,
 	VertexBuffer,
 	IndexBuffer,
-	ConstantBuffer
+	ConstantBuffer,
+	StructuredBuffer,
+	DynamicVertexBuffer
 };
 
 enum class Topology : unsigned
 {
 	Undefined = 0,
+	PointList = 1,
 	LineList = 2,
 	TriangleList = 4,
 	TriangleStrip = 5
+};
+
+enum class DepthStencilState : uint8_t
+{
+	ReadWrite,
+	ReadOnly,
+	Disabled
 };
 
 struct VertexElementDesc
@@ -54,7 +64,8 @@ enum PipelineStage_
 	PipelineStage_ComputeShader = 8,
 	PipelineStage_Rasterizer = 16,
 	PipelineStage_PixelShader = 32,
-	PipelineStage_OutputMerger = 64
+	PipelineStage_OutputMerger = 64,
+	PipelineStage_Depth = 128,
 };
 
 enum class RasterizerState : uint8_t
@@ -84,9 +95,11 @@ enum class ShaderType : unsigned
 enum class ResourceFormat
 {
 	UNKNOWN = 0,
+	R32G32B32A32_FLOAT = 2,
 	R16G16B16A16_FLOAT = 10,
 	R32G32_FLOAT = 16,
 	R32G8X24_TYPELESS = 19,
+	R11G11B10_FLOAT = 26,
 	R8G8B8A8_UNORM = 28,
 	R16G16_FLOAT = 34,
 	R32_FLOAT = 41,

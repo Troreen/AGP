@@ -1,18 +1,25 @@
 #include "GameFramework.pch.h"
-#include "GameFramework/World/World.h"
+#include "GameFramework/AssetHandling/MaterialAsset.h"
+#include "GameFramework/AssetHandling/MeshAsset.h"
 #include "GameFramework/Collision/CollisionSystem.h"
-#include "GameFramework/Components/ColliderComponent.h"
 #include "GameFramework/Components/CameraComponent.h"
+#include "GameFramework/Components/ColliderComponent.h"
+#include "GameFramework/Components/LightComponent.h"
+#include "GameFramework/Components/ParticleComponent.h"
+#include "GameFramework/World/World.h"
 #include "Maths.hpp"
-#include <algorithm>
-#include <cmath>
-#include <stdexcept>
-#include <ServiceLocator.h>
-#include <CommonUtilities/InputMapper.h>
-#include <CommonUtilities/InputHandler.h>
-#include <CommonUtilities/EnumKeyCode.h>
-#include <GameFramework/Components/AnimatorComponent.h>
+
 #include <AISystems/Pathfinder.hpp>
+#include <algorithm>
+#include <CommonUtilities/InputHandler.h>
+#include <CommonUtilities/Intersection.hpp>
+#include <CommonUtilities/Sphere.hpp>
+#include <GameFramework/Components/AnimatorComponent.h>
+#include <GraphicsEngine/GraphicsEngine.h>
+#include <GraphicsEngine/Objects/Mesh.h>
+#include <GraphicsEngine/Drawers/LineDrawer.h>
+#include <ServiceLocator.h>
+#include <stdexcept>
 
 namespace
 {
@@ -52,6 +59,8 @@ World::~World()
 {
 	Clear();
 }
+
+World& World::operator=(World&&) = default;
 
 Actor* World::SpawnActor(std::string_view name)
 {
@@ -222,9 +231,6 @@ void World::BeginPlay()
 		throw;
 	}
 	myUpdating = false;
-
-
-	myDebugActor = FindActor("A_Debug");
 }
 
 void World::Update(float deltaTime)
@@ -305,6 +311,11 @@ RenderSnapshot& World::GenerateRenderSnapshot()
 	myWorldSnapshot.TotalTime = static_cast<float>(mySimulationTime);
 
 	myWorldSnapshot.ActiveCamera = myCamera;
+	Frustum cameraFrustum;
+	if (myCamera != nullptr)
+	{
+		cameraFrustum = myCamera->GetFrustum();
+	}
 
 	for (const std::unique_ptr<Actor>& actor : myActors)
 	{
@@ -323,7 +334,52 @@ RenderSnapshot& World::GenerateRenderSnapshot()
 			MeshComponentBase* meshComponent = dynamic_cast<MeshComponentBase*>(component.get());
 			if (meshComponent != nullptr)
 			{
-				myWorldSnapshot.Meshes.emplace_back(meshComponent);
+				myWorldSnapshot.AllMeshes.emplace_back(meshComponent);
+
+				if (cameraFrustum.IsCulled(meshComponent->GetCullingSphere()))
+				{
+					continue;
+				}
+
+				const std::shared_ptr<Mesh>& mesh = meshComponent->GetMesh()->GetMesh();
+				const std::vector<std::shared_ptr<MaterialAsset>>& materials = meshComponent->GetMaterialList();
+
+				bool addedOpaque = false;
+				bool addedBlended = false;
+
+				const MaterialInterface* currentMaterial = nullptr;
+				for (const Mesh::Element& element : mesh->GetElements())
+				{
+					const MaterialInterface* elementMaterial = materials[element.MaterialIndex] == nullptr ? nullptr : materials[element.MaterialIndex]->GetMaterial().get();
+					if (elementMaterial != nullptr && elementMaterial != currentMaterial)
+					{
+						currentMaterial = elementMaterial;
+					}
+					else if (elementMaterial == nullptr)
+					{
+						currentMaterial = GraphicsEngine::Get().GetDefaultMaterial();
+					}
+
+					switch (currentMaterial->GetBlendMode())
+					{
+						case BlendMode::Opaque:
+							if (!addedOpaque)
+							{
+								myWorldSnapshot.OpaqueMeshes.emplace_back(meshComponent);
+								addedOpaque = true;
+							}
+							break;
+
+						default:
+							if (!addedBlended)
+							{
+								myWorldSnapshot.BlendedMeshes.emplace_back(meshComponent);
+								addedBlended = true;
+							}
+							break;
+					}
+				}
+
 				continue;
 			}
 
@@ -333,8 +389,49 @@ RenderSnapshot& World::GenerateRenderSnapshot()
 				myWorldSnapshot.Lights.emplace_back(lightComponent);
 				continue;
 			}
+
+			ParticleComponent* particleComponent = dynamic_cast<ParticleComponent*>(component.get());
+			if (particleComponent != nullptr)
+			{
+				myWorldSnapshot.Particles.emplace_back(particleComponent);
+				continue;
+			}
 		}
 	}
+
+	std::jthread sortAllMeshes([this]()
+		{
+			std::sort(myWorldSnapshot.AllMeshes.begin(), myWorldSnapshot.AllMeshes.end(), [this](const MeshComponentBase* aLeft, const MeshComponentBase* aRight)
+				{
+					const float distanceToLeft = (myCamera->GetOwner()->GetTransform().GetWorldPosition() - aLeft->GetOwner()->GetTransform().GetWorldPosition()).LengthSqr();
+					const float distanceToRight = (myCamera->GetOwner()->GetTransform().GetWorldPosition() - aRight->GetOwner()->GetTransform().GetWorldPosition()).LengthSqr();
+					return distanceToLeft < distanceToRight;
+				});
+		});
+
+	std::jthread sortOpaqueMeshes([this]()
+		{
+			std::sort(myWorldSnapshot.OpaqueMeshes.begin(), myWorldSnapshot.OpaqueMeshes.end(), [this](const MeshComponentBase* aLeft, const MeshComponentBase* aRight)
+				{
+					const float distanceToLeft = (myCamera->GetOwner()->GetTransform().GetWorldPosition() - aLeft->GetOwner()->GetTransform().GetWorldPosition()).LengthSqr();
+					const float distanceToRight = (myCamera->GetOwner()->GetTransform().GetWorldPosition() - aRight->GetOwner()->GetTransform().GetWorldPosition()).LengthSqr();
+					return distanceToLeft < distanceToRight;
+				});
+		});
+
+	std::jthread sortBlendedMeshes([this]()
+		{
+			std::sort(myWorldSnapshot.BlendedMeshes.begin(), myWorldSnapshot.BlendedMeshes.end(), [this](const MeshComponentBase* aLeft, const MeshComponentBase* aRight)
+				{
+					const float distanceToLeft = (myCamera->GetOwner()->GetTransform().GetWorldPosition() - aLeft->GetOwner()->GetTransform().GetWorldPosition()).LengthSqr();
+					const float distanceToRight = (myCamera->GetOwner()->GetTransform().GetWorldPosition() - aRight->GetOwner()->GetTransform().GetWorldPosition()).LengthSqr();
+					return distanceToLeft > distanceToRight;
+				});
+		});
+
+	sortAllMeshes.join();
+	sortOpaqueMeshes.join();
+	sortBlendedMeshes.join();
 
 	return myWorldSnapshot;
 }

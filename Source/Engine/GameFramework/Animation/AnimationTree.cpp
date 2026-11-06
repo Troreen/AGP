@@ -177,7 +177,7 @@ AnimationVariable& AnimationTree::GetAnimationVariable(const std::string& aName)
 {
 	if (!myAnimationVariables.contains(aName))
 	{
-		std::cout << "No Animation Variable with the name '" << aName << "' exists in the tree '" << myName << "'!" << std::endl;
+		//std::cout << "No Animation Variable with the name '" << aName << "' exists in the tree '" << myName << "'!" << std::endl;
 		return myAnimationVariables.begin()->second;
 	}
 
@@ -298,6 +298,14 @@ AnimatorComponent* AnimationTree::GetAnimationPlayer()
 	}
 
 	return myAnimationPlayer;
+}
+
+void AnimationTree::ResetVariables()
+{
+	for (auto& variable : myAnimationVariables)
+	{
+		variable.second.IsActive = false;
+	}
 }
 
 AnimationState& AnimationTree::GetAnimationState(const std::string& aName)

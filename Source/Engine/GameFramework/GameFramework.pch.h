@@ -7,6 +7,7 @@
 
 #include <CommonUtilities/CommonUtilities.h>
 
+#include <d3d11_1.h>
 #include <filesystem>
 #include <functional>
 #include <vector>

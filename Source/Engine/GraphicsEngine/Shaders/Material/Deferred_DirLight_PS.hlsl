@@ -1,5 +1,5 @@
-#include "Common.hlsli"
-#include "Lighting.hlsli"
+#include "../Internal/Common.hlsli"
+#include "../Internal/Lighting.hlsli"
 
 #define LIGHT_INDEX 0
 

@@ -8,7 +8,6 @@
 #endif
 #include <Windows.h>
 
-#include "Components/CustomComponentRegistry.h"
 #include "InputHandler.h"
 #include "Vector2.hpp"
 #include "XInputHandler.h"
@@ -23,7 +22,6 @@
 #include <GraphicsEngine/GraphicsRenderSettings.h>
 #include <GraphicsEngine/RHI/GraphicsCommandList.h>
 #include <memory>
-#include <optional>
 #include <string>
 #include <vector>
 
@@ -45,10 +43,6 @@ public:
 
 	int Run(Game& aGame);
 
-	// Requests are last-write-wins and are processed only at safe frame boundaries.
-	bool RequestSceneLoad(const std::filesystem::path& aScene);
-	bool ReloadCurrentScene();
-
 private:
 	GraphicsEngine& InitializeWindowAndGraphics();
 	void InitializeServices();
@@ -59,48 +53,45 @@ private:
 	void InitializeGameSession(Game& aGame, GraphicsEngine& aGraphics);
 	void RunMainLoop(Game& aGame, GraphicsEngine& aGraphics);
 	bool PrepareRenderTargetSize(GraphicsEngine& aGraphics);
-	void RenderFrame(GraphicsEngine& aGraphics);
-	void ProcessPendingSceneLoad(Game& aGame);
+	void RenderFrame(float aDeltaTime, GraphicsEngine& aGraphics);
 
 	void ShowRenderPassNotification();
 	
 	void Cleanup(Game& aGame, std::exception_ptr& aFailure);
-	void ClearWorld();
+	void ClearScene();
 	void RemoveApplicationInputListeners();
 	void ReleaseRenderReferences();
 	void KillServices();
 	void DestroyWindowIfCreated() noexcept;
 
-	void UserInterface();
-
+private:
 	ApplicationSettings myApplicationSettings;
 	WindowSettings myWindowSettings;
-
-	std::filesystem::path myContentRoot;
-	std::unique_ptr<World> myWorld;
-	CustomComponentRegistry myComponentRegistry;
-	std::optional<std::filesystem::path> myPendingScene;
-	std::optional<std::filesystem::path> myCurrentScene;
-	CommonUtilities::Vector2u myClientSize{};
-	bool myQuitRequested = false;
-	bool myAcceptSceneRequests = true;
-	bool myGameInitializationStarted = false;
+	InputSettingsApplier myInputSettingsApplier;
+	DebugCameraService myDebugCamera;
 
 	HWND myMainWindowHandle = nullptr;
-	std::wstring myWindowClassName;
 	HCURSOR myCustomCursor = nullptr;
-	bool myWindowClassRegistered = false;
-	InputSettingsApplier myInputSettingsApplier;
+	std::wstring myWindowClassName;
+
+	std::filesystem::path myContentRoot;
+	CommonUtilities::Vector2u myClientSize{};
+
 	CommonUtilities::InputHandler myInputHandler;
 	CommonUtilities::XInputHandler myXInputHandler;
 	std::vector<unsigned> myApplicationInputListenerIds;
 
 	GraphicsCommandList myCommandList;
 	GraphicsRenderSettings myRenderSettings;
+
 	std::shared_ptr<TextWidget> myRenderPassNotificationWidget;
 	std::shared_ptr<FontAsset> myRenderFont;
+
 	float myRenderPassNotificationRemainingSeconds = 0.0f;
 
+	bool myWindowClassRegistered = false;
+	bool myGameInitializationStarted = false;
+	bool myQuitRequested = false;
 	bool myToggleDebugCameraRequested = false;
-	DebugCameraService myDebugCamera;
+	bool myShowDebugWindow = false;
 };

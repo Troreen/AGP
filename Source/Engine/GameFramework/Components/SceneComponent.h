@@ -19,6 +19,9 @@ public:
 	CommonUtilities::Matrix4f GetWorldMatrix() const;
 	CommonUtilities::Vector3f GetWorldPosition() const;
 	CommonUtilities::Vector3f GetWorldDirection() const;
+	CommonUtilities::Vector3f GetWorldForward() const;
+	CommonUtilities::Vector3f GetWorldUp() const;
+
 
 private:
 	Transform myTransform;

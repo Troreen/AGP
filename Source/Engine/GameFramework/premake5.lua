@@ -15,6 +15,9 @@ project "GameFramework"
 	targetname("$(ProjectName)")
 	objdir ("!$(SolutionDir)Intermediate\\$(ProjectName)\\$(Configuration)")
 
+	pchheader "GameFramework.pch.h"
+    pchsource "GameFramework.pch.cpp"
+
 	includedirs {
 		".",
 		dirs.source,

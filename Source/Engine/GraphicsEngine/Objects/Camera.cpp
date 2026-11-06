@@ -23,24 +23,18 @@ Camera::Camera(float aHorizontalFoV, float aNearPlane, float aFarPlane, float aC
     myVerticalFoV = vFoVRad * CommonUtilities::Math::RADIANS_TO_DEGREES<float>;
 
     myProjection = CreatePerspectiveFovProjection(hFoVRad, vFoVRad, myNearPlane, myFarPlane);
-    myNearProjection = CreatePerspectiveFovProjection(hFoVRad, vFoVRad, myNearPlane, aCascadeSplits[0]);
-    myMidProjection = CreatePerspectiveFovProjection(hFoVRad, vFoVRad, aCascadeSplits[0], aCascadeSplits[1]);
-    myFarProjection = CreatePerspectiveFovProjection(hFoVRad, vFoVRad, aCascadeSplits[1], aCascadeSplits[2]);
+	for (size_t i = 0; i < DirectionalLightComponent::ShadowCascadeCount; ++i)
+	{
+		myCascadeProjections[i] = CreatePerspectiveFovProjection(hFoVRad, vFoVRad, i == 0 ? myNearPlane : aCascadeSplits[i - 1], aCascadeSplits[i]);
+	}
 }
 
 const CommonUtilities::Matrix4f& Camera::GetProjectionByCascadeIndex(size_t aIndex) const
 {
-    switch (aIndex)
-    {
-        case 0:
-            return myNearProjection;
-
-        case 1:
-            return myMidProjection;
-
-        case 2:
-            return myFarProjection;
-    }
+	if (aIndex >= 0 && aIndex < DirectionalLightComponent::ShadowCascadeCount)
+	{
+		return myCascadeProjections[aIndex];
+	}
 
     return myProjection;
 }

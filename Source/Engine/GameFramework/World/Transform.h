@@ -1,15 +1,7 @@
 #pragma once
 #include "Matrix4x4.hpp"
 #include "Vector3.hpp"
-
-// Copyable scene/authored transform data. Rotation is yaw (Y), pitch (X),
-// roll (Z), in degrees. Runtime Transform objects remain stable and noncopyable.
-struct TransformData
-{
-	CommonUtilities::Vector3f Position{};
-	CommonUtilities::Vector3f RotationDegrees{};
-	CommonUtilities::Vector3f Scale{1, 1, 1};
-};
+#include "Quaternion.hpp"
 
 // The sole public object transform. Actors are roots; spatial components store
 // an actor-relative offset and compose it explicitly in SceneComponent.
@@ -22,29 +14,46 @@ public:
 	Transform(Transform&&) = delete;
 	Transform& operator=(Transform&&) = delete;
 
-	TransformData GetData() const { return myData; }
-	bool SetData(const TransformData& data);
-	void SetMatrix(const CommonUtilities::Matrix4x4<float>& aMatrix);
+	//const TransformData& GetData() const { return myData; }
+	//bool SetData(const TransformData& data);
 
-	const CommonUtilities::Vector3f& GetLocalPosition() const { return myData.Position; }
-	const CommonUtilities::Vector3f& GetLocalRotationDegrees() const { return myData.RotationDegrees; }
-	const CommonUtilities::Vector3f& GetLocalScale() const { return myData.Scale; }
+	//Getters
+	const CommonUtilities::Vector3f& GetLocalPosition() const { return myPosition; }
+	const CommonUtilities::Vector3f& GetLocalRotationDegrees() const;
+	const CommonUtilities::Vector3f& GetLocalRotationRadians() const;
+	const CommonUtilities::Quaternion<float>& GetLocalRotation() const { return myRotation; };
+	const CommonUtilities::Vector3f& GetLocalScale() const { return myScale; }
 
-	bool SetLocalPosition(const CommonUtilities::Vector3f& position);
-	bool SetLocalRotationDegrees(float yaw, float pitch, float roll);
-	bool SetLocalRotationDegrees(const CommonUtilities::Vector3f& rotation);
-	bool SetLocalScale(const CommonUtilities::Vector3f& scale);
-
-	const CommonUtilities::Matrix4f& GetLocalMatrix() const { return myLocalMatrix; }
-	const CommonUtilities::Matrix4f& GetWorldMatrix() const { return myLocalMatrix; }
-	CommonUtilities::Vector3f GetWorldPosition() const { return myData.Position; }
-	bool SetWorldPosition(const CommonUtilities::Vector3f& position) { return SetLocalPosition(position); }
+	const CommonUtilities::Matrix4f& GetLocalMatrix() const;
+	const CommonUtilities::Matrix4f& GetWorldMatrix() const;
+	CommonUtilities::Vector3f GetWorldPosition() const { return myPosition; }
 
 	CommonUtilities::Vector3f GetLocalForward() const;
 	CommonUtilities::Vector3f GetLocalRight() const;
 	CommonUtilities::Vector3f GetLocalUp() const;
 
+	//Setters
+	void SetLocalPosition(const CommonUtilities::Vector3f& aPosition);
+	void SetWorldPosition(const CommonUtilities::Vector3f& aPosition) { SetLocalPosition(aPosition); }
+	void SetLocalRotationDegrees(float aPitch, float aYaw, float aRoll);
+	void SetLocalRotationDegrees(const CommonUtilities::Vector3f& aRotation);
+	//Takes radians
+	void SetLocalRotation(const CommonUtilities::Vector3f& aRotation);
+
+	void SetLocalRotation(const CommonUtilities::Quaternion<float>& aRotation);
+	void SetLocalScale(const CommonUtilities::Vector3f& aScale);
+	//For Unreal Matrix
+	bool SetMatrix(const CommonUtilities::Matrix4x4<float>& aMatrix);
+
 private:
-	TransformData myData;
-	CommonUtilities::Matrix4f myLocalMatrix;
+
+	void RecalculateMatrix() const;
+
+	CommonUtilities::Vector3f myPosition = { 0.0f, 0.0f, 0.0f };
+	CommonUtilities::Quaternion<float> myRotation = CommonUtilities::Quaternion<float>::CreateIdentity();
+	CommonUtilities::Vector3f myScale = { 1, 1, 1 };
+
+	mutable CommonUtilities::Matrix4f myLocalMatrix;
+
+	mutable bool myIsDirty = false;
 };

@@ -29,9 +29,8 @@ public:
 	SceneWorldBuilder() = default;
 	~SceneWorldBuilder() = default;
 
-	bool Initialize(const std::filesystem::path& aNameConversions);
 	std::unique_ptr<World> BuildWorld(const SceneData& aScene, AssetRegistry& anAssetRegistry,
-	    const std::filesystem::path& aShaderPath, CommonUtilities::Vector2u aClientSize,
+	    const std::filesystem::path& aShaderPath,
 	    const SceneFallbackAssets& someFallbacks = {},
 	    const CustomComponentCreator& aCustomCreator = {});
 
@@ -49,13 +48,11 @@ private:
 	};
 
 	void CreateSceneMaterials(const std::vector<MasterMaterialRecord>& someMaterials, AssetRegistry& anAssetRegistry, const std::filesystem::path& aShaderPath, const SceneFallbackAssets& someFallbacks);
-	void CreateActorsAndComponents(World& aWorld, const std::vector<ActorRecord>& someActors, AssetRegistry& anAssetRegistry, CommonUtilities::Vector2u aClientSize, const SceneFallbackAssets& someFallbacks, const CustomComponentCreator& aCustomCreator);
+	void CreateActorsAndComponents(World& aWorld, const std::vector<ActorRecord>& someActors, AssetRegistry& anAssetRegistry, const SceneFallbackAssets& someFallbacks, const CustomComponentCreator& aCustomCreator);
 	const ComponentData& GetCommonComponentData(const ComponentRecord& aRecord);
 	void ApplyCommonComponentData(Component& aComponent, const ComponentData& someComponentData);
 	std::shared_ptr<MaterialAsset> LoadMaterial(const MaterialInstanceData& someMaterialData, AssetRegistry& anAssetRegistry, const std::string& aComponentName);
 	void ApplyMaterialParameters(MaterialInstance& aMaterial, const std::vector<MaterialParameterData>& someParameters, AssetRegistry& anAssetRegistry);
 	bool ApplyMesh(Actor& anActor, MeshComponentBase& aComponent, const StaticMeshData& someMeshData, AssetRegistry& anAssetRegistry, const SceneFallbackAssets& someFallbacks);
 	Component* CreateComponent(Actor& anActor, const ComponentRecord& aRecord, AssetRegistry& anAssetRegistry, const SceneFallbackAssets& someFallbacks);
-
-	std::unordered_map<std::string, std::string> myUnrealDataNameToMaterialParameterName;
 };

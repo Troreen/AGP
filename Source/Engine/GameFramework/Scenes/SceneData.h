@@ -13,7 +13,7 @@ struct ComponentData
 {
 	std::string Name;
 	bool Enabled = true;
-	TransformData Transform;
+	CommonUtilities::Matrix4f Transform;
 	std::vector<std::string> Tags;
 	std::string SourceParent;
 };
@@ -111,7 +111,7 @@ struct ActorRecord
 	std::string Name;
 	std::string Archetype;
 	std::vector<std::string> Tags;
-	TransformData Transform;
+	CommonUtilities::Matrix4f Transform;
 	bool Active = true;
 	std::vector<ComponentRecord> Components;
 };
@@ -120,4 +120,9 @@ struct SceneData
 {
 	std::vector<MasterMaterialRecord> Materials;
 	std::vector<ActorRecord> Actors;
+
+	std::string EnvironmentCubeTexture;
+
+	CommonUtilities::Vector3f AmbientLightColor = CommonUtilities::Vector3f(1.0f, 1.0f, 1.0f);
+	float AmbientLightIntensity = 1.0f;
 };

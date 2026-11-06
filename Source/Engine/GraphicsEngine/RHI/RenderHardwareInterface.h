@@ -39,10 +39,10 @@ public:
 	bool Resize(unsigned aWidth, unsigned aHeight, Texture& outBackBuffer, Texture& outDepthStencil);
 
     bool CreateVertexBuffer(std::string_view aName, const std::vector<Vertex>& aVertexList, Buffer& outBuffer) const;
-    bool CreateDynamicVertexBuffer(std::string_view aName, size_t aMaxVertexCount, Buffer& outBuffer) const;
-    bool CreateDynamicVertexBufferSimple(std::string_view aName, size_t aMaxVertexCount, Buffer& outBuffer) const;
+    bool CreateDynamicVertexBuffer(std::string_view aName, size_t aVertexSize, size_t aCapacity, Buffer& outBuffer) const;
     bool CreateIndexBuffer(std::string_view aName, const std::vector<unsigned>& aIndexList, Buffer& outBuffer) const;
     bool CreateConstantBuffer(std::string_view aName, size_t aSize, Buffer& outBuffer) const;
+	bool CreateStructuredBuffer(std::string_view aName, size_t aSize, size_t aStride, Buffer& outBuffer) const;
 
     bool CreateDepthStencil(std::string_view aName, unsigned aWidth, unsigned aHeight, Texture& outDepthStencil, bool aCube) const;
     bool CreatePipelineStateObject(const PipelineStateDescription& aDescription, PipelineStateObject& outPSO) const;
@@ -51,6 +51,8 @@ public:
     bool CreateTexture(std::string_view aName, unsigned aWidth, unsigned aHeight, unsigned aNumMips, ResourceFormat aFormat, ResourceBindFlags aBindFlags, Texture& outTexture) const;
     bool CreateColorTexture(std::string_view aName, const std::array<uint8_t, 4>& aColor, Texture& outTexture) const;
     bool CreateColorCubeTexture(std::string_view aName, const std::array<uint8_t, 4>& aColor, Texture& outTexture) const;
+	bool CreateLutCubeTexture(std::string_view aName, unsigned aSize, const void* aByteCode, size_t aDataTypeSize, Texture& outTexture) const;
+	bool CreateDefaultLutCubeTexture(std::string_view aName, unsigned aSize, Texture& outTexture) const;
     bool CreateSampler(const SamplerDescription& aDescription, Sampler& outSampler) const;
     bool CreateGBuffer(std::string_view aName, unsigned aWidth, unsigned aHeight, GBuffer& outGBuffer) const;
 

@@ -1,23 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Assets">
-      <UniqueIdentifier>{3824E0A7-24C6-0A7E-0D81-1ED2F9C191CE}</UniqueIdentifier>
-    </Filter>
     <Filter Include="BehaviourTree">
       <UniqueIdentifier>{3A7B31FB-A63B-AD31-6F76-F6AEDBF5F10D}</UniqueIdentifier>
     </Filter>
-    <Filter Include="BehaviourTree\BaseNodes">
-      <UniqueIdentifier>{BD1A44FF-2952-8C96-325C-F0B99E12B38F}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="BehaviourTree\CustomNodes">
-      <UniqueIdentifier>{FDF4CF74-69B7-03FF-B267-928B1E69DCDC}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="BehaviourTree\CustomNodes\ActionNodes">
-      <UniqueIdentifier>{6300D6A8-CFC4-D498-982A-056304AE70CE}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="BehaviourTree\CustomNodes\ConditionNodes">
-      <UniqueIdentifier>{4C0F0D13-388C-0056-6109-016A4DE59CE9}</UniqueIdentifier>
+    <Filter Include="BehaviourTree\GenericBehaviourTree">
+      <UniqueIdentifier>{FB9B9B4A-E7D7-9EB4-50EA-B6AB3C4547CF}</UniqueIdentifier>
     </Filter>
     <Filter Include="Components">
       <UniqueIdentifier>{6B7DD516-5735-1764-C03C-F0BFAC13B254}</UniqueIdentifier>
@@ -25,8 +13,17 @@
     <Filter Include="Components\ScriptedEvents">
       <UniqueIdentifier>{ED1041C7-59D3-7451-A283-03DE0E854D2F}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Controllers">
+      <UniqueIdentifier>{7C21CA00-E8D6-42F6-71CB-3CCDDD7F39FA}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Player">
       <UniqueIdentifier>{724E55CA-5EF0-7FA0-47AB-93F433EC06F1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Player\Abilities">
+      <UniqueIdentifier>{77DD1174-63D6-30C6-8C08-164B786010D2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Player\Components">
+      <UniqueIdentifier>{470835DB-B31E-3371-FC95-BE9268EB03F9}</UniqueIdentifier>
     </Filter>
     <Filter Include="Resources">
       <UniqueIdentifier>{000BCD17-6C75-818E-B5B3-3234215D5FE3}</UniqueIdentifier>
@@ -36,52 +33,40 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Assets\MeshLibrary.h">
-      <Filter>Assets</Filter>
-    </ClInclude>
-    <ClInclude Include="BehaviourTree\BaseNodes\BT_CompositeNode.h">
-      <Filter>BehaviourTree\BaseNodes</Filter>
-    </ClInclude>
-    <ClInclude Include="BehaviourTree\BaseNodes\BT_DecoratorNode.h">
-      <Filter>BehaviourTree\BaseNodes</Filter>
-    </ClInclude>
-    <ClInclude Include="BehaviourTree\BaseNodes\BT_LeafNodeAction.h">
-      <Filter>BehaviourTree\BaseNodes</Filter>
-    </ClInclude>
-    <ClInclude Include="BehaviourTree\BaseNodes\BT_LeafNodeCondition.h">
-      <Filter>BehaviourTree\BaseNodes</Filter>
-    </ClInclude>
-    <ClInclude Include="BehaviourTree\BaseNodes\BT_Node.h">
-      <Filter>BehaviourTree\BaseNodes</Filter>
-    </ClInclude>
-    <ClInclude Include="BehaviourTree\BaseNodes\BT_SelectorNode.h">
-      <Filter>BehaviourTree\BaseNodes</Filter>
-    </ClInclude>
-    <ClInclude Include="BehaviourTree\BaseNodes\BT_SequenceNode.h">
-      <Filter>BehaviourTree\BaseNodes</Filter>
-    </ClInclude>
-    <ClInclude Include="BehaviourTree\BehaviourTree.h">
-      <Filter>BehaviourTree</Filter>
-    </ClInclude>
     <ClInclude Include="BehaviourTree\BehaviourTreeComponent.h">
       <Filter>BehaviourTree</Filter>
     </ClInclude>
     <ClInclude Include="BehaviourTree\BehaviourTreeFactory.h">
       <Filter>BehaviourTree</Filter>
     </ClInclude>
-    <ClInclude Include="BehaviourTree\BlackBoard.h">
-      <Filter>BehaviourTree</Filter>
+    <ClInclude Include="BehaviourTree\GenericBehaviourTree\BT_CompositeNode.h">
+      <Filter>BehaviourTree\GenericBehaviourTree</Filter>
     </ClInclude>
-    <ClInclude Include="BehaviourTree\CustomNodes\ActionNodes\BT_Action_FollowPlayer.h">
-      <Filter>BehaviourTree\CustomNodes\ActionNodes</Filter>
+    <ClInclude Include="BehaviourTree\GenericBehaviourTree\BT_DecoratorNode.h">
+      <Filter>BehaviourTree\GenericBehaviourTree</Filter>
     </ClInclude>
-    <ClInclude Include="BehaviourTree\CustomNodes\ActionNodes\BT_Action_Idle.h">
-      <Filter>BehaviourTree\CustomNodes\ActionNodes</Filter>
+    <ClInclude Include="BehaviourTree\GenericBehaviourTree\BT_LeafNodeAction.h">
+      <Filter>BehaviourTree\GenericBehaviourTree</Filter>
     </ClInclude>
-    <ClInclude Include="BehaviourTree\CustomNodes\ConditionNodes\BT_Condition_IsPlayerInLOS.h">
-      <Filter>BehaviourTree\CustomNodes\ConditionNodes</Filter>
+    <ClInclude Include="BehaviourTree\GenericBehaviourTree\BT_LeafNodeCondition.h">
+      <Filter>BehaviourTree\GenericBehaviourTree</Filter>
     </ClInclude>
-    <ClInclude Include="Components\CustomComponentRegistry.h">
+    <ClInclude Include="BehaviourTree\GenericBehaviourTree\BT_Node.h">
+      <Filter>BehaviourTree\GenericBehaviourTree</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviourTree\GenericBehaviourTree\BT_SelectorNode.h">
+      <Filter>BehaviourTree\GenericBehaviourTree</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviourTree\GenericBehaviourTree\BT_SequenceNode.h">
+      <Filter>BehaviourTree\GenericBehaviourTree</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviourTree\GenericBehaviourTree\BehaviourTree.h">
+      <Filter>BehaviourTree\GenericBehaviourTree</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviourTree\GenericBehaviourTree\BlackBoard.h">
+      <Filter>BehaviourTree\GenericBehaviourTree</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\EnemyComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
     <ClInclude Include="Components\RegisterCustomComponents.h">
@@ -96,27 +81,45 @@
     <ClInclude Include="Components\SpinComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
+    <ClInclude Include="Controllers\Controller.h">
+      <Filter>Controllers</Filter>
+    </ClInclude>
+    <ClInclude Include="Controllers\ControllerComponent.h">
+      <Filter>Controllers</Filter>
+    </ClInclude>
+    <ClInclude Include="Controllers\ControllerFactory.h">
+      <Filter>Controllers</Filter>
+    </ClInclude>
+    <ClInclude Include="Controllers\FollowPathController.h">
+      <Filter>Controllers</Filter>
+    </ClInclude>
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameLog.h" />
-    <ClInclude Include="Player\Ability.h">
-      <Filter>Player</Filter>
+    <ClInclude Include="Player\Abilities\Ability.h">
+      <Filter>Player\Abilities</Filter>
     </ClInclude>
-    <ClInclude Include="Player\AbilityComponent.h">
-      <Filter>Player</Filter>
+    <ClInclude Include="Player\Abilities\AbilityData.h">
+      <Filter>Player\Abilities</Filter>
     </ClInclude>
-    <ClInclude Include="Player\DashAbility.h">
-      <Filter>Player</Filter>
+    <ClInclude Include="Player\Abilities\DashAbility.h">
+      <Filter>Player\Abilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Player\Abilities\MeleeAbility.h">
+      <Filter>Player\Abilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Player\Components\AbilityComponent.h">
+      <Filter>Player\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Player\Components\PlayerController.h">
+      <Filter>Player\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Player\Components\PlayerMovementComponent.h">
+      <Filter>Player\Components</Filter>
     </ClInclude>
     <ClInclude Include="Player\PlayerActor.h">
       <Filter>Player</Filter>
     </ClInclude>
-    <ClInclude Include="Player\PlayerController.h">
-      <Filter>Player</Filter>
-    </ClInclude>
     <ClInclude Include="Player\PlayerDataStruct.h">
-      <Filter>Player</Filter>
-    </ClInclude>
-    <ClInclude Include="Player\PlayerMovementComponent.h">
       <Filter>Player</Filter>
     </ClInclude>
     <ClInclude Include="Resources\resource.h">
@@ -133,41 +136,32 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Assets\MeshLibrary.cpp">
-      <Filter>Assets</Filter>
-    </ClCompile>
-    <ClCompile Include="BehaviourTree\BaseNodes\BT_LeafNodeCondition.cpp">
-      <Filter>BehaviourTree\BaseNodes</Filter>
-    </ClCompile>
-    <ClCompile Include="BehaviourTree\BaseNodes\BT_Node.cpp">
-      <Filter>BehaviourTree\BaseNodes</Filter>
-    </ClCompile>
-    <ClCompile Include="BehaviourTree\BaseNodes\BT_SelectorNode.cpp">
-      <Filter>BehaviourTree\BaseNodes</Filter>
-    </ClCompile>
-    <ClCompile Include="BehaviourTree\BaseNodes\BT_SequenceNode.cpp">
-      <Filter>BehaviourTree\BaseNodes</Filter>
-    </ClCompile>
-    <ClCompile Include="BehaviourTree\BehaviourTree.cpp">
-      <Filter>BehaviourTree</Filter>
-    </ClCompile>
     <ClCompile Include="BehaviourTree\BehaviourTreeComponent.cpp">
       <Filter>BehaviourTree</Filter>
     </ClCompile>
     <ClCompile Include="BehaviourTree\BehaviourTreeFactory.cpp">
       <Filter>BehaviourTree</Filter>
     </ClCompile>
-    <ClCompile Include="BehaviourTree\BlackBoard.cpp">
-      <Filter>BehaviourTree</Filter>
+    <ClCompile Include="BehaviourTree\GenericBehaviourTree\BT_CompositeNode.cpp">
+      <Filter>BehaviourTree\GenericBehaviourTree</Filter>
     </ClCompile>
-    <ClCompile Include="BehaviourTree\CustomNodes\ActionNodes\BT_Action_FollowPlayer.cpp">
-      <Filter>BehaviourTree\CustomNodes\ActionNodes</Filter>
+    <ClCompile Include="BehaviourTree\GenericBehaviourTree\BT_LeafNodeAction.cpp">
+      <Filter>BehaviourTree\GenericBehaviourTree</Filter>
     </ClCompile>
-    <ClCompile Include="BehaviourTree\CustomNodes\ActionNodes\BT_Action_Idle.cpp">
-      <Filter>BehaviourTree\CustomNodes\ActionNodes</Filter>
+    <ClCompile Include="BehaviourTree\GenericBehaviourTree\BT_LeafNodeCondition.cpp">
+      <Filter>BehaviourTree\GenericBehaviourTree</Filter>
     </ClCompile>
-    <ClCompile Include="BehaviourTree\CustomNodes\ConditionNodes\BT_Condition_IsPlayerInLOS.cpp">
-      <Filter>BehaviourTree\CustomNodes\ConditionNodes</Filter>
+    <ClCompile Include="BehaviourTree\GenericBehaviourTree\BT_Node.cpp">
+      <Filter>BehaviourTree\GenericBehaviourTree</Filter>
+    </ClCompile>
+    <ClCompile Include="BehaviourTree\GenericBehaviourTree\BT_SelectorNode.cpp">
+      <Filter>BehaviourTree\GenericBehaviourTree</Filter>
+    </ClCompile>
+    <ClCompile Include="BehaviourTree\GenericBehaviourTree\BT_SequenceNode.cpp">
+      <Filter>BehaviourTree\GenericBehaviourTree</Filter>
+    </ClCompile>
+    <ClCompile Include="BehaviourTree\GenericBehaviourTree\BehaviourTree.cpp">
+      <Filter>BehaviourTree\GenericBehaviourTree</Filter>
     </ClCompile>
     <ClCompile Include="Components\RegisterCustomComponents.cpp">
       <Filter>Components</Filter>
@@ -181,24 +175,36 @@
     <ClCompile Include="Components\SpinComponent.cpp">
       <Filter>Components</Filter>
     </ClCompile>
+    <ClCompile Include="Controllers\ControllerComponent.cpp">
+      <Filter>Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="Controllers\ControllerFactory.cpp">
+      <Filter>Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="Controllers\FollowPathController.cpp">
+      <Filter>Controllers</Filter>
+    </ClCompile>
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Player\Ability.cpp">
-      <Filter>Player</Filter>
+    <ClCompile Include="Player\Abilities\Ability.cpp">
+      <Filter>Player\Abilities</Filter>
     </ClCompile>
-    <ClCompile Include="Player\AbilityComponent.cpp">
-      <Filter>Player</Filter>
+    <ClCompile Include="Player\Abilities\DashAbility.cpp">
+      <Filter>Player\Abilities</Filter>
     </ClCompile>
-    <ClCompile Include="Player\DashAbility.cpp">
-      <Filter>Player</Filter>
+    <ClCompile Include="Player\Abilities\MeleeAbility.cpp">
+      <Filter>Player\Abilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Player\Components\AbilityComponent.cpp">
+      <Filter>Player\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Player\Components\PlayerController.cpp">
+      <Filter>Player\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Player\Components\PlayerMovementComponent.cpp">
+      <Filter>Player\Components</Filter>
     </ClCompile>
     <ClCompile Include="Player\PlayerActor.cpp">
-      <Filter>Player</Filter>
-    </ClCompile>
-    <ClCompile Include="Player\PlayerController.cpp">
-      <Filter>Player</Filter>
-    </ClCompile>
-    <ClCompile Include="Player\PlayerMovementComponent.cpp">
       <Filter>Player</Filter>
     </ClCompile>
     <ClCompile Include="Runtime\GameApplication.cpp">

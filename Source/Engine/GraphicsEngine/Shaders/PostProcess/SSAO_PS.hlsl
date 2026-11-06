@@ -1,5 +1,5 @@
-#include "../Material/Common.hlsli"
-#include "../Material/Lighting.hlsli"
+#include "../Internal/Common.hlsli"
+#include "../Internal/Samplers.hlsli"
 #include "SSAOHelper.hlsli"
 
 // 32-Sample Hemisphere Kernel (Volumetric Rejection)

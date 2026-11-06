@@ -1,5 +1,5 @@
-#include "Common.hlsli"
-#include "Lighting.hlsli"
+#include "../Internal/Common.hlsli"
+#include "../Internal/Lighting.hlsli"
 #include "Material.hlsli"
 #include "MaterialParameters.hlsli"
 
@@ -21,7 +21,7 @@ GBufferOutput main(VStoPS aPixel)
 {
     const float4 sampleAlbedo = AlbedoTexture.Sample(TrilinearWrap, aPixel.UV0);
     const float2 sampleNormal = NormalTexture.Sample(TrilinearWrap, aPixel.UV0).xy;
-    const float3 pixelNormal = GetWorldNormal(sampleNormal, aPixel.Normal, aPixel.Tangent, aPixel.BiNormal);
+    const float3 worldNormal = GetWorldNormal(sampleNormal, aPixel.Normal, aPixel.Tangent, aPixel.BiNormal);
     const float4 sampleSurface = MaterialTexture.Sample(TrilinearWrap, aPixel.UV0);
     const float3 fxMap = FxTexture.Sample(TrilinearWrap, aPixel.UV0).rgb;
     
@@ -35,7 +35,7 @@ GBufferOutput main(VStoPS aPixel)
     parameters.UV0 = aPixel.UV0;
     parameters.UV1 = aPixel.UV1;
     parameters.ScreenPosition = aPixel.Position.xy;
-    parameters.Normal = pixelNormal;
+    parameters.Normal = worldNormal;
     parameters.VertexNormal = aPixel.Normal;
     parameters.Tangent = aPixel.Tangent;
     parameters.BiNormal = aPixel.BiNormal;
@@ -45,34 +45,23 @@ GBufferOutput main(VStoPS aPixel)
  
     GBufferOutput result;
     result.AlbedoTexture = parameters.PixelColor;
-    switch (FB_RenderPassType)
-    {
-        case 7:
-        {
-            // Material hooks can blend or project normals without using NormalTexture.
-            // Show their final normal in the mesh tangent frame, rather than slot 1.
-            const float3 finalNormal = normalize(parameters.Normal);
-            const float3 localNormal = float3(dot(finalNormal, normalize(aPixel.Tangent)),
-                dot(finalNormal, normalize(aPixel.BiNormal)), dot(finalNormal, normalize(aPixel.Normal)));
-            result.WorldNormalDepth = float4(localNormal * 0.5 + 0.5, 1);
-            break;
-        }
-        
-        default:
-            result.WorldNormalDepth = float4(parameters.Normal, aPixel.ViewDepth);
-            break;
-    }
-    result.SurfaceTexture = float4(parameters.SurfaceValues.rgb, 0);
+    result.WorldNormalDepth = float4(parameters.Normal, aPixel.ViewDepth);
+    result.Emission = parameters.Emission;
     switch (FB_RenderPassType)
     {
         case 5:
             result.Emission = float4(emissionMask, emissionMask, emissionMask, 1);
             break;
 
-        default:
-            result.Emission = parameters.Emission;
+        case 7:
+            result.WorldNormalDepth = float4(sampleNormal, 1, 1);
+            break;
+        
+        case 8:
+            result.WorldNormalDepth = float4(parameters.VertexNormal, 1);
             break;
     }
+    result.SurfaceTexture = float4(parameters.SurfaceValues.rgb, 0);
     result.WorldPosition = parameters.WorldPosition;
     
     return result;

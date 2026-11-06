@@ -7,13 +7,15 @@ LineDrawer& LineDrawer::Get()
 	return instance;
 }
 
-void LineDrawer::DrawLine(const CU::Vector3f& aFrom, const CU::Vector3f& aTo, const CU::Vector4f aColor)
+void LineDrawer::DrawLine([[maybe_unused]] const CU::Vector3f& aFrom, [[maybe_unused]] const CU::Vector3f& aTo, [[maybe_unused]] const CU::Vector4f aColor)
 {
+#ifndef _RETAIL
 	CU::Vector4f from = aFrom.ToVector4(1.0f);
 	CU::Vector4f to = aTo.ToVector4(1.0f);
 
 	myLines.push_back({ from, aColor });
 	myLines.push_back({ to, aColor });
+#endif
 }
 
 const std::vector<SimpleVertex>& LineDrawer::GetLines() const

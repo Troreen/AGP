@@ -1,5 +1,5 @@
-#include "../Material/Lighting.hlsli"
-#include "../Material/Common.hlsli"
+#include "Lighting.hlsli"
+#include "Common.hlsli"
 Texture2D SpriteTexture : register(t0);
 
 float4 main(VStoPS aPixel) : SV_TARGET

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Vector2.hpp"
+#include "EnumLockMode.h"
+
 #include <bitset>
 #include <Windows.h>
 
@@ -26,16 +28,15 @@ namespace CommonUtilities
 
 		void SetWindowHandle(HWND aWindowHandle);
 		HWND GetWindowHandle() const;
-		void SetAutoMouseCapture(bool anEnabled);
-		void SetMouseDeltaEnabled(bool enabled) { myMouseDeltaEnabled = enabled; }
 
-		void ShowCursor();
-		void HideCursor();
-		void CaptureMouse();
-		void ReleaseMouse();
+		void SetCursorVisibility(bool aShow);
+		void SetCursorLockMode(LockMode aLockMode);
 		void CenterMouse();
 
 	private:
+		void UpdateWindowAreaEvent();
+		void SetLockArea() const;
+
 		std::bitset<256> myCurrentState;
 		std::bitset<256> myPreviousState;
 		std::bitset<256> myTentativeState;
@@ -45,10 +46,11 @@ namespace CommonUtilities
 		Vector2<int> myCurrentMouseDelta;
 		Vector2<int> myTentativeMouseDelta;
 
-		bool myIsCursorVisible = true;
-		bool myIsMouseCaptured = false;
-		bool myAutoMouseCapture = true;
-		bool myMouseDeltaEnabled = true;
+		RECT myWindowArea = {};
+		RECT myLockedArea = {};
+
 		HWND myWindowHandle = nullptr;
+
+		LockMode myLockMode = LockMode::None;
 	};
 }

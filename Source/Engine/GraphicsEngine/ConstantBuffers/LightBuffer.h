@@ -1,13 +1,13 @@
 #pragma once
 
 #include <CommonUtilities/CommonUtilities.h>
+#include <GameFramework/Components/LightComponent.h>
 
-constexpr unsigned NUM_CASCADES = 3;
 constexpr unsigned MAX_FORWARD_LIGHTS = 8;
 
 struct Light
 {
-	CU::Matrix4f LightViewProjTexture[NUM_CASCADES];
+	CU::Matrix4f LightViewProjTexture[DirectionalLightComponent::ShadowCascadeCount];
 	CU::Vector3f Color;
 	float Intensity = 0;
 	CU::Vector3f Position;
@@ -24,5 +24,8 @@ struct LightBuffer
 {
 	Light Lights[MAX_FORWARD_LIGHTS];
 	uint32_t NumActiveLights = 0;
-	CU::Vector3f CascadeSplits;
+	CU::Vector3f __padding;
+	CU::Vector3f AmbientLightColor;
+	float AmbientLightIntensity = 1;
+	CU::Vector4f CascadeSplits;
 };

@@ -51,6 +51,22 @@ const std::shared_ptr<MaterialAsset> MeshComponentBase::GetMaterial(unsigned ind
 	return index < myMaterials.size() ? myMaterials[index] : nullptr;
 }
 
+CommonUtilities::Spheref MeshComponentBase::GetCullingSphere() const
+{
+	const std::shared_ptr<Mesh>& mesh = myMesh->GetMesh();
+
+	CU::Vector3f boundsCenter;
+	float boundsRadius;
+	mesh->GetLocalBounds(boundsCenter, boundsRadius);
+
+	const Transform& transform = GetOwner()->GetTransform();
+	CU::Vector3f actorScale = transform.GetLocalScale();
+	boundsRadius *= (std::max)(actorScale.x, (std::max)(actorScale.y, actorScale.z));
+
+	const CU::Vector3f cullPosition = (boundsCenter.XYZ1() * GetOwner()->GetTransform().GetWorldMatrix()).XYZ();
+	return CU::Spheref(cullPosition, boundsRadius);
+}
+
 void MeshComponentBase::SetVisible(bool aVisible)
 {
 	myVisible = aVisible;
@@ -59,6 +75,21 @@ void MeshComponentBase::SetVisible(bool aVisible)
 bool MeshComponentBase::IsVisible() const
 {
 	return myVisible;
+}
+
+void MeshComponentBase::AddInstance(InstanceData&& aInstanceData)
+{
+	myInstanceData.emplace_back(std::move(aInstanceData));
+}
+
+const std::vector<InstanceData>& MeshComponentBase::GetInstanceData() const
+{
+	return myInstanceData;
+}
+
+bool MeshComponentBase::IsInstanced() const
+{
+	return !myInstanceData.empty();
 }
 
 bool MeshComponentBase::HasSkinning() const

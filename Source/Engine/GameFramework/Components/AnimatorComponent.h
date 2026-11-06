@@ -21,6 +21,7 @@ public:
 	};
 
 	AnimatorComponent();
+	~AnimatorComponent();
 
 	void InitializeCustomVariables(const CustomComponentVariables& someVariables) override;
 

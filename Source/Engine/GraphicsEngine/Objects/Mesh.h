@@ -51,6 +51,10 @@ public:
 	const Skeleton* GetSkeleton() const;
 	bool HasSkeleton() const;
 
+	const std::vector<Element>& GetElements() const { return myElements; }
+
+	void GetLocalBounds(CU::Vector3f& outLocalBoundsCenter, float& outLocalBoundsRadius) const;
+
     size_t GetNumMaterialSlots() const { return myNumMaterialSlots; }
 
 private:

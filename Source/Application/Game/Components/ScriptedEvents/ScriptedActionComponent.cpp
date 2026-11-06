@@ -5,8 +5,8 @@
 #include "GameFramework/Components/AnimatorComponent.h"
 #include "GameFramework/ServiceLocator.h"
 #include "GameFramework/AudioManager.h"
-#include "Player/PlayerController.h"
-#include "Player/PlayerMovementComponent.h"
+#include "Player/Components/PlayerController.h"
+#include "Player/Components/PlayerMovementComponent.h"
 #include <Maths.hpp>
 #include <algorithm>
 #include <cmath>

@@ -2,11 +2,10 @@
 #ifndef THREADSAFEQUEUE_HPP
 #define THREADSAFEQUEUE_HPP
 
-#include "CommonUtilities/Queue.hpp"
-
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
+#include <queue>
 
 namespace CommonUtilities
 {
@@ -16,17 +15,18 @@ namespace CommonUtilities
 	public:
 		~ThreadSafeQueue(void)
 		{
-			invalidate();
+			Invalidate();
 		}
 
 		bool TryPop(T& out)
 		{
 			std::lock_guard<std::mutex> lock{ myMutex };
-			if (myQueue.Empty() || !myValid)
+			if (myQueue.empty() || !myValid)
 			{
 				return false;
 			}
-			out = std::move(myQueue.Dequeue());
+			out = std::move(myQueue.front());
+			myQueue.pop();
 			return true;
 		}
 
@@ -35,27 +35,28 @@ namespace CommonUtilities
 			std::unique_lock<std::mutex> lock{ myMutex };
 			myCondition.wait(lock, [this]()
 				{
-					return !myQueue.Empty() || !myValid;
+					return !myQueue.empty() || !myValid;
 				});
 			if (!myValid)
 			{
 				return false;
 			}
-			out = std::move(myQueue.Dequeue());
+			out = std::move(myQueue.front());
+			myQueue.pop();
 			return true;
 		}
 
 		void Push(T aValue)
 		{
 			std::lock_guard<std::mutex> lock{ myMutex };
-			myQueue.Enqueue(std::move(aValue));
+			myQueue.push(std::move(aValue));
 			myCondition.notify_one();
 		}
 
 		void Empty(void) const
 		{
 			std::lock_guard<std::mutex> lock{ myMutex };
-			return myQueue.Empty();
+			return myQueue.empty();
 		}
 
 		void Clear(void)
@@ -63,7 +64,7 @@ namespace CommonUtilities
 			std::lock_guard<std::mutex> lock{ myMutex };
 			while (!myQueue.Empty())
 			{
-				myQueue.Dequeue();
+				myQueue.pop();
 			}
 			myCondition.notify_all();
 		}
@@ -92,7 +93,7 @@ namespace CommonUtilities
 	private:
 		std::atomic_bool myValid{ true };
 		mutable std::mutex myMutex;
-		CommonUtilities::Queue<T> myQueue;
+		std::queue<T> myQueue;
 		std::condition_variable myCondition;
 	};
 }

@@ -309,7 +309,7 @@ namespace CommonUtilities
     {
         static_assert(std::is_floating_point<T>::value, "Intersection requires floating-point T");
         const Vector3<T>& n = aPlane.GetNormal();
-        const T eps = static_cast<T>(1e-6);
+        constexpr T eps = static_cast<T>(1e-6);
         if (n.LengthSqr() <= eps * eps)
         {
             return false;

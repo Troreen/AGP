@@ -1,5 +1,4 @@
 $ErrorActionPreference = 'Stop'
-Import-Module Microsoft.PowerShell.Utility -ErrorAction Stop
 
 $version = '5.0.0-beta8'
 $archiveUrl = "https://github.com/premake/premake-core/releases/download/v$version/premake-$version-windows.zip"

@@ -2,7 +2,7 @@
 
 namespace CommonUtilities
 {
-    enum class LockModes : char
+    enum class LockMode : char
     {
         None,
         Restricted,

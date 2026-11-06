@@ -1,38 +1,25 @@
 #pragma once
+
 #include <GameFramework/Components/CustomComponent.h>
+#include "GenericBehaviourTree/BehaviourTree.h"
 
-#include <BehaviourTree/BehaviourTree.h>
-#include <BehaviourTree/BaseNodes/BT_LeafNodeAction.h>
-
-#include <BehaviourTree/CustomNodes/ActionNodes/BT_Action_FollowPlayer.h>
-#include <BehaviourTree/CustomNodes/ActionNodes/BT_Action_Idle.h>
-#include <BehaviourTree/CustomNodes/ConditionNodes/BT_Condition_IsPlayerInLOS.h>
-#include <BehaviourTree/BaseNodes/BT_SelectorNode.h>
-#include <BehaviourTree/BaseNodes/BT_SequenceNode.h>
+class BT_LeafNodeAction;
 
 class BehaviourTreeComponent : public CustomComponent
 {
 public:
 
-	BehaviourTreeComponent();
-
-	void SetBehaviourTree(const char* aBehaviourTree);
-	void SetActionNode(BT_LeafNodeAction* aActionNode);
-
 	void InitializeCustomVariables(const CustomComponentVariables& someVariables) override;
 
 	void BeginPlay() override;
-	void Update(float aDeltaTime) override;
 
+	void Update(float aDeltaTime) override;
 private:
 
-	void PreUpdate();
-	void UpdateTree();
-	void UpdateData();
-	void UpdateMovement();
-	//void AddSteeringForce();
-	//void TriggerAction();
+	template <typename T>
+	void BlackBoardInsertVariables(BlackBoard& aBB, const std::unordered_map<std::string, T>& aMap, const std::string& aSkipInsert = "");
 
-	BehaviourTree myBehaviourTree;
+	BehaviourTree myTree;
 	BT_LeafNodeAction* myActionNode;
+	std::string myTreeName;
 };

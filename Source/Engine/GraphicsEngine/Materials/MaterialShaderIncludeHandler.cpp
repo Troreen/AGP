@@ -1,4 +1,4 @@
-﻿#include "GraphicsEngine.pch.h"
+#include "GraphicsEngine.pch.h"
 #include "MaterialShaderIncludeHandler.h"
 #include "d3dcompiler.h"
 
@@ -7,9 +7,10 @@
 using namespace Microsoft::WRL;
 
 MaterialShaderIncludeHandler::MaterialShaderIncludeHandler(const std::filesystem::path& aShaderRoot,
-                                                           const std::filesystem::path& aShaderProgramPath,
-                                                           const std::filesystem::path& aMaterialProgramPath)
-    : myShaderRoot(aShaderRoot), myShaderProgramPath(aShaderProgramPath), myMaterialProgramPath(aMaterialProgramPath)
+															const std::filesystem::path& aShaderProgramPath,
+															const std::filesystem::path& aMaterialProgramPath,
+															std::string_view aReplaceName)
+    : myShaderRoot(aShaderRoot), myShaderProgramPath(aShaderProgramPath), myMaterialProgramPath(aMaterialProgramPath), myReplaceName(aReplaceName)
 {
 }
 
@@ -30,7 +31,7 @@ HRESULT MaterialShaderIncludeHandler::Open(D3D_INCLUDE_TYPE IncludeType, LPCSTR 
 	// Our generic include name is material.hlsli
 	// so if the shader requests this file give it the myMaterialProgramPath instead.
 	// This will ensure we load the custom program.
-	if (fileName == "material.hlsli")
+	if (fileName == myReplaceName && !myMaterialProgramPath.empty())
 	{
 		sourcePath = myMaterialProgramPath;
 	}

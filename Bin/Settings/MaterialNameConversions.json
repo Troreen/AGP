@@ -1,7 +1,0 @@
-{
-  "UnrealBaseNames" : {
-    "Base Color" : "MB_DiffuseColor",
-    "Metallic" : "MB_Metalness",
-    "Roughness" : "MB_Roughness"
-  }
-}

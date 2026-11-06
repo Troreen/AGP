@@ -82,4 +82,6 @@ namespace CommonUtilities
         return distanceSquared <= radiusSquared;
         
     }
+
+	using Spheref = Sphere<float>;
 }

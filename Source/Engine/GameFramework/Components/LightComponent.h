@@ -68,7 +68,7 @@ protected:
 class DirectionalLightComponent final : public LightComponent
 {
 public:
-	static constexpr unsigned ShadowCascadeCount = 3;
+	static constexpr unsigned ShadowCascadeCount = 4;
 
 	DirectionalLightComponent();
 

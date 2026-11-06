@@ -14,13 +14,15 @@ class GraphicsEngine;
 
 class TextWidget
 {
+	friend class GraphicsEngine;
+
 public:
 	void SetText(std::string_view text);
-	void SetPosition(const CommonUtilities::Vector2f& position) { myPosition = position; }
+	void SetPosition(const CommonUtilities::Vector2f& position);
 	void SetPixelHeight(float height);
 	void SetColor(const CommonUtilities::Vector4f& color);
 	void SetOpacity(float opacity);
-	void SetFont(std::shared_ptr<Font> font);
+	void SetFont(const std::shared_ptr<Font>& font);
 
 	const std::string& GetText() const { return myText; }
 	const CommonUtilities::Vector2f& GetPosition() const { return myPosition; }
@@ -29,22 +31,27 @@ public:
 	const std::vector<Vertex>& GetVertices() const { return myVertices; }
 	const std::vector<unsigned>& GetIndices() const { return myIndices; }
 	unsigned GetGlyphCount() const { return myGlyphCount; }
+
 	bool RebuildGeometry();
 
 private:
-	std::string myText;
-	CommonUtilities::Vector2f myPosition = {0.0f, 0.0f};
-	float myPixelHeight = 24.0f;
-	CommonUtilities::Vector4f myColor = CommonUtilities::Vector4f::One;
-	float myOpacity = 1.0f;
-	std::shared_ptr<Font> myFont;
-	std::vector<Vertex> myVertices;
-	std::vector<unsigned> myIndices;
 	mutable Buffer myVertexBuffer;
 	mutable Buffer myIndexBuffer;
-	bool myGeometryDirty = true;
-	bool myGpuDirty = true;
+
+	std::string myText;
+
+	std::vector<Vertex> myVertices;
+	std::vector<unsigned> myIndices;
+	std::shared_ptr<Font> myFont;
+
+	CommonUtilities::Vector4f myColor = CommonUtilities::Vector4f::One;
+	CommonUtilities::Vector2f myPosition = {0.0f, 0.0f};
+
 	unsigned myGlyphCount = 0;
 
-	friend class GraphicsEngine;
+	float myPixelHeight = 24.0f;
+	float myOpacity = 1.0f;
+
+	bool myGeometryDirty = true;
+	bool myGpuDirty = true;
 };

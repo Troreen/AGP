@@ -31,6 +31,9 @@
     <Filter Include="Helper">
       <UniqueIdentifier>{C53F33B7-B1E1-5D8D-9A9C-71E186DDE4DD}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Particles">
+      <UniqueIdentifier>{6C2A9B3B-D894-4FB2-21D3-00588D7C2D07}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Scenes">
       <UniqueIdentifier>{86EEB3D0-7290-DEA6-5B4B-F2FA478C65F7}</UniqueIdentifier>
     </Filter>
@@ -87,6 +90,12 @@
     <ClInclude Include="AssetHandling\NavMeshAsset.h">
       <Filter>AssetHandling</Filter>
     </ClInclude>
+    <ClInclude Include="AssetHandling\ParticleSystemAsset.h">
+      <Filter>AssetHandling</Filter>
+    </ClInclude>
+    <ClInclude Include="AssetHandling\SceneAsset.h">
+      <Filter>AssetHandling</Filter>
+    </ClInclude>
     <ClInclude Include="AssetHandling\TextureAsset.h">
       <Filter>AssetHandling</Filter>
     </ClInclude>
@@ -112,6 +121,9 @@
     <ClInclude Include="Components\CustomComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
+    <ClInclude Include="Components\CustomComponentRegistry.h">
+      <Filter>Components</Filter>
+    </ClInclude>
     <ClInclude Include="Components\DebugCameraController.h">
       <Filter>Components</Filter>
     </ClInclude>
@@ -119,6 +131,9 @@
       <Filter>Components</Filter>
     </ClInclude>
     <ClInclude Include="Components\MeshComponentBase.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\ParticleComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
     <ClInclude Include="Components\SceneComponent.h">
@@ -147,10 +162,22 @@
     <ClInclude Include="Helper\Event.hpp">
       <Filter>Helper</Filter>
     </ClInclude>
+    <ClInclude Include="Helper\JsonHelper.hpp">
+      <Filter>Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="Particles\ParticleEmitter.h">
+      <Filter>Particles</Filter>
+    </ClInclude>
+    <ClInclude Include="Particles\ParticleSystem.h">
+      <Filter>Particles</Filter>
+    </ClInclude>
     <ClInclude Include="Scenes\CustomComponentVariables.h">
       <Filter>Scenes</Filter>
     </ClInclude>
     <ClInclude Include="Scenes\SceneData.h">
+      <Filter>Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\SceneManager.h">
       <Filter>Scenes</Filter>
     </ClInclude>
     <ClInclude Include="Scenes\SceneWorldBuilder.h">
@@ -228,6 +255,12 @@
     <ClCompile Include="AssetHandling\NavMeshAsset.cpp">
       <Filter>AssetHandling</Filter>
     </ClCompile>
+    <ClCompile Include="AssetHandling\ParticleSystemAsset.cpp">
+      <Filter>AssetHandling</Filter>
+    </ClCompile>
+    <ClCompile Include="AssetHandling\SceneAsset.cpp">
+      <Filter>AssetHandling</Filter>
+    </ClCompile>
     <ClCompile Include="AssetHandling\TextureAsset.cpp">
       <Filter>AssetHandling</Filter>
     </ClCompile>
@@ -253,6 +286,9 @@
     <ClCompile Include="Components\MeshComponentBase.cpp">
       <Filter>Components</Filter>
     </ClCompile>
+    <ClCompile Include="Components\ParticleComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
     <ClCompile Include="Components\SceneComponent.cpp">
       <Filter>Components</Filter>
     </ClCompile>
@@ -273,6 +309,15 @@
     </ClCompile>
     <ClCompile Include="EventBus.cpp" />
     <ClCompile Include="GameFramework.pch.cpp" />
+    <ClCompile Include="Particles\ParticleEmitter.cpp">
+      <Filter>Particles</Filter>
+    </ClCompile>
+    <ClCompile Include="Particles\ParticleSystem.cpp">
+      <Filter>Particles</Filter>
+    </ClCompile>
+    <ClCompile Include="Scenes\SceneManager.cpp">
+      <Filter>Scenes</Filter>
+    </ClCompile>
     <ClCompile Include="Scenes\SceneWorldBuilder.cpp">
       <Filter>Scenes</Filter>
     </ClCompile>

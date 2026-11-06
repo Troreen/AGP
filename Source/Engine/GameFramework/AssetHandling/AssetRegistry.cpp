@@ -1,12 +1,13 @@
 #include "GameFramework.pch.h"
-#include "GameFramework/AssetHandling/AssetRegistry.h"
+#include "AssetRegistry.h"
 
-#include "GameFramework/AssetHandling/AnimationAsset.h"
-#include "GameFramework/AssetHandling/FontAsset.h"
-#include "GameFramework/AssetHandling/MaterialAsset.h"
-#include "GameFramework/AssetHandling/MeshAsset.h"
-#include "GameFramework/AssetHandling/NavMeshAsset.h"
-#include "GameFramework/AssetHandling/TextureAsset.h"
+#include "AnimationAsset.h"
+#include "FontAsset.h"
+#include "MeshAsset.h"
+#include "NavMeshAsset.h"
+#include "ParticleSystemAsset.h"
+#include "SceneAsset.h"
+#include "TextureAsset.h"
 
 #include <algorithm>
 #include <cctype>
@@ -29,6 +30,8 @@ AssetRegistry::AssetRegistry()
 	RegisterAssetType<NavMeshAsset>({ ".nav" });
 	RegisterAssetType<TextureAsset>({ ".dds" });
 	RegisterAssetType<FontAsset>({ ".font.json" });
+	RegisterAssetType<ParticleSystemAsset>({ ".particles" });
+	RegisterAssetType<SceneAsset>({ ".json" });
 }
 
 AssetRegistry::~AssetRegistry() = default;
@@ -77,14 +80,8 @@ void AssetRegistry::Initialize(const std::filesystem::path& contentRoot)
 		
 		const std::string assetName = GetFullAssetName(path);
 
-		std::cout << assetName << std::endl;
-
-		if (assetName == "lvl_blockout_level.nav")
-		{
-			__debugbreak();
-		}
-
 		std::string alias = Lower(path.filename().generic_string());
+		myAssetAliases[alias] = assetName;
 		alias = alias.substr(0, alias.size() - lowerExtension.size());
 
 		myAssets.try_emplace(assetName, AssetInfo{ .Path = path });

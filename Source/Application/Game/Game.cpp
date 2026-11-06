@@ -1,24 +1,20 @@
 #include "Game.h"
 #include "Runtime/GameApplication.h"
 #include "GameLog.h"
-#include "GameFramework/Collision/CollisionLayers.h"
-#include "GameFramework/AudioManager.h"
-#include "GameFramework/AssetHandling/AssetRegistry.h"
-#include "GameFramework/AssetHandling/AnimationAsset.h"
-#include "GameFramework/AssetHandling/MeshAsset.h"
-#include "GameFramework/AssetHandling/TextureAsset.h"
-#include "GameFramework/Components/SkeletalMeshComponent.h"
-#include "GameFramework/Components/AnimatorComponent.h"
-#include "GameFramework/Components/CameraComponent.h"
-#include "GameFramework/Components/SpriteComponent.h"
-#include "GameFramework/ServiceLocator.h"
-#include "GameFramework/World/World.h"
-#include <GameFramework/Animation/AnimationManager.h>
+#include <GameFramework/AudioManager.h>
+#include <GameFramework/AssetHandling/AssetRegistry.h>
+#include <GameFramework/AssetHandling/MaterialAsset.h>
+#include <GameFramework/AssetHandling/MeshAsset.h>
+#include <GameFramework/AssetHandling/ParticleSystemAsset.h>
+#include <GameFramework/AssetHandling/TextureAsset.h>
+#include <GameFramework/Components/SkeletalMeshComponent.h>
+#include <GameFramework/Components/StaticMeshComponent.h>
+#include <GameFramework/Components/SpriteComponent.h>
+#include <GameFramework/Components/ParticleComponent.h>
+#include <GameFramework/Scenes/SceneManager.h>
+#include <GameFramework/ServiceLocator.h>
+#include <GameFramework/World/World.h>
 #include "InputMapper.h"
-#include "Player/PlayerActor.h"
-#include "Player/PlayerController.h"
-#include "Player/PlayerMovementComponent.h"
-#include "BehaviourTree/BehaviourTreeComponent.h"
 #include "GameFramework/Components/ColliderComponent.h"
 
 #include <memory>
@@ -28,36 +24,52 @@ DEFINE_LOG_CATEGORY(LogGame);
 Game::Game() = default;
 Game::~Game() = default;
 
-void Game::Initialize(GameApplication& anApplication)
+void Game::Initialize()
 {
 	CommonUtilities::InputMapper& input = ServiceLocator::GetInstance().GetInputMapper();
 
-	myInputListenerIDs.push_back(input.AddEventListener("ReloadScene", [&anApplication](const CommonUtilities::InputEvent& anEvent)
-	{
-		if (anEvent.inputData.isPressed)
+	myInputListenerIDs.push_back(input.AddEventListener("ReloadScene", [](const CommonUtilities::InputEvent& anEvent)
 		{
-			anApplication.ReloadCurrentScene();
-		}
-	}));
+			if (anEvent.inputData.isPressed)
+			{
+				ServiceLocator::GetInstance().GetSceneManager().ReloadCurrentScene();
+			}
+		}));
+
+	ServiceLocator::GetInstance().GetSceneManager().OnLoadScene().Subscribe([this]() { ConfigureWorld(); });
+	ServiceLocator::GetInstance().GetAudioManager().PlaySFX(eIntroSwell);
 
 	GAMELOG(Log, "Game ready: F4 reloads the current scene, ESC quits the game.");
 }
 
-void Game::Update(World& aWorld, [[maybe_unused]] float aDeltaTime)
+void Game::Update([[maybe_unused]] World& aWorld, [[maybe_unused]] float aDeltaTime)
 {
-	if (!ServiceLocator::GetInstance().GetAudioManager().IsEventPlaying(eMainTheme))
-	
+	const std::shared_ptr<SceneAsset>& currentScene = ServiceLocator::GetInstance().GetSceneManager().GetCurrentScene();
+
+	if (currentScene != nullptr && currentScene->GetSceneName() == "Lvl_Blistering_Tundra_Level")
 	{
-		ServiceLocator::GetInstance().GetAudioManager().PlayMusic(eMainTheme);
+		ServiceLocator::GetInstance().GetAudioManager().PlayMusic(eBlizzardAmbience, true);
+	}
+	else
+	{
+		ServiceLocator::GetInstance().GetAudioManager().StopMusic(eBlizzardAmbience, false);
+	}
+
+	if (currentScene != nullptr && currentScene->GetSceneName() == "Lvl_Forsaken_Castle_Level")
+	{
+		ServiceLocator::GetInstance().GetAudioManager().PlayMusic(eCastleAmbienceTwo, true);
+	}
+	else
+	{
+		ServiceLocator::GetInstance().GetAudioManager().StopMusic(eCastleAmbienceTwo, false);
 	}
 
 	// The game chooses to listen from the active view, including the debug camera.
 	// Commenting this out becasue it spams the log with info about listener position
-	// if (const CameraComponent* camera = aWorld.GetActiveCamera())
-	// {
-	// 	ServiceLocator::GetInstance().GetAudioManager().SetAudioListener(camera->GetWorldPosition());
-	// }
-
+	//if (const CameraComponent* camera = aWorld.GetActiveCamera())
+	//{
+	//	ServiceLocator::GetInstance().GetAudioManager().SetAudioListener(camera->GetWorldPosition(), camera->GetWorldForward(), camera->GetWorldUp());
+	//}
 }
 
 void Game::Shutdown()
@@ -71,50 +83,87 @@ void Game::Shutdown()
 	myInputListenerIDs.clear();
 }
 
-void Game::ConfigureWorld(World& aWorld)
+void Game::ConfigureWorld()
 {
 	// TODO: remember to turn this off wheen handing in bozos
 	ColliderComponent::SetAllDebugDrawEnabled(true);
-
-	// {
-	// 	Actor* playerBro = aWorld.SpawnActor("PLAYAH_BRO");
-	// 	playerBro->GetTransform().SetLocalRotationDegrees({ 0, 0, 0 });
-	// 	playerBro->GetTransform().SetWorldPosition({ 0, -15, 0 });
-
-	//	SkeletalMeshComponent* component = playerBro->AddComponent<SkeletalMeshComponent>();
-	//	AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
-	//	std::shared_ptr<MeshAsset> meshAsset = assetRegistry.GetAsset<MeshAsset>("SK_player.fbx");
-	//	component->SetMesh(meshAsset);
-
-	//	AnimatorComponent* animatorBro = playerBro->AddComponent<AnimatorComponent>();
-	//	animatorBro->SetMeshComponent(component);
-	//	animatorBro->SetTree("PlayerTree");
-
-
-	//	animatorBro->GetTree().SetBool("IsIdle", true);
-	//}
-
-	//{
-	//	Actor* playerBro = aWorld.SpawnActor("BRO");
-	//	playerBro->GetTransform().SetLocalRotationDegrees({ 0, 0, 0 });
-	//	playerBro->GetTransform().SetWorldPosition({ -100, 100, 0 });
-
-	//	SkeletalMeshComponent* component = playerBro->AddComponent<SkeletalMeshComponent>();
-	//	AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
-	//	std::shared_ptr<MeshAsset> meshAsset = assetRegistry.GetAsset<MeshAsset>("SK_C_Tga_Bro.fbx");
-	//	component->SetMesh(meshAsset);
-
-	//	AnimatorComponent* animatorBro = playerBro->AddComponent<AnimatorComponent>();
-	//	animatorBro->SetMeshComponent(component);
-	//	animatorBro->SetTree("BroTree");
-	//	animatorBro->ConfigurePartialLayerFromJointName("RightArm");
-
-
-	//	animatorBro->GetTree().SetBool("IsIdle", true);
-	//}
+	World& world = *ServiceLocator::GetInstance().GetSceneManager().GetLoadedWorld();
 
 	{
-		Actor* actor = aWorld.SpawnActor("TGALOGO");
+		Actor* actor = world.SpawnActor("GlowCube");
+		StaticMeshComponent* component = actor->AddComponent<StaticMeshComponent>();
+
+		MaterialDescription tempMatDesc{};
+		tempMatDesc.Domain = MaterialDomain::Surface;
+		tempMatDesc.ShadingModel = ShadingModel::Lit;
+		tempMatDesc.BlendMode = BlendMode::Opaque;
+		tempMatDesc.Name = "Glow boi";
+
+		std::shared_ptr<Material> tempMat = std::make_shared<Material>();
+		GraphicsEngine::Get().CreateMaterial(tempMatDesc, *tempMat);
+
+		std::shared_ptr<Texture> allEmissionColor = std::make_shared<Texture>();
+		GraphicsEngine::Get().CreateColorTexture("WOW all emission", { 255, 0, 0, 0 }, *allEmissionColor);
+		tempMat->SetTexture(3, allEmissionColor);
+
+		std::shared_ptr<MaterialAsset> tempMatAss = std::make_shared<MaterialAsset>(tempMat);
+
+		AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
+		assetRegistry.Pin("Glow boi", tempMatAss);
+
+		component->SetMesh(assetRegistry.GetAsset<MeshAsset>("SM_Cube.fbx"));
+		component->SetMaterial(0, tempMatAss);
+
+		float currentAngle = 0;
+		constexpr size_t numberOfCubes = 10;
+		constexpr float angleIncrease = (2.0f * static_cast<float>(std::numbers::pi)) / numberOfCubes;
+		constexpr float rotationIncrease = (360.0f / numberOfCubes) * CU::Math::DEGREES_TO_RADIANS<float>;
+		constexpr float circleRadius = 50.0f;
+
+		for (size_t i = 0; i < numberOfCubes; i++)
+		{
+			const float x = std::cos(currentAngle);
+			const float z = std::sin(currentAngle);
+
+			const CU::Vector3f position = CU::Vector3f(x * circleRadius, 1000, z * circleRadius);
+
+			CU::Matrix4f worldTransform = CU::Matrix4f::FromRotation(0, 0, i * rotationIncrease);
+			worldTransform *= CU::Matrix4f::FromTranslation(position.x, position.y, position.z);
+			component->AddInstance(InstanceData{
+				.World = worldTransform,
+				.WorldInvT = worldTransform.GetInverse().GetTranspose()
+			});
+
+			currentAngle += angleIncrease;
+		}
+
+		actor->GetTransform().SetWorldPosition({ 0, 1000, 0 });
+	}
+
+	{
+		Actor* actor = world.SpawnActor("Particle");
+		actor->GetTransform().SetWorldPosition({ 0, 300, 0 });
+		ParticleComponent* component = actor->AddComponent<ParticleComponent>();
+
+		MaterialDescription particleMatDesc;
+		particleMatDesc.Domain = MaterialDomain::Particles;
+		particleMatDesc.ShadingModel = ShadingModel::Unlit;
+		particleMatDesc.BlendMode = BlendMode::Additive;
+		particleMatDesc.Name = "TestParticles";
+
+		std::shared_ptr<Material> particleMat = std::make_shared<Material>();
+		GraphicsEngine::Get().CreateMaterial(particleMatDesc, *particleMat);
+		std::shared_ptr<MaterialAsset> mat = std::make_shared<MaterialAsset>(particleMat);
+
+		AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
+		assetRegistry.Pin("TestParticles", mat);
+
+		std::shared_ptr<ParticleSystemAsset> asset = assetRegistry.GetAsset<ParticleSystemAsset>("Test.particles");
+		component->SetParticleSystem(asset);
+	}
+
+	{
+		Actor* actor = world.SpawnActor("TGALOGO");
 		SpriteComponent* component = actor->AddComponent<SpriteComponent>();
 
 		AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
@@ -126,55 +175,9 @@ void Game::ConfigureWorld(World& aWorld)
 		component->SetPosition({ 0.0f, 0.0f });
 		component->SetAnchor({ 1.0f, 1.0f });
 	}
-	//{
-	//	Actor* actor = aWorld.SpawnActor("Player");
-	//	actor->GetTransform().SetLocalPosition({0, 0, 0});
-	//	auto* mesh = actor->AddComponent<SkeletalMeshComponent>();
-	//	AssetRegistry& assets = ServiceLocator::GetInstance().GetAssetRegistry();
-	//	mesh->SetMesh(assets.GetAsset<MeshAsset>("SK_player.fbx"));
-	//	auto* animator = actor->AddComponent<AnimatorComponent>();
-	//	animator->SetMeshComponent(mesh);
-	//	animator->SetTree("PlayerTree");
-	//	animator->GetTree().SetBool("IsIdle", true);
-	//	actor->AddComponent<PlayerController>();
-	//	actor->AddComponent<PlayerMovementComponent>();
 
-	//	// Body-only overlap approximation; equipment is outside this sphere.
-	//	auto* collider = actor->AddComponent<ColliderComponent>("Collider");
-	//	collider->SetSphereRadius(60.0f);
-	//	collider->GetTransform().SetLocalPosition({0, 90, 0});
-	//	collider->SetLayer(CollisionLayer::Player);
-	//	collider->SetOverlapsWith({CollisionLayer::Trigger});
-	//}
-//
 	//{
-	//	Actor* actor = aWorld.SpawnActor("Enemy");
-	//	{
-	//		SkeletalMeshComponent* component = actor->AddComponent<SkeletalMeshComponent>();
-	//		AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
-//
-	//		std::shared_ptr<MeshAsset> asset = assetRegistry.GetAsset<MeshAsset>("SK_enemy02.fbx");
-	//		component->SetMesh(asset);
-//
-//
-	//		AnimatorComponent* animatorBro = actor->AddComponent<AnimatorComponent>();
-	//		std::shared_ptr<AnimationAsset> animationIdle = assetRegistry.GetAsset<AnimationAsset>("A_enemy02_idle.fbx");
-	//		std::shared_ptr<AnimationAsset> animationRun = assetRegistry.GetAsset<AnimationAsset>("A_enemy02_mainAttack.fbx");
-	//		animatorBro->SetMeshComponent(component);
-	//		animatorBro->AddAnimation("Idle", animationIdle);
-	//		animatorBro->AddAnimation("Run", animationRun);
-	//		animatorBro->PlayAnimation("Idle", true);
-//
-	//	}
-	//	{
-	//		actor->AddComponent<BehaviourTreeComponent>();
-	//	}
-//
-	//	actor->GetTransform().SetData({ { -500, 0, 0 }, {180, 0, 0} });
-	//}
-//
-	//{
-	//	Actor* actor = aWorld.SpawnActor("NavmeshTest");
+	//	Actor* actor = world.SpawnActor("NavmeshTest");
 	//	SkeletalMeshComponent* component = actor->AddComponent<SkeletalMeshComponent>();
 	//	actor->GetTransform().SetWorldPosition({ -100, 100, 0 });
 
@@ -183,59 +186,4 @@ void Game::ConfigureWorld(World& aWorld)
 	//	std::shared_ptr<MeshAsset> asset = assetRegistry.GetAsset<MeshAsset>("Lvl_Blockout_NavMesh.fbx");
 	//	component->SetMesh(asset);
 	//}
-
-	// Disabled for shader testing.
-	//{ // TODO : Temporary place for debug animation
-	//	AnimationManager::DebugData& data = ServiceLocator::GetInstance().GetAnimationManager().GetDebugData();
-//
-	//	if (!data.Enabled)
-	//	{
-	//		return;
-	//	}
-//
-	//	Actor* playerBro = aWorld.SpawnActor("A_Debug");
-	//	playerBro->GetTransform().SetLocalRotationDegrees({ 0, 0, 0 });
-	//	playerBro->GetTransform().SetWorldPosition({ data.Position.x, data.Position.y, data.Position.z });
-//
-	//	SkeletalMeshComponent* component = playerBro->AddComponent<SkeletalMeshComponent>();
-	//	AssetRegistry& assetRegistry = ServiceLocator::GetInstance().GetAssetRegistry();
-	//	std::shared_ptr<MeshAsset> meshAsset = assetRegistry.GetAsset<MeshAsset>(data.Mesh);
-	//	component->SetMesh(meshAsset);
-//
-	//	AnimatorComponent* animatorBro = playerBro->AddComponent<AnimatorComponent>();
-	//	animatorBro->SetMeshComponent(component);
-	//	animatorBro->SetTree(data.Tree);
-//
-	//	animatorBro->GetTree().SetBool("IsIdle", true);
-//
-	//	CommonUtilities::InputMapper& map = ServiceLocator::GetInstance().GetInputMapper();
-//
-	//	EKeyCode key = EKeyCode::NUMPAD0;
-	//	for (AnimationManager::Variable& var : data.Variables)
-	//	{
-	//		map.BindActionToInputCode(var.Name, key);
-//
-	//		map.AddEventListener(var.Name, [var, animatorBro](const CommonUtilities::InputEvent event)
-	//			{
-	//				if (!event.inputData.isPressed)
-	//				{
-	//					return;
-	//				}
-	//				if (var.Type == "Bool")
-	//				{
-	//					animatorBro->GetTree().SetBool(var.Name, !animatorBro->GetTree().GetAnimationVariable(var.Name).IsActive);
-	//				}
-	//				else
-	//				{
-	//					animatorBro->GetTree().SetTrigger(var.Name);
-	//				}
-	//			});
-//
-	//		if (key == EKeyCode::NUMPAD9)
-	//		{
-	//			break;
-	//		}
-	//		key = EKeyCode(static_cast<int>(key) + 1);
-	//	}
-	//} //Dont put anything below this line
 }

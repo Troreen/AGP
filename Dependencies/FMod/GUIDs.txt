@@ -3,6 +3,10 @@
 {ad286d84-46bf-4f1b-9d68-05d8eb7f0d48} bus:/
 {e4855dad-b162-49f0-944e-f7aa35e817ba} bus:/MUSIC
 {36f2cfd2-cf22-43c1-b391-1189e5cf5fdf} bus:/SFX
+{e3e52510-025f-48cb-9bac-6a0cdcdba7e0} event:/Ability 1
+{832cfa94-6b22-4d14-8ecd-adc6b5319da6} event:/Ability 2
+{ad10419c-37e2-4be8-a9e7-292ca5615e3e} event:/Ability 3
+{415220fc-45ba-414d-96c8-1238f4a65f1e} event:/Ability 4
 {6ed4c109-5890-4b27-a7e2-f9d31624d4bf} event:/After First Kill
 {197b9f2a-999b-4335-ae85-1f5a68dcbea1} event:/After Heart Sway
 {377a75c3-cdf9-47ad-b840-bc0bc3b926ad} event:/Blizzard Ambience
@@ -12,12 +16,20 @@
 {181f7354-b87d-4bbe-8027-56a93fbdc504} event:/Collect Item
 {81cbcc1f-8784-4ef2-a27e-9e50dc2d3eb6} event:/Combat One
 {0fa5d6cc-0dd1-42e4-a266-536c5f7b9f0b} event:/Crossbow Cock
+{29ce63c0-41fd-4f24-a78b-4667d8229b70} event:/Dodge
 {732e38f7-411c-47ad-8453-97d23bb271bd} event:/FMODTest
+{5eb990c3-1b92-4c78-88a4-f22f40a25ea3} event:/Footstep 1
+{a3e33b63-a4f8-4f65-898f-97ed50a5025c} event:/Goodbye Horse
+{4b10f709-abe4-4619-8db4-4f4a8941f46a} event:/Grushenka Crying
 {a9b6425d-9556-42a8-97bc-296aeeb2d25f} event:/Heavy Roar
 {188529c3-9a39-4ef2-a1a8-be70549434cf} event:/Intro Letter
 {4b86d6ba-16b7-4d29-b2f2-f1b4811636ac} event:/Intro Swell
 {7e181595-fa19-4f46-8173-8afd2af56815} event:/Locked Gate
+{8efcc5db-197e-4b38-9097-50fe7f9452e0} event:/MB1
+{3f35398d-ced6-4570-93c6-011b65ed33b8} event:/MB2
+{38359953-1d2c-4472-9183-f8e48123ecae} event:/Meeting Daddy
 {3a428b39-fd8c-4541-a4e8-33d80326b938} event:/Potion Drink
+{7723c304-917c-4ac2-8d82-c3f838d118a1} event:/Reminiscing Dead Bodies
 {6f677fe5-1a80-4808-af9e-14cb88aba8eb} event:/Sickle Slash
 {5df00fd9-ba2b-44d2-b933-9d27cd963cfc} event:/Slash
 {d4124cfd-63af-450e-a691-cd40fdde6788} event:/Slash Hit

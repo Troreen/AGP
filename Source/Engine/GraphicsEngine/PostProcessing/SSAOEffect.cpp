@@ -76,13 +76,6 @@ bool SSAOEffect::Initialize(const RenderHardwareInterface& aRHI)
 	}
 
 	const CommonUtilities::Vector2u clientSize = aRHI.GetClientSize();
-	const unsigned int width = clientSize.x / 2;
-	const unsigned int height = clientSize.y / 2;
-	if (!aRHI.CreateTexture("SSAO Buffer", width, height, 1, ResourceFormat::R8_UNORM, ResourceBindFlag_RenderTarget | ResourceBindFlag_ShaderResource, mySSAOBuffer))
-	{
-		GELOG(Error, "Failed to create SSAO texture!");
-		return false;
-	}
 
 	myResizeTextures.resize(4);
 	unsigned int divisor = 1;

@@ -129,4 +129,6 @@ namespace CommonUtilities
 		// Signed distance using plane equation n·x + d. Assumes n is normalized.
 		return myNormal.Dot(aPosition) + myD;
 	}
+
+	using Planef = Plane<float>;
 }

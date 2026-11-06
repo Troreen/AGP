@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <functional>
 #include <wrl.h>
 #include "d3dcommon.h"
@@ -12,7 +12,7 @@ class MaterialShaderIncludeHandler : public ID3DInclude
 {
 public:
 	MaterialShaderIncludeHandler(const std::filesystem::path& aShaderRoot, const std::filesystem::path& aShaderProgramPath,
-	                             const std::filesystem::path& aMaterialProgramPath);
+									const std::filesystem::path& aMaterialProgramPath, std::string_view aReplaceName = "material.hlsli");
 	virtual ~MaterialShaderIncludeHandler() = default;
 
 	HRESULT Open(D3D_INCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID* ppData, UINT* pBytes) override;
@@ -30,4 +30,5 @@ private:
 	std::filesystem::path myShaderRoot;
 	std::filesystem::path myShaderProgramPath;
 	std::filesystem::path myMaterialProgramPath;
+	std::string myReplaceName;
 };

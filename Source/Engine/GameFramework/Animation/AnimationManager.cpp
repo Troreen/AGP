@@ -17,6 +17,8 @@ AnimationManager::AnimationManager()
 
 void AnimationManager::Initialize(const std::filesystem::path& aContentRoot)
 {
+	myAnimationTrees.emplace_back(AnimationTree());
+
 	{
 		std::filesystem::path path = aContentRoot / "Animations" / "Animation Manager" / "AnimationManager.json";
 		simdjson::padded_string json = simdjson::padded_string::load(path.c_str());
@@ -135,7 +137,7 @@ AnimationTree& AnimationManager::GetAnimationTree(const std::string& aName)
 		}
 	}
 
-	std::cout << "No animation tree with the name '" << aName << "' exists!" << std::endl;
+	std::cout << "----------------------------------------------No animation tree with the name '" << aName << "' exists!" << std::endl;
 	return myAnimationTrees[0];
 
 	//AnimationTree tree;

@@ -1,22 +1,26 @@
 #pragma once
-#include "BehaviourTree.h"
-#include <unordered_map>
-#include <memory>
 #include <string>
-#include "BaseNodes/BT_Node.h"
-#include "BaseNodes/BT_LeafNodeAction.h"
+#include <unordered_map>
 #include <functional>
+
+
+class BehaviourTree;
 
 class BehaviourTreeFactory
 {
 public:
-	void Init();
 
-	BT_LeafNodeAction* GetBehaviourTree(std::string aBehaviourTreeType, BehaviourTree & inoutBehaviourTree);
+	BehaviourTreeFactory();
+
+	static BehaviourTreeFactory& Instance()
+	{
+		static BehaviourTreeFactory instance;
+		return instance;
+	}
+
+	void SetBehaviourTree(const std::string& aTree, BehaviourTree& outTree);
 
 private:
 
-	using CreateBehaviourTree = std::function<BT_LeafNodeAction*(BehaviourTree&)>;
-
-	std::unordered_map<std::string, CreateBehaviourTree> myBehaviourTrees;
+	std::unordered_map<std::string, std::function<void(BehaviourTree&)>> myBehaviourTrees;
 };

@@ -325,10 +325,11 @@ namespace CommonUtilities
 			return Clamp01(InverseLerp(aStart, anEnd, aValue));
 		}
 
-		template <typename T>
-		inline T Remap(const T anInputStart, const T anInputEnd, const T anOutputStart, const T anOutputEnd, const T aValue)
+		template<class T>
+		constexpr FORCEINLINE T Remap(const T aValue, const T aInMin, const T aInMax, const T aOutMin, const T aOutMax)
 		{
-			return anOutputStart + (anOutputEnd - anOutputStart) * InverseLerp(anInputStart, anInputEnd, aValue);
+			const float p = (aValue - aInMin) / (aInMax - aInMin);
+			return aOutMin + p * (aOutMax - aOutMin);
 		}
 
 		template <typename T>
@@ -918,7 +919,7 @@ namespace CommonUtilities
 		template <typename T>
 		inline Vector3<T> RotateVector(const Quaternion<T>& aRotation, const Vector3<T>& aVector)
 		{
-			return aVector * aRotation.ToMatrix3x3();
+			return aVector * aRotation.GetRotationMatrix();
 		}
 
 		template <typename T>
@@ -973,7 +974,7 @@ namespace CommonUtilities
 		template <typename T>
 		inline Vector3<T> YawPitchRollFromQuaternion(const Quaternion<T>& aRotation)
 		{
-			const Matrix3x3<T> m = aRotation.ToMatrix3x3();
+			const Matrix3x3<T> m = aRotation.GetRotationMatrix();
 			const T pitch = static_cast<T>(-std::asin(Clamp(m(3, 2), static_cast<T>(-1), static_cast<T>(1))));
 			const T cosPitch = static_cast<T>(std::cos(pitch));
 
@@ -1139,7 +1140,7 @@ namespace CommonUtilities
 			rotation(3, 1) = forward.x;
 			rotation(3, 2) = forward.y;
 			rotation(3, 3) = forward.z;
-			outRotation = QuaternionFromRotationMatrix(rotation);
+			outRotation = CommonUtilities::Quaternion<float>::CreateFromRotationMatrix(rotation);
 			return true;
 		}
 #pragma endregion

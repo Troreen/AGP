@@ -4,17 +4,15 @@
 #define THREADPOOL_HPP
 
 #include "ThreadSafeQueue.hpp"
+#include "CommonUtilities/Maths.hpp"
 
-#include <algorithm>
 #include <atomic>
 #include <cstdint>
-//#include <functional>
 #include <future>
 #include <memory>
 #include <thread>
-//#include <type_traits>
-//#include <utility>
 #include <vector>
+//#include <iostream>
 
 
 namespace CUThreadPool
@@ -92,7 +90,7 @@ namespace CUThreadPool
 
 	public:
 		ThreadPool(void)
-			:ThreadPool{ std::max(std::thread::hardware_concurrency(), 2u) - 1u }
+			:ThreadPool{ CommonUtilities::Math::Max(std::thread::hardware_concurrency(), 2u) - 1u }
 		{
 		}
 		explicit ThreadPool(const std::uint32_t numThreads)
@@ -125,7 +123,7 @@ namespace CUThreadPool
 		auto Submit(Func&& func, Args&&... args)
 		{
 			auto boundTask = std::bind(std::forward<Func>(func), std::forward<Args>(args)...);
-			using ResultType = std::result_of_t<decaltype(boundTask)()>;
+			using ResultType = std::invoke_result_t<decltype(boundTask)>;
 			using PackagedTask = std::packaged_task<ResultType()>;
 			using TaskType = ThreadTask<PackagedTask>;
 
@@ -143,6 +141,7 @@ namespace CUThreadPool
 				std::unique_ptr<IThreadTask> pTask{ nullptr };
 				if (myWorkQueue.WaitPop(pTask))
 				{
+					//std::cout << "Thread " << std::this_thread::get_id() << " did some work!\n"; // If console debug message is wanted, change here.
 					pTask->Execute();
 				}
 			}

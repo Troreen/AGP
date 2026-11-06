@@ -159,6 +159,7 @@
     <ClInclude Include="AStar.hpp" />
     <ClInclude Include="Camera3D.hpp" />
     <ClInclude Include="CommonUtilities.h" />
+    <ClInclude Include="Curve.hpp" />
     <ClInclude Include="Dijkstra.hpp" />
     <ClInclude Include="EnumGamepadCode.h" />
     <ClInclude Include="EnumKeyCode.h" />

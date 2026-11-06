@@ -1,4 +1,4 @@
-#include "Common.hlsli"
+#include "../Internal/Common.hlsli"
 
 Texture2D<float> SceneDepth : register(t0);
 TextureCube EnvironmentTexture : register(t98);

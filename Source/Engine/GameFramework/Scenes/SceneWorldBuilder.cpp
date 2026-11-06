@@ -24,38 +24,11 @@ DECLARE_LOG_CATEGORY_WITH_NAME(WorldParser, WORLD_PARSER, Verbose);
 
 DEFINE_LOG_CATEGORY(WorldParser);
 
-bool SceneWorldBuilder::Initialize(const std::filesystem::path& aNameConversions)
-{
-	// Load material parameter names and texture slots.
-	simdjson::padded_string json = simdjson::padded_string::load(aNameConversions.c_str());
-	simdjson::dom::parser parser;
-	simdjson::dom::object root;
-
-	simdjson::error_code error = parser.parse(json).get(root);
-	if (error != simdjson::error_code::SUCCESS)
-	{
-		LOG(WorldParser, Warning, "Could not parse name conversion json file '{}'.", aNameConversions.string());
-		return false;
-	}
-
-	simdjson::dom::object baseNames = root["UnrealBaseNames"];
-	for (auto it = baseNames.begin(); it != baseNames.end(); ++it)
-	{
-		simdjson::dom::key_value_pair itValue = *it;
-		const std::string unrealName = std::string(itValue.key);
-		const std::string materialName = std::string(itValue.value.get_string().value());
-
-		myUnrealDataNameToMaterialParameterName[unrealName] = materialName;
-	}
-
-	return true;
-}
-
-std::unique_ptr<World> SceneWorldBuilder::BuildWorld(const SceneData& aScene, AssetRegistry& anAssetRegistry, const std::filesystem::path& aShaderPath, CommonUtilities::Vector2u aClientSize, const SceneFallbackAssets& someFallbacks, const CustomComponentCreator& aCustomCreator)
+std::unique_ptr<World> SceneWorldBuilder::BuildWorld(const SceneData& aScene, AssetRegistry& anAssetRegistry, const std::filesystem::path& aShaderPath, const SceneFallbackAssets& someFallbacks, const CustomComponentCreator& aCustomCreator)
 {
 	std::unique_ptr<World> world = std::make_unique<World>();
 	CreateSceneMaterials(aScene.Materials, anAssetRegistry, aShaderPath, someFallbacks);
-	CreateActorsAndComponents(*world, aScene.Actors, anAssetRegistry, aClientSize, someFallbacks, aCustomCreator);
+	CreateActorsAndComponents(*world, aScene.Actors, anAssetRegistry, someFallbacks, aCustomCreator);
 	return world;
 }
 
@@ -121,12 +94,9 @@ void SceneWorldBuilder::CreateSceneMaterials(const std::vector<MasterMaterialRec
 
 		// Apply base color, metallic, and roughness.
 		{
-			const std::string baseColorName = myUnrealDataNameToMaterialParameterName["Base Color"];
-			const std::string metallicName = myUnrealDataNameToMaterialParameterName["Metallic"];
-			const std::string roughnessName = myUnrealDataNameToMaterialParameterName["Roughness"];
-			instance->SetValue(baseColorName, materialData.BaseColor);
-			instance->SetValue(metallicName, materialData.Metallic);
-			instance->SetValue(roughnessName, materialData.Roughness);
+			instance->SetValue("MB_DiffuseColor", materialData.BaseColor);
+			instance->SetValue("MB_Metalness", materialData.Metallic);
+			instance->SetValue("MB_Roughness", materialData.Roughness);
 		}
 
 		ApplyMaterialParameters(*instance, materialData.Parameters, anAssetRegistry);
@@ -136,7 +106,7 @@ void SceneWorldBuilder::CreateSceneMaterials(const std::vector<MasterMaterialRec
 	}
 }
 
-void SceneWorldBuilder::CreateActorsAndComponents(World& aWorld, const std::vector<ActorRecord>& someActors, AssetRegistry& anAssetRegistry, CommonUtilities::Vector2u aClientSize, const SceneFallbackAssets& someFallbacks, const CustomComponentCreator& aCustomCreator)
+void SceneWorldBuilder::CreateActorsAndComponents(World& aWorld, const std::vector<ActorRecord>& someActors, AssetRegistry& anAssetRegistry, const SceneFallbackAssets& someFallbacks, const CustomComponentCreator& aCustomCreator)
 {
 	CameraComponent* selectedCamera = nullptr;
 	std::vector<std::string> diagnostics;
@@ -158,7 +128,7 @@ void SceneWorldBuilder::CreateActorsAndComponents(World& aWorld, const std::vect
 		actor->SetSourceMetadata(actorData.Archetype, actorData.Tags);
 		actor->SetActive(actorData.Active);
 		
-		if (!actor->GetTransform().SetData(actorData.Transform))
+		if (!actor->GetTransform().SetMatrix(actorData.Transform))
 		{
 			diagnostics.push_back(actorData.Name + ": Invalid Actor transform");
 		}
@@ -201,7 +171,8 @@ void SceneWorldBuilder::CreateActorsAndComponents(World& aWorld, const std::vect
 				{
 					selectedCamera = static_cast<CameraComponent*>(created);
 					const auto& cameraData = std::get<CameraData>(componentRecord);
-					if (!selectedCamera->SetPerspective(cameraData.FieldOfView, cameraData.NearPlane, cameraData.FarPlane, aClientSize))
+					const CU::Vector2u clientSize = GraphicsEngine::Get().GetClientSize();
+					if (!selectedCamera->SetPerspective(cameraData.FieldOfView, cameraData.NearPlane, cameraData.FarPlane, clientSize))
 					{
 						throw std::runtime_error("Invalid camera projection");
 					}
@@ -248,7 +219,7 @@ void SceneWorldBuilder::ApplyCommonComponentData(Component& aComponent, const Co
 
 	// Apply the transform to scene components.
 	SceneComponent* sceneComponent = dynamic_cast<SceneComponent*>(&aComponent);
-	if (sceneComponent && !sceneComponent->GetTransform().SetData(someComponentData.Transform))
+	if (sceneComponent && !sceneComponent->GetTransform().SetMatrix(someComponentData.Transform))
 	{
 		throw std::runtime_error("Invalid component transform");
 	}
@@ -289,6 +260,7 @@ void SceneWorldBuilder::ApplyMaterialParameters(MaterialInstance& aMaterial, con
 		std::string parameterName = parameterData.Name;
 		std::replace(parameterName.begin(), parameterName.end(), ' ', '_');
 		const std::string valueName = parameterName.starts_with("MB_") ? parameterName : "MB_" + parameterName;
+
 		bool bound = false;
 		if (const float* scalar = std::get_if<float>(&parameterData.Value))
 		{
@@ -307,31 +279,29 @@ void SceneWorldBuilder::ApplyMaterialParameters(MaterialInstance& aMaterial, con
 				continue;
 			}
 
-			// Explicit shader roles keep surface layers independent of asset naming conventions.
-			bound = aMaterial.SetTexture(parameterName, texture->GetTexture());
-			if (!bound && textureName->ends_with("_BaseColor"))
+			if (textureName->ends_with("_BaseColor"))
 			{
 				bound = aMaterial.SetTexture(0, texture->GetTexture());
 			}
-			else if (!bound && textureName->ends_with("_Normal"))
+			else if (textureName->ends_with("_Normal"))
 			{
 				bound = aMaterial.SetTexture(1, texture->GetTexture());
 			}
-			else if (!bound && textureName->ends_with("_OcclusionRoughnessMetallic"))
+			else if (textureName->ends_with("_OcclusionRoughnessMetallic"))
 			{
 				bound = aMaterial.SetTexture(2, texture->GetTexture());
 			}
-			else if (!bound && textureName->ends_with("_Emissive"))
+			else if (textureName->ends_with("_Emissive"))
 			{
 				bound = aMaterial.SetTexture(3, texture->GetTexture());
 			}
-			else if (!bound)
+			else
 			{
 				bound = aMaterial.SetTexture(*textureName, texture->GetTexture());
 			}
 			if (!bound)
 			{
-				GFLOG(Warning, "Material '{}' texture parameter '{}' could not bind asset '{}'; match the parameter role, use a standard texture suffix or match the asset name to a shader resource.", aMaterial.GetName(), parameterData.Name, *textureName);
+				GFLOG(Warning, "Material '{}' texture parameter '{}' could not bind asset '{}'; use a standard texture suffix or match the shader resource name.", aMaterial.GetName(), parameterData.Name, *textureName);
 			}
 			continue;
 		}
@@ -390,8 +360,6 @@ bool SceneWorldBuilder::ApplyMesh(Actor& anActor, MeshComponentBase& aComponent,
 		{
 			throw std::runtime_error("Material slot is invalid: " + std::to_string(materialSlot));
 		}
-		GFLOG(Verbose, "Material assignment: actor='{}', component='{}', mesh='{}', slot={}, material='{}'.",
-			anActor.GetName(), someMeshData.Common.Name, someMeshData.MeshName, materialSlot, material->GetMaterial()->GetName());
 	}
 	return true;
 }
@@ -462,9 +430,10 @@ Component* SceneWorldBuilder::CreateComponent(Actor& anActor, const ComponentRec
 				light->SetColor(someComponentData.Color);
 				light->SetSourceColorAlpha(someComponentData.ColorAlpha);
 				light->SetIntensity(someComponentData.Intensity);
-				light->SetShadowCascadeMapSize({ 4096, 4096 }, 0);
+				light->SetShadowCascadeMapSize({ 2048, 2048 }, 0);
 				light->SetShadowCascadeMapSize({ 4096, 4096 }, 1);
 				light->SetShadowCascadeMapSize({ 4096, 4096 }, 2);
+				light->SetShadowCascadeMapSize({ 4096, 4096 }, 3);
 				light->SetCastShadows(true);
 				return light;
 			}

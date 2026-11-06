@@ -1,71 +1,60 @@
 #include "BehaviourTreeComponent.h"
-#include <GameFramework/Components/AnimatorComponent.h>
+#include "GenericBehaviourTree/BT_LeafNodeAction.h"
+#include "BehaviourTreeFactory.h"
+#include <GameFramework/Scenes/CustomComponentVariables.h>
+#include <iostream>
 #include <GameFramework/World/Actor.h>
-#include <BehaviourTree/BehaviourTreeFactory.h>
 
-BehaviourTreeComponent::BehaviourTreeComponent()
-{
-	myActionNode = nullptr;
-}
 
-void BehaviourTreeComponent::SetBehaviourTree(const char* aBehaviourTree)
+template <typename T>
+void BehaviourTreeComponent::BlackBoardInsertVariables(BlackBoard& aBB, const std::unordered_map<std::string, T>& aMap, const std::string& aSkipInsert)
 {
-	BehaviourTreeFactory factory;
-	factory.Init();
-	myActionNode = factory.GetBehaviourTree(aBehaviourTree, myBehaviourTree);
-}
-
-void BehaviourTreeComponent::SetActionNode(BT_LeafNodeAction* aAtionNode)
-{
-	if (myActionNode)
+	for (auto& element : aMap)
 	{
-		myActionNode->EarlyExit();
-	}
+		if (element.first == aSkipInsert)
+		{
+			continue;
+		}
 
-	myActionNode = aAtionNode;
+		aBB.Set<const T>(element.first, std::move(element.second));
+	}
 }
+
 
 void BehaviourTreeComponent::InitializeCustomVariables(const CustomComponentVariables& someVariables)
 {
-	someVariables;
+	myTreeName = someVariables.GetOrDefault<std::string>("BehaviourTree", "");
+
+	BlackBoard& bb = myTree.GetBlackBoard();
+
+	BlackBoardInsertVariables<int64_t>(bb, someVariables.IntVariables);
+	BlackBoardInsertVariables<float>(bb, someVariables.FloatVariables);
+	BlackBoardInsertVariables<bool>(bb, someVariables.BoolVariables);
+	BlackBoardInsertVariables<std::string>(bb, someVariables.StringVariables, "BehaviourTree");
+	BlackBoardInsertVariables<CommonUtilities::Vector3f>(bb, someVariables.VectorVariables);
+	BlackBoardInsertVariables<CustomTransformData>(bb, someVariables.TransformVariables);
+
+	if (myTreeName.empty())
+	{
+		std::cout << "No tree defined on " << GetOwner()->GetName() << " actor";
+	}
 }
 
 void BehaviourTreeComponent::BeginPlay()
 {
-	myBehaviourTree.GetBlackBoard().SetActor(BlackBoardVariable_Actors::OwnerActor, GetOwner());
-	myBehaviourTree.GetBlackBoard().SetComponent(BlackBoardVariable_Components::OwnerAnimation, GetOwner()->GetComponent<AnimatorComponent>());
+	myTree.GetBlackBoard().Set<Actor*>("Owner", GetOwner());
+	BehaviourTreeFactory().SetBehaviourTree(myTreeName, myTree);
+	myActionNode = myTree.GetBlackBoard().Get<BT_LeafNodeAction*>("Running");
 }
 
 void BehaviourTreeComponent::Update(float aDeltaTime)
 {
-	PreUpdate();
+	//myTree.Run();
 
+	myActionNode = myTree.GetBlackBoard().Get<BT_LeafNodeAction*>("Running");
 
-	UpdateData();
-}
-
-void BehaviourTreeComponent::PreUpdate()
-{
-	myBehaviourTree.Run();
-
-	UpdateTree();
-}
-
-void BehaviourTreeComponent::UpdateTree()
-{
-	if (myActionNode->Tick() != BT_NodeStatus::Running)
+	if (myActionNode)
 	{
-		myBehaviourTree.Tick();
+		myActionNode->Update();
 	}
-}
-
-void BehaviourTreeComponent::UpdateData()
-{
-	myActionNode->UpdateActorControllerData();
-	myActionNode->TriggerAction(*this->GetOwner());
-}
-
-void BehaviourTreeComponent::UpdateMovement()
-{
-
 }

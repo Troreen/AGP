@@ -17,6 +17,7 @@ enum class MaterialDomain : uint8_t
 {
 	None,
 	Surface,
+	Particles,
 	// More to come
 };
 

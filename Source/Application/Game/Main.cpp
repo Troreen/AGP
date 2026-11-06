@@ -13,8 +13,8 @@
 #include "GameFramework/ServiceLocator.h"
 #include "GameFramework/Settings/EngineSettings.h"
 #include "GameLog.h"
-
-#include <StringHelpers.h>
+#include "Importer.h"
+#include "StringHelpers.h"
 
 int APIENTRY wWinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ int)
 {
@@ -27,8 +27,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ int)
 	SetConsoleOutputCP(CP_UTF8);
 #endif
 
+#ifndef _DEBUG
 	try
 	{
+#endif
+		TGA::FBX::Importer::InitImporter();
+
 		ServiceLocator::GetInstance().Initialize();
 
 		wchar_t executablePath[MAX_PATH] = {};
@@ -64,7 +68,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ int)
 		Game game;
 		GameApplication application;
 		applicationStarted = true;
-		return application.Run(game);
+
+		const int returnValue = application.Run(game);
+
+		TGA::FBX::Importer::UninitImporter();
+
+		return returnValue;
+#ifndef _DEBUG
 	}
 	catch (const std::exception& error)
 	{
@@ -84,4 +94,5 @@ int APIENTRY wWinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ int)
 
 		return 1;
 	}
+#endif
 }

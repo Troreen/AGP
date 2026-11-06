@@ -13,7 +13,9 @@ class World;
 
 struct DebugCameraPreset
 {
-	TransformData Transform{{0, 260, -950}, {0, 0, 0}, {1, 1, 1}};
+	CommonUtilities::Vector3f Position = { 0, 260, -950 };
+	CommonUtilities::Quaternion<float> Rotation = CommonUtilities::Quaternion<float>::CreateIdentity();
+	CommonUtilities::Vector3f Scale = { 1, 1, 1 };
 	float FieldOfView = 90;
 	float NearPlane = 1;
 	float FarPlane = 50000;
@@ -29,6 +31,7 @@ public:
 	CameraComponent* Ensure(World& world, CommonUtilities::Vector2u clientSize);
 	void Toggle(World& world, CommonUtilities::Vector2u clientSize);
 	void Reset();
+
 private:
 	std::string myPreviousActor;
 	std::string myPreviousComponent;
@@ -40,17 +43,15 @@ public:
 	void BeginPlay() override;
 	void EndPlay() noexcept override;
 	void Update(float deltaTime) override;
+
 private:
-	float myYaw = 0, myPitch = 0;
+	std::vector<unsigned> myListenerIDs;
+
+	CommonUtilities::Vector3f myInput{};
 	CommonUtilities::Vector2f myLookDelta{};
 
-	bool myLook 	= false; 
-	bool myForward 	= false;
-	bool myBack 	= false; 
-	bool myLeft 	= false; 
-	bool myRight 	= false; 
-	bool myUp 		= false; 
-	bool myDown 	= false;
+	float myYaw = 0;
+	float myPitch = 0;
 
-	std::vector<unsigned> myListenerIDs;
+	bool myLook = false;
 };

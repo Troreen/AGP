@@ -107,7 +107,11 @@ namespace UnrealScene
 	void ReadCommonComponent(simdjson::dom::element component, BaseComponentData& outComponent, UnrealComponentType type)
 	{
 		outComponent.name = component["Name"];
-		outComponent.parent = component["Parent"];
+		const auto& parentElement = component.at_key("Parent");
+		if (parentElement.error() != simdjson::NO_SUCH_FIELD)
+		{
+			outComponent.parent = parentElement;
+		}
 		outComponent.typeID = type;
 		if (type == UnrealComponentType::Custom)
 		{
@@ -133,25 +137,29 @@ namespace UnrealScene
 			outComponent.tags.emplace_back(tag.get_c_str().value());
 		}
 
-		const auto& matrix = component["Transform"].get_array().value();
-		outComponent.transform = {
-			static_cast<float>(matrix.at(5).get_double().value()),
-			static_cast<float>(matrix.at(6).get_double().value()),
-			static_cast<float>(matrix.at(4).get_double().value()),
-			static_cast<float>(matrix.at(3).get_double().value()),
-			static_cast<float>(matrix.at(9).get_double().value()),
-			static_cast<float>(matrix.at(10).get_double().value()),
-			static_cast<float>(matrix.at(8).get_double().value()),
-			static_cast<float>(matrix.at(7).get_double().value()),
-			static_cast<float>(matrix.at(1).get_double().value()),
-			static_cast<float>(matrix.at(2).get_double().value()),
-			static_cast<float>(matrix.at(0).get_double().value()),
-			static_cast<float>(matrix.at(11).get_double().value()),
-			static_cast<float>(matrix.at(13).get_double().value()),
-			static_cast<float>(matrix.at(14).get_double().value()),
-			static_cast<float>(matrix.at(12).get_double().value()),
-			static_cast<float>(matrix.at(15).get_double().value()) };
-	}
+		const auto& transformElement = component.at_key("Transform");
+		if (transformElement.error() != simdjson::NO_SUCH_FIELD)
+		{
+			const auto& matrix = transformElement.get_array().value();
+			outComponent.transform = {
+				static_cast<float>(matrix.at(5).get_double().value()),
+				static_cast<float>(matrix.at(6).get_double().value()),
+				static_cast<float>(matrix.at(4).get_double().value()),
+				static_cast<float>(matrix.at(3).get_double().value()),
+				static_cast<float>(matrix.at(9).get_double().value()),
+				static_cast<float>(matrix.at(10).get_double().value()),
+				static_cast<float>(matrix.at(8).get_double().value()),
+				static_cast<float>(matrix.at(7).get_double().value()),
+				static_cast<float>(matrix.at(1).get_double().value()),
+				static_cast<float>(matrix.at(2).get_double().value()),
+				static_cast<float>(matrix.at(0).get_double().value()),
+				static_cast<float>(matrix.at(11).get_double().value()),
+				static_cast<float>(matrix.at(13).get_double().value()),
+				static_cast<float>(matrix.at(14).get_double().value()),
+				static_cast<float>(matrix.at(12).get_double().value()),
+				static_cast<float>(matrix.at(15).get_double().value()) };
+		}
+		}
 
 	CommonUtilities::Matrix4x4<float> UnrealToCommonUtilitiesMatrix(const std::vector<float>& aJsonTransform)
 	{
@@ -308,14 +316,17 @@ namespace UnrealScene
 			materialData.domain = material["Domain"].operator size_t();
 			materialData.shadingModel = material["ShadingModel"].operator size_t();
 			materialData.blendMode = material["BlendMode"].operator size_t();
+
 			const simdjson::dom::array baseColor = material["BaseColor"].get_array().value();
 			const float r = static_cast<float>(baseColor.at(0).get_double().value());
 			const float g = static_cast<float>(baseColor.at(1).get_double().value());
 			const float b = static_cast<float>(baseColor.at(2).get_double().value());
 			const float a = static_cast<float>(baseColor.at(3).get_double().value());
 			materialData.baseColor = { r, g, b, a };
+
 			materialData.metallic = static_cast<float>(material["Metallic"].operator double());
 			materialData.roughness = static_cast<float>(material["Roughness"].operator double());
+
 			const auto twoSided = material["TwoSided"];
 			if (twoSided.error() != simdjson::NO_SUCH_FIELD)
 			{
@@ -535,6 +546,23 @@ namespace UnrealScene
 						actorData.components.push_back(std::move(componentData));
 					}
 					break;
+					case UnrealComponentType::SkyLight:
+					{
+						SkyLightComponentData componentData = {};
+						ReadCommonComponent(component, componentData, UnrealComponentType::SkyLight);
+
+						componentData.EnvironmentCubeTexture = component["CubeMap"]["Path"].get_string().value();
+
+						const auto color = component["Color"].get_array().value();
+						componentData.AmbientLightColor = {
+							static_cast<float>(color.at(0).get_double().value()),
+							static_cast<float>(color.at(1).get_double().value()),
+							static_cast<float>(color.at(2).get_double().value()),
+						};
+						componentData.AmbientLightIntensity = static_cast<float>(component["Intensity"].get_double().value());
+						actorData.components.push_back(std::move(componentData));
+					}
+					break;
 					case UnrealComponentType::Camera:
 					{
 						CameraComponentData componentData = {};
@@ -560,40 +588,18 @@ namespace
 	constexpr float UnrealUnitScale = 1.0f;
 	using UnrealScene::UnrealComponentType;
 
-	std::optional<TransformData> ConvertTransform(const CommonUtilities::Matrix4f& source)
-	{
-		CommonUtilities::Vector3f scale;
-		CommonUtilities::Vector3f position;
-		CommonUtilities::Quaternion<float> rotation;
-		if (!CommonUtilities::DecomposeSRT(source, scale, rotation, position))
-		{
-			return std::nullopt;
-		}
-
-		const CommonUtilities::Vector3f rotationRadians = CommonUtilities::YawPitchRollFromQuaternion(rotation);
-		TransformData transform;
-		transform.Position = position * UnrealUnitScale;
-		transform.Scale = scale;
-		transform.RotationDegrees = {
-			CommonUtilities::RadiansToDegrees(rotationRadians.x),
-			CommonUtilities::RadiansToDegrees(rotationRadians.y),
-			CommonUtilities::RadiansToDegrees(rotationRadians.z)
-		};
-		return transform;
-	}
-
 	const UnrealScene::BaseComponentData& GetBaseComponent(const UnrealScene::ComponentData& component)
 	{
 		return std::visit([](const auto& value) -> const UnrealScene::BaseComponentData& { return value; }, component);
 	}
 
-	ComponentData ConvertCommonData(const UnrealScene::BaseComponentData& source, const TransformData& transform)
+	ComponentData ConvertCommonData(const UnrealScene::BaseComponentData& source)
 	{
 		ComponentData component;
 		component.Name = source.name;
 		component.SourceParent = source.parent;
 		component.Tags = source.tags;
-		component.Transform = transform;
+		component.Transform = source.transform;
 		return component;
 	}
 
@@ -659,18 +665,12 @@ namespace
 
 		for (const UnrealScene::UnrealActorData& sourceActor : source.actors)
 		{
-			const std::optional<TransformData> actorTransform = ConvertTransform(sourceActor.transform);
-			if (!actorTransform)
-			{
-				result.Diagnostics.push_back({ sourceActor.name, "actor transform cannot be decomposed" });
-				continue;
-			}
-
 			ActorRecord actor;
 			actor.Name = sourceActor.name;
 			actor.Archetype = sourceActor.archetype;
 			actor.Tags = sourceActor.tags;
-			actor.Transform = *actorTransform;
+			actor.Transform = sourceActor.transform;
+
 			const auto isCollider = [](const UnrealScene::ComponentData& component)
 			{
 				const auto type = GetBaseComponent(component).typeID;
@@ -694,17 +694,11 @@ namespace
 						continue;
 					}
 				}
-				const std::optional<TransformData> componentTransform = ConvertTransform(baseComponentData.transform);
-				if (!componentTransform)
-				{
-					result.Diagnostics.push_back({ context, "component transform cannot be decomposed" });
-					continue;
-				}
 
 				std::visit([&](const auto& imported)
 					{
 						using SourceType = std::decay_t<decltype(imported)>;
-						const ComponentData common = ConvertCommonData(baseComponentData, *componentTransform);
+						const ComponentData common = ConvertCommonData(baseComponentData);
 						if constexpr (std::is_same_v<SourceType, UnrealScene::StaticMeshComponentData>)
 						{
 							StaticMeshData mesh;
@@ -782,6 +776,12 @@ namespace
 							light.Intensity = imported.intensity;
 							actor.Components.push_back(std::move(light));
 						}
+						else if constexpr (std::is_same_v<SourceType, UnrealScene::SkyLightComponentData>)
+						{
+							scene.EnvironmentCubeTexture = std::filesystem::path(imported.EnvironmentCubeTexture).stem().string();
+							scene.AmbientLightColor = imported.AmbientLightColor;
+							scene.AmbientLightIntensity = imported.AmbientLightIntensity;
+						}
 						else if constexpr (std::is_same_v<SourceType, UnrealScene::CameraComponentData>)
 						{
 							actor.Components.push_back(CameraData{ common, imported.fieldOfView });
@@ -847,21 +847,14 @@ namespace
 UnrealImportResult UnrealSceneImporter::ImportScene(const std::filesystem::path& jsonPath) const
 {
 	UnrealImportResult result;
-	try
+	const UnrealScene::UnrealSceneData importedScene = UnrealScene::ImportScene(jsonPath);
+	if (!importedScene.parsed)
 	{
-		const UnrealScene::UnrealSceneData importedScene = UnrealScene::ImportScene(jsonPath);
-		if (!importedScene.parsed)
-		{
-			result.Diagnostics.push_back({ jsonPath.string(), "could not parse scene JSON" });
-			return result;
-		}
-		RuntimeConversionResult converted = ConvertRuntimeScene(importedScene);
-		result.Diagnostics = std::move(converted.Diagnostics);
-		result.Data = std::move(converted.Scene);
+		result.Diagnostics.push_back({ jsonPath.string(), "could not parse scene JSON" });
+		return result;
 	}
-	catch (const std::exception& error)
-	{
-		result.Diagnostics.push_back({ jsonPath.string(), error.what() });
-	}
+	RuntimeConversionResult converted = ConvertRuntimeScene(importedScene);
+	result.Diagnostics = std::move(converted.Diagnostics);
+	result.Data = std::move(converted.Scene);
 	return result;
 }

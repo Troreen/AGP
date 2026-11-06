@@ -26,6 +26,7 @@ struct PipelineStateDescription
 	RasterizerState FillMode = RasterizerState::FillSolid;
 	RasterizerCullMode CullMode = RasterizerCullMode::Back;
 	BlendMode BlendMode = BlendMode::Opaque;
+	DepthStencilState DepthStencilState = DepthStencilState::ReadWrite;
 };
 
 class PipelineStateObject
@@ -44,6 +45,7 @@ private:
 	Microsoft::WRL::ComPtr<struct ID3D11GeometryShader> myGeometryShader;
 	Microsoft::WRL::ComPtr<struct ID3D11RasterizerState> myRasterizerState;
 	Microsoft::WRL::ComPtr<struct ID3D11BlendState> myBlendState;
+	Microsoft::WRL::ComPtr<struct ID3D11DepthStencilState> myDepthStencilState;
 
 	std::string myName;
 	Topology myTopology;

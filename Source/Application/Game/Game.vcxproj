@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -245,65 +245,68 @@ exit /b 0</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Assets\MeshLibrary.h" />
-    <ClInclude Include="BehaviourTree\BaseNodes\BT_CompositeNode.h" />
-    <ClInclude Include="BehaviourTree\BaseNodes\BT_DecoratorNode.h" />
-    <ClInclude Include="BehaviourTree\BaseNodes\BT_LeafNodeAction.h" />
-    <ClInclude Include="BehaviourTree\BaseNodes\BT_LeafNodeCondition.h" />
-    <ClInclude Include="BehaviourTree\BaseNodes\BT_Node.h" />
-    <ClInclude Include="BehaviourTree\BaseNodes\BT_SelectorNode.h" />
-    <ClInclude Include="BehaviourTree\BaseNodes\BT_SequenceNode.h" />
-    <ClInclude Include="BehaviourTree\BehaviourTree.h" />
     <ClInclude Include="BehaviourTree\BehaviourTreeComponent.h" />
     <ClInclude Include="BehaviourTree\BehaviourTreeFactory.h" />
-    <ClInclude Include="BehaviourTree\BlackBoard.h" />
-    <ClInclude Include="BehaviourTree\CustomNodes\ActionNodes\BT_Action_FollowPlayer.h" />
-    <ClInclude Include="BehaviourTree\CustomNodes\ActionNodes\BT_Action_Idle.h" />
-    <ClInclude Include="BehaviourTree\CustomNodes\ConditionNodes\BT_Condition_IsPlayerInLOS.h" />
-    <ClInclude Include="Components\CustomComponentRegistry.h" />
+    <ClInclude Include="BehaviourTree\GenericBehaviourTree\BT_CompositeNode.h" />
+    <ClInclude Include="BehaviourTree\GenericBehaviourTree\BT_DecoratorNode.h" />
+    <ClInclude Include="BehaviourTree\GenericBehaviourTree\BT_LeafNodeAction.h" />
+    <ClInclude Include="BehaviourTree\GenericBehaviourTree\BT_LeafNodeCondition.h" />
+    <ClInclude Include="BehaviourTree\GenericBehaviourTree\BT_Node.h" />
+    <ClInclude Include="BehaviourTree\GenericBehaviourTree\BT_SelectorNode.h" />
+    <ClInclude Include="BehaviourTree\GenericBehaviourTree\BT_SequenceNode.h" />
+    <ClInclude Include="BehaviourTree\GenericBehaviourTree\BehaviourTree.h" />
+    <ClInclude Include="BehaviourTree\GenericBehaviourTree\BlackBoard.h" />
+    <ClInclude Include="Components\EnemyComponent.h" />
     <ClInclude Include="Components\RegisterCustomComponents.h" />
     <ClInclude Include="Components\ScriptedEvents\ScriptedActionComponent.h" />
     <ClInclude Include="Components\ScriptedEvents\ScriptedEventComponent.h" />
     <ClInclude Include="Components\SpinComponent.h" />
+    <ClInclude Include="Controllers\Controller.h" />
+    <ClInclude Include="Controllers\ControllerComponent.h" />
+    <ClInclude Include="Controllers\ControllerFactory.h" />
+    <ClInclude Include="Controllers\FollowPathController.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameLog.h" />
-    <ClInclude Include="Player\Ability.h" />
-    <ClInclude Include="Player\AbilityComponent.h" />
-    <ClInclude Include="Player\DashAbility.h" />
+    <ClInclude Include="Player\Abilities\Ability.h" />
+    <ClInclude Include="Player\Abilities\AbilityData.h" />
+    <ClInclude Include="Player\Abilities\DashAbility.h" />
+    <ClInclude Include="Player\Abilities\MeleeAbility.h" />
+    <ClInclude Include="Player\Components\AbilityComponent.h" />
+    <ClInclude Include="Player\Components\PlayerController.h" />
+    <ClInclude Include="Player\Components\PlayerMovementComponent.h" />
     <ClInclude Include="Player\PlayerActor.h" />
-    <ClInclude Include="Player\PlayerController.h" />
     <ClInclude Include="Player\PlayerDataStruct.h" />
-    <ClInclude Include="Player\PlayerMovementComponent.h" />
     <ClInclude Include="Resources\resource.h" />
     <ClInclude Include="Resources\targetver.h" />
     <ClInclude Include="Runtime\GameApplication.h" />
     <ClInclude Include="Runtime\GameWindowMessages.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Assets\MeshLibrary.cpp" />
-    <ClCompile Include="BehaviourTree\BaseNodes\BT_LeafNodeCondition.cpp" />
-    <ClCompile Include="BehaviourTree\BaseNodes\BT_Node.cpp" />
-    <ClCompile Include="BehaviourTree\BaseNodes\BT_SelectorNode.cpp" />
-    <ClCompile Include="BehaviourTree\BaseNodes\BT_SequenceNode.cpp" />
-    <ClCompile Include="BehaviourTree\BehaviourTree.cpp" />
     <ClCompile Include="BehaviourTree\BehaviourTreeComponent.cpp" />
     <ClCompile Include="BehaviourTree\BehaviourTreeFactory.cpp" />
-    <ClCompile Include="BehaviourTree\BlackBoard.cpp" />
-    <ClCompile Include="BehaviourTree\CustomNodes\ActionNodes\BT_Action_FollowPlayer.cpp" />
-    <ClCompile Include="BehaviourTree\CustomNodes\ActionNodes\BT_Action_Idle.cpp" />
-    <ClCompile Include="BehaviourTree\CustomNodes\ConditionNodes\BT_Condition_IsPlayerInLOS.cpp" />
+    <ClCompile Include="BehaviourTree\GenericBehaviourTree\BT_CompositeNode.cpp" />
+    <ClCompile Include="BehaviourTree\GenericBehaviourTree\BT_LeafNodeAction.cpp" />
+    <ClCompile Include="BehaviourTree\GenericBehaviourTree\BT_LeafNodeCondition.cpp" />
+    <ClCompile Include="BehaviourTree\GenericBehaviourTree\BT_Node.cpp" />
+    <ClCompile Include="BehaviourTree\GenericBehaviourTree\BT_SelectorNode.cpp" />
+    <ClCompile Include="BehaviourTree\GenericBehaviourTree\BT_SequenceNode.cpp" />
+    <ClCompile Include="BehaviourTree\GenericBehaviourTree\BehaviourTree.cpp" />
     <ClCompile Include="Components\RegisterCustomComponents.cpp" />
     <ClCompile Include="Components\ScriptedEvents\ScriptedActionComponent.cpp" />
     <ClCompile Include="Components\ScriptedEvents\ScriptedEventComponent.cpp" />
     <ClCompile Include="Components\SpinComponent.cpp" />
+    <ClCompile Include="Controllers\ControllerComponent.cpp" />
+    <ClCompile Include="Controllers\ControllerFactory.cpp" />
+    <ClCompile Include="Controllers\FollowPathController.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Player\Ability.cpp" />
-    <ClCompile Include="Player\AbilityComponent.cpp" />
-    <ClCompile Include="Player\DashAbility.cpp" />
+    <ClCompile Include="Player\Abilities\Ability.cpp" />
+    <ClCompile Include="Player\Abilities\DashAbility.cpp" />
+    <ClCompile Include="Player\Abilities\MeleeAbility.cpp" />
+    <ClCompile Include="Player\Components\AbilityComponent.cpp" />
+    <ClCompile Include="Player\Components\PlayerController.cpp" />
+    <ClCompile Include="Player\Components\PlayerMovementComponent.cpp" />
     <ClCompile Include="Player\PlayerActor.cpp" />
-    <ClCompile Include="Player\PlayerController.cpp" />
-    <ClCompile Include="Player\PlayerMovementComponent.cpp" />
     <ClCompile Include="Runtime\GameApplication.cpp" />
     <ClCompile Include="Runtime\GameWindowMessages.cpp" />
   </ItemGroup>

@@ -22,6 +22,7 @@ enum class RenderPassType : uint8_t
     Emission,
 	AmbientOcclusionScreenSpace,
     NormalLocal,
+	VertexNormalWorld,
     NormalWorld,
 
     Count
@@ -29,7 +30,7 @@ enum class RenderPassType : uint8_t
 
 struct GraphicsRenderSettings
 {
-    TonemapType TonemapAlgorithm = TonemapType::Unreal;
+    TonemapType TonemapAlgorithm = TonemapType::ACES;
     RenderPassType RenderPass = RenderPassType::Light;
     bool RunPostProcesses = true;
 
